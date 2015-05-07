@@ -146,11 +146,11 @@ var app_myelectric = {
             var interval = 86400;
             var ndays = Math.floor(graph.width / 40);
             var timeWindow = (3600000*24*ndays);	//Initial time window
-            var now = +new Date;
+            var now = (new Date).getTime();
             var start = (now - timeWindow)*0.001;
             var end = now*0.001;
             start = Math.floor(start / interval) * interval;
-            end = Math.ceil(end / interval) * interval;
+            end = Math.floor(end / interval) * interval;
             
             app_myelectric.daily_data = app_myelectric.getdata(app_myelectric.dailyfeed,start*1000,end*1000,interval);
             if (app_myelectric.daily_data.success != undefined) app_myelectric.daily_data = [];
@@ -169,8 +169,14 @@ var app_myelectric = {
             // Watt hours elapsed
             if (app_myelectric.dailytype==0)
             {
-                var lastday = daily_data_copy[daily_data_copy.length-1][0];
-                daily_data_copy.push([lastday+24*3600*1000,feeds[app_myelectric.dailyfeed].value]);
+                var lastday = daily_data_copy[daily_data_copy.length-1][0] * 0.001;
+                var lastvalday = Math.ceil(feeds[app_myelectric.dailyfeed].time / 86400) * 86400;
+                
+                if (lastvalday==lastday) {
+                    daily_data_copy[daily_data_copy.length-1][1] = feeds[app_myelectric.dailyfeed].value*1;
+                } else if (lastvalday>lastday) {
+                    daily_data_copy.push([lastday*1000,feeds[app_myelectric.dailyfeed].value]);
+                }
 
                 for (var z=1; z<daily_data_copy.length; z++)
                 {
