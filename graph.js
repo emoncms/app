@@ -100,7 +100,7 @@ var graph = {
                     ctx.fillStyle = "#ccccff";
                     
                     ctx.font = "16px arial";
-                    ctx.fillText((data[z][1]*scale).toFixed(0),x,y+20-7);
+                    ctx.fillText((data[z][1]*scale).toFixed(1),x,y+20-7);
                     
                     ctx.font = "14px arial";
                     ctx.fillText(days[dayid],x,this.height-15);
