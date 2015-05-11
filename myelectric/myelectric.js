@@ -189,10 +189,15 @@ var app_myelectric = {
             // kWh elapsed
             else if (app_myelectric.dailytype==1)
             {
-                var lastday = daily_data_copy[daily_data_copy.length-1][0];
-                if (feeds[app_myelectric.dailyfeed].value!=0) {
-                    daily_data_copy.push([lastday+24*3600*1000,feeds[app_myelectric.dailyfeed].value]);
+                var lastday = daily_data_copy[daily_data_copy.length-1][0] * 0.001;
+                var lastvalday = Math.ceil(feeds[app_myelectric.dailyfeed].time / 86400) * 86400;
+                
+                if (lastvalday==lastday) {
+                    daily_data_copy[daily_data_copy.length-1][1] = feeds[app_myelectric.dailyfeed].value*1;
+                } else if (lastvalday>lastday) {
+                    daily_data_copy.push([lastday*1000,feeds[app_myelectric.dailyfeed].value]);
                 }
+                
                 for (var z=1; z<daily_data_copy.length; z++)
                 {
                     var kwh = 0;
@@ -200,7 +205,9 @@ var app_myelectric = {
                     if (daily_data_copy[z][1]!=null && daily_data_copy[z-1][1]!=null) {
                         kwh = (daily_data_copy[z][1] - daily_data_copy[z-1][1]);
                     }
-                    daily.push([daily_data_copy[z][0],kwh]);
+                    // daily data is one day ahead need to shift back one day
+                    // check this for different feed engine types
+                    daily.push([daily_data_copy[z][0]-(86400*1000),kwh]);
                 }
                 
                 $("#kwhd").html((daily[daily.length-1][1]*1).toFixed(1));
