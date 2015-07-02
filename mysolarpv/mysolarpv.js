@@ -235,6 +235,7 @@ var app_mysolarpv = {
             if (feeds[feedid]!=undefined) {
                 solar_now += parseInt(feeds[feedid].value);
                 if (app_mysolarpv.autoupdate) {
+                    console.log(feeds[feedid].time+" "+feeds[feedid].value);
                     app_mysolarpv.timeseries_append("f"+feedid,feeds[feedid].time,parseInt(feeds[feedid].value));
                     app_mysolarpv.timeseries_trim_start("f"+feedid,view.start*0.001);
                 }
@@ -247,6 +248,8 @@ var app_mysolarpv = {
             view.end = now;
             view.start = view.end - timerange;
         }
+        
+        console.log("vs-ve: "+view.start+" "+view.end);
         
         // Lower limit for solar
         if (solar_now<10) solar_now = 0;
@@ -292,9 +295,8 @@ var app_mysolarpv = {
         
         var npoints = 1500;
         interval = Math.round(((view.end - view.start)/npoints)/1000);
-        if (interval<5) interval = 5;
-        view.start = 1000*Math.floor((view.start/1000)/interval)*interval;
-        view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
+        if (interval<1) interval = 1;
+
         var npoints = parseInt((view.end-view.start)/(interval*1000));
         
         // -------------------------------------------------------------------------------------------------------
@@ -302,6 +304,8 @@ var app_mysolarpv = {
         // -------------------------------------------------------------------------------------------------------
         if (app_mysolarpv.reload) {
             app_mysolarpv.reload = false;
+            view.start = 1000*Math.floor((view.start/1000)/interval)*interval;
+            view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
             
             for (var i in app_mysolarpv.solarpower) {
                 var feedid = app_mysolarpv.solarpower[i];
