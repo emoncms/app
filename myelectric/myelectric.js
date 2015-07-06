@@ -104,8 +104,10 @@ var app_myelectric = {
     show: function()
     {
         $("body").css('background-color','#222');
-        $("#footer").css('background-color','#181818');
-        $("#footer").css('color','#999');
+        $(window).ready(function(){
+            $("#footer").css('background-color','#181818');
+            $("#footer").css('color','#999');
+        });
         
         app_myelectric.resize();
         
