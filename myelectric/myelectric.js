@@ -146,11 +146,19 @@ var app_myelectric = {
             var interval = 86400;
             var ndays = Math.floor(graph.width / 40);
             var timeWindow = (3600000*24*ndays);	//Initial time window
-            var now = (new Date).getTime();
+            
+            var d = new Date()
+            var n = d.getTimezoneOffset();
+            var offset = n / -60;
+            var now = d.getTime();
+            
             var start = (now - timeWindow)*0.001;
             var end = now*0.001;
             start = Math.floor(start / interval) * interval;
             end = Math.floor(end / interval) * interval;
+            
+            start -= offset * 3600;
+            end -= offset * 3600;
             
             app_myelectric.daily_data = app_myelectric.getdata(app_myelectric.dailyfeed,start*1000,end*1000,interval);
             if (app_myelectric.daily_data.success != undefined) app_myelectric.daily_data = [];
