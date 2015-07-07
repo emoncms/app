@@ -10,6 +10,8 @@ var app_myelectric = {
     liveupdate: false,
     refresh: true,
     
+    timeoffset: 0,
+    
     // Include required javascript libraries
     include: [
         "Modules/app/graph.js"
@@ -17,6 +19,10 @@ var app_myelectric = {
 
     init: function()
     {
+        var d = new Date()
+        var n = d.getTimezoneOffset();
+        app_myelectric.timeoffset = n / -60;
+    
         if (app.config["myelectric"]!=undefined) {
             app_myelectric.powerfeed = app.config.myelectric.powerfeed;
             app_myelectric.dailyfeed = app.config.myelectric.dailyfeed;
@@ -149,18 +155,15 @@ var app_myelectric = {
             var ndays = Math.floor(graph.width / 40);
             var timeWindow = (3600000*24*ndays);	//Initial time window
             
-            var d = new Date()
-            var n = d.getTimezoneOffset();
-            var offset = n / -60;
-            var now = d.getTime();
+            var now = (new Date()).getTime();
             
             var start = (now - timeWindow)*0.001;
             var end = now*0.001;
             start = Math.floor(start / interval) * interval;
             end = Math.floor(end / interval) * interval;
             
-            start -= offset * 3600;
-            end -= offset * 3600;
+            start -= app_myelectric.timeoffset * 3600;
+            end -= app_myelectric.timeoffset * 3600;
             
             app_myelectric.daily_data = app_myelectric.getdata(app_myelectric.dailyfeed,start*1000,end*1000,interval);
             if (app_myelectric.daily_data.success != undefined) app_myelectric.daily_data = [];
@@ -181,6 +184,7 @@ var app_myelectric = {
             {
                 var lastday = daily_data_copy[daily_data_copy.length-1][0] * 0.001;
                 var lastvalday = Math.ceil(feeds[app_myelectric.dailyfeed].time / 86400) * 86400;
+                lastvalday -= app_myelectric.timeoffset*3600;
                 
                 if (lastvalday==lastday) {
                     daily_data_copy[daily_data_copy.length-1][1] = feeds[app_myelectric.dailyfeed].value*1;
@@ -201,6 +205,7 @@ var app_myelectric = {
             {
                 var lastday = daily_data_copy[daily_data_copy.length-1][0] * 0.001;
                 var lastvalday = Math.ceil(feeds[app_myelectric.dailyfeed].time / 86400) * 86400;
+                lastvalday -= app_myelectric.timeoffset*3600;
                 
                 if (lastvalday==lastday) {
                     daily_data_copy[daily_data_copy.length-1][1] = feeds[app_myelectric.dailyfeed].value*1;
