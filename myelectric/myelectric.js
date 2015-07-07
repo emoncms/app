@@ -195,7 +195,7 @@ var app_myelectric = {
                 for (var z=1; z<daily_data_copy.length; z++)
                 {
                     var kwh = (daily_data_copy[z][1] - daily_data_copy[z-1][1]) * 0.001;
-                    daily.push([daily_data_copy[z][0],kwh]);
+                    daily.push([daily_data_copy[z-1][0],kwh]);
                 }
                 
                 $("#kwhd").html((daily[daily.length-1][1]*1).toFixed(1));
@@ -222,7 +222,7 @@ var app_myelectric = {
                     }
                     // daily data is one day ahead need to shift back one day
                     // check this for different feed engine types
-                    daily.push([daily_data_copy[z][0]-(86400*1000),kwh]);
+                    daily.push([daily_data_copy[z-1][0],kwh]);
                 }
                 
                 $("#kwhd").html((daily[daily.length-1][1]*1).toFixed(1));
