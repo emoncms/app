@@ -193,6 +193,7 @@ var app_mysolarpv = {
             $(".power-value").css("padding-bottom","12px");
             $(".midtext").css("font-size","18px");
             $("#balanceline").show();
+            $("#vistime").show();
         } else {
             $(".electric-title").css("font-size","22px");
             $(".power-value").css("font-size","85px");
@@ -200,6 +201,7 @@ var app_mysolarpv = {
             $(".power-value").css("padding-bottom","20px");
             $(".midtext").css("font-size","20px");
             $("#balanceline").show();
+            $("#vistime").show();
         }
     },
     
