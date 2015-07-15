@@ -185,6 +185,7 @@ var app_mysolarpv = {
             $(".power-value").css("padding-bottom","8px");
             $(".midtext").css("font-size","14px");
             $("#balanceline").hide();
+            $("#vistime").hide();
         } else if (width<=724) {
             $(".electric-title").css("font-size","18px");
             $(".power-value").css("font-size","52px");
