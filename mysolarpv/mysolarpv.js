@@ -32,6 +32,9 @@ var app_mysolarpv = {
         if (app.config["mysolarpv"]!=undefined) {
             this.solarpower = app.config["mysolarpv"].solarpower;
             this.housepower = app.config["mysolarpv"].housepower;
+            
+            if (typeof(this.solarpower)=="string") this.solarpower = this.solarpower.split(",");
+            if (typeof(this.housepower)=="string") this.housepower = this.housepower.split(",");
         } else {
             // Auto scan by feed names
             var feeds = app_mysolarpv.getfeedsbyid();
