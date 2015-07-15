@@ -185,7 +185,9 @@ var app_mysolarpv = {
             $(".power-value").css("padding-bottom","8px");
             $(".midtext").css("font-size","14px");
             $("#balanceline").hide();
-            $("#vistime").hide();
+            $("#vistimeW").hide();
+            $("#vistimeM").hide();
+            $("#vistimeY").hide();
         } else if (width<=724) {
             $(".electric-title").css("font-size","18px");
             $(".power-value").css("font-size","52px");
@@ -193,7 +195,9 @@ var app_mysolarpv = {
             $(".power-value").css("padding-bottom","12px");
             $(".midtext").css("font-size","18px");
             $("#balanceline").show();
-            $("#vistime").show();
+            $("#vistimeW").show();
+            $("#vistimeM").show();
+            $("#vistimeY").show();
         } else {
             $(".electric-title").css("font-size","22px");
             $(".power-value").css("font-size","85px");
@@ -201,7 +205,9 @@ var app_mysolarpv = {
             $(".power-value").css("padding-bottom","20px");
             $(".midtext").css("font-size","20px");
             $("#balanceline").show();
-            $("#vistime").show();
+            $("#vistimeW").show();
+            $("#vistimeM").show();
+            $("#vistimeY").show();
         }
     },
     
