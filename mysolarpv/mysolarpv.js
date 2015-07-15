@@ -270,7 +270,7 @@ var app_mysolarpv = {
         }
         
         if (balance<0) {
-            $("#balance-label").html("IMPORTING:");
+            $("#balance-label").html("IMPORTING");
             $("#balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
         }
         
