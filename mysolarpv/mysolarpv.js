@@ -180,7 +180,7 @@ var app_mysolarpv = {
         
         if (width<=500) {
             $(".electric-title").css("font-size","16px");
-            $(".power-value").css("font-size","38px");
+            $(".power-value").css("font-size","32px");
             $(".power-value").css("padding-top","12px");
             $(".power-value").css("padding-bottom","8px");
             $(".midtext").css("font-size","14px");
