@@ -274,7 +274,7 @@ var app_mysolarpv = {
         }
         
         if (balance>0) {
-            $("#balance-label").html("EXPORTING:");
+            $("#balance-label").html("EXPORTING");
             $("#balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
         }
         
