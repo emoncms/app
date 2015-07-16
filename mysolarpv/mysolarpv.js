@@ -180,11 +180,14 @@ var app_mysolarpv = {
         
         if (width<=500) {
             $(".electric-title").css("font-size","16px");
-            $(".power-value").css("font-size","38px");
+            $(".power-value").css("font-size","32px");
             $(".power-value").css("padding-top","12px");
             $(".power-value").css("padding-bottom","8px");
             $(".midtext").css("font-size","14px");
             $("#balanceline").hide();
+            $("#vistimeW").hide();
+            $("#vistimeM").hide();
+            $("#vistimeY").hide();
         } else if (width<=724) {
             $(".electric-title").css("font-size","18px");
             $(".power-value").css("font-size","52px");
@@ -192,6 +195,9 @@ var app_mysolarpv = {
             $(".power-value").css("padding-bottom","12px");
             $(".midtext").css("font-size","18px");
             $("#balanceline").show();
+            $("#vistimeW").show();
+            $("#vistimeM").show();
+            $("#vistimeY").show();
         } else {
             $(".electric-title").css("font-size","22px");
             $(".power-value").css("font-size","85px");
@@ -199,6 +205,9 @@ var app_mysolarpv = {
             $(".power-value").css("padding-bottom","20px");
             $(".midtext").css("font-size","20px");
             $("#balanceline").show();
+            $("#vistimeW").show();
+            $("#vistimeM").show();
+            $("#vistimeY").show();
         }
     },
     
@@ -265,12 +274,12 @@ var app_mysolarpv = {
         }
         
         if (balance>0) {
-            $("#balance-label").html("EXPORTING:");
+            $("#balance-label").html("EXPORTING");
             $("#balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
         }
         
         if (balance<0) {
-            $("#balance-label").html("IMPORTING:");
+            $("#balance-label").html("IMPORTING");
             $("#balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
         }
         
