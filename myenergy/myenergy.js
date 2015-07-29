@@ -1,19 +1,21 @@
+var datastore = {};
+
 var app_myenergy = {
 
-    solarpower: 0,
-    housepower: 0,
-    
-    feedname: "",
+    solarpower: false,
+    housepower: false,
     
     live: false,
-    
-    windnow: 0,
-    lastviewstart: 0,
-    lastviewend: 0,
+    show_balance_line: 1,
     
     house_data: [],
     solar_data: [],
     wind_data: [],
+      
+    reload: true,
+    autoupdate: true,
+    
+    lastupdate: 0,
     
     annual_wind_gen: 3300,
     capacity_factor: 0.4,
@@ -30,6 +32,8 @@ var app_myenergy = {
     // App start function
     init: function()
     {
+        app_myenergy.my_wind_cap = ((app_myenergy.annual_wind_gen / 365) / 0.024) / app_myenergy.capacity_factor;
+        
         if (app.config["myenergy"]!=undefined) {
             this.annual_wind_gen = 1*app.config["myenergy"].annualwindgen;
             this.solarpower = app.config["myenergy"].solarpower;
@@ -42,33 +46,96 @@ var app_myenergy = {
                 var name = feeds[z].name.toLowerCase();
                 
                 if (name.indexOf("house_power")!=-1) {
-                    app_myenergy.housepower = z;
+                    app_myenergy.housepower = [z];
                 }
                 
                 if (name.indexOf("solar_power")!=-1) {
-                    app_myenergy.solarpower = z;
+                    app_myenergy.solarpower = [z];
                 }
             }
         }
         
         this.my_wind_cap = ((this.annual_wind_gen / 365) / 0.024) / this.capacity_factor;
-
-        var timeWindow = (3600000*24.0*1);
+        
+        var timeWindow = (3600000*6.0*1);
         view.end = +new Date;
         view.start = view.end - timeWindow;
         
         var placeholder = $('#myenergy_placeholder');
         
-        $("#myenergy_zoomout").click(function () {view.zoomout(); app_myenergy.draw();});
-        $("#myenergy_zoomin").click(function () {view.zoomin(); app_myenergy.draw();});
-        $('#myenergy_right').click(function () {view.panright(); app_myenergy.draw();});
-        $('#myenergy_left').click(function () {view.panleft(); app_myenergy.draw();});
-        $('.time').click(function () {view.timewindow($(this).attr("time")); app_myenergy.draw();});
+        $("#myenergy_zoomout").click(function () {view.zoomout(); app_myenergy.reload = true; app_myenergy.autoupdate = false; app_myenergy.draw();});
+        $("#myenergy_zoomin").click(function () {view.zoomin(); app_myenergy.reload = true; app_myenergy.autoupdate = false; app_myenergy.draw();});
+        $('#myenergy_right').click(function () {view.panright(); app_myenergy.reload = true; app_myenergy.autoupdate = false; app_myenergy.draw();});
+        $('#myenergy_left').click(function () {view.panleft(); app_myenergy.reload = true; app_myenergy.autoupdate = false; app_myenergy.draw();});
+        $('.time').click(function () {
+            view.timewindow($(this).attr("time")/24.0); 
+            app_myenergy.reload = true; 
+            app_myenergy.autoupdate = true;
+            app_myenergy.draw();
+        });
         
-        placeholder.bind("plotselected", function (event, ranges)
-        {
+        $("#balanceline").click(function () { 
+            if ($(this).html()=="Show balance") {
+                app_myenergy.show_balance_line = 1;
+                app_myenergy.draw();
+                $(this).html("Hide balance");
+            } else {
+                app_myenergy.show_balance_line = 0;
+                app_myenergy.draw();
+                $(this).html("Show balance");
+            }
+        });
+        
+        placeholder.bind("plotselected", function (event, ranges) {
             view.start = ranges.xaxis.from;
             view.end = ranges.xaxis.to;
+
+            app_myenergy.autoupdate = false;
+            app_myenergy.reload = true; 
+            
+            var now = +new Date();
+            if (Math.abs(view.end-now)<30000) {
+                app_myenergy.autoupdate = true;
+            }
+
+            app_myenergy.draw();
+        });
+
+        $("#myenergy-openconfig").click(function(){
+            $("#myenergy-solarpower").val(app_myenergy.solarpower);
+            $("#myenergy-housepower").val(app_myenergy.housepower);
+            
+            $("#myenergy-annualwind").val(app_myenergy.annual_wind_gen);
+            $("#myenergy-windcap").html(Math.round(app_myenergy.my_wind_cap)+"W");
+            $("#myenergy-prc3mw").html((100*app_myenergy.my_wind_cap / 5000000).toFixed(3));
+            
+            $("#myenergy-config").show();
+            
+        });
+        
+        $("#myenergy-configsave").click(function() {
+            $("#myenergy-config").hide();
+            app_myenergy.annual_wind_gen = $("#myenergy-annualwind").val();
+            var solarfeedids = $("#myenergy-solarpower").val().split(",");
+            var housefeedids = $("#myenergy-housepower").val().split(",");
+            app_myenergy.solarpower = solarfeedids;
+            app_myenergy.housepower = housefeedids;
+            app_myenergy.my_wind_cap = ((app_myenergy.annual_wind_gen / 365) / 0.024) / app_myenergy.capacity_factor;
+            
+            // Save config to db
+            var config = app.config;
+            if (config==false) config = {};
+            config["myenergy"] = {
+                "annualwindgen": app_myenergy.annual_wind_gen,
+                "solarpower": app_myenergy.solarpower,
+                "housepower": app_myenergy.housepower
+            };
+            app.setconfig(config);
+            app_myenergy.reload = true;
+        });
+ 
+        $(window).resize(function(){
+            app_myenergy.resize();
             app_myenergy.draw();
         });
         
@@ -89,50 +156,13 @@ var app_myenergy = {
             $("#chargerate").html(Math.round(balance));
         });   
         */
-        
-        $("#myenergy-openconfig").click(function(){
-            $("#myenergy-solarpower").val(app_myenergy.solarpower);
-            $("#myenergy-housepower").val(app_myenergy.housepower);
-            $("#myenergy-annualwind").val(app_myenergy.annual_wind_gen);
-            $("#myenergy-windcap").html(Math.round(app_myenergy.my_wind_cap)+"W");
-            $("#myenergy-prc3mw").html((100*app_myenergy.my_wind_cap / 5000000).toFixed(3));
-            $("#myenergy-config").show();
-        });
-        
-        $("#myenergy-configsave").click(function() {
-            $("#myenergy-config").hide();
-            app_myenergy.annual_wind_gen = $("#myenergy-annualwind").val();
-            app_myenergy.solarpower = $("#myenergy-solarpower").val();
-            app_myenergy.housepower = $("#myenergy-housepower").val();
-            app_myenergy.my_wind_cap = ((app_myenergy.annual_wind_gen / 365) / 0.024) / app_myenergy.capacity_factor;
-            
-            // Save config to db
-            var config = app.config;
-            if (config==false) config = {};
-            config["myenergy"] = {
-                "annualwindgen": app_myenergy.annual_wind_gen,
-                "solarpower": app_myenergy.solarpower,
-                "housepower": app_myenergy.housepower
-            };
-            app.setconfig(config);
-            
-            var timeWindow = (3600000*24.0*1);
-            view.end = +new Date;
-            view.start = view.end - timeWindow;
-            app_myenergy.draw();
-            
-        });
-        
-        $(window).resize(function(){
-            app_myenergy.resize();
-            app_myenergy.draw();
-        });
     },
 
     show: function() 
     {
+        // this.reload = true;
         this.livefn();
-        this.live = setInterval(this.livefn,10000);
+        this.live = setInterval(this.livefn,5000);
         
         $("body").css("background-color","#222");
         
@@ -143,6 +173,7 @@ var app_myenergy = {
 
         app_myenergy.resize();
         app_myenergy.draw();
+        app_myenergy.draw_bargraph();
     },
     
     resize: function() 
@@ -169,7 +200,7 @@ var app_myenergy = {
             $("#balanceline").hide();
         } else if (width<=724) {
             $(".electric-title").css("font-size","18px");
-            $(".power-value").css("font-size","64px");
+            $(".power-value").css("font-size","52px");
             $(".power-value").css("padding-top","22px");
             $(".power-value").css("padding-bottom","12px");
             $(".midtext").css("font-size","18px");
@@ -186,47 +217,95 @@ var app_myenergy = {
     
     hide: function() 
     {
-        clearInterval(this.windupdater)
+        clearInterval(this.live);
     },
     
     livefn: function()
     {
-    
+        // Check if the updater ran in the last 60s if it did not the app was sleeping
+        // and so the data needs a full reload.
+        var now = +new Date();
+        if ((now-app_myenergy.lastupdate)>60000) app_myenergy.reload = true;
+        app_myenergy.lastupdate = now;
+        
+        // Fetch latest feed data
         var feeds = app_myenergy.getfeedsbyid();
         
+        // Consumption feeds
         var use_now = 0;
+        for (var i in app_myenergy.housepower) {
+            var feedid = app_myenergy.housepower[i];
+            if (feeds[feedid]!=undefined) {
+                use_now += parseInt(feeds[feedid].value);
+                if (app_myenergy.autoupdate) {
+                    app_myenergy.timeseries_append("f"+feedid,feeds[feedid].time,parseInt(feeds[feedid].value));
+                    app_myenergy.timeseries_trim_start("f"+feedid,view.start*0.001);
+                }
+            }
+        }
+        
+        // Solar feeds
         var solar_now = 0;
+        for (var i in app_myenergy.solarpower) {
+            var feedid = app_myenergy.solarpower[i];
+            if (feeds[feedid]!=undefined) {
+                solar_now += parseInt(feeds[feedid].value);
+                if (app_myenergy.autoupdate) {
+                    console.log(feeds[feedid].time+" "+feeds[feedid].value);
+                    app_myenergy.timeseries_append("f"+feedid,feeds[feedid].time,parseInt(feeds[feedid].value));
+                    app_myenergy.timeseries_trim_start("f"+feedid,view.start*0.001);
+                }
+            }
+        }
         
         var national_wind = app_myenergy.getvalueremote(67088);
         var prc_of_capacity = national_wind / 8000;
         app_myenergy.wind_now = app_myenergy.my_wind_cap * prc_of_capacity;
         var wind_now = app_myenergy.wind_now;
         
-        if (feeds[app_myenergy.housepower]!=undefined) use_now = 1*feeds[app_myenergy.housepower].value;
-        if (feeds[app_myenergy.solarpower]!=undefined) solar_now = 1*feeds[app_myenergy.solarpower].value;
-        
-        /*
-        var use_now = 0;
-        var housefeeds = app_myenergy.housepower.split(",");
-        for (z in housefeeds) {
-            use_now += 1*feeds[housefeeds[z]].value;
+        if (app_myenergy.autoupdate) {
+            app_myenergy.timeseries_append("remotewind",now,national_wind);
+            app_myenergy.timeseries_trim_start("remotewind",view.start*0.001);
         }
         
-        var solar_now = 0;
-        var solarfeeds = app_myenergy.solarpower.split(",");
-        for (z in solarfeeds) {
-            solar_now += 1*feeds[solarfeeds[z]].value;
-        }*/
         
-        var totalgen = solar_now + wind_now ;
-        var balance = totalgen - use_now;
+        // Advance view
+        if (app_myenergy.autoupdate) {
+            var timerange = view.end - view.start;
+            view.end = now;
+            view.start = view.end - timerange;
+        }
         
-        $("#myenergy-gridwindnow").html(Math.round(wind_now));
-        $("#myenergy-solarnow").html(Math.round(solar_now));
-        $("#myenergy-usenow").html(Math.round(use_now));
+        console.log("vs-ve: "+view.start+" "+view.end);
         
-        $("#myenergy-totalgen").html(Math.round(totalgen));
-        $("#myenergy-chargerate").html(Math.round(balance));
+        // Lower limit for solar
+        if (solar_now<10) solar_now = 0;
+        var gen_now = solar_now + wind_now;
+        var balance = gen_now - use_now;
+        
+        if (balance==0) {
+            $("#balance-label").html("");
+            $("#balance").html("");
+        }
+        
+        if (balance>0) {
+            $("#balance-label").html("CHARGE RATE:");
+            $("#balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
+        }
+        
+        if (balance<0) {
+            $("#balance-label").html("DISCHARGE RATE:");
+            $("#balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
+        }
+        
+        $("#gennow").html(Math.round(gen_now));
+        $("#solarnow").html(Math.round(solar_now));
+        $("#windnow").html(Math.round(wind_now));
+        
+        $("#usenow").html(use_now);
+        
+        app_myenergy.draw();
+        
     },
     
     draw: function ()
@@ -239,107 +318,100 @@ var app_myenergy = {
         var options = {
             lines: { fill: fill },
             xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end},
-            //yaxis: { min: 0 },
+            yaxes: [{ min: 0 }],
             grid: {hoverable: true, clickable: true},
             selection: { mode: "x" }
         }
         
-        var npoints = 1000;
+        var npoints = 1500;
         interval = Math.round(((view.end - view.start)/npoints)/1000);
+        if (interval<1) interval = 1;
+
+        var npoints = parseInt((view.end-view.start)/(interval*1000));
         
-        if (view.start!=this.lastviewstart || view.end!=this.lastviewend)
-        {
-            this.lastviewstart = view.start;
-            this.lastviewend = view.end;
+        // -------------------------------------------------------------------------------------------------------
+        // LOAD DATA ON INIT OR RELOAD
+        // -------------------------------------------------------------------------------------------------------
+        if (app_myenergy.reload) {
+            app_myenergy.reload = false;
+            view.start = 1000*Math.floor((view.start/1000)/interval)*interval;
+            view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
             
-            if (app_myenergy.housepower) app_myenergy.house_data = this.getdata(app_myenergy.housepower,view.start,view.end,interval);
-            if (app_myenergy.solarpower) app_myenergy.solar_data = this.getdata(app_myenergy.solarpower,view.start,view.end,interval);
-            
-            // This section loads the feed data, including summing if multiple are specified
-            /*
-            var tmp = [];
-            var i = 0;
-            var feeds = app_myenergy.housepower.split(",");
-            for (z in feeds) {
-                var feed = feeds[z];
-                tmp[i] = this.getdata(feed,view.start,view.end,interval);
-                i++;
+            for (var i in app_myenergy.solarpower) {
+                var feedid = app_myenergy.solarpower[i];
+                app_myenergy.timeseries_load("f"+feedid,this.getdata(feedid,view.start,view.end,interval));
             }
             
-            var power = [];
-            app_myenergy.house_data = [];
-            for (z in tmp[0]) {
-                for (s in tmp) {
-                    if (tmp[s][z][1]!=null) power[s] = tmp[s][z][1];
-                }
-                var sum = 0; for (s in tmp) sum+= power[s];
-                app_myenergy.house_data.push([tmp[0][z][0],sum]);
-            }
+            for (var i in app_myenergy.housepower) {
+                var feedid = app_myenergy.housepower[i];
+                app_myenergy.timeseries_load("f"+feedid,this.getdata(feedid,view.start,view.end,interval));
+            }      
             
-            var tmp = [];
-            var i = 0;
-            var feeds = app_myenergy.solarpower.split(",");
-            for (z in feeds) {
-                var feed = feeds[z];
-                tmp[i] = this.getdata(feed,view.start,view.end,interval);
-                i++;
-            }
-            
-            var power = [];
-            app_myenergy.solar_data = [];
-            for (z in tmp[0]) {
-                for (s in tmp) {
-                    if (tmp[s][z][1]!=null) power[s] = tmp[s][z][1];
-                }
-                var sum = 0; for (s in tmp) sum+= power[s];
-                app_myenergy.solar_data.push([tmp[0][z][0],sum]);
-            }
-            */
-            
-            app_myenergy.wind_data = this.getdataremote(67088,view.start,view.end,interval);
+            app_myenergy.timeseries_load("remotewind",this.getdataremote(67088,view.start,view.end,interval));          
         }
-        
-        var use = 0;
-        var gen = 0;
-        var wind = 0;
-        
-        
+        // -------------------------------------------------------------------------------------------------------
         
         var use_data = [];
-        var gen_data = [];
-        var mywind_data = [];
+        var solar_data = [];
+        var wind_data = [];
         var bal_data = [];
         var store_data = [];
         
-        
+        var t = 0;
         var store = 0;
+        var use = 0;
         var mysolar = 0;
+        var mywind = 0;
         
         var total_solar_kwh = 0;
         var total_wind_kwh = 0;
         var total_use_kwh = 0;
         var total_use_direct_kwh = 0;
         
-        var npoints = 0;
-        
-        if (app_myenergy.house_data.length>2) {
-            interval = (app_myenergy.house_data[1][0] - app_myenergy.house_data[0][0])/1000;
-            npoints = app_myenergy.house_data.length;
-        } else {
-            interval = (app_myenergy.wind_data[1][0] - app_myenergy.wind_data[0][0])/1000;
-            npoints = app_myenergy.wind_data.length;
+        var datastart = view.start;
+        for (var z in datastore) {
+            datastart = datastore[z].data[0][0];
+            npoints = datastore[z].data.length;
         }
-        var t = 0;
         
         for (var z=0; z<npoints; z++) {
-            if (app_myenergy.house_data[z]!=undefined && app_myenergy.house_data[z][1]!=null) use = app_myenergy.house_data[z][1];
-            if (app_myenergy.solar_data[z]!=undefined && app_myenergy.solar_data[z][1]!=null) mysolar = app_myenergy.solar_data[z][1];
-            if (app_myenergy.wind_data[z]!=undefined && app_myenergy.wind_data[z][1]!=null) wind = app_myenergy.wind_data[z][1];
+
+            // -------------------------------------------------------------------------------------------------------
+            // Get solar or use values
+            // -------------------------------------------------------------------------------------------------------
+            var tmpsolar = null;
+            for (var i in app_myenergy.solarpower) {
+                var feedid = app_myenergy.solarpower[i];
+                if (datastore["f"+feedid].data[z]!=undefined && datastore["f"+feedid].data[z][1]!=null) {
+                    if (tmpsolar==null) tmpsolar = 0;
+                    tmpsolar += datastore["f"+feedid].data[z][1];   
+                }
+            }
+            if (tmpsolar!=null) mysolar = tmpsolar;
             
-            var prc_of_capacity = wind / 8000;
-            var mywind = app_myenergy.my_wind_cap * prc_of_capacity;
+            var tmpuse = null;
+            for (var i in app_myenergy.housepower) {
+                var feedid = app_myenergy.housepower[i];
+                if (datastore["f"+feedid].data[z]!=undefined && datastore["f"+feedid].data[z][1]!=null) {
+                    if (tmpuse==null) tmpuse = 0;
+                    tmpuse += datastore["f"+feedid].data[z][1];   
+                }
+            }
+            if (tmpuse!=null) use = tmpuse;
             
-            gen = mysolar + mywind;
+            if (datastore["remotewind"].data[z]!=undefined && datastore["remotewind"].data[z][1]!=null) {
+                var wind = datastore["remotewind"].data[z][1]*1;
+                var prc_of_capacity = wind / 8000;
+                app_myenergy.my_wind_cap = ((app_myenergy.annual_wind_gen / 365) / 0.024) / app_myenergy.capacity_factor;
+                mywind = app_myenergy.my_wind_cap * prc_of_capacity;
+            }
+            
+            // -------------------------------------------------------------------------------------------------------
+            // Supply / demand balance calculation
+            // -------------------------------------------------------------------------------------------------------
+            if (mysolar<10) mysolar = 0;
+            
+            var gen = mysolar + mywind;
             
             var balance = gen - use;
             
@@ -349,42 +421,77 @@ var app_myenergy = {
             var store_change = (balance * interval) / (1000*3600);
             store += store_change;
             
-            total_solar_kwh += (mysolar*interval)/(1000*3600);
             total_wind_kwh += (mywind*interval)/(1000*3600);
+            total_solar_kwh += (mysolar*interval)/(1000*3600);
             total_use_kwh += (use*interval)/(1000*3600);
             
-            var time = 0;
-            if (app_myenergy.house_data[z]!=undefined) time = app_myenergy.house_data[z][0];
-            if (app_myenergy.wind_data[z]!=undefined) time = app_myenergy.wind_data[z][0];
+            var time = datastart + (1000 * interval * z);
             use_data.push([time,use]);
-            gen_data.push([time,gen]);
+            solar_data.push([time,mywind+mysolar]);
+            wind_data.push([time,mywind]);
             bal_data.push([time,balance]);
             store_data.push([time,store]);
-            mywind_data.push([time,mywind]);
             
             t += interval;
         }
-        $("#myenergy_total_solar_kwh").html(total_solar_kwh.toFixed(1));
-        $("#myenergy_total_wind_kwh").html(total_wind_kwh.toFixed(1));
-        $("#myenergy_total_gen_kwh").html((total_solar_kwh+total_wind_kwh).toFixed(1));
+        $("#total_wind_kwh").html(total_wind_kwh.toFixed(1));
+        $("#total_solar_kwh").html(total_solar_kwh.toFixed(1));
+        $("#total_use_kwh").html((total_use_kwh).toFixed(1));
         
-        $("#myenergy_total_use_kwh").html((total_use_kwh).toFixed(1));
-        $("#myenergy_total_use_direct_kwh").html((total_use_direct_kwh).toFixed(1)+"kWh ("+Math.round(100*total_use_direct_kwh/total_use_kwh)+"%)");
-        
-        $("#myenergy_total_use_via_store_kwh").html((total_use_kwh-total_use_direct_kwh).toFixed(1)+"kWh ("+Math.round(100*(1-(total_use_direct_kwh/total_use_kwh)))+"%)");
-        
-        
+        $("#total_use_direct_prc").html(Math.round(100*total_use_direct_kwh/total_use_kwh)+"%");
+        $("#total_use_via_store_prc").html(Math.round(100*(1-(total_use_direct_kwh/total_use_kwh)))+"%");
+
+        $("#total_use_direct_kwh").html((total_use_direct_kwh).toFixed(1));
+        $("#total_use_via_store_kwh").html((total_use_kwh-total_use_direct_kwh).toFixed(1));        
+
         options.xaxis.min = view.start;
         options.xaxis.max = view.end;
         
-        $.plot($('#myenergy_placeholder'), 
-            [
-                {data:gen_data,color: "#dccc1f", lines:{lineWidth:0, fill:1.0}},
-                {data:mywind_data,color: "#2ed52e", lines:{lineWidth:0, fill:1.0}},
-                {data:use_data,color: "#0699fa",lines:{lineWidth:0, fill:0.8}},
-                {data:store_data,yaxis:2, color: "#888"}
-            ], options
-        );
+        var series = [
+            {data:solar_data,color: "#dccc1f", lines:{lineWidth:0, fill:1.0}},
+            {data:wind_data,color: "#2ed52e", lines:{lineWidth:0, fill:1.0}},
+            {data:use_data,color: "#0699fa",lines:{lineWidth:0, fill:0.8}}
+        ];
+        
+        if (app_myenergy.show_balance_line) series.push({data:store_data,yaxis:2, color: "#888"});
+        
+        $.plot($('#myenergy_placeholder'),series,options);
+    },
+    
+    draw_bargraph: function() {
+        /*
+        var timeWindow = (3600000*24.0*365);
+        var end = +new Date;
+        var start = end - timeWindow;
+        var interval = 3600*24;
+        
+        var kwh_data = this.getdata(69211,start,end,interval);
+        var kwhd_data = [];
+        
+        for (var day=1; day<kwh_data.length; day++)
+        {
+            var kwh = kwh_data[day][1] - kwh_data[day-1][1];
+            if (kwh_data[day][1]==null || kwh_data[day-1][1]==null) kwh = 0;
+            kwhd_data.push([kwh_data[day][0],kwh]);
+        }
+    
+        var options = {
+            bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: true},
+            xaxis: { mode: "time", timezone: "browser"},
+            grid: {hoverable: true, clickable: true},
+            selection: { mode: "x" }
+        }
+        
+        var series = [];
+        
+        series.push({
+            data: kwhd_data,
+            color: "#dccc1f",
+            lines: {lineWidth:0, fill:1.0}
+        });
+        
+        $.plot($('#myenergy_bargraph'),series,options);
+        */
     },
     
     getfeedsbyid: function()
@@ -419,6 +526,75 @@ var app_myenergy = {
             success: function(data_in) { data = data_in; } 
         });
         return data;
+    },
+    
+    // -------------------------------------------------------------------------------------------------------
+    // IN BROWSER TIMESERIES DATA STORE
+    // with features for appending a new datapoint and triming the old data in order to create a moving view
+    // -------------------------------------------------------------------------------------------------------
+    
+    timeseries_load: function (name,data)
+    {
+        datastore[name] = {};
+        datastore[name].data = data;
+        datastore[name].start = datastore[name].data[0][0] * 0.001;
+        datastore[name].interval = (datastore[name].data[1][0] - datastore[name].data[0][0])*0.001;
+    },
+    
+    timeseries_append: function (name,time,value)
+    {
+        if (datastore[name]==undefined) return false;
+        
+        var interval = datastore[name].interval;
+        var start = datastore[name].start;
+        
+        // 1. align to timeseries interval
+        time = Math.floor(time/interval)*interval;
+        // 2. calculate new data point position
+        var pos = (time - start) / interval;
+        // 3. get last position from data length
+        var last_pos = datastore[name].data.length - 1;
+        
+        // if the datapoint is newer than the last:
+        if (pos > last_pos)
+        {
+            var npadding = (pos - last_pos)-1;
+            
+            // padding
+            if (npadding>0 && npadding<12) {
+                for (var padd = 0; padd<npadding; padd++)
+                {
+                    var padd_time = start + ((last_pos+padd+1) * interval);
+                    datastore[name].data.push([padd_time*1000,null]);
+                }
+            }
+            
+            // insert datapoint
+            datastore[name].data.push([time*1000,value]);
+        }
+    },
+    
+    timeseries_trim_start: function (name,newstart)
+    {
+        if (datastore[name]==undefined) return false;
+        
+        var interval = datastore[name].interval;
+        var start = datastore[name].start;
+        
+        newstart = Math.floor(newstart/interval)*interval;
+        var pos = (newstart - start) / interval;
+        var tmpdata = [];
+        
+        if (pos>=0) {
+            for (var p=pos; p<datastore[name].data.length; p++) {
+                var t = datastore[name].data[p][0];
+                var v = datastore[name].data[p][1];
+                tmpdata.push([t,v]);
+            }
+            datastore[name].data = tmpdata;
+            datastore[name].start = datastore[name].data[0][0] * 0.001;
+            datastore[name].interval = (datastore[name].data[1][0] - datastore[name].data[0][0])*0.001;
+        }
     },
     
     getdataremote: function(id,start,end,interval)
