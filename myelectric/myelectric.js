@@ -39,14 +39,10 @@ var app_myelectric = {
     ],
 
     init: function()
-    {
-        var d = new Date()
-        var n = d.getTimezoneOffset();
-        app_myelectric.timeoffset = n / -60;
-        
-        var timeWindow = (3600000*1.0*1);
+    {        
+        var timewindow = (3600000*3.0*1);
         view.end = +new Date;
-        view.start = view.end - timeWindow;
+        view.start = view.end - timewindow;
 
         // -------------------------------------------------------------------------
         // Load settings
@@ -247,6 +243,9 @@ var app_myelectric = {
     {
         var now = new Date();
         var timenow = now.getTime();
+        
+        var n = now.getTimezoneOffset();
+        var offset = n / -60;
         // --------------------------------------------------------------------------------------------------------
         // REALTIME POWER GRAPH
         // -------------------------------------------------------------------------------------------------------- 
@@ -259,6 +258,10 @@ var app_myelectric = {
         // reload power data
         if (app_myelectric.reload) {
             app_myelectric.reload = false;
+            
+            var timewindow = view.end - view.start;
+            view.end = timenow;
+            view.start = view.end - timewindow;
             
             var npoints = 1500;
             interval = Math.round(((view.end - view.start)/npoints)/1000);
@@ -312,12 +315,13 @@ var app_myelectric = {
         
         if (app_myelectric.reloadkwhd) {
             app_myelectric.reloadkwhd = false;
-            
+        
             var interval = 3600*24;
             var timenow_s = timenow*0.001;
             var end = Math.floor(timenow_s/interval)*interval;
-            
             var start = end - interval * Math.round(graph_bars.width/30);
+            start -= offset * 3600;
+            end -= offset * 3600;
             start*=1000; end*=1000;
             
             var data = [];
@@ -344,6 +348,9 @@ var app_myelectric = {
         // which is then subtracted from the start of this day to obtain today's kwh/d reading
         var lastdayend = Math.floor(feeds[app_myelectric.dailyfeed].time/86400)*86400*1000;
         var thisdayend = lastdayend + (86400*1000);
+        lastdayend -= offset * 3600000;
+        thisdayend -= offset * 3600000;
+            
         // we double check that the last datapoint in the request has the timestamp of the start of this day or end of last..
         if (data[data.length-1][0]==lastdayend) {
             data.push([thisdayend,feeds[app_myelectric.dailyfeed].value]);
