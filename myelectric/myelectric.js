@@ -12,6 +12,8 @@ var app_myelectric = {
     
     fastupdateinst: false,
     
+    escale: 1,
+    
     timeoffset: 0,
     
     startofweek: [0,0],
@@ -362,7 +364,7 @@ var app_myelectric = {
         {
             if (data[z][1]!=null) {
                 var time = data[z-1][0];
-                var diff = (data[z][1]-data[z-1][1])*0.001;
+                var diff = (data[z][1]-data[z-1][1])*app_myelectric.escale;
                 app_myelectric.daily.push([time,diff]);
             }
         }
@@ -378,7 +380,7 @@ var app_myelectric = {
         // --------------------------------------------------------------------------------------------------------
         
         // All time total
-        var alltime_kwh = feeds[app_myelectric.dailyfeed].value*0.001;
+        var alltime_kwh = feeds[app_myelectric.dailyfeed].value*app_myelectric.escale;
         // -------------------------------------------------------------------------------------------------------- 
         // WEEK: Get the time of the start of the week, if we have rolled over to a new week, load the watt hour
         // value in the watt accumulator feed recorded for the start of this week.
@@ -393,7 +395,7 @@ var app_myelectric = {
         if (app_myelectric.startofweek===false) app_myelectric.startofweek = [app_myelectric.startalltime*1000,0];
         
         // Week total
-        var week_kwh = alltime_kwh - (app_myelectric.startofweek[1]*0.001);
+        var week_kwh = alltime_kwh - (app_myelectric.startofweek[1]*app_myelectric.escale);
         $("#myelectric_week_kwh").html(week_kwh.toFixed(1));
         var days = ((feeds[app_myelectric.dailyfeed].time - (app_myelectric.startofweek[0]*0.001))/86400);
         $("#myelectric_week_kwhd").html((week_kwh/days).toFixed(1));
@@ -407,7 +409,7 @@ var app_myelectric = {
         if (app_myelectric.startofmonth===false) app_myelectric.startofmonth = [app_myelectric.startalltime*1000,0];
         
         // Monthly total
-        var month_kwh = alltime_kwh - (app_myelectric.startofmonth[1]*0.001);
+        var month_kwh = alltime_kwh - (app_myelectric.startofmonth[1]*app_myelectric.escale);
         $("#myelectric_month_kwh").html(Math.round(month_kwh));
         var days = ((feeds[app_myelectric.dailyfeed].time - (app_myelectric.startofmonth[0]*0.001))/86400);
         $("#myelectric_month_kwhd").html((month_kwh/days).toFixed(1));
@@ -421,7 +423,7 @@ var app_myelectric = {
         if (app_myelectric.startofyear===false) app_myelectric.startofyear = [app_myelectric.startalltime*1000,0];     
         
         // Year total
-        var year_kwh = alltime_kwh - (app_myelectric.startofyear[1]*0.001);
+        var year_kwh = alltime_kwh - (app_myelectric.startofyear[1]*app_myelectric.escale);
         $("#myelectric_year_kwh").html(Math.round(year_kwh));
         var days = ((feeds[app_myelectric.dailyfeed].time - (app_myelectric.startofyear[0]*0.001))/86400);
         $("#myelectric_year_kwhd").html((year_kwh/days).toFixed(1));
