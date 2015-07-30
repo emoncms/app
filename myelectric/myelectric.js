@@ -73,6 +73,9 @@ var app_myelectric = {
             }
         }
         
+        if (app_myelectric.dailytype==0) app_myelectric.escale = 0.001;
+        if (app_myelectric.dailytype==1) app_myelectric.escale = 1.0;
+        
         // -------------------------------------------------------------------------
         // Decleration of myelectric events
         // -------------------------------------------------------------------------
@@ -125,6 +128,14 @@ var app_myelectric = {
                 "dailyfeed": app_myelectric.dailyfeed,
                 "dailytype": app_myelectric.dailytype
             };
+            if (app_myelectric.dailytype==0) app_myelectric.escale = 0.001;
+            if (app_myelectric.dailytype==1) app_myelectric.escale = 1.0;
+            
+            app_myelectric.last_daytime = 0;
+            app_myelectric.last_startofweektime = 0;
+            app_myelectric.last_startofmonthtime = 0;
+            app_myelectric.last_startofyeartime = 0;
+            
             app.setconfig(config);
             app_myelectric.reload = true;
             app_myelectric.reloadkwhd = true;
