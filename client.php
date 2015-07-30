@@ -6,6 +6,9 @@
 <script>
     var path = "<?php print $path; ?>";
     var apikey = "<?php print $apikey; ?>";
+    
+    apikeystr = ""; 
+    if (apikey!="") apikeystr = "&apikey="+apikey;
 </script>
 
 <link href="<?php echo $path; ?>Modules/app/style.css" rel="stylesheet">
