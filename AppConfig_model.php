@@ -46,7 +46,7 @@ class AppConfig
                         foreach ($value as $val) $tmp[] = (int) $val;
                         $value = $tmp;
                     } else {
-                        $value = preg_replace("/[^A-Za-z0-9,]/",'',$value);
+                        $value = preg_replace("/[^A-Za-z0-9,;£$.]/",'',$value);
                     }
                     
                     $outdata[$appname][$property] = $value;
