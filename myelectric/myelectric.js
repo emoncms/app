@@ -81,7 +81,8 @@ var app_myelectric = {
         
         if (app_myelectric.dailytype==0) app_myelectric.escale = 0.001;
         if (app_myelectric.dailytype==1) app_myelectric.escale = 1.0;
-        
+        if (app.config.myelectric.currency==undefined) app.config.myelectric.currency = "";
+        if (app.config.myelectric.unitcost==undefined) app.config.myelectric.unitcost = 0;
         // -------------------------------------------------------------------------
         // Decleration of myelectric events
         // -------------------------------------------------------------------------
