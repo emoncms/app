@@ -79,6 +79,12 @@ var app_myelectric = {
             }
         }
         
+        if (app_myelectric.dailytype>1) {
+            app_myelectric.dailytype = 0;
+            app_myelectric.dailyfeed = 0;
+        }
+        
+        app_myelectric.escale = 1.0;
         if (app_myelectric.dailytype==0) app_myelectric.escale = 0.001;
         if (app_myelectric.dailytype==1) app_myelectric.escale = 1.0;
         if (app.config.myelectric.currency==undefined) app.config.myelectric.currency = "";
@@ -195,24 +201,26 @@ var app_myelectric = {
             $("#footer").css('background-color','#181818');
             $("#footer").css('color','#999');
         });
-         
-        // start of all time
-        var meta = {};
-        $.ajax({                                      
-            url: path+"feed/getmeta.json",                         
-            data: "id="+app_myelectric.dailyfeed+apikeystr,
-            dataType: 'json',
-            async: false,                      
-            success: function(data_in) { meta = data_in; } 
-        });
-        app_myelectric.startalltime = meta.start_time;
         
-        app_myelectric.reloadkwhd = true;
+        if (app_myelectric.powerfeed>0 && app_myelectric.dailyfeed>0) {
         
-        // resize and start updaters
-        app_myelectric.resize();
+            // start of all time
+            var meta = {};
+            $.ajax({                                      
+                url: path+"feed/getmeta.json",                         
+                data: "id="+app_myelectric.dailyfeed+apikeystr,
+                dataType: 'json',
+                async: false,                      
+                success: function(data_in) { meta = data_in; } 
+            });
+            app_myelectric.startalltime = meta.start_time;
+            
+            app_myelectric.reloadkwhd = true;
+            
+            // resize and start updaters
+            app_myelectric.resize();
+            
         
-        if (app_myelectric.powerfeed && app_myelectric.dailyfeed) {
             app_myelectric.fastupdateinst = setInterval(app_myelectric.fastupdate,5000);
             app_myelectric.fastupdate();
         }
@@ -423,8 +431,11 @@ var app_myelectric = {
                 app_myelectric.daily.push([time,diff*scale]);
             }
         }
-            
-        var usetoday_kwh = app_myelectric.daily[app_myelectric.daily.length-1][1];
+        
+        var usetoday_kwh = 0;
+        if (app_myelectric.daily.length>0) {
+            usetoday_kwh = app_myelectric.daily[app_myelectric.daily.length-1][1];
+        }
         $("#myelectric_usetoday").html((usetoday_kwh).toFixed(1));
 
         graph_bars.draw('myelectric_placeholder_kwhd',[app_myelectric.daily]);
