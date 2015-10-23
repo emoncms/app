@@ -21,7 +21,6 @@
 console.log(path);
 
 var config = app.getconfig();
-
 var nodes = {};
   
 var appname = "myelectric";

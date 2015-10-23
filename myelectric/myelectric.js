@@ -62,6 +62,7 @@ var app_myelectric = {
             app_myelectric.currency = "&"+app.config.myelectric.currency+";";
             app_myelectric.unitcost = app.config.myelectric.unitcost;
         } else {
+            app.config.myelectric = {};
         // if no settings then try auto scanning for feeds with suitable names:
             var feeds = app_myelectric.getfeedsbyid();
             for (z in feeds)
@@ -81,8 +82,8 @@ var app_myelectric = {
         
         if (app_myelectric.dailytype==0) app_myelectric.escale = 0.001;
         if (app_myelectric.dailytype==1) app_myelectric.escale = 1.0;
-        if (app.config.myelectric.currency==undefined) app.config.myelectric.currency = "";
-        if (app.config.myelectric.unitcost==undefined) app.config.myelectric.unitcost = 0;
+        if (app_myelectric.currency==undefined) app_myelectric.currency = "";
+        if (app_myelectric.unitcost==undefined) app_myelectric.unitcost = 0;
         // -------------------------------------------------------------------------
         // Decleration of myelectric events
         // -------------------------------------------------------------------------
@@ -271,7 +272,9 @@ var app_myelectric = {
         }
         
         app_myelectric.reloadkwhd = true;
-        app_myelectric.fastupdate();
+        if (app_myelectric.powerfeed && app_myelectric.dailyfeed) {
+            app_myelectric.fastupdate();
+        }
     },
     
     hide: function()
