@@ -112,8 +112,8 @@ var app_myelectric = {
             
             $("#myelectric_dailytype").val(app_myelectric.dailytype);
             
-            $("#myelectric_currency").val(app.config.myelectric.currency);
-            $("#myelectric_unitcost").val(app.config.myelectric.unitcost);
+            $("#myelectric_currency").val(app_myelectric.currency);
+            $("#myelectric_unitcost").val(app_myelectric.unitcost);
             // Switch to the config interface
             $("#myelectric_config").show();
             $("#myelectric_body").hide();
