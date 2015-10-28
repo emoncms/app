@@ -14,7 +14,7 @@ var app_myelectric = {
     
     viewmode: "energy",
     unitcost: 0.17,
-    currency: "&pound;",
+    currency: "pound",
     
     escale: 1,
     
@@ -59,7 +59,7 @@ var app_myelectric = {
             app_myelectric.powerfeed = app.config.myelectric.powerfeed;
             app_myelectric.dailyfeed = app.config.myelectric.dailyfeed;
             app_myelectric.dailytype = app.config.myelectric.dailytype;
-            app_myelectric.currency = "&"+app.config.myelectric.currency+";";
+            app_myelectric.currency = app.config.myelectric.currency;
             app_myelectric.unitcost = app.config.myelectric.unitcost;
         } else {
             app.config.myelectric = {};
@@ -112,7 +112,7 @@ var app_myelectric = {
             
             $("#myelectric_dailytype").val(app_myelectric.dailytype);
             
-            $("#myelectric_currency").val(app_myelectric.currency.substr(1,-1));
+            $("#myelectric_currency").val(app_myelectric.currency);
             $("#myelectric_unitcost").val(app_myelectric.unitcost);
             // Switch to the config interface
             $("#myelectric_config").show();
@@ -130,7 +130,7 @@ var app_myelectric = {
             app_myelectric.dailyfeed = $("#myelectric_dailyfeed").val();
             app_myelectric.dailytype = $("#myelectric_dailytype").val();
             app_myelectric.unitcost = $("#myelectric_unitcost").val();
-            var currency = $("#myelectric_currency").val();
+            app_myelectric.currency = $("#myelectric_currency").val();
             
             // Save config to db
             var config = app.config;
@@ -140,9 +140,8 @@ var app_myelectric = {
                 "dailyfeed": app_myelectric.dailyfeed,
                 "dailytype": app_myelectric.dailytype,
                 "unitcost": app_myelectric.unitcost,
-                "currency": currency
+                "currency": app_myelectric.currency
             };
-            app_myelectric.currency = "&"+currency+";";
             
             if (app_myelectric.dailytype==0) app_myelectric.escale = 0.001;
             if (app_myelectric.dailytype==1) app_myelectric.escale = 1.0;
@@ -292,10 +291,10 @@ var app_myelectric = {
             $(".u2a").html(""); $(".u2b").html(" kWh/d");
         } else {
             scale = app_myelectric.unitcost;
-            $("#myelectric_usetoday_units_a").html(app_myelectric.currency);
+            $("#myelectric_usetoday_units_a").html("&"+app_myelectric.currency+";");
             $("#myelectric_usetoday_units_b").html("");
-            $(".u1a").html(app_myelectric.currency); $(".u1b").html("");
-            $(".u2a").html(app_myelectric.currency); $(".u2b").html("/day");
+            $(".u1a").html("&"+app_myelectric.currency+";"); $(".u1b").html("");
+            $(".u2a").html("&"+app_myelectric.currency+";"); $(".u2b").html("/day");
         }
         
         var now = new Date();
@@ -339,7 +338,7 @@ var app_myelectric = {
         if (app_myelectric.viewmode=="energy") {
             $("#myelectric_powernow").html((feeds[app_myelectric.powerfeed].value*1).toFixed(0)+"W");
         } else {
-            $("#myelectric_powernow").html(app_myelectric.currency+(feeds[app_myelectric.powerfeed].value*1*app_myelectric.unitcost*0.001).toFixed(2)+"/hr");
+            $("#myelectric_powernow").html("&"+app_myelectric.currency+";"+(feeds[app_myelectric.powerfeed].value*1*app_myelectric.unitcost*0.001).toFixed(2)+"/hr");
         }
         // Advance view
         if (app_myelectric.autoupdate) {
