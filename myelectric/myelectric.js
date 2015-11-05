@@ -415,7 +415,7 @@ var app_myelectric = {
         
         // this is where we add the current day to the kwh/d data by adding a datapoint for the end of the day
         // which is then subtracted from the start of this day to obtain today's kwh/d reading
-        var feedtime = feeds[app_myelectric.dailyfeed].time;
+        var feedtime = feeds[app_myelectric.dailyfeed].time*1.0;
         feedtime += offset * 3600;
         
         var lastdayend = Math.floor(feedtime/86400)*86400;
