@@ -377,6 +377,8 @@ var app_myelectric = {
         
             var interval = 3600*24;
             var timenow_s = timenow*0.001;
+            
+            timenow_s += offset * 3600;
             var end = Math.floor(timenow_s/interval)*interval;
             var start = end - interval * Math.round(graph_bars.width/30);
             start -= offset * 3600;
@@ -405,10 +407,16 @@ var app_myelectric = {
         
         // this is where we add the current day to the kwh/d data by adding a datapoint for the end of the day
         // which is then subtracted from the start of this day to obtain today's kwh/d reading
-        var lastdayend = Math.floor(feeds[app_myelectric.dailyfeed].time/86400)*86400*1000;
-        var thisdayend = lastdayend + (86400*1000);
-        lastdayend -= offset * 3600000;
-        thisdayend -= offset * 3600000;
+        var feedtime = feeds[app_myelectric.dailyfeed].time*1.0;
+        feedtime += offset * 3600;
+        
+        var lastdayend = Math.floor(feedtime/86400)*86400;
+        var thisdayend = lastdayend + 86400;
+        lastdayend -= offset * 3600;
+        thisdayend -= offset * 3600;
+        
+        lastdayend *= 1000;
+        thisdayend *= 1000;
             
         // we double check that the last datapoint in the request has the timestamp of the start of this day or end of last..
         if (data[data.length-1][0]==lastdayend) {
