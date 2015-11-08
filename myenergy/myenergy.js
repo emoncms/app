@@ -370,8 +370,9 @@ var app_myenergy = {
         
         var datastart = view.start;
         for (var z in datastore) {
-            datastart = datastore[z].data[0][0];
             npoints = datastore[z].data.length;
+            if (npoints>0)
+                datastart = datastore[z].data[0][0];
         }
         
         for (var z=0; z<npoints; z++) {
@@ -537,8 +538,12 @@ var app_myenergy = {
     {
         datastore[name] = {};
         datastore[name].data = data;
-        datastore[name].start = datastore[name].data[0][0] * 0.001;
-        datastore[name].interval = (datastore[name].data[1][0] - datastore[name].data[0][0])*0.001;
+        datastore[name].start = 0;
+        if (datastore[name].data.length>1)
+        {
+            datastore[name].start = datastore[name].data[0][0] * 0.001;
+            datastore[name].interval = (datastore[name].data[1][0] - datastore[name].data[0][0])*0.001;
+        }
     },
     
     timeseries_append: function (name,time,value)
