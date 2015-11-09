@@ -501,7 +501,7 @@ var app_myelectric = {
         var valid = [];
         
         var data = app_myelectric.getdata({
-          "id":3,
+          "id":app_myelectric.dailyfeed,
           "start":start*1000,"end":end*1000,"interval":interval,
           "skipmissing":0,"limitinterval":0
         });
