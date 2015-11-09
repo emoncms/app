@@ -11,14 +11,13 @@ var app_myelectric = {
     raw_kwh_data: [],
     
     fastupdateinst: false,
+    slowupdateinst: false,
     
     viewmode: "energy",
     unitcost: 0.17,
     currency: "pound",
     
     escale: 1,
-    
-    timeoffset: 0,
     
     startofweek: [0,0],
     startofmonth: [0,0],
@@ -34,7 +33,9 @@ var app_myelectric = {
     lastupdate: 0, 
     autoupdate: true,
     reload: true,
-    reloadkwhd: true,
+    feeds: {},
+    
+    kwhdtmp: [],
     
     // Include required javascript libraries
     include: [
@@ -126,6 +127,7 @@ var app_myelectric = {
             
             // Stop updaters
             if (app_myelectric.fastupdateinst) clearInterval(app_myelectric.fastupdateinst);
+            if (app_myelectric.slowupdateinst) clearInterval(app_myelectric.slowupdateinst);
         });
 
         // Save configuration, values are simply placed in the config.
@@ -162,7 +164,9 @@ var app_myelectric = {
             app_myelectric.reloadkwhd = true;
             
             app_myelectric.fastupdateinst = setInterval(app_myelectric.fastupdate,5000);
+            app_myelectric.slowupdateinst = setInterval(app_myelectric.slowupdate,60000);
             app_myelectric.fastupdate();
+            app_myelectric.slowupdate();
             
             // Switch to main view 
             $("#myelectric_config").hide();
@@ -185,12 +189,14 @@ var app_myelectric = {
             app_myelectric.viewmode = "cost";
             console.log(app_myelectric.viewmode);
             app_myelectric.fastupdate();
+            app_myelectric.slowupdate();
         });
         
         $(".myelectric-view-kwh").click(function(){
             app_myelectric.viewmode = "energy";
             console.log(app_myelectric.viewmode);
             app_myelectric.fastupdate();
+            app_myelectric.slowupdate();
         });
     },
     
@@ -223,6 +229,8 @@ var app_myelectric = {
         
             app_myelectric.fastupdateinst = setInterval(app_myelectric.fastupdate,5000);
             app_myelectric.fastupdate();
+            app_myelectric.slowupdateinst = setInterval(app_myelectric.slowupdate,60000);
+            app_myelectric.slowupdate();
         }
     },
     
@@ -281,12 +289,14 @@ var app_myelectric = {
         app_myelectric.reloadkwhd = true;
         if (app_myelectric.powerfeed && app_myelectric.dailyfeed) {
             app_myelectric.fastupdate();
+            app_myelectric.slowupdate();
         }
     },
     
     hide: function()
     {
         clearInterval(this.fastupdateinst);
+        clearInterval(this.slowupdateinst);
     },
     
     fastupdate: function()
@@ -308,8 +318,6 @@ var app_myelectric = {
         var now = new Date();
         var timenow = now.getTime();
         
-        var n = now.getTimezoneOffset();
-        var offset = n / -60;
         // --------------------------------------------------------------------------------------------------------
         // REALTIME POWER GRAPH
         // -------------------------------------------------------------------------------------------------------- 
@@ -341,6 +349,7 @@ var app_myelectric = {
         // 1) Get last value of feeds
         // --------------------------------------------------------------------
         var feeds = app_myelectric.getfeedsbyid();
+        app_myelectric.feeds = feeds;
         
         // set the power now value
         if (app_myelectric.viewmode=="energy") {
@@ -367,90 +376,46 @@ var app_myelectric = {
         }
         
         // draw power graph
-        graph_lines.draw("myelectric_placeholder_power",[datastore[app_myelectric.powerfeed].data]);
-
-        // --------------------------------------------------------------------------------------------------------
-        // KWH PER DAY GRAPH
-        // -------------------------------------------------------------------------------------------------------- 
-        // this part draws the kwhd graph but only reloads the data and draws this graph if there is a new day
-        
-        if (now.getDay()!=app_myelectric.last_daytime) {
-            app_myelectric.last_daytime = now.getDay();
-            app_myelectric.reloadkwhd = true;
-            console.log("NEW DAY JUST ROLLED OVER: "+timenow); 
-        }
-        
-        if (app_myelectric.reloadkwhd) {
-            app_myelectric.reloadkwhd = false;
-        
-            var interval = 3600*24;
-            var timenow_s = timenow*0.001;
+        var options = {
+            axes: {
+                color: "rgba(6,153,250,1.0)",
+                font: "12px arial"
+            },
             
-            timenow_s += offset * 3600;
-            var end = Math.floor(timenow_s/interval)*interval;
-            var start = end - interval * Math.round(graph_bars.width/30);
-            start -= offset * 3600;
-            end -= offset * 3600;
-            start*=1000; end*=1000;
+            xaxis: {
+                minor_tick: 60000*10,
+                major_tick: 60000*60
+            },
             
-            var data = [];
-            $.ajax({                                      
-                url: path+"feed/data.json",                         
-                data: "id="+app_myelectric.dailyfeed+"&start="+start+"&end="+end+"&interval="+interval+"&skipmissing=0&limitinterval=0"+apikeystr,
-                dataType: 'json',
-                async: false,
-                success: function(data_in) { 
-                    // phpfina is returning one result too many - this strips out any datapoints that are beyond
-                    // the query request range.
-                    for (var z=0; z<data_in.length; z++) {
-                        if (data_in[z][0]<=end) data.push(data_in[z]);
-                    }
-                } 
-            });
-            app_myelectric.raw_kwh_data = data;
-        }
-        
-        // Makes a copy of the loaded kwh data up to the end of the last day
-        var data = JSON.parse(JSON.stringify(app_myelectric.raw_kwh_data));
-        
-        // this is where we add the current day to the kwh/d data by adding a datapoint for the end of the day
-        // which is then subtracted from the start of this day to obtain today's kwh/d reading
-        var feedtime = feeds[app_myelectric.dailyfeed].time*1.0;
-        feedtime += offset * 3600;
-        
-        var lastdayend = Math.floor(feedtime/86400)*86400;
-        var thisdayend = lastdayend + 86400;
-        lastdayend -= offset * 3600;
-        thisdayend -= offset * 3600;
-        
-        lastdayend *= 1000;
-        thisdayend *= 1000;
-            
-        // we double check that the last datapoint in the request has the timestamp of the start of this day or end of last..
-        if (data[data.length-1][0]==lastdayend) {
-            data.push([thisdayend,feeds[app_myelectric.dailyfeed].value]);
-        }
-        
-        // Calculate the daily totals by subtracting each day from the day before
-        app_myelectric.daily = [];
-        for (var z=1; z<data.length; z++)
-        {
-            if (data[z][1]!=null) {
-                var time = data[z-1][0];
-                var diff = (data[z][1]-data[z-1][1])*app_myelectric.escale;
-                app_myelectric.daily.push([time,diff*scale]);
+            yaxis: {
+                title: "Power (Watts)",
+                units: "W",
+                minor_tick: 250,
+                major_tick: 1000
             }
-        }
+        };
         
-        var usetoday_kwh = 0;
-        if (app_myelectric.daily.length>0) {
-            usetoday_kwh = app_myelectric.daily[app_myelectric.daily.length-1][1];
-        }
-        $("#myelectric_usetoday").html((usetoday_kwh).toFixed(1));
+        var timewindowhours = Math.round((view.end-view.start)/3600000);
+        options.xaxis.major_tick = 30*24*3600*1000;
+        if (timewindowhours<=24*7) options.xaxis.major_tick = 24*3600*1000;
+        if (timewindowhours<=24) options.xaxis.major_tick = 2*3600*1000;
+        if (timewindowhours<=12) options.xaxis.major_tick = 1*3600*1000;
+        options.xaxis.minor_tick = options.xaxis.major_tick / 4;
+        
+        
+        var series = {
+            "solar": {
+                color: "rgba(255,255,255,1.0)",
+                data: []
+            },
+            "use": {
+                color: "rgba(6,153,250,0.5)",
+                data: datastore[app_myelectric.powerfeed].data
+            }
+        };
+        
+        graph_lines.draw("myelectric_placeholder_power",series,options);
 
-        graph_bars.draw('myelectric_placeholder_kwhd',[app_myelectric.daily]);
-        
-        
         // --------------------------------------------------------------------------------------------------------
         // THIS WEEK, MONTH, YEAR TOTALS
         // --------------------------------------------------------------------------------------------------------
@@ -506,8 +471,70 @@ var app_myelectric = {
         // ALL TIME
         $("#myelectric_alltime_kwh").html(Math.round(scale*alltime_kwh));
         var days = ((feeds[app_myelectric.dailyfeed].time - app_myelectric.startalltime)/86400);
-        $("#myelectric_alltime_kwhd").html((scale*alltime_kwh/days).toFixed(1));  
+        $("#myelectric_alltime_kwhd").html((scale*alltime_kwh/days).toFixed(1));
         // --------------------------------------------------------------------------------------------------------        
+    },
+    
+    slowupdate: function()
+    {
+        // When we make a request for daily data it returns the data up to the start of this day. 
+        // This works appart from a request made just after the start of day and before the buffered 
+        // data is written to disk. This produces an error as the day rolls over.
+
+        // Most of the time the request will return data where the last datapoint is the start of the
+        // current day. If the start of the current day is less than 60s (the buffer time)  from the 
+        // current day then the last datapoint will be the previous day start.
+
+        // The easy solution is to request the data every 60s and then always append the last kwh value 
+        // from feeds to the end as a new day, with the interval one day ahead of the last day in the kwh feed.
+
+        // This presents a minor error for 60s after midnight but should not be noticable in most cases 
+        // and will correct itself after the 60s is over.
+        
+        var interval = 86400;
+        var now = new Date();
+        var timezone = (now.getTimezoneOffset()/-60)*3600;
+        var timenow = Math.floor(now.getTime() * 0.001);
+        var end = (Math.floor((timenow+timezone)/interval)*interval)-timezone;
+        var start = end - interval * Math.round(graph_bars.width/30);
+        
+        var valid = [];
+        
+        var data = app_myelectric.getdata({
+          "id":3,
+          "start":start*1000,"end":end*1000,"interval":interval,
+          "skipmissing":0,"limitinterval":0
+        });
+
+        // remove nan values from the end.
+        for (z in data) {
+          if (data[z][1]!=null) {
+            valid.push(data[z]);
+          }
+        }
+        
+        var next = valid[valid.length-1][0] + (interval*1000);
+        
+        if (app_myelectric.feeds[app_myelectric.dailyfeed]!=undefined) {
+            valid.push([next,app_myelectric.feeds[app_myelectric.dailyfeed].value*1.0]);
+        }
+        
+        // Calculate the daily totals by subtracting each day from the day before
+        app_myelectric.daily = [];
+        for (var z=1; z<valid.length; z++)
+        {
+          var time = valid[z-1][0];
+          var diff = (valid[z][1]-valid[z-1][1])*app_myelectric.escale;
+          app_myelectric.daily.push([time,diff*scale]);
+        }
+        
+        var usetoday_kwh = 0;
+        if (app_myelectric.daily.length>0) {
+            usetoday_kwh = app_myelectric.daily[app_myelectric.daily.length-1][1];
+        }
+        $("#myelectric_usetoday").html((usetoday_kwh).toFixed(1));
+
+        graph_bars.draw('myelectric_placeholder_kwhd',[app_myelectric.daily]);
     },
     
     getfeedsbyid: function()
@@ -527,19 +554,27 @@ var app_myelectric = {
     
     getvalue: function(feedid,time) 
     {
-        var result = app_myelectric.getdata(feedid,time,time+1000,1);
+        var result = app_myelectric.getdata({
+          "id":feedid,
+          "start":time,
+          "end":time+1000,
+          "interval":1
+        });
         if (result.length==2) return result[0];
         return false;
     },
     
-    getdata: function(feedid,start,end,interval) 
+    getdata: function(args) 
     {
+        var reqstr = "";
+        for (z in args) reqstr += "&"+z+"="+args[z];
+        reqstr += apikeystr;
+        console.log(reqstr);
+        
         var data = [];
         $.ajax({                                      
-            url: path+"feed/data.json",                         
-            data: "id="+feedid+"&start="+start+"&end="+end+"&interval="+interval+""+apikeystr,
-            dataType: 'json',
-            async: false,                      
+            url: path+"feed/data.json", data: reqstr,
+            dataType: 'json', async: false,             
             success: function(data_in) { data = data_in; } 
         });
         return data;
