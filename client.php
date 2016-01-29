@@ -1,19 +1,19 @@
 <?php
-    global $path; 
+    global $path;
     $apikey = $_GET['apikey'];
 ?>
 
 <script>
     var path = "<?php print $path; ?>";
     var apikey = "<?php print $apikey; ?>";
-    
-    apikeystr = ""; 
+
+    apikeystr = "";
     if (apikey!="") apikeystr = "&apikey="+apikey;
 </script>
 
 <link href="<?php echo $path; ?>Modules/app/style.css" rel="stylesheet">
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/app.js"></script>
-        
+
 <div id="content"></div>
 
 <script>
@@ -22,7 +22,7 @@ console.log(path);
 
 var config = app.getconfig();
 var nodes = {};
-  
+
 var appname = "myelectric";
 req = parse_location_hash(window.location.hash)
 

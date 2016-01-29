@@ -93,17 +93,17 @@ var app_myelectric = {
         // Decleration of myelectric events
         // -------------------------------------------------------------------------
 
-        $(window).resize(function() {
+        $(window).resize(function () {
             app_myelectric.resize();
         });
 
         // When the config icon is pressed, populate dropdown feed selector menu's.
         // and set values if already selected
 
-        $("#myelectric_openconfig").click(function() {
+        $("#myelectric_openconfig").click(function () {
 
             // Load feed list, populate feed selectors and select the selected feed
-            var feeds = app_myelectric.getfeedsbyid();
+            feeds = app_myelectric.getfeedsbyid();
 
             var out = "", selected ="";
             // there is need to flag as selected the selected feed
@@ -141,8 +141,8 @@ var app_myelectric = {
             app_myelectric.dailytype = $("#myelectric_dailytype").val();
 
             // Save config to db
-            var config = app.config;
-            if (config === false) config = {};
+            var config = (config === false) ? {} : app.config;
+            //if (config === false) config = {};
             config["myelectric"] = {
                 "powerfeed": app_myelectric.powerfeed,
                 "dailyfeed": app_myelectric.dailyfeed,
@@ -151,9 +151,9 @@ var app_myelectric = {
                 "currency": app_myelectric.currency
             };
 
-            if (app_myelectric.dailytype === 0) app_myelectric.escale = 0.001;
-            if (app_myelectric.dailytype === 1) app_myelectric.escale = 1.0;
-
+            //if (app_myelectric.dailytype === 0) { app_myelectric.escale = 0.001; }
+            //if (app_myelectric.dailytype === 1) { app_myelectric.escale = 1.0; }
+            app_myelectric.escale = (app_myelectric.dailytype === 0) ? 0.001 : 1.0;
             app_myelectric.last_daytime = 0;
             app_myelectric.last_startofweektime = 0;
             app_myelectric.last_startofmonthtime = 0;
@@ -163,8 +163,8 @@ var app_myelectric = {
             app_myelectric.reload = true;
             app_myelectric.reloadkwhd = true;
 
-            app_myelectric.fastupdateinst = setInterval(app_myelectric.fastupdate,5000);
-            app_myelectric.slowupdateinst = setInterval(app_myelectric.slowupdate,60000);
+            app_myelectric.fastupdateinst = setInterval(app_myelectric.fastupdate, 5000);
+            app_myelectric.slowupdateinst = setInterval(app_myelectric.slowupdate, 60000);
             app_myelectric.fastupdate();
             app_myelectric.slowupdate();
 
@@ -173,13 +173,13 @@ var app_myelectric = {
             $("#myelectric_body").show();
         });
 
-        $("#myelectric_zoomout").click(function () {view.zoomout(); app_myelectric.reload = true; app_myelectric.autoupdate = false; app_myelectric.fastupdate();});
-        $("#myelectric_zoomin").click(function () {view.zoomin(); app_myelectric.reload = true; app_myelectric.autoupdate = false; app_myelectric.fastupdate();});
-        $('#myelectric_right').click(function () {view.panright(); app_myelectric.reload = true; app_myelectric.autoupdate = false; app_myelectric.fastupdate();});
-        $('#myelectric_left').click(function () {view.panleft(); app_myelectric.reload = true; app_myelectric.autoupdate = false; app_myelectric.fastupdate();});
+        $("#myelectric_zoomout").click(function () {view.zoomout(); app_myelectric.reload = true; app_myelectric.autoupdate = false; app_myelectric.fastupdate(); });
+        $("#myelectric_zoomin").click(function () {view.zoomin(); app_myelectric.reload = true; app_myelectric.autoupdate = false; app_myelectric.fastupdate(); });
+        $('#myelectric_right').click(function () {view.panright(); app_myelectric.reload = true; app_myelectric.autoupdate = false; app_myelectric.fastupdate(); });
+        $('#myelectric_left').click(function () {view.panleft(); app_myelectric.reload = true; app_myelectric.autoupdate = false; app_myelectric.fastupdate(); });
 
         $('.myelectric-time').click(function () {
-            view.timewindow($(this).attr("time")/24.0);
+            view.timewindow($(this).attr("time") / 24.0);
             app_myelectric.reload = true;
             app_myelectric.autoupdate = true;
             app_myelectric.fastupdate();
@@ -200,10 +200,10 @@ var app_myelectric = {
         });
     },
 
-    show: function()
+    show: function ()
     {
         $("body").css('background-color','#222');
-        $(window).ready(function(){
+        $(window).ready(function () {
             $("#footer").css('background-color','#181818');
             $("#footer").css('color','#999');
         });
@@ -213,11 +213,11 @@ var app_myelectric = {
             // start of all time
             var meta = {};
             $.ajax({
-                url: path+"feed/getmeta.json",
-                data: "id="+app_myelectric.dailyfeed+apikeystr,
+                url: path + "feed/getmeta.json",
+                data: "id=" + app_myelectric.dailyfeed + apikeystr,
                 dataType: 'json',
                 async: false,
-                success: function(data_in) { meta = data_in; }
+                success: function (data_in) { meta = data_in; }
             });
             app_myelectric.startalltime = meta.start_time;
 
@@ -227,14 +227,14 @@ var app_myelectric = {
             app_myelectric.resize();
 
 
-            app_myelectric.fastupdateinst = setInterval(app_myelectric.fastupdate,5000);
+            app_myelectric.fastupdateinst = setInterval(app_myelectric.fastupdate, 5000);
             app_myelectric.fastupdate();
-            app_myelectric.slowupdateinst = setInterval(app_myelectric.slowupdate,60000);
+            app_myelectric.slowupdateinst = setInterval(app_myelectric.slowupdate, 60000);
             app_myelectric.slowupdate();
         }
     },
 
-    resize: function()
+    resize: function ()
     {
         var windowheight = $(window).height();
 
@@ -293,13 +293,13 @@ var app_myelectric = {
         }
     },
 
-    hide: function()
+    hide: function ()
     {
         clearInterval(this.fastupdateinst);
         clearInterval(this.slowupdateinst);
     },
 
-    fastupdate: function()
+    fastupdate: function ()
     {
         if (app_myelectric.viewmode === "energy") {
             scale = 1;
@@ -475,7 +475,7 @@ var app_myelectric = {
         // --------------------------------------------------------------------------------------------------------
     },
 
-    slowupdate: function()
+    slowupdate: function ()
     {
         // When we make a request for daily data it returns the data up to the start of this day.
         // This works appart from a request made just after the start of day and before the buffered
@@ -495,7 +495,7 @@ var app_myelectric = {
         var now = new Date();
         var timezone = (now.getTimezoneOffset() / -60) * 3600;
         var timenow = Math.floor(now.getTime() * 0.001);
-        var end = (Math.floor((timenow+timezone) / interval)*interval) - timezone;
+        var end = (Math.floor((timenow + timezone) / interval) * interval) - timezone;
         var start = end - interval * Math.round(graph_bars.width / 30);
 
         var valid = [];
@@ -537,14 +537,14 @@ var app_myelectric = {
         graph_bars.draw('myelectric_placeholder_kwhd',[app_myelectric.daily]);
     },
 
-    getfeedsbyid: function()
+    getfeedsbyid: function ()
     {
         var feeds = {};
         $.ajax({
-            url: path+"feed/list.json"+apikeystr,
+            url: path + "feed/list.json" + apikeystr,
             dataType: 'json',
             async: false,
-            success: function(data_in) { feeds = data_in; }
+            success: function (data_in) { feeds = data_in; }
         });
 
         var byid = {};
@@ -552,30 +552,30 @@ var app_myelectric = {
         return byid;
     },
 
-    getvalue: function(feedid,time)
+    getvalue: function (feedid,time)
     {
         var result = app_myelectric.getdata({
           "id":feedid,
           "start":time,
-          "end":time+1000,
+          "end":time + 1000,
           "interval":1
         });
         if (result.length === 2) return result[0];
         return false;
     },
 
-    getdata: function(args)
+    getdata: function (args)
     {
         var reqstr = "";
-        for (z in args) reqstr += "&"+z+"="+args[z];
+        for (z in args) reqstr += "&" + z + "=" + args[z];
         reqstr += apikeystr;
         console.log(reqstr);
 
         var data = [];
         $.ajax({
-            url: path+"feed/data.json", data: reqstr,
+            url: path + "feed/data.json", data: reqstr,
             dataType: 'json', async: false,
-            success: function(data_in) { data = data_in; }
+            success: function (data_in) { data = data_in; }
         });
         return data;
     }
