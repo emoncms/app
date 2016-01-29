@@ -14,4 +14,4 @@ code for lines 71 and 88:
 ```javascript
 $session['lang'] = $row['language'];
 ```
-rem : A conversion to bootstrat3 will probably make the presentation more responsive.
+rem : A conversion to bootstrap3 and font awesome icons will probably make the presentation more responsive.
