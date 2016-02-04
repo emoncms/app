@@ -1,73 +1,6 @@
-<style>
-    .visnav {
-        margin-right:4px;
-        padding-left:8px;
-        padding-right:8px;
-        min-width:20px;
-        background-color:rgba(6,153,250,0.1);
-        line-height:28px;
-        float:left;
-        text-align:center;
-    }
-
-    .appbox {
-        width:25%;
-        text-align:center;
-        padding:10px;
-        vertical-align:top;
-    }
-
-    .appbox-title {
-        color: #aaa;
-        font-weight:bold;
-        font-size:16px;
-        padding-bottom:15px;
-    }
-
-    .appbox-value {
-        color: #0699fa;
-        font-weight:bold;
-        font-size:32px;
-    }
-
-    .appbox-units {
-        color: #0779c1;
-        font-weight:bold;
-        font-size:16px;
-        padding-top:5px
-    }
-    input{
-        width:290px;
-    }
-    select{
-        width:290px;
-    }
-    table{
-        width: 100%;
-        border:0;
-    }
-    .visnavblock{
-        height:28px;
-        padding-bottom:5px;
-    }
-    #myelectric_placeholder_bound_power{
-         width:100%;
-         height:250px;
-    }
-    #myelectric_placeholder_bound_kwhd{
-        width:100%;
-        height:280px;
-    }
-    #myelectric_config{
-        margin: 0px auto;
-        max-width:320px;
-        display:none;
-    }
-</style>
-
 <div class="container">
 
-    <div id="myelectric_config">
+    <div id="myelectric_config" style= "display: none;">
         <div class="electric-title i18n">My Electric config</div>
         <br><br>
 
@@ -86,10 +19,13 @@
         <p><b class="i18n">Set currency, enter text: pound, euro, dollar, yen: </b></p>
         <input type="text" id="myelectric_currency" />
         <br>
-        <p><b class="i18n">Unit cost'>:</b></p>
+        <p><b class="i18n">Unit cost:</b></p>
         <input type="text" id="myelectric_unitcost" />
         <br><br>
-        <button id="myelectric_configsave" class="btn btn-primary">Save</button>
+        <button id="myelectric_configsave" class="btn btn-primary i18n">Save</button>
+        <div id="obj" style="display:none1;">
+
+        </div>
     </div>
 
     <div id="myelectric_body">
@@ -114,9 +50,9 @@
                 <td style="text-align:right; border:0; width:33%">
                     <div class="electric-title i18n">USE TODAY</div>
                     <div class="power-value">
-                        <span id="myelectric_usetoday_units_a" style = "display:none1" class="i18n1"></span>
+                        <span id="myelectric_usetoday_units_a" class="i18n1"></span>
                         <span id="myelectric_usetoday">0</span>
-                        <span id="myelectric_usetoday_units_b" style="font-size:16px"> kWh</span>
+                        <span id="myelectric_usetoday_units_b" style="font-size:16px">kWh</span>
                     </div>
                 </td>
             </tr>
@@ -151,157 +87,67 @@
             <tr>
                 <td class="appbox">
                     <div class="appbox-title  i18n">WEEK</div>
-                    <div>
-                        <span class="appbox-value u1a i18n">$</span><span class="appbox-value" id="myelectric_week_kwh">---</span> <span class="units appbox-units u1b i18n" >kWh</span>
-                    </div>
-                    <div class="appbox-units" >
-                        <span class="units u2a"></span><span id="myelectric_week_kwhd">---</span><span class="units u2b"> kWh/d</span>
-                    </div>
-                </td>
-
-                <td class="appbox">
-                    <div class="appbox-title  i18n">MONTH</div>
-                    <div>
-                        <span class="appbox-value u1a i18n">$</span><span class="appbox-value" id="myelectric_month_kwh">---</span> <span class="units appbox-units u1b i18n" >kWh</span>
-                    </div>
-                    <div class="appbox-units" >
-                        <span class="units u2a"></span><span id="myelectric_month_kwhd">---</span><span class="units u2b i18n"> kWh/d</span>
+                    <div class="blue">
+                        <div class="appbox-value">
+                            <span class="u1a i18n">$</span>
+                            <span id="myelectric_week_kwh">---</span>&nbsp
+                            <span class="appbox-units u1b i18n" >kWh</span>
+                        </div>
+                        <div class="appbox-units" >
+                            <span class="u2a"></span>
+                            <span id="myelectric_week_kwhd">---</span>&nbsp
+                            <span class="u2b">kWh/d</span>
+                        </div>
                     </div>
                 </td>
 
                 <td class="appbox">
-                    <div class="appbox-title i18n">YEAR</div>
-                    <div>
-                        <span class="appbox-value u1a i18n">$</span><span class="appbox-value" id="myelectric_year_kwh">---</span> <span class="units appbox-units u1b i18n" >kWh</span>
-                    </div>
-                    <div class="appbox-units" >
-                        <span class="units u2a"></span><span id="myelectric_year_kwhd">---</span><span class="units u2b i18n"> kWh/d</span>
+                    <div class="green">
+                        <div class="appbox-title  i18n">MONTH</div>
+                        <div class="appbox-value">
+                            <span class="u1a i18n">$</span>
+                            <span id="myelectric_month_kwh">---</span>&nbsp
+                            <span class="appbox-units u1b i18n">kWh</span>
+                        </div>
+                        <div class="appbox-units" >
+                            <span class="u2a"></span><span id="myelectric_month_kwhd">---</span>&nbsp
+                            <span class="u2b i18n">kWh/d</span>
+                        </div>
                     </div>
                 </td>
 
                 <td class="appbox">
-                    <div class="appbox-title i18n">ALL</div>
-                    <div>
-                        <span class="appbox-value u1a i18n">$</span><span class="appbox-value" id="myelectric_alltime_kwh">---</span> <span class="units appbox-units u1b i18n" >kWh</span>
+                    <div class="yellow">
+                        <div class="appbox-title i18n">YEAR</div>
+                        <div class="appbox-value">
+                            <span class="u1a i18n">$</span>
+                            <span id="myelectric_year_kwh">---</span>&nbsp
+                            <span class="appbox-units u1b i18n" >kWh</span>
+                        </div>
+                        <div class="appbox-units" >
+                            <span class="u2a"></span><span id="myelectric_year_kwhd">---</span>&nbsp<span class="u2b i18n">kWh/d</span>
+                        </div>
                     </div>
-                    <div class="appbox-units" >
-                        <span class="units u2a"></span><span id="myelectric_alltime_kwhd i18n">---</span><span class="units u2 i18nb"> kWh/d</span>
+                </td>
+
+                <td class="appbox">
+                    <div class="red">
+                        <div class="appbox-title i18n">ALL</div>
+                        <div>
+                            <span class="u1a i18n">$</span>
+                            <span class="appbox-value" id="myelectric_alltime_kwh">---</span>&nbsp
+                            <span class="appbox-units u1b i18n" >kWh</span>
+                        </div>
+                        <div class="appbox-units" >
+                            <span class="u2a"></span><span id="myelectric_alltime_kwhd i18n">---</span>&nbsp
+                            <span class="u2 i18nb">kWh/d</span>
+                        </div>
                     </div>
                 </td>
             </tr>
         </table>
     </div>
+    <!-- These terms are not yet defined in your language -->
+    <div id="obj" style="display:none;">
+    </div>
 </div>
-<script>
-(function() {
-    var i18ntext = {
-        ref:{
-            "3h": "3h",
-            "6h": "6h",
-            " kWh/d": " kWh/d",
-            "&gt;": "&gt;",
-            "&lt;": "&lt;",
-            "+": "+",
-            "-": "-",
-            "ALL": "ALL",
-            "Bar graph feed": "Bar graph feed",
-            "Cost": "Cost",
-            "D": "D",
-            "M": "M",
-            "MONTH": "MONTH",
-            "My Electric config": "My Electric config",
-            "POWER NOW": "POWER NOW",
-            "Power feed (Watts):": "Power feed (Watts):",
-            "Set currency, enter text: pound, euro, dollar, yen:" : "Set currency, enter text: pound, euro, dollar, yen: ",
-            "USE TODAY": "USE TODAY",
-            "Unit cost'&gt;:": "Unit cost'&gt;:",
-            "W": "W",
-            "WEEK": "WEEK",
-            "Watt hours elapsed": "Watt hours elapsed",
-            "Wh or kWh feed?": "Wh or kWh feed?",
-            "YEAR": "YEAR",
-            "kWh": "kWh",
-            "kWh elaped": "kWh elapsed",
-            "test": "test",
-            "$": "£"
-        },
-        en:{
-            "3h": "3h",
-            "6h": "6h",
-            " kWh/d": " kWh/d",
-            "&gt;": "&gt;",
-            "&lt;": "&lt;",
-            "+": "+",
-            "-": "-",
-            "ALL": "ALL",
-            "Bar graph feed": "Bar graph feed",
-            "Cost": "Cost",
-            "D": "D",
-            "M": "M",
-            "MONTH": "MONTH",
-            "My Electric config": "My Electric config",
-            "POWER NOW": "POWER NOW",
-            "Power feed (Watts):": "Power feed (Watts):",
-            "Set currency, enter text: pound, euro, dollar, yen:" : "Set currency, enter text: pound, euro, dollar, yen: ",
-            "USE TODAY": "USE TODAY",
-            "Unit cost'&gt;:": "Unit cost'&gt;:",
-            "W": "W",
-            "WEEK": "WEEK",
-            "Watt hours elapsed": "Watt hours elapsed",
-            "Wh or kWh feed?": "Wh or kWh feed?",
-            "YEAR": "YEAR",
-            "kWh": "kWh",
-            "kWh elaped": "kWh elapsed",
-            "test": "test",
-            "$": "£"
-        },
-        fr:{
-            "3h": "3h",
-            "6h": "6h",
-            " kWh/d": " kWh/j",
-            "&gt;": "&gt;",
-            "&lt;": "&lt;",
-            "+": "+",
-            "-": "-",
-            "ALL": "Tout",
-            "Bar graph feed": "Histogramme",
-            "Cost": "Coût",
-            "D": "J",
-            "M": "M",
-            "MONTH": "Mois",
-            "My Electric config": "Mon élctricieté configuration",
-            "POWER NOW": "Puissance instantannée",
-            "Power feed (Watts):": "Puissance (Watts):",
-            "Set currency, enter text: pound, euro, dollar, yen: ": "Sélectionner la monnaie , Euro, Dollar, Livre, Yen,...: ",
-            "USE TODAY": "Usage aujourd'hui",
-            "Unit cost'&gt;:": "Coût unitaire:",
-            "W": "S",
-            "WEEK": "Semaine",
-            "Watt hours elapsed": "Watt heure",
-            "Wh or kWh feed?": "Wh or kWh flux?",
-            "YEAR": "Année",
-            "kWh": "kWh",
-            "kWh elaped": "kWh elapsed",
-            "test": "test",
-            "$": "€"
-        }
-    }   // your page initialization code here
-   var lang = 'fr';
-   var result= {
-    "ref":{
-        "test":"test"
-       }
-    };
-   // the DOM will be available here
-   var flds = document.getElementsByClassName("i18n");
-
-   for(var i=0; i<flds.length;i++){
-        var key = flds[i].innerHTML;
-        result['ref'][key]=key
-         flds[i].innerHTML= i18ntext[lang][key]
-   }
-   console.log(result);
-
-})();
-
-</script>

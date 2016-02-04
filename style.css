@@ -8,7 +8,7 @@
     margin-top:0px;
 }
 
-h3 { 
+h3 {
     color: #0699fa;
     margin:0px;
     padding:0px;
@@ -21,7 +21,22 @@ hr {
     margin-top: 6px;
     margin-bottom: 6px;
 }
-
+.electric-head{
+    height:20px;
+    border-bottom:1px solid #333;
+    padding:8px;
+}
+.icon-btn{
+    float:right;
+}
+.config-rem{
+    color:#888;
+    text-align:center;
+}
+.config-rem-right{
+    color:#888;
+    text-align:right;
+}
 .electric-title {
     font-weight:bold;
     font-size:22px;
@@ -30,23 +45,23 @@ hr {
 }
 
 .power-value {
-    font-weight:bold; 
-    font-size:100px; 
-    color:#0699fa; 
+    font-weight:bold;
+    font-size:100px;
+    color:#0699fa;
     padding-top:45px;
     padding-bottom:30px;
 }
 
 .kwh-value {
-    font-weight:normal; 
-    font-size:22px; 
-    color:#0699fa; 
+    font-weight:normal;
+    font-size:22px;
+    color:#0699fa;
     padding-top:15px;
 }
 
 .midtext {
-    font-weight:normal; 
-    font-size:22px; 
+    font-weight:normal;
+    font-size:22px;
     color:#0699fa;
     padding-top:2px;
     padding-bottom:2px;
@@ -73,4 +88,65 @@ input[type=text] {
 
 p {
     color:#aaa;
+}
+table {
+    width: 100%;
+    border: 0;
+}
+td {
+}
+
+.visnav {
+    margin-right:4px;
+    padding-left:8px;
+    padding-right:8px;
+    min-width:20px;
+    background-color:rgba(6,153,250,0.1);
+    line-height:28px;
+    float:left;
+    text-align:center;
+}
+.appbox {
+    width:25%;
+    text-align:center;
+    padding:10px;
+    vertical-align:top;
+
+}
+
+.appbox-title {
+    color: #aaa;
+    font-weight:bold;
+    font-size:20px;
+    padding-bottom:15px;
+}
+
+.appbox-value {
+    font-weight:bold;
+    font-size:36px;
+}
+
+.appbox-units {
+    font-weight:bold;
+    font-size:16px;
+}
+.blue{
+    color:#0699fa;
+    padding-bottom:5px;
+}
+.green{
+    color:#2ed52e;
+    padding-bottom:5px;
+}
+.green2{
+    color:#1ec51e;
+    padding-bottom:5px;
+}
+.yellow{
+    color:#dccc1f;
+    padding-bottom:5px;
+}
+.red{
+    color:#d52e2e;
+    padding-bottom:5px;
 }

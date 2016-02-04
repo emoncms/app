@@ -1,48 +1,79 @@
-    <div class="page">
-       
-       <h3>MY HEATPUMP</h3>
-       
-       <div style="position:relative">
-       
-       <canvas id="heatpump-diagram" width="1200" height="500"></canvas>
-       
-       <span style="position:absolute; top:65px; left:140px; color:#0699fa">HEATPUMP POWER: <b><span class="heatpump-power"></span>W</b></span>
-       <span style="position:absolute; top:140px; left:515px; color:#0699fa">FLOW: <b><span class="heatpump-flow"></span>C</b></span>
-       <span style="position:absolute; top:340px; left:515px; color:#0699fa">RETURN: <b><span class="heatpump-return"></span>C</b></span>
-       
-       <span style="position:absolute; top:420px; left:190px; color:#0699fa">OUTSIDE: <b><span class="heatpump-ambient"></span>C</b></span>
-       <span style="position:absolute; top:95px; left:890px; color:#0699fa">ROOM: <b><span class="room-temperature"></span>C</b></span>
-       </div>
+<style>
+    .info{
+        position:absolute;
+    }
+    .info1{
+        top:65px;
+        left:140px
+    }
+    .info2{
+        top:140px;
+        left:515px
+    }
+    .info3{
+        top:340px;
+        left:515px
+    }
+    .info4{
+        top:420px;
+        left:190px
+    }
+    .info5{
+        top:95px;
+        left:890px
+    }
 
+</style>
+
+    <div class="page">
+       <h3 class = "i18n">MY HEATPUMP</h3>
+       <div style="position:relative">
+           <canvas id="heatpump-diagram" width="1200" height="500"></canvas>
+           <div class = "info info1 blue"><span class = "i18n">HEATPUMP POWER</span><span class="heatpump-power">&nbsp:&nbspW</span></div>
+           <div class = "info info2 blue"><span class = "i18n">FLOW</span><span class="heatpump-flow">&nbsp:&nbsp°C</span></div>
+           <div class = "info info3 blue"><span class = "i18n">RETURN</span><span class="heatpump-return">&nbsp:&nbsp°C</span></div>
+           <div class = "info info4 blue"><span class = "i18n">OUTSIDE</span><span class="heatpump-ambient">&nbsp:&nbsp°C</span></div>
+           <div class = "info info5 blue"><span class = "i18n">ROOM</span><span class="room-temperature">&nbsp:&nbsp°C</span></div>
+       </div>
     </div>
+
     <div style="background-color:#efefef; border-top: 5px solid #aaa">
     <div class="page">
        <div id="myheatpump_kwhgraph" style="display:none; width:100%">
-           <h3>DAILY HEATPUMP ELECTRICITY CONSUMPTION: (kWh)</h3>
+           <h3 class = "i18n">DAILY HEATPUMP ELECTRICITY CONSUMPTION: (kWh)</h3>
            <div id="myheatpump_placeholder_wh_bound" style="width:100%; height:400px; position:relative;">
                 <div id="myheatpump_placeholder_wh" style="width:100%; height:400px"></div>
            </div>
            <br><br>
        </div>
-       
-       <h3>DETAILED VIEW:</h3>
+
+       <h3 class = "i18n">DETAILED VIEW:</h3>
        <div id="myheatpump_placeholder_bound" style="width:100%; height:400px; position:relative; padding-top:40px;">
             <div style="position:absolute; top:0px; left:450px;">
-            <button class='btn myheatpump_time' type='button' time='1'>D</button>
-            <button class='btn myheatpump_time' type='button' time='7'>W</button>
-            <button class='btn myheatpump_time' type='button' time='30'>M</button>
-            <button class='btn myheatpump_time' type='button' time='365'>Y</button>
-            <button id='myheatpump_zoomin' class='btn' >+</button>
-            <button id='myheatpump_zoomout' class='btn' >-</button>
-            <button id='myheatpump_left' class='btn' ><</button>
-            <button id='myheatpump_right' class='btn' >></button>
+            <button class='btn i18n myheatpump_time' type='button' time='1'>D</button>
+            <button class='btn i18n myheatpump_time' type='button' time='7'>W</button>
+            <button class='btn i18n myheatpump_time' type='button' time='30'>M</button>
+            <button class='btn i18n myheatpump_time' type='button' time='365'>Y</button>
+            <button class='btn i18n' id='myheatpump_zoomin'>+</button>
+            <button class='btn i18n' id='myheatpump_zoomout'>-</button>
+            <button class='btn i18n' id='myheatpump_left'><</button>
+            <button class='btn i18n' id='myheatpump_right'>></button>
             </div>
-       
-            <span style="position:absolute; top:5px; left:0px;">POWER (Watts)</span>
-            <span style="position:absolute; top:5px; right:0px;">Temperature (C)</span>
-            <div id="myheatpump_placeholder" style="width:100%; height:400px"></div>
+
+            <span class="i18n"  style="position:absolute; top:5px; left:0px;">POWER (Watts)</span>
+            <span class="i18n"  style="position:absolute; top:5px; right:0px;">Temperature (C)</span>
+            <div id="myheatpump_placeholder" class="i18n"  style="width:100%; height:400px"></div>
        </div><br>
-       <p style="color:#888; text-align:center"><b>Configuration:</b> This dashboard automatically looks for feeds named or containing the words: heatpump_power, heatpump_kwh, heatpump_flow_temp, heatpump_return_temp, ambient_temp and room_temp. If heatpump_kwh is not available it will hide the daily kwh graph.</p>
+       <p style="color:#888; text-align:center"><b class="i18n">Configuration:</b><span class="i18n">heatpumprem</span></p>
+       <!--
+        This dashboard automatically looks for feeds named or containing the words: heatpump_power, heatpump_kwh, heatpump_flow_temp, heatpump_return_temp, ambient_temp and room_temp.
+        If heatpump_kwh is not available it will hide the daily kwh graph.
+        -->
    </div>
-   
+   <!-- These terms are not yet defined in your language -->
+   <div id="obj" style="display:none;">
+   </div>
+
+   </div>
+
    </div>

@@ -3,7 +3,9 @@ $domain = "messages";
 bindtextdomain($domain, dirname(__FILE__)."/locale");
 global $session, $user;
 $apikey = "";
-if ($session['write']) $apikey = "?apikey=".$user->get_apikey_write($session['userid']);
+$lang = substr($user->get_lang($session['userid']),0,2);
+
+if ($session['write']) $apikey = "?lang=".$lang."&apikey=".$user->get_apikey_write($session['userid']);
     $menu_left[] = array(
         'name'=>dgettext($domain,"Apps"),
         'path'=>"app/mysolarpv" ,
