@@ -33,7 +33,6 @@ class AppConfig
 
         // Input sanitisation
         $outdata = array();
-        $f= "€";
         $filter = "/[^A-Za-z0-9£€$.,]/";
         foreach ($data as $appname=>$properties)
         {

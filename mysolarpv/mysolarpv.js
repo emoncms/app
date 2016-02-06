@@ -74,11 +74,11 @@ var app_mysolarpv = {
 
         $("#balanceline").click(function () {
             if ($("#balanceshown").css('display') !== 'none') {
-                app_mysolarpv.show_balance_line = 1;
+                this.show_balance_line = 1;
                 $("#balanceshown").hide();
                 $("#balancehidden").show();
             } else {
-                app_mysolarpv.show_balance_line = 0;
+                this.show_balance_line = 0;
                 $("#balanceshown").show();
                 $("#balancehidden").hide();
             }

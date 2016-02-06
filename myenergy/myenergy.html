@@ -1,156 +1,168 @@
 <div class="container">
 
     <div id="myenergy-config" style="display:none; ">
-
         <div class="electric-title i18n">APP CONFIG</div><br>
-        <p class = "i18n">This app can be used to compare electricity consumption with electricity generation from renewable energy generation sources including onsite solar and wind power from the UK grid.</p><p>The estimate of the amount of power available from UK wind power is calculated by taking the realtime electricity production from wind in the uk now available from bmreports.com divided by the UK installed wind capacity multipled by the amount of wind capacity requried to generate the annual demand at a capacity factor of 40%. This work builds upon the open source hourly energy modelling work that we have been doing with the Center for Alternative Technology <a href="http://zerocarbonbritain.org/energy_model">http://zerocarbonbritain.org/energy_model</a></p>
+            <p>
+                <span class="i18n">myenergy-comment1</span>
+                <a href="http://zerocarbonbritain.org/energy_model">http://zerocarbonbritain.org/energy_model</a>
+            </p>
 
         <table class="table">
             <tr>
                 <td>
-                    <p><b  class="i18n">Electricity consumption</b>&nbsp
-                        <span  class="i18n">feed id (csv for multiple)</span>
+                    <p>
+                        <b  class="i18n">Electricity consumption</b><br />
+                        (<span  class="i18n">feed id (csv for multiple)</span>)
                     </p>
                     <input id="myenergy-housepower" type="text" />
                 </td>
                 <td>
-                    <p><b  class="i18n">Solar generation</b>&nbsp
-                        <span  class="i18n"> feed id (csv for multiple)</span>
+                    <p><b  class="i18n">Solar generation</b><br />
+                        ()<span  class="i18n">feed id (csv for multiple)</span>)
                     </p>
                     <input id="myenergy-solarpower" type="text" />
                 </td>
                 <td>
-                    <p><b  class="i18n">Annual wind generation supplied</b><br />
+                    <p>
+                        <b  class="i18n">Annual wind generation supplied</b>
+                        <br />
                         <span  class="i18n">from renewable energy tariff (kWh)</span>
                     </p>
                     <input id="myenergy-annualwind" type="text" />
-                    <p class="i18n">Wind capacity required: <span id="myenergy-windcap"></span><br><span id="myenergy-prc3mw"></span>% of a 3MW Wind turbine @ 40% capacity factor</p>
+                    <p>
+                        <span class="i18n">Wind capacity required</span>&nbsp:&nbsp
+                        <span id="myenergy-windcap"></span><br><span id="myenergy-prc3mw"></span>%&nbsp
+                        <span class="i18n">of a 3MW Wind turbine at 40% capacity factor</span>
+                    </p>
                 </td>
             </tr>
         </table>
 
         <br><br>
-        <p style="color:#888; text-align:center"><b class="i18n">Configuration:</b>
-            <span class="i18n">
-                This dashboard automatically looks for feeds named or containing the words: solar_power, house_power. To use this dashboard add these names to the relevant feeds.</p>
-            </span>
+        <p style="color:#888; text-align:center">
+            <b class="i18n">Configuration:</b>
+            <span class="i18n">thisdashboard</span>
+            <span class="i18n">myenergy-comment2</span>
+            <span class="i18n">addthesefeeds</span>
+        </p>
+        <button id="myenergy-configsave" class="btn btn-primary i18n">Save</button>
+        <div id="obj" style="color: white; display:none1;">
+            change style to show the missing keys. Copy and paste it in lang file.
 
-        <button id="myenergy-configsave" class="btn btn-primary">Save</button>
-        <h3 class="i18n">Missing keys in i18n file</h3>
-        <div id="obj" style="display:none1;">
-
-        </div>
-
-    </div>
-
-<div class="block">
-
-    <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
-        <div style="float:right;">
-            <!--<span style="color:#fff; margin-right:10px" >Settings</span>-->
-            <i id="myenergy-openconfig" class="icon-wrench icon-white" style="cursor:pointer"></i>
         </div>
     </div>
 
-    <table>
-        <tr>
-            <td style="border:0; width:30%; vertical-align:top">
-                <div class="electric-title i18n">POWER NOW</div>
-                <div class="power-value"><span id="usenow">0</span>W</div>
-            </td>
-            <td style="text-align:left; border:0; width:40%; vertical-align:top">
-                <div class="electric-title i18n">VIRTUAL STORE <span id="balance-label"></span></div>
-                <div class="power-value"><span id="balance"></span></div>
-            </td>
-            <td style="text-align:right; border:0; width:30%">
-                <div class="electric-title i18n">RENEWABLE GEN</div>
-                <div class="power-value"><span id="gennow">0</span>W</div>
-                <div class="electric-title">
-                    <span class = "yellow i18n">SOLAR:</span>&nbsp<span id="solarnow">0</span>&nbsp<span>W</span>
-                    &nbsp|&nbsp
-                    <span class = "green i18n">WIND:</span>&nbsp<span id="windnow">0</span>&nbsp<span>W</span>
-                </div>
-            </td>
-        </tr>
-    </table>
-    <br>
-    <div class="visnavblock" style="height:28px; padding-bottom:5px;">
-        <span class='visnav i18n time' time='3'>3h</span>
-        <span class='visnav i18n time' time='6'>6h</span>
-        <span class='visnav i18n time' time='24'>D</span>
-        <span class='visnav i18n time' time='168'>W</span>
-        <span class='visnav i18n time' time='720'>M</span>
-        <span class='visnav i18n time' time='8760'>Y</span>
-        <span class='visnav i18n' id='myenergy_zoomin' >+</span>
-        <span class='visnav i18n' id='myenergy_zoomout' >-</span>
-        <span class='visnav i18n' id='myenergy_left' ><</span>
-        <span class='visnav i18n' id='myenergy_right' >></span>
-        <span class='visnav i18n' id='balanceline' style="float:right">Show balance</span>
+    <div class="block">
+        <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
+            <div style="float:right;">
+                <!--<span style="color:#fff; margin-right:10px" >Settings</span>-->
+                <i id="myenergy-openconfig" class="icon-wrench icon-white" style="cursor:pointer"></i>
+            </div>
+        </div>
+
+        <table>
+            <tr>
+                <td style="border:0; width:30%; vertical-align:top">
+                    <div class="electric-title i18n">POWER NOW</div>
+                    <div class="power-value"><span id="usenow">0</span>W</div>
+                </td>
+                <td style="text-align:left; border:0; width:40%; vertical-align:top">
+                    <div class="electric-title">
+                        <span id="balance-label1" class= "i18n">VIRTUAL STORE</span>
+                        <span id="balance-label2" class= "i18n" style ="display:none;">CHARGE RATE</span>
+                        <span id="balance-label3" class= "i18n" style ="display:none;">DISCHARGE RATE</span>
+                    </div>
+                    <div class="power-value"><span id="balance"></span></div>
+                </td>
+                <td style="text-align:right; border:0; width:30%">
+                    <div class="electric-title i18n">RENEWABLE GEN</div>
+                    <div class="power-value"><span id="gennow">0</span>W</div>
+                    <div class="electric-title">
+                        <span class = "yellow i18n">SOLAR</span>:&nbsp<span id="solarnow">0</span>&nbsp<span>W</span>
+                        &nbsp|&nbsp
+                        <span class = "green i18n">WIND</span>:&nbsp<span id="windnow">0</span>&nbsp<span>W</span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <br>
+        <div class="visnavblock" style="height:28px; padding-bottom:5px;">
+            <span class='visnav i18n time' time='3'>3h</span>
+            <span class='visnav i18n time' time='6'>6h</span>
+            <span class='visnav i18n time' time='24'>D</span>
+            <span class='visnav i18n time' time='168'>W</span>
+            <span class='visnav i18n time' time='720'>M</span>
+            <span class='visnav i18n time' time='8760'>Y</span>
+            <span class='visnav i18n' id='myenergy_zoomin' >+</span>
+            <span class='visnav i18n' id='myenergy_zoomout' >-</span>
+            <span class='visnav i18n' id='myenergy_left' ><</span>
+            <span class='visnav i18n' id='myenergy_right' >></span>
+            <div id='balanceline' class='visnav' style="float:right;">
+                <span id = "balancehidden" style="display:none;">Show balance</span>
+                <span id = "balanceshown" style="display:none;">Hide balance</span>
+            </div>
+        </div>
+
+        <div id="myenergy_placeholder_bound" style="width:100%; height:500px;">
+            <div id="myenergy_placeholder" style="height:500px"></div>
+        </div>
+
+        <br>
+
+        <table>
+            <tr>
+                <td class="appbox">
+                    <div class="appbox-title i18n">HOUSE</div>
+                    <div class="blue">
+                        <span class="appbox-value" id="total_use_kwh">0</span>&nbsp<span class="appbox-units">kWh</span>
+                    </div>
+                </td>
+
+                <td class="appbox">
+                    <div class="appbox-title i18n">WIND</div>
+                    <div class="green">
+                        <span class="appbox-value" id="total_wind_kwh">0</span>&nbsp<span class="appbox-units">kWh</span>
+                    </div>
+                </td>
+
+                <td class="appbox">
+                    <div class="appbox-title i18n">SOLAR</div>
+                    <div class="yellow">
+                        <span class="appbox-value" id="total_solar_kwh"0</span>&nbsp<span class="appbox-units">kWh</span>
+                    </div>
+                </td>
+
+                <td class="appbox">
+                    <div class="appbox-title i18n">DIRECT</div>
+                    <div class ="green2">
+                        <span class="appbox-value" id="total_use_direct_prc">0</span>
+                    </div>
+                    <div class ="green2">
+                        <span class="appbox-units" id="total_use_direct_kwh">0</span>&nbsp
+                        <span class="appbox-units">kWh</span>
+                    </div>
+                </td>
+
+                <td class="appbox">
+                    <div class="appbox-title i18n">STORE</div>
+                    <div class ="red">
+                        <span class="appbox-value" id="total_use_via_store_prc">0</span>
+                    </div>
+                    <div class ="red">
+                        <span class="appbox-units" id="total_use_via_store_kwh">0</span>&nbsp;
+                        <span class="appbox-units">kWh</span></div>
+                </td>
+            </tr>
+        </table>
+
+
+        <!--
+        <br><br>
+        <div id="myenergy_bargraph_bound" style="width:100%; height:500px;">
+            <div id="myenergy_bargraph" style="height:500px"></div>
+        </div>
+
+        -->
+
     </div>
-
-    <div id="myenergy_placeholder_bound" style="width:100%; height:500px;">
-        <div id="myenergy_placeholder" style="height:500px"></div>
-    </div>
-
-    <br>
-
-    <table>
-        <tr>
-            <td class="appbox">
-                <div class="appbox-title i18n">HOUSE</div>
-                <div class="blue">
-                    <span class="appbox-value" id="total_use_kwh">0</span>&nbsp<span class="appbox-units">kWh</span>
-                </div>
-            </td>
-
-            <td class="appbox">
-                <div class="appbox-title i18n">WIND</div>
-                <div class="green">
-                    <span class="appbox-value" id="total_wind_kwh">0</span>&nbsp<span class="appbox-units">kWh</span>
-                </div>
-            </td>
-
-            <td class="appbox">
-                <div class="appbox-title i18n">SOLAR</div>
-                <div class="yellow">
-                    <span class="appbox-value" id="total_solar_kwh"0</span>&nbsp<span class="appbox-units">kWh</span>
-                </div>
-            </td>
-
-            <td class="appbox">
-                <div class="appbox-title i18n">DIRECT</div>
-                <div class ="green2">
-                    <span class="appbox-value" id="total_use_direct_prc">0</span>
-                </div>
-                <div class ="green2">
-                    <span class="appbox-units" id="total_use_direct_kwh">0</span>&nbsp
-                    <span class="appbox-units">kWh</span>
-                </div>
-            </td>
-
-            <td class="appbox">
-                <div class="appbox-title i18n">STORE</div>
-                <div class ="red">
-                    <span class="appbox-value" id="total_use_via_store_prc">0</span>
-                </div>
-                <div class ="red">
-                    <span class="appbox-units" id="total_use_via_store_kwh">0</span>&nbsp;
-                    <span class="appbox-units">kWh</span></div>
-            </td>
-        </tr>
-    </table>
-
-
-    <!--
-    <br><br>
-    <div id="myenergy_bargraph_bound" style="width:100%; height:500px;">
-        <div id="myenergy_bargraph" style="height:500px"></div>
-    </div>
-
-    -->
-
-</div>
-<!-- These terms are not yet defined in your language -->
-<div id="obj" style="display:none;">
-</div>
 </div>

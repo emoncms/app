@@ -57,6 +57,21 @@ var i18ntext = {
     'DETAILED VIEW:' : 'Vue détaillée:',
     'POWER (Watts)' : 'Puissance (Watt)',
     'Temperature (C)' : 'Température (°C)',
-    'heatpumprem' : 'Ce tableau de bord recherche les flux dont le nom contient les termes: heatpump_power, heatpump_kwh, heatpump_flow_temp, heatpump_return_temp, ambient_temp and room_temp. Si heatpump_kwh n\'est pas disponible. le graphique puissance quotidienne sera masqué.'
+    'thisdashboard' : 'Ce tableau de bord utilise automatiquement les flux nommés:',
+    'addthesefeeds' : 'Pour utiliser ce tableau de bord, adaptez les noms des flux relevants.',
+    'heatpumprem' : 'This dashboard automatically looks for feeds named or containing the words: heatpump_power, heatpump_kwh, heatpump_flow_temp, heatpump_return_temp, ambient_temp and room_temp. If heatpump_kwh is not available it will hide the daily kwh graph.',
+    'myenergy-comment1' : '<p>Cette application peut être utilisée pour comparer la consommation et la production d\'électricité renouvleable produite sur site par rapport à celle du réseau (données du réseau en Grande Bretagne)</p><p>L\'estimation se base sur 40% de la production d\'une turbine éolienne</p>',
+    //'myenergy-comment1' : 'This app can be used to compare electricity consumption with electricity generation from renewable energy generation sources including onsite solar and wind power from the UK grid.</p><p>The estimate of the amount of power available from UK wind power is calculated by taking the realtime electricity production from wind in the uk now available from bmreports.com divided by the UK installed wind capacity multipled by the amount of wind capacity requried to generate the annual demand at a capacity factor of 40%. This work builds upon the open source hourly energy modelling work that we have been doing with the Center for Alternative Technology',
+    'Annual wind generation supplied' : 'Production éolienne annuelle',
+    'from renewable energy tariff (kWh)' : 'provenant des tarifs renouvelables (kWh)',
+    'Wind capacity required' : 'Capacity éolienne requise',
+    'of a 3MW Wind turbine at 40% capacity factor' : 'd\'une turbine de 3MW à 40% de sa capacité',
+    'myenergy-comment2' : 'solar_power, house_power.',
+    'RENEWABLE GEN' : 'Renouvelable',
+    'WIND' : 'EOLIEN',
+    'STORE' : 'STOCK',
+    'VIRTUAL STORE' : 'Stock virtuel',
+    'CHARGE RATE' : 'Taux de charge',
+    'DISCHARGE RATE' : 'Taux de décharge'
 
 };
