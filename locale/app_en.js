@@ -58,7 +58,7 @@ var i18ntext = {
     'POWER (Watts)' : 'POWER (Watts)',
     'Temperature (C)' : 'Temperature (°C)',
     'thisdashboard' : 'This dashboard automatically looks for feeds named or containing the words:',
-    'heatpumprem' : 'heatpump_power, heatpump_kwh, heatpump_flow_temp, heatpump_return_temp, ambient_temp and room_temp.',
+    'heatpumprem' : 'heatpump_power, heatpump_kwh, heatpump_flow_temp, heatpump_return_temp, ambient_temp and heatpump_room_temp.',
     'heatpumphide' : 'If heatpump_kwh is not available it will hide the daily kwh graph.',
     'addthesefeeds' : 'To use this dashboard add these names to the relevant feeds.',
     'myenergy-comment1' : 'This app can be used to compare electricity consumption with electricity generation from renewable energy generation sources including onsite solar and wind power from the UK grid.</p><p>The estimate of the amount of power available from UK wind power is calculated by taking the realtime electricity production from wind in the uk now available from bmreports.com divided by the UK installed wind capacity multipled by the amount of wind capacity requried to generate the annual demand at a capacity factor of 40%. This work builds upon the open source hourly energy modelling work that we have been doing with the Center for Alternative Technology',
