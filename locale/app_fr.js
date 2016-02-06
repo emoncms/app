@@ -16,7 +16,7 @@ var i18ntext = {
     'M': 'M',
     'Missing keys in i18n file' : 'Clés manquantes dans les traductions',
     'MONTH': 'Mois',
-    'My Electric config': 'Mon élctricieté configuration',
+    'My Electric config': 'Mon élctricité configuration',
     'Power feed (Watts):': 'Puissance (Watts):',
     'POWER NOW': 'Puissance instantannée',
     'Set currency, enter text: pound, euro, dollar, yen: ': 'Sélectionner la monnaie , Euro, Dollar, Livre, Yen,...: ',
