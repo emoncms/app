@@ -1,7 +1,7 @@
 /*jslint maxerr: 1000 */
-var datastore = {};
 
 var app_mysolarpv = {
+    datastore : {},
 
     solarpower: false,
     housepower: false,
@@ -29,16 +29,13 @@ var app_mysolarpv = {
 
     // App start function
     init: function () {
-        var feeds, z, name, timeWindow, placeholder, solarfeedids, housefeedids;
+        var feeds, z, houseok, solarok, name, timeWindow, placeholder, solarfeedids, housefeedids;
         if (app.config["mysolarpv"] !== undefined) {
             this.solarpower = app.config["mysolarpv"].solarpower;
             this.housepower = app.config["mysolarpv"].housepower;
 
             if (typeof (this.solarpower) === "string") { this.solarpower = this.solarpower.split(","); }
             if (typeof (this.housepower) === "string") { this.housepower = this.housepower.split(","); }
-            // this may be easier?
-            //this.solarpower = (this.solarpower === undefined) ? "" : this.solarpower.split(",");
-            //this.housepower = (this.housepower === undefined) ? "" : this.housepower.split(",");
         } else {
             // Auto scan by feed names
             feeds = app_mysolarpv.getfeedsbyid();
@@ -47,10 +44,12 @@ var app_mysolarpv = {
 
                 if (name.indexOf("house_power") !== -1) {
                     app_mysolarpv.housepower = [z];
+                    houseok = true;
                 }
 
                 if (name.indexOf("solar_power") !== -1) {
                     app_mysolarpv.solarpower = [z];
+                    solarok = true;
                 }
             }
         }
@@ -126,7 +125,9 @@ var app_mysolarpv = {
 
         $(window).resize(function () {
             app_mysolarpv.resize();
-            app_mysolarpv.draw();
+            if (houseok && solarok) {
+                app_mysolarpv.draw();
+            }
         });
 
         /*
@@ -150,7 +151,6 @@ var app_mysolarpv = {
 
     show: function () {
         // this.reload = true;
-        'use strict';
         this.livefn();
         this.live = setInterval(this.livefn, 5000);
 
@@ -348,9 +348,10 @@ var app_mysolarpv = {
         }
         // -------------------------------------------------------------------------------------------------------
 
-        for (z in datastore) {
-            datastart = datastore[z].data[0][0];
-            npoints = datastore[z].data.length;
+        for (z in app_mysolarpv.datastore) {
+            console.log(z+"    datastore:  "+app_mysolarpv.datastore)
+            datastart = this.datastore[z].data[0][0];
+            npoints = this.datastore[z].data.length;
         }
 
         for (z = 0; z < npoints; z++) {
@@ -361,10 +362,10 @@ var app_mysolarpv = {
             tmpsolar = null;
             for (i in app_mysolarpv.solarpower) {
                 feedid = app_mysolarpv.solarpower[i];
-                if (datastore["f" + feedid].data[z] !== undefined && datastore["f" + feedid].data[z][1] !== null) {
+                if (this.datastore["f" + feedid].data[z] !== undefined && this.datastore["f" + feedid].data[z][1] !== null) {
                     //if (tmpsolar === null) tmpsolar = 0;
                     tmpsolar = (tmpsolar === null) ?  0 : tmpsolar;
-                    tmpsolar += datastore["f" + feedid].data[z][1];
+                    tmpsolar += this.datastore["f" + feedid].data[z][1];
                 }
             }
             //if (tmpsolar !== null) mysolar = tmpsolar;
@@ -372,10 +373,10 @@ var app_mysolarpv = {
 
             for (i in app_mysolarpv.housepower) {
                 feedid = app_mysolarpv.housepower[i];
-                if (datastore["f" + feedid].data[z] !== undefined && datastore["f" + feedid].data[z][1] !== null) {
+                if (this.datastore["f" + feedid].data[z] !== undefined && this.datastore["f" + feedid].data[z][1] !== null) {
                     //if (tmpuse === null) tmpuse = 0;
                     tmpuse = (tmpuse === null) ? 0 : tmpuse;
-                    tmpuse += datastore["f" + feedid].data[z][1];
+                    tmpuse += this.datastore["f" + feedid].data[z][1];
                 }
             }
             tmpuse = (tmpuse !== null) ? tmpuse : null;
@@ -497,17 +498,22 @@ var app_mysolarpv = {
     // -------------------------------------------------------------------------------------------------------
 
     timeseries_load: function (name, data) {
-        datastore[name] = {};
-        datastore[name].data = data;
-        datastore[name].start = datastore[name].data[0][0] * 0.001;
-        datastore[name].interval = (datastore[name].data[1][0] - datastore[name].data[0][0]) * 0.001;
+        if (data === '') {return; }
+        this.datastore[name] = {};
+        this.datastore[name].data = data;
+        console.log (this.datastore);
+        /*
+        if (this.datastore[name] === undefined) {return; }
+        this.datastore[name].start = this.datastore[name].data[0][0] * 0.001;
+        this.datastore[name].interval = (this.datastore[name].data[1][0] - this.datastore[name].data[0][0]) * 0.001;
+        */
     },
 
     timeseries_append: function (name, time, value) {
-        if (datastore[name] === undefined) {return false; }
+        if (this.datastore[name] === undefined) {return false; }
 
-        var interval = datastore[name].interval,
-            start = datastore[name].start,
+        var interval = this.datastore[name].interval,
+            start = this.datastore[name].start,
             pos,
             last_pos,
             npadding,
@@ -519,7 +525,7 @@ var app_mysolarpv = {
         // 2. calculate new data point position
         pos = (time - start) / interval;
         // 3. get last position from data length
-        last_pos = datastore[name].data.length - 1;
+        last_pos = this.datastore[name].data.length - 1;
 
         // if the datapoint is newer than the last:
         if (pos > last_pos) {
@@ -529,20 +535,20 @@ var app_mysolarpv = {
             if (npadding > 0 && npadding < 12) {
                 for (padd = 0; padd < npadding; padd++) {
                     padd_time = start + ((last_pos + padd + 1) * interval);
-                    datastore[name].data.push([padd_time * 1000, null]);
+                    this.datastore[name].data.push([padd_time * 1000, null]);
                 }
             }
 
             // insert datapoint
-            datastore[name].data.push([time * 1000, value]);
+            this.datastore[name].data.push([time * 1000, value]);
         }
     },
 
     timeseries_trim_start: function (name, newstart) {
-        if (datastore[name] === undefined) {return false; }
+        if (this.datastore[name] === undefined) {return false; }
 
-        var interval = datastore[name].interval,
-            start = datastore[name].start,
+        var interval = this.datastore[name].interval,
+            start = this.datastore[name].start,
             pos,
             tmpdata = [],
             p,
@@ -553,14 +559,14 @@ var app_mysolarpv = {
         pos = (newstart - start) / interval;
 
         if (pos >= 0) {
-            for (p = pos; p < datastore[name].data.length; p++) {
-                t = datastore[name].data[p][0];
-                v = datastore[name].data[p][1];
+            for (p = pos; p < this.datastore[name].data.length; p++) {
+                t = this.datastore[name].data[p][0];
+                v = this.datastore[name].data[p][1];
                 tmpdata.push([t, v]);
             }
-            datastore[name].data = tmpdata;
-            datastore[name].start = datastore[name].data[0][0] * 0.001;
-            datastore[name].interval = (datastore[name].data[1][0] - datastore[name].data[0][0]) * 0.001;
+            this.datastore[name].data = tmpdata;
+            this.datastore[name].start = this.datastore[name].data[0][0] * 0.001;
+            this.datastore[name].interval = (this.datastore[name].data[1][0] - this.datastore[name].data[0][0]) * 0.001;
         }
     }
 };

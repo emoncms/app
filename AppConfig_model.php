@@ -17,16 +17,28 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 class AppConfig
 {
     private $mysqli;
+    private $tblname = "app_config";
 
     public function __construct($mysqli)
     {
         $this->mysqli = $mysqli;
     }
 
+    public function checktable(){
+        // redirect to /admin/db when table does not exist
+        $sql = 'show tables where  "app_config"';
+        $result = $this->mysqli->query($sql);
+        if ($row = $result->fetch_array()) {
+            return json_decode($row['data']);
+        } else {
+            return false;
+        }
+    }
+
     public function set($userid,$json)
     {
         $userid = (int) $userid;
-        var_dump ($json);
+        //var_dump ($json);
 
         $data = json_decode($json);
         if (!$data) return array('success'=>false);

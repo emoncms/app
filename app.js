@@ -36,14 +36,14 @@ var app = {
         // include the translation file required by asked language
         // check if answer is 200 or create a blank i18ntext variable
         $.ajax({
-            url: app.basepath + "locale/app_" + 'en' + '.js',
+            url: app.basepath + "locale_js/app_" + 'en' + '.js',
             dataType: 'script',
             async: false,
             error: function () {
             }
         });
         $.ajax({
-            url: app.basepath + "locale/app_" + lang + '.js',
+            url: app.basepath + "locale_js/app_" + lang + '.js',
             dataType: 'script',
             async: false,
             error: function () {

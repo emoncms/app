@@ -20,7 +20,7 @@
 
 <script>
 
-console.log(path);
+//console.log(path);
 
 var config = app.getconfig();
 var nodes = {};
