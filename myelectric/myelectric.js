@@ -43,7 +43,7 @@ var app_myelectric = {
         "Modules/app/lib/graph_bars.js",
         "Modules/app/lib/graph_lines.js",
         "Modules/app/lib/timeseries.js",
-        "Modules/app/vis.helper.js",
+        "Modules/app/vis.helper.js"
     ],
 
     init: function () {
@@ -143,8 +143,7 @@ var app_myelectric = {
             app_myelectric.dailytype = $("#myelectric_dailytype").val();
 
             // Save config to db
-            var config = (config === false) ? {} : app.config;
-            //if (config === false) config = {};
+            if (config === false) {config = {} };
             config["myelectric"] = {
                 "powerfeed": app_myelectric.powerfeed,
                 "dailyfeed": app_myelectric.dailyfeed,
@@ -160,7 +159,6 @@ var app_myelectric = {
             app_myelectric.last_startofweektime = 0;
             app_myelectric.last_startofmonthtime = 0;
             app_myelectric.last_startofyeartime = 0;
-
             app.setconfig(config);
             app_myelectric.reload = true;
             app_myelectric.reloadkwhd = true;

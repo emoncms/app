@@ -1,3 +1,11 @@
+.graph1{
+    width:100%;
+    height:250px;
+}
+.graph2{
+    width:100%;
+    height:280px;
+}
 .page {
     max-width: 1170px;
     height: auto;

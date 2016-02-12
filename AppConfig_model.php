@@ -25,14 +25,10 @@ class AppConfig
     }
 
     public function checktable(){
-        // redirect to /admin/db when table does not exist
-        $sql = 'show tables where  "app_config"';
+        $sql = 'SHOW TABLES LIKE "app_config"';
         $result = $this->mysqli->query($sql);
-        if ($row = $result->fetch_array()) {
-            return json_decode($row['data']);
-        } else {
-            return false;
-        }
+        if ($result->num_rows>0) return true;
+        return false;
     }
 
     public function set($userid,$json)
