@@ -17,7 +17,6 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 class AppConfig
 {
     private $mysqli;
-    private $tblname = "app_config";
 
     public function __construct($mysqli)
     {

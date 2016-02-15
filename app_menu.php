@@ -4,6 +4,14 @@ bindtextdomain($domain, dirname(__FILE__)."/locale");
 global $session, $user;
 $apikey = "";
 $lang = substr($user->get_lang($session['userid']),0,2);
+/*
+
+Check  if language file exist;, otherwise force to use en
+
+*/
+if (!file_exists( dirname(__FILE__)."/locale_js/app_".$lang.'.js')) {
+    $lang= 'en';
+}
 
 if ($session['write']) $apikey = "?lang=".$lang."&apikey=".$user->get_apikey_write($session['userid']);
     $menu_left[] = array(

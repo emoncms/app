@@ -107,19 +107,23 @@ var app_mysolarpv = {
 
         $("#mysolarpv-configsave").click(function () {
             $("#mysolarpv-config").hide();
-
             solarfeedids = $("#mysolarpv-solarpower").val().split(",");
             housefeedids = $("#mysolarpv-housepower").val().split(",");
             app_mysolarpv.solarpower = solarfeedids;
             app_mysolarpv.housepower = housefeedids;
 
             // Save config to db
-            var config = (config === false) ? {} : app.config;
+            var config = (app.config === undefined) ? {} : app.config;
             config["mysolarpv"] = {
                 "solarpower": app_mysolarpv.solarpower,
                 "housepower": app_mysolarpv.housepower
             };
-            app.setconfig(config);
+            if ((app_mysolarpv.solarpower[0] > 1) && (app_mysolarpv.housepower[0] > 1)) {
+                app.setconfig(config);
+            } else {
+                $("#myModal").modal("show")
+            }
+
             app_mysolarpv.reload = true;
         });
 
@@ -237,9 +241,9 @@ var app_mysolarpv = {
         for (i in app_mysolarpv.housepower) {
             feedid = app_mysolarpv.housepower[i];
             if (feeds[feedid] !== undefined) {
-                use_now += Math.parseInt(feeds[feedid].value);
+                use_now += parseInt(feeds[feedid].value);
                 if (app_mysolarpv.autoupdate) {
-                    app_mysolarpv.timeseries_append("f" + feedid, feeds[feedid].time, Math.parseInt(feeds[feedid].value));
+                    app_mysolarpv.timeseries_append("f" + feedid, feeds[feedid].time, parseInt(feeds[feedid].value));
                     app_mysolarpv.timeseries_trim_start("f" + feedid, view.start * 0.001);
                 }
             }
@@ -250,10 +254,10 @@ var app_mysolarpv = {
         for (i in app_mysolarpv.solarpower) {
             feedid = app_mysolarpv.solarpower[i];
             if (feeds[feedid] !== undefined) {
-                solar_now += Math.parseInt(feeds[feedid].value);
+                solar_now += parseInt(feeds[feedid].value);
                 if (app_mysolarpv.autoupdate) {
                     //console.log(feeds[feedid].time+" " + feeds[feedid].value);
-                    app_mysolarpv.timeseries_append("f" + feedid, feeds[feedid].time, Math.parseInt(feeds[feedid].value));
+                    app_mysolarpv.timeseries_append("f" + feedid, feeds[feedid].time, parseInt(feeds[feedid].value));
                     app_mysolarpv.timeseries_trim_start("f" + feedid,view.start * 0.001);
                 }
             }
@@ -349,7 +353,7 @@ var app_mysolarpv = {
         // -------------------------------------------------------------------------------------------------------
 
         for (z in app_mysolarpv.datastore) {
-            console.log(z+"    datastore:  "+app_mysolarpv.datastore)
+            //console.log(z+"    datastore:  "+app_mysolarpv.datastore)
             datastart = this.datastore[z].data[0][0];
             npoints = this.datastore[z].data.length;
         }

@@ -10,7 +10,7 @@ var i18ntext = {
     'Bar graph feed': 'Bar graph feed',
     'Cost': 'Cost',
     'D': 'D',
-    'kWh elaped': 'kWh elapsed',
+    'kWh elapsed' : 'kWh elapsed',
     'kWh': 'kWh',
     'kWh/d': ' kWh/d',
     'M': 'M',
@@ -18,8 +18,7 @@ var i18ntext = {
     'My Electric config': 'My Electric config',
     'Power feed (Watts):': 'Power feed (Watts):',
     'POWER NOW': 'POWER NOW',
-    'Set currency, enter text: pound, euro, dollar, yen:' : 'Set currency, enter text: pound, euro, dollar, yen: ',
-    'test': 'test',
+    'Set currency, enter text: pound, euro, dollar, yen: ' : 'Set currency, enter text: pound, euro, dollar, yen: ',
     'Unit cost:': 'Unit cost;:',
     'USE TODAY': 'USE TODAY',
     'Watt hours elapsed': 'Watt hours elapsed',
@@ -74,6 +73,12 @@ var i18ntext = {
     'STORE' : 'STORE',
     'VIRTUAL STORE' : 'VIRTUAL STORE',
     'CHARGE RATE' : 'CHARGE RATE',
-    'DISCHARGE RATE' : 'DISCHARGE RATE'
+    'DISCHARGE RATE' : 'DISCHARGE RATE',
+    '8h' : '8h',
+    'Missing feeds' : 'Missing feeds',
+    'The Solar PV dashboard needs specific feeds ' : 'The Solar PV dashboard needs specific feeds ',
+    'they are inexistant in your feeds collection' : 'they are inexstant in your feeds collection',
+    'no settings saved' : 'no settings saved',
+    'Close' : 'Close'
 
 };

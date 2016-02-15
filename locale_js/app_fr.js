@@ -73,6 +73,13 @@ var i18ntext = {
     'STORE' : 'STOCK',
     'VIRTUAL STORE' : 'Stock virtuel',
     'CHARGE RATE' : 'Taux de charge',
-    'DISCHARGE RATE' : 'Taux de décharge'
+    'DISCHARGE RATE' : 'Taux de décharge',
+    '8h' : '8h',
+    'Missing feeds' : 'Flux manquants',
+    'The Solar PV dashboard needs specific feeds ' : 'Le tableau de bord PV nécessite la présence de flux spécifiques ',
+    'they are inexistant in your feeds collection' : 'ils n\'existent pas dans votre liste de flux',
+    'no settings saved' : 'rien n\'a été sauvegardé',
+    'Close' : 'Fermer'
+
 
 };

@@ -74,6 +74,13 @@ var i18ntext = {
     'STORE' : 'STORE',
     'VIRTUAL STORE' : 'VIRTUAL STORE',
     'CHARGE RATE' : 'CHARGE RATE',
-    'DISCHARGE RATE' : 'DISCHARGE RATE'
+    'DISCHARGE RATE' : 'DISCHARGE RATE',
+    '8h' : '8h',
+    'Missing feeds' : 'Missing feeds',
+    'The Solar PV dashboard needs specific feeds ' : 'The Solar PV dashboard needs specific feeds ',
+    'they are inexistant in your feeds collection' : 'they are inexstant in your feeds collection',
+    'no settings saved' : 'no settings saved',
+    'Close' : 'Close'
+
 
 };

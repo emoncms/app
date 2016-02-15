@@ -143,7 +143,8 @@ var app_myelectric = {
             app_myelectric.dailytype = $("#myelectric_dailytype").val();
 
             // Save config to db
-            if (config === false) {config = {} };
+            var config = app.config;
+            config =  (config !== false) ? config : {};
             config["myelectric"] = {
                 "powerfeed": app_myelectric.powerfeed,
                 "dailyfeed": app_myelectric.dailyfeed,
@@ -163,14 +164,14 @@ var app_myelectric = {
             app_myelectric.reload = true;
             app_myelectric.reloadkwhd = true;
 
+            // Switch to main view
+            $("#myelectric_config").hide();
+            $("#myelectric_body").show();
+
             app_myelectric.fastupdateinst = setInterval(app_myelectric.fastupdate, 5000);
             app_myelectric.slowupdateinst = setInterval(app_myelectric.slowupdate, 60000);
             app_myelectric.fastupdate();
             app_myelectric.slowupdate();
-
-            // Switch to main view
-            $("#myelectric_config").hide();
-            $("#myelectric_body").show();
         });
 
         $("#myelectric_zoomout").click(function () {view.zoomout(); app_myelectric.reload = true; app_myelectric.autoupdate = false; app_myelectric.fastupdate(); });
