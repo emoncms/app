@@ -86,7 +86,7 @@ var app = {
             }
         }
         out = '<h3 class="i18n">Missing keys in i18n file</h3><div>' + out + '</div>';
-        //document.getElementById("obj").innerHTML= out
+        document.getElementById("obj").innerHTML= out
 
         return true;
     },

@@ -40,7 +40,7 @@ class AppConfig
 
         // Input sanitisation
         $outdata = array();
-        $filter = "/[^A-Za-z0-9£€$.,]/";
+        $filter = "/[^A-Za-z0-9&£€$.,]/";
         foreach ($data as $appname=>$properties)
         {
             $appname = preg_replace($filter,'',$appname);

@@ -36,7 +36,8 @@ var app_myelectric = {
     feeds: {},
 
     kwhdtmp: [],
-
+    kwhperday : "",
+    perday : "",
     // Include required javascript libraries
     // in other modules libs are core libs
     include: [
@@ -47,10 +48,12 @@ var app_myelectric = {
     ],
 
     init: function () {
+        'use strict';
         var timewindow = (3600000 * 3.0),
             z,
             feeds,
-            name;
+            name,
+            m = app_myelectric;
         view.end = +new Date();
         view.start = view.end - timewindow;
 
@@ -59,44 +62,43 @@ var app_myelectric = {
         // -------------------------------------------------------------------------
 
         // If settings exist for myelectric then we load them in here:
-        if (app.config["myelectric"] !== undefined) {
-            app_myelectric.powerfeed = app.config.myelectric.powerfeed;
-            app_myelectric.dailyfeed = app.config.myelectric.dailyfeed;
-            app_myelectric.dailytype = app.config.myelectric.dailytype;
-            app_myelectric.currency = app.config.myelectric.currency;
-            app_myelectric.unitcost = app.config.myelectric.unitcost;
+        if (app.config.myelectric !== undefined) {
+            m.powerfeed = Number(app.config.myelectric.powerfeed);
+            m.dailyfeed = Number(app.config.myelectric.dailyfeed);
+            m.dailytype = Number(app.config.myelectric.dailytype);
+            m.currency = '&' + app.config.myelectric.currency + ';';
+            m.unitcost = Number(app.config.myelectric.unitcost);
         } else {
             app.config.myelectric = {};
         // if no settings then try auto scanning for feeds with suitable names:
-            feeds = app_myelectric.getfeedsbyid();
+            feeds = m.getfeedsbyid();
             for (z in feeds) {
                 name = feeds[z].name.toLowerCase();
                 if (name.indexOf("house_power") !== -1) {
-                    app_myelectric.powerfeed = z;
+                    m.powerfeed = z;
                 }
                 if (name.indexOf("house_wh") !== -1) {
-                    app_myelectric.dailyfeed = z;
-                    app_myelectric.dailytype = 0;
+                    m.dailyfeed = z;
+                    m.dailytype = 0;
                 }
             }
         }
 
-        if (app_myelectric.dailytype > 1) {
-            app_myelectric.dailytype = 0;
-            app_myelectric.dailyfeed = 0;
+        if (m.dailytype > 1) {
+            m.dailytype = 0;
+            m.dailyfeed = 0;
         }
-
-        app_myelectric.escale = 1.0;
-        if (app_myelectric.dailytype === 0) {app_myelectric.escale = 0.001; }
-        if (app_myelectric.dailytype === 1) {app_myelectric.escale = 1.0; }
-        app_myelectric.currency = (app_myelectric.currency === undefined) ? "" : app_myelectric.currency;
-        app_myelectric.unitcost = (app_myelectric.currency === undefined) ? 0 : app_myelectric.unitcost;
+        // m.dailytype stored in table is a string never === to 0 not 1
+        // console.log ('m.dailytype : ' + m.dailytype);
+        m.escale = (m.dailytype === 0) ? 0.001 : 1.0;
+        m.currency = (m.currency === undefined) ? "" : m.currency;
+        m.unitcost = (m.currency === undefined) ? 0 : m.unitcost;
         // -------------------------------------------------------------------------
         // Decleration of myelectric events
         // -------------------------------------------------------------------------
-
+        //console.log(m.perday + "    -    " + m.kwhperday);
         $(window).resize(function () {
-            app_myelectric.resize();
+            m.resize();
         });
 
         // When the config icon is pressed, populate dropdown feed selector menu's.
@@ -145,7 +147,7 @@ var app_myelectric = {
             // Save config to db
             var config = app.config;
             config =  (config !== false) ? config : {};
-            config["myelectric"] = {
+            config.myelectric = {
                 "powerfeed": app_myelectric.powerfeed,
                 "dailyfeed": app_myelectric.dailyfeed,
                 "dailytype": app_myelectric.dailytype,
@@ -155,7 +157,7 @@ var app_myelectric = {
 
             //if (app_myelectric.dailytype === 0) { app_myelectric.escale = 0.001; }
             //if (app_myelectric.dailytype === 1) { app_myelectric.escale = 1.0; }
-            app_myelectric.escale = (app_myelectric.dailytype === 0) ? 0.001 : 1.0;
+            app_myelectric.escale = (app_myelectric.dailytype == 0) ? 0.001 : 1.0;
             app_myelectric.last_daytime = 0;
             app_myelectric.last_startofweektime = 0;
             app_myelectric.last_startofmonthtime = 0;
@@ -202,6 +204,7 @@ var app_myelectric = {
     },
 
     show: function () {
+        'use strict';
         $("body").css('background-color', '#222');
         $(window).ready(function () {
             $("#footer").css('background-color', '#181818');
@@ -219,6 +222,7 @@ var app_myelectric = {
                 async: false,
                 success: function (data_in) { meta = data_in; }
             });
+            //console.log('meta' + meta)
             app_myelectric.startalltime = meta.start_time;
 
             app_myelectric.reloadkwhd = true;
@@ -235,6 +239,7 @@ var app_myelectric = {
     },
 
     resize: function () {
+        'use strict';
         var windowheight = $(window).height(),
             bound = {},
             width = $("#myelectric_placeholder_bound_kwhd").width(),
@@ -291,11 +296,13 @@ var app_myelectric = {
     },
 
     hide: function () {
+        'use strict';
         clearInterval(app_myelectric.fastupdateinst);
         clearInterval(app_myelectric.slowupdateinst);
     },
 
     fastupdate: function () {
+        'use strict';
         var scale,
             feeds,
             timerange,
@@ -304,28 +311,31 @@ var app_myelectric = {
             now,
             timenow,
             npoints = 1500,
-            timewindow;
-;
-        if (app_myelectric.viewmode === "energy") {
+            timewindow,
+            interval,
+            // used m to short name and avoid confusion with e from event
+            m = app_myelectric;
+
+        if (m.viewmode === "energy") {
             scale = 1;
             $("#myelectric_usetoday_units_a").html("");
             $("#myelectric_usetoday_units_b").html("kWh");
             $(".u1a").html("");
             $(".u1b").html("kWh");
             $(".u2a").html("");
-            $(".u2b").html("kWh/d");
+            $(".u2b").html($("#kwhperday").html());
         } else {
-            scale = app_myelectric.unitcost;
-            $("#myelectric_usetoday_units_a").html(app_myelectric.currency);
+            scale = m.unitcost;
+            $("#myelectric_usetoday_units_a").html(m.currency);
             $("#myelectric_usetoday_units_b").html("");
-            $(".u1a").html(app_myelectric.currency);
+            $(".u1a").html(m.currency);
             $(".u1b").html("");
-            $(".u2a").html(app_myelectric.currency);
+            $(".u2a").html(m.currency);
             // '/day is not acceptable, it should be translatablr'
-            $(".u2b").html("/day");
+            $(".u2b").html($("#perday").html());
         }
 
-        var now = new Date();
+        now = new Date();
         var timenow = now.getTime();
         //now = new Date();
         //timenow = now.getTime(),
@@ -336,12 +346,12 @@ var app_myelectric = {
         // Check if the updater ran in the last 60s if it did not the app was sleeping
         // and so the data needs a full reload.
 
-        if ((timenow - app_myelectric.lastupdate) > 60000) {app_myelectric.reload = true; }
-        app_myelectric.lastupdate = timenow;
+        if ((timenow - m.lastupdate) > 60000) {m.reload = true; }
+        m.lastupdate = timenow;
 
         // reload power data
-        if (app_myelectric.reload) {
-            app_myelectric.reload = false;
+        if (m.reload) {
+            m.reload = false;
 
             timewindow = view.end - view.start;
             view.end = timenow;
@@ -351,26 +361,34 @@ var app_myelectric = {
             interval = (interval < 1) ? 1 : interval;
             //if (interval < 1) interval = 1;
 
-            view.start = 1000 * Math.floor((view.start / 1000 ) / interval) * interval;
-            view.end = 1000 * Math.ceil((view.end / 1000 ) / interval) * interval;
+            view.start = 1000 * Math.floor((view.start / 1000) / interval) * interval;
+            view.end = 1000 * Math.ceil((view.end / 1000) / interval) * interval;
 
-            timeseries.load(app_myelectric.powerfeed, view.start, view.end, interval);
+            timeseries.load(m.powerfeed, view.start, view.end, interval);
         }
 
         // --------------------------------------------------------------------
         // 1) Get last value of feeds
+        // this will lock the system when undreds of feeds are available
+        // so just ask for values of required feedids
         // --------------------------------------------------------------------
-        feeds = app_myelectric.getfeedsbyid();
-        app_myelectric.feeds = feeds;
+
+
+        feeds = m.getfeedsbyid();
+        m.feeds = feeds;
+        var pwr = feeds[m.powerfeed].value * 1.0
 
         // set the power now value
-        if (app_myelectric.viewmode === "energy") {
-            $("#myelectric_powernow").html((feeds[app_myelectric.powerfeed].value * 1.0).toFixed(0) + "W");
+        console.log ('m.currency : ' + m.currency)
+        if (m.viewmode === "energy") {
+            $("#myelectric_powernow").html(pwr.toFixed(0) + "W");
         } else {
-            $("#myelectric_powernow").html(app_myelectric.currency + (feeds[app_myelectric.powerfeed].value * 1.0 * app_myelectric.unitcost * 0.001).toFixed(2) + "/hr");
+            $("#myelectric_powernow").html(m.currency + (pwr * 1.0 * m.unitcost * 0.001).toFixed(2) + $("#perhour").html);
         }
+
+        // try to load values to reduce volumes (time is missing)
         // Advance view
-        if (app_myelectric.autoupdate) {
+        if (m.autoupdate) {
 
             // move the view along
             timerange = view.end - view.start;
@@ -378,13 +396,13 @@ var app_myelectric = {
             view.start = view.end - timerange;
 
             timeseries.append(
-                app_myelectric.powerfeed,
-                feeds[app_myelectric.powerfeed].time,
-                feeds[app_myelectric.powerfeed].value
+                m.powerfeed,
+                feeds[m.powerfeed].time,
+                feeds[m.powerfeed].value
             );
 
             // delete data that is now beyond the start of our view
-            timeseries.trim_start(app_myelectric.powerfeed, view.start * 0.001);
+            timeseries.trim_start(m.powerfeed, view.start * 0.001);
         }
 
         // draw power graph
@@ -400,8 +418,8 @@ var app_myelectric = {
             },
 
             yaxis: {
-                title: "Power (Watts)",
-                units: "W",
+                title: $("#ytitle").html(),
+                units:  $("#units").html(),
                 minor_tick: 250,
                 major_tick: 1000
             }
@@ -422,7 +440,7 @@ var app_myelectric = {
             },
             "use": {
                 color: "rgba(6,153,250,0.5)",
-                data: datastore[app_myelectric.powerfeed].data
+                data: datastore[m.powerfeed].data
             }
         };
 
@@ -432,59 +450,66 @@ var app_myelectric = {
         // THIS WEEK, MONTH, YEAR TOTALS
         // --------------------------------------------------------------------------------------------------------
         // All time total
-        var alltime_kwh = feeds[app_myelectric.dailyfeed].value * app_myelectric.escale;
+        var alltime_kwh = feeds[m.dailyfeed].value * m.escale;
         // --------------------------------------------------------------------------------------------------------
         // WEEK: Get the time of the start of the week, if we have rolled over to a new week, load the watt hour
         // value in the watt accumulator feed recorded for the start of this week.
         var dayofweek = now.getDay();
-        //if (dayofweek > 0) dayofweek -= 1; else dayofweek = 6;
-        dayofweek = (dayofweek > 0) ? -1 : 6;
-
-        var time = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayofweek).getTime();
-        if (time !== app_myelectric.last_startofweektime) {
-            app_myelectric.startofweek = app_myelectric.getvalue(app_myelectric.dailyfeed, time);
-            app_myelectric.last_startofweektime = time;
+        dayofweek = (dayofweek > 0) ? dayofweek -1 : 6;
+        // convert last start of week time to unix seconds time
+        var time = (new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayofweek).getTime()) / 1000;
+        if (time !== m.last_startofweektime) {
+            //db stored time is in seconds, not ms
+            m.last_startofweektime = time;
+            m.startofweek = m.getvalue(m.dailyfeed, time);
         }
-        if (app_myelectric.startofweek === false) {app_myelectric.startofweek = [app_myelectric.startalltime * 1000, 0]; }
+        // will probably never execute this?
+        if (m.startofweek === false) {m.startofweek = [m.startalltime, 0]; }
 
         // Week total
-        var week_kwh = alltime_kwh - (app_myelectric.startofweek[1] * app_myelectric.escale);
+        var week_kwh = alltime_kwh - (m.startofweek[1] * m.escale);
         $("#myelectric_week_kwh").html((scale * week_kwh).toFixed(1));
-        var days = ((feeds[app_myelectric.dailyfeed].time - (app_myelectric.startofweek[0] * 0.001)) / 86400);
+        //var days = ((feeds[m.dailyfeed].time - (m.startofweek[0]*0.001))/86400);
+        var days = (feeds[m.dailyfeed].time - m.last_startofweektime) / 86400;
         $("#myelectric_week_kwhd").html((scale * week_kwh / days).toFixed(1));
+        //console.log('days : ' + days +'  week_kWh: ' + week_kwh +'  scale: ' + scale +'  time_present ' + feeds[m.dailyfeed].time +'  start: ' + m.startofweek[1]);
         // --------------------------------------------------------------------------------------------------------
         // MONTH: repeat same process as above
-        var time = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-        if (time !== app_myelectric.last_startofmonthtime) {
-            app_myelectric.startofmonth = app_myelectric.getvalue(app_myelectric.dailyfeed, time);
-            app_myelectric.last_startofmonthtime = time;
+        time = (new Date(now.getFullYear(), now.getMonth(), 1).getTime()) / 1000;
+        //console.log('start of month time : ' + time)
+        if (time !== m.last_startofmonthtime) {
+            m.last_startofmonthtime = time;
+            m.startofmonth = m.getvalue(m.dailyfeed, time);
         }
-        if (app_myelectric.startofmonth === false) {app_myelectric.startofmonth = [app_myelectric.startalltime * 1000, 0]; }
+        if (m.startofmonth === false) {m.startofmonth = [m.startalltime, 0]; }
 
         // Monthly total
-        var month_kwh = alltime_kwh - (app_myelectric.startofmonth[1] * app_myelectric.escale);
+        var month_kwh = alltime_kwh - (m.startofmonth[1] * m.escale);
         $("#myelectric_month_kwh").html(Math.round(scale * month_kwh));
-        var days = ((feeds[app_myelectric.dailyfeed].time - (app_myelectric.startofmonth[0] * 0.001)) / 86400);
+        days = (feeds[m.dailyfeed].time - m.last_startofmonthtime) / 86400;
         $("#myelectric_month_kwhd").html((scale * month_kwh / days).toFixed(1));
+        //console.log('days : ' + days +'  month_kwh: ' + month_kwh +'  scale: ' + scale +'  time_present ' + feeds[m.dailyfeed].time +'  start: ' + m.startofweek[1]);
         // --------------------------------------------------------------------------------------------------------
         // YEAR: repeat same process as above
-        var time = new Date(now.getFullYear(), 0, 1).getTime();
-        if (time !== app_myelectric.last_startofyeartime) {
-            app_myelectric.startofyear = app_myelectric.getvalue(app_myelectric.dailyfeed, time);
-            app_myelectric.last_startofyeartime = time;
+        time = (new Date(now.getFullYear(), 0, 1).getTime()) / 1000;
+        if (time !== m.last_startofyeartime) {
+            m.last_startofyeartime = time;
+            m.startofyear = m.getvalue(m.dailyfeed, time);
         }
-        if (app_myelectric.startofyear === false) {app_myelectric.startofyear = [app_myelectric.startalltime * 1000, 0]; }
+        if (m.startofyear === false) {m.startofyear = [m.startalltime * 1000, 0]; }
 
         // Year total
-        var year_kwh = alltime_kwh - (app_myelectric.startofyear[1] * app_myelectric.escale);
+        var year_kwh = alltime_kwh - (m.startofyear[1] * m.escale);
         $("#myelectric_year_kwh").html(Math.round(scale * year_kwh));
-        var days = ((feeds[app_myelectric.dailyfeed].time - (app_myelectric.startofyear[0] * 0.001)) / 86400);
+        var days = ((feeds[m.dailyfeed].time - m.last_startofyeartime) / 86400);
         $("#myelectric_year_kwhd").html((scale * year_kwh / days).toFixed(1));
+        //console.log('days : ' + days +'  year_kwh: ' + year_kwh +'  scale: ' + scale +'  time_present ' + feeds[m.dailyfeed].time +'  start: ' + m.startofweek[1]);
         // --------------------------------------------------------------------------------------------------------
         // ALL TIME
         $("#myelectric_alltime_kwh").html(Math.round(scale * alltime_kwh));
-        var days = ((feeds[app_myelectric.dailyfeed].time - app_myelectric.startalltime) / 86400);
+        days = ((feeds[m.dailyfeed].time - m.startalltime) / 86400);
         $("#myelectric_alltime_kwhd").html((scale * alltime_kwh / days).toFixed(1));
+        //console.log('days : ' + days +'  alltime_kwh: ' + alltime_kwh +'  scale: ' + scale +'  time_present ' + feeds[m.dailyfeed].time +'  start: ' + m.startofweek[1]);
         // --------------------------------------------------------------------------------------------------------
     },
 
@@ -503,38 +528,38 @@ var app_myelectric = {
         // This presents a minor error for 60s after midnight but should not be noticable in most cases
         // and will correct itself after the 60s is over.
 
-        var interval = 86400;
-        var now = new Date();
-        var timezone = (now.getTimezoneOffset() / -60) * 3600;
-        var timenow = Math.floor(now.getTime() * 0.001);
-        var end = (Math.floor((timenow + timezone) / interval) * interval) - timezone;
-        var start = end - interval * Math.round(graph_bars.width / 30);
-
-        var valid = [];
+        'use strict';
+        var interval = 86400,
+            now = new Date(),
+            timezone = (now.getTimezoneOffset() / -60) * 3600,
+            timenow = Math.floor(now.getTime() * 0.001),
+            end = (Math.floor((timenow + timezone) / interval) * interval) - timezone,
+            start = end - interval * Math.round(graph_bars.width / 30),
+            valid = [];
 
         var data = app_myelectric.getdata({
-            "id": app_myelectric.dailyfeed,
-            "start": start * 1000,
-            "end": end * 1000,
-            "interval": interval,
-            "skipmissing": 0,
-            "limitinterval": 0
-        });
+                "id": app_myelectric.dailyfeed,
+                "start": start * 1000,
+                "end": end * 1000,
+                "interval": interval,
+                "skipmissing": 0,
+                "limitinterval": 0
+            }),
 
         // remove nan values from the end.
-        var z,
+            z,
             time,
             diff,
             usetoday_kwh,
-            scale;
+            scale,
+            next;
+
         for (z in data) {
             if (data[z][1] !== null) {
                 valid.push(data[z]);
             }
         }
-
-        var next = valid[valid.length - 1][0] + (interval * 1000);
-
+        next = (valid.length > 0) ? valid[valid.length - 1][0] + (interval * 1000) : 0;
         if (app_myelectric.feeds[app_myelectric.dailyfeed] !== undefined) {
             valid.push([next, app_myelectric.feeds[app_myelectric.dailyfeed].value * 1.0]);
         }
@@ -552,12 +577,19 @@ var app_myelectric = {
         if (app_myelectric.daily.length > 0) {
             usetoday_kwh = app_myelectric.daily[app_myelectric.daily.length - 1][1];
         }
-        $("#myelectric_usetoday").html(usetoday_kwh.toFixed(1));
+        if (app_myelectric.viewmode === "energy") {
+            $("#myelectric_usetoday").html(usetoday_kwh.toFixed(1));
+        } else {
+            $("#myelectric_usetoday").html((usetoday_kwh * app_myelectric.unitcost).toFixed(2));
+        }
 
         graph_bars.draw('myelectric_placeholder_kwhd', [app_myelectric.daily]);
     },
 
+
     getfeedsbyid: function () {
+        // this functioçn cannot be limited to the required feeds
+        'use strict';
         var feeds = {},
             byid = {},
             z;
@@ -573,6 +605,7 @@ var app_myelectric = {
     },
 
     getvalue: function (feedid, time) {
+        'use strict';
         var result = app_myelectric.getdata({
             "id": feedid,
             "start": time,
@@ -584,13 +617,14 @@ var app_myelectric = {
     },
 
     getdata: function (args) {
+        'use strict';
         var reqstr = "",
-            z;
+            z,
+            data = [];
         for (z in args) {reqstr += "&" + z + "=" + args[z]; }
         reqstr += apikeystr;
         //console.log(reqstr);
 
-        var data = [];
         $.ajax({
             url: path + "feed/data.json",
             data: reqstr,

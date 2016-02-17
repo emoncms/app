@@ -105,13 +105,19 @@
                     <div class="blue">
                         <div class="appbox-title  i18n">MONTH</div>
                         <div class="appbox-value">
-                            <span class="u1a i18n">$</span>
-                            <span id="myelectric_month_kwh">---</span>&nbsp
+                            <span class="u1a i18n">$</span>&nbsp
+                            <span id="myelectric_month_kwh">---</span>
                             <span class="appbox-units u1b i18n">kWh</span>
                         </div>
                         <div class="appbox-units" >
-                            <span class="u2a"></span><span id="myelectric_month_kwhd">---</span>&nbsp
+                            <span class="u2a"></span>&nbsp
+                            <span id="myelectric_month_kwhd">---</span>&nbsp
                             <span class="u2b i18n">kWh/d</span>
+                            <span id = "perday" class="u3b i18n" style= "display: none;">/day</span>
+                            <span id = "kwhperday" class="u3b i18n" style= "display: none;">kWh/d</span>
+                            <span id = "perhour" class="u3b i18n" style= "display: none;">/hr</span>
+                            <span id = "ytitle" class="u3b i18n" style= "display: none;">Power (Watts)</span>
+                            <span id = "units" class="u3b i18n" style= "display: none;">W</span>
                         </div>
                     </div>
                 </td>
@@ -120,12 +126,14 @@
                     <div class="blue">
                         <div class="appbox-title i18n">YEAR</div>
                         <div class="appbox-value">
-                            <span class="u1a i18n">$</span>
-                            <span id="myelectric_year_kwh">---</span>&nbsp
+                            <span class="u1a i18n">$</span>&nbsp
+                            <span id="myelectric_year_kwh">---</span>
                             <span class="appbox-units u1b i18n" >kWh</span>
                         </div>
                         <div class="appbox-units" >
-                            <span class="u2a"></span><span id="myelectric_year_kwhd">---</span>&nbsp<span class="u2b i18n">kWh/d</span>
+                            <span class="u2a"></span>
+                            <span id="myelectric_year_kwhd">---</span>
+                            <span class="u2b i18n">kWh/d</span>
                         </div>
                     </div>
                 </td>
@@ -133,14 +141,14 @@
                 <td class="appbox">
                     <div class="blue">
                         <div class="appbox-title i18n">ALL</div>
-                        <div>
+                        <div class="appbox-value">
                             <span class="u1a i18n">$</span>
-                            <span class="appbox-value" id="myelectric_alltime_kwh">---</span>&nbsp
+                            <span  id="myelectric_alltime_kwh">---</span>
                             <span class="appbox-units u1b i18n" >kWh</span>
                         </div>
                         <div class="appbox-units" >
                             <span class="u2a"></span><span id="myelectric_alltime_kwhd i18n">---</span>&nbsp
-                            <span class="u2 i18nb">kWh/d</span>
+                            <span class="u2b i18n">kWh/d</span>
                         </div>
                     </div>
                 </td>
