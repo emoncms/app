@@ -1,0 +1,1059 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: emoncms9.3\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-01-26 21:07+0100\n"
+"PO-Revision-Date: 2016-01-26 21:12+0100\n"
+"Last-Translator: Benoît Pique <benoit.pique@gmail.com>\n"
+"Language-Team: Baptiste Gaultier (Télécom Bretagne) <baptiste."
+"gaultier@telecom-bretagne.eu>\n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: _;gettext;gettext_noop\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Generator: Poedit 1.5.4\n"
+"X-Poedit-SearchPath-0: ../../..\n"
+"X-Poedit-SearchPath-1: ../../../myelectric\n"
+
+#: ../../../app_menu.php:18
+msgid "My Electric"
+msgstr "Mon électricité"
+
+#: ../../../app_menu.php:19
+msgid "My Solar"
+msgstr "Capteur solaire"
+
+#: ../../../app_menu.php:20
+msgid "My Heatpump"
+msgstr "Ma PAC"
+
+#: ../../../app_menu.php:21
+msgid "My Solar&amp;Wind"
+msgstr "Soleil et Vent"
+
+#: ../../../myelectric/myelectric.html:68
+msgid "My Electric config"
+msgstr "Configuration"
+
+#: ../../../myelectric/myelectric.html:71
+msgid "Power feed (Watts)"
+msgstr "Flux Puissance"
+
+#: ../../../myelectric/myelectric.html:74
+msgid "Bar graph feed"
+msgstr "Histogramme du Flux"
+
+#: ../../../myelectric/myelectric.html:77
+msgid "Wh or kWh feed?"
+msgstr "Flux Wh ou kWh"
+
+#: ../../../myelectric/myelectric.html:77
+msgid "Note: Use power_to_kwh input processor to create this feed type"
+msgstr ""
+"Note: Utiliser l'entrée processeur  power_to_kwh  pour créer ce type de flux"
+
+#: ../../../myelectric/myelectric.html:79
+msgid "Watt hours elapsed"
+msgstr "Wh accumulés"
+
+#: ../../../myelectric/myelectric.html:80
+msgid "kWh elapsed"
+msgstr "kWh accumulés"
+
+#: ../../../myelectric/myelectric.html:83
+msgid "Set currency, enter text: pound, euro, dollar, yen"
+msgstr "Selectionner la monnaie, Livre, Euro, Dollar, Yen, ..."
+
+#: ../../../myelectric/myelectric.html:86
+msgid "Unit cost"
+msgstr "Coût unitaire"
+
+#: ../../../myelectric/myelectric.html:90
+msgid "Save"
+msgstr "Sauvegarder"
+
+#: ../../../myelectric/myelectric.html:98
+#, fuzzy
+msgid "Cost"
+msgstr "Coût"
+
+#: ../../../myelectric/myelectric.html:99
+msgid "kWh"
+msgstr "kWh"
+
+#: ../../../myelectric/myelectric.html:110
+msgid "POWER NOW"
+msgstr "Puissance instantanée"
+
+#: ../../../myelectric/myelectric.html:115
+msgid "USE TODAY"
+msgstr "Utilisation aujourd'hui"
+
+#: ../../../myelectric/myelectric.html:124
+#: ../../../myelectric/myelectric.html:125
+msgid "h"
+msgstr "h"
+
+#: ../../../myelectric/myelectric.html:126
+msgid "D"
+msgstr "J"
+
+#: ../../../myelectric/myelectric.html:127
+msgid "W"
+msgstr "S"
+
+#: ../../../myelectric/myelectric.html:128
+msgid "M"
+msgstr "M"
+
+#: ../../../myelectric/myelectric.html:129
+#: ../../../myelectric/myelectric.html:130
+#: ../../../myelectric/myelectric.html:131
+#, fuzzy
+msgid " "
+msgstr "."
+
+#~ msgid "Select the feed to show"
+#~ msgstr "Flux sélectionné"
+
+#~ msgid "Select the daily feed source to show"
+#~ msgstr "Le flux à afficher"
+
+#~ msgid "Bar graph feed type"
+#~ msgstr "Histogramme type de Flux"
+
+#~ msgid "Select presentation"
+#~ msgstr "selectionner la présentation"
+
+#~ msgid "kWh per day"
+#~ msgstr "kWh quotidien"
+
+#~ msgid "Power (Watts)"
+#~ msgstr "Puissance (Watt)"
+
+#~ msgid "Feeds"
+#~ msgstr "Flux"
+
+#~ msgid "Feed API Help"
+#~ msgstr "Aide de l'API Flux"
+
+#~ msgid "Refresh feed size"
+#~ msgstr "Actualiser les tailles des flux"
+
+#~ msgid "No feeds created"
+#~ msgstr "Aucun flux disponible"
+
+#~ msgid ""
+#~ "Feeds are where your monitoring data is stored. The recommended route for "
+#~ "creating feeds is to start by creating inputs (see the inputs tab). Once "
+#~ "you have inputs you can either log them straight to feeds or if you want "
+#~ "you can add various levels of input processing to your inputs to create "
+#~ "things like daily average data or to calibrate inputs before storage. You "
+#~ "may want to follow the link as a guide for generating your request. "
+#~ msgstr ""
+#~ "Les flux correspondent à l'archivage et au traitement de vos données. "
+#~ "Créez d'abord une source de données (Onglet Sources), utilisez ensuite "
+#~ "les flux pour traiter ces données avant de les archiver. Vous pouvez lire "
+#~ "la documentation sur l'API flux pour plus d'information (en Anglais)"
+
+#~ msgid "Feed API helper"
+#~ msgstr "Aide de l'API"
+
+#~ msgid "Id"
+#~ msgstr "id"
+
+#~ msgid "Name"
+#~ msgstr "Nom"
+
+#~ msgid "Tag"
+#~ msgstr "Etiquette"
+
+#~ msgid "Datatype"
+#~ msgstr "Type de données"
+
+#~ msgid "Engine"
+#~ msgstr "Stockage"
+
+#~ msgid "Public"
+#~ msgstr "Public"
+
+#~ msgid "Make feed public"
+#~ msgstr "Rendre ce flux public"
+
+#~ msgid "Size"
+#~ msgstr "Taille"
+
+#~ msgid "Updated"
+#~ msgstr "Actualisé"
+
+#~ msgid "Value"
+#~ msgstr "Valeur"
+
+#~ msgid "Edit"
+#~ msgstr "modifier"
+
+#~ msgid "Delete"
+#~ msgstr "Supprimer"
+
+#~ msgid "Preview"
+#~ msgstr "Afficher"
+
+#~ msgid "Configure element"
+#~ msgstr "Configurer l'élément"
+
+#~ msgid "Cancel"
+#~ msgstr "Annuler"
+
+#~ msgid "Save changes"
+#~ msgstr "Sauvegarder les changements"
+
+#, fuzzy
+#~ msgid "Feeds API Help"
+#~ msgstr "Aide de l'API Flux"
+
+#~ msgid ""
+#~ "Feeds are where your monitoring data is stored. The recommended route for "
+#~ "creating feeds is to start by creating inputs (see the inputs tab). Once "
+#~ "you have inputs you can either log them straight to feeds or if you want "
+#~ "you can add various levels of input processing to your inputs to create "
+#~ "things like daily average data or to calibrate inputs before storage. You "
+#~ "may want to follow the link as a guide for generating your request."
+#~ msgstr ""
+#~ "Les flux correspondent à l'archivage et au traitement de vos données. "
+#~ "Créez d'abord une source de données (Onglet Sources), utilisez ensuite "
+#~ "les flux pour traiter ces données avant de les archiver. Vous pouvez lire "
+#~ "la documentation sur l'API flux pour plus d'information (en Anglais)"
+
+#~ msgid "CSV data export"
+#~ msgstr "Exportation au format CSV"
+
+#~ msgid "Selected feed:"
+#~ msgstr "Flux sélectionné"
+
+#~ msgid "Select the dates range interval that you wish to export: (From - To)"
+#~ msgstr ""
+#~ "Sélectionner les dates définissant l'intervalle à exporter (Date de - à)"
+
+#~ msgid "Start Date"
+#~ msgstr "Date de début"
+
+#~ msgid "End Date"
+#~ msgstr "Date de fin"
+
+#~ msgid ""
+#~ "Select the time interval with time reference that you wish to export:"
+#~ msgstr ""
+#~ "Sélectionner l'intervalle de temps des échantillons que vous désirez "
+#~ "exporter:"
+
+#~ msgid "Select samples time interval"
+#~ msgstr "Sélection de l'intervalle des échantillons"
+
+#~ msgid "s"
+#~ msgstr "s"
+
+#~ msgid "min"
+#~ msgstr "Min"
+
+#, fuzzy
+#~ msgid "mins"
+#~ msgstr " minutes"
+
+#~ msgid "hour"
+#~ msgstr "Heure"
+
+#~ msgid "hours"
+#~ msgstr "Heures"
+
+#~ msgid "Daily"
+#~ msgstr "Quotidien"
+
+#~ msgid "Weekly"
+#~ msgstr "Hebdomadaire"
+
+#~ msgid "Monthly"
+#~ msgstr "Mensuel"
+
+#~ msgid "Annual"
+#~ msgstr "Annuel"
+
+#~ msgid "Select Time zone (for day export)"
+#~ msgstr "Sélectionner le fuseau horaire (pour exportation d'un jour)"
+
+#~ msgid "Feed intervals note:"
+#~ msgstr "Note à propos des intervalles de Flux"
+
+#~ msgid ""
+#~ "if the selected interval is shorter than the feed interval the feed "
+#~ "interval will be used instead."
+#~ msgstr ""
+#~ "Si l'intervalle sélectionné est inférieur à l'intervalle du flux, c'est "
+#~ "l'intervalle du flux qui servira."
+
+#~ msgid "Averages are only returned for feed engines with built in averaging."
+#~ msgstr ""
+#~ "Les moyennes ne sont fournies que pour les flux utilisant un moteur "
+#~ "contant un calcul de moyenne."
+
+#~ msgid "Estimated download size "
+#~ msgstr "Taille estimée du fichier"
+
+#~ msgid "Export"
+#~ msgstr "Exporter"
+
+#~ msgid "Data selection error"
+#~ msgstr "Erreur de dates"
+
+#~ msgid "Please enter a valid START date."
+#~ msgstr "Entrer une date de DEBUT valide."
+
+#~ msgid "Please enter a valid END date."
+#~ msgstr "Entrer une date de FIN valide."
+
+#~ msgid "Start date should be before end date."
+#~ msgstr "La date de début doit être avant la date de fin."
+
+#~ msgid "Download file size too large (download limit: 10Mb)."
+#~ msgstr "Le fichier est trop gros (limite de déchargement: 10MB)"
+
+#~ msgid "Please select sample time interval."
+#~ msgstr "L'intervalle de temps n'est pas défini."
+
+#~ msgid "Close"
+#~ msgstr "Fermer"
+
+#~ msgid "Are you sure you want to delete this feed?"
+#~ msgstr "Etes vous sûr de vouloir supprimer ce flux ?"
+
+#~ msgid "WARNING deleting a feed is permanent"
+#~ msgstr "ATTENTION ! La suppression d'un flux est irréversible"
+
+#~ msgid "Delete Feed"
+#~ msgstr "Supprimer le Flux"
+
+#~ msgid "Download data"
+#~ msgstr "Télécharger les données"
+
+#~ msgid "Feed API"
+#~ msgstr "API de gestion du flux"
+
+#~ msgid "Apikey authentication"
+#~ msgstr "Authentification APIKey"
+
+#~ msgid ""
+#~ "If you want to call any of the following action's when your not logged "
+#~ "in, add an apikey to the URL of your request: &apikey=APIKEY."
+#~ msgstr ""
+#~ "Si vous voulez appeler ces fonctions sans être connecté, il suffit "
+#~ "d'ajouter votre clé API sur l'url : &apikey=APIKEY"
+
+#~ msgid "Read only:"
+#~ msgstr "Accès en lecture seule : "
+
+#~ msgid "Read & Write:"
+#~ msgstr "Lecture / Ecriture :"
+
+#~ msgid "Html"
+#~ msgstr "Html"
+
+#~ msgid "The feed list view"
+#~ msgstr "La liste des flux "
+
+#~ msgid "This page"
+#~ msgstr "Cette page (documentation API)"
+
+#~ msgid "JSON"
+#~ msgstr "JSON"
+
+#~ msgid "To use the json api the request url needs to include .json"
+#~ msgstr ""
+#~ "Pour utiliser l'api json, vous devez ajouter .json à la fin de l'url"
+
+#~ msgid "returns a list of public feeds made public by the given user."
+#~ msgstr "Renvoi la liste des flux public pour un utilisateur"
+
+#~ msgid "returns the present value of a given feed"
+#~ msgstr "Renvoi la valeur courante d'un flux de données"
+
+#~ msgid "returns feed data"
+#~ msgstr "Les données du flux"
+
+#~ msgid "returns histogram data"
+#~ msgstr "Données d'histogramme"
+
+#~ msgid "returns kwh consumed in a given power band using histogram data type"
+#~ msgstr "Renvoi la puissance consommée sous forme d'histogramme"
+
+#~ msgid "returns id of a feed given by name"
+#~ msgstr "Retourne l'id d'un flux à partir de son nom"
+
+#~ msgid "Feed intervals:"
+#~ msgstr "Intervalles de Flux"
+
+#~ msgid "Select the time range and interval that you wish to export:"
+#~ msgstr "Sélectionner la durée et l'intervalle que vous désirez obtenir:"
+
+#~ msgid "Export data beween selected dates"
+#~ msgstr "Exportation des données entre les dates sélectionnées"
+
+#~ msgid "Feed data export procedure"
+#~ msgstr "Procédure d'exportation des données de Flux"
+
+#~ msgid "Export Data"
+#~ msgstr "Exporte les données"
+
+#~ msgid "Estimated download size: <span> 0</span> kB"
+#~ msgstr "Taille estimée du téléchargement: <span> 0</span> kB"
+
+#~ msgid "Delete permanently"
+#~ msgstr "Supprimer le flux ?"
+
+#, fuzzy
+#~ msgid "Input API Help"
+#~ msgstr "Aide de l'API Flux"
+
+#~ msgid "Missing field parameter"
+#~ msgstr "Manque un paramètre"
+
+#~ msgid "Field updated"
+#~ msgstr "Actualisé"
+
+#~ msgid "Field could not be updated"
+#~ msgstr "Le champ ne peut être mis à jour"
+
+#~ msgid "Feed "
+#~ msgstr "Le flux"
+
+#~ msgid " deleted"
+#~ msgstr "a &eacute;t&eacute; supprim&eacute;"
+
+#~ msgid "Emoncms database setup script"
+#~ msgstr "Script de configuration de la base de donn&eacute;e emoncms"
+
+#~ msgid "Continue to emoncms"
+#~ msgstr "Continuer vers emoncms"
+
+#~ msgid "to run script uncomment runnable"
+#~ msgstr ""
+#~ "Pour ex&eacute;cuter le script, d&eacutecommenter la variable runnable"
+
+#~ msgid "dashboards new"
+#~ msgstr "Nouveau tableau de bord"
+
+#~ msgid "Logout"
+#~ msgstr "D&eacute;connexion"
+
+#~ msgid "dashboard set"
+#~ msgstr "Tableau de bord modifi&eacute;"
+
+#~ msgid "dashboard set configuration"
+#~ msgstr "d&ecute;finir la configuration du tableau de bord"
+
+#~ msgid "Feed type changed"
+#~ msgstr "Le type a &eacute;t&eacute; chang&eacute;"
+
+#~ msgid "Feed tag changed"
+#~ msgstr "L’&eacute;tiquetage du flux a &eacute;t&eacute; modifi&eacute;"
+
+#~ msgid "Feed renamed"
+#~ msgstr "Le flux a &eacute;t&eacute; renomm&eacute;"
+
+#~ msgid "Input deleted"
+#~ msgstr "Source supprim&ecute;e"
+
+#~ msgid "Process list has been reset"
+#~ msgstr "La liste d'actions a &ecute;t&ecute; r&eacute;initialis&eacute;e "
+
+#~ msgid "Invalid username or password"
+#~ msgstr "L'identifiant ou le mot de passe saisi est incorrect"
+
+#~ msgid "Welcome, you are now logged in"
+#~ msgstr "Salut, vous &ecirc;tes maintenant connect&eacute;"
+
+#~ msgid "Sorry username already exists"
+#~ msgstr "D&eacute;sol&eacute;, cet identifiant existe d&eacute;j&agrave;"
+
+#~ msgid "Please enter a username that is 4 to 30 characters long"
+#~ msgstr "Merci de choisir un identifiant de plus de 4 caract&egrave;res"
+
+#~ msgid "Please enter a password that is 4 to 30 characters long"
+#~ msgstr "Mercir de taper un mot de passe contenant "
+
+#~ msgid "Your new account has been created"
+#~ msgstr "Votre compte a &eacute;t&eacute; cr&eacute;&eacute;"
+
+#~ msgid "Your password has been changed"
+#~ msgstr "Votre mot de passe a &eacute;t&eacute; chang&eacute;"
+
+#~ msgid "Invalid password"
+#~ msgstr "Mot de passe incorrect"
+
+#~ msgid "No email address present"
+#~ msgstr "Aucune adresse mail n'est renseignée"
+
+#~ msgid "New read apikey: "
+#~ msgstr "Nouvelle cl&eacute; API (lecture) : "
+
+#~ msgid "New write apikey: "
+#~ msgstr "Nouvelle &ecute; API (&eacute;criture) : "
+
+#~ msgid "You are logged out"
+#~ msgstr "Vous &ecirc;tes d&eacute;connect&eacute;"
+
+#~ msgid "Invalid token"
+#~ msgstr "Jeton invalide"
+
+#~ msgid "Restricted access"
+#~ msgstr "Acc&egrave;s restreint"
+
+#~ msgid "Message successfully sent!"
+#~ msgstr "Message envoy&eacute; avec succ&egrave;s"
+
+#~ msgid " is"
+#~ msgstr "est"
+
+#~ msgid " is inactive"
+#~ msgstr "est inactif"
+
+#~ msgid "Log to feed"
+#~ msgstr "vers flux"
+
+#~ msgid "Power to kWh"
+#~ msgstr "watts vers kWh"
+
+#~ msgid "Power to kWh/d"
+#~ msgstr "watts vers kWh/j"
+
+#~ msgid "x input"
+#~ msgstr " × source"
+
+#~ msgid "kWhinc to kWh/d"
+#~ msgstr "kWhinc vers kWh/j"
+
+#~ msgid "update feed @time"
+#~ msgstr "actualiser le flux @temps"
+
+#~ msgid "+ input"
+#~ msgstr "+ source"
+
+#~ msgid "/ input"
+#~ msgstr "&divide; source"
+
+#~ msgid "phaseshift"
+#~ msgstr "d&eacute;phasage"
+
+#~ msgid "accumulator"
+#~ msgstr "accumulateur"
+
+#~ msgid "histogram"
+#~ msgstr "histogramme"
+
+#~ msgid "average"
+#~ msgstr "moyenne"
+
+#~ msgid ""
+#~ "API keys are used to give authenticated access without login in via a "
+#~ "normal session."
+#~ msgstr ""
+#~ "Les cl&eacute;s API sont utiles pour donner un acc&egrave;s &agrave; "
+#~ "emoncms sans avoir besoin de se connecter."
+
+#~ msgid "Allows to access in read only mode"
+#~ msgstr "Permet l'acc&egrave;s en lecture seule"
+
+#~ msgid "new"
+#~ msgstr "g&eacute;n&eacute;rer"
+
+#~ msgid "Write only access: "
+#~ msgstr "Acc&egrave;s en &eacute;criture : "
+
+#~ msgid "Keep secret. Write mode access"
+#~ msgstr "Ne pas divulguer. Cl&eacute; API avec droits d'&eacute;criture"
+
+#~ msgid "Post API"
+#~ msgstr "API"
+
+#~ msgid ""
+#~ "Example: Click or copy this to your web browser or send from your "
+#~ "monitoring hardware"
+#~ msgstr ""
+#~ "Exemple : Cliquer ou copier ceci dans votre navigateur ou depuis votre "
+#~ "capteur"
+
+#~ msgid "try me"
+#~ msgstr "tester"
+
+#~ msgid "Visualisation API"
+#~ msgstr "API de visualisation"
+
+#~ msgid ""
+#~ "These are all the visualisations that are available in emoncms3. To view "
+#~ "a visualisation enter in a relevant feedid in the underlined boxes below "
+#~ "and then click on the > button."
+#~ msgstr ""
+#~ "Voici les visulations disponibles dans emoncms3. Veuillez entrer un "
+#~ "identifiant de flux dans les champs ci-dessous puis cliquer sur >"
+
+#~ msgid "URL"
+#~ msgstr "Lien"
+
+#~ msgid "View"
+#~ msgstr "Afficher"
+
+#~ msgid "Real-time graph"
+#~ msgstr "Temps-r&eacute;el"
+
+#~ msgid "Raw data graph"
+#~ msgstr "Donn&eacute;es brutes"
+
+#~ msgid "All time histogram"
+#~ msgstr "Histogramme complet"
+
+#~ msgid "Daily histogram"
+#~ msgstr "Histogramme quotidien"
+
+#~ msgid "Zoom"
+#~ msgstr "Zoom"
+
+#~ msgid "kWh/d Comparison"
+#~ msgstr "Comparaison kWh/j"
+
+#~ msgid "Bar graph (ordered by height)"
+#~ msgstr "Histogramme (tri&eacute; par hauteur)"
+
+#~ msgid "Threshold ordered by height"
+#~ msgstr "Seuils (tri&eacute;s par hauteur)"
+
+#~ msgid "Multigraph"
+#~ msgstr "Graphiques multiples"
+
+#~ msgid "Datapoint Editor"
+#~ msgstr "&Eacute;diteur de points"
+
+#~ msgid "Other options:"
+#~ msgstr "Options"
+
+#~ msgid "Hide menu"
+#~ msgstr "Cacher le menu"
+
+#~ msgid ""
+#~ "Hide the top menu and footer by adding the attribute <i>&embed=1</i> to "
+#~ "the URL."
+#~ msgstr ""
+#~ "Cacher le menu et le pied de page en ajoutant l'attribut <i>&embed=1</i> "
+#~ "&agrave; l'adresse."
+
+#~ msgid "Share"
+#~ msgstr "Partager"
+
+#~ msgid "To share a visualisation use your read apikey. Add the attribute "
+#~ msgstr ""
+#~ "Pour partager un visulaisation, indiquer votre cl&eacute API (lecture). "
+#~ "Ajouter"
+
+#~ msgid " to the URL"
+#~ msgstr "&agrave; l'adresse"
+
+#, fuzzy
+#~ msgid "Reset Multigraph"
+#~ msgstr "Graphiques multiples"
+
+#, fuzzy
+#~ msgid "The multigraph can be reset using the <i>&clear=1</i> attribute."
+#~ msgstr ""
+#~ "Le graphe peut &ecirc;tre r&eacute;initialis&eacute; en utilisant "
+#~ "l'attribut  &clear=1."
+
+#~ msgid "Yes please"
+#~ msgstr "Oui"
+
+#~ msgid "Inputs"
+#~ msgstr "Sources"
+
+#~ msgid "Dashboards"
+#~ msgstr "Tableaux de bord"
+
+#~ msgid "Account"
+#~ msgstr "Compte"
+
+#~ msgid "Notify settings"
+#~ msgstr "Configuration des notifications"
+
+#~ msgid "Notification recipiants (To): "
+#~ msgstr "Destinataire : "
+
+#~ msgid "Notify "
+#~ msgstr "Notifier"
+
+#~ msgid "Setup feed notifications"
+#~ msgstr "Configuration des notifications"
+
+#~ msgid "Notify when feed = value: "
+#~ msgstr "Envoyer quand le flux est &eacute;gal &agrave; cette valeur : "
+
+#, fuzzy
+#~ msgid "Notify when feed is inactive"
+#~ msgstr "Envoyer rapport quand le flux est inactif"
+
+#, fuzzy
+#~ msgid "Notify feed status periodically"
+#~ msgstr "Envoyer rapport p&eacute;riodiquement "
+
+#~ msgid "Edit mail settings"
+#~ msgstr "Configuration email"
+
+#~ msgid "User: "
+#~ msgstr "Identifiant : "
+
+#~ msgid "Select preferred language"
+#~ msgstr "S&eacute;lectionner la langue principale"
+
+#~ msgid "Browser language"
+#~ msgstr "Langue du navigateur"
+
+#~ msgid "Change details"
+#~ msgstr "Modification du compte"
+
+#~ msgid "Username:"
+#~ msgstr "Identifiant : "
+
+#~ msgid "Email:"
+#~ msgstr "Correo:"
+
+#~ msgid "Change"
+#~ msgstr "Modifier"
+
+#~ msgid "Change password"
+#~ msgstr "Modifier le mot de passe"
+
+#~ msgid "Current password:"
+#~ msgstr "Ancien mot de passe : "
+
+#~ msgid "New password:"
+#~ msgstr "Nouveau mot de passe : "
+
+#~ msgid "Account Statistics"
+#~ msgstr "Statistiques du compte"
+
+#~ msgid "Disk space use:"
+#~ msgstr "Espace disque utilis&eacute; : "
+
+#~ msgid "Up hits:"
+#~ msgstr "Up hits : "
+
+#~ msgid "Down hits:"
+#~ msgstr "Down hits : "
+
+#~ msgid "en_EN"
+#~ msgstr "Anglais"
+
+#~ msgid "es_ES"
+#~ msgstr "Espagnol"
+
+#~ msgid "nl_BE"
+#~ msgstr "Flamand"
+
+#~ msgid "nl_NL"
+#~ msgstr "N&eacute;erlandais"
+
+#~ msgid "fr_FR"
+#~ msgstr "Français"
+
+#~ msgid "Admin panel"
+#~ msgstr "Administration"
+
+#~ msgid "Total feed data disk space use: "
+#~ msgstr "Espace utilis&eacute; pour le stockage des flux : "
+
+#~ msgid "Users"
+#~ msgstr "Utilisateurs"
+
+#~ msgid "registered users"
+#~ msgstr "utilisateurs enregistr&eacute;s"
+
+#~ msgid "Username"
+#~ msgstr "Nombre d'utilisateur"
+
+#~ msgid "Memory use"
+#~ msgstr "M&eacute;moire"
+
+#~ msgid "Dashboard name: "
+#~ msgstr "Nom du tableau de bord : "
+
+#~ msgid "Description: "
+#~ msgstr "Description : "
+
+#~ msgid "Main: "
+#~ msgstr "Principal : "
+
+#~ msgid "Published: "
+#~ msgstr "Publi&eacute; : "
+
+#~ msgid "Public: "
+#~ msgstr "Public : "
+
+#~ msgid "Menu name: (lowercase a-z only)"
+#~ msgstr "Nom dans le menu (minuscules de a-z) : "
+
+#~ msgid "Dashboard"
+#~ msgstr "Tableau de bord"
+
+#~ msgid "Main"
+#~ msgstr "Principal"
+
+#~ msgid "Published"
+#~ msgstr "Publi&eacute;"
+
+#~ msgid "Actions"
+#~ msgstr "Actions"
+
+#~ msgid "This is the main dashboard"
+#~ msgstr "Tableau de bord principal"
+
+#~ msgid "Set main dashboard"
+#~ msgstr "Choisir comme tableau de bord principal"
+
+#~ msgid "Unpublish dashboard"
+#~ msgstr "Ne plus publier"
+
+#~ msgid "Publish dashboard"
+#~ msgstr "Publier ce teableau de bord"
+
+#~ msgid "Make dashboard private"
+#~ msgstr "Rendre ce tableau de bord privé"
+
+#~ msgid "Draw"
+#~ msgstr "&Eacute;diter"
+
+#~ msgid "Public share URL"
+#~ msgstr "Adresse de partage (public)"
+
+#~ msgid "Private share URL"
+#~ msgstr "Adresse de partage"
+
+#~ msgid "Dashboards:"
+#~ msgstr "Tableaux de bord : "
+
+#~ msgid "Draw Editor"
+#~ msgstr "&Eacute;diter"
+
+#~ msgid "View mode"
+#~ msgstr "Vue"
+
+#~ msgid "Config"
+#~ msgstr "Configuration"
+
+#~ msgid "New"
+#~ msgstr "Nouveau"
+
+#~ msgid "Thumb view"
+#~ msgstr "Aperçu"
+
+#~ msgid "List view"
+#~ msgstr "Liste"
+
+#~ msgid "User"
+#~ msgstr "Utilisateur"
+
+#~ msgid "Description"
+#~ msgstr "Description"
+
+#~ msgid "Select graph type:"
+#~ msgstr "S&eacute;lectionner un type de graphique : "
+
+#~ msgid "Real-time"
+#~ msgstr "Temps-r&eacute;el"
+
+#~ msgid "Raw data"
+#~ msgstr "Donn&eacute;es brutes"
+
+#~ msgid "Histogram"
+#~ msgstr "Histogramme"
+
+#~ msgid "Feed type"
+#~ msgstr "Type de flux"
+
+#~ msgid "Undefined"
+#~ msgstr "Non d&eacute;fini"
+
+#~ msgid "Real-time data"
+#~ msgstr "Donn&eacute;es temps-r&eacute;el"
+
+#~ msgid "Tag feed"
+#~ msgstr "Tag du flux"
+
+#~ msgid "Rename feed"
+#~ msgstr "Renommer le flux"
+
+#~ msgid "Rename"
+#~ msgstr "Renommer"
+
+#~ msgid "Notify"
+#~ msgstr "Notifier"
+
+#~ msgid "Set notification behavior for this feed"
+#~ msgstr "Configurer les notifications pour ce flux"
+
+#~ msgid "feed/delete"
+#~ msgstr "flux/supprimer"
+
+#~ msgid "s ago"
+#~ msgstr " secondes"
+
+#~ msgid " hours ago"
+#~ msgstr "heures"
+
+#~ msgid "inactive"
+#~ msgstr "inactif"
+
+#~ msgid "Input configuration:   "
+#~ msgstr "Configuration des sources : "
+
+#~ msgid "Order"
+#~ msgstr "Ordre"
+
+#~ msgid "Process"
+#~ msgstr "Action"
+
+#~ msgid "Arg"
+#~ msgstr "Param&egrave;tre"
+
+#~ msgid "add"
+#~ msgstr "ajouter"
+
+#~ msgid "Reset process list?"
+#~ msgstr "R&eacute;initialis&eacute; les actions : "
+
+#~ msgid "Are you sure you want to delete input: "
+#~ msgstr "&Ecirc;tes vous s&ucirc;r de vouloir supprimer cette source ? "
+
+#~ msgid "Delete input?"
+#~ msgstr "Supprimer source ?"
+
+#~ msgid "Password:"
+#~ msgstr "Mot de passe : "
+
+#~ msgid "Login"
+#~ msgstr "Connexion"
+
+#~ msgid ""
+#~ "Or if you are new enter a username and password above and click register"
+#~ msgstr ""
+#~ "Ou si vous &ecirc;tes un nouvel utilisateur, indiquer un identifiant et "
+#~ "un mot de passe puis cliquer sur S'inscrire"
+
+#~ msgid "Register"
+#~ msgstr "S'inscrire"
+
+#~ msgid "Old password:"
+#~ msgstr "Mot de passe actuel : "
+
+#~ msgid "delete"
+#~ msgstr "supprimer"
+
+#~ msgid "AUTODETECTLANGUAGE"
+#~ msgstr "Browser language"
+
+#~ msgid "Sorry, you need a valid apikey or be logged in to see this page"
+#~ msgstr ""
+#~ "Lo siento, necesitas una clave válida o estar loggeado para ver esta "
+#~ "página"
+
+#~ msgid "Reset"
+#~ msgstr "Resetear"
+
+#~ msgid "Language"
+#~ msgstr "Lenguaje"
+
+#~ msgid "API keys"
+#~ msgstr "Claves API"
+
+#~ msgid "converted feed: "
+#~ msgstr "fuente convertida:"
+
+#~ msgid "feed: "
+#~ msgstr "fuente:"
+
+#~ msgid " already converted"
+#~ msgstr " ya convertido"
+
+#~ msgid "Embed this graph"
+#~ msgstr "Incrustar este gráfico"
+
+#~ msgid "Realtime: "
+#~ msgstr "Tiempo real:"
+
+#~ msgid "Raw data: "
+#~ msgstr "Datos brutos:"
+
+#~ msgid "English"
+#~ msgstr "Inglés"
+
+#~ msgid "Spanish"
+#~ msgstr "Español"
+
+#~ msgid "Set"
+#~ msgstr "Establecer"
+
+#~ msgid "Save current configuration"
+#~ msgstr "Guardar configuración actual"
+
+#~ msgid "Select Feeds"
+#~ msgstr "Seleccionar Fuentes"
+
+#~ msgid "Left"
+#~ msgstr "Izquierda"
+
+#~ msgid "Right"
+#~ msgstr "Derecha"
+
+#~ msgid "Fill"
+#~ msgstr "Rellenar"
+
+#~ msgid "Loading...  please wait about 5s"
+#~ msgstr "Cargando... por favor espere unos 5s"
+
+#~ msgid "Loading..."
+#~ msgstr "Cargando..."
+
+#~ msgid "2 Months"
+#~ msgstr "2 Meses"
+
+#~ msgid "Day"
+#~ msgstr "Día"
+
+#~ msgid "Hour"
+#~ msgstr "Hora"
+
+#~ msgid "Left vs"
+#~ msgstr "Izquierda vs"
+
+#~ msgid "Loading a feed can take time.. "
+#~ msgstr "Cargar una fuente puede llevar tiempo..."
+
+#~ msgid "1 day"
+#~ msgstr "1 día"
+
+#~ msgid "Date / Time"
+#~ msgstr "Fecha / Hora"
+
+#~ msgid "Total: "
+#~ msgstr "Total:"
+
+#~ msgid " kWh : pounds"
+#~ msgstr "kWh: libras"
+
+#~ msgid " a week, pounds"
+#~ msgstr "una semana, libras"
+
+#~ msgid " a year | Unit price: pounds"
+#~ msgstr "un año | Unidad: libras"
+
+#~ msgid "Last:"
+#~ msgstr "Último:"
+
+#~ msgid "Graph"
+#~ msgstr "Gráfico"
