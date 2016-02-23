@@ -82,7 +82,8 @@ var i18ntext = {
     'The Solar PV dashboard needs specific feeds ' : 'Le tableau de bord PV nécessite la présence de flux spécifiques ',
     'they are inexistant in your feeds collection' : 'ils n\'existent pas dans votre liste de flux',
     'no settings saved' : 'rien n\'a été sauvegardé',
-    'Close' : 'Fermer'
+    'Close' : 'Fermer',
+    'Su,Mo,Tu,We,Th,Fr,Sa' : 'Di,Lu,Ma,Me,Je,Ve,Sa'
 
 
 };

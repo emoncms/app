@@ -83,7 +83,9 @@ var i18ntext = {
     'The Solar PV dashboard needs specific feeds ' : 'The Solar PV dashboard needs specific feeds ',
     'they are inexistant in your feeds collection' : 'they are inexstant in your feeds collection',
     'no settings saved' : 'no settings saved',
-    'Close' : 'Close'
+    'Close' : 'Close',
+    'Su,Mo,Tu,We,Th,Fr,Sa' : 'Su,Mo,Tu,We,Th,Fr,Sa'
+
 
 
 };
