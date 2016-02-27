@@ -15,50 +15,50 @@ msgstr ""
 "X-Poedit-KeywordsList: _;__;_e;_n:1,2;_n_noop:1,2;_nx:1,2;_nx_noop:1,2\n"
 "X-Poedit-SearchPath-0: ../../..\n"
 
-#: ../../../myelectric_view.php:44
+#: ../../../ml_view.php:44
 msgid "My Electric config"
 msgstr ""
 
-#: ../../../myelectric_view.php:47
+#: ../../../ml_view.php:47
 msgid "Power feed (Watts):"
 msgstr ""
 
-#: ../../../myelectric_view.php:51
+#: ../../../ml_view.php:51
 msgid "Bar graph feed:"
 msgstr ""
 
-#: ../../../myelectric_view.php:54
+#: ../../../ml_view.php:54
 msgid "Bar graph feed type:"
 msgstr ""
 
-#: ../../../myelectric_view.php:56
+#: ../../../ml_view.php:56
 msgid "Watt hours elapsed"
 msgstr ""
 
-#: ../../../myelectric_view.php:57
+#: ../../../ml_view.php:57
 msgid "kWh elapsed"
 msgstr ""
 
-#: ../../../myelectric_view.php:58
+#: ../../../ml_view.php:58
 msgid "kWh per day"
 msgstr ""
 
-#: ../../../myelectric_view.php:59
+#: ../../../ml_view.php:59
 msgid "Power (Watts)"
 msgstr ""
 
-#: ../../../myelectric_view.php:64
+#: ../../../ml_view.php:64
 msgid "Save"
 msgstr ""
 
-#: ../../../myelectric_view.php:79
+#: ../../../ml_view.php:79
 msgid "POWER NOW:"
 msgstr ""
 
-#: ../../../myelectric_view.php:83
+#: ../../../ml_view.php:83
 msgid "USE TODAY:"
 msgstr ""
 
-#: ../../../myelectric_view.php:83
+#: ../../../ml_view.php:83
 msgid "kWh"
 msgstr ""

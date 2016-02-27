@@ -1,34 +1,34 @@
 <div class="container">
 
-    <div id="myelectric_config" style= "display: none;">
+    <div id="ml_config" style= "display: none;">
         <div class="electric-title i18n">My Electric config</div>
         <br><br>
 
         <p><b class="i18n">Power feed (Watts):</b></p>
-        <select id="myelectric_powerfeed"></select>
+        <select id="ml_powerfeed"></select>
         <br>
         <p><b class="i18n">Bar graph feed</b></p>
-        <select id="myelectric_dailyfeed"></select>
+        <select id="ml_dailyfeed"></select>
 
         <p><b class="i18n">Wh or kWh feed?</b><br>Note: Use power_to_kwh input processor to create this feed type</p>
-        <select id="myelectric_dailytype">
+        <select id="ml_dailytype">
             <option class="i18n" value=0>Watt hours elapsed</option>
             <option class="i18n" value=1>kWh elapsed</option>
         </select>
 
         <p><b class="i18n">Set currency, enter text: pound, euro, dollar, yen: </b></p>
-        <input type="text" id="myelectric_currency" />
+        <input type="text" id="ml_currency" />
         <br>
         <p><b class="i18n">Unit cost:</b></p>
-        <input type="text" id="myelectric_unitcost" />
+        <input type="text" id="ml_unitcost" />
         <br><br>
-        <button id="myelectric_configsave" class="btn btn-primary i18n">Save</button>
+        <button id="ml_configsave" class="btn btn-primary i18n">Save</button>
         <div id="obj" style="display:none1;">
 
         </div>
     </div>
 
-    <div id="myelectric_body">
+    <div id="ml_body">
         <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
             <div style="float:left; color:#aaa">
                 <span class="myelectric-view-cost i18n" >Cost</span> |
@@ -36,7 +36,7 @@
             </div>
 
             <div style="float:right;">
-                <i id="myelectric_openconfig" class="icon-wrench icon-white" style="cursor:pointer"></i>
+                <i id="ml_openconfig" class="icon-wrench icon-white" style="cursor:pointer"></i>
             </div>
         </div>
 
@@ -44,15 +44,15 @@
             <tr>
                 <td style="border:0; width:33%">
                     <div class="electric-title i18n">POWER NOW</div>
-                    <div class="power-value"><span id="myelectric_powernow">0</span></div>
+                    <div class="power-value"><span id="ml_powernow">0</span></div>
                 </td>
                 <td style="text-align:center; border:0; width:33%"></td>
                 <td style="text-align:right; border:0; width:33%">
                     <div class="electric-title i18n">USE TODAY</div>
                     <div class="power-value">
-                        <span id="myelectric_usetoday_units_a" class="i18n1"></span>
-                        <span id="myelectric_usetoday">0</span>
-                        <span id="myelectric_usetoday_units_b" style="font-size:16px">kWh</span>
+                        <span id="ml_usetoday_units_a" class="i18n1"></span>
+                        <span id="ml_usetoday">0</span>
+                        <span id="ml_usetoday_units_b" style="font-size:16px">kWh</span>
                     </div>
                 </td>
             </tr>
@@ -66,20 +66,20 @@
             <span class='visnav myelectric-time i18n' time='24' >D</span>
             <span class='visnav myelectric-time i18n' time='168' >W</span>
             <span class='visnav myelectric-time i18n' time='720' >M</span>
-            <span class='visnav i18n' id='myelectric_zoomin' >+</span>
-            <span class='visnav i18n' id='myelectric_zoomout' >-</span>
-            <span class='visnav i18n' id='myelectric_left' ><</span>
-            <span class='visnav i18n' id='myelectric_right' >></span>
+            <span class='visnav i18n' id='ml_zoomin' >+</span>
+            <span class='visnav i18n' id='ml_zoomout' >-</span>
+            <span class='visnav i18n' id='ml_left' ><</span>
+            <span class='visnav i18n' id='ml_right' >></span>
         </div>
         <br>
 
-        <div id="myelectric_placeholder_bound_power" class="graph1">
-            <canvas id="myelectric_placeholder_power"></canvas>
+        <div id="ml_placeholder_bound_power" class="graph1">
+            <canvas id="ml_placeholder_power"></canvas>
         </div>
         <br>
 
-        <div id="myelectric_placeholder_bound_kwhd" class="graph2">
-            <canvas id="myelectric_placeholder_kwhd"></canvas>
+        <div id="ml_placeholder_bound_kwhd" class="graph2">
+            <canvas id="ml_placeholder_kwhd"></canvas>
         </div>
         <br>
 
@@ -90,12 +90,12 @@
                     <div class="blue">
                         <div class="appbox-value">
                             <span class="u1a i18n">$</span>
-                            <span id="myelectric_week_kwh">---</span>&nbsp
+                            <span id="ml_week_kwh">---</span>&nbsp
                             <span class="appbox-units u1b i18n" >kWh</span>
                         </div>
                         <div class="appbox-units" >
                             <span class="u2a"></span>
-                            <span id="myelectric_week_kwhd">---</span>&nbsp
+                            <span id="ml_week_kwhd">---</span>&nbsp
                             <span class="u2b">kWh/d</span>
                         </div>
                     </div>
@@ -106,12 +106,12 @@
                         <div class="appbox-title  i18n">MONTH</div>
                         <div class="appbox-value">
                             <span class="u1a i18n">$</span>&nbsp
-                            <span id="myelectric_month_kwh">---</span>
+                            <span id="ml_month_kwh">---</span>
                             <span class="appbox-units u1b i18n">kWh</span>
                         </div>
                         <div class="appbox-units" >
                             <span class="u2a"></span>&nbsp
-                            <span id="myelectric_month_kwhd">---</span>&nbsp
+                            <span id="ml_month_kwhd">---</span>&nbsp
                             <span class="u2b i18n">kWh/d</span>
                             <span id = "perday" class="u3b i18n" style= "display: none;">/day</span>
                             <span id = "kwhperday" class="u3b i18n" style= "display: none;">kWh/d</span>
@@ -128,12 +128,12 @@
                         <div class="appbox-title i18n">YEAR</div>
                         <div class="appbox-value">
                             <span class="u1a i18n">$</span>&nbsp
-                            <span id="myelectric_year_kwh">---</span>
+                            <span id="ml_year_kwh">---</span>
                             <span class="appbox-units u1b i18n" >kWh</span>
                         </div>
                         <div class="appbox-units" >
                             <span class="u2a"></span>
-                            <span id="myelectric_year_kwhd">---</span>
+                            <span id="ml_year_kwhd">---</span>
                             <span class="u2b i18n">kWh/d</span>
                         </div>
                     </div>
@@ -144,11 +144,11 @@
                         <div class="appbox-title i18n">ALL</div>
                         <div class="appbox-value">
                             <span class="u1a i18n">$</span>
-                            <span  id="myelectric_alltime_kwh">---</span>
+                            <span  id="ml_alltime_kwh">---</span>
                             <span class="appbox-units u1b i18n" >kWh</span>
                         </div>
                         <div class="appbox-units" >
-                            <span class="u2a"></span><span id="myelectric_alltime_kwhd i18n">---</span>&nbsp
+                            <span class="u2a"></span><span id="ml_alltime_kwhd i18n">---</span>&nbsp
                             <span class="u2b i18n">kWh/d</span>
                         </div>
                     </div>

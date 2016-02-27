@@ -105,7 +105,7 @@ var app_myelectric = {
         // When the config icon is pressed, populate dropdown feed selector menu's.
         // and set values if already selected
 
-        $("#myelectric_openconfig").click(function () {
+        $("#ml_openconfig").click(function () {
 
             // Load feed list, populate feed selectors and select the selected feed
             feeds = app_myelectric.getfeedsbyid();
@@ -116,19 +116,19 @@ var app_myelectric = {
                 selected = (feeds[z].id === m.powerfeed) ? "selected" : "";
                 out += "<option " + selected + " value=" + feeds[z].id + ">" + feeds[z].name + "</option>";
             }
-            $("#myelectric_powerfeed").html(out);
-            $("#myelectric_powerfeed").val(m.powerfeed);
+            $("#ml_powerfeed").html(out);
+            $("#ml_powerfeed").val(m.powerfeed);
 
-            $("#myelectric_dailyfeed").html(out);
-            $("#myelectric_dailyfeed").val(m.dailyfeed);
+            $("#ml_dailyfeed").html(out);
+            $("#ml_dailyfeed").val(m.dailyfeed);
 
-            $("#myelectric_dailytype").val(m.dailytype);
+            $("#ml_dailytype").val(m.dailytype);
 
-            $("#myelectric_currency").val(m.currency);
-            $("#myelectric_unitcost").val(m.unitcost);
+            $("#ml_currency").val(m.currency);
+            $("#ml_unitcost").val(m.unitcost);
             // Switch to the config interface
-            $("#myelectric_config").show();
-            $("#myelectric_body").hide();
+            $("#ml_config").show();
+            $("#ml_body").hide();
 
             // Stop updaters
             if (m.fastupdateinst) { clearInterval(m.fastupdateinst); }
@@ -138,13 +138,13 @@ var app_myelectric = {
         // Save configuration, values are simply placed in the config.
         // then updates are resumed
 
-        $("#myelectric_configsave").click(function () {
+        $("#ml_configsave").click(function () {
             var m = app_myelectric;
-            m.unitcost = $("#myelectric_unitcost").val();
-            m.currency = $("#myelectric_currency").val();
-            m.powerfeed = $("#myelectric_powerfeed").val();
-            m.dailyfeed = $("#myelectric_dailyfeed").val();
-            m.dailytype = $("#myelectric_dailytype").val();
+            m.unitcost = $("#ml_unitcost").val();
+            m.currency = $("#ml_currency").val();
+            m.powerfeed = $("#ml_powerfeed").val();
+            m.dailyfeed = $("#ml_dailyfeed").val();
+            m.dailytype = $("#ml_dailytype").val();
 
             // Save config to db
             var config = app.config;
@@ -169,8 +169,8 @@ var app_myelectric = {
             m.reloadkwhd = true;
 
             // Switch to main view
-            $("#myelectric_config").hide();
-            $("#myelectric_body").show();
+            $("#ml_config").hide();
+            $("#ml_body").show();
 
             m.fastupdateinst = setInterval(m.fastupdate, 5000);
             m.slowupdateinst = setInterval(m.slowupdate, 60000);
@@ -178,10 +178,10 @@ var app_myelectric = {
             m.slowupdate();
         });
 
-        $("#myelectric_zoomout").click(function () {view.zoomout(); m.reload = true; m.autoupdate = false; m.fastupdate(); });
-        $("#myelectric_zoomin").click(function () {view.zoomin(); m.reload = true; m.autoupdate = false; m.fastupdate(); });
-        $('#myelectric_right').click(function () {view.panright(); m.reload = true; m.autoupdate = false; m.fastupdate(); });
-        $('#myelectric_left').click(function () {view.panleft(); m.reload = true; m.autoupdate = false; m.fastupdate(); });
+        $("#ml_zoomout").click(function () {view.zoomout(); m.reload = true; m.autoupdate = false; m.fastupdate(); });
+        $("#ml_zoomin").click(function () {view.zoomin(); m.reload = true; m.autoupdate = false; m.fastupdate(); });
+        $('#ml_right').click(function () {view.panright(); m.reload = true; m.autoupdate = false; m.fastupdate(); });
+        $('#ml_left').click(function () {view.panleft(); m.reload = true; m.autoupdate = false; m.fastupdate(); });
 
         $('.myelectric-time').click(function () {
             var m = app_myelectric;
@@ -246,20 +246,20 @@ var app_myelectric = {
         'use strict';
         var windowheight = $(window).height(),
             bound = {},
-            width = $("#myelectric_placeholder_bound_kwhd").width(),
-            height = $("#myelectric_placeholder_bound_kwhd").height(),
-            width_pwr = $("#myelectric_placeholder_bound_power").width();
-        $("#myelectric_placeholder_kwhd").attr('width', width);
+            width = $("#ml_placeholder_bound_kwhd").width(),
+            height = $("#ml_placeholder_bound_kwhd").height(),
+            width_pwr = $("#ml_placeholder_bound_power").width();
+        $("#ml_placeholder_kwhd").attr('width', width);
         graph_bars.width = width;
 
-        $("#myelectric_placeholder_kwhd").attr('height', height);
+        $("#ml_placeholder_kwhd").attr('height', height);
         graph_bars.height = height;
 
-        $("#myelectric_placeholder_power").attr('width', width);
+        $("#ml_placeholder_power").attr('width', width);
         graph_lines.width = width;
 
-        var height_pwr = $("#myelectric_placeholder_bound_power").height();
-        $("#myelectric_placeholder_power").attr('height', height_pwr);
+        var height_pwr = $("#ml_placeholder_bound_power").height();
+        $("#ml_placeholder_power").attr('height', height_pwr);
         graph_lines.height = height_pwr;
 
 
@@ -323,16 +323,16 @@ var app_myelectric = {
 
         if (m.viewmode === "energy") {
             scale = 1;
-            $("#myelectric_usetoday_units_a").html("");
-            $("#myelectric_usetoday_units_b").html("kWh");
+            $("#ml_usetoday_units_a").html("");
+            $("#ml_usetoday_units_b").html("kWh");
             $(".u1a").html("");
             $(".u1b").html("kWh");
             $(".u2a").html("");
             $(".u2b").html($("#kwhperday").html());
         } else {
             scale = m.unitcost;
-            $("#myelectric_usetoday_units_a").html(m.currency);
-            $("#myelectric_usetoday_units_b").html("");
+            $("#ml_usetoday_units_a").html(m.currency);
+            $("#ml_usetoday_units_b").html("");
             $(".u1a").html(m.currency);
             $(".u1b").html("");
             $(".u2a").html(m.currency);
@@ -388,9 +388,9 @@ var app_myelectric = {
         // set the power now value
         //console.log ('m.currency : ' + m.currency)
         if (m.viewmode === "energy") {
-            $("#myelectric_powernow").html(pwr.toFixed(0) + "W");
+            $("#ml_powernow").html(pwr.toFixed(0) + "W");
         } else {
-            $("#myelectric_powernow").html(m.currency + (pwr * 1.0 * m.unitcost * 0.001).toFixed(2) + $("#perhour").html());
+            $("#ml_powernow").html(m.currency + (pwr * 1.0 * m.unitcost * 0.001).toFixed(2) + $("#perhour").html());
         }
 
         // try to load values to reduce volumes (time is missing)
@@ -451,7 +451,7 @@ var app_myelectric = {
             }
         };
 
-        graph_lines.draw("myelectric_placeholder_power", series, options);
+        graph_lines.draw("ml_placeholder_power", series, options);
 
         // --------------------------------------------------------------------------------------------------------
         // THIS WEEK, MONTH, YEAR TOTALS
@@ -480,10 +480,10 @@ var app_myelectric = {
 
         // Week total
         var week_kwh = alltime_kwh - (m.startofweek[1] * m.escale);
-        $("#myelectric_week_kwh").html((scale * week_kwh).toFixed(1));
+        $("#ml_week_kwh").html((scale * week_kwh).toFixed(1));
         //var days = ((feeds[m.dailyfeed].time - (m.startofweek[0]*0.001))/86400);
         var days = (sampletime - m.last_startofweektime) / 86400;
-        $("#myelectric_week_kwhd").html((scale * week_kwh / days).toFixed(1));
+        $("#ml_week_kwhd").html((scale * week_kwh / days).toFixed(1));
         //console.log('days : ' + days +'  week_kWh: ' + week_kwh +'  scale: ' + scale +'  time_present ' + sampletime +'  start: ' + m.startofweek[1]);
         // --------------------------------------------------------------------------------------------------------
         // MONTH: repeat same process as above
@@ -497,9 +497,9 @@ var app_myelectric = {
 
         // Monthly total
         var month_kwh = alltime_kwh - (m.startofmonth[1] * m.escale);
-        $("#myelectric_month_kwh").html(Math.round(scale * month_kwh));
+        $("#ml_month_kwh").html(Math.round(scale * month_kwh));
         days = (sampletime - m.last_startofmonthtime) / 86400;
-        $("#myelectric_month_kwhd").html((scale * month_kwh / days).toFixed(1));
+        $("#ml_month_kwhd").html((scale * month_kwh / days).toFixed(1));
         //console.log('days : ' + days +'  month_kwh: ' + month_kwh +'  scale: ' + scale +'  time_present ' + sampletime +'  start: ' + m.startofweek[1]);
         // --------------------------------------------------------------------------------------------------------
         // YEAR: repeat same process as above
@@ -512,15 +512,15 @@ var app_myelectric = {
 
         // Year total
         var year_kwh = alltime_kwh - (m.startofyear[1] * m.escale);
-        $("#myelectric_year_kwh").html(Math.round(scale * year_kwh));
+        $("#ml_year_kwh").html(Math.round(scale * year_kwh));
         var days = ((sampletime - m.last_startofyeartime) / 86400);
-        $("#myelectric_year_kwhd").html((scale * year_kwh / days).toFixed(1));
+        $("#ml_year_kwhd").html((scale * year_kwh / days).toFixed(1));
         //console.log('days : ' + days +'  year_kwh: ' + year_kwh +'  scale: ' + scale +'  time_present ' + sampletime +'  start: ' + m.startofweek[1]);
         // --------------------------------------------------------------------------------------------------------
         // ALL TIME
-        $("#myelectric_alltime_kwh").html(Math.round(scale * alltime_kwh));
+        $("#ml_alltime_kwh").html(Math.round(scale * alltime_kwh));
         days = ((sampletime - m.startalltime) / 86400);
-        $("#myelectric_alltime_kwhd").html((scale * alltime_kwh / days).toFixed(1));
+        $("#ml_alltime_kwhd").html((scale * alltime_kwh / days).toFixed(1));
         //console.log('days : ' + days +'  alltime_kwh: ' + alltime_kwh +'  scale: ' + scale +'  time_present ' + sampletime +'  start: ' + m.startofweek[1]);
         // --------------------------------------------------------------------------------------------------------
     },
@@ -603,13 +603,13 @@ var app_myelectric = {
             usetoday_kwh = m.daily[m.daily.length - 1][1];
         }
         if (m.viewmode === "energy") {
-            $("#myelectric_usetoday").html(usetoday_kwh.toFixed(1));
+            $("#ml_usetoday").html(usetoday_kwh.toFixed(1));
         } else {
-            $("#myelectric_usetoday").html((usetoday_kwh * m.unitcost).toFixed(2));
+            $("#ml_usetoday").html((usetoday_kwh * m.unitcost).toFixed(2));
         }
         i18ndays = $("#i18ndays").html().split(",");
         // give the x axis ledgend in user language
-        graph_bars.draw('myelectric_placeholder_kwhd', [m.daily], i18ndays);
+        graph_bars.draw('ml_placeholder_kwhd', [m.daily], i18ndays);
     },
 
     gettimevalue: function (feedid) {
