@@ -475,6 +475,7 @@ var app_myelectric = {
             m.last_startofweektime = time;
             m.startofweek = m.getvalue(id, time);
         }
+        console.log("m.last_startofweektime : " + m.last_startofweektime + "   m.startofweek : " + m.startofweek + "   alltime_kwh : " + alltime_kwh);
         // will probably never execute this?
         if (m.startofweek === false) {m.startofweek = [m.startalltime, 0]; }
 
@@ -483,6 +484,7 @@ var app_myelectric = {
         $("#ml_week_kwh").html((scale * week_kwh).toFixed(1));
         //var days = ((feeds[m.dailyfeed].time - (m.startofweek[0]*0.001))/86400);
         var days = (sampletime - m.last_startofweektime) / 86400;
+        console.log('days : '+ days + "")
         $("#ml_week_kwhd").html((scale * week_kwh / days).toFixed(1));
         //console.log('days : ' + days +'  week_kWh: ' + week_kwh +'  scale: ' + scale +'  time_present ' + sampletime +'  start: ' + m.startofweek[1]);
         // --------------------------------------------------------------------------------------------------------
@@ -647,11 +649,11 @@ var app_myelectric = {
         'use strict';
         var result = app_myelectric.getdata({
             "id": feedid,
-            "start": time,
-            "end": time + 1000,
+            "start": time + "000",
+            "end": (time + 99000) + "000",
             "interval": 1
         });
-        if (result.length === 2) {return result[0]; }
+        if (result.length > 1) {return result[0]; }
         return false;
     },
 
