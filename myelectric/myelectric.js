@@ -652,7 +652,7 @@ var app_myelectric = {
             "id": feedid,
             "start": time + "000",
             "end": (time + 99000) + "000",
-            "interval": 30000
+            "interval": 300000
         });
         if (result.length > 1) {return result[0]; }
         return false;
