@@ -1,6 +1,48 @@
-<div class="container">
+<style>
+    .visnav {
+        margin-right:4px;
+        padding-left:8px;
+        padding-right:8px;
+        min-width:20px;
+        background-color:rgba(6,153,250,0.1);
+        line-height:28px;
+        float:left;
+        text-align:center;
+    }
     
-<div class="block">
+    .a2 {
+        color: #ccc;
+        font-size:18px;
+        line-height:22px;
+    }
+    
+    h2 {
+        color:#fff;
+    }
+</style>
+    
+<div class="container">
+
+<div id="mysolar-setup" style="display:none; padding-top:50px" class="block">
+
+<h2 style="color:#dccc1f">My Solar</h2>
+
+<p class="a2">The My Solar app can be used to explore onsite solar generation, self consumption, export and building consumption both in realtime with a moving power graph view and historically with a daily and monthly bargraph.</p>
+
+<p class="a2">Configuration is based on naming convention</p>
+
+<ul class="a2">
+    <li>solar</li>
+    <li>use</li>
+    <li>export</li>
+    <li>solar_kwh</li>
+    <li>use_kwh</li>
+    <li>export_kwh</li>
+</ul>
+
+</div>
+    
+<div id="mysolar-block" style="display:none" class="block">
 
     <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
         <div style="float:right;">
@@ -28,30 +70,28 @@
     </table>
     <br>
     
-    <style>
-        .visnav {
-            margin-right:4px;
-            padding-left:8px;
-            padding-right:8px;
-            min-width:20px;
-            background-color:rgba(6,153,250,0.1);
-            line-height:28px;
-            float:left;
-            text-align:center;
-        }
-    </style>
+
 
     <div class="visnavblock" style="height:28px; padding-bottom:5px;">
-        <span class='visnav time' time='1'>1h</span>
-        <span class='visnav time' time='8'>8h</span>
-        <span class='visnav time' time='24'>D</span>
-        <span id='vistimeW' class='visnav time' time='168'>W</span>
-        <span id='vistimeM' class='visnav time' time='720'>M</span>
-        <span id='vistimeY' class='visnav time' time='8760'>Y</span>
-        <span id='mysolarpv_zoomin' class='visnav' >+</span>
-        <span id='mysolarpv_zoomout' class='visnav' >-</span>
-        <span id='mysolarpv_left' class='visnav' ><</span>
-        <span id='mysolarpv_right' class='visnav' >></span>
+        <div id="powergraph-navigation">
+            <span class='visnav time' time='1'>1h</span>
+            <span class='visnav time' time='8'>8h</span>
+            <span class='visnav time' time='24'>D</span>
+            <span id='vistimeW' class='visnav time' time='168'>W</span>
+            <span id='vistimeM' class='visnav time' time='720'>M</span>
+            <span id='vistimeY' class='visnav time' time='8760'>Y</span>
+            <span id='mysolarpv_zoomin' class='visnav' >+</span>
+            <span id='mysolarpv_zoomout' class='visnav' >-</span>
+            <span id='mysolarpv_left' class='visnav' ><</span>
+            <span id='mysolarpv_right' class='visnav' >></span>
+        </div>
+        
+        <div id="bargraph-navigation" style="display:none">
+            <span id="bargraph-viewall" class="visnav" style="font-size:14px">VIEW ALL</span>
+            <span id="bargraph-viewdaily" class="visnav" style="font-size:14px">DAILY</span>
+            <span id="bargraph-viewmonthly" class="visnav" style="font-size:14px">MONTHLY</span>
+            <span id="bargraph-viewannually" class="visnav" style="font-size:14px">ANNUALLY</span>
+        </div>
         
         <span id='viewhistory' class='visnav' style="float:right; font-size:14px">VIEW HISTORY</span>
         <span id='balanceline' class='visnav' style="float:right; font-size:14px">SHOW BALANCE</span>

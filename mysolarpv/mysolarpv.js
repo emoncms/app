@@ -2,6 +2,7 @@ var datastore = {};
 
 var app_mysolarpv = {
 
+    configured: true,
     solarW: false,
     useW: false,
     exportW: false,
@@ -36,15 +37,19 @@ var app_mysolarpv = {
     {
         var feeds = feed.listbyname();
         
+        // -------------------------------------------------------------------------------------------------------------
         // AUTOMATIC FEED SELECTION BY NAMING CONVENTION
-        
+        // We start here by searching for feeds that adhere to the naming convention
+        // If these feeds dont exist then a configuration page is shows that guides through setup
+        // -------------------------------------------------------------------------------------------------------------
+ 
         // Power feeds
         if (feeds['use']!=undefined)
             app_mysolarpv.useW = feeds['use'].id;
         if (feeds['solar']!=undefined)
             app_mysolarpv.solarW = feeds['solar'].id;        
-        if (feeds['export']!=undefined)
-            app_mysolarpv.exportW = feeds['export'].id;
+        //if (feeds['export']!=undefined)
+        //    app_mysolarpv.exportW = feeds['export'].id;
             
         // Cumulative kWh feeds
         if (feeds['use_kwh']!=undefined)
@@ -54,18 +59,31 @@ var app_mysolarpv = {
         if (feeds['export_kwh']!=undefined)
             app_mysolarpv.export_kwh = feeds['export_kwh'].id;
         
+        // Check if all feeds have been set present
+        if (!app_mysolarpv.useW || !app_mysolarpv.solarW || !app_mysolarpv.use_kwh || !app_mysolarpv.solar_kwh || !app_mysolarpv.export_kwh) app_mysolarpv.configured = false;
+        
+        // Show dashboard if all present, configuration page if not:
+        if (app_mysolarpv.configured) $("#mysolar-block").show(); else $("#mysolar-setup").show();
+        
+        // -------------------------------------------------------------------------------------------------------------
+        
+        
         var timeWindow = (3600000*6.0*1);
         view.end = +new Date;
         view.start = view.end - timeWindow;
         
-        app_mysolarpv.init_bargraph();
+        if (app_mysolarpv.configured) app_mysolarpv.init_bargraph();
         
-        var placeholder = $('#mysolarpv_placeholder');
+        // The first view is the powergraph, we load the events for the power graph here.
+        if (app_mysolarpv.view=="powergraph") app_mysolarpv.powergraph_events();
         
+        // The buttons for these powergraph events are hidden when in historic mode 
+        // The events are loaded at the start here and dont need to be unbinded and binded again.
         $("#mysolarpv_zoomout").click(function () {view.zoomout(); app_mysolarpv.reload = true; app_mysolarpv.autoupdate = false; app_mysolarpv.draw();});
         $("#mysolarpv_zoomin").click(function () {view.zoomin(); app_mysolarpv.reload = true; app_mysolarpv.autoupdate = false; app_mysolarpv.draw();});
         $('#mysolarpv_right').click(function () {view.panright(); app_mysolarpv.reload = true; app_mysolarpv.autoupdate = false; app_mysolarpv.draw();});
         $('#mysolarpv_left').click(function () {view.panleft(); app_mysolarpv.reload = true; app_mysolarpv.autoupdate = false; app_mysolarpv.draw();});
+        
         $('.time').click(function () {
             view.timewindow($(this).attr("time")/24.0); 
             app_mysolarpv.reload = true; 
@@ -88,29 +106,29 @@ var app_mysolarpv = {
         $("#viewhistory").click(function () { 
             if ($(this).html()=="VIEW HISTORY") {
                 app_mysolarpv.view = "bargraph";
+                $("#balanceline").hide();
+                $("#powergraph-navigation").hide();
+                $("#bargraph-navigation").show();
+                $('#mysolarpv_placeholder').unbind("plotclick");
+                $('#mysolarpv_placeholder').unbind("plothover");
+                $('#mysolarpv_placeholder').unbind("plotselected");
+                
                 app_mysolarpv.draw();
-                $(this).html("POWER VIEW");
+                setTimeout(function() { $("#viewhistory").html("POWER VIEW"); },80);
             } else {
                 
                 app_mysolarpv.view = "powergraph";
+                $("#balanceline").show();
+                $("#bargraph-navigation").hide();
+                $("#powergraph-navigation").show();
+                $('#mysolarpv_placeholder').unbind("plotclick");
+                $('#mysolarpv_placeholder').unbind("plothover");
+                $('#mysolarpv_placeholder').unbind("plotselected");
+                
                 app_mysolarpv.draw();
-                $(this).html("VIEW HISTORY");
+                app_mysolarpv.powergraph_events();
+                setTimeout(function() { $("#viewhistory").html("VIEW HISTORY"); },80);
             }
-        });
-        
-        placeholder.bind("plotselected", function (event, ranges) {
-            view.start = ranges.xaxis.from;
-            view.end = ranges.xaxis.to;
-
-            app_mysolarpv.autoupdate = false;
-            app_mysolarpv.reload = true; 
-            
-            var now = +new Date();
-            if (Math.abs(view.end-now)<30000) {
-                app_mysolarpv.autoupdate = true;
-            }
-
-            app_mysolarpv.draw();
         });
 
         $(window).resize(function(){
@@ -122,8 +140,10 @@ var app_mysolarpv = {
     show: function() 
     {
         // this.reload = true;
-        this.livefn();
-        this.live = setInterval(this.livefn,5000);
+        if (app_mysolarpv.configured) {
+            app_mysolarpv.livefn();
+            app_mysolarpv.live = setInterval(app_mysolarpv.livefn,5000);
+        }
         
         $("body").css("background-color","#222");
         
@@ -134,7 +154,6 @@ var app_mysolarpv = {
 
         app_mysolarpv.resize();
         app_mysolarpv.draw();
-        // app_mysolarpv.draw_bargraph();
     },
     
     resize: function() 
@@ -183,18 +202,6 @@ var app_mysolarpv = {
             $("#vistimeM").show();
             $("#vistimeY").show();
         }
-        
-        var bargraph_bound = $('#mysolarpv_bargraph_bound');
-        var bargraph = $('#mysolarpv_bargraph');
-
-        var width = bargraph_bound.width();
-        var height = $(window).height()*0.55;
-
-        if (height>width) height = width;
-
-        bargraph.width(width);
-        bargraph_bound.height(height);
-        bargraph.height(height-top_offset);
     },
     
     hide: function() 
@@ -249,13 +256,16 @@ var app_mysolarpv = {
         $("#solarnow").html(solar_now);
         $("#usenow").html(use_now);
         
-        app_mysolarpv.draw();
+        // Only redraw the graph if its the power graph and auto update is turned on
+        if (app_mysolarpv.view=="powergraph" && app_mysolarpv.autoupdate) app_mysolarpv.draw();
     },
     
     draw: function ()
     {
-        if (app_mysolarpv.view=="powergraph") app_mysolarpv.draw_powergraph();
-        if (app_mysolarpv.view=="bargraph") app_mysolarpv.draw_bargraph();
+        if (app_mysolarpv.configured) {
+            if (app_mysolarpv.view=="powergraph") app_mysolarpv.draw_powergraph();
+            if (app_mysolarpv.view=="bargraph") app_mysolarpv.draw_bargraph();
+        }
     },
     
     draw_powergraph: function() {
@@ -362,10 +372,39 @@ var app_mysolarpv = {
         
         $.plot($('#mysolarpv_placeholder'),series,options);
     },
+
+    // ------------------------------------------------------------------------------------------
+    // POWER GRAPH EVENTS
+    // ------------------------------------------------------------------------------------------
+    powergraph_events: function() {
+        $('#mysolarpv_placeholder').bind("plotselected", function (event, ranges) {
+            view.start = ranges.xaxis.from;
+            view.end = ranges.xaxis.to;
+
+            app_mysolarpv.autoupdate = false;
+            app_mysolarpv.reload = true; 
+            
+            var now = +new Date();
+            if (Math.abs(view.end-now)<30000) {
+                app_mysolarpv.autoupdate = true;
+            }
+
+            app_mysolarpv.draw();
+        });
+    },
     
+    // ======================================================================================
+    // PART 2: BAR GRAPH PAGE
+    // ======================================================================================
+
+    // --------------------------------------------------------------------------------------
+    // INIT BAR GRAPH
+    // - load cumulative kWh feeds
+    // - calculate used solar, solar, used and exported kwh/d
+    // --------------------------------------------------------------------------------------
     init_bargraph: function() {
 
-        var timeWindow = (3600000*24.0*30);
+        var timeWindow = (3600000*24.0*40);
         var end = +new Date;
         var start = end - timeWindow;
         var interval = 3600*24;
@@ -404,15 +443,15 @@ var app_mysolarpv = {
         var series = [];
         
         series.push({
-            data: app_mysolarpv.solarused_kwhd_data,
-            color: "#dccc1f",
-            bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 1.0, lineWidth:0}
-        });
-
-        series.push({
             data: app_mysolarpv.use_kwhd_data,
             color: "#0699fa",
             bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 0.8, lineWidth:0}
+        });
+        
+        series.push({
+            data: app_mysolarpv.solarused_kwhd_data,
+            color: "#dccc1f",
+            bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 0.6, lineWidth:0}
         });
         
         series.push({
@@ -423,7 +462,13 @@ var app_mysolarpv = {
         
         app_mysolarpv.historyseries = series;
     },
-    
+
+    // ------------------------------------------------------------------------------------------
+    // DRAW BAR GRAPH
+    // Because the data for the bargraph only needs to be loaded once at the start we seperate out
+    // the data loading part to init and the draw part here just draws the bargraph to the flot
+    // placeholder overwritting the power graph as the view is changed.
+    // ------------------------------------------------------------------------------------------    
     draw_bargraph: function() 
     {
         var markings = [];
@@ -440,11 +485,22 @@ var app_mysolarpv = {
 		    $('#mysolarpv_placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Self-consumption & Consumption</div>");
 		    $('#mysolarpv_placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> Exported solar</div>");
 
+        // Because the bargraph is only drawn once when the view is changed we attach the events at this point
+        app_mysolarpv.bargraph_events();
+    },
+
+    // ------------------------------------------------------------------------------------------
+    // BAR GRAPH EVENTS
+    // - show bar values on hover
+    // - click through to power graph
+    // ------------------------------------------------------------------------------------------
+    bargraph_events: function(){
+    
+        // Show day's figures on the bottom of the page
 		    $('#mysolarpv_placeholder').bind("plothover", function (event, pos, item)
         {
             if (item) {
-                console.log(item.datapoint[0]+" "+item.dataIndex); 
-                
+                // console.log(item.datapoint[0]+" "+item.dataIndex);
                 var z = item.dataIndex;
                 
                 var solar_kwhd = app_mysolarpv.solar_kwhd_data[z][1];
@@ -465,6 +521,33 @@ var app_mysolarpv = {
                 $("#total_import_prc").html(((imported_kwhd/use_kwhd)*100).toFixed(0)+"%");
                 $("#total_import_kwh").html((imported_kwhd).toFixed(1));
                 
+            }
+        });
+
+        // Auto click through to power graph
+		    $('#mysolarpv_placeholder').bind("plotclick", function (event, pos, item)
+        {
+            if (item) {
+                // console.log(item.datapoint[0]+" "+item.dataIndex);
+                var z = item.dataIndex;
+                
+                view.end = app_mysolarpv.solar_kwhd_data[z][0];
+                view.start = view.end - 86400*1000;
+
+                $("#balanceline").show();
+                $("#bargraph-navigation").hide();
+                $("#powergraph-navigation").show();
+                $("#viewhistory").html("VIEW HISTORY");
+                $('#mysolarpv_placeholder').unbind("plotclick");
+                $('#mysolarpv_placeholder').unbind("plothover");
+                $('#mysolarpv_placeholder').unbind("plotselected");
+                
+                app_mysolarpv.reload = true; 
+                app_mysolarpv.autoupdate = false;
+                app_mysolarpv.view = "powergraph";
+                
+                app_mysolarpv.draw();
+                app_mysolarpv.powergraph_events();
             }
         });
     }
