@@ -20,6 +20,8 @@ var app_mysolarpv = {
     
     view: "powergraph",
     historyseries: [],
+    latest_start_time: 0,
+    panning: false,
 
     // Include required javascript libraries
     include: [
@@ -109,9 +111,6 @@ var app_mysolarpv = {
                 $("#balanceline").hide();
                 $("#powergraph-navigation").hide();
                 $("#bargraph-navigation").show();
-                $('#mysolarpv_placeholder').unbind("plotclick");
-                $('#mysolarpv_placeholder').unbind("plothover");
-                $('#mysolarpv_placeholder').unbind("plotselected");
                 
                 app_mysolarpv.draw();
                 setTimeout(function() { $("#viewhistory").html("POWER VIEW"); },80);
@@ -121,9 +120,6 @@ var app_mysolarpv = {
                 $("#balanceline").show();
                 $("#bargraph-navigation").hide();
                 $("#powergraph-navigation").show();
-                $('#mysolarpv_placeholder').unbind("plotclick");
-                $('#mysolarpv_placeholder').unbind("plothover");
-                $('#mysolarpv_placeholder').unbind("plotselected");
                 
                 app_mysolarpv.draw();
                 app_mysolarpv.powergraph_events();
@@ -284,7 +280,7 @@ var app_mysolarpv = {
         
         var npoints = 1500;
         interval = Math.round(((view.end - view.start)/npoints)/1000);
-        if (interval<1) interval = 1;
+        if (interval<10) interval = 10;
 
         var npoints = parseInt((view.end-view.start)/(interval*1000));
         
@@ -377,6 +373,11 @@ var app_mysolarpv = {
     // POWER GRAPH EVENTS
     // ------------------------------------------------------------------------------------------
     powergraph_events: function() {
+    
+        $('#mysolarpv_placeholder').unbind("plotclick");
+        $('#mysolarpv_placeholder').unbind("plothover");
+        $('#mysolarpv_placeholder').unbind("plotselected");
+    
         $('#mysolarpv_placeholder').bind("plotselected", function (event, ranges) {
             view.start = ranges.xaxis.from;
             view.end = ranges.xaxis.to;
@@ -403,15 +404,30 @@ var app_mysolarpv = {
     // - calculate used solar, solar, used and exported kwh/d
     // --------------------------------------------------------------------------------------
     init_bargraph: function() {
+        // Fetch the start_time covering all kwh feeds - this is used for the 'all time' button
+        var latest_start_time = 0;
+        var solar_meta = feed.getmeta(app_mysolarpv.solar_kwh);
+        var use_meta = feed.getmeta(app_mysolarpv.use_kwh);
+        var export_meta = feed.getmeta(app_mysolarpv.export_kwh);
+        if (solar_meta.start_time > latest_start_time) latest_start_time = solar_meta.start_time;
+        if (use_meta.start_time > latest_start_time) latest_start_time = use_meta.start_time;
+        if (export_meta.start_time > latest_start_time) latest_start_time = export_meta.start_time;
+        app_mysolarpv.latest_start_time = latest_start_time;
 
         var timeWindow = (3600000*24.0*40);
         var end = +new Date;
         var start = end - timeWindow;
+        app_mysolarpv.load_bargraph(start,end);
+    },
+    
+    load_bargraph: function(start,end) {
+
         var interval = 3600*24;
         var intervalms = interval * 1000;
         end = Math.ceil(end/intervalms)*intervalms;
         start = Math.floor(start/intervalms)*intervalms;
         
+        // Load kWh data
         var solar_kwh_data = feed.getdata(app_mysolarpv.solar_kwh,start,end,interval,0,0);
         var use_kwh_data = feed.getdata(app_mysolarpv.use_kwh,start,end,interval,0,0);
         var export_kwh_data = feed.getdata(app_mysolarpv.export_kwh,start,end,interval,0,0);
@@ -482,7 +498,7 @@ var app_mysolarpv = {
         
         var plot = $.plot($('#mysolarpv_placeholder'),app_mysolarpv.historyseries,options);
         
-		    $('#mysolarpv_placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Self-consumption & Consumption</div>");
+		    $('#mysolarpv_placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use & Total Use</div>");
 		    $('#mysolarpv_placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> Exported solar</div>");
 
         // Because the bargraph is only drawn once when the view is changed we attach the events at this point
@@ -496,6 +512,11 @@ var app_mysolarpv = {
     // ------------------------------------------------------------------------------------------
     bargraph_events: function(){
     
+        $('#mysolarpv_placeholder').unbind("plotclick");
+        $('#mysolarpv_placeholder').unbind("plothover");
+        $('#mysolarpv_placeholder').unbind("plotselected");
+        $('#bargraph-viewall').unbind("click");
+        
         // Show day's figures on the bottom of the page
 		    $('#mysolarpv_placeholder').bind("plothover", function (event, pos, item)
         {
@@ -527,7 +548,7 @@ var app_mysolarpv = {
         // Auto click through to power graph
 		    $('#mysolarpv_placeholder').bind("plotclick", function (event, pos, item)
         {
-            if (item) {
+            if (item && !app_mysolarpv.panning) {
                 // console.log(item.datapoint[0]+" "+item.dataIndex);
                 var z = item.dataIndex;
                 
@@ -549,6 +570,21 @@ var app_mysolarpv = {
                 app_mysolarpv.draw();
                 app_mysolarpv.powergraph_events();
             }
+        });
+        
+        $('#mysolarpv_placeholder').bind("plotselected", function (event, ranges) {
+            var start = ranges.xaxis.from;
+            var end = ranges.xaxis.to;
+            app_mysolarpv.load_bargraph(start,end);
+            app_mysolarpv.draw();
+            app_mysolarpv.panning = true; setTimeout(function() {app_mysolarpv.panning = false; }, 100);
+        });
+        
+        $('#bargraph-viewall').click(function () {
+            var start = app_mysolarpv.latest_start_time * 1000;
+            var end = +new Date;
+            app_mysolarpv.load_bargraph(start,end);
+            app_mysolarpv.draw();
         });
     }
     
