@@ -1,34 +1,11 @@
 <div class="container">
-
-    <div id="mysolarpv-config" style="display:none; ">
-        
-        <div class="electric-title">APP CONFIG</div><br>
-        
-        
-        <table class="table">
-        <tr>
-            <td style="border:0;">
-                <p><b>Electricity consumption</b> feed id (csv for multiple)</p>
-                <input id="mysolarpv-housepower" type="text" />
-            </td>
-            <td style="border:0;">
-                <p><b>Solar generation</b> feed id (csv for multiple)</p>
-                <input id="mysolarpv-solarpower" type="text" />
-            </td>
-        </table>
-        
-        <br><br>
-        <p style="color:#888; text-align:center"><b>Configuration:</b> This dashboard automatically looks for feeds named or containing the words: solar_power, house_power. To use this dashboard add these names to the relevant feeds.</p>
-
-        <button id="mysolarpv-configsave" class="btn btn-primary">Save</button>
-    </div>
     
 <div class="block">
 
     <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
         <div style="float:right;">
-            <!--<span style="color:#fff; margin-right:10px" >Settings</span>-->
-            <i id="mysolarpv-openconfig" class="icon-wrench icon-white" style="cursor:pointer"></i>
+            <!--<span style="color:#fff; margin-right:10px" >Settings</span>
+            <i id="mysolarpv-openconfig" class="icon-wrench icon-white" style="cursor:pointer"></i>-->
         </div>
     </div>
 
@@ -75,7 +52,9 @@
         <span id='mysolarpv_zoomout' class='visnav' >-</span>
         <span id='mysolarpv_left' class='visnav' ><</span>
         <span id='mysolarpv_right' class='visnav' >></span>
-        <span id='balanceline' class='visnav' style="float:right">Show balance</span>
+        
+        <span id='viewhistory' class='visnav' style="float:right; font-size:14px">VIEW HISTORY</span>
+        <span id='balanceline' class='visnav' style="float:right; font-size:14px">SHOW BALANCE</span>
     </div>
 
     <div id="mysolarpv_placeholder_bound" style="width:100%; height:500px;">
@@ -85,8 +64,10 @@
     <br>
     
     <style>
+    
+    
         .appbox {
-            width:25%;
+            width:20%;
             text-align:center;
             padding:10px;
             vertical-align:top;
@@ -131,22 +112,19 @@
             <div><span class="appbox-units" id="total_use_direct_kwh" style="color:#2ed52e">0</span> <span class="appbox-units" style="color:#2ed52e">kWh</span></div>
         </td>
         
+       <td class="appbox">
+            <div class="appbox-title">EXPORT</div>
+            <div style="padding-bottom:5px"><span class="appbox-value" id="total_export_prc" style="color:#2ed52e">0</span></div>
+            <div><span class="appbox-units" id="total_export_kwh" style="color:#2ed52e">0</span> <span class="appbox-units" style="color:#2ed52e">kWh</span></div>
+        </td>
+        
         <td class="appbox">
             <div class="appbox-title">GRID</div>
-            <div style="padding-bottom:5px"><span class="appbox-value" id="total_use_via_store_prc" style="color:#d52e2e">0</span></div>
-            <div><span class="appbox-units" id="total_use_via_store_kwh" style="color:#d52e2e">0</span> <span class="appbox-units" style="color:#d52e2e">kWh</span></div>
+            <div style="padding-bottom:5px"><span class="appbox-value" id="total_import_prc" style="color:#d52e2e">0</span></div>
+            <div><span class="appbox-units" id="total_import_kwh" style="color:#d52e2e">0</span> <span class="appbox-units" style="color:#d52e2e">kWh</span></div>
         </td>
     </tr>
     </table>
-
-
-    <!--
-    <br><br>
-    <div id="mysolarpv_bargraph_bound" style="width:100%; height:500px;">
-        <div id="mysolarpv_bargraph" style="height:500px"></div>
-    </div>
-    
-    -->
 
 </div>
 </div>
