@@ -29,16 +29,20 @@
 
 <p class="a2">The My Solar app can be used to explore onsite solar generation, self consumption, export and building consumption both in realtime with a moving power graph view and historically with a daily and monthly bargraph.</p>
 
-<p class="a2">Configuration is based on naming convention</p>
+<p class="a2">This app can auto-configure connecting to emoncms feeds with the following names:</p>
 
 <ul class="a2">
-    <li>solar</li>
-    <li>use</li>
-    <li>export</li>
-    <li>solar_kwh</li>
-    <li>use_kwh</li>
-    <li>export_kwh</li>
+    <li><b>solar</b> - solar pv generation in watts</li>
+    <li><b>use</b> - house or building consumption in watts</li>
+    <li><b>export</b> - exported solar in watts</li>
+    <li><b>solar_kwh</b> - cumulative solar generation in kWh</li>
+    <li><b>use_kwh</b> - cumulative consumption in kWh</li>
+    <li><b>export_kwh</b> - cumulative exported solar in kWh</li>
 </ul>
+
+<p class="a2">Cumulative kWh feeds can be generated from power feeds with the power_to_kwh input processor</p>
+
+<p class="a2">Please configure emoncms with these feeds and refresh to continue</p>
 
 </div>
     
