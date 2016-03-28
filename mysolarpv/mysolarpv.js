@@ -76,6 +76,8 @@ var app_mysolarpv = {
         
         if (app_mysolarpv.configured) app_mysolarpv.init_bargraph();
         
+        app_mysolarpv.init_configUI();
+        
         // The first view is the powergraph, we load the events for the power graph here.
         if (app_mysolarpv.view=="powergraph") app_mysolarpv.powergraph_events();
         
@@ -131,6 +133,8 @@ var app_mysolarpv = {
             app_mysolarpv.resize();
             app_mysolarpv.draw();
         });
+        
+        
     },
 
     show: function() 
@@ -589,6 +593,18 @@ var app_mysolarpv = {
             app_mysolarpv.load_bargraph(start,end);
             app_mysolarpv.draw();
         });
+    },
+
+    // ======================================================================================
+    // PART 3: CONFIGURATION UI
+    // ======================================================================================
+
+    init_configUI: function () {
+        $("#mysolarpv-openconfig").click(function(){
+            $("#mysolar-block").hide();
+            
+            $("#mysolar-setup").show();
+        });
     }
-    
+
 }

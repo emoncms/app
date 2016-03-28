@@ -22,36 +22,13 @@
 </style>
     
 <div class="container">
-
-<div id="mysolar-setup" style="display:none; padding-top:50px" class="block">
-
-<h2 style="color:#dccc1f">My Solar</h2>
-
-<p class="a2">The My Solar app can be used to explore onsite solar generation, self consumption, export and building consumption both in realtime with a moving power graph view and historically with a daily and monthly bargraph.</p>
-
-<p class="a2">This app can auto-configure connecting to emoncms feeds with the following names:</p>
-
-<ul class="a2">
-    <li><b>solar</b> - solar pv generation in watts</li>
-    <li><b>use</b> - house or building consumption in watts</li>
-    <li><b>export</b> - exported solar in watts</li>
-    <li><b>solar_kwh</b> - cumulative solar generation in kWh</li>
-    <li><b>use_kwh</b> - cumulative consumption in kWh</li>
-    <li><b>export_kwh</b> - cumulative exported solar in kWh</li>
-</ul>
-
-<p class="a2">Cumulative kWh feeds can be generated from power feeds with the power_to_kwh input processor</p>
-
-<p class="a2">Please configure emoncms with these feeds and refresh to continue</p>
-
-</div>
     
 <div id="mysolar-block" style="display:none" class="block">
 
     <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
         <div style="float:right;">
-            <!--<span style="color:#fff; margin-right:10px" >Settings</span>
-            <i id="mysolarpv-openconfig" class="icon-wrench icon-white" style="cursor:pointer"></i>-->
+            <!--<span style="color:#fff; margin-right:10px" >Settings</span>-->
+            <i id="mysolarpv-openconfig" class="icon-wrench icon-white" style="cursor:pointer"></i>
         </div>
     </div>
 
@@ -171,4 +148,29 @@
     </table>
 
 </div>
+
+
+<div id="mysolar-setup" style="display:none; padding-top:50px" class="block">
+
+<h2 style="color:#dccc1f">My Solar</h2>
+
+<p class="a2">The My Solar app can be used to explore onsite solar generation, self consumption, export and building consumption both in realtime with a moving power graph view and historically with a daily and monthly bargraph.</p>
+
+<p class="a2">This app can auto-configure connecting to emoncms feeds with the following names, alternatively select your feeds below:</p>
+
+<ul class="a2">
+    <li><b>solar</b> - solar pv generation in watts</li>
+    <li><b>use</b> - house or building consumption in watts</li>
+    <li><b>export</b> - exported solar in watts</li>
+    <li><b>solar_kwh</b> - cumulative solar generation in kWh</li>
+    <li><b>use_kwh</b> - cumulative consumption in kWh</li>
+    <li><b>export_kwh</b> - cumulative exported solar in kWh</li>
+</ul>
+
+<p class="a2">Cumulative kWh feeds can be generated from power feeds with the power_to_kwh input processor</p>
+
+<p class="a2">Please configure emoncms with these feeds and refresh to continue</p>
+
+</div>
+
 </div>
