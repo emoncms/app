@@ -493,19 +493,16 @@ var app_myelectric = {
         
         var interval = 86400;
         var now = new Date();
-        var timezone = (now.getTimezoneOffset()/-60)*3600;
-        var timenow = Math.floor(now.getTime() * 0.001);
-        var end = (Math.floor((timenow+timezone)/interval)*interval)-timezone;
+        var end = Math.floor(now.getTime() * 0.001);
         var start = end - interval * Math.round(graph_bars.width/30);
-        
-        var valid = [];
         
         var data = app_myelectric.getdata({
           "id":app_myelectric.dailyfeed,
-          "start":start*1000,"end":end*1000,"interval":interval,
+          "start":start*1000,"end":end*1000,"mode":"daily",
           "skipmissing":0,"limitinterval":0
         });
 
+        var valid = [];
         // remove nan values from the end.
         for (z in data) {
           if (data[z][1]!=null) {
@@ -513,10 +510,17 @@ var app_myelectric = {
           }
         }
         
-        var next = valid[valid.length-1][0] + (interval*1000);
+        var lastday = data[data.length-1][0];
         
-        if (app_myelectric.feeds[app_myelectric.dailyfeed]!=undefined) {
-            valid.push([next,app_myelectric.feeds[app_myelectric.dailyfeed].value*1.0]);
+        var d = new Date();
+        d.setHours(0,0,0,0);
+        if (lastday==d.getTime()) {
+            // last day in kwh data matches start of today from the browser's perspective
+            // which means its safe to append today kwh value
+            var next = valid[valid.length-1][0] + (interval*1000);
+            if (app_myelectric.feeds[app_myelectric.dailyfeed]!=undefined) {
+                valid.push([next,app_myelectric.feeds[app_myelectric.dailyfeed].value*1.0]);
+            }
         }
         
         // Calculate the daily totals by subtracting each day from the day before
