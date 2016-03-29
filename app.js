@@ -55,56 +55,21 @@ var app = {
         
         if (app.config[appname]==undefined) app.config[appname] = {};
         
-        var appconfig = window["app_"+appname].config;
         var feeds = feed.listbyname();
         
-        var valid = {};
-
-        for (var key in appconfig) {
-            
-            if (appconfig[key].type=="feed") {
-                valid[key] = false;
-                
-                // Check if feeds match naming convention
-                var autoname = appconfig[key].autoname;
-                if (feeds[autoname]!=undefined) {
-                    appconfig[key].value = feeds[autoname].id;
-                    valid[key] = true;
-                }
-                // Overwrite with any user set feeds if applicable
-                if (app.config[appname][key]!=undefined) {
-                    appconfig[key].value = app.config[appname][key];
-                    valid[key] = true;
-                }
-            }
-            
-            if (appconfig[key].type=="value") {
-                if (app.config[appname][key]!=undefined) {
-                    appconfig[key].value = app.config[appname][key];
-                } else {
-                    appconfig[key].value = appconfig[key].default;
-                }
-            }
-        }
-
-        var configured = true;
-        for (var key in valid) {
-            if (valid[key]==false) configured = false;
-        }
+        // Check that the config is complete first otherwise show config interface
+        var configured = config_check(window["app_"+appname].config, app.config[appname], feeds);
         
         // Show dashboard if all present, configuration page if not:
-        if (configured) { 
-            $("#"+appname+"-block").show(); 
-        } else {
+        if (!configured) {
             $("#"+appname+"-setup").show();
-            configUI(appname, appconfig, app.config[appname]);
+            configUI(appname, window["app_"+appname].config, app.config[appname]);
         }
-        
-        window["app_"+appname].config = appconfig;
-        
         
         if (configured && app.initialized[appname]==undefined) {
             console.log("init from load "+appname);
+            $("#"+appname+"-block").show();
+            window["app_"+appname].config = config_load(window["app_"+appname].config, app.config[appname], feeds);
             app.initialized[appname] = true;
             window["app_"+appname].init();
         }
@@ -126,7 +91,9 @@ var app = {
         if (app.loaded[appname]==undefined) app.load(appname);
         $(".apps").hide();
         $("#app_"+appname).show();
-        if (window["app_"+appname]!=undefined && app.initialized[appname]!=undefined) window["app_"+appname].show();
+        if (window["app_"+appname]!=undefined && app.initialized[appname]!=undefined) {
+            window["app_"+appname].show();
+        }
     },
     
     hide: function(appname)
@@ -147,9 +114,13 @@ var app = {
         app.config = config;
     },
     
-    setconfig: function(appname, config)
+    setconfig: function(appname, appconfig)
     {
-        app.config[appname] = config;
+        app.config[appname] = appconfig;
+        
+        var feeds = feed.listbyname();
+        window["app_"+appname].config = config_load(window["app_"+appname].config, app.config[appname], feeds);
+        
         $.ajax({ url: path+"app/setconfig.json", data: "data="+JSON.stringify(app.config), async: false, success: function(data){} });
     }
 };
