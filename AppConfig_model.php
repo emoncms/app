@@ -59,11 +59,20 @@ class AppConfig
         
         $result = $this->mysqli->query("SELECT `userid` FROM app_config WHERE `userid`='$userid'");
         if ($result->num_rows) {
-            $this->mysqli->query("UPDATE app_config SET `data`='$json' WHERE `userid`='$userid'");
+        
+            $stmt = $this->mysqli->prepare("UPDATE app_config SET `data`=? WHERE `userid`=?");
+            $stmt->bind_param("si", $json, $userid);
+            if (!$stmt->execute()) {
+                return false;
+            }
             return true;
             
         } else {
-            $this->mysqli->query("INSERT INTO app_config (`userid`,`data`) VALUES ('$userid','$json')");
+            $stmt = $this->mysqli->prepare("INSERT INTO app_config (`userid`,`data`) VALUES (?,?)");
+            $stmt->bind_param("is", $userid,$json);
+            if (!$stmt->execute()) {
+                return false;
+            }
             return true;
         }
         
