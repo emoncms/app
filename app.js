@@ -5,6 +5,10 @@ var app = {
     include: {},
     
     loaded: {},
+    initialized: {},
+    
+    datastore: {},
+    view: {},
 
     load: function(appname) 
     {
@@ -49,23 +53,85 @@ var app = {
             }
         }
         
-        window["app_"+appname].init();
+        if (app.config[appname]==undefined) app.config[appname] = {};
+        
+        var appconfig = window["app_"+appname].config;
+        var feeds = feed.listbyname();
+        
+        var valid = {};
+
+        for (var key in appconfig) {
+            
+            if (appconfig[key].type=="feed") {
+                valid[key] = false;
+                
+                // Check if feeds match naming convention
+                var autoname = appconfig[key].autoname;
+                if (feeds[autoname]!=undefined) {
+                    appconfig[key].value = feeds[autoname].id;
+                    valid[key] = true;
+                }
+                // Overwrite with any user set feeds if applicable
+                if (app.config[appname][key]!=undefined) {
+                    appconfig[key].value = app.config[appname][key];
+                    valid[key] = true;
+                }
+            }
+            
+            if (appconfig[key].type=="value") {
+                if (app.config[appname][key]!=undefined) appconfig[key].value = app.config[appname][key];
+            }
+        }
+
+        var configured = true;
+        for (var key in valid) {
+            if (valid[key]==false) configured = false;
+        }
+        
+        // Show dashboard if all present, configuration page if not:
+        if (configured) { 
+            $("#"+appname+"-block").show(); 
+        } else {
+            $("#"+appname+"-setup").show();
+            configUI(appname, appconfig, app.config[appname]);
+        }
+        
+        window["app_"+appname].config = appconfig;
+        
+        
+        if (configured && app.initialized[appname]==undefined) {
+            console.log("init from load "+appname);
+            app.initialized[appname] = true;
+            window["app_"+appname].init();
+        }
         
         return true;
     },
     
     show: function(appname)
     {
-        if (app.loaded[appname]==undefined) app.load(appname); 
+        if (app.datastore[appname]!=undefined) {
+            datastore = JSON.parse(JSON.stringify(app.datastore[appname]));
+        }
+        
+        if (app.view[appname]!=undefined) { 
+            view.start = app.view[appname].start;
+            view.end = app.view[appname].end;
+        }
+        
+        if (app.loaded[appname]==undefined) app.load(appname);
         $(".apps").hide();
         $("#app_"+appname).show();
-        if (window["app_"+appname]!=undefined) window["app_"+appname].show();
+        if (window["app_"+appname]!=undefined && app.initialized[appname]!=undefined) window["app_"+appname].show();
     },
     
     hide: function(appname)
     {
+        app.datastore[appname] = JSON.parse(JSON.stringify(datastore));
+        app.view[appname] = {start:view.start, end:view.end};
+        
         $("#app_"+appname).hide();
-        if (window["app_"+appname]!=undefined) window["app_"+appname].hide();
+        if (window["app_"+appname]!=undefined && app.initialized[appname]!=undefined) window["app_"+appname].hide();
     },
     
     getconfig: function()
@@ -75,11 +141,11 @@ var app = {
         if (window.apikey!=undefined) apikeystr = "?apikey="+apikey;
         $.ajax({ url: path+"app/getconfig.json"+apikeystr, dataType: 'json', async: false, success: function(data) {config = data;} });
         app.config = config;
-        return config;
     },
     
-    setconfig: function(config)
+    setconfig: function(appname, config)
     {
-        $.ajax({ url: path+"app/setconfig.json", data: "data="+JSON.stringify(config), async: false, success: function(data){} });
+        app.config[appname] = config;
+        $.ajax({ url: path+"app/setconfig.json", data: "data="+JSON.stringify(app.config), async: false, success: function(data){} });
     }
 };

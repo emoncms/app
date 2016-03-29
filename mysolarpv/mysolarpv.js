@@ -1,14 +1,14 @@
-var datastore = {};
-
 var app_mysolarpv = {
 
-    configured: true,
-    solarW: false,
-    useW: false,
-    exportW: false,
-    solar_kwh:false,
-    use_kwh:false,
-    export_kwh:false,
+    config: {
+        "use":{"type":"feed", "autoname":"use", "engine":5, "description":"House or building use in watts"},
+        "solar":{"type":"feed", "autoname":"solar", "engine":5, "description":"Solar pv generation in watts"},
+        //"export":{"type":"feed", "autoname":"export", "engine":5, "description":"Exported solar in watts"},
+        "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative use in kWh"},
+        "solar_kwh":{"type":"feed", "autoname":"solar_kwh", "engine":5, "description":"Cumulative solar generation in kWh"},
+        "export_kwh":{"type":"feed", "autoname":"export_kwh", "engine":5, "description":"Cumulative exported solar in kWh"},
+        //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
+    },
     
     live: false,
     show_balance_line: 0,
@@ -25,7 +25,6 @@ var app_mysolarpv = {
 
     // Include required javascript libraries
     include: [
-        "Modules/app/lib/feed.js",
         "Lib/flot/jquery.flot.min.js",
         "Lib/flot/jquery.flot.time.min.js",
         "Lib/flot/jquery.flot.selection.min.js",
@@ -36,47 +35,14 @@ var app_mysolarpv = {
 
     // App start function
     init: function()
-    {
-        var feeds = feed.listbyname();
-        
-        // -------------------------------------------------------------------------------------------------------------
-        // AUTOMATIC FEED SELECTION BY NAMING CONVENTION
-        // We start here by searching for feeds that adhere to the naming convention
-        // If these feeds dont exist then a configuration page is shows that guides through setup
-        // -------------------------------------------------------------------------------------------------------------
- 
-        // Power feeds
-        if (feeds['use']!=undefined)
-            app_mysolarpv.useW = feeds['use'].id;
-        if (feeds['solar']!=undefined)
-            app_mysolarpv.solarW = feeds['solar'].id;        
-        //if (feeds['export']!=undefined)
-        //    app_mysolarpv.exportW = feeds['export'].id;
-            
-        // Cumulative kWh feeds
-        if (feeds['use_kwh']!=undefined)
-            app_mysolarpv.use_kwh = feeds['use_kwh'].id;
-        if (feeds['solar_kwh']!=undefined)
-            app_mysolarpv.solar_kwh = feeds['solar_kwh'].id;        
-        if (feeds['export_kwh']!=undefined)
-            app_mysolarpv.export_kwh = feeds['export_kwh'].id;
-        
-        // Check if all feeds have been set present
-        if (!app_mysolarpv.useW || !app_mysolarpv.solarW || !app_mysolarpv.use_kwh || !app_mysolarpv.solar_kwh || !app_mysolarpv.export_kwh) app_mysolarpv.configured = false;
-        
-        // Show dashboard if all present, configuration page if not:
-        if (app_mysolarpv.configured) $("#mysolar-block").show(); else $("#mysolar-setup").show();
-        
-        // -------------------------------------------------------------------------------------------------------------
-        
-        
+    {        
+        console.log("mysolarpv:init");
+    
         var timeWindow = (3600000*6.0*1);
         view.end = +new Date;
         view.start = view.end - timeWindow;
         
-        if (app_mysolarpv.configured) app_mysolarpv.init_bargraph();
-        
-        app_mysolarpv.init_configUI();
+        app_mysolarpv.init_bargraph();
         
         // The first view is the powergraph, we load the events for the power graph here.
         if (app_mysolarpv.view=="powergraph") app_mysolarpv.powergraph_events();
@@ -139,18 +105,11 @@ var app_mysolarpv = {
 
     show: function() 
     {
+        console.log("mysolarpv:show");
+        
         // this.reload = true;
-        if (app_mysolarpv.configured) {
-            app_mysolarpv.livefn();
-            app_mysolarpv.live = setInterval(app_mysolarpv.livefn,5000);
-        }
-        
-        $("body").css("background-color","#222");
-        
-        $(window).ready(function(){
-            $("#footer").css('background-color','#181818');
-            $("#footer").css('color','#999');
-        });
+        app_mysolarpv.livefn();
+        app_mysolarpv.live = setInterval(app_mysolarpv.livefn,5000);
 
         app_mysolarpv.resize();
         app_mysolarpv.draw();
@@ -218,13 +177,13 @@ var app_mysolarpv = {
         app_mysolarpv.lastupdate = now;
         
         var feeds = feed.listbyid();
-        var solar_now = parseInt(feeds[app_mysolarpv.solarW].value);
-        var use_now = parseInt(feeds[app_mysolarpv.useW].value);
+        var solar_now = parseInt(feeds[app_mysolarpv.config.solar.value].value);
+        var use_now = parseInt(feeds[app_mysolarpv.config.use.value].value);
         
         if (app_mysolarpv.autoupdate) {
-            timeseries.append("solar",feeds[app_mysolarpv.solarW].time,solar_now);
+            timeseries.append("solar",feeds[app_mysolarpv.config.solar.value].time,solar_now);
             timeseries.trim_start("solar",view.start*0.001);
-            timeseries.append("use",feeds[app_mysolarpv.useW].time,use_now);
+            timeseries.append("use",feeds[app_mysolarpv.config.use.value].time,use_now);
             timeseries.trim_start("use",view.start*0.001);
 
             // Advance view
@@ -262,10 +221,8 @@ var app_mysolarpv = {
     
     draw: function ()
     {
-        if (app_mysolarpv.configured) {
-            if (app_mysolarpv.view=="powergraph") app_mysolarpv.draw_powergraph();
-            if (app_mysolarpv.view=="bargraph") app_mysolarpv.draw_bargraph();
-        }
+        if (app_mysolarpv.view=="powergraph") app_mysolarpv.draw_powergraph();
+        if (app_mysolarpv.view=="bargraph") app_mysolarpv.draw_bargraph();
     },
     
     draw_powergraph: function() {
@@ -295,8 +252,8 @@ var app_mysolarpv = {
             app_mysolarpv.reload = false;
             view.start = 1000*Math.floor((view.start/1000)/interval)*interval;
             view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
-            timeseries.load("solar",feed.getdata(app_mysolarpv.solarW,view.start,view.end,interval,0,0));
-            timeseries.load("use",feed.getdata(app_mysolarpv.useW,view.start,view.end,interval,0,0));
+            timeseries.load("solar",feed.getdata(app_mysolarpv.config.solar.value,view.start,view.end,interval,0,0));
+            timeseries.load("use",feed.getdata(app_mysolarpv.config.use.value,view.start,view.end,interval,0,0));
         }
         // -------------------------------------------------------------------------------------------------------
         
@@ -315,18 +272,18 @@ var app_mysolarpv = {
         var total_use_direct_kwh = 0;
         
         var datastart = view.start;
-        for (var z in datastore) {
-            datastart = datastore[z].data[0][0];
-            npoints = datastore[z].data.length;
-        }
+        //for (var z in datastore) {
+            //datastart = datastore[z].data[0][0];
+            //npoints = datastore[z].data.length;
+        //}
         
         for (var z=0; z<npoints; z++) {
 
             // -------------------------------------------------------------------------------------------------------
             // Get solar or use values
             // -------------------------------------------------------------------------------------------------------
-            if (datastore["solar"].data[z][1]!=null) solar_now = datastore["solar"].data[z][1];   
-            if (datastore["use"].data[z][1]!=null) use_now = datastore["use"].data[z][1];  
+            if (timeseries.value("solar",z)!=null) solar_now = timeseries.value("solar",z);  
+            if (timeseries.value("use",z)!=null) use_now = timeseries.value("use",z);
             
             // -------------------------------------------------------------------------------------------------------
             // Supply / demand balance calculation
@@ -413,9 +370,9 @@ var app_mysolarpv = {
     init_bargraph: function() {
         // Fetch the start_time covering all kwh feeds - this is used for the 'all time' button
         var latest_start_time = 0;
-        var solar_meta = feed.getmeta(app_mysolarpv.solar_kwh);
-        var use_meta = feed.getmeta(app_mysolarpv.use_kwh);
-        var export_meta = feed.getmeta(app_mysolarpv.export_kwh);
+        var solar_meta = feed.getmeta(app_mysolarpv.config.solar_kwh.value);
+        var use_meta = feed.getmeta(app_mysolarpv.config.use_kwh.value);
+        var export_meta = feed.getmeta(app_mysolarpv.config.export_kwh.value);
         if (solar_meta.start_time > latest_start_time) latest_start_time = solar_meta.start_time;
         if (use_meta.start_time > latest_start_time) latest_start_time = use_meta.start_time;
         if (export_meta.start_time > latest_start_time) latest_start_time = export_meta.start_time;
@@ -435,9 +392,9 @@ var app_mysolarpv = {
         start = Math.floor(start/intervalms)*intervalms;
         
         // Load kWh data
-        var solar_kwh_data = feed.getdataDMY(app_mysolarpv.solar_kwh,start,end,"daily","");
-        var use_kwh_data = feed.getdataDMY(app_mysolarpv.use_kwh,start,end,"daily","");
-        var export_kwh_data = feed.getdataDMY(app_mysolarpv.export_kwh,start,end,"daily","");
+        var solar_kwh_data = feed.getdataDMY(app_mysolarpv.config.solar_kwh.value,start,end,"daily","");
+        var use_kwh_data = feed.getdataDMY(app_mysolarpv.config.use_kwh.value,start,end,"daily","");
+        var export_kwh_data = feed.getdataDMY(app_mysolarpv.config.export_kwh.value,start,end,"daily","");
         
         app_mysolarpv.solarused_kwhd_data = [];
         app_mysolarpv.solar_kwhd_data = [];
@@ -593,18 +550,5 @@ var app_mysolarpv = {
             app_mysolarpv.load_bargraph(start,end);
             app_mysolarpv.draw();
         });
-    },
-
-    // ======================================================================================
-    // PART 3: CONFIGURATION UI
-    // ======================================================================================
-
-    init_configUI: function () {
-        $("#mysolarpv-openconfig").click(function(){
-            $("#mysolar-block").hide();
-            
-            $("#mysolar-setup").show();
-        });
     }
-
 }

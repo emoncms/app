@@ -13,14 +13,21 @@
 
 <link href="<?php echo $path; ?>Modules/app/style.css" rel="stylesheet">
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/app.js"></script>
-        
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/config.js"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/feed.js"></script>        
 <div id="content"></div>
 
 <script>
 
+$("body").css('background-color','#222');
+$(window).ready(function(){
+    $("#footer").css('background-color','#181818');
+    $("#footer").css('color','#999');
+});
+
 console.log(path);
 
-var config = app.getconfig();
+app.getconfig();
 var nodes = {};
   
 var appname = "myelectric";
@@ -41,6 +48,29 @@ $(window).on('hashchange', function() {
 
 $(document).ready(function(){
 
+});
+
+$("body").on("click",".openconfig",function(){
+    $("#"+appname+"-block").hide();
+    $("#"+appname+"-setup").show();
+    var appconfig = window["app_"+appname].config;
+    window["app_"+appname].hide(); // Disables timers
+    configUI(appname, appconfig, app.config[appname]);
+});
+
+$("body").on("click",".launchapp",function(){
+    console.log("launching "+appname);
+    $("#"+appname+"-setup").hide();
+    $("#"+appname+"-block").show();
+    
+    if (app.initialized[appname]==undefined) {
+        console.log("init "+appname);
+        app.initialized[appname] = true;
+        window["app_"+appname].init();
+    }
+    
+    console.log("show "+appname);
+    window["app_"+appname].show();
 });
 
 function parse_location_hash(hash)

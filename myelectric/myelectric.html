@@ -1,72 +1,6 @@
-<style>
-    .visnav {
-        margin-right:4px;
-        padding-left:8px;
-        padding-right:8px;
-        min-width:20px;
-        background-color:rgba(6,153,250,0.1);
-        line-height:28px;
-        float:left;
-        text-align:center;
-    }
-    
-    .appbox {
-        width:25%;
-        text-align:center;
-        padding:10px;
-        vertical-align:top;
-    }
-    
-    .appbox-title {
-        color: #aaa;
-        font-weight:bold;
-        font-size:16px;
-        padding-bottom:15px;
-    }
-    
-    .appbox-value {
-        color: #fff;
-        font-weight:bold;
-        font-size:32px;
-    }
-    
-    .appbox-units {
-        color: #fff;
-        font-weight:bold;
-        font-size:16px;
-    }
-</style>
-    
 <div class="container">
 
-    <div id="myelectric_config" style="margin: 0px auto; max-width:320px; display:none">
-        
-        <div class="electric-title">My Electric config</div>
-        <br><br>
-        
-        <p><b style="color:#0699fa">Power feed (Watts):</b></p>
-        <select id="myelectric_powerfeed" style="width:290px"></select>
-        <br>
-        <p><b style="color:#0699fa">Bar graph feed:</b></p>
-        <select id="myelectric_dailyfeed" style="width:290px"></select>
-        
-        <p><b style="color:#0699fa">Wh or kWh feed?:</b><br>Note: Use power_to_kwh input processor to create this feed type</p>
-        <select id="myelectric_dailytype" style="width:290px">
-            <option value=0>Watt hours elapsed</option>
-            <option value=1>kWh elapsed</option>
-        </select>
-        
-        <p><b style="color:#0699fa">Set currency, enter text: pound, euro, dollar, yen:</b></p>
-        <input type="text" id="myelectric_currency" style="width:280px" />
-        <br>
-        <p><b style="color:#0699fa">Unit cost:</b></p>
-        <input type="text" id="myelectric_unitcost" style="width:280px" />
-        <br><br>
-        
-        <button id="myelectric_configsave" class="btn btn-primary">Save</button>
-    </div>
-
-    <div id="myelectric_body">
+    <div id="myelectric-block" style="display:none">
     
         <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
         
@@ -76,7 +10,7 @@
             </div>
         
             <div style="float:right;">
-                <i id="myelectric_openconfig" class="icon-wrench icon-white" style="cursor:pointer"></i>
+                <i class="openconfig icon-wrench icon-white" style="cursor:pointer"></i>
             </div>
         </div>
         
@@ -151,4 +85,27 @@
             </tr>
         </table>
     </div>
+</div>    
+
+<div id="myelectric-setup" style="display:none; padding-top:50px" class="block">
+
+    <h2 style="color:#0699fa">My Electric</h2>
+
+    <div class="row">
+      <div class="span9">
+        <p class="a2">The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time. It includes a real-time view and a historic kWh per day bar graph.</p>
+
+        <p class="a2"><b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
+
+        <p class="a2"><b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+
+        <p class="a2"><b>Setup guide:</b> See setting up feeds for myelectric</p>
+
+        <br><br>
+        <img src="Modules/test/myelectric_app.png" style="width:600px" class="img-rounded">
+      </div>
+      <div class="span3"><div class="app-config"></div></div>
+    </div>
+
+</div>
 </div>

@@ -1,34 +1,11 @@
-<style>
-    .visnav {
-        margin-right:4px;
-        padding-left:8px;
-        padding-right:8px;
-        min-width:20px;
-        background-color:rgba(6,153,250,0.1);
-        line-height:28px;
-        float:left;
-        text-align:center;
-    }
-    
-    .a2 {
-        color: #ccc;
-        font-size:18px;
-        line-height:22px;
-    }
-    
-    h2 {
-        color:#fff;
-    }
-</style>
-    
 <div class="container">
     
-<div id="mysolar-block" style="display:none" class="block">
+<div id="mysolarpv-block" style="display:none" class="block">
 
     <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
         <div style="float:right;">
             <!--<span style="color:#fff; margin-right:10px" >Settings</span>-->
-            <i id="mysolarpv-openconfig" class="icon-wrench icon-white" style="cursor:pointer"></i>
+            <i class="openconfig icon-wrench icon-white" style="cursor:pointer"></i>
         </div>
     </div>
 
@@ -51,8 +28,6 @@
     </table>
     <br>
     
-
-
     <div class="visnavblock" style="height:28px; padding-bottom:5px;">
         <div id="powergraph-navigation">
             <span class='visnav time' time='1'>1h</span>
@@ -83,37 +58,6 @@
     </div>
     
     <br>
-    
-    <style>
-    
-    
-        .appbox {
-            width:20%;
-            text-align:center;
-            padding:10px;
-            vertical-align:top;
-            
-        }
-        
-        .appbox-title {
-            color: #aaa;
-            font-weight:bold;
-            font-size:20px;
-            padding-bottom:15px;
-        }
-        
-        .appbox-value {
-            color: #fff;
-            font-weight:bold;
-            font-size:36px;
-        }
-        
-        .appbox-units {
-            color: #fff;
-            font-weight:bold;
-            font-size:16px;
-        }
-    </style>
     
     <table style="width:100%">
     <tr>
@@ -150,26 +94,25 @@
 </div>
 
 
-<div id="mysolar-setup" style="display:none; padding-top:50px" class="block">
+<div id="mysolarpv-setup" style="display:none; padding-top:50px" class="block">
 
-<h2 style="color:#dccc1f">My Solar</h2>
+    <h2 style="color:#dccc1f">My Solar</h2>
 
-<p class="a2">The My Solar app can be used to explore onsite solar generation, self consumption, export and building consumption both in realtime with a moving power graph view and historically with a daily and monthly bargraph.</p>
+    <div class="row">
+      <div class="span9">
+        <p class="a2">The My Solar app can be used to explore onsite solar generation, self consumption, export and building consumption both in realtime with a moving power graph view and historically with a daily and monthly bargraph.</p>
 
-<p class="a2">This app can auto-configure connecting to emoncms feeds with the following names, alternatively select your feeds below:</p>
+        <p class="a2"><b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
 
-<ul class="a2">
-    <li><b>solar</b> - solar pv generation in watts</li>
-    <li><b>use</b> - house or building consumption in watts</li>
-    <li><b>export</b> - exported solar in watts</li>
-    <li><b>solar_kwh</b> - cumulative solar generation in kWh</li>
-    <li><b>use_kwh</b> - cumulative consumption in kWh</li>
-    <li><b>export_kwh</b> - cumulative exported solar in kWh</li>
-</ul>
+        <p class="a2"><b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
 
-<p class="a2">Cumulative kWh feeds can be generated from power feeds with the power_to_kwh input processor</p>
+        <p class="a2"><b>Setup guide:</b> See setting up feeds for mysolar</p>
 
-<p class="a2">Please configure emoncms with these feeds and refresh to continue</p>
+        <br><br>
+        <img src="Modules/test/mysolar_app.png" style="width:600px" class="img-rounded">
+      </div>
+      <div class="span3"><div class="app-config"></div></div>
+    </div>
 
 </div>
 
