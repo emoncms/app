@@ -186,11 +186,11 @@ var app_myelectric = {
             $(".u1a").html(""); $(".u1b").html("kWh");
             $(".u2a").html(""); $(".u2b").html(" kWh/d");
         } else {
-            scale = app_myelectric.unitcost;
-            $("#myelectric_usetoday_units_a").html(app_myelectric.currency);
+            scale = app_myelectric.config.unitcost.value;
+            $("#myelectric_usetoday_units_a").html(app_myelectric.config.currency.value);
             $("#myelectric_usetoday_units_b").html("");
-            $(".u1a").html(app_myelectric.currency); $(".u1b").html("");
-            $(".u2a").html(app_myelectric.currency); $(".u2b").html("/day");
+            $(".u1a").html(app_myelectric.config.currency.value); $(".u1b").html("");
+            $(".u2a").html(app_myelectric.config.currency.value); $(".u2b").html("/day");
         }
         
         var now = new Date();
@@ -234,7 +234,7 @@ var app_myelectric = {
             $("#myelectric_powernow").html((feeds[use].value*1).toFixed(0)+"W");
         } else {
             // 1000W for an hour (x3600) = 3600000 Joules / 3600,000 = 1.0 kWh x 0.15p = 0.15p/kWh (scaling factor is x3600 / 3600,000 = 0.001)
-            $("#myelectric_powernow").html(app_myelectric.currency+(feeds[use].value*1*app_myelectric.unitcost*0.001).toFixed(3)+"/hr");
+            $("#myelectric_powernow").html(app_myelectric.config.currency.value+(feeds[use].value*1*app_myelectric.config.unitcost.value*0.001).toFixed(3)+"/hr");
         }
         // Advance view
         if (app_myelectric.autoupdate) {

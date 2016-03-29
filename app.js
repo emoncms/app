@@ -79,7 +79,11 @@ var app = {
             }
             
             if (appconfig[key].type=="value") {
-                if (app.config[appname][key]!=undefined) appconfig[key].value = app.config[appname][key];
+                if (app.config[appname][key]!=undefined) {
+                    appconfig[key].value = app.config[appname][key];
+                } else {
+                    appconfig[key].value = appconfig[key].default;
+                }
             }
         }
 

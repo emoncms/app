@@ -34,28 +34,28 @@ class AppConfig
         $outdata = array();
         foreach ($data as $appname=>$properties)
         {
-            $appname = preg_replace("/[^A-Za-z0-9]/",'',$appname);
+            $appname = preg_replace("/[^A-Za-z0-9;&]/",'',$appname);
             
             if (gettype($properties)=="object") {
                 $outdata[$appname] = array();
                 foreach ($properties as $property=>$value)
                 {
-                    $property = preg_replace("/[^A-Za-z0-9]/",'',$property);
+                    $property = preg_replace("/[^A-Za-z0-9;&]/",'',$property);
                     if (gettype($value)=="array") {
                         $tmp = array();
                         foreach ($value as $val) $tmp[] = (int) $val;
                         $value = $tmp;
                     } else {
-                        $value = preg_replace("/[^A-Za-z0-9,;£$.]/",'',$value);
+                        echo $value;
+                        $value = preg_replace("/[^A-Za-z0-9,;£$.&]/",'',$value);
                     }
                     
                     $outdata[$appname][$property] = $value;
                 }
             }
         }
-
         // Re-encode for storage in db text field
-        $json = json_encode($outdata);
+        $json = json_encode($outdata, JSON_UNESCAPED_UNICODE);
         
         $result = $this->mysqli->query("SELECT `userid` FROM app_config WHERE `userid`='$userid'");
         if ($result->num_rows) {
@@ -75,7 +75,10 @@ class AppConfig
         $userid = (int) $userid;
         $result = $this->mysqli->query("SELECT `data` FROM app_config WHERE `userid`='$userid'");
         if ($row = $result->fetch_array()) {
-            return json_decode($row['data']);
+            global $route;
+            header('content-type:text;charset=utf-8');
+            $route->format = "text";
+            return $row['data'];
         } else {
             return false;
         }
