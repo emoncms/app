@@ -435,9 +435,9 @@ var app_mysolarpv = {
         start = Math.floor(start/intervalms)*intervalms;
         
         // Load kWh data
-        var solar_kwh_data = feed.getdata(app_mysolarpv.solar_kwh,start,end,interval,0,0);
-        var use_kwh_data = feed.getdata(app_mysolarpv.use_kwh,start,end,interval,0,0);
-        var export_kwh_data = feed.getdata(app_mysolarpv.export_kwh,start,end,interval,0,0);
+        var solar_kwh_data = feed.getdataDMY(app_mysolarpv.solar_kwh,start,end,"daily","");
+        var use_kwh_data = feed.getdataDMY(app_mysolarpv.use_kwh,start,end,"daily","");
+        var export_kwh_data = feed.getdataDMY(app_mysolarpv.export_kwh,start,end,"daily","");
         
         app_mysolarpv.solarused_kwhd_data = [];
         app_mysolarpv.solar_kwhd_data = [];

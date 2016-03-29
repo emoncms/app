@@ -39,6 +39,7 @@ var app_myelectric = {
     
     // Include required javascript libraries
     include: [
+        "Modules/app/lib/feed.js",
         "Modules/app/lib/graph_bars.js",
         "Modules/app/lib/graph_lines.js",
         "Modules/app/lib/timeseries.js",
@@ -65,7 +66,7 @@ var app_myelectric = {
         } else {
             app.config.myelectric = {};
         // if no settings then try auto scanning for feeds with suitable names:
-            var feeds = app_myelectric.getfeedsbyid();
+            var feeds = feed.listbyid();
             for (z in feeds)
             {
                 var name = feeds[z].name.toLowerCase();
@@ -105,7 +106,7 @@ var app_myelectric = {
         $("#myelectric_openconfig").click(function(){
         
             // Load feed list, populate feed selectors and select the selected feed
-            var feeds = app_myelectric.getfeedsbyid();
+            var feeds = feed.listbyid();
             
             var out = ""; 
             for (z in feeds) {
@@ -342,13 +343,13 @@ var app_myelectric = {
             view.start = 1000*Math.floor((view.start/1000)/interval)*interval;
             view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
             
-            timeseries.load(app_myelectric.powerfeed, view.start, view.end, interval);
+            timeseries.load(app_myelectric.powerfeed, feed.getdata(app_myelectric.powerfeed,view.start,view.end,interval,0,0));
         }
         
         // --------------------------------------------------------------------
         // 1) Get last value of feeds
         // --------------------------------------------------------------------
-        var feeds = app_myelectric.getfeedsbyid();
+        var feeds = feed.listbyid();
         app_myelectric.feeds = feeds;
         
         // set the power now value
@@ -429,7 +430,7 @@ var app_myelectric = {
 
         var time = new Date(now.getFullYear(),now.getMonth(),now.getDate()-dayofweek).getTime();
         if (time!=app_myelectric.last_startofweektime) {
-            app_myelectric.startofweek = app_myelectric.getvalue(app_myelectric.dailyfeed,time);
+            app_myelectric.startofweek = feed.getvalue(app_myelectric.dailyfeed,time);
             app_myelectric.last_startofweektime = time;
         }
         if (app_myelectric.startofweek===false) app_myelectric.startofweek = [app_myelectric.startalltime*1000,0];
@@ -443,7 +444,7 @@ var app_myelectric = {
         // MONTH: repeat same process as above
         var time = new Date(now.getFullYear(),now.getMonth(),1).getTime();
         if (time!=app_myelectric.last_startofmonthtime) {
-            app_myelectric.startofmonth = app_myelectric.getvalue(app_myelectric.dailyfeed,time);
+            app_myelectric.startofmonth = feed.getvalue(app_myelectric.dailyfeed,time);
             app_myelectric.last_startofmonthtime = time;
         }
         if (app_myelectric.startofmonth===false) app_myelectric.startofmonth = [app_myelectric.startalltime*1000,0];
@@ -457,7 +458,7 @@ var app_myelectric = {
         // YEAR: repeat same process as above
         var time = new Date(now.getFullYear(),0,1).getTime();
         if (time!=app_myelectric.last_startofyeartime) {
-            app_myelectric.startofyear = app_myelectric.getvalue(app_myelectric.dailyfeed,time);
+            app_myelectric.startofyear = feed.getvalue(app_myelectric.dailyfeed,time);
             app_myelectric.last_startofyeartime = time;
         }
         if (app_myelectric.startofyear===false) app_myelectric.startofyear = [app_myelectric.startalltime*1000,0];     
@@ -496,11 +497,7 @@ var app_myelectric = {
         var end = Math.floor(now.getTime() * 0.001);
         var start = end - interval * Math.round(graph_bars.width/30);
         
-        var data = app_myelectric.getdata({
-          "id":app_myelectric.dailyfeed,
-          "start":start*1000,"end":end*1000,"mode":"daily",
-          "skipmissing":0,"limitinterval":0
-        });
+        var data = feed.getdataDMY(app_myelectric.dailyfeed,start*1000,end*1000,"daily","");
 
         var valid = [];
         // remove nan values from the end.
@@ -539,48 +536,5 @@ var app_myelectric = {
         $("#myelectric_usetoday").html((usetoday_kwh).toFixed(1));
 
         graph_bars.draw('myelectric_placeholder_kwhd',[app_myelectric.daily]);
-    },
-    
-    getfeedsbyid: function()
-    {
-        var feeds = {};
-        $.ajax({                                      
-            url: path+"feed/list.json"+apikeystr,
-            dataType: 'json',
-            async: false,                      
-            success: function(data_in) { feeds = data_in; } 
-        });
-        
-        var byid = {};
-        for (z in feeds) byid[feeds[z].id] = feeds[z];
-        return byid;
-    },
-    
-    getvalue: function(feedid,time) 
-    {
-        var result = app_myelectric.getdata({
-          "id":feedid,
-          "start":time,
-          "end":time+1000,
-          "interval":1
-        });
-        if (result.length==2) return result[0];
-        return false;
-    },
-    
-    getdata: function(args) 
-    {
-        var reqstr = "";
-        for (z in args) reqstr += "&"+z+"="+args[z];
-        reqstr += apikeystr;
-        console.log(reqstr);
-        
-        var data = [];
-        $.ajax({                                      
-            url: path+"feed/data.json", data: reqstr,
-            dataType: 'json', async: false,             
-            success: function(data_in) { data = data_in; } 
-        });
-        return data;
     }
 };
