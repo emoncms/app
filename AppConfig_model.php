@@ -40,7 +40,7 @@ class AppConfig
                 $outdata[$appname] = array();
                 foreach ($properties as $property=>$value)
                 {
-                    $property = preg_replace("/[^A-Za-z0-9;&]/",'',$property);
+                    $property = preg_replace("/[^A-Za-z0-9;&_]/",'',$property);
                     if (gettype($value)=="array") {
                         $tmp = array();
                         foreach ($value as $val) $tmp[] = (int) $val;
