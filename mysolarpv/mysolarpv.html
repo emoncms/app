@@ -13,15 +13,15 @@
     <tr>
         <td style="border:0; width:33%">
             <div class="electric-title">USE NOW</div>
-            <div class="power-value"><span id="usenow">0</span>W</div>
+            <div class="power-value"><span class="usenow">0</span>W</div>
         </td>
         <td style="text-align:center; border:0; width:33%">
-            <div class="electric-title"><span id="balance-label"></span></div>
-            <div class="power-value"><span id="balance"></span></div>
+            <div class="electric-title"><span class="balance-label"></span></div>
+            <div class="power-value"><span class="balance"></span></div>
         </td>
         <td style="text-align:right; border:0; width:33%">
             <div class="electric-title">SOLAR PV</div>
-            <div class="power-value" style="color:#dccc1f"><span id="solarnow">0</span>W</div>
+            <div class="power-value" style="color:#dccc1f"><span class="solarnow">0</span>W</div>
         </td>
         
     </tr>
@@ -29,28 +29,30 @@
     <br>
     
     <div class="visnavblock" style="height:28px; padding-bottom:5px;">
-        <div id="powergraph-navigation">
-            <span class='visnav time' time='1'>1h</span>
-            <span class='visnav time' time='8'>8h</span>
-            <span class='visnav time' time='24'>D</span>
-            <span id='vistimeW' class='visnav time' time='168'>W</span>
-            <span id='vistimeM' class='visnav time' time='720'>M</span>
-            <span id='vistimeY' class='visnav time' time='8760'>Y</span>
+        <div class="powergraph-navigation">
+            <span class="visnav time" time='1'>1h</span>
+            <span class="visnav time" time='8'>8h</span>
+            <span class="visnav time" time='24'>D</span>
+            <span class="vistimeW visnav time" time='168'>W</span>
+            <span class="vistimeM visnav time" time='720'>M</span>
+            <span class="vistimeY visnav time" time='8760'>Y</span>
             <span id='mysolarpv_zoomin' class='visnav' >+</span>
             <span id='mysolarpv_zoomout' class='visnav' >-</span>
             <span id='mysolarpv_left' class='visnav' ><</span>
             <span id='mysolarpv_right' class='visnav' >></span>
         </div>
         
-        <div id="bargraph-navigation" style="display:none">
-            <span id="bargraph-viewall" class="visnav" style="font-size:14px">VIEW ALL</span>
-            <span id="bargraph-viewdaily" class="visnav" style="font-size:14px">DAILY</span>
-            <span id="bargraph-viewmonthly" class="visnav" style="font-size:14px">MONTHLY</span>
-            <span id="bargraph-viewannually" class="visnav" style="font-size:14px">ANNUALLY</span>
+        <div class="bargraph-navigation" style="display:none">
+            <span class="bargraph-viewall visnav" style="font-size:14px">VIEW ALL</span>
+            <!--
+            <span class="bargraph-viewdaily visnav" style="font-size:14px">DAILY</span>
+            <span class="bargraph-viewmonthly visnav" style="font-size:14px">MONTHLY</span>
+            <span class="bargraph-viewannually visnav" style="font-size:14px">ANNUALLY</span>
+            -->
         </div>
         
-        <span id='viewhistory' class='visnav' style="float:right; font-size:14px">VIEW HISTORY</span>
-        <span id='balanceline' class='visnav' style="float:right; font-size:14px">SHOW BALANCE</span>
+        <span class="visnav viewhistory" style="float:right; font-size:14px">VIEW HISTORY</span>
+        <span class="visnav balanceline" style="float:right; font-size:14px">SHOW BALANCE</span>
     </div>
 
     <div id="mysolarpv_placeholder_bound" style="width:100%; height:500px;">
@@ -63,30 +65,30 @@
     <tr>
         <td class="appbox">
             <div class="appbox-title">USE</div>
-            <div><span class="appbox-value" id="total_use_kwh" style="color:#0699fa">0</span> <span class="appbox-units" style="color:#0699fa">kWh</span></div>
+            <div><span class="appbox-value total_use_kwh" style="color:#0699fa">0</span> <span class="appbox-units" style="color:#0699fa">kWh</span></div>
         </td>
         
         <td class="appbox">
             <div class="appbox-title">SOLAR</div>
-            <div><span class="appbox-value" id="total_solar_kwh" style="color:#dccc1f">0</span> <span class="appbox-units" style="color:#dccc1f">kWh</span></div>
+            <div><span class="appbox-value total_solar_kwh" style="color:#dccc1f">0</span> <span class="appbox-units" style="color:#dccc1f">kWh</span></div>
         </td>
         
         <td class="appbox">
             <div class="appbox-title">DIRECT</div>
-            <div style="padding-bottom:5px"><span class="appbox-value" id="total_use_direct_prc" style="color:#89ae65">0</span></div>
-            <div><span class="appbox-units" id="total_use_direct_kwh" style="color:#89ae65">0</span> <span class="appbox-units" style="color:#89ae65">kWh</span></div>
+            <div style="padding-bottom:5px"><span class="appbox-value total_use_direct_prc" style="color:#89ae65">0</span></div>
+            <div><span class="appbox-units total_use_direct_kwh" style="color:#89ae65">0</span> <span class="appbox-units" style="color:#89ae65">kWh</span></div>
         </td>
         
        <td class="appbox">
             <div class="appbox-title">EXPORT</div>
-            <div style="padding-bottom:5px"><span class="appbox-value" id="total_export_prc" style="color:#b7aa1f">0</span></div>
-            <div><span class="appbox-units" id="total_export_kwh" style="color:#b7aa1f">0</span> <span class="appbox-units" style="color:#b7aa1f">kWh</span></div>
+            <div style="padding-bottom:5px"><span class="appbox-value total_export_prc" style="color:#b7aa1f">0</span></div>
+            <div><span class="appbox-units total_export_kwh" style="color:#b7aa1f">0</span> <span class="appbox-units" style="color:#b7aa1f">kWh</span></div>
         </td>
         
         <td class="appbox">
             <div class="appbox-title">GRID</div>
-            <div style="padding-bottom:5px"><span class="appbox-value" id="total_import_prc" style="color:#d52e2e">0</span></div>
-            <div><span class="appbox-units" id="total_import_kwh" style="color:#d52e2e">0</span> <span class="appbox-units" style="color:#d52e2e">kWh</span></div>
+            <div style="padding-bottom:5px"><span class="appbox-value total_import_prc" style="color:#d52e2e">0</span></div>
+            <div><span class="appbox-units total_import_kwh" style="color:#d52e2e">0</span> <span class="appbox-units" style="color:#d52e2e">kWh</span></div>
         </td>
     </tr>
     </table>
@@ -106,10 +108,10 @@
 
         <p class="a2"><b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
 
-        <p class="a2"><b>Setup guide:</b> See setting up feeds for mysolar</p>
+        <!--<p class="a2"><b>Setup guide:</b> See setting up feeds for mysolar</p>-->
 
         <br><br>
-        <img src="Modules/app/images/mysolar_app.png" style="width:600px" class="img-rounded">
+        <img src="Modules/appdev/images/mysolar_app.png" style="width:600px" class="img-rounded">
       </div>
       <div class="span3"><div class="app-config"></div></div>
     </div>

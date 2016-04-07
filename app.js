@@ -12,6 +12,7 @@ var app = {
 
     load: function(appname) 
     {
+        app.log("INFO","app load "+appname);
         app.loaded[appname] = true;
         // We load here the html of the app into an dedicated element for that app
         // when an app is loaded its html remains in the dom even when viewing another app
@@ -62,12 +63,14 @@ var app = {
         
         // Show dashboard if all present, configuration page if not:
         if (!configured) {
+            app.log("INFO",appname+" not configured, showing setup");
             $("#"+appname+"-setup").show();
             configUI(appname, window["app_"+appname].config, app.config[appname]);
+            $(".ajax-loader").hide();
         }
         
         if (configured && app.initialized[appname]==undefined) {
-            console.log("init from load "+appname);
+            app.log("INFO",appname+" configured, running init");
             $("#"+appname+"-block").show();
             window["app_"+appname].config = config_load(window["app_"+appname].config, app.config[appname], feeds);
             app.initialized[appname] = true;
@@ -79,25 +82,34 @@ var app = {
     
     show: function(appname)
     {
+        app.log("INFO","app show "+appname);
+        
+        // Copy back into the loaded app context its datastore
         if (app.datastore[appname]!=undefined) {
             datastore = JSON.parse(JSON.stringify(app.datastore[appname]));
         }
-        
+        //  and view settings
         if (app.view[appname]!=undefined) { 
             view.start = app.view[appname].start;
             view.end = app.view[appname].end;
         }
         
-        if (app.loaded[appname]==undefined) app.load(appname);
+        // If the app has not been loaded before: run load
+        if (app.loaded[appname]==undefined) {
+            app.load(appname);
+        }
+        
         $(".apps").hide();
         $("#app_"+appname).show();
         if (window["app_"+appname]!=undefined && app.initialized[appname]!=undefined) {
+            $(".ajax-loader").show();
             window["app_"+appname].show();
         }
     },
     
     hide: function(appname)
     {
+        app.log("INFO","app hide "+appname);
         app.datastore[appname] = JSON.parse(JSON.stringify(datastore));
         app.view[appname] = {start:view.start, end:view.end};
         
@@ -110,7 +122,22 @@ var app = {
         var config = {};
         var apikeystr = "";
         if (window.apikey!=undefined) apikeystr = "?apikey="+apikey;
-        $.ajax({ url: path+"app/getconfig.json"+apikeystr, dataType: 'json', async: false, success: function(data) {config = data;} });
+        $.ajax({ 
+            url: path+"app/getconfig.json"+apikeystr, 
+            dataType: 'json',
+            async: false, 
+            success: function(result) {
+
+                if (result.success!=undefined && !result.success) 
+                    app.error("ERROR",config.message);
+
+                if (!result || result==null || result=="" || result.constructor!=Object) {
+                    app.log("ERROR","app.getconfig invalid response: "+result);
+                }
+                
+                config = result;
+            } 
+        });
         app.config = config;
     },
     
@@ -121,6 +148,24 @@ var app = {
         var feeds = feed.listbyname();
         window["app_"+appname].config = config_load(window["app_"+appname].config, app.config[appname], feeds);
         
-        $.ajax({ url: path+"app/setconfig.json", data: "data="+JSON.stringify(app.config), async: false, success: function(data){} });
+        $.ajax({ 
+            url: path+"app/setconfig.json", 
+            data: "data="+JSON.stringify(app.config),
+            dataType: 'text',
+            async: false, 
+            success: function(result){
+                try {
+                    result = JSON.parse(result);
+                    if (result.success!=undefined && !result.success) app.error("ERROR",result.message);
+                } catch (e) {
+                    app.log("ERROR","Could not parse /setconfig reply, error: "+e);
+                }
+            } 
+        });
+    },
+    
+    log: function(level, message) {
+        if (level=="ERROR") alert(level+": "+message);
+        console.log(level+": "+message);
     }
 };

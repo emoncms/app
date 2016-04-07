@@ -1,6 +1,13 @@
 <?php
-    global $path; 
-    $apikey = $_GET['apikey'];
+    global $path, $session, $user;
+    
+    if (isset($_GET['readkey'])) {
+        $apikey = $_GET['readkey'];
+    } elseif (isset($_GET['apikey'])) {
+        $apikey = $_GET['apikey'];
+    }
+    
+    if (isset($session['write']) && $session['write']) $apikey = $user->get_apikey_write($session['userid']);
 ?>
 
 <script>
@@ -16,6 +23,9 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/config.js"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/feed.js"></script>        
 <div id="content"></div>
+
+<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
+
 
 <script>
 
@@ -42,7 +52,6 @@ $(window).on('hashchange', function() {
     app.hide(appname);
     req = parse_location_hash(window.location.hash)
     appname = req[0];
-    app.load(appname);
     app.show(appname);
 });
 
@@ -59,18 +68,21 @@ $("body").on("click",".openconfig",function(){
 });
 
 $("body").on("click",".launchapp",function(){
-    console.log("launching "+appname);
+    app.log("INFO",appname+" launch");
+    $(".ajax-loader").show();
+    
     $("#"+appname+"-setup").hide();
     $("#"+appname+"-block").show();
     
     if (app.initialized[appname]==undefined) {
-        console.log("init "+appname);
         app.initialized[appname] = true;
         window["app_"+appname].init();
     }
-    
-    console.log("show "+appname);
     window["app_"+appname].show();
+});
+
+$(window).resize(function(){
+    window["app_"+appname].resize();
 });
 
 function parse_location_hash(hash)

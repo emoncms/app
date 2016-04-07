@@ -6,8 +6,8 @@ var app_myenergy = {
                              // it is used to scale the share of UK Wind power
 
     config: {
-        "use":{"type":"feed", "autoname":"use", "engine":5, "description":"House or building use in watts"},
-        "solar":{"type":"feed", "autoname":"solar", "engine":5, "description":"Solar pv generation in watts"},
+        "use":{"type":"feed", "autoname":"use", "engine":"5,6", "description":"House or building use in watts"},
+        "solar":{"optional":true, "type":"feed", "autoname":"solar", "engine":"5,6", "description":"Solar pv generation in watts"},
         "windkwh":{"type":"value", "default":2000, "name": "kWh Wind", "description":"kWh of wind energy bought annually"}
     },
     
@@ -39,8 +39,9 @@ var app_myenergy = {
     // App start function
     init: function()
     {
+        app.log("INFO","myenergy init");
+        
         app_myenergy.my_wind_cap = ((app_myenergy.annual_wind_gen / 365) / 0.024) / app_myenergy.capacity_factor;
-                
         this.my_wind_cap = ((this.annual_wind_gen / 365) / 0.024) / this.capacity_factor;
         
         var timeWindow = (3600000*6.0*1);
@@ -60,7 +61,7 @@ var app_myenergy = {
             app_myenergy.draw();
         });
         
-        $("#balanceline").click(function () { 
+        $(".balanceline").click(function () { 
             if ($(this).html()=="Show balance") {
                 app_myenergy.show_balance_line = 1;
                 app_myenergy.draw();
@@ -86,25 +87,23 @@ var app_myenergy = {
 
             app_myenergy.draw();
         });
- 
-        $(window).resize(function(){
-            app_myenergy.resize();
-            app_myenergy.draw();
-        });
     },
 
     show: function() 
     {
+        app.log("INFO","myenergy show");
         // this.reload = true;
-        this.livefn();
-        this.live = setInterval(this.livefn,5000);
-
         app_myenergy.resize();
         app_myenergy.draw();
+        
+        this.livefn();
+        this.live = setInterval(this.livefn,5000);
     },
     
     resize: function() 
     {
+        app.log("INFO","myenergy resize");
+        
         var top_offset = 0;
         var placeholder_bound = $('#myenergy_placeholder_bound');
         var placeholder = $('#myenergy_placeholder');
@@ -124,22 +123,24 @@ var app_myenergy = {
             $(".power-value").css("padding-top","12px");
             $(".power-value").css("padding-bottom","8px");
             $(".midtext").css("font-size","14px");
-            $("#balanceline").hide();
+            $(".balanceline").hide();
         } else if (width<=724) {
             $(".electric-title").css("font-size","18px");
             $(".power-value").css("font-size","52px");
             $(".power-value").css("padding-top","22px");
             $(".power-value").css("padding-bottom","12px");
             $(".midtext").css("font-size","18px");
-            $("#balanceline").show();
+            $(".balanceline").show();
         } else {
             $(".electric-title").css("font-size","22px");
             $(".power-value").css("font-size","85px");
             $(".power-value").css("padding-top","40px");
             $(".power-value").css("padding-bottom","20px");
             $(".midtext").css("font-size","20px");
-            $("#balanceline").show();
+            $(".balanceline").show();
         }
+        
+        app_myenergy.draw();
     },
     
     hide: function() 
@@ -156,20 +157,27 @@ var app_myenergy = {
         app_myenergy.lastupdate = now;
         
         var feeds = feed.listbyid();
-        var solar_now = parseInt(feeds[app_myenergy.config.solar.value].value);
+        var solar_now = 0; 
+        if (app_myenergy.config.solar.value) 
+            solar_now = parseInt(feeds[app_myenergy.config.solar.value].value);
+            
         var use_now = parseInt(feeds[app_myenergy.config.use.value].value);
 
-        var gridwind = app_myenergy.getvalueremote(67088);
+        var gridwind = feed.getvalueremote(67088);
         var average_power = ((app_myenergy.config.windkwh.value/365.0)/0.024);
         var wind_now = Math.round((average_power / app_myenergy.average_wind_power) * gridwind);
         
         if (app_myenergy.autoupdate) {
-            timeseries.append("solar",feeds[app_myenergy.config.solar.value].time,solar_now);
-            timeseries.trim_start("solar",view.start*0.001);
-            timeseries.append("use",feeds[app_myenergy.config.use.value].time,use_now);
+            var updatetime = feeds[app_myenergy.config.use.value].time;
+            
+            if (app_myenergy.config.solar.value) {
+                timeseries.append("solar",updatetime,solar_now);
+                timeseries.trim_start("solar",view.start*0.001);
+            }
+                
+            timeseries.append("use",updatetime,use_now);
             timeseries.trim_start("use",view.start*0.001);
-
-            timeseries.append("remotewind",now,gridwind);
+            timeseries.append("remotewind",updatetime,gridwind);
             timeseries.trim_start("remotewind",view.start*0.001);
             
             var timerange = view.end - view.start;
@@ -183,25 +191,24 @@ var app_myenergy = {
         var balance = gen_now - use_now;
         
         if (balance==0) {
-            $("#balance-label").html("");
-            $("#balance").html("");
+            $(".balance-label").html("");
+            $(".balance").html("");
         }
         
         if (balance>0) {
-            $("#balance-label").html("EXESS:");
-            $("#balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
+            $(".balance-label").html("EXESS:");
+            $(".balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
         }
         
         if (balance<0) {
-            $("#balance-label").html("BACKUP:");
-            $("#balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
+            $(".balance-label").html("BACKUP:");
+            $(".balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
         }
         
-        $("#gennow").html(Math.round(gen_now));
-        $("#solarnow").html(Math.round(solar_now));
-        $("#windnow").html(Math.round(wind_now));
-        
-        $("#usenow").html(use_now);
+        $(".gennow").html(Math.round(gen_now));
+        $(".solarnow").html(Math.round(solar_now));
+        $(".windnow").html(Math.round(wind_now));
+        $(".usenow").html(Math.round(use_now));
         
         if (app_myenergy.autoupdate) app_myenergy.draw();
     },
@@ -223,7 +230,10 @@ var app_myenergy = {
         
         var npoints = 1500;
         interval = Math.round(((view.end - view.start)/npoints)/1000);
-        if (interval<10) interval = 10;
+        var intervalms = interval * 1000;
+
+        view.start = Math.ceil(view.start/intervalms)*intervalms;
+        view.end = Math.ceil(view.end/intervalms)*intervalms;
 
         var npoints = parseInt((view.end-view.start)/(interval*1000));
         
@@ -236,12 +246,13 @@ var app_myenergy = {
             view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
             
             var feedid = app_myenergy.config.solar.value;
-            timeseries.load("solar",feed.getdata(feedid,view.start,view.end,interval,0,0));
+            if (feedid!=false)
+                timeseries.load("solar",feed.getdata(feedid,view.start,view.end,interval,0,0));
         
             var feedid = app_myenergy.config.use.value;
             timeseries.load("use",feed.getdata(feedid,view.start,view.end,interval,0,0));
             
-            timeseries.load("remotewind",this.getdataremote(67088,view.start,view.end,interval));          
+            timeseries.load("remotewind",feed.getdataremote(67088,view.start,view.end,interval));          
         }
         // -------------------------------------------------------------------------------------------------------
         
@@ -262,19 +273,14 @@ var app_myenergy = {
         var total_use_kwh = 0;
         var total_use_direct_kwh = 0;
         
-        var datastart = view.start;
-        // for (var z in datastore) {
-        //   npoints = datastore[z].data.length;
-        //   if (npoints>0)
-        //       datastart = datastore[z].data[0][0];
-        //}
-        
-        for (var z=0; z<npoints; z++) {
+        var datastart = timeseries.start_time("use");
+        for (var z=0; z<timeseries.length("use"); z++) {
 
             // -------------------------------------------------------------------------------------------------------
             // Get solar or use values
             // -------------------------------------------------------------------------------------------------------
-            if (timeseries.value("solar",z)!=null) solar_now = timeseries.value("solar",z);  
+            if (app_myenergy.config.solar.value && timeseries.value("solar",z)!=null) 
+                solar_now = timeseries.value("solar",z);  
             if (timeseries.value("use",z)!=null) use_now = timeseries.value("use",z);
             
             if (timeseries.value("remotewind",z)!=null) {
@@ -311,15 +317,15 @@ var app_myenergy = {
             
             t += interval;
         }
-        $("#total_wind_kwh").html(total_wind_kwh.toFixed(1));
-        $("#total_solar_kwh").html(total_solar_kwh.toFixed(1));
-        $("#total_use_kwh").html((total_use_kwh).toFixed(1));
+        $(".total_wind_kwh").html(total_wind_kwh.toFixed(1));
+        $(".total_solar_kwh").html(total_solar_kwh.toFixed(1));
+        $(".total_use_kwh").html((total_use_kwh).toFixed(1));
         
-        $("#total_use_direct_prc").html(Math.round(100*total_use_direct_kwh/total_use_kwh)+"%");
-        $("#total_use_via_store_prc").html(Math.round(100*(1-(total_use_direct_kwh/total_use_kwh)))+"%");
+        $(".total_use_direct_prc").html(Math.round(100*total_use_direct_kwh/total_use_kwh)+"%");
+        $(".total_use_via_store_prc").html(Math.round(100*(1-(total_use_direct_kwh/total_use_kwh)))+"%");
 
-        $("#total_use_direct_kwh").html((total_use_direct_kwh).toFixed(1));
-        $("#total_use_via_store_kwh").html((total_use_kwh-total_use_direct_kwh).toFixed(1));        
+        $(".total_use_direct_kwh").html((total_use_direct_kwh).toFixed(1));
+        $(".total_use_via_store_kwh").html((total_use_kwh-total_use_direct_kwh).toFixed(1));        
 
         options.xaxis.min = view.start;
         options.xaxis.max = view.end;
@@ -333,31 +339,6 @@ var app_myenergy = {
         if (app_myenergy.show_balance_line) series.push({data:store_data,yaxis:2, color: "#888"});
         
         $.plot($('#myenergy_placeholder'),series,options);
-    },
-    
-    getdataremote: function(id,start,end,interval)
-    {   
-        var data = [];
-        $.ajax({                                      
-            url: path+"app/dataremote.json",
-            data: "id="+id+"&start="+start+"&end="+end+"&interval="+interval+"&skipmissing=0&limitinterval=0",
-            dataType: 'json',
-            async: false,                      
-            success: function(data_in) { data = data_in; } 
-        });
-        return data;
-    },
-    
-    getvalueremote: function(id)
-    {   
-        var value = 0;
-        $.ajax({                                      
-            url: path+"app/valueremote.json",                       
-            data: "id="+id, dataType: 'text', async: false,                      
-            success: function(data_in) {
-                value = data_in;
-            } 
-        });
-        return value;
+        $(".ajax-loader").hide();
     }
 }

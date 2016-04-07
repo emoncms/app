@@ -143,3 +143,13 @@ input[type=text] {
     font-weight:bold;
     font-size:16px;
 }
+
+.ajax-loader{
+    width:32px;
+    height:32px;
+    position:fixed;
+    top:50%;
+    left:50%;
+    margin-top:-16px; /* negative half the size of height */
+    margin-left:-16px; /* negative half the size of width */
+}

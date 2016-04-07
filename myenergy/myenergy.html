@@ -13,16 +13,16 @@
     <tr>
         <td style="border:0; width:30%; vertical-align:top">
             <div class="electric-title">POWER NOW</div>
-            <div class="power-value"><span id="usenow">0</span>W</div>
+            <div class="power-value"><span class="usenow">0</span>W</div>
         </td>
         <td style="text-align:left; border:0; width:40%; vertical-align:top">
-            <div class="electric-title"><span id="balance-label"></span></div>
-            <div class="power-value"><span id="balance"></span></div>
+            <div class="electric-title"><span class="balance-label"></span></div>
+            <div class="power-value"><span class="balance"></span></div>
         </td>
         <td style="text-align:right; border:0; width:30%">
             <div class="electric-title">RENEWABLE GEN</div>
-            <div class="power-value"><span id="gennow">0</span>W</div>
-            <div class="electric-title"><span style="color:#dccc1f">SOLAR: <span id="solarnow">0</span>W</span> | <span style="color:#2ed52e">WIND: <span id="windnow">0</span>W</span></div>
+            <div class="power-value"><span class="gennow">0</span>W</div>
+            <div class="electric-title"><span style="color:#dccc1f">SOLAR: <span class="solarnow">0</span>W</span> | <span style="color:#2ed52e">WIND: <span class="windnow">0</span>W</span></div>
         </td>
         
     </tr>
@@ -30,17 +30,17 @@
     <br>
 
     <div class="visnavblock" style="height:28px; padding-bottom:5px;">
-        <span class='visnav time' time='3'>3h</span>
-        <span class='visnav time' time='6'>6h</span>
-        <span class='visnav time' time='24'>D</span>
-        <span class='visnav time' time='168'>W</span>
-        <span class='visnav time' time='720'>M</span>
-        <span class='visnav time' time='8760'>Y</span>
+        <span class="visnav time" time='3'>3h</span>
+        <span class="visnav time" time='6'>6h</span>
+        <span class="visnav time" time='24'>D</span>
+        <span class="visnav time" time='168'>W</span>
+        <span class="visnav time" time='720'>M</span>
+        <span class="visnav time" time='8760'>Y</span>
         <span id='myenergy_zoomin' class='visnav' >+</span>
         <span id='myenergy_zoomout' class='visnav' >-</span>
         <span id='myenergy_left' class='visnav' ><</span>
         <span id='myenergy_right' class='visnav' >></span>
-        <span id='balanceline' class='visnav' style="float:right">Show balance</span>
+        <span class="balanceline visnav" style="float:right">Show balance</span>
     </div>
 
     <div id="myenergy_placeholder_bound" style="width:100%; height:500px;">
@@ -53,29 +53,29 @@
     <tr>
         <td class="appbox">
             <div class="appbox-title">HOUSE</div>
-            <div><span class="appbox-value" id="total_use_kwh" style="color:#0699fa">0</span> <span class="appbox-units" style="color:#0699fa">kWh</span></div>
+            <div><span class="appbox-value total_use_kwh" style="color:#0699fa">0</span> <span class="appbox-units" style="color:#0699fa">kWh</span></div>
         </td>
         
         <td class="appbox">
             <div class="appbox-title">WIND</div>
-            <div><span class="appbox-value" id="total_wind_kwh" style="color:#2ed52e">0</span> <span class="appbox-units" style="color:#2ed52e">kWh</span></div>
+            <div><span class="appbox-value total_wind_kwh" style="color:#2ed52e">0</span> <span class="appbox-units" style="color:#2ed52e">kWh</span></div>
         </td>
         
         <td class="appbox">
             <div class="appbox-title">SOLAR</div>
-            <div><span class="appbox-value" id="total_solar_kwh" style="color:#dccc1f">0</span> <span class="appbox-units" style="color:#dccc1f">kWh</span></div>
+            <div><span class="appbox-value total_solar_kwh" style="color:#dccc1f">0</span> <span class="appbox-units" style="color:#dccc1f">kWh</span></div>
         </td>
         
         <td class="appbox">
             <div class="appbox-title">DIRECT</div>
-            <div style="padding-bottom:5px"><span class="appbox-value" id="total_use_direct_prc" style="color:#1ec51e">0</span></div>
-            <div><span class="appbox-units" id="total_use_direct_kwh" style="color:#1ec51e">0</span> <span class="appbox-units" style="color:#1ec51e">kWh</span></div>
+            <div style="padding-bottom:5px"><span class="appbox-value total_use_direct_prc" style="color:#1ec51e">0</span></div>
+            <div><span class="appbox-units total_use_direct_kwh" style="color:#1ec51e">0</span> <span class="appbox-units" style="color:#1ec51e">kWh</span></div>
         </td>
         
         <td class="appbox">
             <div class="appbox-title">GRID</div>
-            <div style="padding-bottom:5px"><span class="appbox-value" id="total_use_via_store_prc" style="color:#d52e2e">0</span></div>
-            <div><span class="appbox-units" id="total_use_via_store_kwh" style="color:#d52e2e">0</span> <span class="appbox-units" style="color:#d52e2e">kWh</span></div>
+            <div style="padding-bottom:5px"><span class="appbox-value total_use_via_store_prc" style="color:#d52e2e">0</span></div>
+            <div><span class="appbox-units total_use_via_store_kwh" style="color:#d52e2e">0</span> <span class="appbox-units" style="color:#d52e2e">kWh</span></div>
         </td>
     </tr>
     </table>
@@ -95,7 +95,7 @@
         <p class="a2"><b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
 
         <br><br>
-        <img src="Modules/app/images/myenergy_app.png" style="width:600px; background-color:#333" class="img-polaroid">
+        <img src="Modules/appdev/images/myenergy_app.png" style="width:600px; background-color:#333" class="img-polaroid">
       </div>
       <div class="span3"><div class="app-config"></div></div>
     </div>

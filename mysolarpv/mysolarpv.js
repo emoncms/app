@@ -1,12 +1,12 @@
 var app_mysolarpv = {
 
     config: {
-        "use":{"type":"feed", "autoname":"use", "engine":5, "description":"House or building use in watts"},
-        "solar":{"type":"feed", "autoname":"solar", "engine":5, "description":"Solar pv generation in watts"},
+        "use":{"type":"feed", "autoname":"use", "engine":"5,6", "description":"House or building use in watts"},
+        "solar":{"type":"feed", "autoname":"solar", "engine":"5,6", "description":"Solar pv generation in watts"},
         //"export":{"type":"feed", "autoname":"export", "engine":5, "description":"Exported solar in watts"},
-        "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative use in kWh"},
-        "solar_kwh":{"type":"feed", "autoname":"solar_kwh", "engine":5, "description":"Cumulative solar generation in kWh"},
-        "export_kwh":{"type":"feed", "autoname":"export_kwh", "engine":5, "description":"Cumulative exported solar in kWh"},
+        "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative use in kWh"},
+        "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5, "description":"Cumulative solar generation in kWh"},
+        "export_kwh":{"optional":true, "type":"feed", "autoname":"export_kwh", "engine":5, "description":"Cumulative exported solar in kWh"},
         //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
     },
     
@@ -22,6 +22,8 @@ var app_mysolarpv = {
     historyseries: [],
     latest_start_time: 0,
     panning: false,
+    
+    bargraph_initialized: false,
 
     // Include required javascript libraries
     include: [
@@ -36,13 +38,18 @@ var app_mysolarpv = {
     // App start function
     init: function()
     {        
-        console.log("mysolarpv:init");
+        app.log("INFO","mysolarpv init");
     
         var timeWindow = (3600000*6.0*1);
         view.end = +new Date;
         view.start = view.end - timeWindow;
         
-        app_mysolarpv.init_bargraph();
+        if (app_mysolarpv.config.solar_kwh.value && app_mysolarpv.config.use_kwh.value && app_mysolarpv.config.export_kwh.value) {
+            app_mysolarpv.init_bargraph();
+            $(".viewhistory").show();
+        } else {
+            $(".viewhistory").hide();
+        }
         
         // The first view is the powergraph, we load the events for the power graph here.
         if (app_mysolarpv.view=="powergraph") app_mysolarpv.powergraph_events();
@@ -61,7 +68,7 @@ var app_mysolarpv = {
             app_mysolarpv.draw();
         });
         
-        $("#balanceline").click(function () { 
+        $(".balanceline").click(function () { 
             if ($(this).html()=="SHOW BALANCE") {
                 app_mysolarpv.show_balance_line = 1;
                 app_mysolarpv.draw();
@@ -73,50 +80,52 @@ var app_mysolarpv = {
             }
         });
         
-        $("#viewhistory").click(function () { 
+        $(".viewhistory").click(function () { 
             if ($(this).html()=="VIEW HISTORY") {
                 app_mysolarpv.view = "bargraph";
-                $("#balanceline").hide();
-                $("#powergraph-navigation").hide();
-                $("#bargraph-navigation").show();
+                $(".balanceline").hide();
+                $(".powergraph-navigation").hide();
+                $(".bargraph-navigation").show();
                 
                 app_mysolarpv.draw();
-                setTimeout(function() { $("#viewhistory").html("POWER VIEW"); },80);
+                setTimeout(function() { $(".viewhistory").html("POWER VIEW"); },80);
             } else {
                 
                 app_mysolarpv.view = "powergraph";
-                $("#balanceline").show();
-                $("#bargraph-navigation").hide();
-                $("#powergraph-navigation").show();
+                $(".balanceline").show();
+                $(".bargraph-navigation").hide();
+                $(".powergraph-navigation").show();
                 
                 app_mysolarpv.draw();
                 app_mysolarpv.powergraph_events();
-                setTimeout(function() { $("#viewhistory").html("VIEW HISTORY"); },80);
+                setTimeout(function() { $(".viewhistory").html("VIEW HISTORY"); },80);
             }
-        });
-
-        $(window).resize(function(){
-            app_mysolarpv.resize();
-            app_mysolarpv.draw();
-        });
-        
-        
+        });        
     },
 
     show: function() 
     {
-        console.log("mysolarpv:show");
+        app.log("INFO","mysolarpv show");
+        
+        if (app_mysolarpv.config.solar_kwh.value && app_mysolarpv.config.use_kwh.value && app_mysolarpv.config.export_kwh.value) {
+            if (!app_mysolarpv.bargraph_initialized) app_mysolarpv.init_bargraph();
+            $(".viewhistory").show();
+        } else {
+            $(".viewhistory").hide();
+        }
+        
+        app_mysolarpv.resize();
         
         // this.reload = true;
         app_mysolarpv.livefn();
         app_mysolarpv.live = setInterval(app_mysolarpv.livefn,5000);
 
-        app_mysolarpv.resize();
-        app_mysolarpv.draw();
     },
     
     resize: function() 
     {
+        app.log("INFO","mysolarpv resize");
+        
         var top_offset = 0;
         var placeholder_bound = $('#mysolarpv_placeholder_bound');
         var placeholder = $('#mysolarpv_placeholder');
@@ -136,31 +145,32 @@ var app_mysolarpv = {
             $(".power-value").css("padding-top","12px");
             $(".power-value").css("padding-bottom","8px");
             $(".midtext").css("font-size","14px");
-            $("#balanceline").hide();
-            $("#vistimeW").hide();
-            $("#vistimeM").hide();
-            $("#vistimeY").hide();
+            $(".balanceline").hide();
+            $(".vistimeW").hide();
+            $(".vistimeM").hide();
+            $(".vistimeY").hide();
         } else if (width<=724) {
             $(".electric-title").css("font-size","18px");
             $(".power-value").css("font-size","52px");
             $(".power-value").css("padding-top","22px");
             $(".power-value").css("padding-bottom","12px");
             $(".midtext").css("font-size","18px");
-            $("#balanceline").show();
-            $("#vistimeW").show();
-            $("#vistimeM").show();
-            $("#vistimeY").show();
+            $(".balanceline").show();
+            $(".vistimeW").show();
+            $(".vistimeM").show();
+            $(".vistimeY").show();
         } else {
             $(".electric-title").css("font-size","22px");
             $(".power-value").css("font-size","85px");
             $(".power-value").css("padding-top","40px");
             $(".power-value").css("padding-bottom","20px");
             $(".midtext").css("font-size","20px");
-            $("#balanceline").show();
-            $("#vistimeW").show();
-            $("#vistimeM").show();
-            $("#vistimeY").show();
+            $(".balanceline").show();
+            $(".vistimeW").show();
+            $(".vistimeM").show();
+            $(".vistimeY").show();
         }
+        app_mysolarpv.draw();
     },
     
     hide: function() 
@@ -181,9 +191,10 @@ var app_mysolarpv = {
         var use_now = parseInt(feeds[app_mysolarpv.config.use.value].value);
         
         if (app_mysolarpv.autoupdate) {
-            timeseries.append("solar",feeds[app_mysolarpv.config.solar.value].time,solar_now);
+            var updatetime = feeds[app_mysolarpv.config.solar.value].time;
+            timeseries.append("solar",updatetime,solar_now);
             timeseries.trim_start("solar",view.start*0.001);
-            timeseries.append("use",feeds[app_mysolarpv.config.use.value].time,use_now);
+            timeseries.append("use",updatetime,use_now);
             timeseries.trim_start("use",view.start*0.001);
 
             // Advance view
@@ -198,22 +209,22 @@ var app_mysolarpv = {
         var balance = solar_now - use_now;
         
         if (balance==0) {
-            $("#balance-label").html("PERFECT BALANCE");
-            $("#balance").html("");
+            $(".balance-label").html("PERFECT BALANCE");
+            $(".balance").html("");
         }
         
         if (balance>0) {
-            $("#balance-label").html("EXPORTING");
-            $("#balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
+            $(".balance-label").html("EXPORTING");
+            $(".balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
         }
         
         if (balance<0) {
-            $("#balance-label").html("IMPORTING");
-            $("#balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
+            $(".balance-label").html("IMPORTING");
+            $(".balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
         }
         
-        $("#solarnow").html(solar_now);
-        $("#usenow").html(use_now);
+        $(".solarnow").html(solar_now);
+        $(".usenow").html(use_now);
         
         // Only redraw the graph if its the power graph and auto update is turned on
         if (app_mysolarpv.view=="powergraph" && app_mysolarpv.autoupdate) app_mysolarpv.draw();
@@ -242,6 +253,10 @@ var app_mysolarpv = {
         var npoints = 1500;
         interval = Math.round(((view.end - view.start)/npoints)/1000);
         if (interval<10) interval = 10;
+        var intervalms = interval * 1000;
+
+        view.start = Math.ceil(view.start/intervalms)*intervalms;
+        view.end = Math.ceil(view.end/intervalms)*intervalms;
 
         var npoints = parseInt((view.end-view.start)/(interval*1000));
         
@@ -271,13 +286,12 @@ var app_mysolarpv = {
         var total_use_kwh = 0;
         var total_use_direct_kwh = 0;
         
-        var datastart = view.start;
-        //for (var z in datastore) {
-            //datastart = datastore[z].data[0][0];
-            //npoints = datastore[z].data.length;
-        //}
+        var datastart = timeseries.start_time("solar");
         
-        for (var z=0; z<npoints; z++) {
+        console.log(timeseries.length("solar"));
+        console.log(timeseries.length("use"));
+        
+        for (var z=0; z<timeseries.length("solar"); z++) {
 
             // -------------------------------------------------------------------------------------------------------
             // Get solar or use values
@@ -308,17 +322,17 @@ var app_mysolarpv = {
             
             t += interval;
         }
-        $("#total_solar_kwh").html(total_solar_kwh.toFixed(1));
-        $("#total_use_kwh").html((total_use_kwh).toFixed(1));
+        $(".total_solar_kwh").html(total_solar_kwh.toFixed(1));
+        $(".total_use_kwh").html((total_use_kwh).toFixed(1));
         
-        $("#total_use_direct_prc").html(Math.round(100*total_use_direct_kwh/total_use_kwh)+"%");
-        $("#total_use_direct_kwh").html((total_use_direct_kwh).toFixed(1));
+        $(".total_use_direct_prc").html(Math.round(100*total_use_direct_kwh/total_use_kwh)+"%");
+        $(".total_use_direct_kwh").html((total_use_direct_kwh).toFixed(1));
 
-        $("#total_export_kwh").html((total_solar_kwh-total_use_direct_kwh).toFixed(1));
-        $("#total_export_prc").html((((total_solar_kwh-total_use_direct_kwh)/total_solar_kwh)*100).toFixed(0)+"%");
+        $(".total_export_kwh").html((total_solar_kwh-total_use_direct_kwh).toFixed(1));
+        $(".total_export_prc").html((((total_solar_kwh-total_use_direct_kwh)/total_solar_kwh)*100).toFixed(0)+"%");
                 
-        $("#total_import_prc").html(Math.round(100*(1-(total_use_direct_kwh/total_use_kwh)))+"%");
-        $("#total_import_kwh").html((total_use_kwh-total_use_direct_kwh).toFixed(1));        
+        $(".total_import_prc").html(Math.round(100*(1-(total_use_direct_kwh/total_use_kwh)))+"%");
+        $(".total_import_kwh").html((total_use_kwh-total_use_direct_kwh).toFixed(1));        
 
         options.xaxis.min = view.start;
         options.xaxis.max = view.end;
@@ -331,6 +345,7 @@ var app_mysolarpv = {
         if (app_mysolarpv.show_balance_line) series.push({data:store_data,yaxis:2, color: "#888"});
         
         $.plot($('#mysolarpv_placeholder'),series,options);
+        $(".ajax-loader").hide();
     },
 
     // ------------------------------------------------------------------------------------------
@@ -368,6 +383,7 @@ var app_mysolarpv = {
     // - calculate used solar, solar, used and exported kwh/d
     // --------------------------------------------------------------------------------------
     init_bargraph: function() {
+        app_mysolarpv.bargraph_initialized = true;
         // Fetch the start_time covering all kwh feeds - this is used for the 'all time' button
         var latest_start_time = 0;
         var solar_meta = feed.getmeta(app_mysolarpv.config.solar_kwh.value);
@@ -413,10 +429,10 @@ var app_mysolarpv = {
             if (export_kwh_data[day][1]==null || export_kwh_data[day-1][1]==null) export_kwh = null;
             
             if (solar_kwh!=null && use_kwh!=null & export_kwh!=null) {
-                app_mysolarpv.solarused_kwhd_data.push([solar_kwh_data[day][0],solar_kwh - export_kwh]);
-                app_mysolarpv.solar_kwhd_data.push([solar_kwh_data[day][0],solar_kwh]);
-                app_mysolarpv.use_kwhd_data.push([use_kwh_data[day][0],use_kwh]);
-                app_mysolarpv.export_kwhd_data.push([export_kwh_data[day][0],export_kwh*-1]);
+                app_mysolarpv.solarused_kwhd_data.push([solar_kwh_data[day-1][0],solar_kwh - export_kwh]);
+                app_mysolarpv.solar_kwhd_data.push([solar_kwh_data[day-1][0],solar_kwh]);
+                app_mysolarpv.use_kwhd_data.push([use_kwh_data[day-1][0],use_kwh]);
+                app_mysolarpv.export_kwhd_data.push([export_kwh_data[day-1][0],export_kwh*-1]);
             }
         }
         
@@ -479,7 +495,7 @@ var app_mysolarpv = {
         $('#mysolarpv_placeholder').unbind("plotclick");
         $('#mysolarpv_placeholder').unbind("plothover");
         $('#mysolarpv_placeholder').unbind("plotselected");
-        $('#bargraph-viewall').unbind("click");
+        $('.bargraph-viewall').unbind("click");
         
         // Show day's figures on the bottom of the page
 		    $('#mysolarpv_placeholder').bind("plothover", function (event, pos, item)
@@ -494,17 +510,17 @@ var app_mysolarpv = {
                 var export_kwhd = app_mysolarpv.export_kwhd_data[z][1];
                 var imported_kwhd = use_kwhd-solarused_kwhd;
                 
-                $("#total_solar_kwh").html((solar_kwhd).toFixed(1));
-                $("#total_use_kwh").html((use_kwhd).toFixed(1));
+                $(".total_solar_kwh").html((solar_kwhd).toFixed(1));
+                $(".total_use_kwh").html((use_kwhd).toFixed(1));
                 
-                $("#total_use_direct_prc").html(((solarused_kwhd/use_kwhd)*100).toFixed(0)+"%");
-                $("#total_use_direct_kwh").html((solarused_kwhd).toFixed(1));
+                $(".total_use_direct_prc").html(((solarused_kwhd/use_kwhd)*100).toFixed(0)+"%");
+                $(".total_use_direct_kwh").html((solarused_kwhd).toFixed(1));
                 
-                $("#total_export_kwh").html((export_kwhd*-1).toFixed(1));
-                $("#total_export_prc").html(((export_kwhd/solar_kwhd)*100*-1).toFixed(0)+"%");
+                $(".total_export_kwh").html((export_kwhd*-1).toFixed(1));
+                $(".total_export_prc").html(((export_kwhd/solar_kwhd)*100*-1).toFixed(0)+"%");
                 
-                $("#total_import_prc").html(((imported_kwhd/use_kwhd)*100).toFixed(0)+"%");
-                $("#total_import_kwh").html((imported_kwhd).toFixed(1));
+                $(".total_import_prc").html(((imported_kwhd/use_kwhd)*100).toFixed(0)+"%");
+                $(".total_import_kwh").html((imported_kwhd).toFixed(1));
                 
             }
         });
@@ -519,10 +535,10 @@ var app_mysolarpv = {
                 view.end = app_mysolarpv.solar_kwhd_data[z][0];
                 view.start = view.end - 86400*1000;
 
-                $("#balanceline").show();
-                $("#bargraph-navigation").hide();
-                $("#powergraph-navigation").show();
-                $("#viewhistory").html("VIEW HISTORY");
+                $(".balanceline").show();
+                $(".bargraph-navigation").hide();
+                $(".powergraph-navigation").show();
+                $(".viewhistory").html("VIEW HISTORY");
                 $('#mysolarpv_placeholder').unbind("plotclick");
                 $('#mysolarpv_placeholder').unbind("plothover");
                 $('#mysolarpv_placeholder').unbind("plotselected");
@@ -544,7 +560,7 @@ var app_mysolarpv = {
             app_mysolarpv.panning = true; setTimeout(function() {app_mysolarpv.panning = false; }, 100);
         });
         
-        $('#bargraph-viewall').click(function () {
+        $('.bargraph-viewall').click(function () {
             var start = app_mysolarpv.latest_start_time * 1000;
             var end = +new Date;
             app_mysolarpv.load_bargraph(start,end);
