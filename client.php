@@ -13,6 +13,7 @@
 <script>
     var path = "<?php print $path; ?>";
     var apikey = "<?php print $apikey; ?>";
+    var sessionwrite = <?php echo $session['write']; ?>;
     
     apikeystr = ""; 
     if (apikey!="") apikeystr = "&apikey="+apikey;
@@ -34,6 +35,11 @@ $(window).ready(function(){
     $("#footer").css('background-color','#181818');
     $("#footer").css('color','#999');
 });
+
+if (!sessionwrite) {
+    $(".openconfig").hide();
+}
+
 
 console.log(path);
 

@@ -75,6 +75,7 @@ var app = {
             window["app_"+appname].config = config_load(window["app_"+appname].config, app.config[appname], feeds);
             app.initialized[appname] = true;
             window["app_"+appname].init();
+            if (!sessionwrite) $(".openconfig").hide();
         }
         
         return true;
