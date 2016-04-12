@@ -6,7 +6,7 @@ var app_mysolarpv = {
         //"export":{"type":"feed", "autoname":"export", "engine":5, "description":"Exported solar in watts"},
         "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative use in kWh"},
         "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5, "description":"Cumulative solar generation in kWh"},
-        "export_kwh":{"optional":true, "type":"feed", "autoname":"export_kwh", "engine":5, "description":"Cumulative exported solar in kWh"},
+        "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "engine":5, "description":"Cumulative grid import in kWh"},
         //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
     },
     
@@ -44,7 +44,7 @@ var app_mysolarpv = {
         view.end = +new Date;
         view.start = view.end - timeWindow;
         
-        if (app_mysolarpv.config.solar_kwh.value && app_mysolarpv.config.use_kwh.value && app_mysolarpv.config.export_kwh.value) {
+        if (app_mysolarpv.config.solar_kwh.value && app_mysolarpv.config.use_kwh.value && app_mysolarpv.config.import_kwh.value) {
             app_mysolarpv.init_bargraph();
             $(".viewhistory").show();
         } else {
@@ -107,7 +107,7 @@ var app_mysolarpv = {
     {
         app.log("INFO","mysolarpv show");
         
-        if (app_mysolarpv.config.solar_kwh.value && app_mysolarpv.config.use_kwh.value && app_mysolarpv.config.export_kwh.value) {
+        if (app_mysolarpv.config.solar_kwh.value && app_mysolarpv.config.use_kwh.value && app_mysolarpv.config.import_kwh.value) {
             if (!app_mysolarpv.bargraph_initialized) app_mysolarpv.init_bargraph();
             $(".viewhistory").show();
         } else {
@@ -388,10 +388,10 @@ var app_mysolarpv = {
         var latest_start_time = 0;
         var solar_meta = feed.getmeta(app_mysolarpv.config.solar_kwh.value);
         var use_meta = feed.getmeta(app_mysolarpv.config.use_kwh.value);
-        var export_meta = feed.getmeta(app_mysolarpv.config.export_kwh.value);
+        var import_meta = feed.getmeta(app_mysolarpv.config.import_kwh.value);
         if (solar_meta.start_time > latest_start_time) latest_start_time = solar_meta.start_time;
         if (use_meta.start_time > latest_start_time) latest_start_time = use_meta.start_time;
-        if (export_meta.start_time > latest_start_time) latest_start_time = export_meta.start_time;
+        if (import_meta.start_time > latest_start_time) latest_start_time = import_meta.start_time;
         app_mysolarpv.latest_start_time = latest_start_time;
 
         var timeWindow = (3600000*24.0*40);
@@ -410,7 +410,7 @@ var app_mysolarpv = {
         // Load kWh data
         var solar_kwh_data = feed.getdataDMY(app_mysolarpv.config.solar_kwh.value,start,end,"daily","");
         var use_kwh_data = feed.getdataDMY(app_mysolarpv.config.use_kwh.value,start,end,"daily","");
-        var export_kwh_data = feed.getdataDMY(app_mysolarpv.config.export_kwh.value,start,end,"daily","");
+        var import_kwh_data = feed.getdataDMY(app_mysolarpv.config.import_kwh.value,start,end,"daily","");
         
         app_mysolarpv.solarused_kwhd_data = [];
         app_mysolarpv.solar_kwhd_data = [];
@@ -425,14 +425,16 @@ var app_mysolarpv = {
             var use_kwh = use_kwh_data[day][1] - use_kwh_data[day-1][1];
             if (use_kwh_data[day][1]==null || use_kwh_data[day-1][1]==null) use_kwh = null;
             
-            var export_kwh = export_kwh_data[day][1] - export_kwh_data[day-1][1];
-            if (export_kwh_data[day][1]==null || export_kwh_data[day-1][1]==null) export_kwh = null;
+            var import_kwh = import_kwh_data[day][1] - import_kwh_data[day-1][1];
+            if (import_kwh_data[day][1]==null || import_kwh_data[day-1][1]==null) import_kwh = null;
+            
+            var export_kwh = solar_kwh - (use_kwh - import_kwh);
             
             if (solar_kwh!=null && use_kwh!=null & export_kwh!=null) {
                 app_mysolarpv.solarused_kwhd_data.push([solar_kwh_data[day-1][0],solar_kwh - export_kwh]);
                 app_mysolarpv.solar_kwhd_data.push([solar_kwh_data[day-1][0],solar_kwh]);
                 app_mysolarpv.use_kwhd_data.push([use_kwh_data[day-1][0],use_kwh]);
-                app_mysolarpv.export_kwhd_data.push([export_kwh_data[day-1][0],export_kwh*-1]);
+                app_mysolarpv.export_kwhd_data.push([import_kwh_data[day-1][0],export_kwh*-1]);
             }
         }
         
@@ -532,8 +534,8 @@ var app_mysolarpv = {
                 // console.log(item.datapoint[0]+" "+item.dataIndex);
                 var z = item.dataIndex;
                 
-                view.end = app_mysolarpv.solar_kwhd_data[z][0];
-                view.start = view.end - 86400*1000;
+                view.start = app_mysolarpv.solar_kwhd_data[z][0];
+                view.end = view.start + 86400*1000;
 
                 $(".balanceline").show();
                 $(".bargraph-navigation").hide();

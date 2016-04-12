@@ -97,7 +97,8 @@ class AppConfig
             $route->format = "text";
             return $row['data'];
         } else {
-            return false;
+            $config = new stdClass();
+            return $config;
         }
         
     }
