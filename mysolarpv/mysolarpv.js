@@ -1,8 +1,8 @@
 var app_mysolarpv = {
 
     config: {
-        "use":{"type":"feed", "autoname":"use", "engine":"5,6", "description":"House or building use in watts"},
-        "solar":{"type":"feed", "autoname":"solar", "engine":"5,6", "description":"Solar pv generation in watts"},
+        "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"House or building use in watts"},
+        "solar":{"type":"feed", "autoname":"solar", "engine":"5", "description":"Solar pv generation in watts"},
         //"export":{"type":"feed", "autoname":"export", "engine":5, "description":"Exported solar in watts"},
         "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative use in kWh"},
         "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5, "description":"Cumulative solar generation in kWh"},
@@ -408,14 +408,19 @@ var app_mysolarpv = {
         start = Math.floor(start/intervalms)*intervalms;
         
         // Load kWh data
-        var solar_kwh_data = feed.getdataDMY(app_mysolarpv.config.solar_kwh.value,start,end,"daily","");
-        var use_kwh_data = feed.getdataDMY(app_mysolarpv.config.use_kwh.value,start,end,"daily","");
-        var import_kwh_data = feed.getdataDMY(app_mysolarpv.config.import_kwh.value,start,end,"daily","");
+        var solar_kwh_data = feed.getdataDMY(app_mysolarpv.config.solar_kwh.value,start,end,"daily");
+        var use_kwh_data = feed.getdataDMY(app_mysolarpv.config.use_kwh.value,start,end,"daily");
+        var import_kwh_data = feed.getdataDMY(app_mysolarpv.config.import_kwh.value,start,end,"daily");
+        
+        console.log(solar_kwh_data);
+        console.log(use_kwh_data);
         
         app_mysolarpv.solarused_kwhd_data = [];
         app_mysolarpv.solar_kwhd_data = [];
         app_mysolarpv.use_kwhd_data = [];
         app_mysolarpv.export_kwhd_data = [];
+        
+        if (solar_kwh_data.length>1) {
         
         for (var day=1; day<solar_kwh_data.length; day++)
         {
@@ -436,6 +441,8 @@ var app_mysolarpv = {
                 app_mysolarpv.use_kwhd_data.push([use_kwh_data[day-1][0],use_kwh]);
                 app_mysolarpv.export_kwhd_data.push([import_kwh_data[day-1][0],export_kwh*-1]);
             }
+        }
+        
         }
         
         var series = [];

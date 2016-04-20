@@ -14,7 +14,7 @@ function app_controller()
 
     if ($route->format == 'html')
     {
-        if ($route->action == "" && $session['write']) {
+        if ($route->action == "") {
             $result = view("Modules/app/client.php",array());
         }
     }

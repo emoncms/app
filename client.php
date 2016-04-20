@@ -20,7 +20,7 @@
 </script>
 
 <link href="<?php echo $path; ?>Modules/app/style.css" rel="stylesheet">
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/app.js"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/app2.js"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/config.js"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/feed.js"></script>        
 <div id="content"></div>
@@ -39,9 +39,6 @@ $(window).ready(function(){
 if (!sessionwrite) {
     $(".openconfig").hide();
 }
-
-
-console.log(path);
 
 app.getconfig();
 var nodes = {};

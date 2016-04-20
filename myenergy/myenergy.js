@@ -196,7 +196,7 @@ var app_myenergy = {
         }
         
         if (balance>0) {
-            $(".balance-label").html("EXESS:");
+            $(".balance-label").html("EXCESS:");
             $(".balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
         }
         

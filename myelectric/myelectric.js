@@ -2,7 +2,7 @@
 var app_myelectric = {
 
     config: {
-        "use":{"type":"feed", "autoname":"use", "engine":"5,6", "description":"House or building use in watts"},
+        "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"House or building use in watts"},
         "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative use in kWh"},
         "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity £/kWh"},
         "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$..)"}
@@ -199,16 +199,18 @@ var app_myelectric = {
         // Check if the updater ran in the last 60s if it did not the app was sleeping
         // and so the data needs a full reload.
         
-        if ((timenow-app_myelectric.lastupdate)>60000) app_myelectric.reload = true;
+        if ((timenow-app_myelectric.lastupdate)>60000) {
+            app_myelectric.reload = true;
+            var timewindow = view.end - view.start;
+            view.end = timenow;
+            view.start = view.end - timewindow;
+        }
+        
         app_myelectric.lastupdate = timenow;
         
         // reload power data
         if (app_myelectric.reload) {
             app_myelectric.reload = false;
-            
-            var timewindow = view.end - view.start;
-            view.end = timenow;
-            view.start = view.end - timewindow;
             
             var npoints = 1500;
             interval = Math.round(((view.end - view.start)/npoints)/1000);
@@ -376,7 +378,7 @@ var app_myelectric = {
         var end = Math.floor(now.getTime() * 0.001);
         var start = end - interval * Math.round(graph_bars.width/30);
         
-        var result = feed.getdataDMY(use_kwh,start*1000,end*1000,"daily","");
+        var result = feed.getdataDMY(use_kwh,start*1000,end*1000,"daily");
 
         var data = [];
         // remove nan values from the end.

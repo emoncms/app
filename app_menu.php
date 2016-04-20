@@ -4,7 +4,7 @@
     
     
     $apikey = "";
-    if ($session['write']) $apikey = "?apikey=".$user->get_apikey_write($session['userid']);
+    if ($session['write']) $apikey = "?readkey=".$user->get_apikey_read($session['userid']);
     
     $menu_left[] = array(
         'name'=>"Apps", 
