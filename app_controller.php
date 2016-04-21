@@ -14,7 +14,7 @@ function app_controller()
 
     if ($route->format == 'html')
     {
-        if ($route->action == "" && $session['write']) {
+        if ($route->action == "") {
             $result = view("Modules/app/client.php",array());
         }
     }
@@ -41,6 +41,7 @@ function app_controller()
         {
             $id = (int) get("id");
             $result = (float) json_decode(file_get_contents("http://emoncms.org/feed/value.json?id=$id"));
+            $route->format = "text/plain";
         }
     }
 

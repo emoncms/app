@@ -52,13 +52,54 @@ hr {
     padding-bottom:2px;
 }
 
+
+
+p {
+    color:#aaa;
+}
+
+.a2 {
+    color: #ccc;
+    font-size:18px;
+    line-height:22px;
+}
+
+h2 {
+    color:#fff;
+}
+
+.appconfig-box {
+    width: 100%;
+    border: 1px solid #fff;
+    margin-bottom:8px;
+    padding:10px;
+    color:#fff;
+}
+
+.feed-select-div {
+    margin:0px;
+    margin-top:5px;
+    width:100%;
+}
+
+select {
+    background-color:#333;
+    color:#fff;
+    margin:0px;
+    width:85%;
+}
+
+input[type=text] {
+    background-color:#333;
+    color:#fff;
+    margin:0px;
+    margin-top:5px;
+    width:90%;
+}
+
 .visnavblock {
     color:#0699fa;
     font-size:18px;
-}
-
-.visnav {
-
 }
 
 .visnav:hover {
@@ -66,11 +107,49 @@ hr {
     cursor: pointer;
 }
 
-input[type=text] {
-    background-color:#444;
-    color:#0699fa;
+.visnav {
+    margin-right:4px;
+    padding-left:8px;
+    padding-right:8px;
+    min-width:20px;
+    background-color:rgba(6,153,250,0.1);
+    line-height:28px;
+    float:left;
+    text-align:center;
 }
 
-p {
-    color:#aaa;
+.appbox {
+    width:20%;
+    text-align:center;
+    padding:10px;
+    vertical-align:top;
+}
+
+.appbox-title {
+    color: #aaa;
+    font-weight:bold;
+    font-size:20px;
+    padding-bottom:15px;
+}
+
+.appbox-value {
+    color: #fff;
+    font-weight:bold;
+    font-size:36px;
+}
+
+.appbox-units {
+    color: #fff;
+    font-weight:bold;
+    font-size:16px;
+}
+
+.ajax-loader{
+    width:32px;
+    height:32px;
+    position:fixed;
+    top:50%;
+    left:50%;
+    margin-top:-16px; /* negative half the size of height */
+    margin-left:-16px; /* negative half the size of width */
 }
