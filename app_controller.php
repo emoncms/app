@@ -45,6 +45,6 @@ function app_controller()
         }
     }
 
-    return array('content'=>$result, 'fullwidth'=>true);
+    return array('content'=>$result, 'fullwidth'=>false);
 }
 
