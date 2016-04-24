@@ -189,7 +189,7 @@ var app_mysolarpv = {
         var feeds = feed.listbyid();
         var solar_now = parseInt(feeds[app_mysolarpv.config.solar.value].value);
         var use_now = parseInt(feeds[app_mysolarpv.config.use.value].value);
-        
+
         if (app_mysolarpv.autoupdate) {
             var updatetime = feeds[app_mysolarpv.config.solar.value].time;
             timeseries.append("solar",updatetime,solar_now);
@@ -202,7 +202,6 @@ var app_mysolarpv = {
             view.end = now;
             view.start = view.end - timerange;
         }
-        
         // Lower limit for solar
         if (solar_now<10) solar_now = 0;
         
@@ -252,6 +251,7 @@ var app_mysolarpv = {
         
         var npoints = 1500;
         interval = Math.round(((view.end - view.start)/npoints)/1000);
+        interval = view.round_interval(interval);
         if (interval<10) interval = 10;
         var intervalms = interval * 1000;
 
