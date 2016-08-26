@@ -377,7 +377,7 @@ var app_mysolarpvimmersion = {
         $(".total_export_prc").html(((total_export_kwh/total_solar_kwh)*100).toFixed(0)+"%");
         $(".total_export_kwh").html(total_export_kwh.toFixed(1));
                 
-        $(".total_import_prc").html(((total_import_kwh/total_use_kwh)*100).toFixed(0)+"%");
+        $(".total_import_prc").html(((total_import_kwh/total_house_kwh)*100).toFixed(0)+"%");
         $(".total_import_kwh").html(total_import_kwh.toFixed(1));        
 
         options.xaxis.min = view.start;
