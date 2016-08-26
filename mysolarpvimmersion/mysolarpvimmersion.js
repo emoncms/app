@@ -385,7 +385,7 @@ var app_mysolarpvimmersion = {
         
         var series = [
             {data:gen_data,color: "#dccc1f", lines:{lineWidth:0, fill:1.0}},
-            {data:house_data,color: "#0699fa", stack:1, lines:{lineWidth:0, fill:0.8}},
+            {data:house_data,color: "#82cbfc", stack:1, lines:{lineWidth:0, fill:0.8}},
             {data:immersion_data,color: "#ff4100", stack:1, lines:{lineWidth:0, fill:0.8}}
         ];
         
