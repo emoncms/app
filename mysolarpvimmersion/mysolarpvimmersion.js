@@ -386,7 +386,7 @@ var app_mysolarpvimmersion = {
         var series = [
             {data:gen_data,color: "#dccc1f", lines:{lineWidth:0, fill:1.0}},
             {data:house_data,color: "#82cbfc", stack:1, lines:{lineWidth:0, fill:0.8}},
-            {data:immersion_data,color: "#ff4100", stack:1, lines:{lineWidth:0, fill:0.8}}
+            {data:immersion_data,color: "#fb7b50", stack:1, lines:{lineWidth:0, fill:0.8}}
         ];
         
         if (app_mysolarpvimmersion.show_balance_line) series.push({data:store_data,yaxis:2, color: "#888"});
