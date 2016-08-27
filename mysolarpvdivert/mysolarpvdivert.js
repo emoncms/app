@@ -307,10 +307,6 @@ var app_mysolarpvdivert = {
         
         var datastart = timeseries.start_time("solar");
         
-        console.log(timeseries.length("solar"));
-        console.log(timeseries.length("use"));
-        console.log(timeseries.length("divert"));
-        
         for (var z=0; z<timeseries.length("solar"); z++) {
 
             // -------------------------------------------------------------------------------------------------------
@@ -636,7 +632,6 @@ var app_mysolarpvdivert = {
         $('#mysolarpvdivert_placeholder').bind("plotclick", function (event, pos, item)
         {
             if (item && !app_mysolarpvdivert.panning) {
-                // console.log(item.datapoint[0]+" "+item.dataIndex);
                 var z = item.dataIndex;
                 
                 view.start = app_mysolarpvdivert.solar_kwhd_data[z][0];
