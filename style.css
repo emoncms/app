@@ -151,13 +151,12 @@ input[type=text] {
     color: #aaa;
     font-weight:bold;
     font-size:12px;
-    padding-bottom:5px;
 }
 
 .tooltip-value {
     color: #fff;
     font-weight:bold;
-    font-size:22px;
+    font-size:14px;
 }
 
 .tooltip-units {

@@ -409,6 +409,10 @@ var app_mysolarpvdivert = {
             if (item) {
                 // Show tooltip
                 var tooltip_items = [];
+
+                var date = new Date(item.datapoint[0]);
+                tooltip_items.push(["TIME", dateFormat(date, 'HH:MM'), ""]);
+
                 for (i = 0; i < app_mysolarpvdivert.powerseries.length; i++) {
                     var series = app_mysolarpvdivert.powerseries[i];
                     tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "kWh"]);
@@ -683,7 +687,7 @@ var app_mysolarpvdivert = {
                     position: "absolute",
                     display: "none",
                     border: "1px solid #545454",
-                    padding: "10px",
+                    padding: "8px",
                     "background-color": "#333",
                 })
                 .appendTo("body");
@@ -694,11 +698,7 @@ var app_mysolarpvdivert = {
         for (i = 0; i < values.length; i++) {
             var value = values[i];
             var div = $('<div class="tooltip-item"></div>').appendTo(tooltip);
-            $('<div class="tooltip-title">'+value[0]+'</div>').appendTo(div);
-            $('<div><span class="tooltip-value">'+value[1]+'</span> <span class="tooltip-units">'+value[2]+'</span></div>').appendTo(div);
-            if (i < values.length - 1) {
-                $('<div style="height: 8px"/>').appendTo(tooltip);
-            }
+            $('<div><span class="tooltip-title">'+value[0]+'</span> : <span class="tooltip-value">'+value[1]+'</span> <span class="tooltip-units">'+value[2]+'</span></div>').appendTo(div);
         }
 
         tooltip
