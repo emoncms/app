@@ -1,13 +1,13 @@
-var app_mysolarpvimmersion = {
+var app_mysolarpvdivert = {
 
     config: {
         "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"House or building use in watts"},
         "solar":{"type":"feed", "autoname":"solar", "engine":"5", "description":"Solar pv generation in watts"},
-        "immersion":{"type":"feed", "autoname":"immersion", "engine":"5", "description":"Immersion usage in watts"},
+        "divert":{"type":"feed", "autoname":"divert", "engine":"5", "description":"Immersion usage in watts"},
         //"export":{"type":"feed", "autoname":"export", "engine":5, "description":"Exported solar in watts"},
         "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative use in kWh"},
         "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5, "description":"Cumulative solar generation in kWh"},
-        "immersion_kwh":{"optional":true, "type":"feed", "autoname":"immersion_kwh", "engine":5, "description":"Cumulative immersion usage in kWh"},
+        "divert_kwh":{"optional":true, "type":"feed", "autoname":"divert_kwh", "engine":5, "description":"Cumulative divert usage in kWh"},
         "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "engine":5, "description":"Cumulative grid import in kWh"},
         //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
     },
@@ -41,66 +41,66 @@ var app_mysolarpvimmersion = {
     // App start function
     init: function()
     {        
-        app.log("INFO","mysolarpvimmersion init");
+        app.log("INFO","mysolarpvdivert init");
     
         var timeWindow = (3600000*6.0*1);
         view.end = +new Date;
         view.start = view.end - timeWindow;
         
-        if (app_mysolarpvimmersion.config.solar_kwh.value && app_mysolarpvimmersion.config.use_kwh.value && app_mysolarpvimmersion.config.import_kwh.value) {
-            app_mysolarpvimmersion.init_bargraph();
+        if (app_mysolarpvdivert.config.solar_kwh.value && app_mysolarpvdivert.config.use_kwh.value && app_mysolarpvdivert.config.import_kwh.value) {
+            app_mysolarpvdivert.init_bargraph();
             $(".viewhistory").show();
         } else {
             $(".viewhistory").hide();
         }
         
         // The first view is the powergraph, we load the events for the power graph here.
-        if (app_mysolarpvimmersion.view=="powergraph") app_mysolarpvimmersion.powergraph_events();
+        if (app_mysolarpvdivert.view=="powergraph") app_mysolarpvdivert.powergraph_events();
         
         // The buttons for these powergraph events are hidden when in historic mode 
         // The events are loaded at the start here and dont need to be unbinded and binded again.
-        $("#mysolarpvimmersion_zoomout").click(function () {view.zoomout(); app_mysolarpvimmersion.reload = true; app_mysolarpvimmersion.autoupdate = false; app_mysolarpvimmersion.draw();});
-        $("#mysolarpvimmersion_zoomin").click(function () {view.zoomin(); app_mysolarpvimmersion.reload = true; app_mysolarpvimmersion.autoupdate = false; app_mysolarpvimmersion.draw();});
-        $('#mysolarpvimmersion_right').click(function () {view.panright(); app_mysolarpvimmersion.reload = true; app_mysolarpvimmersion.autoupdate = false; app_mysolarpvimmersion.draw();});
-        $('#mysolarpvimmersion_left').click(function () {view.panleft(); app_mysolarpvimmersion.reload = true; app_mysolarpvimmersion.autoupdate = false; app_mysolarpvimmersion.draw();});
+        $("#mysolarpvdivert_zoomout").click(function () {view.zoomout(); app_mysolarpvdivert.reload = true; app_mysolarpvdivert.autoupdate = false; app_mysolarpvdivert.draw();});
+        $("#mysolarpvdivert_zoomin").click(function () {view.zoomin(); app_mysolarpvdivert.reload = true; app_mysolarpvdivert.autoupdate = false; app_mysolarpvdivert.draw();});
+        $('#mysolarpvdivert_right').click(function () {view.panright(); app_mysolarpvdivert.reload = true; app_mysolarpvdivert.autoupdate = false; app_mysolarpvdivert.draw();});
+        $('#mysolarpvdivert_left').click(function () {view.panleft(); app_mysolarpvdivert.reload = true; app_mysolarpvdivert.autoupdate = false; app_mysolarpvdivert.draw();});
         
         $('.time').click(function () {
             view.timewindow($(this).attr("time")/24.0); 
-            app_mysolarpvimmersion.reload = true; 
-            app_mysolarpvimmersion.autoupdate = true;
-            app_mysolarpvimmersion.draw();
+            app_mysolarpvdivert.reload = true; 
+            app_mysolarpvdivert.autoupdate = true;
+            app_mysolarpvdivert.draw();
         });
         
         $(".balanceline").click(function () { 
             if ($(this).html()=="SHOW BALANCE") {
-                app_mysolarpvimmersion.show_balance_line = 1;
-                app_mysolarpvimmersion.draw();
+                app_mysolarpvdivert.show_balance_line = 1;
+                app_mysolarpvdivert.draw();
                 $(this).html("HIDE BALANCE");
             } else {
-                app_mysolarpvimmersion.show_balance_line = 0;
-                app_mysolarpvimmersion.draw();
+                app_mysolarpvdivert.show_balance_line = 0;
+                app_mysolarpvdivert.draw();
                 $(this).html("SHOW BALANCE");
             }
         });
         
         $(".viewhistory").click(function () { 
             if ($(this).html()=="VIEW HISTORY") {
-                app_mysolarpvimmersion.view = "bargraph";
+                app_mysolarpvdivert.view = "bargraph";
                 $(".balanceline").hide();
                 $(".powergraph-navigation").hide();
                 $(".bargraph-navigation").show();
                 
-                app_mysolarpvimmersion.draw();
+                app_mysolarpvdivert.draw();
                 setTimeout(function() { $(".viewhistory").html("POWER VIEW"); },80);
             } else {
                 
-                app_mysolarpvimmersion.view = "powergraph";
+                app_mysolarpvdivert.view = "powergraph";
                 $(".balanceline").show();
                 $(".bargraph-navigation").hide();
                 $(".powergraph-navigation").show();
                 
-                app_mysolarpvimmersion.draw();
-                app_mysolarpvimmersion.powergraph_events();
+                app_mysolarpvdivert.draw();
+                app_mysolarpvdivert.powergraph_events();
                 setTimeout(function() { $(".viewhistory").html("VIEW HISTORY"); },80);
             }
         });        
@@ -108,30 +108,30 @@ var app_mysolarpvimmersion = {
 
     show: function() 
     {
-        app.log("INFO","mysolarpvimmersion show");
+        app.log("INFO","mysolarpvdivert show");
         
-        if (app_mysolarpvimmersion.config.solar_kwh.value && app_mysolarpvimmersion.config.use_kwh.value && app_mysolarpvimmersion.config.import_kwh.value) {
-            if (!app_mysolarpvimmersion.bargraph_initialized) app_mysolarpvimmersion.init_bargraph();
+        if (app_mysolarpvdivert.config.solar_kwh.value && app_mysolarpvdivert.config.use_kwh.value && app_mysolarpvdivert.config.import_kwh.value) {
+            if (!app_mysolarpvdivert.bargraph_initialized) app_mysolarpvdivert.init_bargraph();
             $(".viewhistory").show();
         } else {
             $(".viewhistory").hide();
         }
         
-        app_mysolarpvimmersion.resize();
+        app_mysolarpvdivert.resize();
         
         // this.reload = true;
-        app_mysolarpvimmersion.livefn();
-        app_mysolarpvimmersion.live = setInterval(app_mysolarpvimmersion.livefn,5000);
+        app_mysolarpvdivert.livefn();
+        app_mysolarpvdivert.live = setInterval(app_mysolarpvdivert.livefn,5000);
 
     },
     
     resize: function() 
     {
-        app.log("INFO","mysolarpvimmersion resize");
+        app.log("INFO","mysolarpvdivert resize");
         
         var top_offset = 0;
-        var placeholder_bound = $('#mysolarpvimmersion_placeholder_bound');
-        var placeholder = $('#mysolarpvimmersion_placeholder');
+        var placeholder_bound = $('#mysolarpvdivert_placeholder_bound');
+        var placeholder = $('#mysolarpvdivert_placeholder');
 
         var width = placeholder_bound.width();
         var height = $(window).height()*0.55;
@@ -173,7 +173,7 @@ var app_mysolarpvimmersion = {
             $(".vistimeM").show();
             $(".vistimeY").show();
         }
-        app_mysolarpvimmersion.draw();
+        app_mysolarpvdivert.draw();
     },
     
     hide: function() 
@@ -186,22 +186,22 @@ var app_mysolarpvimmersion = {
         // Check if the updater ran in the last 60s if it did not the app was sleeping
         // and so the data needs a full reload.
         var now = +new Date();
-        if ((now-app_mysolarpvimmersion.lastupdate)>60000) app_mysolarpvimmersion.reload = true;
-        app_mysolarpvimmersion.lastupdate = now;
+        if ((now-app_mysolarpvdivert.lastupdate)>60000) app_mysolarpvdivert.reload = true;
+        app_mysolarpvdivert.lastupdate = now;
         
         var feeds = feed.listbyid();
-        var solar_now = parseInt(feeds[app_mysolarpvimmersion.config.solar.value].value);
-        var use_now = parseInt(feeds[app_mysolarpvimmersion.config.use.value].value);
-        var immersion_now = parseInt(feeds[app_mysolarpvimmersion.config.immersion.value].value);
+        var solar_now = parseInt(feeds[app_mysolarpvdivert.config.solar.value].value);
+        var use_now = parseInt(feeds[app_mysolarpvdivert.config.use.value].value);
+        var divert_now = parseInt(feeds[app_mysolarpvdivert.config.divert.value].value);
 
-        if (app_mysolarpvimmersion.autoupdate) {
-            var updatetime = feeds[app_mysolarpvimmersion.config.solar.value].time;
+        if (app_mysolarpvdivert.autoupdate) {
+            var updatetime = feeds[app_mysolarpvdivert.config.solar.value].time;
             timeseries.append("solar",updatetime,solar_now);
             timeseries.trim_start("solar",view.start*0.001);
             timeseries.append("use",updatetime,use_now);
             timeseries.trim_start("use",view.start*0.001);
-            timeseries.append("immersion",updatetime,immersion_now);
-            timeseries.trim_start("immersion",view.start*0.001);
+            timeseries.append("divert",updatetime,divert_now);
+            timeseries.trim_start("divert",view.start*0.001);
 
             // Advance view
             var timerange = view.end - view.start;
@@ -213,7 +213,7 @@ var app_mysolarpvimmersion = {
         
         var balance = solar_now - use_now;
 
-        var house_now = use_now - immersion_now;
+        var house_now = use_now - divert_now;
         
         if (balance==0) {
             $(".balance-label").html("PERFECT BALANCE");
@@ -232,17 +232,17 @@ var app_mysolarpvimmersion = {
         
         $(".solarnow").html(solar_now);
         $(".housenow").html(house_now);
-        $(".immersionnow").html(immersion_now);
+        $(".divertnow").html(divert_now);
         $(".usenow").html(use_now);
         
         // Only redraw the graph if its the power graph and auto update is turned on
-        if (app_mysolarpvimmersion.view=="powergraph" && app_mysolarpvimmersion.autoupdate) app_mysolarpvimmersion.draw();
+        if (app_mysolarpvdivert.view=="powergraph" && app_mysolarpvdivert.autoupdate) app_mysolarpvdivert.draw();
     },
     
     draw: function ()
     {
-        if (app_mysolarpvimmersion.view=="powergraph") app_mysolarpvimmersion.draw_powergraph();
-        if (app_mysolarpvimmersion.view=="bargraph") app_mysolarpvimmersion.draw_bargraph();
+        if (app_mysolarpvdivert.view=="powergraph") app_mysolarpvdivert.draw_powergraph();
+        if (app_mysolarpvdivert.view=="bargraph") app_mysolarpvdivert.draw_bargraph();
     },
     
     draw_powergraph: function() {
@@ -273,13 +273,13 @@ var app_mysolarpvimmersion = {
         // -------------------------------------------------------------------------------------------------------
         // LOAD DATA ON INIT OR RELOAD
         // -------------------------------------------------------------------------------------------------------
-        if (app_mysolarpvimmersion.reload) {
-            app_mysolarpvimmersion.reload = false;
+        if (app_mysolarpvdivert.reload) {
+            app_mysolarpvdivert.reload = false;
             view.start = 1000*Math.floor((view.start/1000)/interval)*interval;
             view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
-            timeseries.load("solar",feed.getdata(app_mysolarpvimmersion.config.solar.value,view.start,view.end,interval,0,0));
-            timeseries.load("use",feed.getdata(app_mysolarpvimmersion.config.use.value,view.start,view.end,interval,0,0));
-            timeseries.load("immersion",feed.getdata(app_mysolarpvimmersion.config.immersion.value,view.start,view.end,interval,0,0));
+            timeseries.load("solar",feed.getdata(app_mysolarpvdivert.config.solar.value,view.start,view.end,interval,0,0));
+            timeseries.load("use",feed.getdata(app_mysolarpvdivert.config.use.value,view.start,view.end,interval,0,0));
+            timeseries.load("divert",feed.getdata(app_mysolarpvdivert.config.divert.value,view.start,view.end,interval,0,0));
         }
         // -------------------------------------------------------------------------------------------------------
         
@@ -287,27 +287,27 @@ var app_mysolarpvimmersion = {
         var gen_data = [];
         var bal_data = [];
         var store_data = [];
-        var immersion_data = [];
+        var divert_data = [];
         var house_data = [];
         
         var t = 0;
         var store = 0;
         var use_now = 0;
         var solar_now = 0;
-        var immersion_now = 0;
+        var divert_now = 0;
         var house_now = 0;
         
         var total_solar_kwh = 0;
         var total_use_kwh = 0;
         var total_use_solar_kwh = 0;
         var total_house_solar_kwh = 0;
-        var total_immersion_kwh = 0;
+        var total_divert_kwh = 0;
         
         var datastart = timeseries.start_time("solar");
         
         console.log(timeseries.length("solar"));
         console.log(timeseries.length("use"));
-        console.log(timeseries.length("immersion"));
+        console.log(timeseries.length("divert"));
         
         for (var z=0; z<timeseries.length("solar"); z++) {
 
@@ -316,9 +316,9 @@ var app_mysolarpvimmersion = {
             // -------------------------------------------------------------------------------------------------------
             if (timeseries.value("solar",z)!=null) solar_now = timeseries.value("solar",z);  
             if (timeseries.value("use",z)!=null) use_now = timeseries.value("use",z);
-            if (timeseries.value("immersion",z)!=null) immersion_now = timeseries.value("immersion",z);
+            if (timeseries.value("divert",z)!=null) divert_now = timeseries.value("divert",z);
 
-            house_now = use_now - immersion_now;
+            house_now = use_now - divert_now;
             
             // -------------------------------------------------------------------------------------------------------
             // Supply / demand balance calculation
@@ -346,33 +346,33 @@ var app_mysolarpvimmersion = {
             
             total_solar_kwh += (solar_now*interval)/(1000*3600);
             total_use_kwh += (use_now*interval)/(1000*3600);
-            total_immersion_kwh += (immersion_now*interval)/(1000*3600);
+            total_divert_kwh += (divert_now*interval)/(1000*3600);
             
             var time = datastart + (1000 * interval * z);
             use_data.push([time,use_now]);
             gen_data.push([time,solar_now]);
             bal_data.push([time,balance_use]);
             store_data.push([time,store]);
-            immersion_data.push([time,immersion_now]);
+            divert_data.push([time,divert_now]);
             house_data.push([time,house_now]);
             
             t += interval;
         }
 
-        var total_house_kwh = total_use_kwh - total_immersion_kwh;
+        var total_house_kwh = total_use_kwh - total_divert_kwh;
         var total_export_kwh = total_solar_kwh - total_use_solar_kwh;
         var total_import_kwh = total_use_kwh - total_use_solar_kwh;
 
         $(".total_house_kwh").html(total_house_kwh.toFixed(1));
-        $(".total_immersion_kwh").html((total_immersion_kwh).toFixed(1));
+        $(".total_divert_kwh").html((total_divert_kwh).toFixed(1));
         $(".total_use_kwh").html((total_use_kwh).toFixed(1));
         $(".total_solar_kwh").html(total_solar_kwh.toFixed(1));
         
         $(".total_house_solar_prc").html(((total_house_solar_kwh/total_solar_kwh)*100).toFixed(0)+"%");
         $(".total_house_solar_kwh").html((total_house_solar_kwh).toFixed(1));
         
-        $(".total_immersion_solar_prc").html(((total_immersion_kwh/total_solar_kwh)*100).toFixed(0)+"%");
-        $(".total_immersion_solar_kwh").html((total_immersion_kwh).toFixed(1));
+        $(".total_divert_solar_prc").html(((total_divert_kwh/total_solar_kwh)*100).toFixed(0)+"%");
+        $(".total_divert_solar_kwh").html((total_divert_kwh).toFixed(1));
 
         $(".total_export_prc").html(((total_export_kwh/total_solar_kwh)*100).toFixed(0)+"%");
         $(".total_export_kwh").html(total_export_kwh.toFixed(1));
@@ -386,12 +386,12 @@ var app_mysolarpvimmersion = {
         var series = [
             {data:gen_data,color: "#dccc1f", lines:{lineWidth:0, fill:1.0}},
             {data:house_data,color: "#82cbfc", stack:1, lines:{lineWidth:0, fill:0.8}},
-            {data:immersion_data,color: "#fb7b50", stack:1, lines:{lineWidth:0, fill:0.8}}
+            {data:divert_data,color: "#fb7b50", stack:1, lines:{lineWidth:0, fill:0.8}}
         ];
         
-        if (app_mysolarpvimmersion.show_balance_line) series.push({data:store_data,yaxis:2, color: "#888"});
+        if (app_mysolarpvdivert.show_balance_line) series.push({data:store_data,yaxis:2, color: "#888"});
         
-        $.plot($('#mysolarpvimmersion_placeholder'),series,options);
+        $.plot($('#mysolarpvdivert_placeholder'),series,options);
         $(".ajax-loader").hide();
     },
 
@@ -400,23 +400,23 @@ var app_mysolarpvimmersion = {
     // ------------------------------------------------------------------------------------------
     powergraph_events: function() {
     
-        $('#mysolarpvimmersion_placeholder').unbind("plotclick");
-        $('#mysolarpvimmersion_placeholder').unbind("plothover");
-        $('#mysolarpvimmersion_placeholder').unbind("plotselected");
+        $('#mysolarpvdivert_placeholder').unbind("plotclick");
+        $('#mysolarpvdivert_placeholder').unbind("plothover");
+        $('#mysolarpvdivert_placeholder').unbind("plotselected");
     
-        $('#mysolarpvimmersion_placeholder').bind("plotselected", function (event, ranges) {
+        $('#mysolarpvdivert_placeholder').bind("plotselected", function (event, ranges) {
             view.start = ranges.xaxis.from;
             view.end = ranges.xaxis.to;
 
-            app_mysolarpvimmersion.autoupdate = false;
-            app_mysolarpvimmersion.reload = true; 
+            app_mysolarpvdivert.autoupdate = false;
+            app_mysolarpvdivert.reload = true; 
             
             var now = +new Date();
             if (Math.abs(view.end-now)<30000) {
-                app_mysolarpvimmersion.autoupdate = true;
+                app_mysolarpvdivert.autoupdate = true;
             }
 
-            app_mysolarpvimmersion.draw();
+            app_mysolarpvdivert.draw();
         });
     },
     
@@ -430,21 +430,21 @@ var app_mysolarpvimmersion = {
     // - calculate used solar, solar, used and exported kwh/d
     // --------------------------------------------------------------------------------------
     init_bargraph: function() {
-        app_mysolarpvimmersion.bargraph_initialized = true;
+        app_mysolarpvdivert.bargraph_initialized = true;
         // Fetch the start_time covering all kwh feeds - this is used for the 'all time' button
         var latest_start_time = 0;
-        var solar_meta = feed.getmeta(app_mysolarpvimmersion.config.solar_kwh.value);
-        var use_meta = feed.getmeta(app_mysolarpvimmersion.config.use_kwh.value);
-        var import_meta = feed.getmeta(app_mysolarpvimmersion.config.import_kwh.value);
+        var solar_meta = feed.getmeta(app_mysolarpvdivert.config.solar_kwh.value);
+        var use_meta = feed.getmeta(app_mysolarpvdivert.config.use_kwh.value);
+        var import_meta = feed.getmeta(app_mysolarpvdivert.config.import_kwh.value);
         if (solar_meta.start_time > latest_start_time) latest_start_time = solar_meta.start_time;
         if (use_meta.start_time > latest_start_time) latest_start_time = use_meta.start_time;
         if (import_meta.start_time > latest_start_time) latest_start_time = import_meta.start_time;
-        app_mysolarpvimmersion.latest_start_time = latest_start_time;
+        app_mysolarpvdivert.latest_start_time = latest_start_time;
 
         var timeWindow = (3600000*24.0*40);
         var end = +new Date;
         var start = end - timeWindow;
-        app_mysolarpvimmersion.load_bargraph(start,end);
+        app_mysolarpvdivert.load_bargraph(start,end);
     },
     
     load_bargraph: function(start,end) {
@@ -455,17 +455,17 @@ var app_mysolarpvimmersion = {
         start = Math.floor(start/intervalms)*intervalms;
         
         // Load kWh data
-        var solar_kwh_data = feed.getdataDMY(app_mysolarpvimmersion.config.solar_kwh.value,start,end,"daily");
-        var use_kwh_data = feed.getdataDMY(app_mysolarpvimmersion.config.use_kwh.value,start,end,"daily");
-        var import_kwh_data = feed.getdataDMY(app_mysolarpvimmersion.config.import_kwh.value,start,end,"daily");
+        var solar_kwh_data = feed.getdataDMY(app_mysolarpvdivert.config.solar_kwh.value,start,end,"daily");
+        var use_kwh_data = feed.getdataDMY(app_mysolarpvdivert.config.use_kwh.value,start,end,"daily");
+        var divert_kwh_data = feed.getdataDMY(app_mysolarpvdivert.config.divert_kwh.value,start,end,"daily");
+        var import_kwh_data = feed.getdataDMY(app_mysolarpvdivert.config.import_kwh.value,start,end,"daily");
         
-        console.log(solar_kwh_data);
-        console.log(use_kwh_data);
-        
-        app_mysolarpvimmersion.solarused_kwhd_data = [];
-        app_mysolarpvimmersion.solar_kwhd_data = [];
-        app_mysolarpvimmersion.use_kwhd_data = [];
-        app_mysolarpvimmersion.export_kwhd_data = [];
+        app_mysolarpvdivert.solarused_kwhd_data = [];
+        app_mysolarpvdivert.solar_kwhd_data = [];
+        app_mysolarpvdivert.use_kwhd_data = [];
+        app_mysolarpvdivert.house_kwhd_data = [];
+        app_mysolarpvdivert.divert_kwhd_data = [];
+        app_mysolarpvdivert.export_kwhd_data = [];
         
         if (solar_kwh_data.length>1) {
         
@@ -476,17 +476,23 @@ var app_mysolarpvimmersion = {
             
             var use_kwh = use_kwh_data[day][1] - use_kwh_data[day-1][1];
             if (use_kwh_data[day][1]==null || use_kwh_data[day-1][1]==null) use_kwh = null;
+
+            var divert_kwh = divert_kwh_data[day][1] - divert_kwh_data[day-1][1];
+            if (divert_kwh_data[day][1]==null || divert_kwh_data[day-1][1]==null) divert_kwh = null;
             
             var import_kwh = import_kwh_data[day][1] - import_kwh_data[day-1][1];
             if (import_kwh_data[day][1]==null || import_kwh_data[day-1][1]==null) import_kwh = null;
             
             var export_kwh = solar_kwh - (use_kwh - import_kwh);
+            var house_kwh = use_kwh - divert_kwh;
             
-            if (solar_kwh!=null && use_kwh!=null & export_kwh!=null) {
-                app_mysolarpvimmersion.solarused_kwhd_data.push([solar_kwh_data[day-1][0],solar_kwh - export_kwh]);
-                app_mysolarpvimmersion.solar_kwhd_data.push([solar_kwh_data[day-1][0],solar_kwh]);
-                app_mysolarpvimmersion.use_kwhd_data.push([use_kwh_data[day-1][0],use_kwh]);
-                app_mysolarpvimmersion.export_kwhd_data.push([import_kwh_data[day-1][0],export_kwh*-1]);
+            if (solar_kwh!=null && use_kwh!=null && export_kwh!=null && divert_kwh!=null && house_kwh!=null) {
+                app_mysolarpvdivert.solarused_kwhd_data.push([solar_kwh_data[day-1][0],solar_kwh - export_kwh]);
+                app_mysolarpvdivert.solar_kwhd_data.push([solar_kwh_data[day-1][0],solar_kwh]);
+                app_mysolarpvdivert.use_kwhd_data.push([use_kwh_data[day-1][0],use_kwh]);
+                app_mysolarpvdivert.house_kwhd_data.push([use_kwh_data[day-1][0],house_kwh]);
+                app_mysolarpvdivert.divert_kwhd_data.push([divert_kwh_data[day-1][0],divert_kwh]);
+                app_mysolarpvdivert.export_kwhd_data.push([import_kwh_data[day-1][0],export_kwh*-1]);
             }
         }
         
@@ -495,24 +501,30 @@ var app_mysolarpvimmersion = {
         var series = [];
         
         series.push({
-            data: app_mysolarpvimmersion.use_kwhd_data,
-            color: "#0699fa",
-            bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 0.8, lineWidth:0}
+            data: app_mysolarpvdivert.house_kwhd_data,
+            color: "#82cbfc",
+            bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 0.8, lineWidth:0, stack:true}
         });
         
         series.push({
-            data: app_mysolarpvimmersion.solarused_kwhd_data,
+            data: app_mysolarpvdivert.divert_kwhd_data,
+            color: "#fb7b50",
+            bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 0.8, lineWidth:0, stack:true}
+        });
+        
+        series.push({
+            data: app_mysolarpvdivert.solarused_kwhd_data,
             color: "#dccc1f",
             bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 0.6, lineWidth:0}
         });
         
         series.push({
-            data: app_mysolarpvimmersion.export_kwhd_data,
+            data: app_mysolarpvdivert.export_kwhd_data,
             color: "#dccc1f",
             bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 0.8, lineWidth:0}
         });
         
-        app_mysolarpvimmersion.historyseries = series;
+        app_mysolarpvdivert.historyseries = series;
     },
 
     // ------------------------------------------------------------------------------------------
@@ -532,13 +544,13 @@ var app_mysolarpvimmersion = {
             selection: { mode: "x" }
         }
         
-        var plot = $.plot($('#mysolarpvimmersion_placeholder'),app_mysolarpvimmersion.historyseries,options);
+        var plot = $.plot($('#mysolarpvdivert_placeholder'),app_mysolarpvdivert.historyseries,options);
         
-		    $('#mysolarpvimmersion_placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use & Total Use</div>");
-		    $('#mysolarpvimmersion_placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> Exported solar</div>");
+		    $('#mysolarpvdivert_placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use & Total Use</div>");
+		    $('#mysolarpvdivert_placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> Exported solar</div>");
 
         // Because the bargraph is only drawn once when the view is changed we attach the events at this point
-        app_mysolarpvimmersion.bargraph_events();
+        app_mysolarpvdivert.bargraph_events();
     },
 
     // ------------------------------------------------------------------------------------------
@@ -548,22 +560,22 @@ var app_mysolarpvimmersion = {
     // ------------------------------------------------------------------------------------------
     bargraph_events: function(){
     
-        $('#mysolarpvimmersion_placeholder').unbind("plotclick");
-        $('#mysolarpvimmersion_placeholder').unbind("plothover");
-        $('#mysolarpvimmersion_placeholder').unbind("plotselected");
+        $('#mysolarpvdivert_placeholder').unbind("plotclick");
+        $('#mysolarpvdivert_placeholder').unbind("plothover");
+        $('#mysolarpvdivert_placeholder').unbind("plotselected");
         $('.bargraph-viewall').unbind("click");
         
         // Show day's figures on the bottom of the page
-		    $('#mysolarpvimmersion_placeholder').bind("plothover", function (event, pos, item)
+		    $('#mysolarpvdivert_placeholder').bind("plothover", function (event, pos, item)
         {
             if (item) {
                 // console.log(item.datapoint[0]+" "+item.dataIndex);
                 var z = item.dataIndex;
                 
-                var solar_kwhd = app_mysolarpvimmersion.solar_kwhd_data[z][1];
-                var solarused_kwhd = app_mysolarpvimmersion.solarused_kwhd_data[z][1];
-                var use_kwhd = app_mysolarpvimmersion.use_kwhd_data[z][1];
-                var export_kwhd = app_mysolarpvimmersion.export_kwhd_data[z][1];
+                var solar_kwhd = app_mysolarpvdivert.solar_kwhd_data[z][1];
+                var solarused_kwhd = app_mysolarpvdivert.solarused_kwhd_data[z][1];
+                var use_kwhd = app_mysolarpvdivert.use_kwhd_data[z][1];
+                var export_kwhd = app_mysolarpvdivert.export_kwhd_data[z][1];
                 var imported_kwhd = use_kwhd-solarused_kwhd;
                 
                 $(".total_solar_kwh").html((solar_kwhd).toFixed(1));
@@ -582,45 +594,45 @@ var app_mysolarpvimmersion = {
         });
 
         // Auto click through to power graph
-		    $('#mysolarpvimmersion_placeholder').bind("plotclick", function (event, pos, item)
+		    $('#mysolarpvdivert_placeholder').bind("plotclick", function (event, pos, item)
         {
-            if (item && !app_mysolarpvimmersion.panning) {
+            if (item && !app_mysolarpvdivert.panning) {
                 // console.log(item.datapoint[0]+" "+item.dataIndex);
                 var z = item.dataIndex;
                 
-                view.start = app_mysolarpvimmersion.solar_kwhd_data[z][0];
+                view.start = app_mysolarpvdivert.solar_kwhd_data[z][0];
                 view.end = view.start + 86400*1000;
 
                 $(".balanceline").show();
                 $(".bargraph-navigation").hide();
                 $(".powergraph-navigation").show();
                 $(".viewhistory").html("VIEW HISTORY");
-                $('#mysolarpvimmersion_placeholder').unbind("plotclick");
-                $('#mysolarpvimmersion_placeholder').unbind("plothover");
-                $('#mysolarpvimmersion_placeholder').unbind("plotselected");
+                $('#mysolarpvdivert_placeholder').unbind("plotclick");
+                $('#mysolarpvdivert_placeholder').unbind("plothover");
+                $('#mysolarpvdivert_placeholder').unbind("plotselected");
                 
-                app_mysolarpvimmersion.reload = true; 
-                app_mysolarpvimmersion.autoupdate = false;
-                app_mysolarpvimmersion.view = "powergraph";
+                app_mysolarpvdivert.reload = true; 
+                app_mysolarpvdivert.autoupdate = false;
+                app_mysolarpvdivert.view = "powergraph";
                 
-                app_mysolarpvimmersion.draw();
-                app_mysolarpvimmersion.powergraph_events();
+                app_mysolarpvdivert.draw();
+                app_mysolarpvdivert.powergraph_events();
             }
         });
         
-        $('#mysolarpvimmersion_placeholder').bind("plotselected", function (event, ranges) {
+        $('#mysolarpvdivert_placeholder').bind("plotselected", function (event, ranges) {
             var start = ranges.xaxis.from;
             var end = ranges.xaxis.to;
-            app_mysolarpvimmersion.load_bargraph(start,end);
-            app_mysolarpvimmersion.draw();
-            app_mysolarpvimmersion.panning = true; setTimeout(function() {app_mysolarpvimmersion.panning = false; }, 100);
+            app_mysolarpvdivert.load_bargraph(start,end);
+            app_mysolarpvdivert.draw();
+            app_mysolarpvdivert.panning = true; setTimeout(function() {app_mysolarpvdivert.panning = false; }, 100);
         });
         
         $('.bargraph-viewall').click(function () {
-            var start = app_mysolarpvimmersion.latest_start_time * 1000;
+            var start = app_mysolarpvdivert.latest_start_time * 1000;
             var end = +new Date;
-            app_mysolarpvimmersion.load_bargraph(start,end);
-            app_mysolarpvimmersion.draw();
+            app_mysolarpvdivert.load_bargraph(start,end);
+            app_mysolarpvdivert.draw();
         });
     }
 }
