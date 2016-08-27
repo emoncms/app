@@ -506,10 +506,10 @@ var app_mysolarpvdivert = {
             if (solar_kwh!=null && use_kwh!=null && export_kwh!=null && divert_kwh!=null && house_kwh!=null) {
                 app_mysolarpvdivert.house_solar_kwhd_data.push([solar_kwh_data[day-1][0],house_solar_kwh]);
                 app_mysolarpvdivert.solar_kwhd_data.push([solar_kwh_data[day-1][0],solar_kwh]);
-                app_mysolarpvdivert.use_kwhd_data.push([use_kwh_data[day-1][0],use_kwh]);
+                app_mysolarpvdivert.use_kwhd_data.push([use_kwh_data[day-1][0],use_kwh*-1]);
                 app_mysolarpvdivert.house_kwhd_data.push([use_kwh_data[day-1][0],house_kwh]);
                 app_mysolarpvdivert.divert_kwhd_data.push([divert_kwh_data[day-1][0],divert_kwh]);
-                app_mysolarpvdivert.export_kwhd_data.push([import_kwh_data[day-1][0],export_kwh*-1]);
+                app_mysolarpvdivert.export_kwhd_data.push([import_kwh_data[day-1][0],export_kwh]);
             }
         }
         
@@ -521,29 +521,30 @@ var app_mysolarpvdivert = {
             data: app_mysolarpvdivert.divert_kwhd_data,
             label: "Divert",
             color: "#fb7b50",
-            bars: { show: true, align: "left", barWidth: 0.4*3600*24*1000, fill: 0.8, lineWidth: 0 },
-            stack: 1
-        });
-        
-        series.push({
-            data: app_mysolarpvdivert.house_kwhd_data,
-            label: "House",
-            color: "#82cbfc",
-            bars: { show: true, align: "left", barWidth: 0.4*3600*24*1000, fill: 0.8, lineWidth: 0},
+            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.8, lineWidth: 0 },
             stack: 1
         });
         
         series.push({
             data: app_mysolarpvdivert.house_solar_kwhd_data,
-            label: "Solar Used",
-            color: "#dccc1f",
-            bars: { show: true, align: "right", barWidth: 0.4*3600*24*1000, fill: 0.8, lineWidth: 0 }
+            label: "House Solar",
+            color: "#82cbfc",
+            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.8, lineWidth: 0 },
+            stack: 1
         });
         
         series.push({
             data: app_mysolarpvdivert.export_kwhd_data,
             label: "Export",
             color: "#2ed52e",
+            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.8, lineWidth: 0 },
+            stack: 1
+        });
+        
+        series.push({
+            data: app_mysolarpvdivert.use_kwhd_data,
+            label: "Use",
+            color: "#0598fa",
             bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.8, lineWidth: 0 }
         });
         
@@ -597,10 +598,10 @@ var app_mysolarpvdivert = {
                 
                 var solar_kwh = app_mysolarpvdivert.solar_kwhd_data[z][1];
                 var house_solar_kwh = app_mysolarpvdivert.house_solar_kwhd_data[z][1];
-                var use_kwh = app_mysolarpvdivert.use_kwhd_data[z][1];
+                var use_kwh = app_mysolarpvdivert.use_kwhd_data[z][1]*-1;
                 var house_kwh = app_mysolarpvdivert.house_kwhd_data[z][1];
                 var divert_kwh = app_mysolarpvdivert.divert_kwhd_data[z][1];
-                var export_kwh = app_mysolarpvdivert.export_kwhd_data[z][1] * -1;
+                var export_kwh = app_mysolarpvdivert.export_kwhd_data[z][1];
                 var import_kwh = use_kwh - house_solar_kwh - divert_kwh;
                 
                 $(".total_house_kwh").html(house_kwh.toFixed(1));
@@ -621,7 +622,7 @@ var app_mysolarpvdivert = {
                 $(".total_import_kwh").html(import_kwh.toFixed(1));
 
                 // Show tooltip
-                app_mysolarpvdivert.show_tooltip(pos.pageX+10, pos.pageY+5, [[item.series.label.toUpperCase(), Math.abs(item.datapoint[1]).toFixed(1), "kWh"]]);
+                app_mysolarpvdivert.show_tooltip(pos.pageX+10, pos.pageY+5, [[item.series.label.toUpperCase(), Math.abs(item.datapoint[1]-item.datapoint[2]).toFixed(1), "kWh"]]);
             } else {
                 // Hide tooltip
                 app_mysolarpvdivert.hide_tooltip();
