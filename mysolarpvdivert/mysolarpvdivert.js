@@ -22,6 +22,7 @@ var app_mysolarpvdivert = {
     
     view: "powergraph",
     historyseries: [],
+    powerseries: [],
     latest_start_time: 0,
     panning: false,
     
@@ -255,8 +256,9 @@ var app_mysolarpvdivert = {
             lines: { fill: fill },
             xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end},
             yaxes: [{ min: 0 }],
-            grid: {hoverable: true, clickable: true},
-            selection: { mode: "x" }
+            grid: { hoverable: true, clickable: true },
+            selection: { mode: "x" },
+            legend: { show: false }
         }
         
         var npoints = 1500;
@@ -384,14 +386,16 @@ var app_mysolarpvdivert = {
         options.xaxis.max = view.end;
         
         var series = [
-            {data:gen_data,color: "#dccc1f", lines:{lineWidth:0, fill:1.0}},
-            {data:house_data,color: "#82cbfc", stack:1, lines:{lineWidth:0, fill:0.8}},
-            {data:divert_data,color: "#fb7b50", stack:1, lines:{lineWidth:0, fill:0.8}}
+            {data:gen_data, label: "Solar", color: "#dccc1f", lines:{lineWidth:0, fill:1.0}},
+            {data:house_data, label: "House", color: "#82cbfc", stack:1, lines:{lineWidth:0, fill:0.8}},
+            {data:divert_data, label: "Divert", color: "#fb7b50", stack:1, lines:{lineWidth:0, fill:0.8}}
         ];
         
-        if (app_mysolarpvdivert.show_balance_line) series.push({data:store_data,yaxis:2, color: "#888"});
+        if (app_mysolarpvdivert.show_balance_line) series.push({data:store_data, label: "Balance", yaxis:2, color: "#888"});
+
+        app_mysolarpvdivert.powerseries = series;
         
-        $.plot($('#mysolarpvdivert_placeholder'),series,options);
+        $.plot($('#mysolarpvdivert_placeholder'),app_mysolarpvdivert.powerseries,options);
         $(".ajax-loader").hide();
     },
 
@@ -403,6 +407,22 @@ var app_mysolarpvdivert = {
         $('#mysolarpvdivert_placeholder').unbind("plotclick");
         $('#mysolarpvdivert_placeholder').unbind("plothover");
         $('#mysolarpvdivert_placeholder').unbind("plotselected");
+
+        $('#mysolarpvdivert_placeholder').bind("plothover", function (event, pos, item)
+        {
+            if (item) {
+                // Show tooltip
+                var tooltip_items = [];
+                for (i = 0; i < app_mysolarpvdivert.powerseries.length; i++) {
+                    var series = app_mysolarpvdivert.powerseries[i];
+                    tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "kWh"]);
+                }
+                app_mysolarpvdivert.show_tooltip(pos.pageX+10, pos.pageY+5, tooltip_items);
+            } else {
+                // Hide tooltip
+                app_mysolarpvdivert.hide_tooltip();
+            }
+        });
     
         $('#mysolarpvdivert_placeholder').bind("plotselected", function (event, ranges) {
             view.start = ranges.xaxis.from;
@@ -460,7 +480,7 @@ var app_mysolarpvdivert = {
         var divert_kwh_data = feed.getdataDMY(app_mysolarpvdivert.config.divert_kwh.value,start,end,"daily");
         var import_kwh_data = feed.getdataDMY(app_mysolarpvdivert.config.import_kwh.value,start,end,"daily");
         
-        app_mysolarpvdivert.solarused_kwhd_data = [];
+        app_mysolarpvdivert.house_solar_kwhd_data = [];
         app_mysolarpvdivert.solar_kwhd_data = [];
         app_mysolarpvdivert.use_kwhd_data = [];
         app_mysolarpvdivert.house_kwhd_data = [];
@@ -485,9 +505,10 @@ var app_mysolarpvdivert = {
             
             var export_kwh = solar_kwh - (use_kwh - import_kwh);
             var house_kwh = use_kwh - divert_kwh;
+            var house_solar_kwh = house_kwh - import_kwh;
             
             if (solar_kwh!=null && use_kwh!=null && export_kwh!=null && divert_kwh!=null && house_kwh!=null) {
-                app_mysolarpvdivert.solarused_kwhd_data.push([solar_kwh_data[day-1][0],solar_kwh - export_kwh]);
+                app_mysolarpvdivert.house_solar_kwhd_data.push([solar_kwh_data[day-1][0],house_solar_kwh]);
                 app_mysolarpvdivert.solar_kwhd_data.push([solar_kwh_data[day-1][0],solar_kwh]);
                 app_mysolarpvdivert.use_kwhd_data.push([use_kwh_data[day-1][0],use_kwh]);
                 app_mysolarpvdivert.house_kwhd_data.push([use_kwh_data[day-1][0],house_kwh]);
@@ -501,27 +522,33 @@ var app_mysolarpvdivert = {
         var series = [];
         
         series.push({
-            data: app_mysolarpvdivert.house_kwhd_data,
-            color: "#82cbfc",
-            bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 0.8, lineWidth:0, stack:true}
-        });
-        
-        series.push({
             data: app_mysolarpvdivert.divert_kwhd_data,
+            label: "Divert",
             color: "#fb7b50",
-            bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 0.8, lineWidth:0, stack:true}
+            bars: { show: true, align: "left", barWidth: 0.4*3600*24*1000, fill: 0.8, lineWidth: 0 },
+            stack: 1
         });
         
         series.push({
-            data: app_mysolarpvdivert.solarused_kwhd_data,
+            data: app_mysolarpvdivert.house_kwhd_data,
+            label: "House",
+            color: "#82cbfc",
+            bars: { show: true, align: "left", barWidth: 0.4*3600*24*1000, fill: 0.8, lineWidth: 0},
+            stack: 1
+        });
+        
+        series.push({
+            data: app_mysolarpvdivert.house_solar_kwhd_data,
+            label: "Solar Used",
             color: "#dccc1f",
-            bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 0.6, lineWidth:0}
+            bars: { show: true, align: "right", barWidth: 0.4*3600*24*1000, fill: 0.8, lineWidth: 0 }
         });
         
         series.push({
             data: app_mysolarpvdivert.export_kwhd_data,
-            color: "#dccc1f",
-            bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 0.8, lineWidth:0}
+            label: "Export",
+            color: "#2ed52e",
+            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.8, lineWidth: 0 }
         });
         
         app_mysolarpvdivert.historyseries = series;
@@ -539,15 +566,16 @@ var app_mysolarpvdivert = {
         markings.push({ color: "#ccc", lineWidth: 1, yaxis: { from: 0, to: 0 } });
         
         var options = {
-            xaxis: { mode: "time", timezone: "browser"},
-            grid: {hoverable: true, clickable: true, markings:markings},
-            selection: { mode: "x" }
-        }
+            xaxis: { mode: "time", timezone: "browser", minTickSize: [1, "day"], timeformat: "%d/%m/%y" },
+            grid: { hoverable: true, clickable: true, markings: markings },
+            selection: { mode: "x" },
+            legend: { show: false }
+        };
         
         var plot = $.plot($('#mysolarpvdivert_placeholder'),app_mysolarpvdivert.historyseries,options);
         
-		    $('#mysolarpvdivert_placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use & Total Use</div>");
-		    $('#mysolarpvdivert_placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> Exported solar</div>");
+        $('#mysolarpvdivert_placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use & Total Use</div>");
+        $('#mysolarpvdivert_placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> Exported solar</div>");
 
         // Because the bargraph is only drawn once when the view is changed we attach the events at this point
         app_mysolarpvdivert.bargraph_events();
@@ -566,35 +594,46 @@ var app_mysolarpvdivert = {
         $('.bargraph-viewall').unbind("click");
         
         // Show day's figures on the bottom of the page
-		    $('#mysolarpvdivert_placeholder').bind("plothover", function (event, pos, item)
+        $('#mysolarpvdivert_placeholder').bind("plothover", function (event, pos, item)
         {
             if (item) {
-                // console.log(item.datapoint[0]+" "+item.dataIndex);
                 var z = item.dataIndex;
                 
-                var solar_kwhd = app_mysolarpvdivert.solar_kwhd_data[z][1];
-                var solarused_kwhd = app_mysolarpvdivert.solarused_kwhd_data[z][1];
-                var use_kwhd = app_mysolarpvdivert.use_kwhd_data[z][1];
-                var export_kwhd = app_mysolarpvdivert.export_kwhd_data[z][1];
-                var imported_kwhd = use_kwhd-solarused_kwhd;
+                var solar_kwh = app_mysolarpvdivert.solar_kwhd_data[z][1];
+                var house_solar_kwh = app_mysolarpvdivert.house_solar_kwhd_data[z][1];
+                var use_kwh = app_mysolarpvdivert.use_kwhd_data[z][1];
+                var house_kwh = app_mysolarpvdivert.house_kwhd_data[z][1];
+                var divert_kwh = app_mysolarpvdivert.divert_kwhd_data[z][1];
+                var export_kwh = app_mysolarpvdivert.export_kwhd_data[z][1] * -1;
+                var import_kwh = use_kwh - house_solar_kwh - divert_kwh;
                 
-                $(".total_solar_kwh").html((solar_kwhd).toFixed(1));
-                $(".total_use_kwh").html((use_kwhd).toFixed(1));
-                
-                $(".total_use_solar_prc").html(((solarused_kwhd/use_kwhd)*100).toFixed(0)+"%");
-                $(".total_use_solar_kwh").html((solarused_kwhd).toFixed(1));
-                
-                $(".total_export_kwh").html((export_kwhd*-1).toFixed(1));
-                $(".total_export_prc").html(((export_kwhd/solar_kwhd)*100*-1).toFixed(0)+"%");
-                
-                $(".total_import_prc").html(((imported_kwhd/use_kwhd)*100).toFixed(0)+"%");
-                $(".total_import_kwh").html((imported_kwhd).toFixed(1));
-                
+                $(".total_house_kwh").html(house_kwh.toFixed(1));
+                $(".total_divert_kwh").html((divert_kwh).toFixed(1));
+                $(".total_use_kwh").html((use_kwh).toFixed(1));
+                $(".total_solar_kwh").html(solar_kwh.toFixed(1));
+        
+                $(".total_house_solar_prc").html(((house_solar_kwh/solar_kwh)*100).toFixed(0)+"%");
+                $(".total_house_solar_kwh").html((house_solar_kwh).toFixed(1));
+        
+                $(".total_divert_solar_prc").html(((divert_kwh/solar_kwh)*100).toFixed(0)+"%");
+                $(".total_divert_solar_kwh").html((divert_kwh).toFixed(1));
+        
+                $(".total_export_prc").html(((export_kwh/solar_kwh)*100).toFixed(0)+"%");
+                $(".total_export_kwh").html(export_kwh.toFixed(1));
+        
+                $(".total_import_prc").html(((import_kwh/house_kwh)*100).toFixed(0)+"%");
+                $(".total_import_kwh").html(import_kwh.toFixed(1));
+
+                // Show tooltip
+                app_mysolarpvdivert.show_tooltip(pos.pageX+10, pos.pageY+5, [[item.series.label.toUpperCase(), Math.abs(item.datapoint[1]).toFixed(1), "kWh"]]);
+            } else {
+                // Hide tooltip
+                app_mysolarpvdivert.hide_tooltip();
             }
         });
 
         // Auto click through to power graph
-		    $('#mysolarpvdivert_placeholder').bind("plotclick", function (event, pos, item)
+        $('#mysolarpvdivert_placeholder').bind("plotclick", function (event, pos, item)
         {
             if (item && !app_mysolarpvdivert.panning) {
                 // console.log(item.datapoint[0]+" "+item.dataIndex);
@@ -634,5 +673,47 @@ var app_mysolarpvdivert = {
             app_mysolarpvdivert.load_bargraph(start,end);
             app_mysolarpvdivert.draw();
         });
-    }
+    },
+
+    // ------------------------------------------------------------------------------------------
+    // TOOLTIP HANDLING
+    // Show & hide the tooltip
+    // ------------------------------------------------------------------------------------------
+    show_tooltip: function(x, y, values) {
+        var tooltip = $('#mysolarpvdivert_tooltip');
+        if (!tooltip[0]) {
+            tooltip = $('<div id="mysolarpvdivert_tooltip"></div>')
+                .css({
+                    position: "absolute",
+                    display: "none",
+                    border: "1px solid #545454",
+                    padding: "10px",
+                    "background-color": "#333",
+                })
+                .appendTo("body");
+        }
+
+        tooltip.html('');
+
+        for (i = 0; i < values.length; i++) {
+            var value = values[i];
+            var div = $('<div class="tooltip-item"></div>').appendTo(tooltip);
+            $('<div class="tooltip-title">'+value[0]+'</div>').appendTo(div);
+            $('<div><span class="tooltip-value">'+value[1]+'</span> <span class="tooltip-units">'+value[2]+'</span></div>').appendTo(div);
+            if (i < values.length - 1) {
+                $('<div style="height: 8px"/>').appendTo(tooltip);
+            }
+        }
+
+        tooltip
+            .css({
+                left: x,
+                top: y
+            })
+            .show();
+    },
+
+    hide_tooltip: function() {
+        $('#mysolarpvdivert_tooltip').hide();
+    },
 }
