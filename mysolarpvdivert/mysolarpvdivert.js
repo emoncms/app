@@ -525,7 +525,7 @@ var app_mysolarpvdivert = {
             data: app_mysolarpvdivert.house_solar_kwhd_data,
             label: "House Solar",
             color: "#82cbfc",
-            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.8, lineWidth: 0 },
+            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 1.0, lineWidth: 0 },
             stack: 1
         });
         
@@ -533,7 +533,7 @@ var app_mysolarpvdivert = {
             data: app_mysolarpvdivert.divert_kwhd_data,
             label: "Divert",
             color: "#fb7b50",
-            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.8, lineWidth: 0 },
+            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 1.0, lineWidth: 0 },
             stack: 1
         });
         
@@ -541,7 +541,7 @@ var app_mysolarpvdivert = {
             data: app_mysolarpvdivert.export_kwhd_data,
             label: "Export",
             color: "#2ed52e",
-            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.8, lineWidth: 0 },
+            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 1.0, lineWidth: 0 },
             stack: 1
         });
         
@@ -549,7 +549,7 @@ var app_mysolarpvdivert = {
             data: app_mysolarpvdivert.use_kwhd_data,
             label: "Use",
             color: "#0598fa",
-            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.8, lineWidth: 0 }
+            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 1.0, lineWidth: 0 }
         });
         
         app_mysolarpvdivert.historyseries = series;
