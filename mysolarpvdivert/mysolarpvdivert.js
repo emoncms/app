@@ -523,7 +523,7 @@ var app_mysolarpvdivert = {
         
         series.push({
             data: app_mysolarpvdivert.house_solar_kwhd_data,
-            label: "House Solar",
+            label: "House",
             color: "#82cbfc",
             bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 1.0, lineWidth: 0 },
             stack: 1
@@ -626,7 +626,16 @@ var app_mysolarpvdivert = {
                 $(".total_import_kwh").html(import_kwh.toFixed(1));
 
                 // Show tooltip
-                app_mysolarpvdivert.show_tooltip(pos.pageX+10, pos.pageY+5, [[item.series.label.toUpperCase(), Math.abs(item.datapoint[1]-item.datapoint[2]).toFixed(1), "kWh"]]);
+                var tooltip_items = [];
+
+                var date = new Date(item.datapoint[0]);
+                tooltip_items.push(["DATE", dateFormat(date, 'dd/mm/yy'), ""]);
+
+                for (i = 0; i < app_mysolarpvdivert.historyseries.length; i++) {
+                    var series = app_mysolarpvdivert.historyseries[i];
+                    tooltip_items.push([series.label.toUpperCase(), Math.abs(series.data[item.dataIndex][1]).toFixed(1), "kWh"]);
+                }
+                app_mysolarpvdivert.show_tooltip(pos.pageX+10, pos.pageY+5, tooltip_items);
             } else {
                 // Hide tooltip
                 app_mysolarpvdivert.hide_tooltip();
@@ -694,11 +703,13 @@ var app_mysolarpvdivert = {
         }
 
         tooltip.html('');
+        var table = $('<table/>').appendTo(tooltip);
 
         for (i = 0; i < values.length; i++) {
             var value = values[i];
-            var div = $('<div class="tooltip-item"></div>').appendTo(tooltip);
-            $('<div><span class="tooltip-title">'+value[0]+'</span> : <span class="tooltip-value">'+value[1]+'</span> <span class="tooltip-units">'+value[2]+'</span></div>').appendTo(div);
+            var row = $('<tr class="tooltip-item"/>').appendTo(table);
+            $('<td style="padding-right: 8px"><span class="tooltip-title">'+value[0]+'</span></td>').appendTo(row);
+            $('<td><span class="tooltip-value">'+value[1]+'</span> <span class="tooltip-units">'+value[2]+'</span></td>').appendTo(row);
         }
 
         tooltip
