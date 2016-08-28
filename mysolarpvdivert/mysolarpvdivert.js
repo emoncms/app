@@ -574,7 +574,7 @@ var app_mysolarpvdivert = {
         markings.push({ color: "#ccc", lineWidth: 1, yaxis: { from: 0, to: 0 } });
         
         var options = {
-            xaxis: { mode: "time", timezone: "browser", minTickSize: [1, "day"], timeformat: "%d/%m/%y" },
+            xaxis: { mode: "time", timezone: "browser", minTickSize: [1, "day"] },
             grid: { hoverable: true, clickable: true, markings: markings },
             selection: { mode: "x" },
             legend: { show: false }
