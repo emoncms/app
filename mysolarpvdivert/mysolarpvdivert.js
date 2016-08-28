@@ -367,15 +367,20 @@ var app_mysolarpvdivert = {
         $(".total_divert_kwh").html((total_divert_kwh).toFixed(1));
         $(".total_use_kwh").html((total_use_kwh).toFixed(1));
         $(".total_solar_kwh").html(total_solar_kwh.toFixed(1));
-        
-        $(".total_house_solar_prc").html(((total_house_solar_kwh/total_solar_kwh)*100).toFixed(0)+"%");
-        $(".total_house_solar_kwh").html((total_house_solar_kwh).toFixed(1));
-        
-        $(".total_divert_solar_prc").html(((total_divert_kwh/total_solar_kwh)*100).toFixed(0)+"%");
-        $(".total_divert_solar_kwh").html((total_divert_kwh).toFixed(1));
 
-        $(".total_export_prc").html(((total_export_kwh/total_solar_kwh)*100).toFixed(0)+"%");
+        $(".total_house_solar_kwh").html((total_house_solar_kwh).toFixed(1));
+        $(".total_divert_solar_kwh").html((total_divert_kwh).toFixed(1));
         $(".total_export_kwh").html(total_export_kwh.toFixed(1));
+        
+        if (total_solar_kwh > 0) {
+            $(".total_house_solar_prc").html(((total_house_solar_kwh/total_solar_kwh)*100).toFixed(0)+"%");
+            $(".total_divert_solar_prc").html(((total_divert_kwh/total_solar_kwh)*100).toFixed(0)+"%");
+            $(".total_export_prc").html(((total_export_kwh/total_solar_kwh)*100).toFixed(0)+"%");
+        } else {
+            $(".total_house_solar_prc").html("-- %");
+            $(".total_divert_solar_prc").html("-- %");
+            $(".total_export_prc").html("-- %");
+        }
                 
         $(".total_import_prc").html(((total_import_kwh/total_house_kwh)*100).toFixed(0)+"%");
         $(".total_import_kwh").html(total_import_kwh.toFixed(1));        
