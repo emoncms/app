@@ -209,8 +209,9 @@ var app_mysolarpvdivert = {
             view.end = now;
             view.start = view.end - timerange;
         }
-        // Lower limit for solar
+        // Lower limit for solar & divert
         if (solar_now<10) solar_now = 0;
+        if (divert_now<10) divert_now = 0;
         
         var balance = solar_now - use_now;
 
@@ -322,6 +323,7 @@ var app_mysolarpvdivert = {
             // Supply / demand balance calculation
             // -------------------------------------------------------------------------------------------------------
             if (solar_now<10) solar_now = 0;
+            if (divert_now<10) divert_now = 0;
 
             var balance_use = solar_now - use_now;
             if (balance_use>=0) {
