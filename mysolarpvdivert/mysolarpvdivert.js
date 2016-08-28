@@ -522,17 +522,17 @@ var app_mysolarpvdivert = {
         var series = [];
         
         series.push({
-            data: app_mysolarpvdivert.divert_kwhd_data,
-            label: "Divert",
-            color: "#fb7b50",
+            data: app_mysolarpvdivert.house_solar_kwhd_data,
+            label: "House Solar",
+            color: "#82cbfc",
             bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.8, lineWidth: 0 },
             stack: 1
         });
         
         series.push({
-            data: app_mysolarpvdivert.house_solar_kwhd_data,
-            label: "House Solar",
-            color: "#82cbfc",
+            data: app_mysolarpvdivert.divert_kwhd_data,
+            label: "Divert",
+            color: "#fb7b50",
             bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.8, lineWidth: 0 },
             stack: 1
         });
