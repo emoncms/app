@@ -415,7 +415,7 @@ var app_mysolarpvdivert = {
 
                 for (i = 0; i < app_mysolarpvdivert.powerseries.length; i++) {
                     var series = app_mysolarpvdivert.powerseries[i];
-                    tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "kWh"]);
+                    tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "W"]);
                 }
                 app_mysolarpvdivert.show_tooltip(pos.pageX+10, pos.pageY+5, tooltip_items);
             } else {
