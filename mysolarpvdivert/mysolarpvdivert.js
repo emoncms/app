@@ -462,14 +462,17 @@ var app_mysolarpvdivert = {
         var latest_start_time = 0;
         var solar_meta = feed.getmeta(app_mysolarpvdivert.config.solar_kwh.value);
         var use_meta = feed.getmeta(app_mysolarpvdivert.config.use_kwh.value);
+        var divert_meta = feed.getmeta(app_mysolarpvdivert.config.divert_kwh.value);
         var import_meta = feed.getmeta(app_mysolarpvdivert.config.import_kwh.value);
         if (solar_meta.start_time > latest_start_time) latest_start_time = solar_meta.start_time;
         if (use_meta.start_time > latest_start_time) latest_start_time = use_meta.start_time;
+        if (divert_meta.start_time > latest_start_time) latest_start_time = divert_meta.start_time;
         if (import_meta.start_time > latest_start_time) latest_start_time = import_meta.start_time;
         app_mysolarpvdivert.latest_start_time = latest_start_time;
 
         var earliest_start_time = solar_meta.start_time;
         earliest_start_time = Math.min(earliest_start_time, use_meta.start_time);
+        earliest_start_time = Math.min(earliest_start_time, divert_meta.start_time);
         earliest_start_time = Math.min(earliest_start_time, import_meta.start_time);
         view.first_data = latest_start_time * 1000;
 
