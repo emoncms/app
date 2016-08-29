@@ -468,6 +468,11 @@ var app_mysolarpvdivert = {
         if (import_meta.start_time > latest_start_time) latest_start_time = import_meta.start_time;
         app_mysolarpvdivert.latest_start_time = latest_start_time;
 
+        var earliest_start_time = solar_meta.start_time;
+        earliest_start_time = Math.min(earliest_start_time, use_meta.start_time);
+        earliest_start_time = Math.min(earliest_start_time, import_meta.start_time);
+        view.first_data = latest_start_time * 1000;
+
         var timeWindow = (3600000*24.0*40);
         var end = +new Date;
         var start = end - timeWindow;
