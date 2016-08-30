@@ -94,6 +94,7 @@ var app_myelectric = {
             success: function(data_in) { meta = data_in; } 
         });
         app_myelectric.startalltime = meta.start_time;
+        view.first_data = meta.start_time * 1000;
         
         app_myelectric.reloadkwhd = true;
         
