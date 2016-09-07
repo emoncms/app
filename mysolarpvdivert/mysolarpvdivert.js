@@ -3,10 +3,12 @@ var app_mysolarpvdivert = {
     config: {
         "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"House or building use in watts"},
         "solar":{"type":"feed", "autoname":"solar", "engine":"5", "description":"Solar pv generation in watts"},
+        "wind":{"optional":true, "type":"feed", "autoname":"wind", "engine":"5", "description":"Wind generation in watts"},
         "divert":{"type":"feed", "autoname":"divert", "engine":"5", "description":"Immersion usage in watts"},
         //"export":{"type":"feed", "autoname":"export", "engine":5, "description":"Exported solar in watts"},
         "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative use in kWh"},
         "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5, "description":"Cumulative solar generation in kWh"},
+        "wind_kwh":{"optional":true, "type":"feed", "autoname":"wind_kwh", "engine":5, "description":"Cumulative wind generation in kWh"},
         "divert_kwh":{"optional":true, "type":"feed", "autoname":"divert_kwh", "engine":5, "description":"Cumulative divert usage in kWh"},
         "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "engine":5, "description":"Cumulative grid import in kWh"},
         //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
@@ -14,6 +16,7 @@ var app_mysolarpvdivert = {
     
     live: false,
     show_balance_line: 0,
+    has_wind: false,
       
     reload: true,
     autoupdate: true,
@@ -48,7 +51,18 @@ var app_mysolarpvdivert = {
         view.end = +new Date;
         view.start = view.end - timeWindow;
         
-        if (app_mysolarpvdivert.config.solar_kwh.value && app_mysolarpvdivert.config.use_kwh.value && app_mysolarpvdivert.config.import_kwh.value) {
+        if (app_mysolarpvdivert.config.wind.value) {
+            app_mysolarpvdivert.has_wind = true;
+            $(".generationtitle").html("GENERATION");
+        } else {
+            $(".generationtitle").html("SOLAR");
+        }
+        
+        if (app_mysolarpvdivert.config.solar_kwh.value && 
+            app_mysolarpvdivert.config.use_kwh.value && 
+            app_mysolarpvdivert.config.import_kwh.value &&
+            (!app_mysolarpvdivert.has_wind || app_mysolarpvdivert.config.wind_kwh.value))
+        {
             app_mysolarpvdivert.init_bargraph();
             $(".viewhistory").show();
         } else {
@@ -194,6 +208,11 @@ var app_mysolarpvdivert = {
         var solar_now = parseInt(feeds[app_mysolarpvdivert.config.solar.value].value);
         var use_now = parseInt(feeds[app_mysolarpvdivert.config.use.value].value);
         var divert_now = parseInt(feeds[app_mysolarpvdivert.config.divert.value].value);
+        
+        var wind_now = 0;
+        if (app_mysolarpvdivert.has_wind) {
+          wind_now = parseInt(feeds[app_mysolarpvdivert.config.wind.value].value);
+        }
 
         if (app_mysolarpvdivert.autoupdate) {
             var updatetime = feeds[app_mysolarpvdivert.config.solar.value].time;
@@ -203,6 +222,11 @@ var app_mysolarpvdivert = {
             timeseries.trim_start("use",view.start*0.001);
             timeseries.append("divert",updatetime,divert_now);
             timeseries.trim_start("divert",view.start*0.001);
+            
+            if (app_mysolarpvdivert.has_wind) {
+              timeseries.append("wind",updatetime,wind_now);
+              timeseries.trim_start("wind",view.start*0.001);
+            }
 
             // Advance view
             var timerange = view.end - view.start;
@@ -211,9 +235,10 @@ var app_mysolarpvdivert = {
         }
         // Lower limit for solar & divert
         if (solar_now<10) solar_now = 0;
+        if (wind_now<10) wind_now = 0;
         if (divert_now<10) divert_now = 0;
         
-        var balance = solar_now - use_now;
+        var balance = (solar_now + wind_now) - use_now;
 
         var house_now = use_now - divert_now;
         
@@ -232,7 +257,7 @@ var app_mysolarpvdivert = {
             $(".balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
         }
         
-        $(".solarnow").html(solar_now);
+        $(".generationnow").html(solar_now + wind_now);
         $(".housenow").html(house_now);
         $(".divertnow").html(divert_now);
         $(".usenow").html(use_now);
@@ -283,11 +308,15 @@ var app_mysolarpvdivert = {
             timeseries.load("solar",feed.getdata(app_mysolarpvdivert.config.solar.value,view.start,view.end,interval,0,0));
             timeseries.load("use",feed.getdata(app_mysolarpvdivert.config.use.value,view.start,view.end,interval,0,0));
             timeseries.load("divert",feed.getdata(app_mysolarpvdivert.config.divert.value,view.start,view.end,interval,0,0));
+            if (app_mysolarpvdivert.has_wind) {
+              timeseries.load("wind",feed.getdata(app_mysolarpvdivert.config.wind.value,view.start,view.end,interval,0,0));
+            }
         }
         // -------------------------------------------------------------------------------------------------------
         
         var use_data = [];
-        var gen_data = [];
+        var solar_data = [];
+        var wind_data = [];
         var bal_data = [];
         var store_data = [];
         var divert_data = [];
@@ -297,13 +326,15 @@ var app_mysolarpvdivert = {
         var store = 0;
         var use_now = 0;
         var solar_now = 0;
+        var wind_now = 0;
         var divert_now = 0;
         var house_now = 0;
         
         var total_solar_kwh = 0;
+        var total_wind_kwh = 0;
         var total_use_kwh = 0;
-        var total_use_solar_kwh = 0;
-        var total_house_solar_kwh = 0;
+        var total_use_generated_kwh = 0;
+        var total_house_generated_kwh = 0;
         var total_divert_kwh = 0;
         
         var datastart = timeseries.start_time("solar");
@@ -316,6 +347,11 @@ var app_mysolarpvdivert = {
             if (timeseries.value("solar",z)!=null) solar_now = timeseries.value("solar",z);  
             if (timeseries.value("use",z)!=null) use_now = timeseries.value("use",z);
             if (timeseries.value("divert",z)!=null) divert_now = timeseries.value("divert",z);
+            if (app_mysolarpvdivert.has_wind) {
+                if (timeseries.value("wind",z)!=null) wind_now = timeseries.value("wind",z);
+            } else {
+                wind_now = 0;
+            }
 
             house_now = use_now - divert_now;
             
@@ -323,34 +359,39 @@ var app_mysolarpvdivert = {
             // Supply / demand balance calculation
             // -------------------------------------------------------------------------------------------------------
             if (solar_now<10) solar_now = 0;
+            if (wind_now<10) wind_now = 0;
             if (divert_now<10) divert_now = 0;
 
-            var balance_use = solar_now - use_now;
+            var generated_now = solar_now + wind_now;
+
+            var balance_use = generated_now - use_now;
             if (balance_use>=0) {
-                total_use_solar_kwh += (use_now*interval)/(1000*3600);
+                total_use_generated_kwh += (use_now*interval)/(1000*3600);
             }
             if (balance_use<0) {
-                total_use_solar_kwh += (solar_now*interval)/(1000*3600);
+                total_use_generated_kwh += (generated_now*interval)/(1000*3600);
             }
             
-            var balance_house = solar_now - house_now;
+            var balance_house = generated_now - house_now;
             if (balance_house>=0) {
-                total_house_solar_kwh += (house_now*interval)/(1000*3600);
+                total_house_generated_kwh += (house_now*interval)/(1000*3600);
             }
             if (balance_house<0) {
-                total_house_solar_kwh += (solar_now*interval)/(1000*3600);
+                total_house_generated_kwh += (generated_now*interval)/(1000*3600);
             }
             
             var store_change = (balance_use * interval) / (1000*3600);
             store += store_change;
             
             total_solar_kwh += (solar_now*interval)/(1000*3600);
+            total_wind_kwh += (wind_now*interval)/(1000*3600);
             total_use_kwh += (use_now*interval)/(1000*3600);
             total_divert_kwh += (divert_now*interval)/(1000*3600);
             
             var time = datastart + (1000 * interval * z);
             use_data.push([time,use_now]);
-            gen_data.push([time,solar_now]);
+            solar_data.push([time,solar_now]);
+            wind_data.push([time,wind_now]);
             bal_data.push([time,balance_use]);
             store_data.push([time,store]);
             divert_data.push([time,divert_now]);
@@ -359,26 +400,27 @@ var app_mysolarpvdivert = {
             t += interval;
         }
 
+        var total_generated_kwh = total_solar_kwh + total_wind_kwh;
         var total_house_kwh = total_use_kwh - total_divert_kwh;
-        var total_export_kwh = total_solar_kwh - total_use_solar_kwh;
-        var total_import_kwh = total_use_kwh - total_use_solar_kwh;
+        var total_export_kwh = total_generated_kwh - total_use_generated_kwh;
+        var total_import_kwh = total_use_kwh - total_use_generated_kwh;
 
         $(".total_house_kwh").html(total_house_kwh.toFixed(1));
         $(".total_divert_kwh").html((total_divert_kwh).toFixed(1));
         $(".total_use_kwh").html((total_use_kwh).toFixed(1));
-        $(".total_solar_kwh").html(total_solar_kwh.toFixed(1));
+        $(".total_generated_kwh").html(total_generated_kwh.toFixed(1));
 
-        $(".total_house_solar_kwh").html((total_house_solar_kwh).toFixed(1));
-        $(".total_divert_solar_kwh").html((total_divert_kwh).toFixed(1));
+        $(".total_house_generated_kwh").html((total_house_generated_kwh).toFixed(1));
+        $(".total_divert_generated_kwh").html((total_divert_kwh).toFixed(1));
         $(".total_export_kwh").html(total_export_kwh.toFixed(1));
         
-        if (total_solar_kwh > 0) {
-            $(".total_house_solar_prc").html(((total_house_solar_kwh/total_solar_kwh)*100).toFixed(0)+"%");
-            $(".total_divert_solar_prc").html(((total_divert_kwh/total_solar_kwh)*100).toFixed(0)+"%");
-            $(".total_export_prc").html(((total_export_kwh/total_solar_kwh)*100).toFixed(0)+"%");
+        if (total_generated_kwh > 0) {
+            $(".total_house_generated_prc").html(((total_house_generated_kwh/total_generated_kwh)*100).toFixed(0)+"%");
+            $(".total_divert_generated_prc").html(((total_divert_kwh/total_generated_kwh)*100).toFixed(0)+"%");
+            $(".total_export_prc").html(((total_export_kwh/total_generated_kwh)*100).toFixed(0)+"%");
         } else {
-            $(".total_house_solar_prc").html("-- %");
-            $(".total_divert_solar_prc").html("-- %");
+            $(".total_house_generated_prc").html("-- %");
+            $(".total_divert_generated_prc").html("-- %");
             $(".total_export_prc").html("-- %");
         }
                 
@@ -388,11 +430,13 @@ var app_mysolarpvdivert = {
         options.xaxis.min = view.start;
         options.xaxis.max = view.end;
         
-        var series = [
-            {data:gen_data, label: "Solar", color: "#dccc1f", lines:{lineWidth:0, fill:1.0}},
-            {data:house_data, label: "House", color: "#82cbfc", stack:1, lines:{lineWidth:0, fill:0.8}},
-            {data:divert_data, label: "Divert", color: "#fb7b50", stack:1, lines:{lineWidth:0, fill:0.8}}
-        ];
+        var series = [];
+        
+        series.push({data:solar_data, label: "Solar", color: "#dccc1f", stack:1, lines:{lineWidth:0, fill:1.0}});
+        if (app_mysolarpvdivert.has_wind) series.push({data:wind_data, label: "Wind", color: "#1fdc6e", stack:1, lines:{lineWidth:0, fill:1.0}});
+        
+        series.push({data:house_data, label: "House", color: "#82cbfc", stack:2, lines:{lineWidth:0, fill:0.8}});
+        series.push({data:divert_data, label: "Divert", color: "#fb7b50", stack:2, lines:{lineWidth:0, fill:0.8}});
         
         if (app_mysolarpvdivert.show_balance_line) series.push({data:store_data, label: "Balance", yaxis:2, color: "#888"});
 
@@ -494,9 +538,14 @@ var app_mysolarpvdivert = {
         var use_kwh_data = feed.getdataDMY(app_mysolarpvdivert.config.use_kwh.value,start,end,"daily");
         var divert_kwh_data = feed.getdataDMY(app_mysolarpvdivert.config.divert_kwh.value,start,end,"daily");
         var import_kwh_data = feed.getdataDMY(app_mysolarpvdivert.config.import_kwh.value,start,end,"daily");
+        var wind_kwh_data = [];
+        if (app_mysolarpvdivert.has_wind) {
+            wind_kwh_data = feed.getdataDMY(app_mysolarpvdivert.config.wind_kwh.value,start,end,"daily");
+        }
         
-        app_mysolarpvdivert.house_solar_kwhd_data = [];
+        app_mysolarpvdivert.house_generated_kwhd_data = [];
         app_mysolarpvdivert.solar_kwhd_data = [];
+        app_mysolarpvdivert.wind_kwhd_data = [];
         app_mysolarpvdivert.use_kwhd_data = [];
         app_mysolarpvdivert.house_kwhd_data = [];
         app_mysolarpvdivert.divert_kwhd_data = [];
@@ -509,22 +558,33 @@ var app_mysolarpvdivert = {
             var solar_kwh = solar_kwh_data[day][1] - solar_kwh_data[day-1][1];
             if (solar_kwh_data[day][1]==null || solar_kwh_data[day-1][1]==null) solar_kwh = null;
             
+            var wind_kwh = null;
+            if (app_mysolarpvdivert.has_wind) {
+                var wind_kwh = wind_kwh_data[day][1] - wind_kwh_data[day-1][1];
+                if (wind_kwh_data[day][1]==null || wind_kwh_data[day-1][1]==null) wind_kwh = null;
+            }
+            
             var use_kwh = use_kwh_data[day][1] - use_kwh_data[day-1][1];
             if (use_kwh_data[day][1]==null || use_kwh_data[day-1][1]==null) use_kwh = null;
-
+            
             var divert_kwh = divert_kwh_data[day][1] - divert_kwh_data[day-1][1];
             if (divert_kwh_data[day][1]==null || divert_kwh_data[day-1][1]==null) divert_kwh = null;
             
             var import_kwh = import_kwh_data[day][1] - import_kwh_data[day-1][1];
             if (import_kwh_data[day][1]==null || import_kwh_data[day-1][1]==null) import_kwh = null;
             
-            var export_kwh = solar_kwh - (use_kwh - import_kwh);
+            var generated_kwh = solar_kwh + wind_kwh;
+            var export_kwh = generated_kwh - (use_kwh - import_kwh);
             var house_kwh = use_kwh - divert_kwh;
             var house_solar_kwh = house_kwh - import_kwh;
             
-            if (solar_kwh!=null && use_kwh!=null && export_kwh!=null && divert_kwh!=null && house_kwh!=null) {
-                app_mysolarpvdivert.house_solar_kwhd_data.push([solar_kwh_data[day-1][0],house_solar_kwh]);
+            if (solar_kwh!=null && use_kwh!=null && export_kwh!=null && divert_kwh!=null && house_kwh!=null &&
+                (!app_mysolarpvdivert.has_wind || wind_kwh!=null)
+               )
+            {
+                app_mysolarpvdivert.house_generated_kwhd_data.push([solar_kwh_data[day-1][0],house_solar_kwh]);
                 app_mysolarpvdivert.solar_kwhd_data.push([solar_kwh_data[day-1][0],solar_kwh]);
+                if (wind_kwh!=null) app_mysolarpvdivert.wind_kwhd_data.push([wind_kwh_data[day-1][0],wind_kwh]);
                 app_mysolarpvdivert.use_kwhd_data.push([use_kwh_data[day-1][0],use_kwh*-1]);
                 app_mysolarpvdivert.house_kwhd_data.push([use_kwh_data[day-1][0],house_kwh]);
                 app_mysolarpvdivert.divert_kwhd_data.push([divert_kwh_data[day-1][0],divert_kwh]);
@@ -537,7 +597,7 @@ var app_mysolarpvdivert = {
         var series = [];
         
         series.push({
-            data: app_mysolarpvdivert.house_solar_kwhd_data,
+            data: app_mysolarpvdivert.house_generated_kwhd_data,
             label: "House",
             color: "#82cbfc",
             bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 1.0, lineWidth: 0 },
@@ -616,23 +676,26 @@ var app_mysolarpvdivert = {
                 var z = item.dataIndex;
                 
                 var solar_kwh = app_mysolarpvdivert.solar_kwhd_data[z][1];
-                var house_solar_kwh = app_mysolarpvdivert.house_solar_kwhd_data[z][1];
+                var wind_kwh = (app_mysolarpvdivert.has_wind) ? app_mysolarpvdivert.wind_kwhd_data[z][1] : 0;
+                var house_generated_kwh = app_mysolarpvdivert.house_generated_kwhd_data[z][1];
                 var use_kwh = app_mysolarpvdivert.use_kwhd_data[z][1]*-1;
                 var house_kwh = app_mysolarpvdivert.house_kwhd_data[z][1];
                 var divert_kwh = app_mysolarpvdivert.divert_kwhd_data[z][1];
                 var export_kwh = app_mysolarpvdivert.export_kwhd_data[z][1];
-                var import_kwh = use_kwh - house_solar_kwh - divert_kwh;
+                
+                var generated_kwh = solar_kwh + wind_kwh;
+                var import_kwh = use_kwh - house_generated_kwh - divert_kwh;
                 
                 $(".total_house_kwh").html(house_kwh.toFixed(1));
                 $(".total_divert_kwh").html((divert_kwh).toFixed(1));
                 $(".total_use_kwh").html((use_kwh).toFixed(1));
-                $(".total_solar_kwh").html(solar_kwh.toFixed(1));
+                $(".total_generated_kwh").html(generated_kwh.toFixed(1));
         
-                $(".total_house_solar_prc").html(((house_solar_kwh/solar_kwh)*100).toFixed(0)+"%");
-                $(".total_house_solar_kwh").html((house_solar_kwh).toFixed(1));
+                $(".total_house_generated_prc").html(((house_generated_kwh/generated_kwh)*100).toFixed(0)+"%");
+                $(".total_house_generated_kwh").html((house_generated_kwh).toFixed(1));
         
-                $(".total_divert_solar_prc").html(((divert_kwh/solar_kwh)*100).toFixed(0)+"%");
-                $(".total_divert_solar_kwh").html((divert_kwh).toFixed(1));
+                $(".total_divert_generated_prc").html(((divert_kwh/generated_kwh)*100).toFixed(0)+"%");
+                $(".total_divert_generated_kwh").html((divert_kwh).toFixed(1));
         
                 $(".total_export_prc").html(((export_kwh/solar_kwh)*100).toFixed(0)+"%");
                 $(".total_export_kwh").html(export_kwh.toFixed(1));
