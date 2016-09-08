@@ -162,6 +162,10 @@ var app_mysolarpvdivert = {
             $(".power-value").css("font-size","32px");
             $(".power-value").css("padding-top","12px");
             $(".power-value").css("padding-bottom","8px");
+            $(".statsbox-title").css("font-size","14px");
+            $(".statsbox-value").css("font-size","20px");
+            $(".statsbox-units").css("font-size","12px");
+            $(".statsbox-prc").css("font-size","12px");
             $(".midtext").css("font-size","14px");
             $(".balanceline").hide();
             $(".vistimeW").hide();
@@ -172,6 +176,10 @@ var app_mysolarpvdivert = {
             $(".power-value").css("font-size","52px");
             $(".power-value").css("padding-top","22px");
             $(".power-value").css("padding-bottom","12px");
+            $(".statsbox-title").css("font-size","16px");
+            $(".statsbox-value").css("font-size","22px");
+            $(".statsbox-units").css("font-size","14px");
+            $(".statsbox-prc").css("font-size","14px");
             $(".midtext").css("font-size","18px");
             $(".balanceline").show();
             $(".vistimeW").show();
@@ -182,6 +190,10 @@ var app_mysolarpvdivert = {
             $(".power-value").css("font-size","85px");
             $(".power-value").css("padding-top","40px");
             $(".power-value").css("padding-bottom","20px");
+            $(".statsbox-title").css("font-size","20px");
+            $(".statsbox-value").css("font-size","36px");
+            $(".statsbox-units").css("font-size","16px");
+            $(".statsbox-prc").css("font-size","16px");
             $(".midtext").css("font-size","20px");
             $(".balanceline").show();
             $(".vistimeW").show();
@@ -404,6 +416,7 @@ var app_mysolarpvdivert = {
         var total_house_kwh = total_use_kwh - total_divert_kwh;
         var total_export_kwh = total_generated_kwh - total_use_generated_kwh;
         var total_import_kwh = total_use_kwh - total_use_generated_kwh;
+        var total_grid_balance_kwh = total_export_kwh - total_import_kwh;
 
         $(".total_house_kwh").html(total_house_kwh.toFixed(1));
         $(".total_divert_kwh").html((total_divert_kwh).toFixed(1));
@@ -411,16 +424,18 @@ var app_mysolarpvdivert = {
         $(".total_generated_kwh").html(total_generated_kwh.toFixed(1));
 
         $(".total_house_generated_kwh").html((total_house_generated_kwh).toFixed(1));
-        $(".total_divert_generated_kwh").html((total_divert_kwh).toFixed(1));
         $(".total_export_kwh").html(total_export_kwh.toFixed(1));
+        $(".total_grid_balance_kwh").html(total_grid_balance_kwh.toFixed(1));
         
         if (total_generated_kwh > 0) {
-            $(".total_house_generated_prc").html(((total_house_generated_kwh/total_generated_kwh)*100).toFixed(0)+"%");
-            $(".total_divert_generated_prc").html(((total_divert_kwh/total_generated_kwh)*100).toFixed(0)+"%");
+            $(".house_generated_total_generated_prc").html(((total_house_generated_kwh/total_generated_kwh)*100).toFixed(0)+"%");
+            $(".house_generated_house_use_prc").html(((total_house_generated_kwh/total_house_kwh)*100).toFixed(0)+"%");
+            $(".divert_total_generated_prc").html(((total_divert_kwh/total_generated_kwh)*100).toFixed(0)+"%");
             $(".total_export_prc").html(((total_export_kwh/total_generated_kwh)*100).toFixed(0)+"%");
         } else {
-            $(".total_house_generated_prc").html("-- %");
-            $(".total_divert_generated_prc").html("-- %");
+            $(".house_generated_total_generated_prc").html("-- %");
+            $(".house_generated_house_use_prc").html("-- %%");
+            $(".divert_total_generated_prc").html("-- %");
             $(".total_export_prc").html("-- %");
         }
                 
@@ -685,23 +700,22 @@ var app_mysolarpvdivert = {
                 
                 var generated_kwh = solar_kwh + wind_kwh;
                 var import_kwh = use_kwh - house_generated_kwh - divert_kwh;
+                var total_grid_balance_kwh = export_kwh - import_kwh;
                 
                 $(".total_house_kwh").html(house_kwh.toFixed(1));
                 $(".total_divert_kwh").html((divert_kwh).toFixed(1));
                 $(".total_use_kwh").html((use_kwh).toFixed(1));
                 $(".total_generated_kwh").html(generated_kwh.toFixed(1));
-        
-                $(".total_house_generated_prc").html(((house_generated_kwh/generated_kwh)*100).toFixed(0)+"%");
                 $(".total_house_generated_kwh").html((house_generated_kwh).toFixed(1));
-        
-                $(".total_divert_generated_prc").html(((divert_kwh/generated_kwh)*100).toFixed(0)+"%");
-                $(".total_divert_generated_kwh").html((divert_kwh).toFixed(1));
-        
-                $(".total_export_prc").html(((export_kwh/solar_kwh)*100).toFixed(0)+"%");
                 $(".total_export_kwh").html(export_kwh.toFixed(1));
-        
-                $(".total_import_prc").html(((import_kwh/house_kwh)*100).toFixed(0)+"%");
                 $(".total_import_kwh").html(import_kwh.toFixed(1));
+                $(".total_grid_balance_kwh").html(total_grid_balance_kwh.toFixed(1));
+                
+                $(".house_generated_total_generated_prc").html(((house_generated_kwh/generated_kwh)*100).toFixed(0)+"%");
+                $(".house_generated_house_use_prc").html(((house_generated_kwh/house_kwh)*100).toFixed(0)+"%");
+                $(".divert_total_generated_prc").html(((divert_kwh/generated_kwh)*100).toFixed(0)+"%");
+                $(".total_export_prc").html(((export_kwh/solar_kwh)*100).toFixed(0)+"%");
+                $(".total_import_prc").html(((import_kwh/house_kwh)*100).toFixed(0)+"%");
 
                 // Show tooltip
                 var tooltip_items = [];

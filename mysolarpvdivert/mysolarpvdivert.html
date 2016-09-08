@@ -73,53 +73,206 @@
     
     <br>
     
-    <table style="width:100%">
+<style type="text/css">
+.statstable {
+    width: 100%;
+    border-spacing: 10px;
+    border-collapse: separate;
+}
+
+.statsbox {
+    width: 20%;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.statsbox-inner-unit {
+    color: #333;
+    padding: 10px;
+}
+
+.statsbox-inner-arrow {
+    color: #999;
+}
+
+.statsbox-title {
+    font-weight: bold;
+    font-size: 20px;
+    padding-bottom: 15px;
+}
+
+.statsbox-value {
+    font-weight: bold;
+    font-size: 36px;
+}
+
+.statsbox-units {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.statsbox-prc {
+    font-weight: normal;
+    font-size: 16px;
+}
+
+.statsbox-arrow-down {
+    position: relative;
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+}
+
+.statsbox-arrow-down:after {
+    top: 100%;
+    left: 50%;
+    border: solid transparent;
+    content: " ";
+    width: 0; 
+    height: 0; 
+    position: absolute;
+    pointer-events: none;
+    border-top-color: #999;
+    border-width: 16px;
+    margin-left: -16px;
+}
+
+.statsbox-arrow-right {
+    position: relative;
+    margin-right: 16px;
+    margin-left: 16px;
+}
+
+.statsbox-arrow-right:after {
+  left: 100%;
+  top: 50%;
+  border: solid transparent;
+  content: " ";
+  width: 0; 
+  height: 0; 
+  position: absolute;
+  pointer-events: none;
+  border-left-color: #999;
+  border-width: 16px;
+  margin-top: -16px;
+}
+</style>
+    
+    <table class="statstable">
+    
     <tr>
-        <td class="appbox">
-            <div class="appbox-title">TOTAL USE</div>
-            <div><span class="appbox-value total_use_kwh" style="color:#0598fa">0</span> <span class="appbox-units" style="color:#0598fa">kWh</span></div>
-        </td>
-
-        <td class="appbox">
-            <div class="appbox-title">HOUSE</div>
-            <div><span class="appbox-value total_house_kwh" style="color:#82cbfc">0</span> <span class="appbox-units" style="color:#82cbfc">kWh</span></div>
-        </td>
-
-        <td class="appbox">
-            <div class="appbox-title">DIVERT</div>
-            <div><span class="appbox-value total_divert_kwh" style="color:#fb7b50">0</span> <span class="appbox-units" style="color:#fb7b50">kWh</span></div>
-        </td>
-
-        <td class="appbox">
-            <div class="appbox-title">IMPORT</div>
-            <div style="padding-bottom:5px"><span class="appbox-value total_import_prc" style="color:#d52e2e">0</span></div>
-            <div><span class="appbox-units total_import_kwh" style="color:#d52e2e">0</span> <span class="appbox-units" style="color:#d52e2e">kWh</span></div>
-        </td>
-    </tr>
-    <tr>
-        <td class="appbox">
-            <div class="appbox-title"><span class="generationtitle">SOLAR</span></div>
-            <div><span class="appbox-value total_generated_kwh" style="color:#dccc1f">0</span> <span class="appbox-units" style="color:#dccc1f">kWh</span></div>
-        </td>
-
-        <td class="appbox">
-            <div class="appbox-title">HOUSE</div>
-            <div style="padding-bottom:5px"><span class="appbox-value total_house_generated_prc" style="color:#82cbfc">0</span></div>
-            <div><span class="appbox-units total_house_generated_kwh" style="color:#82cbfc">0</span> <span class="appbox-units" style="color:#82cbfc">kWh</span></div>
+        <td class="statsbox" colspan="2">
+            <div class="statsbox-inner-unit" style="background: #dccc1f">
+                <div class="statsbox-title"><span class="generationtitle">SOLAR</span></div>
+                <div><span class="statsbox-value total_generated_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+            </div>
         </td>
         
-        <td class="appbox">
-            <div class="appbox-title">DIVERT</div>
-            <div style="padding-bottom:5px"><span class="appbox-value total_divert_generated_prc" style="color:#fb7b50">0</span></div>
-            <div><span class="appbox-units total_divert_generated_kwh" style="color:#fb7b50">0</span> <span class="appbox-units" style="color:#fb7b50">kWh</span></div>
+        <td class="statsbox">
+            <div class="statsbox-inner-arrow">
+                <table><tr>
+                     <td>
+                          <div><span class="statsbox-prc total_export_prc">0</span></div>
+                     </td>
+                     <td width="100%">
+                          <div class="statsbox-arrow-right"><span class="statsbox-value total_export_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                    </td>
+                </tr></table>
+            </div>
+        </td>
+
+        <td class="statsbox">
+            <div class="statsbox-inner-unit" style="background: #d52e2e">
+                <div class="statsbox-title">GRID</div>
+                <div><span class="statsbox-value total_grid_balance_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+            </div>
+        </td>
+    </tr>
+    
+    <tr>
+        <td class="statsbox">
+            <div class="statsbox-inner-arrow">
+                <div><span class="statsbox-prc divert_total_generated_prc">0</span></div>
+            </div>
         </td>
         
-        <td class="appbox">
-            <div class="appbox-title">EXPORT</div>
-            <div style="padding-bottom:5px"><span class="appbox-value total_export_prc" style="color:#2ed52e">0</span></div>
-            <div><span class="appbox-units total_export_kwh" style="color:#2ed52e">0</span> <span class="appbox-units" style="color:#2ed52e">kWh</span></div>
-        </td>        
+        <td class="statsbox">
+            <div class="statsbox-inner-arrow">
+                <div><span class="statsbox-prc house_generated_total_generated_prc">0</span></div>
+            </div>
+        </td>
+
+        <td class="statsbox">
+        </td>
+        
+        <td class="statsbox">
+            <div class="statsbox-inner-arrow">
+            </div>
+        </td>
     </tr>
+    
+    <tr>
+        <td class="statsbox">
+            <div class="statsbox-inner-arrow">
+                <div class="statsbox-arrow-down"><span class="statsbox-value total_divert_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+            </div>
+        </td>
+        
+        <td class="statsbox">
+            <div class="statsbox-inner-arrow">
+                <div class="statsbox-arrow-down"><span class="statsbox-value total_house_generated_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+            </div>
+        </td>
+
+        <td class="statsbox">
+        </td>
+        
+        <td class="statsbox">
+            <div class="statsbox-inner-arrow">
+                <div class="statsbox-arrow-down"><span class="statsbox-value total_import_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+            </div>
+        </td>
+    </tr>
+    
+    <tr>
+        <td class="statsbox">
+            <div class="statsbox-inner-arrow">
+            </div>
+        </td>
+        
+        <td class="statsbox">
+            <div class="statsbox-inner-arrow">
+                <div><span class="statsbox-prc house_generated_house_use_prc">0</span></div>
+            </div>
+        </td>
+
+        <td class="statsbox">
+            <div class="statsbox-inner-arrow">
+            </div>
+        </td>
+        
+        <td class="statsbox">
+            <div class="statsbox-inner-arrow">
+                <div><span class="statsbox-prc total_import_prc">0</span></div>
+            </div>
+        </td>
+    </tr>
+    
+    <tr>
+        <td class="statsbox">
+            <div class="statsbox-inner-unit" style="background: #fb7b50">
+                <div class="statsbox-title">DIVERT</div>
+                <div><span class="statsbox-value total_divert_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+            </div>
+        </td>
+        
+        <td class="statsbox" colspan="3">
+            <div class="statsbox-inner-unit" style="background: #82cbfc">
+                <div class="statsbox-title">HOUSE</div>
+                <div><span class="statsbox-value total_house_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+            </div>
+        </td>
+    </tr>
+    
     </table>
 
 </div>
