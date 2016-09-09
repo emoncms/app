@@ -166,6 +166,7 @@ var app_mysolarpvdivert = {
             $(".statsbox-value").css("font-size","20px");
             $(".statsbox-units").css("font-size","12px");
             $(".statsbox-prc").css("font-size","12px");
+            $(".statsbox-inner-unit").css("padding","4px");
             $(".midtext").css("font-size","14px");
             $(".balanceline").hide();
             $(".vistimeW").hide();
@@ -180,6 +181,7 @@ var app_mysolarpvdivert = {
             $(".statsbox-value").css("font-size","22px");
             $(".statsbox-units").css("font-size","14px");
             $(".statsbox-prc").css("font-size","14px");
+            $(".statsbox-inner-unit").css("padding","8px");
             $(".midtext").css("font-size","18px");
             $(".balanceline").show();
             $(".vistimeW").show();
@@ -194,6 +196,7 @@ var app_mysolarpvdivert = {
             $(".statsbox-value").css("font-size","36px");
             $(".statsbox-units").css("font-size","16px");
             $(".statsbox-prc").css("font-size","16px");
+            $(".statsbox-inner-unit").css("padding","10px");
             $(".midtext").css("font-size","20px");
             $(".balanceline").show();
             $(".vistimeW").show();
