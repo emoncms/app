@@ -2,14 +2,15 @@ var view =
 {
   'start':0,
   'end':0,
+  'first_data':0,
 
   'zoomout':function ()
   {
     var time_window = this.end - this.start;
     var middle = this.start + time_window / 2;
     time_window = time_window * 2;
-    this.start = middle - (time_window/2);
-    this.end = middle + (time_window/2);
+    this.start = Math.max(middle - (time_window/2), this.first_data);
+    this.end = Math.min(middle + (time_window/2), this.now());
   },
 
   'zoomin':function ()
@@ -25,6 +26,10 @@ var view =
   {
     var time_window = this.end - this.start;
     var shiftsize = time_window * 0.2;
+    var now = this.now();
+    if (this.end + shiftsize > now) {
+      shiftsize = now - this.end;
+    }
     this.start += shiftsize;
     this.end += shiftsize;
   },
@@ -33,6 +38,9 @@ var view =
   {
     var time_window = this.end - this.start;
     var shiftsize = time_window * 0.2;
+    if (this.start - shiftsize < this.first_data) {
+      shiftsize = this.start - this.first_data;
+    }
     this.start -= shiftsize;
     this.end -= shiftsize;
   },
@@ -71,6 +79,12 @@ var view =
       if (interval>3600*72) outinterval = 3600*72;
       
       return outinterval;
+  },
+
+  'now':function()
+  {
+    var date = new Date();
+    return date.getTime();
   }
 }
 
