@@ -446,7 +446,7 @@ var app_mysolarpvdivert = {
             $(".total_export_prc").html(((total_export_kwh/total_generated_kwh)*100).toFixed(0)+"%");
         } else {
             $(".house_generated_total_generated_prc").html("-- %");
-            $(".house_generated_house_use_prc").html("-- %%");
+            $(".house_generated_house_use_prc").html("-- %");
             $(".divert_total_generated_prc").html("-- %");
             $(".total_export_prc").html("-- %");
         }
@@ -723,11 +723,19 @@ var app_mysolarpvdivert = {
                 $(".total_import_kwh").html(import_kwh.toFixed(1));
                 $(".total_grid_balance_kwh").html(total_grid_balance_kwh.toFixed(1));
                 
-                $(".house_generated_total_generated_prc").html(((house_generated_kwh/generated_kwh)*100).toFixed(0)+"%");
-                $(".house_generated_house_use_prc").html(((house_generated_kwh/house_kwh)*100).toFixed(0)+"%");
-                $(".divert_total_generated_prc").html(((divert_kwh/generated_kwh)*100).toFixed(0)+"%");
-                $(".total_export_prc").html(((export_kwh/solar_kwh)*100).toFixed(0)+"%");
                 $(".total_import_prc").html(((import_kwh/house_kwh)*100).toFixed(0)+"%");
+                
+                if (generated_kwh > 0) {
+                    $(".house_generated_total_generated_prc").html(((house_generated_kwh/generated_kwh)*100).toFixed(0)+"%");
+                    $(".house_generated_house_use_prc").html(((house_generated_kwh/house_kwh)*100).toFixed(0)+"%");
+                    $(".divert_total_generated_prc").html(((divert_kwh/generated_kwh)*100).toFixed(0)+"%");
+                    $(".total_export_prc").html(((export_kwh/generated_kwh)*100).toFixed(0)+"%");
+                } else {
+                    $(".house_generated_total_generated_prc").html("-- %");
+                    $(".house_generated_house_use_prc").html("-- %");
+                    $(".divert_total_generated_prc").html("-- %");
+                    $(".total_export_prc").html("-- %");
+                }
 
                 // Show tooltip
                 var tooltip_items = [];
