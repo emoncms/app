@@ -325,14 +325,20 @@ var app_mysolarpv = {
         $(".total_solar_kwh").html(total_solar_kwh.toFixed(1));
         $(".total_use_kwh").html((total_use_kwh).toFixed(1));
         
-        $(".total_use_direct_prc").html(Math.round(100*total_use_direct_kwh/total_use_kwh)+"%");
         $(".total_use_direct_kwh").html((total_use_direct_kwh).toFixed(1));
 
         $(".total_export_kwh").html((total_solar_kwh-total_use_direct_kwh).toFixed(1));
-        $(".total_export_prc").html((((total_solar_kwh-total_use_direct_kwh)/total_solar_kwh)*100).toFixed(0)+"%");
                 
         $(".total_import_prc").html(Math.round(100*(1-(total_use_direct_kwh/total_use_kwh)))+"%");
         $(".total_import_kwh").html((total_use_kwh-total_use_direct_kwh).toFixed(1));        
+        
+        if (total_solar_kwh > 0) {
+            $(".total_use_direct_prc").html(Math.round(100*total_use_direct_kwh/total_use_kwh)+"%");
+            $(".total_export_prc").html((((total_solar_kwh-total_use_direct_kwh)/total_solar_kwh)*100).toFixed(0)+"%");
+        } else {
+            $(".total_use_direct_prc").html("-- %");
+            $(".total_export_prc").html("-- %");
+        }
 
         options.xaxis.min = view.start;
         options.xaxis.max = view.end;
@@ -522,14 +528,20 @@ var app_mysolarpv = {
                 $(".total_solar_kwh").html((solar_kwhd).toFixed(1));
                 $(".total_use_kwh").html((use_kwhd).toFixed(1));
                 
-                $(".total_use_direct_prc").html(((solarused_kwhd/use_kwhd)*100).toFixed(0)+"%");
                 $(".total_use_direct_kwh").html((solarused_kwhd).toFixed(1));
                 
                 $(".total_export_kwh").html((export_kwhd*-1).toFixed(1));
-                $(".total_export_prc").html(((export_kwhd/solar_kwhd)*100*-1).toFixed(0)+"%");
                 
                 $(".total_import_prc").html(((imported_kwhd/use_kwhd)*100).toFixed(0)+"%");
                 $(".total_import_kwh").html((imported_kwhd).toFixed(1));
+        
+                if (solar_kwhd > 0) {
+                    $(".total_use_direct_prc").html(((solarused_kwhd/use_kwhd)*100).toFixed(0)+"%");
+                    $(".total_export_prc").html(((export_kwhd/solar_kwhd)*100*-1).toFixed(0)+"%");
+                } else {
+                    $(".total_use_direct_prc").html("-- %");
+                    $(".total_export_prc").html("-- %");
+                }
                 
             }
         });
