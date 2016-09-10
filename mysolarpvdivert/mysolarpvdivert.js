@@ -736,18 +736,6 @@ var app_mysolarpvdivert = {
                     $(".divert_total_generated_prc").html("-- %");
                     $(".total_export_prc").html("-- %");
                 }
-
-                // Show tooltip
-                var tooltip_items = [];
-
-                var date = new Date(item.datapoint[0]);
-                tooltip_items.push(["DATE", dateFormat(date, 'dd/mm/yy'), ""]);
-
-                for (i = 0; i < app_mysolarpvdivert.historyseries.length; i++) {
-                    var series = app_mysolarpvdivert.historyseries[i];
-                    tooltip_items.push([series.label.toUpperCase(), Math.abs(series.data[item.dataIndex][1]).toFixed(1), "kWh"]);
-                }
-                app_mysolarpvdivert.show_tooltip(pos.pageX+10, pos.pageY+5, tooltip_items);
             } else {
                 // Hide tooltip
                 app_mysolarpvdivert.hide_tooltip();
