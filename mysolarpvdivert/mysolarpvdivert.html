@@ -81,7 +81,7 @@
 }
 
 .statsbox {
-    width: 20%;
+    width: 25%;
     text-align: center;
     vertical-align: middle;
 }
@@ -162,22 +162,30 @@
     
     <tr>
         <td class="statsbox" colspan="2">
-            <div class="statsbox-padded statsbox-inner-unit" style="background: #dccc1f">
-                <div class="statsbox-title"><span class="generationtitle">SOLAR</span></div>
-                <div><span class="statsbox-value total_generated_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+            <div class="statsbox-inner-unit" style="background: #dccc1f">
+                <div class="statsbox-padded" style="position: relative;">
+                    <div class="statsbox-title"><span class="generationtitle">SOLAR</span></div>
+                    <div><span class="statsbox-value total_generated_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                    <div style="position: absolute; width: 50%; left: 0%; bottom: 0%">
+                        <span class="statsbox-prc divert_total_generated_prc">0</span>
+                    </div>
+                    <div style="position: absolute; width: 50%; left: 50%; bottom: 0%">
+                        <span class="statsbox-prc house_generated_total_generated_prc">0</span>
+                    </div>
+                    <div style="position: absolute; height: 100%; right: 0%; top: 0%">
+                        <div style="display: table; height: 100%; border-spacing: 0px;">
+                        <div style="display: table-cell; vertical-align: middle;">
+                        <span class="statsbox-prc total_export_prc">0</span>
+                        </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </td>
         
         <td class="statsbox">
             <div class="statsbox-inner-arrow">
-                <table><tr>
-                     <td>
-                          <div><span class="statsbox-prc total_export_prc">0</span></div>
-                     </td>
-                     <td width="100%">
-                          <div class="statsbox-padded statsbox-arrow-right"><span class="statsbox-value total_export_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                    </td>
-                </tr></table>
+                <div class="statsbox-padded statsbox-arrow-right"><span class="statsbox-value total_export_kwh">0</span> <span class="statsbox-units">kWh</span></div>
             </div>
         </td>
 
@@ -185,30 +193,6 @@
             <div class="statsbox-padded statsbox-inner-unit" style="background: #d52e2e">
                 <div class="statsbox-title">GRID</div>
                 <div><span class="statsbox-value total_grid_balance_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-            </div>
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="statsbox">
-            <div class="statsbox-inner-arrow">
-                <div><span class="statsbox-prc divert_total_generated_prc">0</span></div>
-            </div>
-        </td>
-        
-        <td class="statsbox">
-            <div class="statsbox-inner-arrow">
-                <div><span class="statsbox-prc house_generated_total_generated_prc">0</span></div>
-            </div>
-        </td>
-
-        <td class="statsbox">
-            <div class="statsbox-inner-arrow">
-            </div>
-        </td>
-        
-        <td class="statsbox">
-            <div class="statsbox-inner-arrow">
             </div>
         </td>
     </tr>
@@ -238,30 +222,6 @@
     
     <tr>
         <td class="statsbox">
-            <div class="statsbox-inner-arrow">
-            </div>
-        </td>
-        
-        <td class="statsbox">
-            <div class="statsbox-inner-arrow">
-                <div><span class="statsbox-prc house_generated_house_use_prc">0</span></div>
-            </div>
-        </td>
-
-        <td class="statsbox">
-            <div class="statsbox-inner-arrow">
-            </div>
-        </td>
-        
-        <td class="statsbox">
-            <div class="statsbox-inner-arrow">
-                <div><span class="statsbox-prc total_import_prc">0</span></div>
-            </div>
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="statsbox">
             <div class="statsbox-padded statsbox-inner-unit" style="background: #fb7b50">
                 <div class="statsbox-title">DIVERT</div>
                 <div><span class="statsbox-value total_divert_kwh">0</span> <span class="statsbox-units">kWh</span></div>
@@ -269,9 +229,17 @@
         </td>
         
         <td class="statsbox" colspan="3">
-            <div class="statsbox-padded statsbox-inner-unit" style="background: #82cbfc">
-                <div class="statsbox-title">HOUSE</div>
-                <div><span class="statsbox-value total_house_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+            <div class="statsbox-inner-unit" style="background: #82cbfc">
+                <div class="statsbox-padded" style="position: relative;">
+                    <div class="statsbox-title">HOUSE</div>
+                    <div><span class="statsbox-value total_house_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                    <div style="position: absolute; width: 33.33333%; left: 0%; top: 0%">
+                        <div><span class="statsbox-prc house_generated_house_use_prc">0</span></div>
+                    </div>
+                    <div style="position: absolute; width: 33.33333%; left: 66.66667%; top: 0%">
+                        <div><span class="statsbox-prc total_import_prc">0</span></div>
+                    </div>
+                </div>
             </div>
         </td>
     </tr>
