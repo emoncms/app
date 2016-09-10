@@ -603,17 +603,17 @@ var app_mysolarpvdivert = {
             var generated_kwh = solar_kwh + wind_kwh;
             var export_kwh = generated_kwh - (use_kwh - import_kwh);
             var house_kwh = use_kwh - divert_kwh;
-            var house_solar_kwh = house_kwh - import_kwh;
+            var house_generated_kwh = house_kwh - import_kwh;
             
             if (solar_kwh!=null && use_kwh!=null && export_kwh!=null && divert_kwh!=null && house_kwh!=null &&
                 (!app_mysolarpvdivert.has_wind || wind_kwh!=null)
                )
             {
-                app_mysolarpvdivert.house_generated_kwhd_data.push([solar_kwh_data[day-1][0],house_solar_kwh]);
+                app_mysolarpvdivert.house_generated_kwhd_data.push([solar_kwh_data[day-1][0],house_generated_kwh]);
                 app_mysolarpvdivert.solar_kwhd_data.push([solar_kwh_data[day-1][0],solar_kwh]);
                 if (wind_kwh!=null) app_mysolarpvdivert.wind_kwhd_data.push([wind_kwh_data[day-1][0],wind_kwh]);
-                app_mysolarpvdivert.use_kwhd_data.push([use_kwh_data[day-1][0],use_kwh*-1]);
-                app_mysolarpvdivert.house_kwhd_data.push([use_kwh_data[day-1][0],house_kwh]);
+                app_mysolarpvdivert.use_kwhd_data.push([use_kwh_data[day-1][0],use_kwh]);
+                app_mysolarpvdivert.house_kwhd_data.push([use_kwh_data[day-1][0],house_kwh*-1]);
                 app_mysolarpvdivert.divert_kwhd_data.push([divert_kwh_data[day-1][0],divert_kwh]);
                 app_mysolarpvdivert.export_kwhd_data.push([import_kwh_data[day-1][0],export_kwh]);
             }
@@ -648,10 +648,11 @@ var app_mysolarpvdivert = {
         });
         
         series.push({
-            data: app_mysolarpvdivert.use_kwhd_data,
+            data: app_mysolarpvdivert.house_kwhd_data,
             label: "Use",
             color: "#0598fa",
-            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 1.0, lineWidth: 0 }
+            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 1.0, lineWidth: 0 },
+            stack: 2
         });
         
         app_mysolarpvdivert.historyseries = series;
@@ -678,7 +679,7 @@ var app_mysolarpvdivert = {
         var plot = $.plot($('#mysolarpvdivert_placeholder'),app_mysolarpvdivert.historyseries,options);
         
         $('#mysolarpvdivert_placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Solar usage (house, diverted & exported)</div>");
-        $('#mysolarpvdivert_placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> Total usage</div>");
+        $('#mysolarpvdivert_placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> House usage</div>");
 
         // Because the bargraph is only drawn once when the view is changed we attach the events at this point
         app_mysolarpvdivert.bargraph_events();
@@ -705,8 +706,8 @@ var app_mysolarpvdivert = {
                 var solar_kwh = app_mysolarpvdivert.solar_kwhd_data[z][1];
                 var wind_kwh = (app_mysolarpvdivert.has_wind) ? app_mysolarpvdivert.wind_kwhd_data[z][1] : 0;
                 var house_generated_kwh = app_mysolarpvdivert.house_generated_kwhd_data[z][1];
-                var use_kwh = app_mysolarpvdivert.use_kwhd_data[z][1]*-1;
-                var house_kwh = app_mysolarpvdivert.house_kwhd_data[z][1];
+                var use_kwh = app_mysolarpvdivert.use_kwhd_data[z][1];
+                var house_kwh = app_mysolarpvdivert.house_kwhd_data[z][1]*-1;
                 var divert_kwh = app_mysolarpvdivert.divert_kwhd_data[z][1];
                 var export_kwh = app_mysolarpvdivert.export_kwhd_data[z][1];
                 
