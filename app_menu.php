@@ -16,7 +16,8 @@
             
             array('name' => 'My Electric', 'icon' => '', 'path' => "app$apikey#myelectric", 'session' => 'read', 'order' => 1),
             array('name' => 'My Solar', 'icon' => '', 'path' => "app$apikey#mysolarpv", 'session' => 'read', 'order' => 2),
-            array('name' => 'My Solar&amp;Wind', 'icon' => '','path' => "app$apikey#myenergy", 'session' => 'read', 'order' => 3)
+            array('name' => 'My Solar&amp;Wind', 'icon' => '','path' => "app$apikey#myenergy", 'session' => 'read', 'order' => 3),
+            array('name' => 'My Solar (with divert)', 'icon' => '', 'path' => "app$apikey#mysolarpvdivert", 'session' => 'read', 'order' => 4),
             
         )
     );

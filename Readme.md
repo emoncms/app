@@ -8,6 +8,9 @@ Power + Kwh/D
 * **-MySolar**
 Solar power generated Vs. consumed
 
+* **MySolar (with divert)**
+Solar power generated Vs. consumed, with special handling for excess generation that's been diverted to an immersion/electric car/etc.
+
 * **MyHeatpump**
 Heatpump statistics
 

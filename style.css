@@ -144,6 +144,27 @@ input[type=text] {
     font-size:16px;
 }
 
+.tooltip-item {
+}
+
+.tooltip-title {
+    color: #aaa;
+    font-weight:bold;
+    font-size:12px;
+}
+
+.tooltip-value {
+    color: #fff;
+    font-weight:bold;
+    font-size:14px;
+}
+
+.tooltip-units {
+    color: #fff;
+    font-weight:bold;
+    font-size:10px;
+}
+
 .ajax-loader{
     width:32px;
     height:32px;
