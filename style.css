@@ -33,8 +33,7 @@ hr {
     font-weight:bold; 
     font-size:100px; 
     color:#0699fa; 
-    padding-top:45px;
-    padding-bottom:30px;
+    line-height: 1.1;
 }
 
 .kwh-value {
