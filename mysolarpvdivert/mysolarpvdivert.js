@@ -160,8 +160,6 @@ var app_mysolarpvdivert = {
         if (width<=500) {
             $(".electric-title").css("font-size","16px");
             $(".power-value").css("font-size","32px");
-            $(".power-value").css("padding-top","12px");
-            $(".power-value").css("padding-bottom","8px");
             $(".statstable").css("border-spacing","4px");
             $(".statsbox-title").css("font-size","14px");
             $(".statsbox-title").css("padding-bottom","4px");
@@ -178,8 +176,6 @@ var app_mysolarpvdivert = {
         } else if (width<=724) {
             $(".electric-title").css("font-size","18px");
             $(".power-value").css("font-size","52px");
-            $(".power-value").css("padding-top","22px");
-            $(".power-value").css("padding-bottom","12px");
             $(".statstable").css("border-spacing","8px");
             $(".statsbox-title").css("font-size","16px");
             $(".statsbox-title").css("padding-bottom","8px");
@@ -196,8 +192,6 @@ var app_mysolarpvdivert = {
         } else {
             $(".electric-title").css("font-size","22px");
             $(".power-value").css("font-size","85px");
-            $(".power-value").css("padding-top","40px");
-            $(".power-value").css("padding-bottom","20px");
             $(".statstable").css("border-spacing","10px");
             $(".statsbox-title").css("font-size","20px");
             $(".statsbox-title").css("padding-bottom","15px");
