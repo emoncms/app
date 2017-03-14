@@ -13,6 +13,7 @@ function app_controller()
     $appconfig = new AppConfig($mysqli);
 
     $tmpdb = array(
+      "house2"=>array("app"=>"myelectric2", "config"=>array("use"=>"142685","use_kwh"=>"142693","unitcost"=>"0.16")), 
       "house"=>array("app"=>"myelectric", "config"=>array("use"=>"142685","use_kwh"=>"142693","unitcost"=>"0.16")), 
       "solar"=>array("app"=>"mysolarpv", "config"=>array("use"=>"142685","use_kwh"=>"142693","solar"=>"142685","solar_kwh"=>"142693","import_kwh"=>"142693")),
       "solardivert"=>array("app"=>"mysolarpvdivert", "config"=>array("use"=>"142685","use_kwh"=>"142693","solar"=>"142685","solar_kwh"=>"142693","divert"=>"142685","divert_kwh"=>"142693","import_kwh"=>"142693")),
