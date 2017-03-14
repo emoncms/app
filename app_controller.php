@@ -64,7 +64,8 @@ function app_controller()
             $app = $tmpdb[$userappname]["app"];
             $config = $tmpdb[$userappname]["config"];
             
-            $result = view("Modules/app/apps/$app.php",array("config"=>$config));
+            $result = view("Modules/app/sidebar.php",array());
+            $result .= view("Modules/app/apps/$app.php",array("config"=>$config));
         }
     }
 
