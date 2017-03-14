@@ -88,44 +88,43 @@ var view =
   }
 }
 
-var stats = {
-
-  'min': 0,
-  'max': 0,
-  'mean': 0,
-  'stdev': 0,
-
-  'calc':function(data)
-  {
-    var sum = 0, i=0;
-    stats.min = 0;
-    stats.max = 0;
+function stats(data)
+{
+    var sum = 0;
+    var i=0;
+    var minval = 0;
+    var maxval = 0;
     for (z in data)
     {
-      if (i==0) {
-        stats.max = data[z][1];
-        stats.min = data[z][1];
-      }
-    
-      if (data[z][1]>stats.max) stats.max = data[z][1];
-      if (data[z][1]<stats.min) stats.min = data[z][1];
-      sum +=data[z][1];
-      i++;
+        var val = data[z][1];
+        if (val!=null) 
+        {
+            if (i==0) {
+                maxval = val;
+                minval = val;
+            }
+            if (val>maxval) maxval = val;
+            if (val<minval) minval = val;
+            sum += val;
+            i++;
+        }
     }
-    
-    stats.mean = sum / i;
-
+    var mean = sum / i;
     sum = 0, i=0;
     for (z in data)
     {
-      sum += (data[z][1] - stats.mean) * (data[z][1] - stats.mean);
-      i++;
+        sum += (data[z][1] - mean) * (data[z][1] - mean);
+        i++;
     }
+    var stdev = Math.sqrt(sum / i);
     
-    stats.stdev = Math.sqrt(sum / i);
-    
-  }
-
+    return {
+        "minval":minval,
+        "maxval":maxval,
+        "diff":maxval-minval,
+        "mean":mean,
+        "stdev":stdev
+    }
 }
 
 // http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values/901144#901144
@@ -144,21 +143,25 @@ var urlParams;
 
 function tooltip(x, y, contents, bgColour)
 {
-
-    var offset = 15; // use higher values for a little spacing between `x,y` and tooltip
-    var elem = $('<div id="tooltip">' + contents + '</div>').css({
+    var offset = 10; // use higher values for a little spacing between `x,y` and tooltip
+    var elem = $('<div id="tooltip" >' + contents + '</div>').css({
         position: 'absolute',
+        color: "#000",
         display: 'none',
         'font-weight':'bold',
-        border: '1px solid rgb(255, 221, 221)',
+        border: '1px solid #000',
         padding: '2px',
         'background-color': bgColour,
-        opacity: '0.8'
-    }).appendTo("body").fadeIn(200);
-    //x = x - elem.width();
-    //x = x - elem.width();
+        opacity: '0.8',
+        "text-align": 'left'
+    }).appendTo("body").fadeIn(00);
+
+    var elemY = y - elem.height() - offset;
+    var elemX = x - elem.width()  - offset;
+    if (elemY < 0) { elemY = 0; } 
+    if (elemX < 0) { elemX = 0; } 
     elem.css({
-        top: y - elem.height() - offset,
-        left: x - elem.width() - offset,
+        top: elemY,
+        left: elemX
     });
-};
+}
