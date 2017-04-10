@@ -118,7 +118,7 @@
         <!--<p class="a2"><b>Setup guide:</b> See setting up feeds for myelectric</p>-->
 
         <br><br>
-        <img src="../Modules/app/images/app.png" style="width:600px" class="img-rounded">
+        <img src="../Modules/app/images/myelectric_app.png" style="width:600px" class="img-rounded">
       </div>
       <div class="span3"><div class="app-config"></div></div>
     </div>
@@ -249,12 +249,14 @@ function init()
     
 function show()
 {   
+    /*
     $(".navbar-inner").css('background-image','none');
     $(".navbar-inner").css('background-color','#44b3e2');
     $(".nav li a").css('color','#fff');
     $(".nav li a").css('text-shadow','none');
     $(".caret").css('border-top-color','#fff');
     $(".caret").css('border-bottom-color','#fff');
+    */
     
     app_log("INFO","myelectric show");
     // start of all time

@@ -20,7 +20,7 @@ global $path;
   left: 0;
   z-index: 2; /* Stay on top */
   
-  background-color: #5abce5;
+  background-color: #333; /*#5abce5;*/
   color:#fff;
   text-align:left;
   
@@ -30,25 +30,39 @@ global $path;
 
 .sidenav_inner {
   /*box-sizing: border-box;*/
-  padding-left: 20px;
-  padding-top: 20px;
+
   width: 250px;
+  padding-top:20px;
 }
 
 /* The navigation menu links */
 .sidenav a {
-  padding: 8px 8px 0px 10px;
   text-decoration: none;
-
   color: #fff;
   display: block;
+  padding:15px;
   transition: 0.3s
+  
 }
 
 /* When you mouse over the navigation links, change their color */
 .sidenav a:hover, .offcanvas a:focus{
   color: #f1f1f1;
 }
+
+.appmenu {
+  list-style: none;
+  margin:0px;
+  padding:0px;
+}
+
+.appmenu li {
+}
+
+.appmenu li:hover {
+  background-color: #444;
+}
+
 </style>
 
 <!-- Side-bar navigation ----------------------------------------------------------------->
@@ -56,15 +70,13 @@ global $path;
   <div class="sidenav_inner">
     <!--<img src="<?php echo $path; ?>files/emoncms_logo.png" style="width:200px;">-->
 
-    <div id="appmenu"></div>
-    <br><br>
-    <b>My Apps</b><br>
-    <a href="<?php echo $path; ?>app/house">House</a>
-    <a href="<?php echo $path; ?>app/house2">House 2</a>
-    <a href="<?php echo $path; ?>app/car">Car</a>
-    <a href="<?php echo $path; ?>app/solar">Solar</a>
-    <a href="<?php echo $path; ?>app/solardivert">Solar Divert</a>
-    <a href="<?php echo $path; ?>app/airsource">Heatpump</a>
-    <a href="<?php echo $path; ?>app/template">Template</a>
+    <ul class="appmenu">
+    <?php
+    foreach ($menu as $key=>$menuitem) {
+        echo "<li><a href='".$path."app/$key'>".$menuitem["name"]."</a></li>";
+    }
+    ?>
+    </ul>
+    
   </div>
 </div>

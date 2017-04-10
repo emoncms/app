@@ -13,13 +13,13 @@ function app_controller()
     $appconfig = new AppConfig($mysqli);
 
     $tmpdb = array(
-      "house2"=>array("app"=>"myelectric2", "config"=>array("use"=>"142685","use_kwh"=>"142693","unitcost"=>"0.16")), 
-      "house"=>array("app"=>"myelectric", "config"=>array("use"=>"142685","use_kwh"=>"142693","unitcost"=>"0.16")), 
-      "solar"=>array("app"=>"mysolarpv", "config"=>array("use"=>"142685","use_kwh"=>"142693","solar"=>"142685","solar_kwh"=>"142693","import_kwh"=>"142693")),
-      "solardivert"=>array("app"=>"mysolarpvdivert", "config"=>array("use"=>"142685","use_kwh"=>"142693","solar"=>"142685","solar_kwh"=>"142693","divert"=>"142685","divert_kwh"=>"142693","import_kwh"=>"142693")),
-      "car"=>array("app"=>"myelectric", "config"=>array("use"=>"142685","use_kwh"=>"142693","unitcost"=>"0.12")),
-      "airsource"=>array("app"=>"myheatpump", "config"=>array("heatpump_elec"=>142685,"heatpump_elec_kwh"=>142693)),
-      "template"=>array("app"=>"template", "config"=>array())
+      "house2"=>array("name"=>"Main House", "app"=>"myelectric2", "config"=>array()), 
+      "house"=>array("name"=>"House", "app"=>"myelectric", "config"=>array()), 
+      "solar"=>array("name"=>"My Solar", "app"=>"mysolarpv", "config"=>array()),
+      "solardivert"=>array("name"=>"My Solar divert", "app"=>"mysolarpvdivert", "config"=>array("use"=>"142685","use_kwh"=>"142693","solar"=>"142685","solar_kwh"=>"142693","divert"=>"142685","divert_kwh"=>"142693","import_kwh"=>"142693")),
+      "car"=>array("name"=>"Nissan Leaf", "app"=>"myelectric", "config"=>array("use"=>"142685","use_kwh"=>"142693","unitcost"=>"0.12")),
+      "airsource"=>array("name"=>"Air-source Heatpump", "app"=>"myheatpump", "config"=>array("heatpump_elec"=>142685,"heatpump_elec_kwh"=>142693)),
+      "template"=>array("name"=>"Template", "app"=>"template", "config"=>array())
     );
 
     // ------------------------------------------------------------------------------------
@@ -64,11 +64,11 @@ function app_controller()
             $app = $tmpdb[$userappname]["app"];
             $config = $tmpdb[$userappname]["config"];
             
-            $result = view("Modules/app/sidebar.php",array());
+            $result = view("Modules/app/sidebar.php",array("menu"=>$tmpdb));
             $result .= view("Modules/app/apps/$app.php",array("config"=>$config));
         }
     }
 
-    return array('content'=>$result, 'fullwidth'=>false);
+    return array('content'=>$result, 'fullwidth'=>true);
 }
 
