@@ -72,8 +72,8 @@ global $path;
 
     <ul class="appmenu">
     <?php
-    foreach ($menu as $key=>$menuitem) {
-        echo "<li><a href='".$path."app/$key'>".$menuitem["name"]."</a></li>";
+    foreach ($applist as $name=>$appitem) {
+        echo "<li><a href='".$path."app/$name'>".$name."</a></li>";
     }
     ?>
     </ul>

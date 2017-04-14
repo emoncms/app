@@ -11,27 +11,29 @@ function app_controller()
     
     include "Modules/app/AppConfig_model.php";
     $appconfig = new AppConfig($mysqli);
-
-    $tmpdb = array(
-      "house2"=>array("name"=>"Main House", "app"=>"myelectric2", "config"=>array()), 
-      "house"=>array("name"=>"House", "app"=>"myelectric", "config"=>array()), 
-      "solar"=>array("name"=>"My Solar", "app"=>"mysolarpv", "config"=>array()),
-      "solardivert"=>array("name"=>"My Solar divert", "app"=>"mysolarpvdivert", "config"=>array("use"=>"142685","use_kwh"=>"142693","solar"=>"142685","solar_kwh"=>"142693","divert"=>"142685","divert_kwh"=>"142693","import_kwh"=>"142693")),
-      "car"=>array("name"=>"Nissan Leaf", "app"=>"myelectric", "config"=>array("use"=>"142685","use_kwh"=>"142693","unitcost"=>"0.12")),
-      "airsource"=>array("name"=>"Air-source Heatpump", "app"=>"myheatpump", "config"=>array("heatpump_elec"=>142685,"heatpump_elec_kwh"=>142693)),
-      "template"=>array("name"=>"Template", "app"=>"template", "config"=>array())
-    );
-
+    
     // ------------------------------------------------------------------------------------
     // API
     // ------------------------------------------------------------------------------------
-    if ($route->action == "setconfig" && $session['write']) {
+    if ($route->action == "list" && $session['read']) {
         $route->format = "json";
-        $result = $appconfig->set($session['userid'],get('data'));    
+        $result = $appconfig->applist($session['userid']);
+    }
+    else if ($route->action == "add" && $session['write']) {
+        $route->format = "json";
+        $result = $appconfig->add($session['userid'],get("app"),get("name"));
+    }
+    else if ($route->action == "remove" && $session['write']) {
+        $route->format = "json";
+        $result = $appconfig->remove($session['userid'],get("name"));
+    }
+    else if ($route->action == "setconfig" && $session['write']) {
+        $route->format = "json";
+        $result = $appconfig->setconfig($session['userid'],get('name'),get('config'));    
     } 
     else if ($route->action == "getconfig" && $session['read']) {
         $route->format = "json";
-        $result = $appconfig->get($session['userid']);
+        $result = $appconfig->getconfig($session['userid'],get('name'));
     }
     else if ($route->action == "dataremote") {
         $route->format = "json";
@@ -57,14 +59,15 @@ function app_controller()
     // ------------------------------------------------------------------------------------
     // APP LOAD
     // ------------------------------------------------------------------------------------
-    else if ($route->action!="") {
+    else if ($route->action!="" && $session['read']) {
+        $applist = $appconfig->applist($session['userid']);
         $userappname = $route->action;
-        if (isset($tmpdb[$userappname])) {
+        if (isset($applist->$userappname)) {
             $route->format = "html";
-            $app = $tmpdb[$userappname]["app"];
-            $config = $tmpdb[$userappname]["config"];
+            $app = $applist->$userappname->app;
+            $config = $applist->$userappname->config;
             
-            $result = view("Modules/app/sidebar.php",array("menu"=>$tmpdb));
+            $result = view("Modules/app/sidebar.php",array("applist"=>$applist));
             $result .= view("Modules/app/apps/$app.php",array("config"=>$config));
         }
     }
