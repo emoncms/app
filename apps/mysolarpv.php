@@ -16,8 +16,6 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/vis.helper.js"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/timeseries.js"></script> 
-
-<div class="container">
     
 <div id="app-block" style="display:none" class="block">
 
@@ -134,8 +132,6 @@
       </div>
       <div class="span3"><div class="app-config"></div></div>
     </div>
-
-</div>
 
 </div>
 

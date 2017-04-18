@@ -15,8 +15,6 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/timeseries.js"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/vis.helper.js"></script> 
 
-<div class="container">
-
     <div id="app-block" style="display:none">
     
         <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
@@ -123,7 +121,6 @@
       <div class="span3"><div class="app-config"></div></div>
     </div>
 
-</div>
 </div>
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>

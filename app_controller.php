@@ -5,7 +5,7 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 
 function app_controller()
 {
-    global $session,$route,$mysqli;
+    global $path,$session,$route,$mysqli;
 
     $result = false;
     
@@ -67,11 +67,16 @@ function app_controller()
             $app = $applist->$userappname->app;
             $config = $applist->$userappname->config;
             
-            $result = view("Modules/app/sidebar.php",array("applist"=>$applist));
+            $result = "<link href='".$path."Modules/app/app.css' rel='stylesheet'>";
+            $result .= "<div id='wrapper'>";
+            $result .= view("Modules/app/sidebar.php",array("applist"=>$applist));
             $result .= view("Modules/app/apps/$app.php",array("config"=>$config));
+            $result .= "</div>";
         }
     }
 
+    global $fullwidth;
+    $fullwidth = true;
     return array('content'=>$result, 'fullwidth'=>true);
 }
 
