@@ -100,20 +100,28 @@ function app_controller()
     // ------------------------------------------------------------------------------------
     // APP LOAD
     // ------------------------------------------------------------------------------------
-    else if ($route->action!="" && $session['read']) {
+    else if ($session['read']) {
         $applist = $appconfig->applist($session['userid']);
         $userappname = $route->action;
-        if (isset($applist->$userappname)) {
-            $route->format = "html";
+        
+        if (!isset($applist->$userappname)) {
+            $userappname = key($applist);
+        }
+        
+        $route->format = "html";
+        if ($userappname!=false) {
             $app = $applist->$userappname->app;
             $config = $applist->$userappname->config;
-            
-            $result = "<link href='".$path."Modules/app/app.css' rel='stylesheet'>";
-            $result .= "<div id='wrapper'>";
-            $result .= view("Modules/app/sidebar.php",array("applist"=>$applist));
-            $result .= view("Modules/app/apps/$app.php",array("config"=>$config));
-            $result .= "</div>";
         }
+        $result = "<link href='".$path."Modules/app/app.css' rel='stylesheet'>";
+        $result .= "<div id='wrapper'>";
+        $result .= view("Modules/app/sidebar.php",array("applist"=>$applist));
+        if ($userappname!=false) {
+            $result .= view("Modules/app/apps/$app.php",array("config"=>$config));
+        } else {
+        
+        }
+        $result .= "</div>";
     }
 
     global $fullwidth;

@@ -34,10 +34,12 @@
   background-color:rgb(68,179,226);
 }
 
+#app-block { max-width:1100px }
+
 </style>
 
 <br>
-<div class="container" style="font-family: Montserrat, Veranda, sans-serif;">
+<div style="font-family: Montserrat, Veranda, sans-serif;">
 
   <div id="app-block" style="display:none">
       
@@ -191,7 +193,7 @@ $(window).ready(function(){
 
 $(".navbar-inner").css('background-image','none');
 $(".navbar-inner").css('background-color','#44b3e2');
-$(".navbar-inner").css('border','0');
+$(".navbar-inner").css('border-color','#44b3e2');
 $(".nav li a").css('color','#fff');
 $(".nav li a").css('text-shadow','none');
 $(".caret").css('border-top-color','#fff');
