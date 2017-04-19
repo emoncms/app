@@ -119,7 +119,7 @@ function app_controller()
         if ($userappname!=false) {
             $result .= view("Modules/app/apps/$app.php",array("config"=>$config));
         } else {
-        
+            $result .= view("Modules/app/list_view.php",array("available_apps"=>$available_apps));
         }
         $result .= "</div>";
     }
