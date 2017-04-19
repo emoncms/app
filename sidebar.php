@@ -14,6 +14,8 @@ global $path;
         echo "<li><a href='".$path."app/$name'>".$name."</a></li>";
     }
     ?>
+    
+    <li><a href="<?php echo $path; ?>app/new"><i class="icon-plus icon-white"></i> Add new app</a></li>
     </ul>
     
   </div>

@@ -12,6 +12,33 @@ function app_controller()
     include "Modules/app/AppConfig_model.php";
     $appconfig = new AppConfig($mysqli);
     
+    $available_apps = array (
+        "myelectric"=>array(
+            "title"=>"My Electric", 
+            "description"=>"A simple electricity consumption app showing real-time power in Watts and daily consumption in kWh. Switch between energy and cost modes."
+        ),
+        "myelectric2"=>array(
+            "title"=>"My Electric 2", 
+            "description"=>"A slightly more in-depth version of the standard My Electric app with a daily kWh consumption graph which allows drilling down to see the power data for any selected day.<br>Household consumption can also be compared with the average UK household and ZeroCarbonBritain targets."
+        ),
+        "myheatpump"=>array(
+            "title"=>"My Heatpump", 
+            "description"=>"Explore heatpump performance: daily electricity consumption, heat output and COP. Zoom in for detailed temperature, power, heat graphs."
+        ),
+        "mysolarpv"=>array(
+              "title"=>"My Solar", 
+              "description"=>"Explore solar generation compared to household consumption"
+        ),
+        "mysolarpvdivert"=>array(
+            "title"=>"My Solar + Divert", 
+            "description"=>"Explore solar generation compared to household consumption"
+        ),
+        "template"=>array(
+            "title"=>"Template", 
+            "description"=>"A basic app example useful for developing new apps"
+        )       
+    );
+    
     // ------------------------------------------------------------------------------------
     // API
     // ------------------------------------------------------------------------------------
@@ -21,7 +48,12 @@ function app_controller()
     }
     else if ($route->action == "add" && $session['write']) {
         $route->format = "json";
-        $result = $appconfig->add($session['userid'],get("app"),get("name"));
+        $appname = get("app");
+        if (isset($available_apps[$appname])) {
+            $result = $appconfig->add($session['userid'],$appname,get("name"));
+        } else {
+            $result = "Invalid app";
+        }
     }
     else if ($route->action == "remove" && $session['write']) {
         $route->format = "json";
@@ -55,6 +87,15 @@ function app_controller()
         $end = (float) get("end");
         $interval = (int) get("interval");
         $result = json_decode(file_get_contents("https://openenergymonitor.org/ukgrid/api.php?q=data&id=1&start=$start&end=$end&interval=$interval"));
+    }
+    else if ($route->action == "new") {
+        $applist = $appconfig->applist($session['userid']);
+        $route->format = "html";
+        $result = "<link href='".$path."Modules/app/app.css' rel='stylesheet'>";
+        $result .= "<div id='wrapper'>";
+        $result .= view("Modules/app/sidebar.php",array("applist"=>$applist));
+        $result .= view("Modules/app/list_view.php",array("available_apps"=>$available_apps));
+        $result .= "</div>";
     }
     // ------------------------------------------------------------------------------------
     // APP LOAD
