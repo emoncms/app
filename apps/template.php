@@ -58,6 +58,7 @@ if (!sessionwrite) $(".openconfig").hide();
 config.app = {
     "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"House or building use in watts"}
 };
+config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 config.feeds = feed.list();
 

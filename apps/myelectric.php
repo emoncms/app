@@ -152,6 +152,7 @@ config.app = {
     "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$..)"}
 };
 
+config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 config.feedsbyname = feed.listbyname();
 for (var z in config.feedsbyname) config.feedsbyid[config.feedsbyname[z].id] = config.feedsbyname[z];

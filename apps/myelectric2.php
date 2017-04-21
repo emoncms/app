@@ -195,6 +195,7 @@ config.app = {
     "use":{"type":"feed", "autoname":"use", "engine":"5"},
     "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5}
 };
+config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 config.feeds = feed.list();
 

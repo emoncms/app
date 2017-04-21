@@ -117,7 +117,7 @@ function app_controller()
         $result .= "<div id='wrapper'>";
         $result .= view("Modules/app/sidebar.php",array("applist"=>$applist));
         if ($userappname!=false) {
-            $result .= view("Modules/app/apps/$app.php",array("config"=>$config));
+            $result .= view("Modules/app/apps/$app.php",array("name"=>$userappname, "config"=>$config));
         } else {
             $result .= view("Modules/app/list_view.php",array("available_apps"=>$available_apps));
         }
