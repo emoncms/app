@@ -28,7 +28,7 @@ function sidebar_resize() {
     var width = $(window).width();
     var height = $(window).height();
     var nav = $(".navbar").height();
-    $(".sidenav").height(height-nav-40);
+    $(".sidenav").height(height-nav);
     
     if (width<1024) {
         $(".sidenav").css("left","0");

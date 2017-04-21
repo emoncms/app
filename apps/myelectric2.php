@@ -178,14 +178,6 @@ $(window).ready(function(){
     //$("#footer").css('color','#999');
 });
 
-$(".navbar-inner").css('background-image','none');
-$(".navbar-inner").css('background-color','#44b3e2');
-$(".navbar-inner").css('border-color','#44b3e2');
-$(".nav li a").css('color','#fff');
-$(".nav li a").css('text-shadow','none');
-$(".caret").css('border-top-color','#fff');
-$(".caret").css('border-bottom-color','#fff');
-
 if (!sessionwrite) $(".openconfig").hide();
 
 // ----------------------------------------------------------------------
