@@ -11,7 +11,7 @@ global $path;
     <ul class="appmenu">
     <?php
     foreach ($applist as $name=>$appitem) {
-        echo "<li><a href='".$path."app/".urlencode($name)."'>".$name."</a></li>";
+        echo "<li><a href='".$path."app/view?name=".$name."'>".$name."</a></li>";
     }
     ?>
     

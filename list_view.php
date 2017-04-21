@@ -88,8 +88,11 @@ $("#app-new-action").click(function(){
         async: true,                      
         success: function(result) {
             console.log(result);
+            window.location = path+"app/view";
         } 
     });
+    
+    
 });
 
 $("#app-new-cancel").click(function(){

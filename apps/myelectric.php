@@ -112,6 +112,7 @@
         <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.
         <br><br>
         <img src="../Modules/app/images/myelectric_app.png" style="width:600px" class="img-rounded">
+        
       </div>
     </div>
     <div class="app-config"></div>
@@ -154,24 +155,11 @@ config.app = {
 
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
-config.feedsbyname = feed.listbyname();
-for (var z in config.feedsbyname) config.feedsbyid[config.feedsbyname[z].id] = config.feedsbyname[z];
+config.feeds = feed.list();
 
-var initialized = false;
-// Check that the config is complete first otherwise show config interface
-if (!config.check()) {
-    $("#app-setup").show();
-    $(".ajax-loader").hide();
-    config.UI();
-} else {
-    $("#app-block").show();
-    init(); initialized = true;
-    if (!sessionwrite) $(".openconfig").hide();
-    
-    $(".ajax-loader").show();
-    config.load();
-    show();
-}
+config.initapp = function(){init()};
+config.showapp = function(){show()};
+config.hideapp = function(){hide()};
 
 // ----------------------------------------------------------------------
 // App variable init
@@ -201,6 +189,8 @@ var lastupdate = 0;
 var autoupdate = true;
 var reload = true;
 var feeds = {};
+
+config.init();
 
 function init()
 {   
@@ -588,28 +578,7 @@ function slowupdate()
     $(".ajax-loader").hide();
 }
 
-// ----------------------------------------------------------------------
-// Configuration p2
-// ----------------------------------------------------------------------
-$("body").on("click",".openconfig",function(){
-    $("#app-block").hide();
-    $("#app-setup").show();
-    hide();
-    config.UI();
-});
-
-$("body").on("click",".launchapp",function(){
-    $(".ajax-loader").show();
-    $("#app-setup").hide();
-    $("#app-block").show();
-    if (!initialized) { init(); initialized = true; }
-    config.load();
-    show();
-});
-
-$(window).resize(function(){
-    //if (initialized) resize();
-});
+$(window).resize(function(){ });
 
 // ----------------------------------------------------------------------
 // App log

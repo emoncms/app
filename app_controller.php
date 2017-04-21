@@ -100,9 +100,9 @@ function app_controller()
     // ------------------------------------------------------------------------------------
     // APP LOAD
     // ------------------------------------------------------------------------------------
-    else if ($session['read']) {
+    else if ($route->action == "view" && $session['read']) {
         $applist = $appconfig->applist($session['userid']);
-        $userappname = $route->action;
+        $userappname = get("name");
         
         if (!isset($applist->$userappname)) {
             $userappname = key($applist);

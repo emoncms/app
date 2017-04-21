@@ -24,7 +24,9 @@
 
 <div id="app-setup" style="display:none; padding-top:50px" class="block">
     <h2 class="appconfig-title">Template</h2>
-    <div class="appconfig-description">A basic app example useful for developing new apps</div>
+    <div class="appconfig-description">
+    <div class="appconfig-description-inner">A basic app example useful for developing new apps</div>
+    </div>
     <div class="app-config"></div>
 </div>
 

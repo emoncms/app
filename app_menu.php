@@ -8,7 +8,7 @@
     
     $menu_left[] = array(
         'name'=>"Apps", 
-        'path'=>"app#" , 
+        'path'=>"app/view" , 
         'session'=>"write", 
         'order' => 5,
         'icon'=>'icon-leaf icon-white'
