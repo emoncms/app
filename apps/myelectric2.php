@@ -7,7 +7,7 @@
 ?>
 
 <link href="<?php echo $path; ?>Modules/app/style.css" rel="stylesheet">
-  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />    
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />    
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/config.js"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/feed.js"></script>
 
@@ -34,8 +34,6 @@
   background-color:rgb(68,179,226);
 }
 
-#app-block { max-width:1100px }
-
 </style>
 
 <br>
@@ -44,6 +42,7 @@
   <div id="app-block" style="display:none">
       
     <div class="block-bound">
+      <div class="bluenav openconfig"><i class="icon-wrench icon-white"></i></div>
       <div class="bluenav cost">Cost</div>
       <div class="bluenav energy">Energy</div>
       <div class="block-title">MY ELECTRIC</div>
@@ -117,24 +116,7 @@
       </div>
     </div>
     <br>
-    <!--
-    <div class="block-bound">
-      <div class="block-title">TIME OF USE</div>
-    </div>
-    <div style="background-color:rgba(68,179,226,0.1); padding:10px; color:#333">
-      <div style="width:400px; text-align:center; float:right; padding-top:100px;">
-          <p><b><span id="prclocal">--</span>%</b> Off-peak power<br><span style="font-size:12px">In the last 7 days</span></p>
-          <img id="star1" src="<?php echo $path; ?>files/star20.png" style="width:45px">
-          <img id="star2" src="<?php echo $path; ?>files/star20.png" style="width:45px">
-          <img id="star3" src="<?php echo $path; ?>files/star20.png" style="width:45px">
-          <img id="star4" src="<?php echo $path; ?>files/star20.png" style="width:45px">
-          <img id="star5" src="<?php echo $path; ?>files/star20.png" style="width:45px">
-      </div>
-      
-      <canvas id="piegraph" width=420 height=400 ></canvas>
-    </div>
-    <br>
-    -->
+    
     <div style="width:48%">
       <div class="block-bound">
           <div class="block-title">COMPARISON</div>
@@ -153,19 +135,24 @@
         <div style="clear:both"></div>
       </div>
     </div>
-
   </div>    
+</div>
 
-  <div id="app-setup" style="display:none; padding-top:50px" class="block">
-      <h2 style="color:#0699fa">My Heatpump</h2>
-      <div class="row">
-        <div class="span9">
-          <p class="a2">This is a template app example</p>
-        </div>
-        <div class="span3"><div class="app-config"></div></div>
+<div id="app-setup" style="display:none; padding-top:50px" class="block">
+    <h2 class="appconfig-title">My Electric</h2>
+
+    <div class="appconfig-description">
+      <div class="appconfig-description-inner">
+        The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time. It includes a real-time view and a historic kWh per day bar graph.
+        <br><br>
+        <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
+        <br><br>
+        <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.
+        <br><br>
+        <img src="../Modules/app/images/myelectric_app.png" style="width:600px" class="img-rounded">
       </div>
-  </div>
-  
+    </div>
+    <div class="app-config"></div>
 </div>
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>

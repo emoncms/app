@@ -112,27 +112,21 @@
 
 </div>
 
-
 <div id="app-setup" style="display:none; padding-top:50px" class="block">
+    <h2 class="appconfig-title" style="color:#dccc1f">My Solar</h2>
 
-    <h2 style="color:#dccc1f">My Solar</h2>
-
-    <div class="row">
-      <div class="span9">
-        <p class="a2">The My Solar app can be used to explore onsite solar generation, self consumption, export and building consumption both in realtime with a moving power graph view and historically with a daily and monthly bargraph.</p>
-
-        <p class="a2"><b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-
-        <p class="a2"><b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
-
-        <!--<p class="a2"><b>Setup guide:</b> See setting up feeds for mysolar</p>-->
-
+    <div class="appconfig-description">
+      <div class="appconfig-description-inner">
+        The My Solar app can be used to explore onsite solar generation, self consumption, export and building consumption both in realtime with a moving power graph view and historically with a daily and monthly bargraph.
+        <br><br>
+        <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
+        <br><br>
+        <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.
         <br><br>
         <img src="../Modules/app/images/mysolar_app.png" style="width:600px" class="img-rounded">
       </div>
-      <div class="span3"><div class="app-config"></div></div>
     </div>
-
+    <div class="app-config"></div>
 </div>
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>

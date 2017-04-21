@@ -30,7 +30,7 @@ function app_controller()
               "description"=>"Explore solar generation compared to household consumption"
         ),
         "mysolarpvdivert"=>array(
-            "title"=>"My Solar + Divert", 
+            "title"=>"My Solar Divert", 
             "description"=>"Explore solar generation compared to household consumption"
         ),
         "template"=>array(

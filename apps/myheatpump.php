@@ -7,7 +7,7 @@
 ?>
 
 <link href="<?php echo $path; ?>Modules/app/style.css" rel="stylesheet">
-  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />    
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />    
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/config.js"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/feed.js"></script>
 
@@ -18,7 +18,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/vis.helper.js"></script>
 
 <br>
-<div class="container" style="font-family: Montserrat, Veranda, sans-serif;">
+<div style="font-family: Montserrat, Veranda, sans-serif;">
 
   <div id="app-block" style="display:none">
 
@@ -140,20 +140,24 @@
       </tr>
       </table>
     </div>
-
-
-  </div>    
-
-  <div id="app-setup" style="display:none; padding-top:50px" class="block">
-      <h2 style="color:#0699fa">My Heatpump</h2>
-      <div class="row">
-        <div class="span9">
-          <p class="a2">This is a template app example</p>
-        </div>
-        <div class="span3"><div class="app-config"></div></div>
-      </div>
-  </div>
+  </div>  
+</div>    
   
+<div id="app-setup" style="display:none; padding-top:50px" class="block">
+    <h2 class="appconfig-title">My Heatpump</h2>
+
+    <div class="appconfig-description">
+      <div class="appconfig-description-inner">
+        The My Heatpump app is a simple home energy monitoring app for exploring home or building electricity consumption over time. It includes a real-time view and a historic kWh per day bar graph.
+        <br><br>
+        <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
+        <br><br>
+        <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.
+        <br><br>
+        <img src="../Modules/app/images/myelectric_app.png" style="width:600px" class="img-rounded">
+      </div>
+    </div>
+    <div class="app-config"></div>
 </div>
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
@@ -173,7 +177,7 @@ if (apikey!="") apikeystr = "&apikey="+apikey;
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
-$("body").css('background-color','WhiteSmoke');
+
 $(window).ready(function(){
     //$("#footer").css('background-color','#181818');
     //$("#footer").css('color','#999');
@@ -182,6 +186,7 @@ $(window).ready(function(){
 $(".navbar-inner").css('background-image','none');
 $(".navbar-inner").css('background-color','#44b3e2');
 $(".navbar-inner").css('border','0');
+$(".navbar-inner").css('border-color','#44b3e2');
 $(".nav li a").css('color','#fff');
 $(".nav li a").css('text-shadow','none');
 $(".caret").css('border-top-color','#fff');

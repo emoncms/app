@@ -67,12 +67,31 @@ h2 {
     color:#fff;
 }
 
+.app-config {
+width:30%; float:left
+}
+
 .appconfig-box {
-    width: 100%;
     border: 1px solid #fff;
     margin-bottom:8px;
     padding:10px;
     color:#fff;
+}
+
+.appconfig-title {
+    color:#0699fa;
+}
+
+.appconfig-description {
+    width:70%;
+    float:left;
+}
+
+.appconfig-description-inner {
+    padding-right:20px;
+    color: #ccc;
+    font-size:18px;
+    line-height:22px;
 }
 
 .feed-select-div {

@@ -10,30 +10,22 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/config.js"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/feed.js"></script>
 
-<div class="container">
-
-  <div id="app-block" style="display:none">
-    <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
-      <div style="float:right;">
-        <i class="openconfig icon-wrench icon-white" style="cursor:pointer"></i>
-      </div>
+<div id="app-block" style="display:none">
+  <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
+    <div style="float:right;">
+      <i class="openconfig icon-wrench icon-white" style="cursor:pointer"></i>
     </div>
-    <div style="text-align:center">
-      <div class="electric-title">POWER NOW</div>
-      <div class="power-value"><span id="powernow">0</span></div>
-    </div>
-  </div>    
-
-  <div id="app-setup" style="display:none; padding-top:50px" class="block">
-      <h2 style="color:#0699fa">Template</h2>
-      <div class="row">
-        <div class="span9">
-          <p class="a2">This is a template app example</p>
-        </div>
-        <div class="span3"><div class="app-config"></div></div>
-      </div>
   </div>
-  
+  <div style="text-align:center">
+    <div class="electric-title">POWER NOW</div>
+    <div class="power-value"><span id="powernow">0</span></div>
+  </div>
+</div>    
+
+<div id="app-setup" style="display:none; padding-top:50px" class="block">
+    <h2 class="appconfig-title">Template</h2>
+    <div class="appconfig-description">A basic app example useful for developing new apps</div>
+    <div class="app-config"></div>
 </div>
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
