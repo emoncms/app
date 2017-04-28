@@ -243,6 +243,10 @@ APP
   .block-title { font-size:12px; padding:8px; }
   .dmy {display:none}
   .legendLabel { font-size:10px; }
+  
+  .appbox { padding:5px }
+  .appbox-value { font-size:28px }
+  .appbox-title { font-size:16px }
 }
     
 @media (min-width: 450px) and (max-width: 960px) { }
