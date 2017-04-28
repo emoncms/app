@@ -88,7 +88,7 @@ function app_controller()
         $interval = (int) get("interval");
         $result = json_decode(file_get_contents("https://openenergymonitor.org/ukgrid/api.php?q=data&id=1&start=$start&end=$end&interval=$interval"));
     }
-    else if ($route->action == "new") {
+    else if ($route->action == "new" && $session['write']) {
         $applist = $appconfig->applist($session['userid']);
         $route->format = "html";
         $result = "<link href='".$path."Modules/app/app.css' rel='stylesheet'>";
