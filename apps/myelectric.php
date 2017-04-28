@@ -4,16 +4,18 @@
     if (isset($session['write']) && $session['write']) $apikey = $user->get_apikey_write($session['userid']);
     else if (isset($_GET['readkey'])) $apikey = $_GET['readkey'];
     else if (isset($_GET['apikey'])) $apikey = $_GET['apikey'];
+    
+    $v = 1;
 ?>
 
-<link href="<?php echo $path; ?>Modules/app/style.css" rel="stylesheet">
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/config.js"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/feed.js"></script>
+<link href="<?php echo $path; ?>Modules/app/style.css?v=<?php echo $v; ?>" rel="stylesheet">
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/config.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/feed.js?v=<?php echo $v; ?>"></script>
 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/graph_bars.js"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/graph_lines.js"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/timeseries.js"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/vis.helper.js"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/graph_bars.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/graph_lines.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/timeseries.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/vis.helper.js?v=<?php echo $v; ?>"></script> 
 
 <div id="app-block" style="display:none">
 
