@@ -5,7 +5,7 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 
 function app_controller()
 {
-    global $path,$session,$route,$mysqli;
+    global $path,$session,$route,$mysqli,$user;
 
     $result = false;
     
@@ -100,28 +100,45 @@ function app_controller()
     // ------------------------------------------------------------------------------------
     // APP LOAD
     // ------------------------------------------------------------------------------------
-    else if ($route->action == "view" && $session['read']) {
-        $applist = $appconfig->applist($session['userid']);
-        $userappname = get("name");
-        
-        if (!isset($applist->$userappname)) {
-            $userappname = key($applist);
+    else if ($route->action == "view") {
+    
+        // enable apikey read access
+        $userid = false;
+        if (isset($session['write']) && $session['write']) {
+            $userid = $session['userid'];
+            $apikey = $user->get_apikey_write($session['userid']);
+        } else if (isset($_GET['readkey'])) {
+            $apikey = $_GET['readkey'];
+            $userid = $user->get_id_from_apikey($apikey);
+        } else if (isset($_GET['apikey'])) {
+            $apikey = $_GET['apikey'];
+            $userid = $user->get_id_from_apikey($apikey);
         }
         
-        $route->format = "html";
-        if ($userappname!=false) {
-            $app = $applist->$userappname->app;
-            $config = $applist->$userappname->config;
+        if ($userid)
+        {
+            $applist = $appconfig->applist($userid);
+            $userappname = get("name");
+            
+            if (!isset($applist->$userappname)) {
+                $userappname = key($applist);
+            }
+            
+            $route->format = "html";
+            if ($userappname!=false) {
+                $app = $applist->$userappname->app;
+                $config = $applist->$userappname->config;
+            }
+            $result = "<link href='".$path."Modules/app/app.css' rel='stylesheet'>";
+            $result .= "<div id='wrapper'>";
+            if ($session['write']) $result .= view("Modules/app/sidebar.php",array("applist"=>$applist));
+            if ($userappname!=false) {
+                $result .= view("Modules/app/apps/$app.php",array("name"=>$userappname, "config"=>$config, "apikey"=>$apikey));
+            } else {
+                $result .= view("Modules/app/list_view.php",array("available_apps"=>$available_apps));
+            }
+            $result .= "</div>";
         }
-        $result = "<link href='".$path."Modules/app/app.css' rel='stylesheet'>";
-        $result .= "<div id='wrapper'>";
-        $result .= view("Modules/app/sidebar.php",array("applist"=>$applist));
-        if ($userappname!=false) {
-            $result .= view("Modules/app/apps/$app.php",array("name"=>$userappname, "config"=>$config));
-        } else {
-            $result .= view("Modules/app/list_view.php",array("available_apps"=>$available_apps));
-        }
-        $result .= "</div>";
     }
 
     global $fullwidth;

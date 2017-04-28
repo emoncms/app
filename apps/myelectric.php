@@ -1,10 +1,5 @@
 <?php
-    global $path, $session, $user;
-    // Authentication
-    if (isset($session['write']) && $session['write']) $apikey = $user->get_apikey_write($session['userid']);
-    else if (isset($_GET['readkey'])) $apikey = $_GET['readkey'];
-    else if (isset($_GET['apikey'])) $apikey = $_GET['apikey'];
-    
+    global $path, $session;
     $v = 1;
 ?>
 
@@ -59,12 +54,12 @@
     </div>
     <br>
     
-    <div id="placeholder_bound_power" style="width:100%; height:250px;">
+    <div id="placeholder_bound_power" style="width:100%; height:220px;">
         <canvas id="placeholder_power"></canvas>
     </div>
     <br>
     
-    <div id="placeholder_bound_kwhd" style="width:100%; height:280px;">
+    <div id="placeholder_bound_kwhd" style="width:100%; height:250px;">
         <canvas id="placeholder_kwhd"></canvas>
     </div>
     <br>

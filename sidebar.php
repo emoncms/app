@@ -1,5 +1,8 @@
 <?php
-global $path;
+global $path, $session, $user;
+
+$apikey = "";
+if ($session['write']) $apikey = "&readkey=".$user->get_apikey_read($session['userid']);
 ?>
 
 <!-- Side-bar navigation ----------------------------------------------------------------->
@@ -9,7 +12,7 @@ global $path;
     <ul class="appmenu">
     <?php
     foreach ($applist as $name=>$appitem) {
-        echo "<li><a href='".$path."app/view?name=".$name."'>".$name."</a></li>";
+        echo "<li><a href='".$path."app/view?name=".$name.$apikey."'>".$name."</a></li>";
     }
     ?>
     
