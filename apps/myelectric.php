@@ -578,7 +578,7 @@ function slowupdate()
     $(".ajax-loader").hide();
 }
 
-$(window).resize(function(){ });
+$(window).resize(function(){ resize(); });
 
 // ----------------------------------------------------------------------
 // App log
