@@ -87,7 +87,7 @@ class AppConfig
         if (!$config || $config===null) return array('success'=>false, "message"=>"Could not parse json");
         foreach ($config as $key=>$value) {
             // Key must be lower case alphanumeric with no special char's
-            if (preg_replace("/[^a-z0-9]/",'',$key)!=$key) return array('success'=>false, "message"=>"Invalid config key");
+            if (preg_replace("/[^a-z0-9_]/",'',$key)!=$key) return array('success'=>false, "message"=>"Invalid config key");
             // Value type can not be object, array or resource
             if (gettype($value)=="object") return array('success'=>false, "message"=>"Config value cannot be object");
             if (gettype($value)=="array") return array('success'=>false, "message"=>"Config value cannot be array");
