@@ -186,6 +186,8 @@ input[type=text] {
 /* ----------------------------------------------------------
 APP
 ------------------------------------------------------------*/
+
+/* Used in myelectric2 and myheatpump */
 .block-bound {
   color:#fff;
   background-color: #ccc;
@@ -230,6 +232,11 @@ APP
   font-size:18px;
 }
 
+.col2 {
+    width:49%;
+    float:left;
+}
+
 /* ---------------------------------------------------------
  RESPONSIVE
 ----------------------------------------------------------*/
@@ -247,8 +254,12 @@ APP
   .appbox { padding:5px }
   .appbox-value { font-size:28px }
   .appbox-title { font-size:16px }
+  
+  .col2 { width:100%; }
 }
     
-@media (min-width: 450px) and (max-width: 960px) { }
+@media (min-width: 450px) and (max-width: 960px) { 
+  .col2 { width:100%; } 
+}
 @media (min-width: 960px) { }
 

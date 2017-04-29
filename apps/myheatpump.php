@@ -1,9 +1,5 @@
 <?php
-    global $path, $session, $user;
-    // Authentication
-    if (isset($session['write']) && $session['write']) $apikey = $user->get_apikey_write($session['userid']);
-    else if (isset($_GET['readkey'])) $apikey = $_GET['readkey'];
-    else if (isset($_GET['apikey'])) $apikey = $_GET['apikey'];
+    global $path, $session;
 ?>
 
 <link href="<?php echo $path; ?>Modules/app/style.css" rel="stylesheet">
@@ -65,7 +61,7 @@
     <div class="block-bound">
     
       <div class="bargraph-navigation">
-        <div class="bluenav bargraph-other">OTHER</div>
+        <!--<div class="bluenav bargraph-other">OTHER</div>-->
         <div class="bluenav bargraph-alltime">ALL TIME</div>
         <div class="bluenav bargraph-month">MONTH</div>
         <div class="bluenav bargraph-week">WEEK</div>
@@ -148,7 +144,7 @@
 
     <div class="appconfig-description">
       <div class="appconfig-description-inner">
-        The My Heatpump app is a simple home energy monitoring app for exploring home or building electricity consumption over time. It includes a real-time view and a historic kWh per day bar graph.
+        The My Heatpump app can be used to explore the performance of a heatpump including, electricity consumption, heat output, COP and system temperatures.
         <br><br>
         <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
         <br><br>
@@ -179,18 +175,8 @@ if (apikey!="") apikeystr = "&apikey="+apikey;
 // ----------------------------------------------------------------------
 
 $(window).ready(function(){
-    //$("#footer").css('background-color','#181818');
-    //$("#footer").css('color','#999');
-});
 
-$(".navbar-inner").css('background-image','none');
-$(".navbar-inner").css('background-color','#44b3e2');
-$(".navbar-inner").css('border','0');
-$(".navbar-inner").css('border-color','#44b3e2');
-$(".nav li a").css('color','#fff');
-$(".nav li a").css('text-shadow','none');
-$(".caret").css('border-top-color','#fff');
-$(".caret").css('border-bottom-color','#fff');
+});
 
 if (!sessionwrite) $(".openconfig").hide();
 
@@ -757,9 +743,9 @@ function resize() {
     var placeholder = $('#placeholder');
 
     var width = placeholder_bound.width();
-    var height = width*0.5;
+    var height = width*0.6;
     if (height<250) height = 250;
-
+    if (height>480) height = 480;
     if (height>width) height = width;
 
     placeholder.width(width);

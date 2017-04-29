@@ -1,9 +1,5 @@
 <?php
-    global $path, $session, $user;
-    // Authentication
-    if (isset($session['write']) && $session['write']) $apikey = $user->get_apikey_write($session['userid']);
-    else if (isset($_GET['readkey'])) $apikey = $_GET['readkey'];
-    else if (isset($_GET['apikey'])) $apikey = $_GET['apikey'];
+    global $path, $session;
 ?>
 
 <link href="<?php echo $path; ?>Modules/app/style.css" rel="stylesheet">
@@ -51,12 +47,11 @@
     <div style="background-color:#fff; color:#333; padding:10px;">
       <table style="width:100%">
         <tr>
-          <td style="width:33%">
+          <td style="width:40%">
               <div class="electric-title">POWER NOW</div>
               <div class="power-value"><span id="power_now">0</span>W</div>
           </td>
-          <td style="text-align:center; width:33%"></td>
-          <td style="text-align:right; width:33%">
+          <td style="text-align:right">
               <div class="electric-title">USE TODAY</div>
               <div class="power-value"><span id="kwh_today">0</span> kWh</div>
           </td>
@@ -68,7 +63,7 @@
     <div class="block-bound">
     
       <div class="bargraph-navigation">
-        <div class="bluenav bargraph-other">OTHER</div>
+        <!--<div class="bluenav bargraph-other">OTHER</div>-->
         <div class="bluenav bargraph-alltime">ALL TIME</div>
         <div class="bluenav bargraph-month">MONTH</div>
         <div class="bluenav bargraph-week">WEEK</div>
@@ -95,8 +90,13 @@
       </div>
     </div>
           
-    <div style="background-color:#eee; color:#333;">
+    <div id="power-graph-footer" style="background-color:#eee; color:#333; display:none">
       <div id='advanced-toggle' class='bluenav' >SHOW DETAIL</div>
+ 
+       <div style="padding:10px;">
+        kWh in window: <b id="window-kwh"></b> <b>kWh</b>
+      </div>
+      
       <div style="clear:both"></div>
     </div>
           
@@ -117,7 +117,7 @@
     </div>
     <br>
     
-    <div style="width:48%">
+    <div class="col2">
       <div class="block-bound">
           <div class="block-title">COMPARISON</div>
       </div>
@@ -134,16 +134,31 @@
         </div>
         <div style="clear:both"></div>
       </div>
+      
     </div>
+    
+    <!--
+    
+    <div class="col2">
+      <div class="block-bound">
+          <div class="block-title"></div>
+      </div>
+      
+      <div style="background-color:rgba(68,179,226,0.1); padding:20px; color:#333; text-align:center">
+      </div>
+      
+    </div>
+    -->
+    
   </div>    
 </div>
 
 <div id="app-setup" style="display:none; padding-top:50px" class="block">
-    <h2 class="appconfig-title">My Electric</h2>
+    <h2 class="appconfig-title">My Electric 2</h2>
 
     <div class="appconfig-description">
       <div class="appconfig-description-inner">
-        The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time. It includes a real-time view and a historic kWh per day bar graph.
+        The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time.
         <br><br>
         <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
         <br><br>
@@ -227,6 +242,8 @@ function init()
 }
 
 function show() {
+    $("body").css('background-color','WhiteSmoke');
+    
     meta["use_kwh"] = feed.getmeta(feeds["use_kwh"].id);
     if (meta["use_kwh"].start_time>start_time) start_time = meta["use_kwh"].start_time;
     use_start = feed.getvalue(feeds["use_kwh"].id, start_time*1000)[1];
@@ -409,6 +426,7 @@ $("#transport").click(function() {
 
 function powergraph_load() 
 {
+    $("#power-graph-footer").show();
     var start = view.start; var end = view.end;
     var npoints = 800;
     var interval = ((end-start)*0.001) / npoints;
@@ -424,6 +442,10 @@ function powergraph_load()
     
     var feedstats = {};
     feedstats["use"] = stats(data["use"]);
+    
+    var time_elapsed = (data["use"][data["use"].length-1][0] - data["use"][0][0])*0.001;
+    var kwh_in_window = (feedstats["use"].mean * time_elapsed) / 3600000;
+    $("#window-kwh").html(kwh_in_window.toFixed(2));
     
     var out = "";
     for (var z in feedstats) {
@@ -471,6 +493,10 @@ function powergraph_draw()
 
 function bargraph_load(start,end) 
 {   
+    $("#power-graph-footer").hide();
+    $("#advanced-toggle").html("SHOW DETAIL");
+    $("#advanced-block").hide();
+        
     var interval = 3600*24;
     var intervalms = interval * 1000;
     end = Math.ceil(end/intervalms)*intervalms;
@@ -669,7 +695,8 @@ function resize() {
     var placeholder = $('#placeholder');
 
     var width = placeholder_bound.width();
-    var height = width*0.5;
+    var height = width*0.6;
+    if (height>500) height = 500;
 
     if (height>width) height = width;
     
@@ -678,6 +705,29 @@ function resize() {
     placeholder.width(width);
     placeholder_bound.height(height);
     placeholder.height(height-top_offset);
+    
+    if (width<=500) {
+        $(".electric-title").css("font-size","16px");
+        $(".power-value").css("font-size","38px");
+        //$(".midtext").css("font-size","14px");
+        //$(".units").hide();
+        //$(".visnav").css("padding-left","5px");
+        // $(".visnav").css("padding-right","5px");
+    } else if (width<=724) {
+        $(".electric-title").css("font-size","18px");
+        $(".power-value").css("font-size","52px");
+        /*$(".midtext").css("font-size","18px");
+        $(".units").show();
+        $(".visnav").css("padding-left","8px");
+        $(".visnav").css("padding-right","8px");*/
+    } else {
+        $(".electric-title").css("font-size","22px");
+        $(".power-value").css("font-size","52px");
+        /*$(".midtext").css("font-size","20px");
+        $(".units").show();
+        $(".visnav").css("padding-left","8px");
+        $(".visnav").css("padding-right","8px");*/
+    }
 }
 
 $(window).resize(function(){

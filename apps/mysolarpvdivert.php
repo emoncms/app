@@ -1,9 +1,5 @@
 <?php
-    global $path, $session, $user;
-    // Authentication
-    if (isset($session['write']) && $session['write']) $apikey = $user->get_apikey_write($session['userid']);
-    else if (isset($_GET['readkey'])) $apikey = $_GET['readkey'];
-    else if (isset($_GET['apikey'])) $apikey = $_GET['apikey'];
+    global $path, $session;
 ?>
 
 <link href="<?php echo $path; ?>Modules/app/style.css" rel="stylesheet">
