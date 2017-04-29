@@ -33,6 +33,11 @@ function app_controller()
             "title"=>"My Solar Divert", 
             "description"=>"Explore solar generation compared to household consumption"
         ),
+        "openevse"=>array(
+            "title"=>"OpenEVSE", 
+            "description"=>"Explore OpenEVSE charging"
+        ),
+        
         "template"=>array(
             "title"=>"Template", 
             "description"=>"A basic app example useful for developing new apps"
