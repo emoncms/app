@@ -53,7 +53,6 @@ function app_controller()
         $route->format = "json";
         $id = (int) get("id");
         $result = (float) json_decode(file_get_contents("http://emoncms.org/feed/value.json?id=$id"));
-        $route->format = "text/plain";
     }
     else if ($route->action == "ukgridremote") {
         $route->format = "json";

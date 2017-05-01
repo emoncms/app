@@ -21,11 +21,14 @@ $available_apps = array (
         "title"=>"My Solar Divert", 
         "description"=>"Explore solar generation compared to household consumption"
     ),
+    "myenergy"=>array(
+          "title"=>"My Energy", 
+          "description"=>"This app extends the My Solar app by adding in a share of UK wind"
+    ),
     "openevse"=>array(
         "title"=>"OpenEVSE", 
         "description"=>"Explore OpenEVSE charging"
     ),
-    
     "template"=>array(
         "title"=>"Template", 
         "description"=>"A basic app example useful for developing new apps"
