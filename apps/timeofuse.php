@@ -437,7 +437,7 @@ function powergraph_load()
 {
     $("#power-graph-footer").show();
     var start = view.start; var end = view.end;
-    var npoints = 800;
+    var npoints = 1200;
     var interval = ((end-start)*0.001) / npoints;
     interval = view.round_interval(interval);
     var intervalms = interval * 1000;
@@ -453,18 +453,29 @@ function powergraph_load()
     feedstats["use"] = stats(data["use"]);
     
     var time_elapsed = (data["use"][data["use"].length-1][0] - data["use"][0][0])*0.001;
-    var kwh_in_window = (feedstats["use"].mean * time_elapsed) / 3600000;
-    $("#window-kwh").html(kwh_in_window.toFixed(2));
+    var kwh_in_window = 0.0; // (feedstats["use"].mean * time_elapsed) / 3600000;
+    
+    for (var z=0; z<data["use"].length-1; z++) {
+        var power = 0;
+        if (data["use"][z][1]!=null) power = data["use"][z][1];
+        var time = (data["use"][z+1][0] - data["use"][z][0]) *0.001;
+        
+        if (time<3600) {
+            kwh_in_window += (power * time) / 3600000;
+        }
+    }
+    
+    $("#window-kwh").html(kwh_in_window.toFixed(1));
     
     var out = "";
     for (var z in feedstats) {
         out += "<tr>";
         out += "<td style='text-align:left'>"+z+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].minval.toFixed(2)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].maxval.toFixed(2)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].diff.toFixed(2)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].mean.toFixed(2)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].stdev.toFixed(2)+"</td>";
+        out += "<td style='text-align:center'>"+feedstats[z].minval.toFixed(0)+"</td>";
+        out += "<td style='text-align:center'>"+feedstats[z].maxval.toFixed(0)+"</td>";
+        out += "<td style='text-align:center'>"+feedstats[z].diff.toFixed(0)+"</td>";
+        out += "<td style='text-align:center'>"+feedstats[z].mean.toFixed(0)+"</td>";
+        out += "<td style='text-align:center'>"+feedstats[z].stdev.toFixed(0)+"</td>";
         out += "</tr>";
     }
     $("#stats").html(out);
