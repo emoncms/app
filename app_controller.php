@@ -73,6 +73,7 @@ function app_controller()
     // ------------------------------------------------------------------------------------
     // APP LOAD
     // ------------------------------------------------------------------------------------
+    
     else if ($route->action == "view") {
     
         // enable apikey read access
@@ -94,7 +95,7 @@ function app_controller()
             $userappname = get("name");
             
             if (!isset($applist->$userappname)) {
-                $userappname = key($applist);
+                foreach ($applist as $key=>$val) { $userappname = $key; break; }
             }
             
             $route->format = "html";
