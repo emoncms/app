@@ -65,7 +65,7 @@ function app_controller()
     else if ($route->action == "new" && $session['write']) {
         $applist = $appconfig->applist($session['userid']);
         $route->format = "html";
-        $result = "<link href='".$path."Modules/app/app.css' rel='stylesheet'>";
+        $result = "<link href='".$path."Modules/app/css/pagenav.css?v=1' rel='stylesheet'>";
         $result .= "<div id='wrapper'>";
         $result .= view("Modules/app/sidebar.php",array("applist"=>$applist));
         $result .= view("Modules/app/list_view.php",array("available_apps"=>$available_apps));
@@ -103,7 +103,8 @@ function app_controller()
                 $app = $applist->$userappname->app;
                 $config = $applist->$userappname->config;
             }
-            $result = "<link href='".$path."Modules/app/app.css' rel='stylesheet'>";
+            
+            $result = "<link href='".$path."Modules/app/css/pagenav.css?v=1' rel='stylesheet'>";
             $result .= "<div id='wrapper'>";
             if ($session['write']) $result .= view("Modules/app/sidebar.php",array("applist"=>$applist));
             if ($userappname!=false) {

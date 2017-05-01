@@ -1,24 +1,24 @@
 <?php global $path; ?>
-<style>
 
+<style>
 .app-item {
-    padding:15px;
-    border-bottom: 1px solid #ccc;
-    border-left: 1px solid #ccc;
-    border-right: 1px solid #ccc;
+  padding:15px;
+  border-bottom: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
 }
 
 .app-item:hover {
-    background-color:#eee;
-    cursor:pointer;
+  background-color:#eee;
+  cursor:pointer;
 }
 
 .app-item-title {
-    font-weight:bold;
-    font-size:14px;
+  font-weight:bold;
+  font-size:14px;
 }
-
 </style>
+
 <div style="height:10px"></div>
 
 <h2>Available Apps</h2>
@@ -91,8 +91,6 @@ $("#app-new-action").click(function(){
             window.location = path+"app/view";
         } 
     });
-    
-    
 });
 
 $("#app-new-cancel").click(function(){

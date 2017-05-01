@@ -3,7 +3,9 @@
     $v = 1;
 ?>
 
-<link href="<?php echo $path; ?>Modules/app/style.css?v=<?php echo $v; ?>" rel="stylesheet">
+<link href="<?php echo $path; ?>Modules/app/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
+<link href="<?php echo $path; ?>Modules/app/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
+
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/config.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/feed.js?v=<?php echo $v; ?>"></script>
 
@@ -292,21 +294,18 @@ function resize()
     if (width<=500) {
         $(".electric-title").css("font-size","16px");
         $(".power-value").css("font-size","38px");
-        $(".midtext").css("font-size","14px");
         $(".units").hide();
         $(".visnav").css("padding-left","5px");
         $(".visnav").css("padding-right","5px");
     } else if (width<=724) {
         $(".electric-title").css("font-size","18px");
         $(".power-value").css("font-size","52px");
-        $(".midtext").css("font-size","18px");
         $(".units").show();
         $(".visnav").css("padding-left","8px");
         $(".visnav").css("padding-right","8px");
     } else {
         $(".electric-title").css("font-size","22px");
         $(".power-value").css("font-size","85px");
-        $(".midtext").css("font-size","20px");
         $(".units").show();
         $(".visnav").css("padding-left","8px");
         $(".visnav").css("padding-right","8px");

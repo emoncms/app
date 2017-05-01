@@ -1,17 +1,46 @@
 <?php
     global $path, $session;
+    $v = 1;
 ?>
+<link href="<?php echo $path; ?>Modules/app/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
+<link href="<?php echo $path; ?>Modules/app/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 
-<link href="<?php echo $path; ?>Modules/app/style.css" rel="stylesheet">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />    
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/config.js"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/feed.js"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/config.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/feed.js?v=<?php echo $v; ?>"></script>
 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/vis.helper.js"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/vis.helper.js?v=<?php echo $v; ?>"></script>
+
+<style>
+
+.title1 {
+  font-weight:bold;
+}
+
+.value1 {
+  font-weight:bold;
+  font-size:32px;
+  padding-top:10px;
+  padding-bottom:10px;
+}
+
+.units1 {
+  font-weight:normal;
+  padding-left:4px;
+  display: inline-block;
+  font-size:18px;
+}
+
+@media (max-width: 450px) {  
+  .title1 { font-size:12px }
+  .value1 { font-size:18px }
+}
+
+</style>
 
 <br>
 <div style="font-family: Montserrat, Veranda, sans-serif;">

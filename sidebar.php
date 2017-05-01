@@ -1,8 +1,7 @@
 <?php
-global $path, $session, $user;
-
-$apikey = "";
-if ($session['write']) $apikey = "&readkey=".$user->get_apikey_read($session['userid']);
+    global $path, $session, $user;
+    $apikey = "";
+    if ($session['write']) $apikey = "&readkey=".$user->get_apikey_read($session['userid']);
 ?>
 
 <!-- Side-bar navigation ----------------------------------------------------------------->
