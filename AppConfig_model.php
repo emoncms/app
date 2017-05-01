@@ -17,10 +17,12 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 class AppConfig
 {
     private $mysqli;
+    private $available_apps;
 
-    public function __construct($mysqli)
+    public function __construct($mysqli,$available_apps)
     {
         $this->mysqli = $mysqli;
+        $this->available_apps = $available_apps;
     }
     
     // ----------------------------------------------------------------------------------------------
@@ -168,6 +170,19 @@ class AppConfig
         } else {
             $applist = new stdClass();
         }
+        
+        // App list config migration
+        foreach ($applist as $name=>$appitem) {
+            if (!isset($applist->$name->config)) {
+                $applist->$name = new stdClass();
+                $applist->$name->app = $name;
+                $applist->$name->config = $appitem;
+            }
+            if (!isset($this->available_apps[$name])) {
+                unset($applist->$name);
+            }
+        }
+        
         return $applist;
     }
 }
