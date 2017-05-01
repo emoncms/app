@@ -9,6 +9,10 @@ $available_apps = array (
         "title"=>"My Electric 2", 
         "description"=>"A slightly more in-depth version of the standard My Electric app with a daily kWh consumption graph which allows drilling down to see the power data for any selected day.<br>Household consumption can also be compared with the average UK household and ZeroCarbonBritain targets."
     ),
+    "timeofuse"=>array(
+        "title"=>"Time of use", 
+        "description"=>""
+    ),
     "myheatpump"=>array(
         "title"=>"My Heatpump", 
         "description"=>"Explore heatpump performance: daily electricity consumption, heat output and COP. Zoom in for detailed temperature, power, heat graphs."
