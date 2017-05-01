@@ -174,12 +174,13 @@ class AppConfig
         // App list config migration
         foreach ($applist as $name=>$appitem) {
             if (!isset($applist->$name->config)) {
-                $applist->$name = new stdClass();
-                $applist->$name->app = $name;
-                $applist->$name->config = $appitem;
-            }
-            if (!isset($this->available_apps[$name])) {
-                unset($applist->$name);
+                if (isset($this->available_apps[$name])) {
+                    $applist->$name = new stdClass();
+                    $applist->$name->app = $name;
+                    $applist->$name->config = $appitem;
+                } else {
+                    unset($applist->$name);
+                }
             }
         }
         
