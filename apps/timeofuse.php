@@ -44,8 +44,8 @@
       
     <div class="block-bound">
       <div class="bluenav openconfig"><i class="icon-wrench icon-white"></i></div>
-      <div class="bluenav cost">Cost</div>
-      <div class="bluenav energy">Energy</div>
+      <!--<div class="bluenav cost">Cost</div>
+      <div class="bluenav energy">Energy</div>-->
       <div class="block-title">MY ELECTRIC</div>
     </div>
 
@@ -539,13 +539,13 @@ function bargraph_load(start,end)
         
         var d = new Date();
         d.setHours(0,0,0,0);
-        /*
-        if (lastday==d.getTime()) {
+        
+        //if (lastday==d.getTime()) {
             // last day in kwh data matches start of today from the browser's perspective
             // which means its safe to append today kwh value
-            var next = elec_data[elec_data.length-1][0] + (interval*1000);
-            elec_data.push([next,feeds["use_kwh"].value]);
-        }*/
+        //    var next = elec_data[elec_data.length-1][0] + (interval*1000);
+            // elec_data.push([next,feeds["use_kwh"].value]);
+        //}
  
         var total_kwh = 0; 
         var n = 0;
@@ -581,8 +581,8 @@ function bargraph_load(start,end)
         bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 1.0, lineWidth:0}
     });
     
-    //var kwh_today = data["use_kwhd"][data["use_kwhd"].length-1][1];
-    //$("#kwh_today").html(kwh_today.toFixed(1));
+    var kwh_today = data["economy7"][data["economy7"].length-1][1] + data["standard"][data["standard"].length-1][1];
+    $("#kwh_today").html(kwh_today.toFixed(1));
 }
 
 function bargraph_draw() 

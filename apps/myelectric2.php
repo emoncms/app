@@ -43,8 +43,8 @@
       
     <div class="block-bound">
       <div class="bluenav openconfig"><i class="icon-wrench icon-white"></i></div>
-      <div class="bluenav cost">Cost</div>
-      <div class="bluenav energy">Energy</div>
+      <!--<div class="bluenav cost">Cost</div>-->
+      <!--<div class="bluenav energy">Energy</div>-->
       <div class="block-title">MY ELECTRIC</div>
     </div>
 
@@ -448,8 +448,19 @@ function powergraph_load()
     feedstats["use"] = stats(data["use"]);
     
     var time_elapsed = (data["use"][data["use"].length-1][0] - data["use"][0][0])*0.001;
-    var kwh_in_window = (feedstats["use"].mean * time_elapsed) / 3600000;
-    $("#window-kwh").html(kwh_in_window.toFixed(2));
+    var kwh_in_window = 0.0; // (feedstats["use"].mean * time_elapsed) / 3600000;
+    
+    for (var z=0; z<data["use"].length-1; z++) {
+        var power = 0;
+        if (data["use"][z][1]!=null) power = data["use"][z][1];
+        var time = (data["use"][z+1][0] - data["use"][z][0]) *0.001;
+        
+        if (time<3600) {
+            kwh_in_window += (power * time) / 3600000;
+        }
+    }
+    
+    $("#window-kwh").html(kwh_in_window.toFixed(1));
     
     var out = "";
     for (var z in feedstats) {

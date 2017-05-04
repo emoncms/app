@@ -329,7 +329,7 @@ function updater()
         
         if (feeds["heatpump_elec"]!=undefined) $("#heatpump_elec").html(Math.round(feeds["heatpump_elec"].value));
         if (feeds["heatpump_heat"]!=undefined) $("#heatpump_heat").html(Math.round(feeds["heatpump_heat"].value));
-        if (feeds["heatpump_flowT"]!=undefined) $("#heatpump_flowT").html(feeds["heatpump_flowT"].value.toFixed(1));
+        if (feeds["heatpump_flowT"]!=undefined) $("#heatpump_flowT").html((1*feeds["heatpump_flowT"].value).toFixed(1));
         
         // Update all-time values
         var total_elec = 0;
