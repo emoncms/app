@@ -124,6 +124,24 @@
     
     <div class="col2">
       <div class="block-bound">
+          <div class="block-title">TOTALS</div>
+      </div>
+      
+      <div style="background-color:rgba(68,179,226,0.1); padding:20px; color:#333;">
+          <div class="electric-title">DAY TIME TOTAL</div>
+          <div class="power-value"><span id="daytime_total_kwh">0</span>kWh</div><br>
+          <div class="electric-title">DAY TIME DAILY AVERAGE</div>
+          <div class="power-value"><span id="daytime_average_kwhd">0</span>kWh/d</div><br>
+          <div class="electric-title">NIGHT TIME TOTAL</div>
+          <div class="power-value"><span id="nighttime_total_kwh">0</span> kWh</div><br>
+          <div class="electric-title">NIGHT TIME DAILY AVERAGE</div>
+          <div class="power-value"><span id="nighttime_average_kwhd">0</span> kWh/d</div><br>
+      </div>
+      
+    </div>
+    
+    <div class="col2">
+      <div class="block-bound">
           <div class="block-title">COMPARISON</div>
       </div>
       
@@ -547,6 +565,8 @@ function bargraph_load(start,end)
             elec_data.push([next,feeds["use_kwh"].value]);
         }*/
  
+        var daytime_total_kwh = 0;
+        var nighttime_total_kwh = 0;
         var total_kwh = 0; 
         var n = 0;
         // Calculate the daily totals by subtracting each day from the day before
@@ -562,6 +582,10 @@ function bargraph_load(start,end)
             
             console.log(economy7+" "+standard);
             total_kwh += economy7 + standard;
+            
+            daytime_total_kwh += standard;
+            nighttime_total_kwh += economy7;
+            
             n++;
         }
         period_average = total_kwh / n;
@@ -583,6 +607,12 @@ function bargraph_load(start,end)
     
     //var kwh_today = data["use_kwhd"][data["use_kwhd"].length-1][1];
     //$("#kwh_today").html(kwh_today.toFixed(1));
+    
+    $("#daytime_total_kwh").html(daytime_total_kwh.toFixed(1));
+    $("#daytime_average_kwhd").html((daytime_total_kwh/n).toFixed(1));
+    
+    $("#nighttime_total_kwh").html(nighttime_total_kwh.toFixed(1));
+    $("#nighttime_average_kwhd").html((nighttime_total_kwh/n).toFixed(1));
 }
 
 function bargraph_draw() 
