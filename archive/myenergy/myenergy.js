@@ -41,7 +41,7 @@ var app_myenergy = {
     {
         app.log("INFO","myenergy init");
         
-        app_myenergy.my_wind_cap = ((app_myenergy.annual_wind_gen / 365) / 0.024) / app_myenergy.capacity_factor;
+        my_wind_cap = ((annual_wind_gen / 365) / 0.024) / capacity_factor;
         this.my_wind_cap = ((this.annual_wind_gen / 365) / 0.024) / this.capacity_factor;
         
         var timeWindow = (3600000*6.0*1);
@@ -50,25 +50,25 @@ var app_myenergy = {
         
         var placeholder = $('#myenergy_placeholder');
         
-        $("#myenergy_zoomout").click(function () {view.zoomout(); app_myenergy.reload = true; app_myenergy.autoupdate = false; app_myenergy.draw();});
-        $("#myenergy_zoomin").click(function () {view.zoomin(); app_myenergy.reload = true; app_myenergy.autoupdate = false; app_myenergy.draw();});
-        $('#myenergy_right').click(function () {view.panright(); app_myenergy.reload = true; app_myenergy.autoupdate = false; app_myenergy.draw();});
-        $('#myenergy_left').click(function () {view.panleft(); app_myenergy.reload = true; app_myenergy.autoupdate = false; app_myenergy.draw();});
+        $("#myenergy_zoomout").click(function () {view.zoomout(); reload = true; autoupdate = false; draw();});
+        $("#myenergy_zoomin").click(function () {view.zoomin(); reload = true; autoupdate = false; draw();});
+        $('#myenergy_right').click(function () {view.panright(); reload = true; autoupdate = false; draw();});
+        $('#myenergy_left').click(function () {view.panleft(); reload = true; autoupdate = false; draw();});
         $('.time').click(function () {
             view.timewindow($(this).attr("time")/24.0); 
-            app_myenergy.reload = true; 
-            app_myenergy.autoupdate = true;
-            app_myenergy.draw();
+            reload = true; 
+            autoupdate = true;
+            draw();
         });
         
         $(".balanceline").click(function () { 
             if ($(this).html()=="Show balance") {
-                app_myenergy.show_balance_line = 1;
-                app_myenergy.draw();
+                show_balance_line = 1;
+                draw();
                 $(this).html("Hide balance");
             } else {
-                app_myenergy.show_balance_line = 0;
-                app_myenergy.draw();
+                show_balance_line = 0;
+                draw();
                 $(this).html("Show balance");
             }
         });
@@ -77,15 +77,15 @@ var app_myenergy = {
             view.start = ranges.xaxis.from;
             view.end = ranges.xaxis.to;
 
-            app_myenergy.autoupdate = false;
-            app_myenergy.reload = true; 
+            autoupdate = false;
+            reload = true; 
             
             var now = +new Date();
             if (Math.abs(view.end-now)<30000) {
-                app_myenergy.autoupdate = true;
+                autoupdate = true;
             }
 
-            app_myenergy.draw();
+            draw();
         });
     },
 
@@ -93,8 +93,8 @@ var app_myenergy = {
     {
         app.log("INFO","myenergy show");
         // this.reload = true;
-        app_myenergy.resize();
-        app_myenergy.draw();
+        resize();
+        draw();
         
         this.livefn();
         this.live = setInterval(this.livefn,5000);
@@ -134,7 +134,7 @@ var app_myenergy = {
             $(".balanceline").show();
         }
         
-        app_myenergy.draw();
+        draw();
     },
     
     hide: function() 
@@ -147,24 +147,24 @@ var app_myenergy = {
         // Check if the updater ran in the last 60s if it did not the app was sleeping
         // and so the data needs a full reload.
         var now = +new Date();
-        if ((now-app_myenergy.lastupdate)>60000) app_myenergy.reload = true;
-        app_myenergy.lastupdate = now;
+        if ((now-lastupdate)>60000) reload = true;
+        lastupdate = now;
         
         var feeds = feed.listbyid();
         var solar_now = 0; 
-        if (app_myenergy.config.solar.value) 
-            solar_now = parseInt(feeds[app_myenergy.config.solar.value].value);
+        if (config.solar.value) 
+            solar_now = parseInt(feeds[config.solar.value].value);
             
-        var use_now = parseInt(feeds[app_myenergy.config.use.value].value);
+        var use_now = parseInt(feeds[config.use.value].value);
 
         var gridwind = feed.getvalueremote(67088);
-        var average_power = ((app_myenergy.config.windkwh.value/365.0)/0.024);
-        var wind_now = Math.round((average_power / app_myenergy.average_wind_power) * gridwind);
+        var average_power = ((config.windkwh.value/365.0)/0.024);
+        var wind_now = Math.round((average_power / average_wind_power) * gridwind);
         
-        if (app_myenergy.autoupdate) {
-            var updatetime = feeds[app_myenergy.config.use.value].time;
+        if (autoupdate) {
+            var updatetime = feeds[config.use.value].time;
             
-            if (app_myenergy.config.solar.value) {
+            if (config.solar.value) {
                 timeseries.append("solar",updatetime,solar_now);
                 timeseries.trim_start("solar",view.start*0.001);
             }
@@ -204,7 +204,7 @@ var app_myenergy = {
         $(".windnow").html(Math.round(wind_now));
         $(".usenow").html(Math.round(use_now));
         
-        if (app_myenergy.autoupdate) app_myenergy.draw();
+        if (autoupdate) draw();
     },
     
     draw: function ()
@@ -234,16 +234,16 @@ var app_myenergy = {
         // -------------------------------------------------------------------------------------------------------
         // LOAD DATA ON INIT OR RELOAD
         // -------------------------------------------------------------------------------------------------------
-        if (app_myenergy.reload) {
-            app_myenergy.reload = false;
+        if (reload) {
+            reload = false;
             view.start = 1000*Math.floor((view.start/1000)/interval)*interval;
             view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
             
-            var feedid = app_myenergy.config.solar.value;
+            var feedid = config.solar.value;
             if (feedid!=false)
                 timeseries.load("solar",feed.getdata(feedid,view.start,view.end,interval,0,0));
         
-            var feedid = app_myenergy.config.use.value;
+            var feedid = config.use.value;
             timeseries.load("use",feed.getdata(feedid,view.start,view.end,interval,0,0));
             
             timeseries.load("remotewind",feed.getdataremote(67088,view.start,view.end,interval));          
@@ -273,14 +273,14 @@ var app_myenergy = {
             // -------------------------------------------------------------------------------------------------------
             // Get solar or use values
             // -------------------------------------------------------------------------------------------------------
-            if (app_myenergy.config.solar.value && timeseries.value("solar",z)!=null) 
+            if (config.solar.value && timeseries.value("solar",z)!=null) 
                 solar_now = timeseries.value("solar",z);  
             if (timeseries.value("use",z)!=null) use_now = timeseries.value("use",z);
             
             if (timeseries.value("remotewind",z)!=null) {
                 var gridwind = timeseries.value("remotewind",z);
-                var average_power = ((app_myenergy.config.windkwh.value/365.0)/0.024);
-                wind_now = Math.round((average_power / app_myenergy.average_wind_power) * gridwind);
+                var average_power = ((config.windkwh.value/365.0)/0.024);
+                wind_now = Math.round((average_power / average_wind_power) * gridwind);
             }
             
             // -------------------------------------------------------------------------------------------------------
@@ -330,7 +330,7 @@ var app_myenergy = {
             {data:use_data,color: "#0699fa",lines:{lineWidth:0, fill:0.8}}
         ];
         
-        if (app_myenergy.show_balance_line) series.push({data:store_data,yaxis:2, color: "#888"});
+        if (show_balance_line) series.push({data:store_data,yaxis:2, color: "#888"});
         
         $.plot($('#myenergy_placeholder'),series,options);
         $(".ajax-loader").hide();

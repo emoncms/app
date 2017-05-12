@@ -1,0 +1,96 @@
+/*-------------------------------------*/
+
+h2 {
+  color:#fff;
+}
+
+/*-------------------------------------*/
+
+.electric-title {
+  font-weight:bold;
+  font-size:22px;
+  color:#aaa;
+  padding-top:20px;
+}
+
+.power-value {
+  font-weight:bold; 
+  font-size:100px; 
+  color:#0699fa; 
+  line-height: 1.1;
+}
+
+/*-------------------------------------*/
+
+.visnavblock {
+  color:#0699fa;
+  font-size:18px;
+}
+
+.visnav {
+  margin-right:4px;
+  padding-left:8px;
+  padding-right:8px;
+  min-width:20px;
+  background-color:rgba(6,153,250,0.1);
+  line-height:28px;
+  float:left;
+  text-align:center;
+}
+
+.visnav:hover {
+  color:#0699fa;
+  cursor: pointer;
+}
+
+/*-------------------------------------*/
+
+.appbox {
+  width:20%;
+  text-align:center;
+  padding:10px;
+  vertical-align:top;
+}
+
+.appbox-title {
+  color: #aaa;
+  font-weight:bold;
+  font-size:20px;
+  padding-bottom:15px;
+}
+
+.appbox-value {
+  color: #fff;
+  font-weight:bold;
+  font-size:36px;
+}
+
+.appbox-units {
+  color: #fff;
+  font-weight:bold;
+  font-size:16px;
+}
+
+/*-------------------------------------*/
+
+.ajax-loader{
+  width:32px;
+  height:32px;
+  position:fixed;
+  top:50%;
+  left:50%;
+  margin-top:-16px; /* negative half the size of height */
+  margin-left:-16px; /* negative half the size of width */
+}
+
+/*-------------------------------------*/
+
+@media (max-width: 450px) {
+  .row { padding:10px; }  
+  .appbox { padding:5px }
+  .appbox-value { font-size:28px }
+  .appbox-title { font-size:16px }
+}
+    
+@media (min-width: 450px) and (max-width: 960px) { }
+@media (min-width: 960px) { }
