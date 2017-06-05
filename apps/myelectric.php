@@ -1,6 +1,6 @@
 <?php
     global $path, $session;
-    $v = 1;
+    $v = 2;
 ?>
 
 <link href="<?php echo $path; ?>Modules/app/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
@@ -35,7 +35,7 @@
                 <div class="power-value"><span id="powernow">0</span></div>
             </td>
             <td style="text-align:right; border:0;">
-                <div class="electric-title">USE TODAY</div>
+                <div class="electric-title">TODAY</div>
                 <div class="power-value"><span id="usetoday_units_a"></span><span id="usetoday">0</span><span id="usetoday_units_b" style="font-size:16px"> kWh</span></div>
             </td>
         </tr>
@@ -380,10 +380,20 @@ function fastupdate()
     
     // set the power now value
     if (viewmode=="energy") {
-        $("#powernow").html((feeds[use].value*1).toFixed(0)+"W");
+        if (feeds[use].value<10000) {
+            $("#powernow").html((feeds[use].value*1).toFixed(0)+"W");
+        } else {
+            $("#powernow").html((feeds[use].value*0.001).toFixed(1)+"kW");
+        }
     } else {
         // 1000W for an hour (x3600) = 3600000 Joules / 3600,000 = 1.0 kWh x 0.15p = 0.15p/kWh (scaling factor is x3600 / 3600,000 = 0.001)
-        $("#powernow").html(config.app.currency.value+(feeds[use].value*1*config.app.unitcost.value*0.001).toFixed(3)+"/hr");
+        var cost_now = feeds[use].value*1*config.app.unitcost.value*0.001;
+        
+        if (cost_now<1.0) {
+            $("#powernow").html(config.app.currency.value+(feeds[use].value*1*config.app.unitcost.value*0.001).toFixed(3)+"/hr");
+        } else {
+            $("#powernow").html(config.app.currency.value+(feeds[use].value*1*config.app.unitcost.value*0.001).toFixed(2)+"/hr");
+        }
     }
     // Advance view
     if (autoupdate) {
@@ -568,7 +578,12 @@ function slowupdate()
     if (daily.length>0) {
         usetoday_kwh = daily[daily.length-1][1];
     }
-    $("#usetoday").html((usetoday_kwh).toFixed(1));
+    
+    if (usetoday_kwh<100) {
+        $("#usetoday").html((usetoday_kwh).toFixed(1));
+    } else {
+        $("#usetoday").html((usetoday_kwh).toFixed(0));
+    }
 
     graph_bars.draw('placeholder_kwhd',[daily]);
     $(".ajax-loader").hide();
