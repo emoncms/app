@@ -52,7 +52,7 @@
         <tr>
           <td style="width:40%">
               <div class="electric-title">POWER NOW</div>
-              <div class="power-value"><span id="power_now">0</span>W</div>
+              <div class="power-value"><span id="power_now">0</span></div>
           </td>
           <td style="text-align:right">
               <div class="electric-title">TODAY</div>
@@ -215,11 +215,12 @@ function show() {
 
     resize();
 
+    var timeWindow = (3600000*24.0*30);
+    var end = (new Date()).getTime();
+    var start = end - timeWindow;
+    bargraph_load(start,end);
+
     if (viewmode=="bargraph") {
-        var timeWindow = (3600000*24.0*30);
-        var end = (new Date()).getTime();
-        var start = end - timeWindow;
-        bargraph_load(start,end);
         bargraph_draw();
     } else {
         view.end = (new Date()).getTime();
@@ -247,7 +248,11 @@ function updater()
             if (config.app[key].value) feeds[key] = result[config.app[key].value];
         }
         
-        $("#power_now").html(Math.round(feeds["use"].value));
+        if (feeds["use"].value<5000) {
+            $("#power_now").html(Math.round(feeds["use"].value)+"W");
+        } else {
+            $("#power_now").html((feeds["use"].value*0.001).toFixed(1)+"kW");
+        }
         // Update all-time values
         var total_elec = feeds["use_kwh"].value - use_start;
         $("#total_elec").html(Math.round(total_elec));

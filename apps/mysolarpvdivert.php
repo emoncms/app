@@ -385,11 +385,13 @@ function init()
         $(".generationtitle").html("SOLAR");
     }
     
-    if (config.app.solar_kwh.value && 
+    if (config.app.divert_kwh.value && 
+        config.app.solar_kwh.value && 
         config.app.use_kwh.value && 
         config.app.import_kwh.value &&
         (!has_wind || config.app.wind_kwh.value))
     {
+        console.log("INIT BARGRAPH");
         init_bargraph();
         $(".viewhistory").show();
     } else {
@@ -452,7 +454,7 @@ function show()
 {
     app_log("INFO","mysolarpvdivert show");
     
-    if (config.app.solar_kwh.value && config.app.use_kwh.value && config.app.import_kwh.value) {
+    if (config.app.solar_kwh.value && config.app.use_kwh.value && config.app.import_kwh.value && config.app.divert_kwh.value) {
         if (!bargraph_initialized) init_bargraph();
         $(".viewhistory").show();
     } else {
