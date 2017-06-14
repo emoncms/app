@@ -130,13 +130,13 @@
       
       <div style="background-color:rgba(68,179,226,0.1); padding:20px; color:#333;">
           <div class="electric-title">DAY TIME TOTAL</div>
-          <div class="power-value"><span id="daytime_total_kwh">0</span>kWh</div><br>
+          <div class="power-value"><span id="daytime_total_kwh">0</span></div><br>
           <div class="electric-title">DAY TIME DAILY AVERAGE</div>
-          <div class="power-value"><span id="daytime_average_kwhd">0</span>kWh/d</div><br>
+          <div class="power-value"><span id="daytime_average_kwhd">0</span></div><br>
           <div class="electric-title">NIGHT TIME TOTAL</div>
-          <div class="power-value"><span id="nighttime_total_kwh">0</span> kWh</div><br>
+          <div class="power-value"><span id="nighttime_total_kwh">0</span></div><br>
           <div class="electric-title">NIGHT TIME DAILY AVERAGE</div>
-          <div class="power-value"><span id="nighttime_average_kwhd">0</span> kWh/d</div><br>
+          <div class="power-value"><span id="nighttime_average_kwhd">0</span></div><br>
       </div>
       
     </div>
@@ -636,11 +636,19 @@ function bargraph_load(start,end)
         bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 1.0, lineWidth:0}
     });
     
-    $("#daytime_total_kwh").html(daytime_total_kwh.toFixed(1));
-    $("#daytime_average_kwhd").html((daytime_total_kwh/n).toFixed(1));
-    
-    $("#nighttime_total_kwh").html(nighttime_total_kwh.toFixed(1));
-    $("#nighttime_average_kwhd").html((nighttime_total_kwh/n).toFixed(1));
+    if (viewcostenergy=="energy") {
+        $("#daytime_total_kwh").html(daytime_total_kwh.toFixed(1)+" kWh");
+        $("#daytime_average_kwhd").html((daytime_total_kwh/n).toFixed(1)+" kWh/d");
+        
+        $("#nighttime_total_kwh").html(nighttime_total_kwh.toFixed(1)+" kWh");
+        $("#nighttime_average_kwhd").html((nighttime_total_kwh/n).toFixed(1)+" kWh/d");
+    } else {
+        $("#daytime_total_kwh").html(config.app.currency.value+(daytime_total_kwh*config.app.unitcost_day.value).toFixed(2));
+        $("#daytime_average_kwhd").html(config.app.currency.value+(daytime_total_kwh*config.app.unitcost_day.value/n).toFixed(2)+"/day");
+        
+        $("#nighttime_total_kwh").html(config.app.currency.value+(nighttime_total_kwh*config.app.unitcost_night.value).toFixed(2));
+        $("#nighttime_average_kwhd").html(config.app.currency.value+(nighttime_total_kwh*config.app.unitcost_night.value/n).toFixed(2)+"/day");
+    }
 
     var kwh_today = data["economy7"][data["economy7"].length-1][1] + data["standard"][data["standard"].length-1][1];
     $("#kwh_today").html(kwh_today.toFixed(1)+" kWh");
