@@ -58,7 +58,7 @@
           </td>
           <td style="text-align:right">
               <div class="electric-title">USE TODAY</div>
-              <div class="power-value"><span id="kwh_today">0</span> kWh</div>
+              <div class="power-value"><span id="kwh_today">0</span></div>
           </td>
         </tr>
       </table>
@@ -600,7 +600,7 @@ function bargraph_load(start,end)
     $("#kwh_today").html(kwh_today.toFixed(1));
     
     if (viewcostenergy=="energy") {
-        $("#kwh_today").html(kwh_today.toFixed(1));
+        $("#kwh_today").html(kwh_today.toFixed(1)+" kWh");
     } else {
         $("#kwh_today").html(config.app.currency.value+(kwh_today*config.app.unitcost.value).toFixed(2));
     }

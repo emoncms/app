@@ -44,6 +44,7 @@
       
     <div class="block-bound">
       <div class="bluenav openconfig"><i class="icon-wrench icon-white"></i></div>
+      <div class="bluenav viewcostenergy">ENERGY MODE</div>
       <!--<div class="bluenav cost">Cost</div>
       <div class="bluenav energy">Energy</div>-->
       <div class="block-title">MY ELECTRIC</div>
@@ -54,11 +55,11 @@
         <tr>
           <td style="width:40%">
               <div class="electric-title">POWER NOW</div>
-              <div class="power-value"><span id="power_now">0</span>W</div>
+              <div class="power-value"><span id="power_now">0</span></div>
           </td>
           <td style="text-align:right">
               <div class="electric-title">USE TODAY</div>
-              <div class="power-value"><span id="kwh_today">0</span> kWh</div>
+              <div class="power-value"><span id="kwh_today">0</span></div>
           </td>
         </tr>
       </table>
@@ -225,7 +226,11 @@ config.app = {
     "use":{"type":"feed", "autoname":"use", "engine":"5"},
     "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5},
     "economy7_start":{"type":"value", "default":1, "name": "Economy 7 start", "description":"Start time in hours (e.g 1.5 for 1:30am)"},
-    "economy7_end":{"type":"value", "default":7, "name": "Economy 7 end", "description":"End time in hours (e.g 7.0 for 7:00am)"}
+    "economy7_end":{"type":"value", "default":7, "name": "Economy 7 end", "description":"End time in hours (e.g 7.0 for 7:00am)"},
+    
+    "unitcost_day":{"type":"value", "default":0.15, "name": "Day time unit cost", "description":"Day time unit cost of electricity £/kWh"},
+    "unitcost_night":{"type":"value", "default":0.07, "name": "Night time unit cost", "description":"Night time unit cost of electricity £/kWh"},
+    "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$..)"}
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
@@ -245,6 +250,7 @@ var bargraph_series = [];
 var powergraph_series = [];
 var previousPoint = false;
 var viewmode = "bargraph";
+var viewcostenergy = "energy";
 var panning = false;
 var period_text = "month";
 var period_average = 0;
@@ -300,10 +306,7 @@ function updater()
             if (config.app[key].value) feeds[key] = result[config.app[key].value];
         }
         
-        $("#power_now").html(Math.round(feeds["use"].value));
-        // Update all-time values
-        var total_elec = feeds["use_kwh"].value - use_start;
-        $("#total_elec").html(Math.round(total_elec));
+        $("#power_now").html(Math.round(feeds["use"].value)+"W");
     });
 }
 
@@ -362,7 +365,19 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
             var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
             var date = days[d.getDay()]+", "+months[d.getMonth()]+" "+d.getDate();
-            tooltip(item.pageX, item.pageY, date+"<br>Day:"+(standard_kwh).toFixed(1)+" kWh<br>Night:"+(economy7_kwh).toFixed(1)+" kWh<br>Total:"+(economy7_kwh+standard_kwh).toFixed(1)+" kWh", "#fff");
+           
+            var text = "";
+            if (viewcostenergy=="energy") {
+                text = date+"<br>Day:"+(standard_kwh).toFixed(1)+" kWh<br>Night:"+(economy7_kwh).toFixed(1)+" kWh<br>Total:"+(economy7_kwh+standard_kwh).toFixed(1)+" kWh";
+            } else {
+                var daycost = config.app.currency.value+(standard_kwh*config.app.unitcost_day.value).toFixed(2);
+                var nightcost = config.app.currency.value+(economy7_kwh*config.app.unitcost_night.value).toFixed(2);
+                var totalcost = config.app.currency.value+((standard_kwh*config.app.unitcost_day.value)+(economy7_kwh*config.app.unitcost_night.value)).toFixed(2);
+                            
+                text = date+"<br>Day:"+(standard_kwh).toFixed(1)+" kWh ("+daycost+")<br>Night:"+(economy7_kwh).toFixed(1)+" kWh ("+nightcost+")<br>Total:"+(economy7_kwh+standard_kwh).toFixed(1)+" kWh ("+totalcost+")";
+            }
+            
+            tooltip(item.pageX, item.pageY, text, "#fff");
         }
     } else $("#tooltip").remove();
 });
@@ -440,6 +455,22 @@ $("#transport").click(function() {
     comparison_transport = 0;
     if ($(this)[0].checked) comparison_transport = 1;
     energystacks_draw();
+});
+
+$(".viewcostenergy").click(function(){
+    var view = $(this).html();
+    if (view=="ENERGY MODE") {
+        $(this).html("COST MODE");
+        viewcostenergy = "cost";
+    } else {
+        $(this).html("ENERGY MODE");
+        viewcostenergy = "energy";
+    }
+    
+    $(".powergraph-navigation").hide();
+    viewmode = "bargraph";
+    $(".bargraph-navigation").show();
+    show();
 });
 
 // -------------------------------------------------------------------------------
@@ -612,7 +643,13 @@ function bargraph_load(start,end)
     $("#nighttime_average_kwhd").html((nighttime_total_kwh/n).toFixed(1));
 
     var kwh_today = data["economy7"][data["economy7"].length-1][1] + data["standard"][data["standard"].length-1][1];
-    $("#kwh_today").html(kwh_today.toFixed(1));
+    $("#kwh_today").html(kwh_today.toFixed(1)+" kWh");
+    
+    //if (viewcostenergy=="energy") {
+    //    $("#kwh_today").html(kwh_today.toFixed(1));
+    //} else {
+    //    $("#kwh_today").html(config.app.currency.value+(kwh_today*config.app.unitcost.value).toFixed(2));
+    //}
 }
 
 function bargraph_draw() 
