@@ -11,6 +11,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/timeseries.js?v=<?php echo $v; ?>"></script> 
@@ -385,11 +386,13 @@ function init()
         $(".generationtitle").html("SOLAR");
     }
     
-    if (config.app.solar_kwh.value && 
+    if (config.app.divert_kwh.value && 
+        config.app.solar_kwh.value && 
         config.app.use_kwh.value && 
         config.app.import_kwh.value &&
         (!has_wind || config.app.wind_kwh.value))
     {
+        console.log("INIT BARGRAPH");
         init_bargraph();
         $(".viewhistory").show();
     } else {
@@ -452,7 +455,7 @@ function show()
 {
     app_log("INFO","mysolarpvdivert show");
     
-    if (config.app.solar_kwh.value && config.app.use_kwh.value && config.app.import_kwh.value) {
+    if (config.app.solar_kwh.value && config.app.use_kwh.value && config.app.import_kwh.value && config.app.divert_kwh.value) {
         if (!bargraph_initialized) init_bargraph();
         $(".viewhistory").show();
     } else {

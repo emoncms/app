@@ -40,6 +40,11 @@ $available_apps = array (
         "status"=>"Development",
         "title"=>"OpenEVSE",
         "description"=>"Explore OpenEVSE charging"
+    ),
+    "hydro"=>array(
+        "status"=>"Development",
+        "title"=>"Hydro",
+        "description"=>"Hydro output app"
     )
     //"template"=>array(
     //    "title"=>"Template", 
