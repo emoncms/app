@@ -43,6 +43,7 @@
       
     <div class="block-bound">
       <div class="bluenav openconfig"><i class="icon-wrench icon-white"></i></div>
+      <div class="bluenav viewcostenergy">ENERGY MODE</div>
       <!--<div class="bluenav cost">Cost</div>-->
       <!--<div class="bluenav energy">Energy</div>-->
       <div class="block-title">MY ELECTRIC</div>
@@ -53,7 +54,7 @@
         <tr>
           <td style="width:40%">
               <div class="electric-title">POWER NOW</div>
-              <div class="power-value"><span id="power_now">0</span>W</div>
+              <div class="power-value"><span id="power_now">0</span></div>
           </td>
           <td style="text-align:right">
               <div class="electric-title">USE TODAY</div>
@@ -98,7 +99,7 @@
       <div id='advanced-toggle' class='bluenav' >SHOW DETAIL</div>
  
        <div style="padding:10px;">
-        kWh in window: <b id="window-kwh"></b> <b>kWh</b>
+        kWh in window: <b id="window-kwh"></b> <b id="window-cost"></b>
       </div>
       
       <div style="clear:both"></div>
@@ -204,7 +205,9 @@ if (!sessionwrite) $(".openconfig").hide();
 // ----------------------------------------------------------------------
 config.app = {
     "use":{"type":"feed", "autoname":"use", "engine":"5"},
-    "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5}
+    "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5},
+    "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity £/kWh"},
+    "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$..)"}
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
@@ -224,6 +227,7 @@ var bargraph_series = [];
 var powergraph_series = [];
 var previousPoint = false;
 var viewmode = "bargraph";
+var viewcostenergy = "energy";
 var panning = false;
 var period_text = "month";
 var period_average = 0;
@@ -279,10 +283,11 @@ function updater()
             if (config.app[key].value) feeds[key] = result[config.app[key].value];
         }
         
-        $("#power_now").html(Math.round(feeds["use"].value));
-        // Update all-time values
-        var total_elec = feeds["use_kwh"].value - use_start;
-        $("#total_elec").html(Math.round(total_elec));
+        if (viewcostenergy=="energy") {
+            $("#power_now").html(Math.round(feeds["use"].value)+"W");
+        } else {
+            $("#power_now").html(config.app.currency.value+(feeds["use"].value*1*config.app.unitcost.value*0.001).toFixed(3)+"/hr");
+        }
     });
 }
 
@@ -339,7 +344,15 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
             var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
             var date = days[d.getDay()]+", "+months[d.getMonth()]+" "+d.getDate();
-            tooltip(item.pageX, item.pageY, date+"<br>"+(elec_kwh).toFixed(1)+" kWh", "#fff");
+            
+            var text = "";
+            if (viewcostenergy=="energy") {
+                text = date+"<br>"+(elec_kwh).toFixed(1)+" kWh";
+            } else {
+                text = date+"<br>"+(elec_kwh).toFixed(1)+" kWh ("+config.app.currency.value+(elec_kwh*config.app.unitcost.value).toFixed(2)+")";
+            }
+            
+            tooltip(item.pageX, item.pageY, text, "#fff");
         }
     } else $("#tooltip").remove();
 });
@@ -419,6 +432,22 @@ $("#transport").click(function() {
     energystacks_draw();
 });
 
+$(".viewcostenergy").click(function(){
+    var view = $(this).html();
+    if (view=="ENERGY MODE") {
+        $(this).html("COST MODE");
+        viewcostenergy = "cost";
+    } else {
+        $(this).html("ENERGY MODE");
+        viewcostenergy = "energy";
+    }
+    
+    $(".powergraph-navigation").hide();
+    viewmode = "bargraph";
+    $(".bargraph-navigation").show();
+    show();
+});
+
 // -------------------------------------------------------------------------------
 // FUNCTIONS
 // -------------------------------------------------------------------------------
@@ -459,8 +488,14 @@ function powergraph_load()
             kwh_in_window += (power * time) / 3600000;
         }
     }
-    
-    $("#window-kwh").html(kwh_in_window.toFixed(1));
+
+    if (viewcostenergy=="energy") {
+        $("#window-kwh").html(kwh_in_window.toFixed(1)+ "kWh");
+        $("#window-cost").html("");
+    } else {
+        $("#window-kwh").html(kwh_in_window.toFixed(1)+ "kWh");
+        $("#window-cost").html("("+config.app.currency.value+(kwh_in_window*config.app.unitcost.value).toFixed(2)+")");
+    }
     
     var out = "";
     for (var z in feedstats) {
@@ -563,6 +598,12 @@ function bargraph_load(start,end)
     
     var kwh_today = data["use_kwhd"][data["use_kwhd"].length-1][1];
     $("#kwh_today").html(kwh_today.toFixed(1));
+    
+    if (viewcostenergy=="energy") {
+        $("#kwh_today").html(kwh_today.toFixed(1));
+    } else {
+        $("#kwh_today").html(config.app.currency.value+(kwh_today*config.app.unitcost.value).toFixed(2));
+    }
 }
 
 function bargraph_draw() 
