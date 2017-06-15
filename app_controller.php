@@ -108,6 +108,7 @@ function app_controller()
             $result .= "<div id='wrapper'>";
             if ($session['write']) $result .= view("Modules/app/sidebar.php",array("applist"=>$applist));
             if ($userappname!=false) {
+                if (!file_exists("Modules/app/apps/$app.php")) $app = "blank";
                 $result .= view("Modules/app/apps/$app.php",array("name"=>$userappname, "config"=>$config, "apikey"=>$apikey));
             } else {
                 $result .= view("Modules/app/list_view.php",array("available_apps"=>$available_apps));

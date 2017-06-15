@@ -1,6 +1,6 @@
 <?php
     global $path, $session;
-    $v = 1;
+    $v = 2;
 ?>
 <link href="<?php echo $path; ?>Modules/app/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
@@ -43,21 +43,21 @@
       
     <div class="block-bound">
       <div class="bluenav openconfig"><i class="icon-wrench icon-white"></i></div>
-      <div class="bluenav viewcostenergy">ENERGY MODE</div>
+      <div class="bluenav viewcostenergy">VIEW COST</div>
       <!--<div class="bluenav cost">Cost</div>-->
       <!--<div class="bluenav energy">Energy</div>-->
-      <div class="block-title">MY ELECTRIC</div>
+      <div id="app-title" class="block-title">MY ELECTRIC</div>
     </div>
 
     <div style="background-color:#fff; color:#333; padding:10px;">
       <table style="width:100%">
         <tr>
           <td style="width:40%">
-              <div class="electric-title">POWER NOW</div>
+              <div class="electric-title">NOW</div>
               <div class="power-value"><span id="power_now">0</span></div>
           </td>
           <td style="text-align:right">
-              <div class="electric-title">USE TODAY</div>
+              <div class="electric-title">TODAY</div>
               <div class="power-value"><span id="kwh_today">0</span></div>
           </td>
         </tr>
@@ -122,7 +122,7 @@
     </div>
     <br>
     
-    <div class="col2">
+    <div id="energystack-comparison" class="col2" style="display:none">
       <div class="block-bound">
           <div class="block-title">COMPARISON</div>
       </div>
@@ -204,10 +204,12 @@ if (!sessionwrite) $(".openconfig").hide();
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
+    "title":{"type":"value", "default":"MY ELECTRIC", "name": "Title", "description":"Optional title for app"},
     "use":{"type":"feed", "autoname":"use", "engine":"5"},
     "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5},
     "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity £/kWh"},
-    "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$..)"}
+    "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$..)"},
+    "showcomparison":{"type":"checkbox", "default":true, "name": "Show comparison", "description":"Energy stack comparison"}
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
@@ -252,6 +254,9 @@ function init()
 function show() {
     $("body").css('background-color','WhiteSmoke');
     
+    $("#app-title").html(config.app.title.value);
+    if (config.app.showcomparison.value) $("#energystack-comparison").show(); else $("#energystack-comparison").hide();
+    
     meta["use_kwh"] = feed.getmeta(feeds["use_kwh"].id);
     if (meta["use_kwh"].start_time>start_time) start_time = meta["use_kwh"].start_time;
     use_start = feed.getvalue(feeds["use_kwh"].id, start_time*1000)[1];
@@ -284,7 +289,11 @@ function updater()
         }
         
         if (viewcostenergy=="energy") {
-            $("#power_now").html(Math.round(feeds["use"].value)+"W");
+            if (feeds["use"].value<10000) {
+                $("#power_now").html(Math.round(feeds["use"].value)+"W");
+            } else {
+                $("#power_now").html((feeds["use"].value*0.001).toFixed(1)+"kW");
+            }
         } else {
             $("#power_now").html(config.app.currency.value+(feeds["use"].value*1*config.app.unitcost.value*0.001).toFixed(3)+"/hr");
         }
@@ -434,11 +443,11 @@ $("#transport").click(function() {
 
 $(".viewcostenergy").click(function(){
     var view = $(this).html();
-    if (view=="ENERGY MODE") {
-        $(this).html("COST MODE");
+    if (view=="VIEW COST") {
+        $(this).html("VIEW ENERGY");
         viewcostenergy = "cost";
     } else {
-        $(this).html("ENERGY MODE");
+        $(this).html("VIEW COST");
         viewcostenergy = "energy";
     }
     
