@@ -93,7 +93,7 @@ function app_controller()
         {
             $applist = $appconfig->applist($userid);
             
-            if (isset($route->subaction)) {
+            if ($route->subaction) {
                 $userappname = $route->subaction;
             } else {
                 $userappname = get("name");
