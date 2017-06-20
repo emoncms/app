@@ -92,7 +92,12 @@ function app_controller()
         if ($userid)
         {
             $applist = $appconfig->applist($userid);
-            $userappname = get("name");
+            
+            if (isset($route->subaction)) {
+                $userappname = $route->subaction;
+            } else {
+                $userappname = get("name");
+            }
             
             if (!isset($applist->$userappname)) {
                 foreach ($applist as $key=>$val) { $userappname = $key; break; }
