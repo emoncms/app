@@ -1,6 +1,6 @@
 <?php
     global $path, $session;
-    $v = 2;
+    $v = 3;
 ?>
 <link href="<?php echo $path; ?>Modules/app/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
@@ -596,23 +596,23 @@ function bargraph_load(start,end)
             n++;
         }
         period_average = total_kwh / n;
+        
+        var kwh_today = data["use_kwhd"][data["use_kwhd"].length-1][1];
+        $("#kwh_today").html(kwh_today.toFixed(1));
+        
+        if (viewcostenergy=="energy") {
+            $("#kwh_today").html(kwh_today.toFixed(1)+" kWh");
+        } else {
+            $("#kwh_today").html(config.app.currency.value+(kwh_today*config.app.unitcost.value).toFixed(2));
+        }
     }
-
+    
     bargraph_series = [];
     
     bargraph_series.push({
         data: data["use_kwhd"], color: "#44b3e2",
         bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 1.0, lineWidth:0}
     });
-    
-    var kwh_today = data["use_kwhd"][data["use_kwhd"].length-1][1];
-    $("#kwh_today").html(kwh_today.toFixed(1));
-    
-    if (viewcostenergy=="energy") {
-        $("#kwh_today").html(kwh_today.toFixed(1)+" kWh");
-    } else {
-        $("#kwh_today").html(config.app.currency.value+(kwh_today*config.app.unitcost.value).toFixed(2));
-    }
 }
 
 function bargraph_draw() 
