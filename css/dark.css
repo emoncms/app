@@ -103,6 +103,11 @@ h2 {
 
 .container-fluid { padding:0 }
 
+#footer {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
 .navbar-fixed-top {
     margin-left: 0px;
     margin-right: 0px;
