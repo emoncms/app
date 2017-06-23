@@ -43,7 +43,7 @@
 <div style="font-family: Montserrat, Veranda, sans-serif;">
 <div id="app-block" style="display:none">
     
-  <div class="col1"><div class="col1-inner">
+  <div id="myelectric-realtime" class="col1"><div class="col1-inner">
       
     <div class="block-bound">
       <div class="bluenav openconfig"><i class="icon-wrench icon-white"></i></div>
@@ -252,7 +252,12 @@ function show() {
     $("body").css('background-color','WhiteSmoke');
     
     $("#app-title").html(config.app.title.value);
-    if (config.app.showcomparison.value) $("#energystack-comparison").show(); else $("#energystack-comparison").hide();
+    if (config.app.showcomparison.value) {
+        $("#energystack-comparison").show();
+    } else {
+        $("#energystack-comparison").hide();
+        $("#energystack-comparison").parent().hide();
+    }
     
     meta["use_kwh"] = feed.getmeta(feeds["use_kwh"].id);
     if (meta["use_kwh"].start_time>start_time) start_time = meta["use_kwh"].start_time;
@@ -755,13 +760,18 @@ function resize() {
     var placeholder_bound = $('#placeholder_bound');
     var placeholder = $('#placeholder');
 
+    var window_height = $(window).height();
+    var topblock = $("#myelectric-realtime").height();
+    
+    
+    
+
     var width = placeholder_bound.width();
     var height = width*0.6;
     if (height>500) height = 500;
-
     if (height>width) height = width;
     
-    console.log(width+" "+height);
+    if (!config.app.showcomparison.value) height = window_height - topblock - 200;
 
     placeholder.width(width);
     placeholder_bound.height(height);
