@@ -30,6 +30,10 @@
     line-height: 1.1;
 }
 
+.units {
+    font-size:75%;
+}
+
 .block-bound {
   background-color:rgb(68,179,226);
 }
@@ -283,12 +287,12 @@ function updater()
         
         if (viewcostenergy=="energy") {
             if (feeds["use"].value<10000) {
-                $("#power_now").html(Math.round(feeds["use"].value)+"W");
+                $("#power_now").html(Math.round(feeds["use"].value)+"<span class='units'>W</span>");
             } else {
-                $("#power_now").html((feeds["use"].value*0.001).toFixed(1)+"kW");
+                $("#power_now").html((feeds["use"].value*0.001).toFixed(1)+"<span class='units'>kW</span>");
             }
         } else {
-            $("#power_now").html(config.app.currency.value+(feeds["use"].value*1*config.app.unitcost.value*0.001).toFixed(3)+"/hr");
+            $("#power_now").html(config.app.currency.value+(feeds["use"].value*1*config.app.unitcost.value*0.001).toFixed(3)+"<span class='units'>/hr</span>");
         }
     });
 }
@@ -591,10 +595,9 @@ function bargraph_load(start,end)
         period_average = total_kwh / n;
         
         var kwh_today = data["use_kwhd"][data["use_kwhd"].length-1][1];
-        $("#kwh_today").html(kwh_today.toFixed(1));
         
         if (viewcostenergy=="energy") {
-            $("#kwh_today").html(kwh_today.toFixed(1)+" kWh");
+            $("#kwh_today").html(kwh_today.toFixed(1)+"<span class='units'>kWh</span>");
         } else {
             $("#kwh_today").html(config.app.currency.value+(kwh_today*config.app.unitcost.value).toFixed(2));
         }
