@@ -16,7 +16,9 @@
 
 <div id="app-block" style="display:none">
 
-    <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
+  <div class="col1"><div class="col1-inner">
+
+    <div style="height:20px; border-bottom:1px solid #333; padding-bottom:8px;">
     
         <div style="float:left; color:#aaa">
         <span class="myelectric-view-cost" >Cost</span> | 
@@ -24,7 +26,7 @@
         </div>
     
         <div style="float:right;">
-            <i class="openconfig icon-wrench icon-white" style="cursor:pointer"></i>
+            <i class="openconfig icon-wrench icon-white" style="cursor:pointer; padding-right:5px"></i>
         </div>
     </div>
     
@@ -97,6 +99,9 @@
             </td>
         </tr>
     </table>
+    
+  </div></div>
+  
 </div>   
 
 <div id="app-setup" style="display:none; padding-top:50px" class="block">

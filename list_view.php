@@ -17,14 +17,24 @@
   font-weight:bold;
   font-size:14px;
 }
+
+.col1 {
+  width:100%;
+}
+.col1-inner { padding:10px; }
+
 </style>
 
 <div style="height:10px"></div>
 
-<h2>Available Apps</h2>
-<p>Create a new instance of an app by clicking on one of the apps below.</p>
+<div style="padding:20px">
 
-<div id="available-apps"></div>
+  <h2>Available Apps</h2>
+  <p>Create a new instance of an app by clicking on one of the apps below.</p>
+
+  <div id="available-apps"></div>
+
+</div>
 
 <!-------------------------------------------------------------------------------------------
   MODALS

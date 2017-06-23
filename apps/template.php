@@ -9,15 +9,19 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/feed.js?v=<?php echo $v; ?>"></script>
 
 <div id="app-block" style="display:none">
-  <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
-    <div style="float:right;">
-      <i class="openconfig icon-wrench icon-white" style="cursor:pointer"></i>
+  <div class="col1"><div class="col1-inner">
+  
+    <div style="height:20px; border-bottom:1px solid #333; padding-bottom:8px;">
+      <div style="float:right;">
+        <i class="openconfig icon-wrench icon-white" style="cursor:pointer; padding-right:5px;"></i>
+      </div>
     </div>
-  </div>
-  <div style="text-align:center">
-    <div class="electric-title">POWER NOW</div>
-    <div class="power-value"><span id="powernow">0</span></div>
-  </div>
+    <div style="text-align:center">
+      <div class="electric-title">POWER NOW</div>
+      <div class="power-value"><span id="powernow">0</span></div>
+    </div>
+  
+  </div></div>
 </div>    
 
 <div id="app-setup" style="display:none; padding-top:50px" class="block">

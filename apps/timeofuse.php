@@ -1,6 +1,6 @@
 <?php
     global $path, $session;
-    $v = 2;
+    $v = 3;
 ?>
 <link href="<?php echo $path; ?>Modules/app/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
@@ -37,11 +37,11 @@
 
 </style>
 
-<br>
 <div style="font-family: Montserrat, Veranda, sans-serif;">
-
-  <div id="app-block" style="display:none">
-      
+<div id="app-block" style="display:none">
+    
+  <div class="col1"><div class="col1-inner">
+  
     <div class="block-bound">
       <div class="bluenav openconfig"><i class="icon-wrench icon-white"></i></div>
       <div class="bluenav viewcostenergy">ENERGY MODE</div>
@@ -64,7 +64,9 @@
         </tr>
       </table>
     </div>
-    <br>
+    
+  </div></div>
+  <div class="col1"><div class="col1-inner">
 
     <div class="block-bound">
     
@@ -121,9 +123,11 @@
         </table>
       </div>
     </div>
-    <br>
     
-    <div class="col2">
+  </div></div>
+    
+  <div class="col2">
+    <div class="col2-inner">
       <div class="block-bound">
           <div class="block-title">TOTALS</div>
       </div>
@@ -138,10 +142,11 @@
           <div class="electric-title">NIGHT TIME DAILY AVERAGE</div>
           <div class="power-value"><span id="nighttime_average_kwhd">0</span></div><br>
       </div>
-      
     </div>
-    
-    <div class="col2">
+  </div>
+  
+  <div class="col2">
+    <div class="col2-inner">
       <div class="block-bound">
           <div class="block-title">COMPARISON</div>
       </div>
@@ -158,26 +163,13 @@
         </div>
         <div style="clear:both"></div>
       </div>
-      
     </div>
+  </div>
     
-    <!--
-    
-    <div class="col2">
-      <div class="block-bound">
-          <div class="block-title"></div>
-      </div>
-      
-      <div style="background-color:rgba(68,179,226,0.1); padding:20px; color:#333; text-align:center">
-      </div>
-      
-    </div>
-    -->
-    
-  </div>    
+</div>    
 </div>
 
-<div id="app-setup" style="display:none; padding-top:50px" class="block">
+<div id="app-setup" class="block">
     <h2 class="appconfig-title">My Electric 2</h2>
 
     <div class="appconfig-description">

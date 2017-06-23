@@ -18,10 +18,12 @@
     
 <div id="app-block" style="display:none" class="block">
 
-    <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
+  <div class="col1"><div class="col1-inner">
+
+    <div style="height:20px; border-bottom:1px solid #333; padding-bottom:8px;">
         <div style="float:right;">
             <!--<span style="color:#fff; margin-right:10px" >Settings</span>-->
-            <i class="openconfig icon-wrench icon-white" style="cursor:pointer"></i>
+            <i class="openconfig icon-wrench icon-white" style="cursor:pointer; padding-right:5px"></i>
         </div>
     </div>
 
@@ -282,7 +284,8 @@
     </tr>
     
     </table>
-
+  </div></div>
+  
 </div>
 
 <div id="app-setup" style="display:none; padding-top:50px" class="block">

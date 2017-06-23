@@ -1,3 +1,6 @@
+#app-block {
+    padding:10px;
+}
 /*-------------------------------------*/
 
 h2 {
@@ -71,6 +74,19 @@ h2 {
   font-size:16px;
 }
 
+/* --------------------------------------------------------*/
+
+.col1 {
+  width:100%;
+}
+.col1-inner { padding:10px; }
+
+.col2 {
+  width:50%;
+  float:left;
+}
+.col2-inner { padding:10px; }
+
 /*-------------------------------------*/
 
 .ajax-loader{
@@ -84,13 +100,23 @@ h2 {
 }
 
 /*-------------------------------------*/
+@media (max-width: 767px) {
+  body {padding:0};
+}
 
 @media (max-width: 450px) {
   .row { padding:10px; }  
   .appbox { padding:5px }
   .appbox-value { font-size:28px }
   .appbox-title { font-size:16px }
+
+  #app-block { padding:5px; }
+  .col2 { width:100%; }  
+  .col1-inner { padding:5px; }
+  .col2-inner { padding:5px; }
 }
     
-@media (min-width: 450px) and (max-width: 960px) { }
+@media (min-width: 450px) and (max-width: 960px) { 
+  .col2 { width:100%; } 
+}
 @media (min-width: 960px) { }

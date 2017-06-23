@@ -29,6 +29,10 @@ $("#app_menu").parent().attr("href","#");
 $("#app_menu").find("i").removeClass("icon-leaf");
 $("#app_menu").find("i").addClass("icon-list");
 
+$(".container-fluid").css("padding","0");
+$(".navbar-fixed-top").css("margin-left","0");
+$(".navbar-fixed-top").css("margin-right","0");
+
 var sidebar_enabled = true;
 var sidebar_visible = true;
 

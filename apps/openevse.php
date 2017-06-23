@@ -1,6 +1,6 @@
 <?php
     global $path, $session;
-    $v = 1;
+    $v = 2;
 ?>
 <link href="<?php echo $path; ?>Modules/app/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
@@ -35,11 +35,10 @@
 
 </style>
 
-<br>
 <div style="font-family: Montserrat, Veranda, sans-serif;">
+<div id="app-block" style="display:none">
 
-  <div id="app-block" style="display:none">
-      
+  <div class="col1"><div class="col1-inner">
     <div class="block-bound">
       <div class="bluenav openconfig"><i class="icon-wrench icon-white"></i></div>
       <!--<div class="bluenav cost">Cost</div>
@@ -61,7 +60,9 @@
         </tr>
       </table>
     </div>
-    <br>
+
+  </div></div>
+  <div class="col1"><div class="col1-inner">
 
     <div class="block-bound">
     
@@ -118,11 +119,13 @@
         </table>
       </div>
     </div>
+
+  </div></div>
     
-  </div>    
+</div>    
 </div>
 
-<div id="app-setup" style="display:none; padding-top:50px" class="block">
+<div id="app-setup" class="block">
     <h2 class="appconfig-title">OpenEVSE</h2>
 
     <div class="appconfig-description">

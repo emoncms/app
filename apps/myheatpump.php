@@ -1,6 +1,6 @@
 <?php
     global $path, $session;
-    $v = 1;
+    $v = 2;
 ?>
 <link href="<?php echo $path; ?>Modules/app/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
@@ -42,11 +42,10 @@
 
 </style>
 
-<br>
 <div style="font-family: Montserrat, Veranda, sans-serif;">
+<div id="app-block" style="display:none">
 
-  <div id="app-block" style="display:none">
-
+  <div class="col1"><div class="col1-inner">
     <div class="block-bound">
       <div style="float:right">
           <div class="openconfig" style="padding-top:10px; padding-right:10px; cursor:pointer">
@@ -55,8 +54,6 @@
       </div>
       
       <div class="block-title">MY HEATPUMP</div>
-      
-
     </div>
 
     <div style="background-color:#fff; color:#333">
@@ -85,7 +82,9 @@
         </tr>
       </table>
     </div>
-    <br>
+
+  </div></div>
+  <div class="col1"><div class="col1-inner">
 
     <div class="block-bound">
     
@@ -139,7 +138,9 @@
         </table>
       </div>
     </div>
-    <br>
+
+  </div></div>
+  <div class="col1"><div class="col1-inner">
          
     <div class="block-bound">
         <div class="block-title">ALL TIME HISTORY</div>
@@ -165,10 +166,13 @@
       </tr>
       </table>
     </div>
-  </div>  
+
+  </div></div>
+
+</div>  
 </div>    
   
-<div id="app-setup" style="display:none; padding-top:50px" class="block">
+<div id="app-setup" class="block">
     <h2 class="appconfig-title">My Heatpump</h2>
 
     <div class="appconfig-description">
