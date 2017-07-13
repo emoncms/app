@@ -133,7 +133,6 @@ padding:10px;
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
 
 <script>
-
 // ----------------------------------------------------------------------
 // Globals
 // ----------------------------------------------------------------------
@@ -142,12 +141,12 @@ var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 
 apikeystr = "";
-if (apikey!="") apikeystr = "&apikey="+apikey;
+if (apikey != "") {apikeystr = "&apikey=" + apikey;}
 
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
-$(window).ready(function(){
+$(window).ready(function() {
 
 
 });
@@ -158,16 +157,31 @@ if (!sessionwrite) $(".openconfig").hide();
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5},
-    "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$..)"}
+    "use_kwh": {
+        "type": "feed",
+        "autoname": "use_kwh",
+        "engine": 5
+    },
+    "currency": {
+        "type": "value",
+        "default": "£",
+        "name": "Currency",
+        "description": "Currency symbol (£,$..)"
+    }
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 config.feeds = feed.list();
 
-config.initapp = function(){init()};
-config.showapp = function(){show()};
-config.hideapp = function(){hide()};
+config.initapp = function() {
+    init()
+};
+config.showapp = function() {
+    show()
+};
+config.hideapp = function() {
+    hide()
+};
 
 // ----------------------------------------------------------------------
 // APPLICATION
@@ -191,76 +205,84 @@ var start_time = 0;
 var use_start = 0;
 
 //These should be in a resource file for globalization
-var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-var rates = [
-{ cost: 0.1199, colour: "#276FBF" },
-{ cost: 0.2499, colour: "#F03A47" },
-{ cost: 0.0499, colour: "#97CC04" }
+var rates = [{
+        cost: 0.1199,
+        colour: "#276FBF"
+    },
+    {
+        cost: 0.2499,
+        colour: "#F03A47"
+    },
+    {
+        cost: 0.0499,
+        colour: "#97CC04"
+    }
 ];
 
 //Rate zero = standard 11.99 pence
 //Rate one  = premium 24.99 pence
 //rate two  = low 4.99 pence
 
-   //48 item array containing which half hour segment belongs to which rate
-   //runs from 00:00 (midnight) to 23:59 in 30 minute segments
-   rate_bucket=[
-//00:00 to 01:00
-2,2,
-//01:00 to 02:00
-2,2,
-//02:00 to 03:00
-2,2,
-//03:00 to 04:00
-2,2,
-//04:00 to 05:00
-2,2,
-//05:00 to 06:00
-2,2,
-//06:00 to 07:00
-0,0,
-//07
-0,0,
-//08
-0,0,
-//09
-0,0,
-//10
-0,0,
-//11
-0,0,
-//12
-0,0,
-//13
-0,0,
-//14
-0,0,
-//15
-0,0,
-//16:00 to 17:00
-1,1,
-//17:00 to 18:00
-1,1,
-//18:00 to 19:00
-1,1,
-//19:00 to 20:00
-0,0,
-//20:00 to 21:00
-0,0,
-//21:00 to 22:00
-0,0,
-//22:00 to 23:00
-0,0,
-//23:00 to 23:59
-2,2 ];
+//48 item array containing which half hour segment belongs to which rate
+//runs from 00:00 (midnight) to 23:59 in 30 minute segments
+rate_bucket = [
+    //00:00 to 01:00
+    2, 2,
+    //01:00 to 02:00
+    2, 2,
+    //02:00 to 03:00
+    2, 2,
+    //03:00 to 04:00
+    2, 2,
+    //04:00 to 05:00
+    2, 2,
+    //05:00 to 06:00
+    2, 2,
+    //06:00 to 07:00
+    0, 0,
+    //07
+    0, 0,
+    //08
+    0, 0,
+    //09
+    0, 0,
+    //10
+    0, 0,
+    //11
+    0, 0,
+    //12
+    0, 0,
+    //13
+    0, 0,
+    //14
+    0, 0,
+    //15
+    0, 0,
+    //16:00 to 17:00
+    1, 1,
+    //17:00 to 18:00
+    1, 1,
+    //18:00 to 19:00
+    1, 1,
+    //19:00 to 20:00
+    0, 0,
+    //20:00 to 21:00
+    0, 0,
+    //21:00 to 22:00
+    0, 0,
+    //22:00 to 23:00
+    0, 0,
+    //23:00 to 23:59
+    2, 2
+];
 
 
 config.init();
 
-function init()
-{
+function init() {
     // Quick translation of feed ids
     feeds = {};
     for (var key in config.app) {
@@ -269,12 +291,12 @@ function init()
 }
 
 function show() {
-    $("body").css('background-color','WhiteSmoke');
+    $("body").css('background-color', 'WhiteSmoke');
     meta["use_kwh"] = feed.getmeta(feeds["use_kwh"].id);
 
-    if (meta["use_kwh"].start_time>start_time) start_time = meta["use_kwh"].start_time;
+    if (meta["use_kwh"].start_time > start_time) start_time = meta["use_kwh"].start_time;
 
-    use_start = feed.getvalue(feeds["use_kwh"].id, start_time*1000)[1];
+    use_start = feed.getvalue(feeds["use_kwh"].id, start_time * 1000)[1];
 
     resize();
 
@@ -285,12 +307,12 @@ function show() {
 
 function initialLoad() {
     //30 days - this really should work out the number of days etc.
-    var timeWindow = (3600000*24.0*30);
+    var timeWindow = (3600000 * 24.0 * 30);
     var end = (new Date()).getTime();
     var start = end - timeWindow;
     period_text = "month";
 
-    bargraph_load(start,end);
+    bargraph_load(start, end);
     bargraph_draw();
     halfhour_usage_bargraph_draw();
 }
@@ -300,17 +322,21 @@ function timeFormatter(ms) {
     var date = new Date(ms);
     var hh = date.getHours();
     var mm = date.getMinutes();
-    if (hh < 10) {hh = '0' + hh}
-    if (mm < 10) {mm = '0' + mm}
+    if (hh < 10) {
+        hh = '0' + hh;
+    }
+    if (mm < 10) {
+        mm = '0' + mm;
+    }
     return hh + ':' + mm;
 };
 
 
 function hide() {
-	//We should stop any timers we have started here
+    //We should stop any timers we have started here
 }
 
-$("#halfhour_placeholder").bind("plothover", function (event, pos, item) {
+$("#halfhour_placeholder").bind("plothover", function(event, pos, item) {
     if (item) {
         var z = item.dataIndex;
         var seriesIndex = item.seriesIndex;
@@ -319,98 +345,98 @@ $("#halfhour_placeholder").bind("plothover", function (event, pos, item) {
             previousPointHalfHour = item.datapoint;
             $("#tooltip").remove();
 
-            var text = timeFormatter(item.datapoint[0])
-		+"<br>"
-		+ halfhour_usage_series[seriesIndex].data[z][1].toFixed(4)
-		+ " kWh @ " + config.app.currency.value+rates[seriesIndex].cost.toFixed(4)+"/kWh <br>";
-	    tooltip(item.pageX, item.pageY, text, "#eee");
-	}
+            var text = timeFormatter(item.datapoint[0]) +
+                "<br>" +
+                halfhour_usage_series[seriesIndex].data[z][1].toFixed(4) +
+                " kWh @ " + config.app.currency.value + rates[seriesIndex].cost.toFixed(4) + "/kWh <br>";
+            tooltip(item.pageX, item.pageY, text, "#eee");
+        }
 
     } else $("#tooltip").remove();
 });
 
 
 
-$("#placeholder").bind("plothover", function (event, pos, item) {
+$("#placeholder").bind("plothover", function(event, pos, item) {
     if (item) {
         var z = item.dataIndex;
         var seriesIndex = item.seriesIndex;
 
-	 if (seriesIndex==0){ }
-
-        else {
+        if (seriesIndex == 0) {} else {
 
 
-        if (previousPoint != item.datapoint) {
-            previousPoint = item.datapoint;
+            if (previousPoint != item.datapoint) {
+                previousPoint = item.datapoint;
 
-            $("#tooltip").remove();
+                $("#tooltip").remove();
 
-            var itemTime = item.datapoint[0];
+                var itemTime = item.datapoint[0];
 
-            var d = new Date(itemTime);
-		//This is UK formatted date - should be regional
-            var date = days[d.getDay()]+", "+months[d.getMonth()]+" "+d.getDate();
-            var text = "";
+                var d = new Date(itemTime);
+                //This is UK formatted date - should be regional
+                var date = days[d.getDay()] + ", " + months[d.getMonth()] + " " + d.getDate();
+                var text = "";
 
-                text = date+"<br>";
-		var totalcost=0;
-var totalkwh=0;
-		for (series in bargraph_series) {
-			if (series>0) {
+                text = date + "<br>";
+                var totalcost = 0;
+                var totalkwh = 0;
+                for (var series in bargraph_series) {
+                    if (series > 0) {
 
-			var cost=rates[series-1].cost * bargraph_series[series].data[z][1];
-			totalkwh+= bargraph_series[series].data[z][1];
+                        var cost = rates[series - 1].cost * bargraph_series[series].data[z][1];
+                        totalkwh += bargraph_series[series].data[z][1];
 
-			text +="Rate "+series+":"+ bargraph_series[series].data[z][1].toFixed(3)+ " kWh = " + config.app.currency.value
-+ cost.toFixed(2)+" @ "+ rates[series-1].cost.toFixed(4) + "<br>";
-totalcost+=cost;
-}//end if
-		}//end for
+                        text += "Rate " + series + ":" + bargraph_series[series].data[z][1].toFixed(3) + " kWh = " + config.app.currency.value +
+                            cost.toFixed(2) + " @ " + rates[series - 1].cost.toFixed(4) + "<br>";
+                        totalcost += cost;
+                    } //end if
+                } //end for
 
-		text +="Total: "+ config.app.currency.value+totalcost.toFixed(2) + " / "+ totalkwh.toFixed(3)+"kWh";
+                text += "Total: " + config.app.currency.value + totalcost.toFixed(2) + " / " + totalkwh.toFixed(3) + "kWh";
 
-            tooltip(item.pageX, item.pageY, text, "#eee");
+                tooltip(item.pageX, item.pageY, text, "#eee");
+            }
         }
-}
     } else $("#tooltip").remove();
 
 });
 
-$('#placeholder').bind("plotselected", function (event, ranges) {
+$('#placeholder').bind("plotselected", function(event, ranges) {
     var start = ranges.xaxis.from;
     var end = ranges.xaxis.to;
     panning = true;
-    bargraph_load(start,end);
+    bargraph_load(start, end);
     bargraph_draw();
     halfhour_usage_bargraph_draw();
-    setTimeout(function() { panning = false; }, 100);
+    setTimeout(function() {
+        panning = false;
+    }, 100);
 });
 
-$('.bargraph-alltime').click(function () {
+$('.bargraph-alltime').click(function() {
     var start = start_time * 1000;
     var end = (new Date()).getTime();
-    bargraph_load(start,end);
+    bargraph_load(start, end);
     bargraph_draw();
     halfhour_usage_bargraph_draw();
     period_text = "period";
 });
 
-$('.bargraph-week').click(function () {
-    var timeWindow = (3600000*24.0*7);
+$('.bargraph-week').click(function() {
+    var timeWindow = (3600000 * 24.0 * 7);
     var end = (new Date()).getTime();
     var start = end - timeWindow;
-    bargraph_load(start,end);
+    bargraph_load(start, end);
     bargraph_draw();
     halfhour_usage_bargraph_draw();
     period_text = "week";
 });
 
-$('.bargraph-month').click(function () {
-    var timeWindow = (3600000*24.0*30);
+$('.bargraph-month').click(function() {
+    var timeWindow = (3600000 * 24.0 * 30);
     var end = (new Date()).getTime();
     var start = end - timeWindow;
-    bargraph_load(start,end);
+    bargraph_load(start, end);
     bargraph_draw();
     halfhour_usage_bargraph_draw();
     period_text = "month";
@@ -431,214 +457,288 @@ function newFilledArray(len, val) {
     return rv;
 }
 
-function bargraph_load(start,end)
-{
-    var interval = 3600*24;
+function bargraph_load(start, end) {
+    var interval = 3600 * 24;
     var intervalms = interval * 1000;
-    end = Math.ceil(end/intervalms)*intervalms;
-    start = Math.floor(start/intervalms)*intervalms;
+    end = Math.ceil(end / intervalms) * intervalms;
+    start = Math.floor(start / intervalms) * intervalms;
 
     var halfhour = [];
-    for (i = 0; i < 24.0; i=i+0.5) { halfhour.push(i);  }
-
-    var elec_data = feed.getdataDMY_time_of_use( feeds["use_kwh"].id, start, end, "daily", JSON.stringify(halfhour) );
-
-        if (elec_data.length > 0) {
-            //Replace the null values in last reading with the highest kWh reading so far today....
-            var lastIndex = elec_data.length - 1;
-            var maxReading = 0;
-            var elecResult = elec_data[lastIndex][1];
-            for (var z in elecResult) {
-                if (elecResult.hasOwnProperty(z)) {
-                    if (elecResult[z] > maxReading) {
-                        maxReading = elecResult[z];
-                    }
-                    if (elecResult[z] === null) {
-                        elecResult[z] = maxReading;
-                    }
-                }
-            } //end for
-
-            // Now work out the kWh difference between each reading, using closing reading from yesterday as starting position for today
-            kwh = [];
-            for (var day in elec_data) {
-		if (day>0) {
-		var readings = [];
-
-                for (var reading in elec_data[day][1]) {
-		   var value=0;
-		    if (reading==0) {
-			//First reading of the day, so subtract the previous days final reading
-			value=elec_data[day][1][0] - elec_data[day-1][1][ elec_data[day-1][1].length -1];
-		    } else {
-			//Take this reading away from previous
-			value= elec_data[day][1][reading] - elec_data[day][1][reading-1] ;
-                    }
-
-		    if (value<0) value=0;
-		    readings.push(value);
-                }//end for
-
-		kwh.push( [elec_data[day][0], readings] );
-
-		//console.log(readings);
-
-		}//end if
-            }//end for
-        }//end if
-
-
-//At this point kwh object contains a breakdown of the energy usage in 30 minute segments
-//create a total summary for these 30 minute segments over the time period
-//and split into colour coded series to show on graph
-
-	var breakdown=[];
-
-	for (var loop in rates) { breakdown[loop] = []; }
-
-	for (var time in halfhour) {
-		var total=0.0;
-		 for (var day in kwh) {
-			total+= kwh[day][1][time];
-		}//end for
-		//Avoid negative numbers
-		if (total<0) {total=0.0;}
-
-		//Create a fake date so the graph shows the time correctly
-		var seconds=1483228800000+(( halfhour[time] * 3600000));
-		//breakdown[rate_bucket[time]].push([ halfhour[time].toString(), total ]);
-		breakdown[rate_bucket[time]].push([ seconds, total ]);
-	}
-
-//Calculate the total used for the period on an half hourly basis to allow user to visualise peak times over a longer period of time.
-//Colour code bars as per rate level
- halfhour_usage_series = [];
-
- for (var x in breakdown) {
-   halfhour_usage_series.push({
-        stack: false,
-        data: breakdown[x],
-	color: rates[x].colour,
-        label: "Rate "+ (parseInt(x)+1) + " "+ config.app.currency.value + rates[x].cost.toFixed(4),
-        bars: { show: true, align: "center", barWidth: 0.45*3600000, fill: 1.0, lineWidth:0},
-	clickable: false
-    });
-}
-
-//	console.log(halfhour_usage_series);
-
-   // Init rate variable
-   rate=[];
-   for (var loop in rates) { rate[loop] = []; }
-
-   //Init variable to hold breakdown of total daily cost
-   var thisdaycost=[];
-
-   for (var day in kwh) {
-
-		//Create array to hold todays totals, and zero it
-		var thisdaytotal=newFilledArray( rate.length, 0);
-
-		//For each time segment sum up the kWh used for this day and split into
-		//the different rate "buckets"
- 		for (var time in halfhour) {
-			thisdaytotal[ rate_bucket[time] ] += kwh[day][1][time] ;
-		}
-
-		var todaycost=0;
-
-		for (var loop in thisdaytotal){
-			//Cost for today
-		        todaycost +=  thisdaytotal[loop] * rates[loop].cost;
-			//kWh breakdown for each rate for the whole day
-			rate[loop].push([ kwh[day][0], thisdaytotal[loop]  ]);
-		}
-
-		thisdaycost.push([ kwh[day][0], todaycost]);
-}
-
-	//This holds the data for the main graph on top of the page
-    bargraph_series = [];
-
- bargraph_series.push({
-        stack: false,
-        data: thisdaycost, color: '#16425B' ,
-        label: "Cost",
-        yaxis: 2, clickable: false,  hoverable:false
-    });
-
-	for (var r in rates) {
-
-    bargraph_series.push({
-        stack: true,
-        data: rate[r],
-        color: rates[r].colour,
-	label: "Rate "+ (parseInt(r)+1) + " "+ config.app.currency.value + rates[r].cost.toFixed(4),
-	yaxis: 1,
-        bars: { show: true, align: "center", barWidth:  0.75*3600*24*1000, fill: 0.75, lineWidth:0}, clickable: false
-    });
-}//end for
-
-}//end function
-
-function halfhour_usage_bargraph_draw()
-{
-    var halfhour_options = {
- xaxis: {
-            mode: "time",
-            font: {size:flot_font_size, color:"#666"},
-            minTickSize: [30,"minute"]
-        },
-yaxes: [
-{min:0, tickFormatter: kWhFormatter, position: 'left', alignTicksWithAxis:null,  font: {size:flot_font_size, color:"#666"} },
-],
-
-        selection: { mode: "x" },
-        grid: {
-            show:true,
-            color:"#aaa",
-            borderWidth:0,
-            hoverable: true,
-            clickable: false
-		//, backgroundColor: { colors: ["#dbdee5", "#999"] }
-        },
-	legend: { show: true, container: $('#halfhour_legend'), margin:15, position:"nw", noColumns:8, placement: 'outsideGrid' }
+    for (i = 0; i < 24.0; i = i + 0.5) {
+        halfhour.push(i);
     }
 
-    var halfhour_plot = $.plot($('#halfhour_placeholder'),halfhour_usage_series,halfhour_options);
+    var elec_data = feed.getdataDMY_time_of_use(feeds["use_kwh"].id, start, end, "daily", JSON.stringify(halfhour));
+
+    if (elec_data.length > 0) {
+        //Replace the null values in last reading with the highest kWh reading so far today....
+        var lastIndex = elec_data.length - 1;
+        var maxReading = 0;
+        var elecResult = elec_data[lastIndex][1];
+        for (var z in elecResult) {
+            if (elecResult.hasOwnProperty(z)) {
+                if (elecResult[z] > maxReading) {
+                    maxReading = elecResult[z];
+                }
+                if (elecResult[z] === null) {
+                    elecResult[z] = maxReading;
+                }
+            }
+        } //end for
+
+        // Now work out the kWh difference between each reading, using closing reading from yesterday as starting position for today
+        kwh = [];
+        for (var day in elec_data) {
+            if (day > 0) {
+                var readings = [];
+
+                for (var reading in elec_data[day][1]) {
+                    var value = 0;
+                    if (reading == 0) {
+                        //First reading of the day, so subtract the previous days final reading
+                        value = elec_data[day][1][0] - elec_data[day - 1][1][elec_data[day - 1][1].length - 1];
+                    } else {
+                        //Take this reading away from previous
+                        value = elec_data[day][1][reading] - elec_data[day][1][reading - 1];
+                    }
+
+                    if (value < 0) value = 0;
+                    readings.push(value);
+                } //end for
+
+                kwh.push([elec_data[day][0], readings]);
+
+                //console.log(readings);
+
+            } //end if
+        } //end for
+    } //end if
+
+
+    //At this point kwh object contains a breakdown of the energy usage in 30 minute segments
+    //create a total summary for these 30 minute segments over the time period
+    //and split into colour coded series to show on graph
+
+    var breakdown = [];
+
+    for (var loop in rates) {
+        breakdown[loop] = [];
+    }
+
+    for (var time in halfhour) {
+        var total = 0.0;
+        for (var day in kwh) {
+            total += kwh[day][1][time];
+        } //end for
+        //Avoid negative numbers
+        if (total < 0) {
+            total = 0.0;
+        }
+
+        //Create a fake date so the graph shows the time correctly
+        var seconds = 1483228800000 + ((halfhour[time] * 3600000));
+        //breakdown[rate_bucket[time]].push([ halfhour[time].toString(), total ]);
+        breakdown[rate_bucket[time]].push([seconds, total]);
+    }
+
+    //Calculate the total used for the period on an half hourly basis to allow user to visualise peak times over a longer period of time.
+    //Colour code bars as per rate level
+    halfhour_usage_series = [];
+
+    for (var x in breakdown) {
+        halfhour_usage_series.push({
+            stack: false,
+            data: breakdown[x],
+            color: rates[x].colour,
+            label: "Rate " + (parseInt(x) + 1) + " " + config.app.currency.value + rates[x].cost.toFixed(4),
+            bars: {
+                show: true,
+                align: "center",
+                barWidth: 0.45 * 3600000,
+                fill: 1.0,
+                lineWidth: 0
+            },
+            clickable: false
+        });
+    }
+
+    //	console.log(halfhour_usage_series);
+
+    // Init rate variable
+    rate = [];
+    for (var loop in rates) {
+        rate[loop] = [];
+    }
+
+    //Init variable to hold breakdown of total daily cost
+    var thisdaycost = [];
+
+    for (var day in kwh) {
+
+        //Create array to hold todays totals, and zero it
+        var thisdaytotal = newFilledArray(rate.length, 0);
+
+        //For each time segment sum up the kWh used for this day and split into
+        //the different rate "buckets"
+        for (var time in halfhour) {
+            thisdaytotal[rate_bucket[time]] += kwh[day][1][time];
+        }
+
+        var todaycost = 0;
+
+        for (var loop in thisdaytotal) {
+            //Cost for today
+            todaycost += thisdaytotal[loop] * rates[loop].cost;
+            //kWh breakdown for each rate for the whole day
+            rate[loop].push([kwh[day][0], thisdaytotal[loop]]);
+        }
+
+        thisdaycost.push([kwh[day][0], todaycost]);
+    }
+
+    //This holds the data for the main graph on top of the page
+    bargraph_series = [];
+
+    bargraph_series.push({
+        stack: false,
+        data: thisdaycost,
+        color: '#16425B',
+        label: "Cost",
+        yaxis: 2,
+        clickable: false,
+        hoverable: false
+    });
+
+    for (var r in rates) {
+
+        bargraph_series.push({
+            stack: true,
+            data: rate[r],
+            color: rates[r].colour,
+            label: "Rate " + (parseInt(r) + 1) + " " + config.app.currency.value + rates[r].cost.toFixed(4),
+            yaxis: 1,
+            bars: {
+                show: true,
+                align: "center",
+                barWidth: 0.75 * 3600 * 24 * 1000,
+                fill: 0.75,
+                lineWidth: 0
+            },
+            clickable: false
+        });
+    } //end for
+
+} //end function
+
+function halfhour_usage_bargraph_draw() {
+    var halfhour_options = {
+        xaxis: {
+            mode: "time",
+            font: {
+                size: flot_font_size,
+                color: "#666"
+            },
+            minTickSize: [30, "minute"]
+        },
+        yaxes: [{
+            min: 0,
+            tickFormatter: kWhFormatter,
+            position: 'left',
+            alignTicksWithAxis: null,
+            font: {
+                size: flot_font_size,
+                color: "#666"
+            }
+        }, ],
+
+        selection: {
+            mode: "x"
+        },
+        grid: {
+            show: true,
+            color: "#aaa",
+            borderWidth: 0,
+            hoverable: true,
+            clickable: false
+            //, backgroundColor: { colors: ["#dbdee5", "#999"] }
+        },
+        legend: {
+            show: true,
+            container: $('#halfhour_legend'),
+            margin: 15,
+            position: "nw",
+            noColumns: 8,
+            placement: 'outsideGrid'
+        }
+    };
+
+    var halfhour_plot = $.plot($('#halfhour_placeholder'), halfhour_usage_series, halfhour_options);
 }
 
 
-function currencyFormatter(v, axis) {return config.app.currency.value+v.toFixed(axis.tickDecimals);}
-function kWhFormatter(v, axis) { return v.toFixed(axis.tickDecimals)+'kWh';}
+function currencyFormatter(v, axis) {
+    return config.app.currency.value + v.toFixed(axis.tickDecimals);
+}
 
-function bargraph_draw()
-{
+function kWhFormatter(v, axis) {
+    return v.toFixed(axis.tickDecimals) + 'kWh';
+}
+
+function bargraph_draw() {
     var options = {
         xaxis: {
             mode: "time",
             timezone: "browser",
-            font: {size:flot_font_size, color:"#666"},
-            reserveSpace:false,
-	    minTickSize: [1, "day"]
+            font: {
+                size: flot_font_size,
+                color: "#666"
+            },
+            reserveSpace: false,
+            minTickSize: [1, "day"]
         },
 
-yaxes: [ 
-{min:0, tickFormatter: kWhFormatter, position: 'left', alignTicksWithAxis:null,  font: {size:flot_font_size, color:"#666"} },
-{min:0, alignTicksWithAxis:1,position: 'right', tickFormatter: currencyFormatter,  font: {size:flot_font_size, color:"#666"} } 
-],
+        yaxes: [{
+                min: 0,
+                tickFormatter: kWhFormatter,
+                position: 'left',
+                alignTicksWithAxis: null,
+                font: {
+                    size: flot_font_size,
+                    color: "#666"
+                }
+            },
+            {
+                min: 0,
+                alignTicksWithAxis: 1,
+                position: 'right',
+                tickFormatter: currencyFormatter,
+                font: {
+                    size: flot_font_size,
+                    color: "#666"
+                }
+            }
+        ],
 
-      selection: { mode: "x" },
+        selection: {
+            mode: "x"
+        },
         grid: {
-            show:true,
-            color:"#aaa",
-            borderWidth:0,
+            show: true,
+            color: "#aaa",
+            borderWidth: 0,
             hoverable: true
         },
-	legend: { show: true, container: $('#placeholder_legend'), margin:15, position:"nw", noColumns:8,  placement: 'outsideGrid' }
-    }
+        legend: {
+            show: true,
+            container: $('#placeholder_legend'),
+            margin: 15,
+            position: "nw",
+            noColumns: 8,
+            placement: 'outsideGrid'
+        }
+    };
 
-    var plot = $.plot($('#placeholder'),bargraph_series,options);
+    var plot = $.plot($('#placeholder'), bargraph_series, options);
 }
 
 // -------------------------------------------------------------------------------
@@ -650,24 +750,24 @@ function resize() {
     var placeholder = $('#placeholder');
 
     var width = placeholder_bound.width();
-    var height = width*0.6;
-    if (height>500) height = 500;
+    var height = width * 0.6;
+    if (height > 500) height = 500;
 
-    if (height>width) height = width;
+    if (height > width) height = width;
 
     //console.log(width+" "+height);
 
     placeholder.width(width);
     placeholder_bound.height(height);
-    placeholder.height(height-top_offset);
+    placeholder.height(height - top_offset);
 
 }
 
-$(window).resize(function(){
+$(window).resize(function() {
     var window_width = $(this).width();
 
     flot_font_size = 12;
-    if (window_width<450) flot_font_size = 10;
+    if (window_width < 450) flot_font_size = 10;
 
     resize();
 
@@ -678,8 +778,8 @@ $(window).resize(function(){
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------
-function app_log (level, message) {
-    if (level=="ERROR") alert(level+": "+message);
-    console.log(level+": "+message);
+function app_log(level, message) {
+    if (level == "ERROR") alert(level + ": " + message);
+    console.log(level + ": " + message);
 }
 </script>
