@@ -40,9 +40,16 @@ $available_apps = array (
         "status"=>"Development",
         "title"=>"OpenEVSE",
         "description"=>"Explore OpenEVSE charging"
-    )
+    ),
     //"template"=>array(
-    //    "title"=>"Template", 
+    //    "status"=>"Development",
+    //    "title"=>"Template",
     //    "description"=>"A basic app example useful for developing new apps"
-    //)       
+    //),
+    "costcomparison"=>array(
+        "status"=>"Development",
+        "title"=>"Cost Comparison",
+        "description"=>"Energy provider cost comparison - based on Time of use app"
+    ),
+
 );
