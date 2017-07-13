@@ -42,6 +42,11 @@ padding:10px;
       <div class="bluenav openconfig"><i class="icon-wrench icon-white"></i></div>
       <div class="block-title">Energy Cost Comparison</div>
     </div>
+
+<div class="graph">
+<label for="tariff">Tariff</label>
+<select id="tariff" name="tariff"></select>
+</div>
     </div>
 </div>
 
@@ -53,21 +58,11 @@ padding:10px;
         <div class="bluenav bargraph-month">MONTH</div>
         <div class="bluenav bargraph-week">WEEK</div>
       </div>
-      <div class="powergraph-navigation" style="display:none">
-        <div class="bluenav viewhistory">VIEW HISTORY</div>
-        <span class="bluenav" id="right" >></span>
-        <span class="bluenav" id="left" ><</span>
-        <span class="bluenav" id="zoomout" >-</span>
-        <span class="bluenav" id="zoomin" >+</span>
-        <span class="bluenav time" time='720'>M</span>
-        <span class="bluenav time" time='168'>W</span>
-        <span class="bluenav time" time='24'>D</span>
-      </div>
       <div class="block-title">HISTORY</div>
     </div>
     <div class="graph">
       <div id="placeholder_bound" style="width:100%; height:500px;">
-<div id="placeholder_legend"></div>
+	<div id="placeholder_legend"></div>
         <div id="placeholder" style="height:500px"></div>
       </div>
     </div>
@@ -97,18 +92,17 @@ padding:10px;
 
 <div class="col1"><div class="col1-inner">
 
- <div class="block-bound">
+<div class="block-bound">
 <div class="block-title">Energy used by half-hour of day (over whole period)</div>
 </div>
- <div class="graph">
-      <div id="halfhour_placeholder_bound" style="width:100%; height:250px;">
+<div class="graph">
+<div id="halfhour_placeholder_bound" style="width:100%; height:250px;">
 <div id="halfhour_legend"></div>
 <div id="halfhour_placeholder" style="height:250px"></div>
 </div>
-    </div>
 </div>
 </div>
-
+</div>
 </div>
 </div>
 
@@ -142,14 +136,6 @@ var sessionwrite = <?php echo $session['write']; ?>;
 
 apikeystr = "";
 if (apikey != "") {apikeystr = "&apikey=" + apikey;}
-
-// ----------------------------------------------------------------------
-// Display
-// ----------------------------------------------------------------------
-$(window).ready(function() {
-
-
-});
 
 if (!sessionwrite) $(".openconfig").hide();
 
@@ -194,12 +180,8 @@ var bargraph_series = [];
 var halfhour_usage_series = [];
 var previousPoint = false;
 var previousPointHalfHour = false;
-//var viewcostenergy = "energy";
 var panning = false;
 var period_text = "month";
-//var period_average = 0;
-//var comparison_heating = false;
-//var comparison_transport = false;
 var flot_font_size = 12;
 var start_time = 0;
 var use_start = 0;
@@ -208,7 +190,17 @@ var use_start = 0;
 var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-var rates = [{
+var energy_rates = []
+
+energy_rates.push( {
+
+ identifier : "GREENENERGYTIDE20170713",
+ label : "Green Energy Tide tariff (W Mids)",
+ updated_epoc : 1499978704,
+//Rate zero = standard 11.99 pence
+//Rate one  = premium 24.99 pence
+//rate two  = low 4.99 pence
+ rates : [{
         cost: 0.1199,
         colour: "#276FBF"
     },
@@ -220,15 +212,10 @@ var rates = [{
         cost: 0.0499,
         colour: "#97CC04"
     }
-];
-
-//Rate zero = standard 11.99 pence
-//Rate one  = premium 24.99 pence
-//rate two  = low 4.99 pence
-
+ ],
 //48 item array containing which half hour segment belongs to which rate
 //runs from 00:00 (midnight) to 23:59 in 30 minute segments
-rate_bucket = [
+ rate_bucket : [
     //00:00 to 01:00
     2, 2,
     //01:00 to 02:00
@@ -277,8 +264,148 @@ rate_bucket = [
     0, 0,
     //23:00 to 23:59
     2, 2
-];
+  ]
+});
 
+
+
+
+energy_rates.push( {
+ identifier : "SAINSBURYENERGYFIXEDPRICEFEB2018WESTMIDS",
+ label : "Sainsbury's Energy Fixed Price February 2018 (W Mids)",
+ updated_epoc : 1499978704,
+//Rate zero = standard 10.98 pence
+ rates : [{
+        cost: 0.1098,
+        colour: "#276FBF"
+    }
+ ],
+ rate_bucket : [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0  ]
+});
+
+
+
+
+energy_rates.push( {
+ identifier : "ECOTRICITYGREENELECTRICWESTMIDS",
+ label : "Ecotricity Green Electricity (W Mids)",
+ updated_epoc : 1499978704,
+ rates : [{
+        cost: 0.1820,
+        colour: "#276FBF"
+    }
+ ],
+ rate_bucket : [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0  ]
+});
+
+
+energy_rates.push( {
+ identifier : "NPOWERECONOMY7CLEANERENERGYFIXOCT2019MIDLANDS",
+ label : "NPOWER Economy 7 Cleaner Energy Fix October 2019 (Midlands area)",
+ updated_epoc : 1499978704,
+
+ rates : [{cost: 0.17829, colour: "#F03A47"},{cost: 0.08463, colour: "#276FBF"}
+ ],
+ rate_bucket : [
+//23:30 to 08:00 is enonomy 7 hours
+  //00:00 to 01:00
+    1, 1,
+    //01:00 to 02:00
+    1, 1,
+    //02:00 to 03:00
+    1, 1,
+    //03:00 to 04:00
+    1, 1,
+    //04:00 to 05:00
+    1, 1,
+    //05:00 to 06:00
+    1, 1,
+    //06:00 to 07:00
+    1, 1,
+    1, 1,
+    0, 0,    0, 0,    0, 0,    0, 0,    0, 0,    0, 0,    0, 0, 0, 0,    0, 0,    0, 0,    0, 0,    0, 0,    0, 0, 0, 0, 0, 0,
+    //23:00 to 23:59
+    0, 1
+]
+});
+
+
+
+
+energy_rates.push( {
+ identifier : "NPOWERECONOMY7STANDARDVARIABLEMIDLANDS",
+ label : "NPOWER Economy 7 Standard Variable (Midlands area)",
+ updated_epoc : 1499978704,
+
+ rates : [{cost: 0.226065, colour: "#F03A47"},{cost: 0.08085, colour: "#276FBF"}
+ ],
+ rate_bucket : [
+//23:30 to 08:00 is enonomy 7 hours
+  //00:00 to 01:00
+    1, 1,
+    //01:00 to 02:00
+    1, 1,
+    //02:00 to 03:00
+    1, 1,
+    //03:00 to 04:00
+    1, 1,
+    //04:00 to 05:00
+    1, 1,
+    //05:00 to 06:00
+    1, 1,
+    //06:00 to 07:00
+    1, 1,
+    1, 1,
+    0, 0,    0, 0,    0, 0,    0, 0,    0, 0,    0, 0,    0, 0, 0, 0,    0, 0,    0, 0,    0, 0,    0, 0,    0, 0, 0, 0, 0, 0,
+    //23:00 to 23:59
+    0, 1
+]
+});
+
+
+//Useful NPOWER site for Economy 7 regions in UK
+// https://customerservices.npower.com/app/answers/detail/a_id/179/~/what-are-the-economy-7-peak-and-off-peak-periods%3F
+
+//console.log(energy_rates);
+
+var selected_energy_rate = null;
+
+// ----------------------------------------------------------------------
+// Display
+// ----------------------------------------------------------------------
+$(window).ready(function() {
+
+for (var t in energy_rates) {
+	$('#tariff')
+          .append($('<option>', { value : energy_rates[t].identifier })
+          .text(energy_rates[t].label)); 
+}
+
+selected_energy_rate = energy_rates[0];
+
+    initialLoad();
+
+    $(".ajax-loader").hide();
+
+});
+
+
+$( "#tariff" ).change(function() {
+  var newTariff=$( "select#tariff option:checked" ).val();
+
+  for (var t in energy_rates) {
+
+    if (newTariff===energy_rates[t].identifier) {
+
+    	selected_energy_rate = energy_rates[t];
+	initialLoad();
+	$(".ajax-loader").hide();
+	break;
+    }
+
+  }
+
+});
 
 config.init();
 
@@ -299,10 +426,6 @@ function show() {
     use_start = feed.getvalue(feeds["use_kwh"].id, start_time * 1000)[1];
 
     resize();
-
-    initialLoad();
-
-    $(".ajax-loader").hide();
 }
 
 function initialLoad() {
@@ -348,7 +471,7 @@ $("#halfhour_placeholder").bind("plothover", function(event, pos, item) {
             var text = timeFormatter(item.datapoint[0]) +
                 "<br>" +
                 halfhour_usage_series[seriesIndex].data[z][1].toFixed(4) +
-                " kWh @ " + config.app.currency.value + rates[seriesIndex].cost.toFixed(4) + "/kWh <br>";
+                " kWh @ " + config.app.currency.value + selected_energy_rate.rates[seriesIndex].cost.toFixed(4) + "/kWh <br>";
             tooltip(item.pageX, item.pageY, text, "#eee");
         }
 
@@ -383,11 +506,11 @@ $("#placeholder").bind("plothover", function(event, pos, item) {
                 for (var series in bargraph_series) {
                     if (series > 0) {
 
-                        var cost = rates[series - 1].cost * bargraph_series[series].data[z][1];
+                        var cost = selected_energy_rate.rates[series - 1].cost * bargraph_series[series].data[z][1];
                         totalkwh += bargraph_series[series].data[z][1];
 
                         text += "Rate " + series + ":" + bargraph_series[series].data[z][1].toFixed(3) + " kWh = " + config.app.currency.value +
-                            cost.toFixed(2) + " @ " + rates[series - 1].cost.toFixed(4) + "<br>";
+                            cost.toFixed(2) + " @ " + selected_energy_rate.rates[series - 1].cost.toFixed(4) + "<br>";
                         totalcost += cost;
                     } //end if
                 } //end for
@@ -521,7 +644,7 @@ function bargraph_load(start, end) {
 
     var breakdown = [];
 
-    for (var loop in rates) {
+    for (var loop in selected_energy_rate.rates) {
         breakdown[loop] = [];
     }
 
@@ -537,8 +660,7 @@ function bargraph_load(start, end) {
 
         //Create a fake date so the graph shows the time correctly
         var seconds = 1483228800000 + ((halfhour[time] * 3600000));
-        //breakdown[rate_bucket[time]].push([ halfhour[time].toString(), total ]);
-        breakdown[rate_bucket[time]].push([seconds, total]);
+        breakdown[selected_energy_rate.rate_bucket[time]].push([seconds, total]);
     }
 
     //Calculate the total used for the period on an half hourly basis to allow user to visualise peak times over a longer period of time.
@@ -549,8 +671,8 @@ function bargraph_load(start, end) {
         halfhour_usage_series.push({
             stack: false,
             data: breakdown[x],
-            color: rates[x].colour,
-            label: "Rate " + (parseInt(x) + 1) + " " + config.app.currency.value + rates[x].cost.toFixed(4),
+            color: selected_energy_rate.rates[x].colour,
+            label: "Rate " + (parseInt(x) + 1) + " " + config.app.currency.value + selected_energy_rate.rates[x].cost.toFixed(4),
             bars: {
                 show: true,
                 align: "center",
@@ -566,7 +688,7 @@ function bargraph_load(start, end) {
 
     // Init rate variable
     rate = [];
-    for (var loop in rates) {
+    for (var loop in selected_energy_rate.rates) {
         rate[loop] = [];
     }
 
@@ -581,14 +703,14 @@ function bargraph_load(start, end) {
         //For each time segment sum up the kWh used for this day and split into
         //the different rate "buckets"
         for (var time in halfhour) {
-            thisdaytotal[rate_bucket[time]] += kwh[day][1][time];
+            thisdaytotal[selected_energy_rate.rate_bucket[time]] += kwh[day][1][time];
         }
 
         var todaycost = 0;
 
         for (var loop in thisdaytotal) {
             //Cost for today
-            todaycost += thisdaytotal[loop] * rates[loop].cost;
+            todaycost += thisdaytotal[loop] * selected_energy_rate.rates[loop].cost;
             //kWh breakdown for each rate for the whole day
             rate[loop].push([kwh[day][0], thisdaytotal[loop]]);
         }
@@ -609,13 +731,13 @@ function bargraph_load(start, end) {
         hoverable: false
     });
 
-    for (var r in rates) {
+    for (var r in selected_energy_rate.rates) {
 
         bargraph_series.push({
             stack: true,
             data: rate[r],
-            color: rates[r].colour,
-            label: "Rate " + (parseInt(r) + 1) + " " + config.app.currency.value + rates[r].cost.toFixed(4),
+            color: selected_energy_rate.rates[r].colour,
+            label: "Rate " + (parseInt(r) + 1) + " " + config.app.currency.value + selected_energy_rate.rates[r].cost.toFixed(4),
             yaxis: 1,
             bars: {
                 show: true,
@@ -708,7 +830,7 @@ function bargraph_draw() {
                 }
             },
             {
-                min: 0,
+                min: 0, max:10,
                 alignTicksWithAxis: 1,
                 position: 'right',
                 tickFormatter: currencyFormatter,
