@@ -25,16 +25,11 @@ div.font {
 font-family: Montserrat, Veranda, sans-serif;
 }
 
-div.style1 {
-background-color:#dbdee5;
-color:#333;
-padding:10px;
-}
-
 div.graph {
 background-color:#dbdee5;
 padding:10px;
 }
+.selected { font-size:20pt; }
 </style>
 <div class="font">
 <div id="app-block" style="display:none">
@@ -51,6 +46,7 @@ padding:10px;
 </div>
     </div>
 </div>
+
 
 <div class="col1">
   <div class="col1-inner">
@@ -151,15 +147,15 @@ config.db = <?php echo json_encode($config); ?>;
 config.feeds = feed.list();
 
 config.initapp = function() {
-	console.log('initapp');
+	//console.log('initapp');
     init()
 };
 config.showapp = function() {
-	console.log('showapp');
+	//console.log('showapp');
     show()
 };
 config.hideapp = function() {
-	console.log('hideapp');
+	//console.log('hideapp');
     hide()
 };
 
@@ -214,42 +210,55 @@ $( "#tariff" ).change(function() {
 
 config.init();
 
-function init() {
+function init() {	
     // Quick translation of feed ids
     feeds = {};
     for (var key in config.app) {
         if (config.app[key].value) feeds[key] = config.feedsbyid[config.app[key].value];
     }
-	
-	
-for (var t in energy_rates) {
-	$('#tariff')
-          .append($('<option>', { value : energy_rates[t].identifier })
-          .text(energy_rates[t].supplier + " " + energy_rates[t].label + " ["+energy_rates[t].region+"]")); 
-}
 
-selected_energy_rate = energy_rates[0];
+	for (var t in energy_rates) {
+		$('#tariff')
+			  .append($('<option>', { value : energy_rates[t].identifier })
+			  .text(energy_rates[t].supplier + " " + energy_rates[t].label + " ["+energy_rates[t].region+"]")); 
+	}
 
-
+	selected_energy_rate = energy_rates[0];
 }
 
 function show() {
     $("body").css('background-color', 'WhiteSmoke');
-    meta.use_kwh = feed.getmeta(feeds.use_kwh.id);
+	
+	console.log(feeds);
+	
+    meta["use_kwh"] = feed.getmeta(feeds.use_kwh.id);
 
-    if (meta.use_kwh.start_time > start_time) start_time = meta.use_kwh.start_time;
+    if (meta.use_kwh.start_time > start_time) {
+		//Wind back start time to midnight on first reading day
+		var d=new Date(meta.use_kwh.start_time * 1000);	
+		d.setHours(0,0,0,0);
+		start_time = d.getTime() / 1000;
+		//console.log("kwh first reading",d);
+	}
 
     resize();
 	
-	if (selected_start==null) {	oneweek(); } else {	reloadExistingRange(); }
+	if (selected_start==null) {	oneweek(); $(".bargraph-week").addClass("selected");} else {	reloadExistingRange(); }
 	$(".ajax-loader").hide();
 }
+
+function clearHighlight() {
+
+$(".bargraph-navigation .bluenav").removeClass("selected");
+
+}
+
 
 function loadAndDisplay(number_of_days_offset) {
     var d=new Date();	
 	//Clear minutes and hours
-    d.setHours(0,0,0,0);
-	
+    d.setHours(23,59,59,999);
+
     var timeWindow = (3600000 * 24.0 * number_of_days_offset);
     
 	selected_end = d.getTime();
@@ -281,22 +290,29 @@ $('.bargraph-alltime').click(function() {
 	//From start of data capture to today
     selected_start = start_time * 1000;
 	var d=new Date();	
-    d.setHours(0,0,0,0);
+    d.setHours(23,59,59,0);
     selected_end = d.getTime();
 	reloadExistingRange();
+	clearHighlight();
+	$(this).addClass("selected");
 });
+
+
 
 $('.bargraph-week').click(function() {
 	oneweek();
+	clearHighlight();
+	$(this).addClass("selected");
 });
 
 $('.bargraph-month').click(function() {
 	//TODO: We really should work out number of days in the month and not assume 30 days
 	loadAndDisplay(30);
+	clearHighlight();
+	$(this).addClass("selected");
 });
 
 $('.bargraph-year').click(function() {
-	
 	//Go back to 1st Jan in current year
 	var d=new Date((new Date).getFullYear(), 0, 1, 0, 0, 0, 0)
     selected_start = d.getTime();	
@@ -304,15 +320,19 @@ $('.bargraph-year').click(function() {
 	selected_start = Math.max(selected_start, (start_time * 1000));
 	
     d=new Date();
-    d.setHours(0,0,0,0);
+    d.setHours(23,59,59,0);
     selected_end = d.getTime();
 	
 	reloadExistingRange();
+	
+	clearHighlight();
+	$(this).addClass("selected");
 });
 
 $('.bargraph-day').click(function() {
-	//We really should work out number of days in the month etc. not assume 30 days
-	loadAndDisplay(1);
+	loadAndDisplay(2);    
+	clearHighlight();
+	$(this).addClass("selected");
 });
 
 function timeFormatter(ms) {
@@ -414,16 +434,19 @@ function newFilledArray(len, val) {
 }
 
 function bargraph_load(start, end) {
-    var intervalms = (3600 * 24) * 1000;
-    end = Math.ceil(end / intervalms) * intervalms;
-    start = Math.floor(start / intervalms) * intervalms;
+	//console.log('bargraph_load',new Date(start),new Date(end));
+	//console.log('bargraph_load',start,end);
 
-	console.log('bargraph_load',start,end);
-   
+    //var intervalms = (3600 * 48) * 1000;
+    //end = Math.ceil(end / intervalms) * intervalms;
+    //start = Math.floor(start / intervalms) * intervalms;
+		  
 	var halfhour =  [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, 20.5, 21, 21.5, 22, 22.5, 23, 23.5];
 	
-    var elec_data = feed.getdataDMY_time_of_use(feeds["use_kwh"].id, start, end, "daily", JSON.stringify(halfhour));
+    var elec_data = feed.getdataDMY_time_of_use(feeds.use_kwh.id, start, end, "daily", JSON.stringify(halfhour));
 
+	//console.log(elec_data);
+	
     if (elec_data.length > 0) {
         //Replace the null values in last reading with the highest kWh reading so far today....
         var lastIndex = elec_data.length - 1;
