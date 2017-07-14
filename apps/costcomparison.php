@@ -9,10 +9,13 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/feed.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script>
+<!--<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.symbol.min.js?v=<?php echo $v; ?>"></script>-->
+<!--<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.axislabels.min.js?v=<?php echo $v; ?>"></script>-->
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/vis.helper.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/costcomparison_rates.js?v=<?php echo $v; ?>"></script>
 <style>
 .block-bound {
   background-color:#394d74;
@@ -33,7 +36,6 @@ background-color:#dbdee5;
 padding:10px;
 }
 </style>
-
 <div class="font">
 <div id="app-block" style="display:none">
   <div class="col1">
@@ -50,45 +52,26 @@ padding:10px;
     </div>
 </div>
 
-  <div class="col1"><div class="col1-inner">
+<div class="col1">
+  <div class="col1-inner">
     <div class="block-bound">
       <div class="bargraph-navigation">
-        <!--<div class="bluenav bargraph-other">OTHER</div>-->
         <div class="bluenav bargraph-alltime">ALL TIME</div>
+        <div class="bluenav bargraph-year">YEAR</div>
         <div class="bluenav bargraph-month">MONTH</div>
         <div class="bluenav bargraph-week">WEEK</div>
+        <div class="bluenav bargraph-day">DAY</div>
       </div>
       <div class="block-title">HISTORY</div>
     </div>
     <div class="graph">
       <div id="placeholder_bound" style="width:100%; height:500px;">
-	<div id="placeholder_legend"></div>
-        <div id="placeholder" style="height:500px"></div>
+	    <div id="placeholder_legend"></div>
+        <div id="placeholder" style="width:100%; height:100%;"></div>
       </div>
-    </div>
-
-    <div id="power-graph-footer" style="background-color:#eee; color:#333; display:none">
-      <div id='advanced-toggle' class='bluenav' >SHOW DETAIL</div>
-       <div style="padding:10px;">kWh in window: <b id="window-kwh"></b> <b>kWh</b></div>
-      <div style="clear:both"></div>
-    </div>
-
-    <div id="advanced-block" style="background-color:#eee; padding:10px; display:none">
-      <div style="color:#000">
-        <table class="table">
-          <tr>
-          <th></th>
-          <th style="text-align:center">Min</th>
-          <th style="text-align:center">Max</th>
-          <th style="text-align:center">Diff</th>
-          <th style="text-align:center">Mean</th>
-          <th style="text-align:center">StDev</th>
-          </tr>
-          <tbody id="stats"></tbody>
-        </table>
-      </div>
-    </div>
-  </div></div>
+    </div> 
+  </div>
+</div>
 
 <div class="col1"><div class="col1-inner">
 
@@ -105,6 +88,9 @@ padding:10px;
 </div>
 </div>
 </div>
+
+<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
+
 
 <div id="app-setup" class="block">
     <h2 class="appconfig-title">Cost Comparison</h2>
@@ -124,9 +110,8 @@ padding:10px;
     <div class="app-config"></div>
 </div>
 
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
 
-<script>
+<script type="text/javascript">
 // ----------------------------------------------------------------------
 // Globals
 // ----------------------------------------------------------------------
@@ -153,6 +138,12 @@ config.app = {
         "default": "£",
         "name": "Currency",
         "description": "Currency symbol (£,$..)"
+    },
+	"maximum_currency_amount": {
+	"type": "value",
+	"default": "10.00",
+	"name": "Max currency value",
+	"description": "Maximum daily amount to show on currency axis (default of 10.00)"
     }
 };
 config.name = "<?php echo $name; ?>";
@@ -160,12 +151,15 @@ config.db = <?php echo json_encode($config); ?>;
 config.feeds = feed.list();
 
 config.initapp = function() {
+	console.log('initapp');
     init()
 };
 config.showapp = function() {
+	console.log('showapp');
     show()
 };
 config.hideapp = function() {
+	console.log('hideapp');
     hide()
 };
 
@@ -174,219 +168,34 @@ config.hideapp = function() {
 // ----------------------------------------------------------------------
 var feeds = {};
 var meta = {};
-var data = {};
+//var data = {};
 var rate = [];
+
 var bargraph_series = [];
 var halfhour_usage_series = [];
+
 var previousPoint = false;
 var previousPointHalfHour = false;
-var panning = false;
-var period_text = "month";
-var flot_font_size = 12;
-var start_time = 0;
-var use_start = 0;
 
-//These should be in a resource file for globalization
+var flot_font_size = 12;
+
+//Time of first data reading
+var start_time = 0;
+//Currently selected tariff
+var selected_energy_rate = null;
+
+//These should be in a resource file for regionalization
 var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-var energy_rates = []
-
-energy_rates.push( {
-
- identifier : "GREENENERGYTIDE20170713",
- label : "Green Energy Tide tariff (W Mids)",
- updated_epoc : 1499978704,
-//Rate zero = standard 11.99 pence
-//Rate one  = premium 24.99 pence
-//rate two  = low 4.99 pence
- rates : [{
-        cost: 0.1199,
-        colour: "#276FBF"
-    },
-    {
-        cost: 0.2499,
-        colour: "#F03A47"
-    },
-    {
-        cost: 0.0499,
-        colour: "#97CC04"
-    }
- ],
-//48 item array containing which half hour segment belongs to which rate
-//runs from 00:00 (midnight) to 23:59 in 30 minute segments
- rate_bucket : [
-    //00:00 to 01:00
-    2, 2,
-    //01:00 to 02:00
-    2, 2,
-    //02:00 to 03:00
-    2, 2,
-    //03:00 to 04:00
-    2, 2,
-    //04:00 to 05:00
-    2, 2,
-    //05:00 to 06:00
-    2, 2,
-    //06:00 to 07:00
-    0, 0,
-    //07
-    0, 0,
-    //08
-    0, 0,
-    //09
-    0, 0,
-    //10
-    0, 0,
-    //11
-    0, 0,
-    //12
-    0, 0,
-    //13
-    0, 0,
-    //14
-    0, 0,
-    //15
-    0, 0,
-    //16:00 to 17:00
-    1, 1,
-    //17:00 to 18:00
-    1, 1,
-    //18:00 to 19:00
-    1, 1,
-    //19:00 to 20:00
-    0, 0,
-    //20:00 to 21:00
-    0, 0,
-    //21:00 to 22:00
-    0, 0,
-    //22:00 to 23:00
-    0, 0,
-    //23:00 to 23:59
-    2, 2
-  ]
-});
-
-
-
-
-energy_rates.push( {
- identifier : "SAINSBURYENERGYFIXEDPRICEFEB2018WESTMIDS",
- label : "Sainsbury's Energy Fixed Price February 2018 (W Mids)",
- updated_epoc : 1499978704,
-//Rate zero = standard 10.98 pence
- rates : [{
-        cost: 0.1098,
-        colour: "#276FBF"
-    }
- ],
- rate_bucket : [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0  ]
-});
-
-
-
-
-energy_rates.push( {
- identifier : "ECOTRICITYGREENELECTRICWESTMIDS",
- label : "Ecotricity Green Electricity (W Mids)",
- updated_epoc : 1499978704,
- rates : [{
-        cost: 0.1820,
-        colour: "#276FBF"
-    }
- ],
- rate_bucket : [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0  ]
-});
-
-
-energy_rates.push( {
- identifier : "NPOWERECONOMY7CLEANERENERGYFIXOCT2019MIDLANDS",
- label : "NPOWER Economy 7 Cleaner Energy Fix October 2019 (Midlands area)",
- updated_epoc : 1499978704,
-
- rates : [{cost: 0.17829, colour: "#F03A47"},{cost: 0.08463, colour: "#276FBF"}
- ],
- rate_bucket : [
-//23:30 to 08:00 is enonomy 7 hours
-  //00:00 to 01:00
-    1, 1,
-    //01:00 to 02:00
-    1, 1,
-    //02:00 to 03:00
-    1, 1,
-    //03:00 to 04:00
-    1, 1,
-    //04:00 to 05:00
-    1, 1,
-    //05:00 to 06:00
-    1, 1,
-    //06:00 to 07:00
-    1, 1,
-    1, 1,
-    0, 0,    0, 0,    0, 0,    0, 0,    0, 0,    0, 0,    0, 0, 0, 0,    0, 0,    0, 0,    0, 0,    0, 0,    0, 0, 0, 0, 0, 0,
-    //23:00 to 23:59
-    0, 1
-]
-});
-
-
-
-
-energy_rates.push( {
- identifier : "NPOWERECONOMY7STANDARDVARIABLEMIDLANDS",
- label : "NPOWER Economy 7 Standard Variable (Midlands area)",
- updated_epoc : 1499978704,
-
- rates : [{cost: 0.226065, colour: "#F03A47"},{cost: 0.08085, colour: "#276FBF"}
- ],
- rate_bucket : [
-//23:30 to 08:00 is enonomy 7 hours
-  //00:00 to 01:00
-    1, 1,
-    //01:00 to 02:00
-    1, 1,
-    //02:00 to 03:00
-    1, 1,
-    //03:00 to 04:00
-    1, 1,
-    //04:00 to 05:00
-    1, 1,
-    //05:00 to 06:00
-    1, 1,
-    //06:00 to 07:00
-    1, 1,
-    1, 1,
-    0, 0,    0, 0,    0, 0,    0, 0,    0, 0,    0, 0,    0, 0, 0, 0,    0, 0,    0, 0,    0, 0,    0, 0,    0, 0, 0, 0, 0, 0,
-    //23:00 to 23:59
-    0, 1
-]
-});
-
-
-//Useful NPOWER site for Economy 7 regions in UK
-// https://customerservices.npower.com/app/answers/detail/a_id/179/~/what-are-the-economy-7-peak-and-off-peak-periods%3F
-
-//console.log(energy_rates);
-
-var selected_energy_rate = null;
+var selected_start, selected_end;
 
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
 $(window).ready(function() {
 
-for (var t in energy_rates) {
-	$('#tariff')
-          .append($('<option>', { value : energy_rates[t].identifier })
-          .text(energy_rates[t].label)); 
-}
-
-selected_energy_rate = energy_rates[0];
-
-    initialLoad();
-
     $(".ajax-loader").hide();
-
 });
 
 
@@ -394,17 +203,13 @@ $( "#tariff" ).change(function() {
   var newTariff=$( "select#tariff option:checked" ).val();
 
   for (var t in energy_rates) {
-
     if (newTariff===energy_rates[t].identifier) {
-
     	selected_energy_rate = energy_rates[t];
-	initialLoad();
-	$(".ajax-loader").hide();
-	break;
+		reloadExistingRange();
+		$(".ajax-loader").hide();
+		break;
     }
-
   }
-
 });
 
 config.init();
@@ -415,31 +220,100 @@ function init() {
     for (var key in config.app) {
         if (config.app[key].value) feeds[key] = config.feedsbyid[config.app[key].value];
     }
+	
+	
+for (var t in energy_rates) {
+	$('#tariff')
+          .append($('<option>', { value : energy_rates[t].identifier })
+          .text(energy_rates[t].supplier + " " + energy_rates[t].label + " ["+energy_rates[t].region+"]")); 
+}
+
+selected_energy_rate = energy_rates[0];
+
+
 }
 
 function show() {
     $("body").css('background-color', 'WhiteSmoke');
-    meta["use_kwh"] = feed.getmeta(feeds["use_kwh"].id);
+    meta.use_kwh = feed.getmeta(feeds.use_kwh.id);
 
-    if (meta["use_kwh"].start_time > start_time) start_time = meta["use_kwh"].start_time;
-
-    use_start = feed.getvalue(feeds["use_kwh"].id, start_time * 1000)[1];
+    if (meta.use_kwh.start_time > start_time) start_time = meta.use_kwh.start_time;
 
     resize();
+	
+	if (selected_start==null) {	oneweek(); } else {	reloadExistingRange(); }
+	$(".ajax-loader").hide();
 }
 
-function initialLoad() {
-    //30 days - this really should work out the number of days etc.
-    var timeWindow = (3600000 * 24.0 * 30);
-    var end = (new Date()).getTime();
-    var start = end - timeWindow;
-    period_text = "month";
+function loadAndDisplay(number_of_days_offset) {
+    var d=new Date();	
+	//Clear minutes and hours
+    d.setHours(0,0,0,0);
+	
+    var timeWindow = (3600000 * 24.0 * number_of_days_offset);
+    
+	selected_end = d.getTime();
+    selected_start = selected_end - timeWindow;
 
-    bargraph_load(start, end);
+	//ensure we only request after the logging began
+	selected_start=Math.max(selected_start, (start_time * 1000));
+	
+	reloadExistingRange();
+}
+
+function reloadExistingRange() {
+    bargraph_load(selected_start, selected_end);
     bargraph_draw();
-    halfhour_usage_bargraph_draw();
+    halfhour_usage_bargraph_draw();	
 }
 
+function oneweek() {
+	loadAndDisplay(7);
+}
+
+$('#placeholder').bind("plotselected", function(event, ranges) {
+    selected_start = ranges.xaxis.from;
+    selected_end = ranges.xaxis.to;   
+	reloadExistingRange();    
+});
+
+$('.bargraph-alltime').click(function() {
+	//From start of data capture to today
+    selected_start = start_time * 1000;
+	var d=new Date();	
+    d.setHours(0,0,0,0);
+    selected_end = d.getTime();
+	reloadExistingRange();
+});
+
+$('.bargraph-week').click(function() {
+	oneweek();
+});
+
+$('.bargraph-month').click(function() {
+	//TODO: We really should work out number of days in the month and not assume 30 days
+	loadAndDisplay(30);
+});
+
+$('.bargraph-year').click(function() {
+	
+	//Go back to 1st Jan in current year
+	var d=new Date((new Date).getFullYear(), 0, 1, 0, 0, 0, 0)
+    selected_start = d.getTime();	
+	
+	selected_start = Math.max(selected_start, (start_time * 1000));
+	
+    d=new Date();
+    d.setHours(0,0,0,0);
+    selected_end = d.getTime();
+	
+	reloadExistingRange();
+});
+
+$('.bargraph-day').click(function() {
+	//We really should work out number of days in the month etc. not assume 30 days
+	loadAndDisplay(1);
+});
 
 function timeFormatter(ms) {
     var date = new Date(ms);
@@ -509,8 +383,7 @@ $("#placeholder").bind("plothover", function(event, pos, item) {
                         var cost = selected_energy_rate.rates[series - 1].cost * bargraph_series[series].data[z][1];
                         totalkwh += bargraph_series[series].data[z][1];
 
-                        text += "Rate " + series + ":" + bargraph_series[series].data[z][1].toFixed(3) + " kWh = " + config.app.currency.value +
-                            cost.toFixed(2) + " @ " + selected_energy_rate.rates[series - 1].cost.toFixed(4) + "<br>";
+                        text += "Rate " + series + ":" + bargraph_series[series].data[z][1].toFixed(3) + " kWh @ " + selected_energy_rate.rates[series - 1].cost.toFixed(4) + " = " + config.app.currency.value + cost.toFixed(2) + "<br>";
                         totalcost += cost;
                     } //end if
                 } //end for
@@ -524,46 +397,6 @@ $("#placeholder").bind("plothover", function(event, pos, item) {
 
 });
 
-$('#placeholder').bind("plotselected", function(event, ranges) {
-    var start = ranges.xaxis.from;
-    var end = ranges.xaxis.to;
-    panning = true;
-    bargraph_load(start, end);
-    bargraph_draw();
-    halfhour_usage_bargraph_draw();
-    setTimeout(function() {
-        panning = false;
-    }, 100);
-});
-
-$('.bargraph-alltime').click(function() {
-    var start = start_time * 1000;
-    var end = (new Date()).getTime();
-    bargraph_load(start, end);
-    bargraph_draw();
-    halfhour_usage_bargraph_draw();
-    period_text = "period";
-});
-
-$('.bargraph-week').click(function() {
-    var timeWindow = (3600000 * 24.0 * 7);
-    var end = (new Date()).getTime();
-    var start = end - timeWindow;
-    bargraph_load(start, end);
-    bargraph_draw();
-    halfhour_usage_bargraph_draw();
-    period_text = "week";
-});
-
-$('.bargraph-month').click(function() {
-    var timeWindow = (3600000 * 24.0 * 30);
-    var end = (new Date()).getTime();
-    var start = end - timeWindow;
-    bargraph_load(start, end);
-    bargraph_draw();
-    halfhour_usage_bargraph_draw();
-    period_text = "month";
-});
 
 // -------------------------------------------------------------------------------
 // FUNCTIONS
@@ -581,16 +414,14 @@ function newFilledArray(len, val) {
 }
 
 function bargraph_load(start, end) {
-    var interval = 3600 * 24;
-    var intervalms = interval * 1000;
+    var intervalms = (3600 * 24) * 1000;
     end = Math.ceil(end / intervalms) * intervalms;
     start = Math.floor(start / intervalms) * intervalms;
 
-    var halfhour = [];
-    for (i = 0; i < 24.0; i = i + 0.5) {
-        halfhour.push(i);
-    }
-
+	console.log('bargraph_load',start,end);
+   
+	var halfhour =  [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, 20.5, 21, 21.5, 22, 22.5, 23, 23.5];
+	
     var elec_data = feed.getdataDMY_time_of_use(feeds["use_kwh"].id, start, end, "daily", JSON.stringify(halfhour));
 
     if (elec_data.length > 0) {
@@ -724,11 +555,13 @@ function bargraph_load(start, end) {
     bargraph_series.push({
         stack: false,
         data: thisdaycost,
-        color: '#16425B',
+        color: '#000000',
         label: "Cost",
         yaxis: 2,
         clickable: false,
-        hoverable: false
+        hoverable: false,
+		//points: { symbol: "square"}
+		lines : { show : true, lineWidth : 3}
     });
 
     for (var r in selected_energy_rate.rates) {
@@ -817,6 +650,9 @@ function bargraph_draw() {
             },
             reserveSpace: false,
             minTickSize: [1, "day"]
+						
+			//,axisLabel: "Time"
+    
         },
 
         yaxes: [{
@@ -827,17 +663,22 @@ function bargraph_draw() {
                 font: {
                     size: flot_font_size,
                     color: "#666"
-                }
+                }				
+				//,axisLabel: "Energy usage (kWh)"
+				//,axisLabelUseCanvas: true
             },
             {
-                min: 0, max:10,
+                min: 0, max: config.app.maximum_currency_amount.value,
                 alignTicksWithAxis: 1,
                 position: 'right',
-                tickFormatter: currencyFormatter,
+                tickFormatter: currencyFormatter, 
+				tickDecimals:2,
                 font: {
                     size: flot_font_size,
                     color: "#666"
                 }
+				//,axisLabel: "Total energy cost"
+				//,axisLabelUseCanvas: true
             }
         ],
 
@@ -870,11 +711,9 @@ function resize() {
     var top_offset = 0;
     var placeholder_bound = $('#placeholder_bound');
     var placeholder = $('#placeholder');
-
     var width = placeholder_bound.width();
     var height = width * 0.6;
     if (height > 500) height = 500;
-
     if (height > width) height = width;
 
     //console.log(width+" "+height);
@@ -882,17 +721,13 @@ function resize() {
     placeholder.width(width);
     placeholder_bound.height(height);
     placeholder.height(height - top_offset);
-
 }
 
 $(window).resize(function() {
     var window_width = $(this).width();
-
     flot_font_size = 12;
     if (window_width < 450) flot_font_size = 10;
-
     resize();
-
     bargraph_draw();
     halfhour_usage_bargraph_draw();
 });
