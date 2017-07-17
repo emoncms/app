@@ -16,9 +16,10 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/lib/costcomparison_rates.js?v=<?php echo $v; ?>"></script>
+
 <style>
 .block-bound {
-  background-color:#394d74;
+background-color:#394d74;
 }
 
 div.font {
@@ -31,79 +32,89 @@ padding:10px;
 }
 .selected { font-size:20pt; }
 </style>
+
 <div class="font">
-<div id="app-block" style="display:none">
-  <div class="col1">
-    <div class="col1-inner">
-    <div class="block-bound">
-      <div class="bluenav openconfig"><i class="icon-wrench icon-white"></i></div>
-      <div class="block-title">Energy Cost Comparison</div>
-    </div>
-
-<div class="graph">
-<label for="tariff">Tariff</label>
-<select id="tariff" name="tariff"></select>
+	<div id="app-block" style="display:none">
+		<div class="col1">
+			<div class="col1-inner">
+				<div class="block-bound">
+					<div class="bluenav openconfig">
+						<i class="icon-wrench icon-white"></i>
+					</div>
+					<div class="block-title">
+						Energy Cost Comparison
+					</div>
+				</div>
+				<div class="graph">
+					<label for="tariff">Tariff</label> <select id="tariff" name="tariff">
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="col1">
+			<div class="col1-inner">
+				<div class="block-bound">
+					<div class="bargraph-navigation">
+						<div class="bluenav bargraph-alltime">
+							ALL TIME
+						</div>
+						<div class="bluenav bargraph-year">
+							YEAR
+						</div>
+						<div class="bluenav bargraph-month">
+							MONTH
+						</div>
+						<div class="bluenav bargraph-week">
+							WEEK
+						</div>
+						<div class="bluenav bargraph-day">
+							DAY
+						</div>
+					</div>
+					<div class="block-title">
+						HISTORY
+					</div>
+				</div>
+				<div class="graph">
+					<div id="placeholder_bound" style="width:100%; height:500px;">
+						<div id="placeholder_legend"></div>
+						<div id="placeholder" style="width:100%; height:100%;"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col1">
+			<div class="col1-inner">
+				<div class="block-bound">
+					<div class="block-title">
+						Energy used by half-hour of day (over whole period)
+					</div>
+				</div>
+				<div class="graph">
+					<div id="halfhour_placeholder_bound" style="width:100%; height:250px;">
+						<div id="halfhour_legend"></div>
+						<div id="halfhour_placeholder" style="height:250px"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
-    </div>
-</div>
-
-
-<div class="col1">
-  <div class="col1-inner">
-    <div class="block-bound">
-      <div class="bargraph-navigation">
-        <div class="bluenav bargraph-alltime">ALL TIME</div>
-        <div class="bluenav bargraph-year">YEAR</div>
-        <div class="bluenav bargraph-month">MONTH</div>
-        <div class="bluenav bargraph-week">WEEK</div>
-        <div class="bluenav bargraph-day">DAY</div>
-      </div>
-      <div class="block-title">HISTORY</div>
-    </div>
-    <div class="graph">
-      <div id="placeholder_bound" style="width:100%; height:500px;">
-	    <div id="placeholder_legend"></div>
-        <div id="placeholder" style="width:100%; height:100%;"></div>
-      </div>
-    </div> 
-  </div>
-</div>
-
-<div class="col1"><div class="col1-inner">
-
-<div class="block-bound">
-<div class="block-title">Energy used by half-hour of day (over whole period)</div>
-</div>
-<div class="graph">
-<div id="halfhour_placeholder_bound" style="width:100%; height:250px;">
-<div id="halfhour_legend"></div>
-<div id="halfhour_placeholder" style="height:250px"></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
-
-
-<div id="app-setup" class="block">
-    <h2 class="appconfig-title">Cost Comparison</h2>
-    <div class="appconfig-description">
-      <div class="appconfig-description-inner">
-        The Cost Comparison app allows you to compare your energy usage against energy suppliers tariffs including new time of use tariffs.
-        <br><br>
-        <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
-	<br><br>
-	<b>Note:</b> If you have solar or renewable energy generation then use the import_kwh feed to view the actual cost based on energy brought from the grid
-	<br><br>
-        <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.
-        <br><br>
-        <img src="../Modules/app/images/costcomparison_app.png" style="width:600px" class="img-rounded">
-      </div>
-    </div>
-    <div class="app-config"></div>
+<div class="ajax-loader"><img src="%3C?php%20echo%20$path;%20?%3EModules/app/images/ajax-loader.gif"></div>
+<div class="block" id="app-setup">
+	<h2 class="appconfig-title">Cost Comparison</h2>
+	<div class="appconfig-description">
+		<div class="appconfig-description-inner">The Cost Comparison app allows you to compare your energy usage against energy suppliers tariffs including new time of use tariffs.<br>
+		<br>
+		<b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.<br>
+		<br>
+		<b>Note:</b> If you have solar or renewable energy generation then use the import_kwh feed to view the actual cost based on energy brought from the grid<br>
+		<br>
+		<b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.<br>
+		<br>
+		<img class="img-rounded" src="../Modules/app/images/costcomparison_app.png" style="width:600px"></div>
+	</div>
+	<div class="app-config"></div>
 </div>
 
 
@@ -127,7 +138,8 @@ config.app = {
     "use_kwh": {
         "type": "feed",
         "autoname": "use_kwh",
-        "engine": 5
+        "engine": 5, 
+		"description": "Use import_kwh if you have solar or renewable energy, otherwise use_kwh."		
     },
     "currency": {
         "type": "value",
@@ -147,15 +159,12 @@ config.db = <?php echo json_encode($config); ?>;
 config.feeds = feed.list();
 
 config.initapp = function() {
-	//console.log('initapp');
     init()
 };
 config.showapp = function() {
-	//console.log('showapp');
     show()
 };
 config.hideapp = function() {
-	//console.log('hideapp');
     hide()
 };
 
@@ -164,7 +173,6 @@ config.hideapp = function() {
 // ----------------------------------------------------------------------
 var feeds = {};
 var meta = {};
-//var data = {};
 var rate = [];
 
 var bargraph_series = [];
@@ -185,13 +193,13 @@ var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 var selected_start, selected_end;
+var updaterinst = false;
 
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
 $(window).ready(function() {
-
-    $(".ajax-loader").hide();
+    
 });
 
 
@@ -202,7 +210,6 @@ $( "#tariff" ).change(function() {
     if (newTariff===energy_rates[t].identifier) {
     	selected_energy_rate = energy_rates[t];
 		reloadExistingRange();
-		$(".ajax-loader").hide();
 		break;
     }
   }
@@ -243,14 +250,18 @@ function show() {
 
     resize();
 	
-	if (selected_start==null) {	oneweek(); $(".bargraph-week").addClass("selected");} else {	reloadExistingRange(); }
-	$(".ajax-loader").hide();
+	updater();
+	
+	//Update every 15 seconds
+	updaterinst = setInterval(updater,15000);
+}
+
+function updater() {
+	if (selected_start==null) {	oneweek(); $(".bargraph-week").addClass("selected");} else { reloadExistingRange(); }
 }
 
 function clearHighlight() {
-
-$(".bargraph-navigation .bluenav").removeClass("selected");
-
+	$(".bargraph-navigation .bluenav").removeClass("selected");
 }
 
 
@@ -351,6 +362,7 @@ function timeFormatter(ms) {
 
 function hide() {
     //We should stop any timers we have started here
+	clearInterval(updaterinst);
 }
 
 $("#halfhour_placeholder").bind("plothover", function(event, pos, item) {
@@ -434,6 +446,8 @@ function newFilledArray(len, val) {
 }
 
 function bargraph_load(start, end) {
+	
+	$(".ajax-loader").show();
 	//console.log('bargraph_load',new Date(start),new Date(end));
 	//console.log('bargraph_load',start,end);
 
@@ -605,7 +619,8 @@ function bargraph_load(start, end) {
             clickable: false
         });
     } //end for
-
+	
+	$(".ajax-loader").hide();
 } //end function
 
 function halfhour_usage_bargraph_draw() {
