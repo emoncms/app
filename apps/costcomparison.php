@@ -252,8 +252,8 @@ function show() {
 	
 	updater();
 	
-	//Update every 15 seconds
-	updaterinst = setInterval(updater,15000);
+	//Update every 45 seconds
+	updaterinst = setInterval(updater,45000);
 }
 
 function updater() {
