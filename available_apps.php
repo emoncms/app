@@ -21,6 +21,11 @@ $available_apps = array (
           "title"=>"My Energy", 
           "description"=>"This app extends the My Solar app by adding in a share of UK wind"
     ),
+    "costcomparison"=>array(
+        "status"=>"",
+        "title"=>"Cost Comparison",
+        "description"=>"Energy provider cost comparison with time of use tariffs"
+    ),	
     "myelectric2"=>array(
         "status"=>"Development",
         "title"=>"My Electric 2", 
@@ -40,9 +45,9 @@ $available_apps = array (
         "status"=>"Development",
         "title"=>"OpenEVSE",
         "description"=>"Explore OpenEVSE charging"
-    )
-    //"template"=>array(
-    //    "title"=>"Template", 
+    )    //,"template"=>array(
+    //    "status"=>"Development",
+    //    "title"=>"Template",
     //    "description"=>"A basic app example useful for developing new apps"
-    //)       
+    //)
 );
