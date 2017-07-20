@@ -36,6 +36,11 @@ $available_apps = array (
         "title"=>"Time of use", 
         "description"=>"Time of use version of My Electric, showing night time and day time consumption. Night tariff start and end times can be set in the config to adjust for different tariff times."
     ),
+    "timeofuse2"=>array(
+        "status"=>"Development",
+        "title"=>"Time of use - AU", 
+        "description"=>"Time of use version of My Electric, with multiple tarrifs applicable in Australia."
+    ),
     "myheatpump"=>array(
         "status"=>"Development",
         "title"=>"My Heatpump", 
