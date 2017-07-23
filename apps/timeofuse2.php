@@ -168,7 +168,7 @@
         used in Australia. </p>
         <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.
         <br><br>
-        <img src="../Modules/app/images/myelectric_app.png" style="width:600px" class="img-rounded">
+        <img src="../Modules/app/images/timeofuse2_app.png" style="width:600px" class="img-rounded">
         <p>
         As the number of configuration options for this are quite large, a shorthand has been used to specify
         the tiers, days and times they apply and the respective costs.</p>
@@ -295,7 +295,7 @@ function init()
     var hour = 23;
 
     // Quick translation of feed ids
-    console.log(config.app);
+    //console.log(config.app);
     feeds = {};
     feeds["use"] = config.feedsbyid[config.app["use"].value];
     feeds["use_kwh"] = config.feedsbyid[config.app["use_kwh"].value];
@@ -343,7 +343,6 @@ function show() {
     var start = end - timeWindow;
     bargraph_load(start,end);
     bargraph_draw();
-    timeofuse_load();
 
     updater();
     updaterinst = setInterval(updater,5000);
@@ -483,7 +482,6 @@ $('.bargraph-alltime').click(function () {
     bargraph_load(start,end);
     bargraph_draw();
     period_text = "period";
-    timeofuse_load();
 });
 
 $('.bargraph-week').click(function () {
@@ -493,7 +491,6 @@ $('.bargraph-week').click(function () {
     bargraph_load(start,end);
     bargraph_draw();
     period_text = "week";
-    timeofuse_load();
 });
 
 $('.bargraph-month').click(function () {
@@ -503,7 +500,6 @@ $('.bargraph-month').click(function () {
     bargraph_load(start,end);
     bargraph_draw();
     period_text = "month";
-    timeofuse_load();
 });
 
 $("#heating").click(function() {
@@ -632,7 +628,7 @@ function bargraph_load(start,end)
 
     var hourly = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
     
-    console.log(JSON.stringify(hourly));
+    //console.log(JSON.stringify(hourly));
     var elec_result = feed.getdataDMY_time_of_use(feeds["use_kwh"].id,start,end,"daily",JSON.stringify(hourly));
 
     var cur_use = feeds["use_kwh"].value;
@@ -668,7 +664,7 @@ function bargraph_load(start,end)
 
     }
 
-    console.log(elec_data);
+    //console.log(elec_data);
     
     for (var a = 0; a < tier_names.length; a++) {
         data[tier_names[a]] = [];
@@ -756,7 +752,7 @@ function bargraph_load(start,end)
         var totals_str = '<div class="electric-title">COMBINED</div><div class="power-value">$' +
             total_kwh.toFixed(2) + '</div><br>';
         var averages_str = '<div class="electric-title">COMBINED</div><div class="power-value">$' +
-           (total_kwh/n).toFixed(2) + ' kWh/d</div><br>';
+           (total_kwh/n).toFixed(2) + '/day</div><br>';
         for (var a = 0; a < tier_names.length; a++) {
             totals_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
                '</div><div class="power-value">$' + tier_total_kwh[a].toFixed(2) + '</div><br>';
@@ -808,41 +804,6 @@ function bargraph_draw()
     $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'></div>");
 }
 
-function timeofuse_load() 
-{
-  /*
-  $.ajax({                                      
-      url: path+"household/data?id="+feeds["use"].id,
-      dataType: 'json',                  
-      success: function(result) {
-          console.log("here...");
-          var prc = Math.round(100*((result.overnightkwh + result.middaykwh) / result.totalkwh));
-          $("#prclocal").html(prc);
-          
-          if (prc>20) $("#star1").attr("src",path+"files/star.png");
-          if (prc>40) setTimeout(function() { $("#star2").attr("src",path+"files/star.png"); }, 100);
-          if (prc>60) setTimeout(function() { $("#star3").attr("src",path+"files/star.png"); }, 200);
-          if (prc>80) setTimeout(function() { $("#star4").attr("src",path+"files/star.png"); }, 300);
-          if (prc>90) setTimeout(function() { $("#star5").attr("src",path+"files/star.png"); }, 400);
-          
-          var data = [
-            {name:"AM PEAK", value: result.morningkwh, color:"rgba(68,179,226,0.8)"},
-            {name:"DAYTIME", value: result.middaykwh, color:"rgba(68,179,226,0.6)"},
-            {name:"PM PEAK", value: result.eveningkwh, color:"rgba(68,179,226,0.9)"},
-            {name:"NIGHT", value: result.overnightkwh, color:"rgba(68,179,226,0.4)"},
-            // {name:"HYDRO", value: 2.0, color:"rgba(255,255,255,0.2)"}   
-          ];
-          
-          var options = {
-            "color": "#333",
-            "centertext": "THIS "+period_text.toUpperCase()
-          }; 
-          
-          piegraph("piegraph",data,options);
-      } 
-  });*/
-}
-
 function stack(ctx,data,xoffset,options) {
     options.scale = options.height / options.maxval;
 
@@ -878,7 +839,7 @@ function resize() {
 
     if (height>width) height = width;
     
-    console.log(width+" "+height);
+    //console.log(width+" "+height);
 
     placeholder.width(width);
     placeholder_bound.height(height);
@@ -889,10 +850,10 @@ function resize() {
         $(".power-value").css("font-size","38px");
     } else if (width<=724) {
         $(".electric-title").css("font-size","18px");
-        $(".power-value").css("font-size","52px");
+        $(".power-value").css("font-size","42px");
     } else {
         $(".electric-title").css("font-size","22px");
-        $(".power-value").css("font-size","52px");
+        $(".power-value").css("font-size","42px");
     }
 }
 
