@@ -183,16 +183,16 @@
         <h4>Shorthand</h4>
         <p>Tier names and tarrifs are specified as a comma separated, colon separated list. If there are three
         tarrifs, Off Peak, Shoulder and Peak, costing 16.5c/kWh, 25.3c/kWh and 59.4c/kWh respectively, they
-        are specified as <b>OffPeak:0.165,Shoulder:0.253,Peak:0.594</b></p>
+        are specified as <b>OffPeak;0.165,Shoulder;0.253,Peak;0.594</b></p>
         <p>Tier start times are split into to definitions, weekday and weekend. They both use the same format,
         &lt;start hour&gt;:&lt;tier&gt;,&lt;start hour&gt;:&lt;tier&gt;,... <br>
         &lt;tier&gt; is the tier number defined above, numbered from 0<br>
         <b>Example:</b> A weekday with the following tarrif times: OffPeak: 00:00 - 06:59, Shoulder: 07:00
         - 13:59, Peak: 14:00 - 19:59, Shoulder: 20:00 - 21:59, OffPeak: 22:00 - 23:59 would be defined as
-        <b>0:0,7:1,14:2,20:1,22:0</b></p>
+        <b>0;0,7;1,14;2,20;1,22;0</b></p>
         <p>To specify the public holidays that should be treated the same as weekends, specify a comma separated
         list of days of the year (from 1-365/366) per year. <b>Example:</b> for public holiays Jan 2, Apr 14,
-        Apr 17, Apr 25, Jun 12, Oct 2, Dec 25, Dec 26 you would specify <b>2017:2,105,108,116,164,275,359,360;2018:1...</b>
+        Apr 17, Apr 25, Jun 12, Oct 2, Dec 25, Dec 26 you would specify <b>2017;2,105,108,116,164,275,359,360;2018;1...</b>
       </div>
     </div>
     <div class="app-config"></div>
@@ -230,16 +230,16 @@ config.app = {
     "use":{"type":"feed", "autoname":"use", "engine":5, "description":"Time Of Use total feed (W)"},
     "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5, "description":"Time Of Use accumulated kWh"},
     "currency":{"type":"value", "default":"$", "name": "Currency", "description":"Currency symbol (£,$..)"},
-    "tier_cost":{"type":"value", "default":"OffPeak:0.165,Shoulder:0.253,Peak:0.594",
+    "tier_cost":{"type":"value", "default":"OffPeak;0.165,Shoulder;0.253,Peak;0.594",
         "name":"Tier Names and Costs, currency/kWh",
         "description":"List of tier costs and names. See description on the left for details."},
-    "wd_times":{"type":"value", "default":"0:0,7:1,14:2,20:1,22:0",
+    "wd_times":{"type":"value", "default":"0;0,7;1,14;2,20;1,22;0",
         "name":"Weekday Tier Start Times",
         "description":"List of weekday tier start times. See description on the left for details"},
-    "we_times":{"type":"value", "default":"0:0,7:1,22:0",
+    "we_times":{"type":"value", "default":"0;0,7;1,22;0",
         "name":"Weekend Tier Start Times",
         "description":"List of weekend tier start times. See description on the left for details"},
-    "ph_days":{"type":"value", "default":"2017:2,105,108,116,164,275,359,360",
+    "ph_days":{"type":"value", "default":"2017;2,105,108,116,164,275,359,360",
         "name":"Weekend Tier Start Times",
         "description":"List of public holidays. See description on the left for details"}
 };
@@ -274,6 +274,7 @@ var use_start = 0;
 
 // cents/kWh rates, one for each tier.
 var tier_names = [];
+var tier_rates = [];
 
 // Array of hours that will contain the tier for each hour
 var weekday_tiers = [,,,,,,,,,,,,,,,,,,,,,,,]; 
@@ -291,7 +292,6 @@ function init()
     var props = [];
     var wd_times = [];
     var we_times = [];
-    var tier_rates = [];
     var hour = 23;
 
     // Quick translation of feed ids
@@ -301,14 +301,14 @@ function init()
     feeds["use_kwh"] = config.feedsbyid[config.app["use_kwh"].value];
     tiers = config.app["tier_cost"].value.split(",");
     for (var a = 0; a < tiers.length; a++) {
-        props = tiers[a].split(":");
+        props = tiers[a].split(";");
         tier_names[a] = props[0];
         tier_rates[a] = parseFloat(props[1]);
     }
     wd_times = config.app["wd_times"].value.split(",");
     hour = 23;
     for (var a = wd_times.length - 1; a >= 0; a--) {
-        props = wd_times[a].split(":");
+        props = wd_times[a].split(";");
         var start = parseInt(props[0]);
         var tier = parseInt(props[1]);
         do {
@@ -319,7 +319,7 @@ function init()
     we_times = config.app["we_times"].value.split(",");
     hour = 23;
     for (var a = we_times.length - 1; a >= 0; a--) {
-        props = we_times[a].split(":");
+        props = we_times[a].split(";");
         var start = parseInt(props[0]);
         var tier = parseInt(props[1]);
         do {
@@ -409,6 +409,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
         var z = item.dataIndex;
         var seriesIndex = item.seriesIndex;
         var tier_vals = [];
+        var total = 0;
         
         if (previousPoint != item.datapoint) {
             previousPoint = item.datapoint;
@@ -417,7 +418,8 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             var itemTime = item.datapoint[0];
             for (var a = 0; a < tier_names.length; a++) {
                 tier_vals[a] = bargraph_series[a].data[z][1];
-            };
+                total += tier_vals[a];
+            }
             
             var d = new Date(itemTime);
             var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -426,15 +428,16 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
            
             var text = "";
             if (viewcostenergy=="energy") {
-                text = date ;
+                text = date + "<br>Total: " + total.toFixed(1) + " kWh";
                 for (var a = tier_names.length - 1; a >= 0; a--) {
                     if (tier_vals[a] == 0) continue;
-                    text += "<br>" + tier_names[a] + ":" + (tier_vals[a]).toFixed(1) + " kWh";
+                    text += "<br>" + tier_names[a] + ": " + (tier_vals[a]).toFixed(1) + " kWh";
                 }
             } else {
-                text = date ;
+                text = date + "<br>Total: $" + total.toFixed(2);
                 for (var a = tier_names.length - 1; a >= 0; a--) {
-                    text += "<br>" + tier_names[a] + ":" + config.app["currency"].value + " " + (tier_vals[a]).toFixed(1);
+                    if (tier_vals[a] == 0) continue;
+                    text += "<br>" + tier_names[a] + ": " + config.app["currency"].value + (tier_vals[a]).toFixed(2);
                 }
             }
             
@@ -710,9 +713,15 @@ function bargraph_load(start,end)
             }
 
             for (var a = 0; a < tier_names.length; a++) {
-                data[tier_names[a]].push([time,tier_kwh[a]]);
-                tier_total_kwh[a] += tier_kwh[a];
-                total_kwh += tier_kwh[a];
+                if (viewcostenergy=="energy") {
+                    data[tier_names[a]].push([time,tier_kwh[a]]);
+                    tier_total_kwh[a] += tier_kwh[a];
+                    total_kwh += tier_kwh[a];
+                } else {
+                    data[tier_names[a]].push([time,tier_kwh[a]*tier_rates[a]]);
+                    tier_total_kwh[a] += tier_kwh[a] * tier_rates[a];
+                    total_kwh += tier_kwh[a] * tier_rates[a];
+                }
             }
             n++;
         }
@@ -731,37 +740,41 @@ function bargraph_load(start,end)
     }
     
     if (viewcostenergy=="energy") {
-        var totals_str = "";
-        var averages_str = "";
+        var totals_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
+            total_kwh.toFixed(1) + ' kWh</div><br>';
+        var averages_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
+           (total_kwh/n).toFixed(1) + ' kWh/d</div><br>';
         for (var a = 0; a < tier_names.length; a++) {
             totals_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
-               ' TOTAL</div><div class="power-value">' + tier_total_kwh[a].toFixed(1) + ' kWh</div><br>';
+               '</div><div class="power-value">' + tier_total_kwh[a].toFixed(1) + ' kWh</div><br>';
             averages_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
-               ' DAILY AVERAGE</div><div class="power-value">' + (tier_total_kwh[a]/n).toFixed(1) + ' kWh/d</div><br>';
+               '</div><div class="power-value">' + (tier_total_kwh[a]/n).toFixed(1) + ' kWh/d</div><br>';
         }
         $("#totals").html(totals_str);
         $("#averages").html(averages_str);
-        //$("#peak_average_kwhd").html((peak_total_kwh/n).toFixed(1)+" kWh/d");
-        
-        //$("#offpeak_total_kwh").html(offpeak_total_kwh.toFixed(1)+" kWh");
-        //$("#offpeak_average_kwhd").html((offpeak_total_kwh/n).toFixed(1)+" kWh/d");
-    //} else {
-        //$("#peak_total_kwh").html(config.app.currency.value+(peak_total_kwh*config.app.unitcost_day.value).toFixed(2));
-        //$("#peak_average_kwhd").html(config.app.currency.value+(peak_total_kwh*config.app.unitcost_day.value/n).toFixed(2)+"/day");
-        
-        //$("#offpeak_total_kwh").html(config.app.currency.value+(offpeak_total_kwh*config.app.unitcost_night.value).toFixed(2));
-        //$("#offpeak_average_kwhd").html(config.app.currency.value+(offpeak_total_kwh*config.app.unitcost_night.value/n).toFixed(2)+"/day");
+    } else {
+        var totals_str = '<div class="electric-title">COMBINED</div><div class="power-value">$' +
+            total_kwh.toFixed(2) + '</div><br>';
+        var averages_str = '<div class="electric-title">COMBINED</div><div class="power-value">$' +
+           (total_kwh/n).toFixed(2) + ' kWh/d</div><br>';
+        for (var a = 0; a < tier_names.length; a++) {
+            totals_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
+               '</div><div class="power-value">$' + tier_total_kwh[a].toFixed(2) + '</div><br>';
+            averages_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
+               '</div><div class="power-value">$' + (tier_total_kwh[a]/n).toFixed(2) + '/day</div><br>';
+        }
+        $("#totals").html(totals_str);
+        $("#averages").html(averages_str);
     }
 
     var kwh_today = 0;
     for (var a = 0; a < tier_names.length; a++) kwh_today += data[tier_names[a]][data[tier_names[a]].length - 1][1];
-    $("#kwh_today").html(kwh_today.toFixed(1)+" kWh");
     
-    //if (viewcostenergy=="energy") {
-    //    $("#kwh_today").html(kwh_today.toFixed(1));
-    //} else {
-    //    $("#kwh_today").html(config.app.currency.value+(kwh_today*config.app.unitcost.value).toFixed(2));
-    //}
+    if (viewcostenergy=="energy") {
+        $("#kwh_today").html(kwh_today.toFixed(1)+" kWh");
+    } else {
+        $("#kwh_today").html("$" + kwh_today.toFixed(2));
+    }
 }
 
 function bargraph_draw() 
