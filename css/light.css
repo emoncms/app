@@ -1,0 +1,92 @@
+#app-block {
+    padding:10px;
+}
+
+.block-bound {
+  color:#fff;
+  background-color: #ccc;
+}
+
+.block-title {
+  font-weight:bold;
+  padding:10px;
+}
+
+/* --------------------------------------------------------*/
+
+.bluenav {
+  float:right;
+  display:block;
+  border-left: 1px solid rgba(255,255,255,0.5);
+  font-weight:bold;
+  font-size:14px;
+  padding:11px;
+  cursor:pointer;
+  min-width:30px;
+  text-align:center;
+}
+
+.bluenav:hover {
+  background-color:rgba(255,255,255,0.2);
+}
+
+/* --------------------------------------------------------*/
+
+.col1 {
+  width:100%;
+}
+.col1-inner { padding:10px; }
+
+.col2 {
+  width:50%;
+  float:left;
+}
+.col2-inner { padding:10px; }
+
+/* --------------------------------------------------------*/
+
+.ajax-loader{
+  width:32px;
+  height:32px;
+  position:fixed;
+  top:50%;
+  left:50%;
+  margin-top:-16px; /* negative half the size of height */
+  margin-left:-16px; /* negative half the size of width */
+}
+
+/* --------------------------------------------------------*/
+
+.container-fluid { padding:0 }
+
+#footer {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.navbar-fixed-top {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+@media (max-width: 767px) {
+  body {padding:0};
+}
+
+@media (max-width: 450px) {
+  .row { padding:10px; }
+  .bluenav { font-size:12px; padding:8px; min-width:15px; }
+  .block-title { font-size:12px; padding:8px; }
+  .dmy {display:none}
+  
+  #app-block { padding:5px; }
+  .col2 { width:100%; }
+  .col1-inner { padding:5px; }
+  .col2-inner { padding:5px; }
+}
+    
+@media (min-width: 450px) and (max-width: 960px) { 
+  .col2 { width:100%; } 
+}
+@media (min-width: 960px) { }
+

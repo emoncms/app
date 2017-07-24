@@ -1,0 +1,135 @@
+#app-block {
+    padding:10px;
+}
+/*-------------------------------------*/
+
+h2 {
+  color:#fff;
+}
+
+/*-------------------------------------*/
+
+.electric-title {
+  font-weight:bold;
+  font-size:22px;
+  color:#aaa;
+  padding-top:20px;
+}
+
+.power-value {
+  font-weight:bold; 
+  font-size:100px; 
+  color:#0699fa; 
+  line-height: 1.1;
+}
+
+/*-------------------------------------*/
+
+.visnavblock {
+  color:#0699fa;
+  font-size:18px;
+}
+
+.visnav {
+  margin-right:4px;
+  padding-left:8px;
+  padding-right:8px;
+  min-width:20px;
+  background-color:rgba(6,153,250,0.1);
+  line-height:28px;
+  float:left;
+  text-align:center;
+}
+
+.visnav:hover {
+  color:#0699fa;
+  cursor: pointer;
+}
+
+/*-------------------------------------*/
+
+.appbox {
+  width:20%;
+  text-align:center;
+  padding:10px;
+  vertical-align:top;
+}
+
+.appbox-title {
+  color: #aaa;
+  font-weight:bold;
+  font-size:20px;
+  padding-bottom:15px;
+}
+
+.appbox-value {
+  color: #fff;
+  font-weight:bold;
+  font-size:36px;
+}
+
+.appbox-units {
+  color: #fff;
+  font-weight:bold;
+  font-size:16px;
+}
+
+/* --------------------------------------------------------*/
+
+.col1 {
+  width:100%;
+}
+.col1-inner { padding:10px; }
+
+.col2 {
+  width:50%;
+  float:left;
+}
+.col2-inner { padding:10px; }
+
+/*-------------------------------------*/
+
+.ajax-loader{
+  width:32px;
+  height:32px;
+  position:fixed;
+  top:50%;
+  left:50%;
+  margin-top:-16px; /* negative half the size of height */
+  margin-left:-16px; /* negative half the size of width */
+}
+
+/*-------------------------------------*/
+
+.container-fluid { padding:0 }
+
+#footer {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.navbar-fixed-top {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+@media (max-width: 767px) {
+  body {padding:0};
+}
+
+@media (max-width: 450px) {
+  .row { padding:10px; }  
+  .appbox { padding:5px }
+  .appbox-value { font-size:28px }
+  .appbox-title { font-size:16px }
+
+  #app-block { padding:5px; }
+  .col2 { width:100%; }  
+  .col1-inner { padding:5px; }
+  .col2-inner { padding:5px; }
+}
+    
+@media (min-width: 450px) and (max-width: 960px) { 
+  .col2 { width:100%; } 
+}
+@media (min-width: 960px) { }

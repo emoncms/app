@@ -1,0 +1,53 @@
+#app-setup {
+  padding:20px;
+  display:none; 
+}
+
+.app-config {
+  width:30%;
+  float:left
+}
+
+.appconfig-box {
+  border: 1px solid #fff;
+  margin-bottom:8px;
+  padding:10px;
+  color:#fff;
+}
+
+.appconfig-title {
+  color:#0699fa;
+}
+
+.appconfig-description {
+  width:70%;
+  float:left;
+}
+
+.appconfig-description-inner {
+  padding-right:20px;
+  color: #ccc;
+  font-size:18px;
+  line-height:22px;
+}
+
+.feed-select-div {
+  margin:0px;
+  margin-top:5px;
+  width:100%;
+}
+
+select {
+  background-color:#333;
+  color:#fff;
+  margin:0px;
+  width:85%;
+}
+
+input[type=text] {
+  background-color:#333;
+  color:#fff;
+  margin:0px;
+  margin-top:5px;
+  width:90%;
+}
