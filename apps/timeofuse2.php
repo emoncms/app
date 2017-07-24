@@ -259,6 +259,7 @@ var meta = {};
 var data = {};
 var bargraph_series = [];
 var powergraph_series = [];
+var series_tier_colours = ["#44b3e2", "#4473e2", "#4433e2"];
 var previousPoint = false;
 var viewmode = "bargraph";
 var viewcostenergy = "energy";
@@ -502,16 +503,6 @@ $('.bargraph-month').click(function () {
     period_text = "month";
 });
 
-$("#heating").click(function() {
-    comparison_heating = 0;
-    if ($(this)[0].checked) comparison_heating = 1;
-});
-
-$("#transport").click(function() {
-    comparison_transport = 0;
-    if ($(this)[0].checked) comparison_transport = 1;
-});
-
 $(".viewcostenergy").click(function(){
     var view = $(this).html();
     if (view=="ENERGY MODE") {
@@ -540,6 +531,7 @@ $(".viewcostenergy").click(function(){
 function powergraph_load() 
 {
     $("#power-graph-footer").show();
+    var data_tier = [];
     var start = view.start; var end = view.end;
     var npoints = 1200;
     var interval = ((end-start)*0.001) / npoints;
@@ -549,9 +541,37 @@ function powergraph_load()
     end = Math.ceil(end/intervalms)*intervalms;
 
     data["use"] = feed.getdata(feeds["use"].id,start,end,interval,1,1);
-    
+    for (var b = 0; b < tier_names.length; b++) {
+        data_tier[b] = [];
+    }
+    console.log(data_tier);
+    for (var a = 0; a < data["use"].length; a++) {
+        var time = data["use"][a][0];
+        var d = new Date(time);
+        var day = d.getDay();
+        var hr = d.getHours();
+        var pointval = data["use"][a][1];
+        for (var b = 0; b < tier_names.length; b++) {
+            if ((day == 0) || (day == 6)) {
+                if (b == weekend_tiers[hr]) {
+                    data_tier[b].push([time,pointval]);
+                } else {
+                    data_tier[b].push([time,0]);
+                }
+            } else {
+                if (b == weekday_tiers[hr]) {
+                    data_tier[b].push([time,pointval]);
+                } else {
+                    data_tier[b].push([time,0]);
+                }
+            }
+        }
+    }
+        
     powergraph_series = [];
-    powergraph_series.push({data:data["use"], yaxis:1, color:"#44b3e2", lines:{show:true, fill:0.8, lineWidth:0}});
+    for (var a = 0; a < tier_names.length; a++) {
+        powergraph_series.push({data:data_tier[a], yaxis:1, color:series_tier_colours[a], lines:{show:true, fill:0.8, lineWidth:0}});
+    }
     
     var feedstats = {};
     feedstats["use"] = stats(data["use"]);
@@ -725,12 +745,11 @@ function bargraph_load(start,end)
     }
 
     bargraph_series = [];
-    bargraph_series_colours = ["#44b3e2", "#4493e2", "#4473e2"];
     
     for (var a = 0; a < tier_names.length; a++) {
         bargraph_series.push({
             stack: true,
-            data: data[tier_names[a]], color: bargraph_series_colours[a],
+            data: data[tier_names[a]], color: series_tier_colours[a],
             bars: { show: true, align: "left", barWidth: 0.8*3600*24*1000, fill: 1.0, lineWidth:0}
         });
     }
