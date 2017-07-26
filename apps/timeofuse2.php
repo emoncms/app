@@ -160,11 +160,11 @@
 </div>
 
 <div id="app-setup" class="block">
-    <h2 class="appconfig-title">Time of Use - AU</h2>
+    <h2 class="appconfig-title">Time of Use - flexible</h2>
 
     <div class="appconfig-description">
       <div class="appconfig-description-inner">
-        <p>The "Time of Use - AU" app is a simple home energy monitoring app for exploring home or building
+        <p>The "Time of Use - flexible" app is a simple home energy monitoring app for exploring home or building
         electricity consumption and cost over time. It allows you to track multiple electricity tariffs as
         used in Australia. </p>
         <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.
