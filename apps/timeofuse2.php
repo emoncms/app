@@ -47,7 +47,7 @@
       <div class="bluenav viewcostenergy">ENERGY MODE</div>
       <!--<div class="bluenav cost">Cost</div>
       <div class="bluenav energy">Energy</div>-->
-      <div class="block-title">MY ELECTRIC</div>
+      <div class="block-title">TIME OF USE</div>
     </div>
 
     <div style="background-color:#fff; color:#333; padding:10px;">
@@ -192,8 +192,10 @@
         - 13:59, Peak: 14:00 - 19:59, Shoulder: 20:00 - 21:59, OffPeak: 22:00 - 23:59 would be defined as
         <b>0:0,7:1,14:2,20:1,22:0</b></p>
         <p>To specify the public holidays that should be treated the same as weekends, specify a comma separated
-        list of days of the year (from 1-365/366) per year. <b>Example:</b> for public holiays Jan 2, Apr 14,
-        Apr 17, Apr 25, Jun 12, Oct 2, Dec 25, Dec 26 you would specify <b>2017:2,105,108,116,164,275,359,360;2018:1...</b>
+        list of days of the year (from 1-365/366) per year. <b>Example:</b> for public holiays 2017: Jan 2, Apr 14,
+        Apr 17, Apr 25, Jun 12, Oct 2, Dec 25, Dec 26; and 2018: Jan 1 you would specify
+        <b>2017:2,104,107,115,163,275,359,360;2018:1</b><br><a href="https://www.epochconverter.com/days">
+        https://www.epochconverter.com/days</a> provides an easy reference.</p>
       </div>
     </div>
     <div class="app-config"></div>
@@ -240,8 +242,8 @@ config.app = {
     "we_times":{"type":"value", "default":"0:0,7:1,22:0",
         "name":"Weekend Tier Start Times",
         "description":"List of weekend tier start times. See description on the left for details"},
-    "ph_days":{"type":"value", "default":"2017:2,105,108,116,164,275,359,360",
-        "name":"Weekend Tier Start Times",
+    "ph_days":{"type":"value", "default":"2017:2,104,107,115,163,275,359,360;2018:1",
+        "name":"Public Holiday days",
         "description":"List of public holidays. See description on the left for details"}
 };
 config.name = "<?php echo $name; ?>";
@@ -294,6 +296,7 @@ function init()
     var props = [];
     var wd_times = [];
     var we_times = [];
+    var ph_yrs = [];
     var hour = 23;
 
     // Quick translation of feed ids
@@ -328,6 +331,16 @@ function init()
             weekend_tiers[hour] = tier;
             hour--;
         } while (hour >= start);
+    }
+    ph_yrs = config.app["ph_days"].value.split(";");
+    for (var yr in ph_yrs) {
+        var dates = ph_yrs[yr].split(":");
+        var days = dates[1].split(",");
+        for (var i in days) {
+            var d = (new Date(parseInt(dates[0]), 0, 0));
+            d.setDate(d.getDate() + parseInt(days[i]));
+            public_holidays.push(d);
+        }
     }
 }
 
@@ -530,6 +543,7 @@ $(".viewcostenergy").click(function(){
 // - bargraph_load
 // - bargraph_draw
 // - resize
+// - we_ph
 
 function powergraph_load() 
 {
@@ -552,10 +566,9 @@ function powergraph_load()
         var time = data["use"][a][0];
         var pointval = data["use"][a][1];
         var d = new Date(time);
-        var day = d.getDay();
         var hr = d.getHours();
         for (var b = 0; b < tier_names.length; b++) {
-            if ((day == 0) || (day == 6)) {
+            if (we_ph(d)) {
                 if (b == weekend_tiers[hr]) {
                     data_tier[b].push([time,pointval]);
                 } else {
@@ -573,7 +586,12 @@ function powergraph_load()
         
     powergraph_series = [];
     for (var a = 0; a < tier_names.length; a++) {
-        powergraph_series.push({data:data_tier[a], yaxis:1, color:series_tier_colours[a], lines:{show:true, fill:0.8, lineWidth:0}});
+        powergraph_series.push({
+            data:data_tier[a],
+            yaxis:1,
+            color:series_tier_colours[a],
+            lines:{show:true, fill:0.8, lineWidth:0}
+        });
     }
     
     var feedstats = {};
@@ -718,14 +736,14 @@ function bargraph_load(start,end)
 
             for (var y = 0; y < 23; y++) {
                 // y should be the hourly accumulate kWh
-                if (day == 0 || day == 6) { // weekend
+                if (we_ph(d)) { // weekend
                     tier_kwh[weekend_tiers[y]] += (elec_data[z][1][y+1] - elec_data[z][1][y]);
                 } else {
                     tier_kwh[weekday_tiers[y]] += (elec_data[z][1][y+1] - elec_data[z][1][y]);
                 }
             }
 	    // last period ends with the next days first value
-            if (day == 0 || day == 6) { // weekend
+            if (we_ph(d)) { // weekend
                 if ((z+1)<elec_data.length) tier_kwh[weekend_tiers[23]] += elec_data[z+1][1][0] - elec_data[z][1][23];
             } else {
                 if ((z+1)<elec_data.length) tier_kwh[weekday_tiers[23]] += elec_data[z+1][1][0] - elec_data[z][1][23];
@@ -895,6 +913,18 @@ $(window).resize(function(){
     
     
 });
+
+// ----------------------------------------------------------------------
+// Weekend or Public Holiday
+// ----------------------------------------------------------------------
+function we_ph (datetocheck) {
+    var dayofweek = datetocheck.getDay();
+    if ((dayofweek == 0) || (dayofweek == 6)) return true;
+    for (var i in public_holidays) {
+        if (public_holidays[i].valueOf() == datetocheck.valueOf()) return true;
+    }
+    return false;
+}
 
 // ----------------------------------------------------------------------
 // App log
