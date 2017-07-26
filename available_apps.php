@@ -26,6 +26,11 @@ $available_apps = array (
         "title"=>"Cost Comparison",
         "description"=>"Energy provider cost comparison with time of use tariffs"
     ),	
+    "timeofuse2"=>array(
+        "status"=>"",
+        "title"=>"Time of use - flexible", 
+        "description"=>"Time of use version of My Electric, with multiple tariffs (written for Australia, could be useful elsewhere with multiple tariffs)."
+    ),
     "myelectric2"=>array(
         "status"=>"Development",
         "title"=>"My Electric 2", 
@@ -35,11 +40,6 @@ $available_apps = array (
         "status"=>"Development",
         "title"=>"Time of use", 
         "description"=>"Time of use version of My Electric, showing night time and day time consumption. Night tariff start and end times can be set in the config to adjust for different tariff times."
-    ),
-    "timeofuse2"=>array(
-        "status"=>"Development",
-        "title"=>"Time of use - AU", 
-        "description"=>"Time of use version of My Electric, with multiple tarrifs applicable in Australia."
     ),
     "myheatpump"=>array(
         "status"=>"Development",

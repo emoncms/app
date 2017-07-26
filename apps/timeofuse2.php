@@ -165,7 +165,7 @@
     <div class="appconfig-description">
       <div class="appconfig-description-inner">
         <p>The "Time of Use - AU" app is a simple home energy monitoring app for exploring home or building
-        electricity consumption and cost over time. It allows you to track multiple electricity tarrifs as
+        electricity consumption and cost over time. It allows you to track multiple electricity tariffs as
         used in Australia. </p>
         <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.
         <br><br>
@@ -175,20 +175,20 @@
         the tiers, days and times they apply and the respective costs.</p>
         <p><b>Assumptions</b>:
         <ul>
-        <li>Any number of tarrifs can be defined, but they must be consistent across weekdays or weekends.</li>
-        <li>One cost must be defined per tarrif tier.</li>
+        <li>Any number of tariffs can be defined, but they must be consistent across weekdays or weekends.</li>
+        <li>One cost must be defined per tariff tier.</li>
         <li>Each weekday (Monday to Friday) has the same tiers and times for each tier.</li>
         <li>Each weekend day (Saturday and Sunday) has the same tiers and times for each tier.</li>
         <li>Public Holidays are treated the same as a weekend day.</li>
         </ul>
         <h4>Shorthand</h4>
-        <p>Tier names and tarrifs are specified as a comma separated, colon separated list. If there are three
-        tarrifs, Off Peak, Shoulder and Peak, costing 16.5c/kWh, 25.3c/kWh and 59.4c/kWh respectively, they
+        <p>Tier names and tariffs are specified as a comma separated, colon separated list. If there are three
+        tariffs, Off Peak, Shoulder and Peak, costing 16.5c/kWh, 25.3c/kWh and 59.4c/kWh respectively, they
         are specified as <b>OffPeak:0.165,Shoulder:0.253,Peak:0.594</b></p>
         <p>Tier start times are split into to definitions, weekday and weekend. They both use the same format,
         &lt;start hour&gt;:&lt;tier&gt;,&lt;start hour&gt;:&lt;tier&gt;,... <br>
         &lt;tier&gt; is the tier number defined above, numbered from 0<br>
-        <b>Example:</b> A weekday with the following tarrif times: OffPeak: 00:00 - 06:59, Shoulder: 07:00
+        <b>Example:</b> A weekday with the following tariff times: OffPeak: 00:00 - 06:59, Shoulder: 07:00
         - 13:59, Peak: 14:00 - 19:59, Shoulder: 20:00 - 21:59, OffPeak: 22:00 - 23:59 would be defined as
         <b>0:0,7:1,14:2,20:1,22:0</b></p>
         <p>To specify the public holidays that should be treated the same as weekends, specify a comma separated
