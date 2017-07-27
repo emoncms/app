@@ -185,7 +185,7 @@
         <p>Tier names and tariffs are specified as a comma separated, colon separated list. If there are three
         tariffs, Off Peak, Shoulder and Peak, costing 16.5c/kWh, 25.3c/kWh and 59.4c/kWh respectively, they
         are specified as <b>OffPeak:0.165,Shoulder:0.253,Peak:0.594</b></p>
-        <p>Tier start times are split into to definitions, weekday and weekend. They both use the same format,
+        <p>Tier start times are split into two definitions, weekday and weekend. They both use the same format,
         &lt;start hour&gt;:&lt;tier&gt;,&lt;start hour&gt;:&lt;tier&gt;,... <br>
         &lt;tier&gt; is the tier number defined above, numbered from 0<br>
         <b>Example:</b> A weekday with the following tariff times: OffPeak: 00:00 - 06:59, Shoulder: 07:00
@@ -262,7 +262,7 @@ var meta = {};
 var data = {};
 var bargraph_series = [];
 var powergraph_series = [];
-var series_tier_colours = ["#44b3e2", "#4473e2", "#4433e2"];
+var series_tier_colours = ["#44b3e2", "#4473e2", "#4433e2", "#44b3b2", "#44b372", "#44b332"];
 var previousPoint = false;
 var viewmode = "bargraph";
 var viewcostenergy = "energy";
