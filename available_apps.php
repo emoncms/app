@@ -26,6 +26,11 @@ $available_apps = array (
         "title"=>"Cost Comparison",
         "description"=>"Energy provider cost comparison with time of use tariffs"
     ),	
+    "timeofuse2"=>array(
+        "status"=>"",
+        "title"=>"Time of use - flexible", 
+        "description"=>"Time of use version of My Electric, with multiple tariffs (written for Australia, could be useful elsewhere with multiple tariffs)."
+    ),
     "myelectric2"=>array(
         "status"=>"Development",
         "title"=>"My Electric 2", 
