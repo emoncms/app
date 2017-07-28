@@ -21,16 +21,6 @@ $available_apps = array (
           "title"=>"My Energy", 
           "description"=>"This app extends the My Solar app by adding in a share of UK wind"
     ),
-    "costcomparison"=>array(
-        "status"=>"",
-        "title"=>"Cost Comparison",
-        "description"=>"Energy provider cost comparison with time of use tariffs"
-    ),	
-    "timeofuse2"=>array(
-        "status"=>"",
-        "title"=>"Time of use - flexible", 
-        "description"=>"Time of use version of My Electric, with multiple tariffs (written for Australia, could be useful elsewhere with multiple tariffs)."
-    ),
     "myelectric2"=>array(
         "status"=>"Development",
         "title"=>"My Electric 2", 
@@ -40,6 +30,16 @@ $available_apps = array (
         "status"=>"Development",
         "title"=>"Time of use", 
         "description"=>"Time of use version of My Electric, showing night time and day time consumption. Night tariff start and end times can be set in the config to adjust for different tariff times."
+    ),
+    "timeofuse2"=>array(
+        "status"=>"Development",
+        "title"=>"Time of use - flexible", 
+        "description"=>"Time of use version of My Electric, with multiple tariffs (written for Australia, could be useful elsewhere with multiple tariffs)."
+    ),
+    "costcomparison"=>array(
+        "status"=>"Development",
+        "title"=>"Cost Comparison",
+        "description"=>"Energy provider cost comparison with time of use tariffs"
     ),
     "myheatpump"=>array(
         "status"=>"Development",
