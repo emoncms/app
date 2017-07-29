@@ -332,14 +332,16 @@ function init()
             hour--;
         } while (hour >= start);
     }
-    ph_yrs = config.app["ph_days"].value.split(";");
-    for (var yr in ph_yrs) {
-        var dates = ph_yrs[yr].split(":");
-        var days = dates[1].split(",");
-        for (var i in days) {
-            var d = (new Date(parseInt(dates[0]), 0, 0));
-            d.setDate(d.getDate() + parseInt(days[i]));
-            public_holidays.push(d);
+    if (config.app["ph_days"].value != "") {
+        ph_yrs = config.app["ph_days"].value.split(";");
+        for (var yr in ph_yrs) {
+            var dates = ph_yrs[yr].split(":");
+            var days = dates[1].split(",");
+            for (var i in days) {
+                var d = (new Date(parseInt(dates[0]), 0, 0));
+                d.setDate(d.getDate() + parseInt(days[i]));
+                public_holidays.push(d);
+            }
         }
     }
 }
@@ -447,7 +449,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                         text += "<br>" + tier_names[a] + ": " + (tier_vals[a]).toFixed(1) + " kWh";
                     }
                 } else {
-                    text = date + "<br>Total: $" + total.toFixed(2);
+                    text = date + "<br>Total: "+ config.app["currency"].value + total.toFixed(2);
                     for (var a = tier_names.length - 1; a >= 0; a--) {
                         if (tier_vals[a] == 0) continue;
                         text += "<br>" + tier_names[a] + ": " + config.app["currency"].value + (tier_vals[a]).toFixed(2);
@@ -789,15 +791,17 @@ function bargraph_load(start,end)
         $("#totals").html(totals_str);
         $("#averages").html(averages_str);
     } else {
-        var totals_str = '<div class="electric-title">COMBINED</div><div class="power-value">$' +
-            total_kwh.toFixed(2) + '</div><br>';
-        var averages_str = '<div class="electric-title">COMBINED</div><div class="power-value">$' +
-           (total_kwh/n).toFixed(2) + '/day</div><br>';
+        var totals_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
+            config.app["currency"].value + total_kwh.toFixed(2) + '</div><br>';
+        var averages_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
+           config.app["currency"].value + (total_kwh/n).toFixed(2) + '/day</div><br>';
         for (var a = 0; a < tier_names.length; a++) {
             totals_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="power-value">$' + tier_total_kwh[a].toFixed(2) + '</div><br>';
+               '</div><div class="power-value">' + config.app["currency"].value +
+               tier_total_kwh[a].toFixed(2) + '</div><br>';
             averages_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="power-value">$' + (tier_total_kwh[a]/n).toFixed(2) + '/day</div><br>';
+               '</div><div class="power-value">' + config.app["currency"].value +
+               (tier_total_kwh[a]/n).toFixed(2) + '/day</div><br>';
         }
         $("#totals").html(totals_str);
         $("#averages").html(averages_str);
@@ -809,7 +813,7 @@ function bargraph_load(start,end)
     if (viewcostenergy=="energy") {
         $("#kwh_today").html(kwh_today.toFixed(1)+" kWh");
     } else {
-        $("#kwh_today").html("$" + kwh_today.toFixed(2));
+        $("#kwh_today").html(config.app["currency"].value + kwh_today.toFixed(2));
     }
 }
 
