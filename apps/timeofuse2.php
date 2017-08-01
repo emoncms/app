@@ -335,11 +335,13 @@ function init()
     ph_yrs = config.app["ph_days"].value.split(";");
     for (var yr in ph_yrs) {
         var dates = ph_yrs[yr].split(":");
-        var days = dates[1].split(",");
-        for (var i in days) {
-            var d = (new Date(parseInt(dates[0]), 0, 0));
-            d.setDate(d.getDate() + parseInt(days[i]));
-            public_holidays.push(d);
+        if (dates[1]!=undefined) {
+            var days = dates[1].split(",");
+            for (var i in days) {
+                var d = (new Date(parseInt(dates[0]), 0, 0));
+                d.setDate(d.getDate() + parseInt(days[i]));
+                public_holidays.push(d);
+            }
         }
     }
 }
