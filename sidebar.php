@@ -4,7 +4,7 @@
     if ($session['write']) $apikey = "&readkey=".$user->get_apikey_read($session['userid']);
 ?>
 
-<!-- Side-bar navigation ----------------------------------------------------------------->
+<!-- Side-bar navigation -->
 <div class="sidenav">
   <div class="sidenav_inner">
     
