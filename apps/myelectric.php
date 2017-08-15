@@ -252,7 +252,7 @@ function show()
         data: "id="+config.app.use_kwh.value+apikeystr,
         dataType: 'json',
         async: false,                      
-        success(data_in) { meta = data_in; }
+        success: function(data_in) { meta = data_in; }
     });
     startalltime = meta.start_time;
     view.first_data = meta.start_time * 1000;
