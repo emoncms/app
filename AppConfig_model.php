@@ -95,7 +95,7 @@ class AppConfig
             if (gettype($value)=="array") return array('success'=>false, "message"=>"Config value cannot be array");
             if (gettype($value)=="resource") return array('success'=>false, "message"=>"Config value cannot be resource");
             // Value can be alphanumeric, either case plus selected char's
-            if (preg_replace("/[^A-Za-z0-9,;£$.&\s]/",'',$value)!=$value) return array('success'=>false, "message"=>"Invalid config value");
+            if (preg_replace("/[^A-Za-z0-9,\-:;€£$.&\s]/",'',$value)!=$value) return array('success'=>false, "message"=>"Invalid config value");
         }
         
         // Load config from database
