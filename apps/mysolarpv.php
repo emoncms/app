@@ -545,7 +545,7 @@ function powergraph_events() {
 function init_bargraph() {
     bargraph_initialized = true;
     // Fetch the start_time covering all kwh feeds - this is used for the 'all time' button
-    var latest_start_time = 0;
+    latest_start_time = 0;
     var solar_meta = feed.getmeta(config.app.solar_kwh.value);
     var use_meta = feed.getmeta(config.app.use_kwh.value);
     var import_meta = feed.getmeta(config.app.import_kwh.value);
