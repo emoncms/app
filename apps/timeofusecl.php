@@ -457,15 +457,15 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             if (viewmode == "bargraph") {
                 var date = days[d.getDay()]+", "+months[d.getMonth()]+" "+d.getDate();
            
-                for (var a = 1; a <= tier_names.length; a++) {
+                for (var a = 0; a < tier_names.length; a++) {
                     tier_vals[a] = bargraph_series[a].data[z][1];
                     total += tier_vals[a];
                 }
-                tier_vals[cl_idx+1] = bargraph_series[cl_idx+1].data[z][1];
-                total += tier_vals[cl_idx+1];
+                tier_vals[cl_idx] = bargraph_series[cl_idx].data[z][1];
+                total += tier_vals[cl_idx];
                 if (viewcostenergy=="cost") {
-                    tier_vals[0] = bargraph_series[0].data[z][1];
-                    total += tier_vals[0];
+                    tier_vals[cl_idx+1] = bargraph_series[cl_idx+1].data[z][1];
+                    total += tier_vals[cl_idx+1];
                 }
             
                 if (viewcostenergy=="energy") {
@@ -478,7 +478,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 } else {
                     text = date + "<br>Total: "+ config.app["currency"].value + total.toFixed(2);
                     for (var a = tier_names.length - 1; a >= 0; a--) {
-                        if (tier_vals[a] == 0) continue;
+                        if (tier_vals[a+1] == 0) continue;
                         text += "<br>" + tier_names[a] + ": " + config.app["currency"].value + (tier_vals[a+1]).toFixed(2);
                     }
                     text += "<br>Controlled Load:" + config.app["currency"].value + (tier_vals[cl_idx+1]).toFixed(2);
