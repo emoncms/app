@@ -36,6 +36,11 @@ $available_apps = array (
         "title"=>"Time of use - flexible", 
         "description"=>"Time of use version of My Electric, with multiple tariffs (written for Australia, could be useful elsewhere with multiple tariffs)."
     ),
+    "timeofusecl"=>array(
+        "status"=>"Development",
+        "title"=>"Time of use - flexible + CL", 
+        "description"=>"Time of use - flexible with daily supply charge and controlled load (written for Australia, could be useful elsewhere with multiple tariffs)."
+    ),
     "costcomparison"=>array(
         "status"=>"Development",
         "title"=>"Cost Comparison",
