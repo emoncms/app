@@ -723,7 +723,6 @@ function bargraph_load(start,end)
     //console.log(JSON.stringify(hourly));
     var elec_result = feed.getdataDMY_time_of_use(feeds["use_kwh"].id,start,end,"daily",JSON.stringify(hourly));
     var cl_result = feed.getdataDMY(feeds["cl_kwh"].id,start,end,"daily");
-    cl_result[cl_result.length-1][1] = feeds["cl_kwh"].value;
 
     var elec_data = [];
 
@@ -753,7 +752,14 @@ function bargraph_load(start,end)
         if (include) elec_data.push(elec_result[z]);
     }
 
+    for (var z in cl_result) {
+        if (cl_result[z][1] == null) {
+            cl_result[z][1] = feeds["cl_kwh"].value;
+        }
+    }
+
     //console.log(elec_data);
+    //console.log(cl_result);
     
     for (var a = 0; a < tier_names.length; a++) {
         data[tier_names[a]] = [];
