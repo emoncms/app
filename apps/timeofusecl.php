@@ -815,7 +815,7 @@ function bargraph_load(start,end)
                 if ((z+1)<elec_data.length) tier_kwh[weekday_tiers[23]] += elec_data[z+1][1][0] - elec_data[z][1][23];
             }
 
-            tier_kwh[cl_idx] += cl_result[z+1][1] - cl_result[z][1];
+            if ((z+1)<elec_data.length) tier_kwh[cl_idx] += cl_result[z+1][1] - cl_result[z][1];
 
             for (var a = 0; a < tier_names.length; a++) {
                 if (viewcostenergy=="energy") {
