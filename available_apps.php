@@ -1,5 +1,7 @@
 <?php
-
+//
+// NOTE: DO NOT USE "_" CHARACTERS IN THE NAME OF YOUR APP .php FILE. IT WILL SILENTLY FAIL TO CREATE A NEW APP
+//
 $available_apps = array (
     "myelectric"=>array(
         "status"=>"",
