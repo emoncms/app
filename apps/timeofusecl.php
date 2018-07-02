@@ -735,7 +735,7 @@ function bargraph_load(start,end)
         if (elec_result[z][0] >= today.getTime()) {
             // this is today or tomorrow set all null values to the current feed value.
             for (var y in elec_result[z][1]) {
-		if (elec_result[z][1][y] == null) {
+        if (elec_result[z][1][y] == null) {
                     elec_result[z][1][y] = feeds["use_kwh"].value;
                 }
             }
@@ -808,7 +808,7 @@ function bargraph_load(start,end)
                     tier_kwh[weekday_tiers[y]] += (elec_data[z][1][y+1] - elec_data[z][1][y]);
                 }
             }
-	    // last period ends with the next days first value
+        // last period ends with the next days first value
             if (we_ph(d)) { // weekend
                 if ((z+1)<elec_data.length) tier_kwh[weekend_tiers[23]] += elec_data[z+1][1][0] - elec_data[z][1][23];
             } else {

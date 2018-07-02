@@ -47,8 +47,8 @@ var view =
 
   'timewindow':function(time)
   {
-    this.start = ((new Date()).getTime())-(3600000*24*time);	//Get start time
-    this.end = (new Date()).getTime();	//Get end time
+    this.start = ((new Date()).getTime())-(3600000*24*time);    //Get start time
+    this.end = (new Date()).getTime();    //Get end time
   },
   
   'round_interval':function(interval)
