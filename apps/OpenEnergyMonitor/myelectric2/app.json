@@ -1,0 +1,5 @@
+{
+    "title"          : "My Electric 2",
+    "description"    : "A slightly more in-depth version of the standard My Electric app with a daily kWh consumption graph which allows drilling down to see the power data for any selected day.<br>Household consumption can also be compared with the average UK household and ZeroCarbonBritain targets.",
+    "status"         : "Development"
+}
