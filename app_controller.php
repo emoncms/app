@@ -54,16 +54,22 @@ function app_controller()
             $route->format = "html";
             if ($app!=false) {
                 $id = $applist->$app->app;
-                $config = $applist->$app->config;
-                
-                $dir = $appavail[$id]['dir'];
+                if (isset($appavail[$id])) {
+                    $dir = $appavail[$id]['dir'];
+                    $config = $applist->$app->config;
+                }
+                else {
+                    $id = 'blank';
+                    $dir = "Modules/app/Apps/blank/";
+                    $config = new stdClass();
+                }
             }
             
             $result = "<link href='".$path."Modules/app/Views/css/pagenav.css?v=1' rel='stylesheet'>";
             $result .= "<div id='wrapper'>";
             if ($session['write']) $result .= view("Modules/app/Views/app_sidebar.php",array("applist"=>$applist));
             if ($app!=false) {
-                $result .= view($dir."view.php",array("name"=>$app, "appdir"=>$dir, "config"=>$config, "apikey"=>$apikey));
+                $result .= view($dir.$id.".php",array("name"=>$app, "appdir"=>$dir, "config"=>$config, "apikey"=>$apikey));
             } else {
                 $result .= view("Modules/app/Views/app_view.php",array("apps"=>$appavail));
             }

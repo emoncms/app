@@ -7,6 +7,7 @@ old.app_settings.php
 # Ignore all Apps except core ones
 Apps/*
 Apps/*/
+!Apps/blank
 !Apps/template
 !Apps/OpenEnergyMonitor
 !Apps/OpenEnergyMonitor/*
