@@ -40,11 +40,13 @@ class AppConfig
                 $file = str_replace('\\', '/', $file);
                 $dir = dirname($file);
                 $content = (array) json_decode(file_get_contents($file));
-                $content['dir'] = stripslashes($dir.'/');
-                
-                $id = basename($dir);
-                if ($id != 'template') {
-                    $list[$id] = $content;
+                if (json_last_error() == 0 && array_key_exists("title", $content) && array_key_exists("description", $content)) {
+                    $content['dir'] = stripslashes($dir.'/');
+                    
+                    $id = basename($dir);
+                    if ($id != 'template') {
+                        $list[$id] = $content;
+                    }
                 }
             }
         }
