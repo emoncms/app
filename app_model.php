@@ -15,10 +15,12 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 class AppConfig
 {
     private $mysqli;
+    private $settings;
 
-    public function __construct($mysqli)
+    public function __construct($mysqli, $settings)
     {
         $this->mysqli = $mysqli;
+        $this->settings = $settings;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -26,47 +28,33 @@ class AppConfig
     // ----------------------------------------------------------------------------------------------
     public function get_available()
     {
-        $appsettings = "Modules/app/app_settings.php";
-        if (file_exists($appsettings)) {
-            require_once $appsettings;
-        }
-        if (!isset($appdir)) {
-            $appdir = "Modules/app/Apps/";
-        }
         $list = array();
-        $it = new RecursiveDirectoryIterator($appdir);
-        foreach(new RecursiveIteratorIterator($it) as $file){
-            if(strpos($file ,".json") !== false) {
-                $file = str_replace('\\', '/', $file);
+        
+        $it = new RecursiveDirectoryIterator("Modules/app/apps/");
+        foreach(new RecursiveIteratorIterator($it) as $file) {
+            // Replace all backslashes to avoid conflicts with paths on windows machines
+            $file = str_replace('\\', '/', $file);
+            if(basename($file ,".json") == 'app') {
                 $dir = dirname($file);
+                
                 $content = (array) json_decode(file_get_contents($file));
                 if (json_last_error() == 0 && array_key_exists("title", $content) && array_key_exists("description", $content)) {
                     $content['dir'] = stripslashes($dir.'/');
                     
                     $id = basename($dir);
-                    if ($id != 'template') {
+                    if ($id != 'template' && (!isset($this->settings) || !isset($this->settings['hidden']) 
+                        || !in_array($id, $this->settings['hidden']))) {
+                        
                         $list[$id] = $content;
                     }
                 }
             }
         }
-        
-        if (isset($applist)) {
-            $whitelist = array();
-            foreach($list as $id=>$app) {
-                if (in_array($id, $applist)) {
-                    $whitelist[$id] = $app;
-                }
-            }
-            return $whitelist;
-        }
-        else {
-            usort($list, function($a1, $a2) {
-                if($a1['status'] == $a2['status'])
-                    return strcmp($a1['title'], $a2['title']);
-                return strcmp($a1['status'], $a2['status']);
-            });
-        }
+        uasort($list, function($a1, $a2) {
+            if($a1['status'] == $a2['status'])
+                return strcmp($a1['title'], $a2['title']);
+            return strcmp($a1['status'], $a2['status']);
+        });
         return $list;
     }
 

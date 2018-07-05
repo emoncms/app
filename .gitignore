@@ -1,13 +1,10 @@
 .project
 .buildpath
-.settings*
-app_settings.php
-old.app_settings.php
 
 # Ignore all Apps except core ones
-Apps/*
-Apps/*/
-!Apps/blank
-!Apps/template
-!Apps/OpenEnergyMonitor
-!Apps/OpenEnergyMonitor/*
+apps/*
+apps/*/
+!apps/blank
+!apps/template
+!apps/OpenEnergyMonitor
+!apps/OpenEnergyMonitor/*
