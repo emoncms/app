@@ -129,8 +129,7 @@ var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 
-apikeystr = ""; 
-if (apikey!="") apikeystr = "&apikey="+apikey;
+var feed = new Feed(apikey);
 
 // ----------------------------------------------------------------------
 // Display
@@ -152,18 +151,18 @@ config.app = {
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
-config.feeds = feed.list();
+config.feeds = feed.getList();
 
 config.initapp = function(){init()};
 config.showapp = function(){show()};
 config.hideapp = function(){hide()};
 
 // ----------------------------------------------------------------------
-// APPLICATION
+// Application
 // ----------------------------------------------------------------------
 var feeds = {};
 
-var live = false;
+var updateTimer = false;
 var show_balance_line = 0;
 var reload = true;
 var autoupdate = true;
@@ -183,7 +182,7 @@ config.init();
 // App start function
 function init()
 {        
-    app_log("INFO","mysolarpv init");
+    appLog("INFO", "mysolarpv init");
     
     my_wind_cap = ((annual_wind_gen / 365) / 0.024) / capacity_factor;
 
@@ -223,16 +222,15 @@ function init()
 
 function show() 
 {
-    app_log("INFO","mysolarpv show");
+    appLog("INFO", "mysolarpv show");
     resize();
-    livefn();
-    live = setInterval(livefn,5000);
-
+    update();
+    updateTimer = setInterval(update, 5000);
 }
 
 function resize() 
 {
-    app_log("INFO","mysolarpv resize");
+    appLog("INFO", "mysolarpv resize");
     
     var top_offset = 0;
     var placeholder_bound = $('#placeholder_bound');
@@ -274,10 +272,10 @@ function resize()
 
 function hide() 
 {
-    clearInterval(live);
+    clearInterval(updateTimer);
 }
 
-function livefn()
+function update()
 {
     // Check if the updater ran in the last 60s if it did not the app was sleeping
     // and so the data needs a full reload.
@@ -285,14 +283,14 @@ function livefn()
     if ((now-lastupdate)>60000) reload = true;
     lastupdate = now;
     
-    var feeds = feed.listbyid();
+    var feeds = feed.getListById();
     var solar_now = 0;
     if (config.app.solar.value)
         solar_now = parseInt(feeds[config.app.solar.value].value);
         
     var use_now = parseInt(feeds[config.app.use.value].value);
     
-    var gridwind = feed.getvalueremote(67088);
+    var gridwind = feed.getRemoteValue(67088);
     var average_power = ((config.app.windkwh.value/365.0)/0.024);
     var wind_now = Math.round((average_power / average_wind_power) * gridwind);
 
@@ -381,13 +379,13 @@ function draw_powergraph() {
         view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
 
         var feedid = config.app.solar.value;
-        if (feedid!=false)
-            timeseries.load("solar",feed.getdata(feedid,view.start,view.end,interval,0,0));
-        
+        if (feedid!=false) {
+            timeseries.load("solar", feed.getData(feedid, view.start, view.end, interval, 0, 0));
+        }
         var feedid = config.app.use.value;
-        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,interval,0,0));
+        timeseries.load("use", feed.getData(config.app.use.value, view.start, view.end, interval, 0, 0));
         
-        timeseries.load("remotewind",feed.getdataremote(67088,view.start,view.end,interval));    
+        timeseries.load("remotewind", feed.getRemoteData(67088, view.start, view.end, interval));    
     }
     // -------------------------------------------------------------------------------------------------------
     
@@ -508,8 +506,11 @@ $(window).resize(function(){
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------
-function app_log (level, message) {
-    if (level=="ERROR") alert(level+": "+message);
-    console.log(level+": "+message);
+function appLog(level, message) {
+    if (level == "ERROR") {
+        alert(level + ": " + message);
+    }
+    console.log(level + ": " + message);
 }
+
 </script>

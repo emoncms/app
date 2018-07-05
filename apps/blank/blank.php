@@ -1,12 +1,13 @@
 <?php
-global $path, $session;
-$v = 5;
+    global $path, $session;
+    $v = 5;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/data.js?v=<?php echo $v; ?>"></script>
 
 <div id="app-block" style="display:none">
   <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
@@ -38,8 +39,7 @@ var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 
-apikeystr = ""; 
-if (apikey!="") apikeystr = "&apikey="+apikey;
+var feed = new Feed(apikey);
 
 // ----------------------------------------------------------------------
 // Display
@@ -59,45 +59,49 @@ config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 config.feeds = feed.list();
 
-config.initapp = function(){init()};
-config.showapp = function(){show()};
-config.hideapp = function(){clear()};
+config.initapp = function() {
+    init();
+};
+config.showapp = function() {
+    show();
+};
+config.hideapp = function() {
+    clear();
+};
 
 // ----------------------------------------------------------------------
-// APPLICATION
+// Application
 // ----------------------------------------------------------------------
 config.init();
 
-function init()
-{   
+function init() {   
 
 }
     
-function show()
-{   
+function show() {   
     $(".ajax-loader").hide();
 }
    
-function updater()
-{
+function updater() {
 
 }
 
-function resize() 
-{
+function resize() {
 
 }
 
-function clear()
-{
+function clear() {
 
 }
 
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------
-function app_log (level, message) {
-    if (level=="ERROR") alert(level+": "+message);
-    console.log(level+": "+message);
+function appLog(level, message) {
+    if (level == "ERROR") {
+        alert(level + ": " + message);
+    }
+    console.log(level + ": " + message);
 }
+
 </script>

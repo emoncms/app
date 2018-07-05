@@ -212,8 +212,7 @@ var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 
-apikeystr = ""; 
-if (apikey!="") apikeystr = "&apikey="+apikey;
+var feed = new Feed(apikey);
 
 // ----------------------------------------------------------------------
 // Display
@@ -248,14 +247,14 @@ config.app = {
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
-config.feeds = feed.list();
+config.feeds = feed.getList();
 
 config.initapp = function(){init()};
 config.showapp = function(){show()};
 config.hideapp = function(){hide()};
 
 // ----------------------------------------------------------------------
-// APPLICATION
+// Application
 // ----------------------------------------------------------------------
 var feeds = {};
 var meta = {};
@@ -273,7 +272,7 @@ var comparison_heating = false;
 var comparison_transport = false;
 var flot_font_size = 12;
 var start_time = 0;
-var updaterinst = false;
+var updateTimer = false;
 var use_start = 0;
 
 // cents/kWh rates, one for each tier.
@@ -351,9 +350,9 @@ function init()
 function show() {
     $("body").css('background-color','WhiteSmoke');
     
-    meta["use_kwh"] = feed.getmeta(feeds["use_kwh"].id);
+    meta["use_kwh"] = feed.getMeta(feeds["use_kwh"].id);
     if (meta["use_kwh"].start_time>start_time) start_time = meta["use_kwh"].start_time;
-    use_start = feed.getvalue(feeds["use_kwh"].id, start_time*1000)[1];
+    use_start = feed.getValue(feeds["use_kwh"].id, start_time*1000)[1];
 
     resize();
 
@@ -363,18 +362,18 @@ function show() {
     bargraph_load(start,end);
     bargraph_draw();
 
-    updater();
-    updaterinst = setInterval(updater,5000);
+    update();
+    updateTimer = setInterval(update, 5000);
     $(".ajax-loader").hide();
 }
 
 function hide() {
-    clearInterval(updaterinst);
+    clearInterval(updateTimer);
 }
 
-function updater()
+function update()
 {
-    feed.listbyidasync(function(result){
+    feed.getListById(function(result) {
         for (var key in config.app) {
             if (config.app[key].value) feeds[key] = result[config.app[key].value];
         }
@@ -561,7 +560,7 @@ function powergraph_load()
     start = Math.ceil(start/intervalms)*intervalms;
     end = Math.ceil(end/intervalms)*intervalms;
 
-    data["use"] = feed.getdata(feeds["use"].id,start,end,interval,1,1);
+    data["use"] = feed.getData(feeds["use"].id, start, end, interval, 1, 1);
     for (var b = 0; b < tier_names.length; b++) {
         data_tier[b] = [];
     }
@@ -674,7 +673,7 @@ function bargraph_load(start,end)
     var hourly = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
     
     //console.log(JSON.stringify(hourly));
-    var elec_result = feed.getdataDMY_time_of_use(feeds["use_kwh"].id,start,end,"daily",JSON.stringify(hourly));
+    var elec_result = feed.getDailyTimeOfUse(feeds["use_kwh"].id, start, end, JSON.stringify(hourly));
 
     var cur_use = feeds["use_kwh"].value;
     
@@ -935,8 +934,11 @@ function we_ph (datetocheck) {
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------
-function app_log (level, message) {
-    if (level=="ERROR") alert(level+": "+message);
-    console.log(level+": "+message);
+function appLog(level, message) {
+    if (level == "ERROR") {
+        alert(level + ": " + message);
+    }
+    console.log(level + ": " + message);
 }
+
 </script>

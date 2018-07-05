@@ -1,5 +1,5 @@
 #app-block {
-    padding:10px;
+  padding:10px;
 }
 /*-------------------------------------*/
 
@@ -104,13 +104,13 @@ h2 {
 .container-fluid { padding:0 }
 
 #footer {
-    margin-left: 0px;
-    margin-right: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
 }
 
 .navbar-fixed-top {
-    margin-left: 0px;
-    margin-right: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
 }
 
 @media (max-width: 767px) {
@@ -118,18 +118,18 @@ h2 {
 }
 
 @media (max-width: 450px) {
-  .row { padding:10px; }  
+  .row { padding:10px; }
   .appbox { padding:5px }
   .appbox-value { font-size:28px }
   .appbox-title { font-size:16px }
 
   #app-block { padding:5px; }
-  .col2 { width:100%; }  
+  .col2 { width:100%; }
   .col1-inner { padding:5px; }
   .col2-inner { padding:5px; }
 }
-    
-@media (min-width: 450px) and (max-width: 960px) { 
-  .col2 { width:100%; } 
+
+@media (min-width: 450px) and (max-width: 960px) {
+  .col2 { width:100%; }
 }
 @media (min-width: 960px) { }

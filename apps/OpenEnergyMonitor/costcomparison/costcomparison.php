@@ -15,7 +15,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?><?php echo $appdir; ?>rates.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; echo $appdir; ?>rates.js?v=<?php echo $v; ?>"></script>
 
 <style>
 .block-bound {
@@ -112,13 +112,14 @@ padding:10px;
         <br>
         <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.<br>
         <br>
-        <img class="img-rounded" src="<?php echo $path; ?><?php echo $appdir; ?>preview.png" style="width:600px"></div>
+        <img class="img-rounded" src="<?php echo $path; echo $appdir; ?>preview.png" style="width:600px"></div>
     </div>
     <div class="app-config"></div>
 </div>
 
 
 <script type="text/javascript">
+
 // ----------------------------------------------------------------------
 // Globals
 // ----------------------------------------------------------------------
@@ -126,8 +127,7 @@ var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 
-apikeystr = "";
-if (apikey != "") {apikeystr = "&apikey=" + apikey;}
+var feed = new Feed(apikey);
 
 if (!sessionwrite) $(".openconfig").hide();
 
@@ -156,7 +156,7 @@ config.app = {
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
-config.feeds = feed.list();
+config.feeds = feed.getList();
 
 config.initapp = function() {
     init()
@@ -169,7 +169,7 @@ config.hideapp = function() {
 };
 
 // ----------------------------------------------------------------------
-// APPLICATION
+// Application
 // ----------------------------------------------------------------------
 var feeds = {};
 var meta = {};
@@ -183,17 +183,17 @@ var previousPointHalfHour = false;
 
 var flot_font_size = 12;
 
-//Time of first data reading
+// Time of first data reading
 var start_time = 0;
-//Currently selected tariff
+// Currently selected tariff
 var selected_energy_rate = null;
 
-//These should be in a resource file for regionalization
+// These should be in a resource file for regionalization
 var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 var selected_start, selected_end;
-var updaterinst = false;
+var updateTimer = false;
 
 // ----------------------------------------------------------------------
 // Display
@@ -238,7 +238,7 @@ function show() {
     
     console.log(feeds);
     
-    meta["use_kwh"] = feed.getmeta(feeds.use_kwh.id);
+    meta["use_kwh"] = feed.getMeta(feeds.use_kwh.id);
 
     if (meta.use_kwh.start_time > start_time) {
         //Wind back start time to midnight on first reading day
@@ -250,14 +250,14 @@ function show() {
 
     resize();
     
-    updater();
+    update();
     
     //Update every 45 seconds
-    updaterinst = setInterval(updater,45000);
+    updateTimer = setInterval(update, 45000);
 }
 
-function updater() {
-    if (selected_start==null) {    oneweek(); $(".bargraph-week").addClass("selected");} else { reloadExistingRange(); }
+function update() {
+    if (selected_start == null) {    oneweek(); $(".bargraph-week").addClass("selected");} else { reloadExistingRange(); }
 }
 
 function clearHighlight() {
@@ -362,7 +362,7 @@ function timeFormatter(ms) {
 
 function hide() {
     //We should stop any timers we have started here
-    clearInterval(updaterinst);
+    clearInterval(updateTimer);
 }
 
 $("#halfhour_placeholder").bind("plothover", function(event, pos, item) {
@@ -457,7 +457,7 @@ function bargraph_load(start, end) {
           
     var halfhour =  [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, 20.5, 21, 21.5, 22, 22.5, 23, 23.5];
     
-    var elec_data = feed.getdataDMY_time_of_use(feeds.use_kwh.id, start, end, "daily", JSON.stringify(halfhour));
+    var elec_data = feed.getDailyTimeOfUse(feeds.use_kwh.id, start, end, JSON.stringify(halfhour));
 
     //console.log(elec_data);
     
@@ -773,8 +773,11 @@ $(window).resize(function() {
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------
-function app_log(level, message) {
-    if (level == "ERROR") alert(level + ": " + message);
+function appLog(level, message) {
+    if (level == "ERROR") {
+        alert(level + ": " + message);
+    }
     console.log(level + ": " + message);
 }
+
 </script>
