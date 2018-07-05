@@ -29,7 +29,8 @@ class AppConfig
     public function get_available()
     {
         $list = array();
-        $it = new RecursiveDirectoryIterator("Modules/app/Apps/");
+        
+        $it = new RecursiveDirectoryIterator("Modules/app/apps/");
         foreach(new RecursiveIteratorIterator($it) as $file) {
             // Replace all backslashes to avoid conflicts with paths on windows machines
             $file = str_replace('\\', '/', $file);

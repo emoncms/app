@@ -60,7 +60,7 @@ function app_controller()
                 }
                 else {
                     $id = 'blank';
-                    $dir = "Modules/app/Apps/blank/";
+                    $dir = "Modules/app/apps/blank/";
                     $config = new stdClass();
                 }
             }

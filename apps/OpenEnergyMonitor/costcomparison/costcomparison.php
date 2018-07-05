@@ -15,7 +15,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?><?php echo $appdir; ?>rates.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; echo $appdir; ?>rates.js?v=<?php echo $v; ?>"></script>
 
 <style>
 .block-bound {
@@ -112,7 +112,7 @@ padding:10px;
         <br>
         <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.<br>
         <br>
-        <img class="img-rounded" src="<?php echo $path; ?><?php echo $appdir; ?>preview.png" style="width:600px"></div>
+        <img class="img-rounded" src="<?php echo $path; echo $appdir; ?>preview.png" style="width:600px"></div>
     </div>
     <div class="app-config"></div>
 </div>
