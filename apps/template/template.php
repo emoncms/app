@@ -7,6 +7,7 @@
 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/data.js?v=<?php echo $v; ?>"></script>
 
 <div id="app-block" style="display:none">
   <div class="col1"><div class="col1-inner">
@@ -63,7 +64,13 @@ if (!sessionwrite) $(".openconfig").hide();
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"House or building use in watts"}
+    "use": {
+        "type": "feed", 
+        "class": "power",
+        "autoname": "use", 
+        "engine": "2,5,6", 
+        "description": "House or building use in watts"
+    }
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
@@ -82,11 +89,11 @@ config.hideapp = function() {
 // ----------------------------------------------------------------------
 // Application
 // ----------------------------------------------------------------------
-var feeds = {};
-
 config.init();
 
 function init() {
+    // Initialize the data cache
+    data.init(feed, config);
 }
 
 function show() {
@@ -95,11 +102,13 @@ function show() {
     resize();
     updateTimer = setInterval(update, 5000);
 }
-    var use = config.app.use.value;
-    feeds = feed.listbyid();
-    $("#powernow").html((feeds[use].value*1).toFixed(1)+"W");
 
 function update() {
+    // Asynchronously update all configured "power" and "energy" feeds
+    data.update(function(result) {
+
+        $("#powernow").html(result.getLatestValue("use").toFixed(1)+"W");
+    });
 }
 
 function resize() {
