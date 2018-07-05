@@ -1,8 +1,5 @@
 .project
 .buildpath
-.settings*
-app_settings.php
-old.app_settings.php
 
 # Ignore all Apps except core ones
 Apps/*
