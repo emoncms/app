@@ -30,8 +30,12 @@ class AppConfig
     {
         $list = array();
         
-        $it = new RecursiveDirectoryIterator("Modules/app/apps/");
-        foreach(new RecursiveIteratorIterator($it) as $file) {
+        $dirs = new RecursiveDirectoryIterator("Modules/app/apps/");
+        $it = new RecursiveIteratorIterator($dirs);
+        foreach($it as $file) {
+            // Restrict iteration to two levels
+            if ($it->getDepth() > 2) continue;
+            
             // Replace all backslashes to avoid conflicts with paths on windows machines
             $file = str_replace('\\', '/', $file);
             if(basename($file ,".json") == 'app') {
