@@ -126,10 +126,9 @@ padding:10px;
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
+if (!sessionwrite) $(".openconfig").hide();
 
 var feed = new Feed(apikey);
-
-if (!sessionwrite) $(".openconfig").hide();
 
 // ----------------------------------------------------------------------
 // Configuration
@@ -234,8 +233,6 @@ function init() {
 }
 
 function show() {
-    $("body").css('background-color', 'WhiteSmoke');
-    
     console.log(feeds);
     
     meta["use_kwh"] = feed.getMeta(feeds.use_kwh.id);

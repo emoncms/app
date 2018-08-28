@@ -128,18 +128,9 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
+if (!sessionwrite) $(".openconfig").hide();
 
 var feed = new Feed(apikey);
-
-// ----------------------------------------------------------------------
-// Display
-// ----------------------------------------------------------------------
-$("body").css('background-color','#222');
-$(window).ready(function(){
-    $("#footer").css('background-color','#181818');
-    $("#footer").css('color','#999');
-});
-if (!sessionwrite) $(".openconfig").hide();
 
 // ----------------------------------------------------------------------
 // Configuration

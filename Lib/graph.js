@@ -209,7 +209,7 @@ class Graph {
         var i=0;
         var minval = 0;
         var maxval = 0;
-        for (z in data) {
+        for (var z in data) {
             var val = data[z][1];
             if (val != null) {
                 if (i==0) {
@@ -224,7 +224,7 @@ class Graph {
         }
         var mean = sum / i;
         sum = 0, i=0;
-        for (z in data) {
+        for (var z in data) {
             sum += (data[z][1] - mean)*(data[z][1] - mean);
             i++;
         }

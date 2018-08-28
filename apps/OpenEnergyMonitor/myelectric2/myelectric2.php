@@ -182,19 +182,9 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
+if (!sessionwrite) $(".openconfig").hide();
 
 var feed = new Feed(apikey);
-
-// ----------------------------------------------------------------------
-// Display
-// ----------------------------------------------------------------------
-$("body").css('background-color','WhiteSmoke');
-$(window).ready(function(){
-    //$("#footer").css('background-color','#181818');
-    //$("#footer").css('color','#999');
-});
-
-if (!sessionwrite) $(".openconfig").hide();
 
 // ----------------------------------------------------------------------
 // Configuration
@@ -203,8 +193,8 @@ config.app = {
     "title":{"type":"value", "default":"MY ELECTRIC", "name": "Title", "description":"Optional title for app"},
     "use":{"type":"feed", "autoname":"use", "engine":"5"},
     "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5},
-    "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity £/kWh"},
-    "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$..)"},
+    "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity &pound;/kWh"},
+    "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (&pound;,&euro;,&dollar;,..)"},
     "showcomparison":{"type":"checkbox", "default":true, "name": "Show comparison", "description":"Energy stack comparison"}
 };
 config.name = "<?php echo $name; ?>";
@@ -254,8 +244,6 @@ function init()
 }
 
 function show() {
-    $("body").css('background-color','WhiteSmoke');
-    
     $("#app-title").html(config.app.title.value);
     if (config.app.showcomparison.value) {
         $("#energystack-comparison").show();

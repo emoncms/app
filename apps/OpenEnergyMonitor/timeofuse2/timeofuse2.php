@@ -211,19 +211,9 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
+if (!sessionwrite) $(".openconfig").hide();
 
 var feed = new Feed(apikey);
-
-// ----------------------------------------------------------------------
-// Display
-// ----------------------------------------------------------------------
-$("body").css('background-color','WhiteSmoke');
-$(window).ready(function(){
-    //$("#footer").css('background-color','#181818');
-    //$("#footer").css('color','#999');
-});
-
-if (!sessionwrite) $(".openconfig").hide();
 
 // ----------------------------------------------------------------------
 // Configuration
@@ -348,8 +338,6 @@ function init()
 }
 
 function show() {
-    $("body").css('background-color','WhiteSmoke');
-    
     meta["use_kwh"] = feed.getMeta(feeds["use_kwh"].id);
     if (meta["use_kwh"].start_time>start_time) start_time = meta["use_kwh"].start_time;
     use_start = feed.getValue(feeds["use_kwh"].id, start_time*1000)[1];

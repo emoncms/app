@@ -3,16 +3,9 @@
   display:none; 
 }
 
-.app-config {
-  width:30%;
-  float:left
-}
-
 .appconfig-box {
-  border: 1px solid #fff;
   margin-bottom:8px;
   padding:10px;
-  color:#fff;
 }
 
 .appconfig-title {
@@ -26,28 +19,32 @@
 
 .appconfig-description-inner {
   padding-right:20px;
-  color: #ccc;
   font-size:18px;
   line-height:22px;
 }
+.app-config {
+  width:30%;
+  float:left
+}
 
-.feed-select-div {
+.app-config select {
+  margin:0px;
+  width:85%;
+}
+
+.app-config input[type=text] {
+  margin:0px;
+  margin-top:5px;
+  width:90%;
+}
+
+.app-config .feed-auto {
+	font-size:12px;
+}
+
+.app-config .feed-select-div {
   margin:0px;
   margin-top:5px;
   width:100%;
 }
 
-select {
-  background-color:#333;
-  color:#fff;
-  margin:0px;
-  width:85%;
-}
-
-input[type=text] {
-  background-color:#333;
-  color:#fff;
-  margin:0px;
-  margin-top:5px;
-  width:90%;
-}

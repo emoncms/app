@@ -68,10 +68,7 @@ var config = {
 
     UI: function() {
         $(".app-config").html("");
-        $("body").css('background-color','#222');
-        $("#footer").css('background-color','#181818');
-        $("#footer").css('color','#999');
-     
+        
         // Remove old config items that are no longer used/described in new config definition
         if (config.db.constructor===Array) config.db = {};
         
@@ -84,15 +81,15 @@ var config = {
         for (var z in config.app) {
             out += "<div class='appconfig-box' key='"+z+"'>";
             if (config.app[z].type=="feed") {
-                out += "<i class='status icon-ok-sign icon-white'></i> <b class='feedname' key='"+z+"'>"+config.app[z].autoname+" <span style='color:#ccc; font-size:12px'>[AUTO]</span></b><i class='appconfig-edit icon-pencil icon-white' style='float:right; cursor:pointer'></i>";
+                out += "<i class='status icon-ok-sign icon-app-config'></i> <b class='feedname' key='"+z+"'>"+config.app[z].autoname+" <span class='feed-auto'>[AUTO]</span></b><i class='appconfig-edit icon-pencil icon-app-config' style='float:right; cursor:pointer'></i>";
                 out += "<br><span class='appconfig-info'></span>";
                 out += "<div class='feed-select-div input-append'><select class='feed-select'></select><button class='btn feed-select-ok'>ok</button></div>";
             } else if (config.app[z].type=="value") {
-                out += "<i class='status icon-ok-sign icon-white'></i> <b>"+config.app[z].name+"</b>";
+                out += "<i class='status icon-ok-sign icon-app-config'></i> <b>"+config.app[z].name+"</b>";
                 out += "<br><span class='appconfig-info'></span>";
                 out += "<input class='appconfig-value' type='text' key='"+z+"' value='"+config.app[z].default+"' / >";
             } else if (config.app[z].type=="checkbox") {
-                out += "<i class='status icon-ok-sign icon-white'></i> <b>"+config.app[z].name+"</b>";
+                out += "<i class='status icon-ok-sign icon-app-config'></i> <b>"+config.app[z].name+"</b>";
                 out += "<br><span class='appconfig-info'></span>";
                 var checked = ""; if (config.app[z].default) checked = "checked";
                 out += " <input class='appconfig-value' type='checkbox' key='"+z+"' "+checked+" / >";
@@ -100,7 +97,7 @@ var config = {
             out += "</div>";
         }
         
-        out += "<br><div style='text-align:center;'><button class='btn launchapp' style='padding:10px; display:none'>Launch App</button><button class='btn btn-danger deleteapp' style='padding:10px; margin-left:20px'><i class='icon-trash icon-white'></i> Delete</button></div>";
+        out += "<br><div style='text-align:center;'><button class='btn launchapp' style='padding:10px; display:none'>Launch App</button><button class='btn btn-danger deleteapp' style='padding:10px; margin-left:20px'><i class='icon-trash icon-app-config'></i> Delete</button></div>";
         
         $(".app-config").html(out);
 
@@ -199,7 +196,7 @@ var config = {
             
             if (feedid=="auto") {
                 delete config.db[key];
-                configItem.find(".feedname").html(config.app[key].autoname+" <span style='color:#ccc; font-size:12px'>[AUTO]</span>");
+                configItem.find(".feedname").html(config.app[key].autoname+" <span class='feed-auto'>[AUTO]</span>");
             }
             
             if (feedid!=0 ) {

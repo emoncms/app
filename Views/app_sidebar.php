@@ -5,19 +5,16 @@
 ?>
 
 <!-- Side-bar navigation -->
-<div class="sidenav">
-  <div class="sidenav_inner">
-    
+<div class="sidenav notransition">
+  <div class="sidenav-inner">
     <ul class="appmenu">
-    <?php
-    foreach ($applist as $name=>$appitem) {
-        echo "<li><a href='".$path."app/view?name=".$name.$apikey."'>".$name."</a></li>";
-    }
-    ?>
-    
-    <li><a href="<?php echo $path; ?>app/new"><i class="icon-plus icon-white"></i> Add new app</a></li>
+      <?php
+      foreach ($applist as $name=>$appitem) {
+          echo "<li><a href='".$path."app/view?name=".$name.$apikey."'>".$name."</a></li>";
+      }
+      ?>
+      <li><a href="<?php echo $path; ?>app/new"><i class="icon-plus icon-app-new"></i> Add new app</a></li>
     </ul>
-    
   </div>
 </div>
 
@@ -26,8 +23,7 @@
 var max_wrapper_width = 1150;
 
 $("#app_menu").parent().attr("href","#");
-$("#app_menu").find("i").removeClass("icon-leaf");
-$("#app_menu").find("i").addClass("icon-list");
+$("#app_menu").find("i").removeClass("icon-leaf").addClass("icon-th-list");
 
 var sidebar_enabled = true;
 var sidebar_visible = true;
@@ -37,14 +33,18 @@ sidebar_resize();
 function sidebar_resize() {
     var width = $(window).width();
     var height = $(window).height();
-    var nav = $(".navbar").height();
-    $(".sidenav").height(height-nav);
+    var height_nav = $(".navbar").height();
+    $(".sidenav").addClass('notransition').height(height-height_nav);
     
-    if (width<max_wrapper_width) {
-        hide_sidebar()
+    if (width < max_wrapper_width) {
+        hide_sidebar();
     } else {
-        if (sidebar_enabled) show_sidebar()
+        if (sidebar_enabled) show_sidebar();
     }
+    // Disable transitions for 350ms, which is the defined slide-in period
+    setTimeout(function() {
+    	$(".sidenav").removeClass('notransition');
+	}, 350);
 }
 
 $(window).resize(function(){

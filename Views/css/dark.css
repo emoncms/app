@@ -1,13 +1,92 @@
-#app-block {
-  padding:10px;
-}
-/*-------------------------------------*/
-
-h2 {
-  color:#fff;
+/* -------------------------------------------------------------------
+Side navigation
+--------------------------------------------------------------------*/
+.sidenav {
+  background: #333;
 }
 
-/*-------------------------------------*/
+/* The navigation menu links */
+.sidenav a {
+  color: #fff;
+}
+
+/* When you mouse over the navigation links, change their color */
+.sidenav a:hover, .offcanvas a:focus{
+  color: #f1f1f1;
+}
+
+.appmenu li:hover {
+  background-color: #444;
+}
+.appmenu .icon-app-new {
+  background-image: url("../../../../Lib/bootstrap/img/glyphicons-halflings-white.png");
+}
+
+/* -------------------------------------------------------------------
+Config
+--------------------------------------------------------------------*/
+.appconfig-box {
+  border: 1px solid #fff;
+  color: #fff;
+}
+.appconfig-description-inner {
+  padding-right: 20px;
+  color: #ccc;
+}
+
+.app-config select {
+  background-color: #333;
+  color: #fff;
+}
+.app-config input[type=text] {
+  background-color: #333;
+  color: #fff;
+}
+.app-config .icon-app-config {
+  background-image: url("../../../../Lib/bootstrap/img/glyphicons-halflings-white.png");
+}
+
+.app-config .feed-auto {
+  color: #ccc;
+}
+
+/* -------------------------------------------------------------------
+Applications
+--------------------------------------------------------------------*/
+body {
+  background-color: #222;
+}
+@media (max-width: 767px) {
+  body {padding:0};
+}
+
+#footer {
+  margin-left: 0px;
+  margin-right: 0px;
+  background-color: #181818;
+  color: #999;
+}
+
+.navbar-fixed-top {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.container-fluid { padding: 0 }
+
+/*------------------------------------------------------------------*/
+
+.ajax-loader{
+  width:32px;
+  height:32px;
+  position:fixed;
+  top:50%;
+  left:50%;
+  margin-top:-16px; /* negative half the size of height */
+  margin-left:-16px; /* negative half the size of width */
+}
+
+/*------------------------------------------------------------------*/
 
 .electric-title {
   font-weight:bold;
@@ -23,7 +102,7 @@ h2 {
   line-height: 1.1;
 }
 
-/*-------------------------------------*/
+/*------------------------------------------------------------------*/
 
 .visnavblock {
   color:#0699fa;
@@ -46,7 +125,15 @@ h2 {
   cursor: pointer;
 }
 
-/*-------------------------------------*/
+/*------------------------------------------------------------------*/
+
+#app-block {
+  padding:10px;
+}
+
+h2 {
+  color:#fff;
+}
 
 .appbox {
   width:20%;
@@ -74,7 +161,7 @@ h2 {
   font-size:16px;
 }
 
-/* --------------------------------------------------------*/
+/*------------------------------------------------------------------*/
 
 .col1 {
   width:100%;
@@ -86,36 +173,6 @@ h2 {
   float:left;
 }
 .col2-inner { padding:10px; }
-
-/*-------------------------------------*/
-
-.ajax-loader{
-  width:32px;
-  height:32px;
-  position:fixed;
-  top:50%;
-  left:50%;
-  margin-top:-16px; /* negative half the size of height */
-  margin-left:-16px; /* negative half the size of width */
-}
-
-/*-------------------------------------*/
-
-.container-fluid { padding:0 }
-
-#footer {
-  margin-left: 0px;
-  margin-right: 0px;
-}
-
-.navbar-fixed-top {
-  margin-left: 0px;
-  margin-right: 0px;
-}
-
-@media (max-width: 767px) {
-  body {padding:0};
-}
 
 @media (max-width: 450px) {
   .row { padding:10px; }
