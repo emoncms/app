@@ -12,7 +12,7 @@ Page wrapper
 Side nav
 --------------------------------------------------------------------*/
 .sidenav {
-  z-index: 1000;
+  z-index: 99;
   position: fixed;
   margin-top: 0px;
   margin-left: -250px;

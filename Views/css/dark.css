@@ -25,11 +25,11 @@ Side navigation
 /* -------------------------------------------------------------------
 Config
 --------------------------------------------------------------------*/
-.appconfig-box {
+.app-config-box {
   border: 1px solid #fff;
   color: #fff;
 }
-.appconfig-description-inner {
+.app-config-description-inner {
   padding-right: 20px;
   color: #ccc;
 }
@@ -127,7 +127,7 @@ body {
 
 /*------------------------------------------------------------------*/
 
-#app-block {
+#app-container {
   padding:10px;
 }
 
@@ -180,7 +180,7 @@ h2 {
   .appbox-value { font-size:28px }
   .appbox-title { font-size:16px }
 
-  #app-block { padding:5px; }
+  #app-container { padding:5px; }
   .col2 { width:100%; }
   .col1-inner { padding:5px; }
   .col2-inner { padding:5px; }

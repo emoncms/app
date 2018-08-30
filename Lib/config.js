@@ -21,7 +21,7 @@ var config = {
             $(".ajax-loader").hide();     // Hide AJAX loader
             config.UI();                  // Populate setup UI options
         } else {
-            $("#app-block").show();       // Show app block
+            $("#app-container").show();       // Show app block
             $(".ajax-loader").show();     // Show AJAX loader
             
             config.load();                // Merge db config into app config
@@ -30,23 +30,23 @@ var config = {
             config.showapp();
         }
 
-        $("body").on("click",".openconfig",function(){
-            $("#app-block").hide();
-            $("#app-setup").show();    
+        $("body").on("click",".app-setup",function(){
+            $("#app-container").hide();
+            $("#app-setup").show();
             config.UI();
             config.hideapp();
         });
 
-        $("body").on("click",".launchapp",function(){
+        $("body").on("click",".app-launch",function(){
             $(".ajax-loader").show();
             $("#app-setup").hide();
-            $("#app-block").show();
+            $("#app-container").show();
             config.load();
             if (!config.initialized) { config.initapp(); config.initialized = true; }
             config.showapp();
         });
         
-        $("body").on("click",".deleteapp",function(){
+        $("body").on("click",".app-delete",function(){
             console.log("delete: "+config.name);
             $.ajax({ 
                 url: path+"app/remove", 
@@ -79,30 +79,30 @@ var config = {
         // Draw the config interface from the config object:
         var out = "";
         for (var z in config.app) {
-            out += "<div class='appconfig-box' key='"+z+"'>";
+            out += "<div class='app-config-box' key='"+z+"'>";
             if (config.app[z].type=="feed") {
-                out += "<i class='status icon-ok-sign icon-app-config'></i> <b class='feedname' key='"+z+"'>"+config.app[z].autoname+" <span class='feed-auto'>[AUTO]</span></b><i class='appconfig-edit icon-pencil icon-app-config' style='float:right; cursor:pointer'></i>";
-                out += "<br><span class='appconfig-info'></span>";
+                out += "<i class='status icon-ok-sign icon-app-config'></i> <b class='feed-name' key='"+z+"'>"+config.app[z].autoname+" <span class='feed-auto'>[AUTO]</span></b><i class='app-config-edit icon-pencil icon-app-config' style='float:right; cursor:pointer'></i>";
+                out += "<br><span class='app-config-info'></span>";
                 out += "<div class='feed-select-div input-append'><select class='feed-select'></select><button class='btn feed-select-ok'>ok</button></div>";
             } else if (config.app[z].type=="value") {
                 out += "<i class='status icon-ok-sign icon-app-config'></i> <b>"+config.app[z].name+"</b>";
-                out += "<br><span class='appconfig-info'></span>";
-                out += "<input class='appconfig-value' type='text' key='"+z+"' value='"+config.app[z].default+"' / >";
+                out += "<br><span class='app-config-info'></span>";
+                out += "<input class='app-config-value' type='text' key='"+z+"' value='"+config.app[z].default+"' / >";
             } else if (config.app[z].type=="checkbox") {
                 out += "<i class='status icon-ok-sign icon-app-config'></i> <b>"+config.app[z].name+"</b>";
-                out += "<br><span class='appconfig-info'></span>";
+                out += "<br><span class='app-config-info'></span>";
                 var checked = ""; if (config.app[z].default) checked = "checked";
-                out += " <input class='appconfig-value' type='checkbox' key='"+z+"' "+checked+" / >";
+                out += " <input class='app-config-value' type='checkbox' key='"+z+"' "+checked+" / >";
             }
             out += "</div>";
         }
         
-        out += "<br><div style='text-align:center;'><button class='btn launchapp' style='padding:10px; display:none'>Launch App</button><button class='btn btn-danger deleteapp' style='padding:10px; margin-left:20px'><i class='icon-trash icon-app-config'></i> Delete</button></div>";
+        out += "<br><div style='text-align:center;'><button class='btn app-launch' style='padding:10px; display:none'>Launch App</button><button class='btn btn-danger app-delete' style='padding:10px; margin-left:20px'><i class='icon-trash icon-app-config'></i> Delete</button></div>";
         
         $(".app-config").html(out);
 
         for (var z in config.app) {
-            var configItem = $(".appconfig-box[key="+z+"]");
+            var configItem = $(".app-config-box[key="+z+"]");
             
             if (config.app[z].type=="feed") {
                 // Create list of feeds that satisfy engine requirement
@@ -121,7 +121,7 @@ var config = {
                     var feedid = config.db[z];
                     if (config.feedsbyid[feedid]!=undefined && config.engine_check(config.feedsbyid[feedid],config.app[z])) {
                         var keyappend = ""; if (z!=config.feedsbyid[feedid].name) keyappend = z+": ";
-                        configItem.find(".feedname").html(keyappend+config.feedsbyid[feedid].name);
+                        configItem.find(".feed-name").html(keyappend+config.feedsbyid[feedid].name);
                         configItem.find(".feed-select").val(feedid);
                         configItem.find(".feed-select-div").hide();
                         feedvalid = true;
@@ -152,26 +152,26 @@ var config = {
             }
             
             if (config.app[z].type=="value") {
-                if (config.db[z]!=undefined) configItem.find(".appconfig-value").val(config.db[z]);
+                if (config.db[z]!=undefined) configItem.find(".app-config-value").val(config.db[z]);
             }
 
             if (config.app[z].type=="checkbox") {
-                if (config.db[z]!=undefined) configItem.find(".appconfig-value")[0].checked = config.db[z];
+                if (config.db[z]!=undefined) configItem.find(".app-config-value")[0].checked = config.db[z];
             }
                         
             // Set description
-            configItem.find(".appconfig-info").html(config.app[z].description);
+            configItem.find(".app-config-info").html(config.app[z].description);
         }
         
         if (config.check()) {
-            $(".launchapp").show();
+            $(".app-launch").show();
         }
 
         // Brings up the feed selector if the pencil item is clicked
-        $(".appconfig-edit").unbind("click");
-        $(".appconfig-edit").click(function(){
+        $(".app-config-edit").unbind("click");
+        $(".app-config-edit").click(function(){
             var key = $(this).parent().attr("key");
-            var configItem = $(".appconfig-box[key="+key+"]");
+            var configItem = $(".app-config-box[key="+key+"]");
             
             if (config.app[key].type=="feed") {
                 configItem.find(".feed-select-div").show();
@@ -181,14 +181,14 @@ var config = {
         $(".feed-select-ok").unbind("click");
         $(".feed-select-ok").click(function(){
             var key = $(this).parent().parent().attr("key");
-            var configItem = $(".appconfig-box[key="+key+"]");
+            var configItem = $(".app-config-box[key="+key+"]");
             
             var feedid = $(this).parent().find(".feed-select").val();
             
             if (feedid!="auto" && feedid!=0) {
                 config.db[key] = feedid;
                 var keyappend = ""; if (key!=config.feedsbyid[feedid].name) keyappend = key+": ";
-                configItem.find(".feedname").html(keyappend+config.feedsbyid[feedid].name);
+                configItem.find(".feed-name").html(keyappend+config.feedsbyid[feedid].name);
                 configItem.find(".status").addClass("icon-ok-sign"); 
                 configItem.find(".status").removeClass("icon-remove-circle");
                 // Save config
@@ -196,7 +196,7 @@ var config = {
             
             if (feedid=="auto") {
                 delete config.db[key];
-                configItem.find(".feedname").html(config.app[key].autoname+" <span class='feed-auto'>[AUTO]</span>");
+                configItem.find(".feed-name").html(config.app[key].autoname+" <span class='feed-auto'>[AUTO]</span>");
             }
             
             if (feedid!=0 ) {
@@ -204,18 +204,18 @@ var config = {
                 config.set();
                 
                 if (config.check()) {
-                    $(".launchapp").show();
+                    $(".app-launch").show();
                 } else {
-                    $(".launchapp").hide();
+                    $(".app-launch").hide();
                 }
             }
         });
         
-        $(".appconfig-value").unbind("click");
-        $(".appconfig-value").change(function(){
+        $(".app-config-value").unbind("click");
+        $(".app-config-value").change(function(){
             var value = false;
             var key = $(this).parent().attr("key");
-            var configItem = $(".appconfig-box[key="+key+"]");
+            var configItem = $(".app-config-box[key="+key+"]");
             
             if (config.app[key].type=="value") {
                 value = $(this).val();

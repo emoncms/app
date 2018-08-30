@@ -43,12 +43,12 @@
 </style>
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
-<div id="app-block" style="display:none">
+<div id="app-container" style="display:none">
 
   <div class="col1"><div class="col1-inner">
     <div class="block-bound">
       <div style="float:right">
-          <div class="openconfig" style="padding-top:10px; padding-right:10px; cursor:pointer">
+          <div class="config" style="padding-top:10px; padding-right:10px; cursor:pointer">
               <i class="icon-wrench icon-white"></i>
           </div>
       </div>
@@ -173,10 +173,10 @@
 </div>    
   
 <div id="app-setup" class="block">
-    <h2 class="appconfig-title">My Heatpump</h2>
+    <h2 class="app-config-title">My Heatpump</h2>
 
-    <div class="appconfig-description">
-      <div class="appconfig-description-inner">
+    <div class="app-config-description">
+      <div class="app-config-description-inner">
         The My Heatpump app can be used to explore the performance of a heatpump including, electricity consumption, heat output, COP and system temperatures.
         <br><br>
         <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
@@ -189,7 +189,7 @@
     <div class="app-config"></div>
 </div>
 
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
+<div class="ajax-loader"></div>
 
 <script>
 
@@ -199,7 +199,7 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".openconfig").hide();
+if (!sessionwrite) $(".app-setup").hide();
 
 var feed = new Feed(apikey);
 

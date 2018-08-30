@@ -22,12 +22,12 @@ Side navigation
 /* -------------------------------------------------------------------
 Config
 --------------------------------------------------------------------*/
-.appconfig-box {
+.app-config-box {
   background-color: #ddd;
   border: 1px solid #d1d1d1;
   color: #333;
 }
-.appconfig-description-inner {
+.app-config-description-inner {
   padding-right: 20px;
   color: #333;
 }
@@ -68,21 +68,7 @@ body {
 
 .container-fluid {padding:0}
 
-/* --------------------------------------------------------*/
-
-.ajax-loader{
-  width:32px;
-  height:32px;
-  position:fixed;
-  top:50%;
-  left:50%;
-  margin-top:-16px; /* negative half the size of height */
-  margin-left:-16px; /* negative half the size of width */
-}
-
-/* --------------------------------------------------------*/
-
-#app-block {
+#app-container {
   padding:10px;
 }
 
@@ -133,7 +119,7 @@ body {
   .block-title { font-size:12px; padding:8px; }
   .dmy {display:none}
   
-  #app-block { padding:5px; }
+  #app-container { padding:5px; }
   .col2 { width:100%; }
   .col1-inner { padding:5px; }
   .col2-inner { padding:5px; }

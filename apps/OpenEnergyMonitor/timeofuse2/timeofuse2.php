@@ -38,12 +38,12 @@
 </style>
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
-<div id="app-block" style="display:none">
+<div id="app-container" style="display:none">
     
   <div class="col1"><div class="col1-inner">
   
     <div class="block-bound">
-      <div class="bluenav openconfig"><i class="icon-wrench icon-white"></i></div>
+      <div class="bluenav app-setup"><i class="icon-wrench icon-white"></i></div>
       <div class="bluenav viewcostenergy">ENERGY MODE</div>
       <!--<div class="bluenav cost">Cost</div>
       <div class="bluenav energy">Energy</div>-->
@@ -160,10 +160,10 @@
 </div>
 
 <div id="app-setup" class="block">
-    <h2 class="appconfig-title">Time of Use - flexible</h2>
+    <h2 class="app-config-title">Time of Use - flexible</h2>
 
-    <div class="appconfig-description">
-      <div class="appconfig-description-inner">
+    <div class="app-config-description">
+      <div class="app-config-description-inner">
         <p>The "Time of Use - flexible" app is a simple home energy monitoring app for exploring home or building
         electricity consumption and cost over time. It allows you to track multiple electricity tariffs as
         used in Australia. </p>
@@ -201,7 +201,7 @@
     <div class="app-config"></div>
 </div>
 
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
+<div class="ajax-loader"></div>
 
 <script>
 
@@ -211,7 +211,7 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".openconfig").hide();
+if (!sessionwrite) $(".app-setup").hide();
 
 var feed = new Feed(apikey);
 

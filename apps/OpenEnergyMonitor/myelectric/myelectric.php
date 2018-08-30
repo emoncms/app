@@ -14,7 +14,7 @@
 <script type="text/javascript" src="<?php echo $path; echo $appdir; ?>graph_energy.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; echo $appdir; ?>graph_power.js?v=<?php echo $v; ?>"></script> 
 
-<div id="app-block" style="display:none">
+<div id="app-container" style="display:none">
 
   <div class="col1"><div class="col1-inner">
 
@@ -26,7 +26,7 @@
         </div>
     
         <div style="float:right;">
-            <i class="openconfig icon-wrench icon-white" style="cursor:pointer; padding-right:5px"></i>
+            <i class="config icon-wrench icon-white" style="cursor:pointer; padding-right:5px"></i>
         </div>
     </div>
     
@@ -105,10 +105,10 @@
 </div>   
 
 <div id="app-setup" style="display:none; padding-top:50px" class="block">
-    <h2 class="appconfig-title">My Electric</h2>
+    <h2 class="app-config-title">My Electric</h2>
 
-    <div class="appconfig-description">
-      <div class="appconfig-description-inner">
+    <div class="app-config-description">
+      <div class="app-config-description-inner">
         The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time. It includes a real-time view and a historic kWh per day bar graph.
         <br><br>
         <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
@@ -133,7 +133,7 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".openconfig").hide();
+if (!sessionwrite) $(".app-setup").hide();
 
 var feed = new Feed(apikey);
 

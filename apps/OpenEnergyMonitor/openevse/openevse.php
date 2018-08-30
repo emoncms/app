@@ -36,11 +36,11 @@
 </style>
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
-<div id="app-block" style="display:none">
+<div id="app-container" style="display:none">
 
   <div class="col1"><div class="col1-inner">
     <div class="block-bound">
-      <div class="bluenav openconfig"><i class="icon-wrench icon-white"></i></div>
+      <div class="bluenav app-setup"><i class="icon-wrench icon-white"></i></div>
       <!--<div class="bluenav cost">Cost</div>
       <div class="bluenav energy">Energy</div>-->
       <div class="block-title">OPENEVSE</div>
@@ -126,10 +126,10 @@
 </div>
 
 <div id="app-setup" class="block">
-    <h2 class="appconfig-title">OpenEVSE</h2>
+    <h2 class="app-config-title">OpenEVSE</h2>
 
-    <div class="appconfig-description">
-      <div class="appconfig-description-inner">
+    <div class="app-config-description">
+      <div class="app-config-description-inner">
         This OpenEVSE app is designed to be used in conjunction with the OpenEVSE electric vehicle charging station.
         <br><br>
         <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
@@ -142,7 +142,7 @@
     <div class="app-config"></div>
 </div>
 
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
+<div class="ajax-loader"></div>
 
 <script>
 
@@ -152,7 +152,7 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".openconfig").hide();
+if (!sessionwrite) $(".app-setup").hide();
 
 var feed = new Feed(apikey);
 

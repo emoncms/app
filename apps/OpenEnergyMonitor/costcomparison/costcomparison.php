@@ -34,11 +34,11 @@ padding:10px;
 </style>
 
 <div class="font">
-    <div id="app-block" style="display:none">
+    <div id="app-container" style="display:none">
         <div class="col1">
             <div class="col1-inner">
                 <div class="block-bound">
-                    <div class="bluenav openconfig">
+                    <div class="bluenav app-setup">
                         <i class="icon-wrench icon-white"></i>
                     </div>
                     <div class="block-title">
@@ -100,11 +100,11 @@ padding:10px;
         </div>
     </div>
 </div>
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"></div>
+<div class="ajax-loader"></div>
 <div class="block" id="app-setup">
-    <h2 class="appconfig-title">Cost Comparison</h2>
-    <div class="appconfig-description">
-        <div class="appconfig-description-inner">The Cost Comparison app allows you to compare your energy usage against energy suppliers tariffs including new time of use tariffs.<br>
+    <h2 class="app-config-title">Cost Comparison</h2>
+    <div class="app-config-description">
+        <div class="app-config-description-inner">The Cost Comparison app allows you to compare your energy usage against energy suppliers tariffs including new time of use tariffs.<br>
         <br>
         <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.<br>
         <br>
@@ -126,7 +126,7 @@ padding:10px;
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".openconfig").hide();
+if (!sessionwrite) $(".app-setup").hide();
 
 var feed = new Feed(apikey);
 
