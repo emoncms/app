@@ -284,7 +284,7 @@ class PowerGraph extends Graph {
                 reserveSpace: false
             },
             yaxes: [
-                {min: 0, font: {size: this.view.flotFontSize, color: "#666"}, reserveSpace: false},
+                {font: {size: this.view.flotFontSize, color: "#666"}, reserveSpace: false},
                 {font: {size: this.view.flotFontSize, color: "#666"}, reserveSpace: false}
             ],
             grid: {

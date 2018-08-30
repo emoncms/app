@@ -21,7 +21,7 @@ var config = {
             $(".ajax-loader").hide();     // Hide AJAX loader
             config.UI();                  // Populate setup UI options
         } else {
-            $("#app-container").show();       // Show app block
+            $("#app-container").show();   // Show app container
             $(".ajax-loader").show();     // Show AJAX loader
             
             config.load();                // Merge db config into app config
@@ -307,6 +307,9 @@ var config = {
 
     engine_check: function(feed,conf)
     {
+    	if (typeof conf.engine === 'undefined') {
+    		return true;
+    	}
         if (isNaN(conf.engine)) {
             var engines = conf.engine.split(",");
             if (engines.length>0) {
@@ -317,7 +320,6 @@ var config = {
         } else {
             if (feed.engine*1==conf.engine*1) return true;
         }
-
         return false;
     },
 
