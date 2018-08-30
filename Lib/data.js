@@ -57,12 +57,11 @@ class DataCache {
             }
         }
         
-        var self = this;
         $.when.apply($, requests).done(function() {
 
             // Callback the PowerData list with all newly fetched data series
-            callback(self.cache);
-        });
+            callback(this.cache);
+        }.bind(this));
     }
     
     loadPower(start, end, interval, callback) {
@@ -78,12 +77,11 @@ class DataCache {
             }
         }
         
-        var self = this;
         $.when.apply($, requests).done(function() {
 
             // Callback the PowerData list with all newly fetched data series
-            callback(self.cache);
-        });
+            callback(this.cache);
+        }.bind(this));
     }
     
     loadDailyEnergy(start, end, callback) {
@@ -99,20 +97,18 @@ class DataCache {
             }
         }
         
-        var self = this;
         $.when.apply($, requests).done(function() {
 
             // Callback the PowerData list with all newly fetched data series
-            callback(self.cache);
-        });
+            callback(this.cache);
+        }.bind(this));
     }
     
     update(callback, updatePowerSeries) {
-        var self = this;
         return this.feed.getListById(function(result) {
 
-            for (var key in self.cache.series) {
-                var series = self.cache.get(key);
+            for (var key in this.cache.series) {
+                var series = this.cache.get(key);
                 var feed = result[series.id];
                 
                 if (feed.value != null) {
@@ -127,7 +123,7 @@ class DataCache {
                         series.append();
                         
                         // If the cache exceeds the specified datapoint limit, trim the first value
-                        if (series.getLength() > self.datapointsLimit) {
+                        if (series.getLength() > this.datapointsLimit) {
                             series.trim();
                         }
                     }
@@ -135,8 +131,8 @@ class DataCache {
             }
             
             // Callback the updated PowerData list
-            callback(self.cache);
-        });
+            callback(this.cache);
+        }.bind(this));
     }
     
     iteratePower(start, end, interval) {
@@ -254,7 +250,6 @@ class DataCollection {
         }
         else intervalMillis = interval*1000;
         
-        var self = this;
         var iterator = {};
         iterator[Symbol.iterator] = function *() {
             // The index object is used to remember the position of the last correctly aligned
@@ -268,8 +263,8 @@ class DataCollection {
                 timevalue['time'] = time;
 
                 // Iterate all configured energy data series and treat missing days as zero energy
-                for (var key in self.series) {
-                    var series = self.get(key);
+                for (var key in this.series) {
+                    var series = this.get(key);
                     if (series instanceof FixedIntervalPowerSeries ||
                             series instanceof IntermittentPowerSeries) {
                         
@@ -282,7 +277,8 @@ class DataCollection {
 
                 time += intervalMillis;
             }
-        }
+        }.bind(this)
+        
         return iterator;
     }
     
@@ -293,7 +289,6 @@ class DataCollection {
         today.setHours(0,0,0,0);
         var todayTime = today.getTime()
         
-        var self = this;
         var iterator = {};
         iterator[Symbol.iterator] = function *() {
             // The index object is used to remember the position of the last correctly aligned
@@ -308,8 +303,8 @@ class DataCollection {
                 day['time'] = time;
                 
                 // Iterate all configured energy data series and treat missing days as zero energy
-                for (var key in self.series) {
-                    var series = self.get(key);
+                for (var key in this.series) {
+                    var series = this.get(key);
                     if (series instanceof FixedIntervalEnergySeries ||
                             series instanceof IntermittentEnergySeries) {
                         
@@ -324,7 +319,7 @@ class DataCollection {
                 date.setDate(date.getDate()+1);
                 time = date.getTime();
             }
-        }
+        }.bind(this);
         return iterator;
     }
 }
@@ -362,16 +357,12 @@ class Series {
     }
     
     getEarliestTime() {
-        if (this.earliest == null) {
-            this.loadEarliest();
-        }
+        this.loadEarliest();
         return this.earliest[0];
     }
     
     getEarliestValue() {
-        if (this.earliest == null) {
-            this.loadEarliest();
-        }
+        this.loadEarliest();
         return this.earliest[1];
     }
 }
@@ -387,14 +378,13 @@ class FixedIntervalSeries extends Series {
     loadMeta(callback, async) {
         if (this.meta == null) {
             if (typeof callback == 'function' || async) {
-                var self = this;
                 return this.feed.getMeta(this.id, function(result) {
-                    self.meta = result;
+                    this.meta = result;
                     
                     if (typeof callback == 'function') {
                         callback(result);
                     }
-                });
+                }.bind(this));
             }
             else {
                 this.meta = this.feed.getMeta(this.id);
@@ -406,15 +396,14 @@ class FixedIntervalSeries extends Series {
         // For fixed interval feeds, this information is held in its meta data
         if (this.earliest == null) {
             if (typeof callback == 'function' || async) {
-                var self = this;
                 return this.loadMeta(function(result) {
-                    var earliestTime = self.meta.start_time*1000;
-                    self.earliest = self.getTimevalue(earliestTime);
+                    var earliestTime = this.meta.start_time*1000;
+                    this.earliest = this.getTimevalue(earliestTime);
                     
                     if (typeof callback == 'function') {
-                        callback(self.earliest);
+                        callback(this.earliest);
                     }
-                });
+                }.bind(this));
             }
             else {
                 this.loadMeta();
@@ -433,8 +422,8 @@ class FixedIntervalSeries extends Series {
             interval = this.meta.interval;
         }
         var intervalMillis = interval*1000;
-        
         var metaStartMillis = this.meta.start_time*1000;
+        
         if (start >= metaStartMillis) {
             start = metaStartMillis + Math.ceil((start - metaStartMillis)/intervalMillis)*intervalMillis;
         }
@@ -453,11 +442,11 @@ class FixedIntervalSeries extends Series {
                 
                 this.interval = intervalMillis;
                 
-                var self = this;
                 return this.feed.getData(this.id, start, end, interval, true, true, function(result) {
-                    self.data = result;
-                    self.latest = result[result.length-1];
-                });
+                    this.data = result;
+                    this.latest = result[result.length-1];
+                    
+                }.bind(this));
             }
         }
         else {
@@ -501,11 +490,11 @@ class IntermittentSeries extends Series {
             
             this.interval = intervalMillis;
             
-            var self = this;
             return this.feed.getData(this.id, start, end, interval, true, true, function(result) {
-                self.data = result;
-                self.latest = result[result.length-1];
-            });
+                this.data = result;
+                this.latest = result[result.length-1];
+                
+            }.bind(this));
         }
     }
     
@@ -514,14 +503,13 @@ class IntermittentSeries extends Series {
         // will be returned as the earliest time value
         if (this.earliest == null) {
             if (typeof callback == 'function' || async) {
-                var self = this;
                 return this.getTimevalue(0, function(result) {
-                    self.earliest = result;
+                    this.earliest = result;
 
                     if (typeof callback == 'function') {
-                        callback(self.earliest);
+                        callback(this.earliest);
                     }
-                });
+                }.bind(this));
             }
             else {
                 this.earliest = this.getTimevalue(0);
@@ -553,18 +541,25 @@ class FixedIntervalPowerSeries extends FixedIntervalSeries {
     }
     
     iterateTimevalue(time, interval, indices) {
-        var index = indices[this.key];
+    	var index = indices[this.key];
         var result = null;
-
+        
         for (var i=index; i<this.data.length; i++) {
-            if (this.data[i][0] == time) {
-                index = i;
+            var deltaThis = Math.abs(time - this.data[i][0]);
+            var deltaLast = Math.abs(time - this.data[index][0]);
+            
+            if (deltaThis > deltaLast) {
                 break;
+            }
+            else if (deltaThis <= deltaLast) {
+                index = i;
             }
         }
         indices[this.key] = index;
         
-        if (Math.abs(time - this.data[index][0]) < interval) {
+        if (typeof this.data[index] !== 'undefined' 
+                && Math.abs(time - this.data[index][0]) < interval) {
+        	
             result = this.data[index][1];
         }
         return result;
@@ -623,15 +618,14 @@ class FixedIntervalEnergySeries extends FixedIntervalSeries {
     loadDaily(start, end) {
         // Only reload, if the requested interval is not already hold in cache
         if (this.data.length < 1 || start < this.data[0][0] || end > this.latest[0]) {
-            var self = this;
             return this.feed.getDailyData(this.id, start, end, function(result) {
-                self.data = [];
+                this.data = [];
                 
                 // Remove NaN values
                 for (var i in result) {
-                    if (result[i][1] != null) self.data.push(result[i]);
+                    if (result[i][1] != null) this.data.push(result[i]);
                 }
-            });
+            }.bind(this));
         }
     }
     
@@ -683,7 +677,7 @@ class FixedIntervalEnergySeries extends FixedIntervalSeries {
         }
         indices[this.key] = index;
 
-        if (typeof this.data[index] != undefined) {
+        if (typeof this.data[index] !== 'undefined') {
             // Calculate the daily totals by subtracting each day from the upcoming day
             if (index < this.data.length-1 && 
                     Math.abs(time - this.data[index][0]) < interval &&
@@ -723,14 +717,13 @@ class IntermittentEnergySeries extends IntermittentSeries {
                 start <= (this.data[0][0] - interval) || 
                 end >= (this.latest[0] + interval)) {
             
-            var self = this;
             return this.feed.getDailyData(this.id, start, end, function(result) {
                 
                 // Remove NaN values
                 for (var i in result) {
-                    if (result[i][1] != null) self.data.push(result[i]);
+                    if (result[i][1] != null) this.data.push(result[i]);
                 }
-            });
+            }.bind(this));
         }
     }
     

@@ -5,24 +5,14 @@ class GraphView {
             return false;
         }
         this.container = container;
-        this.container.load(path + "Modules/app/lib/graph.html");
+        this.container.load(path + "Modules/app/lib/graph.php");
         
-        if (!$('#tooltip').length) {
-            $("<div id='tooltip'></div>").css({
-                position: 'absolute',
-                display: 'none',
-                border: '1px solid #000',
-                padding: '2px',
-                'font-weight': 'bold',
-                'text-align': 'left',
-                'background-color': '#fff',
-                color: '#000',
-                opacity: 0.80
-            }).appendTo("body");
-        }
+        if (!$('.graph-tooltip').length) $("<div class='graph-tooltip' style='display:none'></div>").appendTo("body");
+
         this.flotFontSize = 12;
         this.mode = "energy";
         this.unit = "energy";
+        this.ready = false;
     }
     
     init(data, config) {
@@ -36,6 +26,8 @@ class GraphView {
         this.data.loadMeta(function(result) {
             this.power.earliest = result.getEarliestPowerTime();
             this.energy.earliest = result.getEarliestEnergyTime();
+            this.ready = true;
+            
         }.bind(this));
     }
     
@@ -84,7 +76,7 @@ class Graph {
     }
     
     events() {
-        var plot = $('#placeholder', this.view.container).off();
+        var plot = $('.graph', this.view.container).off();
         plot.on('plothover', function(event, pos, item) {
             if (item) {
                 var itemTime = item.datapoint[0];
@@ -97,25 +89,23 @@ class Graph {
                     var cons = item.datapoint[1];
                     var text = "";
                     if (this.view.mode == "energy") {
-                        var header = days[date.getDay()]+", "+months[date.getMonth()]+" "+date.getDate();
-                        
+                        text = "<b>"+days[date.getDay()]+", "+months[date.getMonth()]+" "+date.getDate()+"</b><br>";
                         if (this.view.unit == "energy") {
-                            text = header+"<br>"+(cons).toFixed(1)+" kWh";
+                            text += (cons).toFixed(1)+" kWh";
                         } else {
-                            text = header+"<br>"+(cons).toFixed(1)+" kWh ("+this.view.currency+(cons*this.view.unitCost).toFixed(2)+")";
+                            text += (cons).toFixed(1)+" kWh ("+this.view.currency+(cons*this.view.unitCost).toFixed(2)+")";
                         }
                     }
                     else {
-                        var header = months[date.getMonth()]+" "+date.getDate()+", "+date.getHours()+":"+date.getMinutes();
-                        
+                        text = "<b>"+months[date.getMonth()]+" "+date.getDate()+", "+date.getHours()+":"+date.getMinutes()+"</b><br>";
                         if (cons < 10000) {
-                            text = header+"<br>"+Math.round(cons)+" W";
+                        	text += Math.round(cons)+" W";
                         }
                         else {
-                            text = header+"<br>"+(cons*0.001).toFixed(1)+" kW";
+                        	text += (cons*0.001).toFixed(1)+" kW";
                         }
                     }
-                    var tooltip = $('#tooltip').html(text).fadeIn(200);
+                    var tooltip = $('.graph-tooltip').html(text).fadeIn(200);
                     
                     var offset = 10; // use higher values for a little spacing between `x,y` and tooltip
                     var y = item.pageY - tooltip.height() - offset;
@@ -131,7 +121,7 @@ class Graph {
             }
             else {
                 this.selectedLast = null;
-                $("#tooltip").hide();
+                $(".graph-tooltip").hide();
             }
         }.bind(this));
         
@@ -144,9 +134,10 @@ class Graph {
                 this.view.mode = "power";
                 this.view.setTimeWindow(start, end);
                 this.view.load();
-                
-                $(".bargraph-navigation", this.view.container).hide();
-                $(".powergraph-navigation", this.view.container).show();
+
+                $(".graph-header .energy", this.view.container).hide();
+                $(".graph-header .power", this.view.container).show();
+                $(".graph-stats", this.view.container).hide();
             }
         }.bind(this));
         
@@ -159,6 +150,7 @@ class Graph {
             this.view.load();
             
             setTimeout(function() { this.panning = false; }.bind(this), 100);
+            
         }.bind(this));
     }
     
@@ -257,22 +249,22 @@ class PowerGraph extends Graph {
     }
     
     draw() {
-        $("#power-graph-footer", this.view.container).show();
+        $(".graph-info", this.view.container).show();
         
-        var windowPower = [];
-        var windowEnergy = 0.0;
+        var usePower = [];
+        var useEnergy = 0.0;
         for (var timevalue of this.view.data.iteratePower(this.start, this.end, this.interval)) {
             var time = timevalue.time;
             
             var power = timevalue['use'];
             if (power != null) {
-                if (windowPower.length > 0) {
-                    var timeDelta = (time - windowPower[windowPower.length-1][0])*0.001;
+                if (usePower.length > 0) {
+                    var timeDelta = (time - usePower[usePower.length-1][0])*0.001;
                     if (timeDelta < 3600) {
-                        windowEnergy += (power*timeDelta)/3600000;
+                        useEnergy += (power*timeDelta)/3600000;
                     }
                 }
-                windowPower.push([time, power]);
+                usePower.push([time, power]);
             }
         }
         
@@ -310,71 +302,77 @@ class PowerGraph extends Graph {
         }
 
         var series = [];
-        series.push({
-            data: windowPower, yaxis: 1, color: "#44b3e2", 
-            lines: { show: true, fill: 0.8, lineWidth: 0}
-        });
-        
-        var plot = $.plot($('#placeholder'), series, options);
-        
-        var windowStats = {};
-        windowStats["use"] = Graph.stats(windowPower);
-        
-        var windowStatsOut = "";
-        for (var z in windowStats) {
-            windowStatsOut += "<tr>";
-            windowStatsOut += "<td style='text-align:left'>"+z+"</td>";
-            windowStatsOut += "<td style='text-align:center'>"+windowStats[z].minval.toFixed(2)+"</td>";
-            windowStatsOut += "<td style='text-align:center'>"+windowStats[z].maxval.toFixed(2)+"</td>";
-            windowStatsOut += "<td style='text-align:center'>"+windowStats[z].diff.toFixed(2)+"</td>";
-            windowStatsOut += "<td style='text-align:center'>"+windowStats[z].mean.toFixed(2)+"</td>";
-            windowStatsOut += "<td style='text-align:center'>"+windowStats[z].stdev.toFixed(2)+"</td>";
-            windowStatsOut += "</tr>";
+        if (usePower.length > 0) {
+            series.push({
+                data: usePower, yaxis: 1, color: "#44b3e2", 
+                lines: { show: true, fill: 0.8, lineWidth: 0}
+            });
         }
-        $("#stats").html(windowStatsOut);
+        var plot = $.plot($('.graph'), series, options);
         
         if (this.view.unit == "energy") {
-            $("#window-kwh", this.view.container).html(windowEnergy.toFixed(1)+ "kWh");
+            $("#window-kwh", this.view.container).html(useEnergy.toFixed(1)+ " kWh");
             $("#window-cost", this.view.container).html("");
         } else {
-            $("#window-kwh", this.view.container).html(windowEnergy.toFixed(1)+ "kWh");
-            $("#window-cost", this.view.container).html("("+this.view.currency+(windowEnergy*this.view.unitCost).toFixed(2)+")");
+            $("#window-kwh", this.view.container).html(useEnergy.toFixed(1)+ " kWh");
+            $("#window-cost", this.view.container).html("("+this.view.currency+(useEnergy*this.view.unitCost).toFixed(2)+")");
         }
+        
+        var windowStats = {};
+        windowStats["use"] = Graph.stats(usePower);
+        
+        var windowStatsOut = "";
+        for (var key in windowStats) {
+            windowStatsOut += "<tr>";
+            windowStatsOut += "<td style='text-align:left'>"+key+"</td>";
+            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].minval.toFixed(2)+"</td>";
+            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].maxval.toFixed(2)+"</td>";
+            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].diff.toFixed(2)+"</td>";
+            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].mean.toFixed(2)+"</td>";
+            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].stdev.toFixed(2)+"</td>";
+            windowStatsOut += "</tr>";
+        }
+        $("#graph-stats").html(windowStatsOut);
+        
         this.events();
     }
     
     events() {
         super.events();
-        var navigation = $('.powergraph-navigation', this.view.container).off();
-        navigation.on('click', '.viewhistory', function() {
-            $(".powergraph-navigation", this.view.container).hide();
-            $(".bargraph-navigation", this.view.container).show();
-
+        var navigation = $('.graph-header', this.view.container).off('click');
+        navigation.on('click', '.history', function() {
+            $(".graph-header .power", this.view.container).hide();
+            $(".graph-header .energy", this.view.container).show();
+            $(".graph-stats", this.view.container).hide();
+            $("#graph-stats", this.view.container).empty();
+            
             this.view.mode = "energy";
             this.view.load();
+            
         }.bind(this));
         
         navigation.on('click', '.time', function(event) {
-            var days = event.target.getAttribute('time');
-            this.setTimeWindowDays(days/24.0);
+            var days = $(event.target).data('days');
+            this.setTimeWindowDays(days);
             this.load();
+            
         }.bind(this));
         
-        $("#zoomout", this.view.container).off().on('click', function() { this.zoomOut(); }.bind(this));
-        $("#zoomin", this.view.container).off().on('click', function() { this.zoomIn(); }.bind(this));
-        $('#right', this.view.container).off().on('click', function() { this.panRight(); }.bind(this));
-        $('#left', this.view.container).off().on('click', function() { this.panLeft(); }.bind(this));
+        navigation.on('click', '.zoom-in', function() { this.zoomIn(); }.bind(this));
+        navigation.on('click', '.zoom-out', function() { this.zoomOut(); }.bind(this));
+        navigation.on('click', '.pan-left', function() { this.panLeft(); }.bind(this));
+        navigation.on('click', '.pan-right', function() { this.panRight(); }.bind(this));
         
-        $("#advanced-toggle", this.view.container).off().on('click', function(event) {
-            var element = $(event.target.id, this.view.container);
-            var mode = element.html();
-            if (mode == "SHOW DETAIL") {
-                $("#advanced-block", this.view.container).show();
-                element.html("HIDE DETAIL");
+        $('.graph-footer').off('click').on('click', '.details', function(event) {
+            var action = $(event.target, this.view.container);
+            var mode = action.html();
+            if (mode.toLowerCase().indexOf('show') !== -1) {
+                $(".graph-stats", this.view.container).slideDown(350);
+                action.html("HIDE DETAIL");
             }
             else {
-                $("#advanced-block", this.view.container).hide();
-                element.html("SHOW DETAIL");
+                $(".graph-stats", this.view.container).slideUp(350);
+                action.html("SHOW DETAIL");
             }
         }.bind(this));
     }
@@ -498,7 +496,7 @@ class EnergyGraph extends Graph {
     }
     
     draw() {
-        $("#power-graph-footer", this.view.container).hide();
+        $(".graph-info", this.view.container).hide();
         
         var periodEnergy = 0;
         var dailyEnergy = [];
@@ -543,34 +541,23 @@ class EnergyGraph extends Graph {
             data: dailyEnergy, color: "#44b3e2",
             bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 1.0, lineWidth: 0}
         });
-        
-        var plot = $.plot($('#placeholder', this.view.container), series, options);
-        $('#placeholder', this.view.container).append("<div id='bargraph-label' style='position:absolute; left:50px; top:30px; color:#666; font-size:12px'></div>");
+        $.plot($('.graph', this.view.container), series, options);
         
         this.events();
     }
     
     events() {
         super.events();
-        var navigation = $('.bargraph-navigation', this.view.container).off();
-        navigation.on('click', '.bargraph-week', function() {
-            this.setTimeWindowDays(7);
-            this.periodText = "week";
-
-            this.load();
-        }.bind(this));
-        
-        navigation.on('click', '.bargraph-month', function() {
-            this.setTimeWindowDays(30);
-            this.periodText = "month";
-
-            this.load();
-        }.bind(this));
-        
-        navigation.on('click', '.bargraph-alltime', function() {
-            this.setTimeWindow(this.earliest, (new Date()).getTime());
-            this.periodText = "period";
-            
+        $('.graph-header', this.view.container).off('click').on('click', '.time', function(event) {
+            var time = $(event.target);
+            var text = time.data('text');
+            if (text == 'all') {
+                this.setTimeWindow(this.earliest, (new Date()).getTime());
+            }
+            else {
+                this.setTimeWindowDays(time.data('days'));
+            }
+            this.periodText = text;
             this.load();
         }.bind(this));
     }
