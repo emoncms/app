@@ -427,6 +427,7 @@ class FixedIntervalSeries extends Series {
                 return this.feed.getData(this.id, start, end, interval, true, true, true).then(function(result) {
                     this.data = result;
                     this.latest = result[result.length-1];
+                    return result;
                     
                 }.bind(this));
             }
@@ -469,6 +470,7 @@ class IntermittentSeries extends Series {
             return this.feed.getData(this.id, start, end, interval, true, true, true).then(function(result) {
                 this.data = result;
                 this.latest = result[result.length-1];
+                return result;
                 
             }.bind(this));
         }
