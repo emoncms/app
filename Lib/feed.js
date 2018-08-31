@@ -1,19 +1,16 @@
 class Feed {
 
     constructor(apikey) {
-    	if (typeof apikey !== 'undefined' || this.apikey != "") {
-    		this.apikey = "?apikey=" + apikey;
-    	}
-    	else {
-    		this.apikey = "";
-    	}
+        if (typeof apikey !== 'undefined' || this.apikey != "") {
+            this.apikey = "?apikey=" + apikey;
+        }
+        else {
+            this.apikey = "";
+        }
     }
 
-    getList(callback) {
-        var async = false;
-        if (typeof callback === 'function') {
-            async = true;
-        }
+    getList(async) {
+        if (typeof async === 'undefined') async = false;
         
         var feeds = {};
         var promise = $.ajax({                                      
@@ -23,71 +20,60 @@ class Feed {
             success(result) {
                 if (!result || result === null || result === "" || result.constructor != Array) {
                     console.log("ERROR", "feed.list received invalid result: " + result.message);
+                    // TODO: throw Exception
                 }
-                else feeds = result;
-
-                if (async) {
-                    callback(feeds);
-                }
+                else if(!async) feeds = result;
+                return result;
             }
         });
-        
         if (async) {
             return promise;
         }
-        else return feeds;
+        return feeds;
     }
 
-    getListById(callback) {
-        var result;
-        if (typeof callback === 'function') {
-            result = this.getList(function(feeds) {
-                var feedsById = {};
-                for (var i in feeds) feedsById[feeds[i].id] = feeds[i];
-                
-                if (typeof callback === 'function') {
-                    callback(feedsById);
-                }
-            });
-        }
-        else {
-            result = {};
-            
-            var feeds = this.getList();
+    getListById(async) {
+        if (typeof async === 'undefined') async = false;
+        
+        var feedsById = function(feeds) {
+            var result = {};
             for (var i in feeds) result[feeds[i].id] = feeds[i];
+            
+            return result;
         }
-        
-        return result;
-    }
-
-    getListByName(callback) {
-        var result;
-        if (typeof callback === 'function') {
-            result = this.getList(function(feeds) {
-                var feedsByName = {};
-                for (var i in feeds) feedsByName[feeds[i].name] = feeds[i];
-                
-                if (typeof callback === 'function') {
-                    callback(feedsByName);
-                }
+        if (async) {
+            return this.getList(true).then(function(feeds) {
+                return feedsById(feeds);
             });
         }
         else {
-            result = {};
-            
-            var feeds = this.getList();
-            for (var i in feeds) result[feeds[i].name] = feeds[i];
+            return feedsById(this.getList());
         }
-        
-        return result;
     }
 
-    getMeta(id, callback) {
-        var async = false;
-        if (typeof callback === 'function') {
-            async = true;
+    getListByName(async) {
+        if (typeof async === 'undefined') async = false;
+        
+        var feedsByName = function(feeds) {
+            var result = {};
+            for (var i in feeds) result[feeds[i].name] = feeds[i];
+            
+            return result;
         }
+        var result;
+        if (async) {
+            return this.getList(true).then(function(feeds) {
+                return feedsByName(feeds);
+            });
+        }
+        else {
+            return feedsByName(this.getList());
+        }
+    }
 
+    getMeta(id, async) {
+        if (typeof async === 'undefined') async = false;
+        
         var meta = {};
         var promise = $.ajax({                                      
             url: path+"feed/getmeta.json"+this.apikey,
@@ -97,26 +83,20 @@ class Feed {
             success(result) {
                 if (!result || result === null || result === "" || result.constructor != Object) {
                     console.log("ERROR", "feed.getMeta received invalid result: " + result.message);
+                    // TODO: throw Exception
                 }
-                else meta = result;
-
-                if (async) {
-                    callback(meta);
-                }
+                else if(!async) meta = result;
+                return result;
             }
         });
-        
         if (async) {
             return promise;
         }
-        else return meta;
+        return meta;
     }
 
-    getData(id, start, end, interval, skipMissing, limitInterval, callback) {
-        var async = false;
-        if (typeof callback === 'function') {
-            async = true;
-        }
+    getData(id, start, end, interval, skipMissing, limitInterval, async) {
+        if (typeof async === 'undefined') async = false;
         
         if (typeof skipMissing == 'boolean') {
             skipMissing = skipMissing ? 1 : 0;
@@ -124,7 +104,7 @@ class Feed {
         if (typeof limitInterval == 'boolean') {
             limitInterval = limitInterval ? 1 : 0;
         }
-
+        
         var data = [];
         var promise = $.ajax({    
             url: path+"feed/data.json"+this.apikey,
@@ -134,30 +114,24 @@ class Feed {
             success(result) {
                 if (!result || result === null || result === "" || result.constructor != Array) {
                     console.log("ERROR", "feed.getData received invalid result: " + result.message);
+                    // TODO: throw Exception
                 }
-                else data = result;
-
-                if (async) {
-                    callback(data);
-                }
+                else if(!async) data = result;
+                return result;
             }
         });
-        
         if (async) {
             return promise;
         }
-        else return data;
+        return data;
     }
 
-    getDailyData(id, start, end, callback) {
-        return this.getDMYData(id, start, end, "daily", callback);
+    getDailyData(id, start, end, async) {
+        return this.getDMYData(id, start, end, "daily", async);
     }
 
-    getDMYData(id, start, end, mode, callback) {
-        var async = false;
-        if (typeof callback === 'function') {
-            async = true;
-        }
+    getDMYData(id, start, end, mode, async) {
+        if (typeof async === 'undefined') async = false;
         
         var data = [];
         var promise = $.ajax({
@@ -168,30 +142,24 @@ class Feed {
             success(result) {
                 if (!result || result === null || result === "" || result.constructor != Array) {
                     console.log("ERROR", "feed.getDMY received invalid result: " + result.message);
+                    // TODO: throw Exception
                 }
-                else data = result;
-                
-                if (async) {
-                    callback(data);
-                }
+                else if(!async) data = result;
+                return result;
             }
         });
-        
         if (async) {
             return promise;
         }
-        else return data;
+        return data;
     }
 
-    getDailyTimeOfUse(id, start, end, split, callback) {
-        return this.getDMYTimeOfUse(id, start, end, "daily", split, callback);
+    getDailyTimeOfUse(id, start, end, split, async) {
+        return this.getDMYTimeOfUse(id, start, end, "daily", split, async);
     }
 
-    getDMYTimeOfUse(id, start, end, mode, split, callback) {
-        var async = false;
-        if (typeof callback === 'function') {
-            async = true;
-        }
+    getDMYTimeOfUse(id, start, end, mode, split, async) {
+        if (typeof async === 'undefined') async = false;
         
         var data = [];
         var promise = $.ajax({
@@ -202,26 +170,20 @@ class Feed {
             success(result) {
                 if (!result || result === null || result === "" || result.constructor != Array) {
                     console.log("ERROR", "feed.getDataDMY received invalid result: " + result.message);
+                    // TODO: throw Exception
                 }
-                else data = result;
-                
-                if (async) {
-                    callback(data);
-                }
+                else if(!async) data = result;
+                return result;
             }
         });
-        
         if (async) {
             return promise;
         }
-        else return data;
+        return data;
     }
 
-    getAverage(id, start, end, interval, callback) {
-        var async = false;
-        if (typeof callback === 'function') {
-            async = true;
-        }
+    getAverage(id, start, end, interval, async) {
+        if (typeof async === 'undefined') async = false;
         
         var data = [];
         var promise = $.ajax({                                      
@@ -232,45 +194,34 @@ class Feed {
             success: function(result) {
                 if (!result || result === null || result === "" || result.constructor != Array) {
                     console.log("ERROR", "feed.getAverage received invalid result: " + result.message);
+                    // TODO: throw Exception
                 }
-                else data = result;
-                
-                if (async) {
-                    callback(data);
-                }
+                else if(!async) data = result;
+                return result;
             }
         });
-        
         if (async) {
             return promise;
         }
-        else return data;
+        return data;
     }
 
-    getValue(id, time, callback)  {
-        var result;
-        if (typeof callback === 'function') {
-            result = this.getData(id, time, time+1000, 1, false, false, function(data) {
-                var value = data.length > 0 ? data[0] : null;
-                
-                if (typeof callback === 'function') {
-                    callback(value);
-                }
+    getValue(id, time, async)  {
+        if (typeof async === 'undefined') async = false;
+        
+        if (async) {
+            return this.getData(id, time, time+1000, 1, false, false, true).then(function(data) {
+                return data.length > 0 ? data[0] : null;
             });
         }
         else {
             var data = this.getData(id, time, time+1000, 1, false, false);
-            result = data.length > 0 ? data[0] : null;
+            return data.length > 0 ? data[0] : null;
         }
-        
-        return result;
     }
 
-    getRemoteData(id, start, end, interval, skipMissing, limitInterval, callback) {
-        var async = false;
-        if (typeof callback === 'function') {
-            async = true;
-        }
+    getRemoteData(id, start, end, interval, skipMissing, limitInterval, async) {
+        if (typeof async === 'undefined') async = false;
         
         if (typeof skipMissing == 'boolean') {
             skipMissing = skipMissing ? 1 : 0;
@@ -288,26 +239,20 @@ class Feed {
             success(result) {
                 if (!result || result === null || result === "" || result.constructor != Array) {
                     console.log("ERROR", "feed.getDataRemote received invalid result: " + result.message);
+                    // TODO: throw Exception
                 }
-                else data = result;
-                
-                if (async) {
-                    callback(data);
-                }
+                else if(!async) data = result;
+                return data;
             }
         });
-        
         if (async) {
             return promise;
         }
-        else return data;
+        return data;
     }
 
-    getRemoteValue(id, callback) {
-        var async = false;
-        if (typeof callback === 'function') {
-            async = true;
-        }
+    getRemoteValue(id, async) {
+        if (typeof async === 'undefined') async = false;
         
         var value = 0;
         var promise = $.ajax({                                      
@@ -318,18 +263,15 @@ class Feed {
             success(result) {
                 if (isNaN(result)) {
                     console.log("ERROR", "feed.getValueRemote received value that is not a number: " + result.message);
+                    // TODO: throw Exception
                 }
-                else value = parseFloat(result);
-                
-                if (async) {
-                    callback(data);
-                }
+                else if(!async) value = parseFloat(result);
+                return result;
             }
         });
-        
         if (async) {
             return promise;
         }
-        else return value;
+        return value;
     }
 }

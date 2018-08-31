@@ -307,9 +307,9 @@ var config = {
 
     engine_check: function(feed,conf)
     {
-    	if (typeof conf.engine === 'undefined') {
-    		return true;
-    	}
+        if (typeof conf.engine === 'undefined') {
+            return true;
+        }
         if (isNaN(conf.engine)) {
             var engines = conf.engine.split(",");
             if (engines.length>0) {

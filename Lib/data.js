@@ -7,7 +7,7 @@ class DataCache {
         this.cache = null;
     }
     
-    init(keys, config) {
+    set(keys, config) {
         var data = {};
         for (var key in config.app) {
             if (config.app[key]['value'] && keys.indexOf(key) > -1) {
@@ -38,33 +38,23 @@ class DataCache {
         return this.cache.get(key);
     }
     
-    loadMeta(callback) {
+    loadMeta() {
         // Build an array of ajax promise objects and wait for them to finish
         var requests = [];
         for (var key in this.cache.series) {
             var series = this.cache.get(key);
-            
-            if (series instanceof FixedIntervalPowerSeries ||
-                    series instanceof FixedIntervalEnergySeries) {
-                // Always initialize meta data for fixed interval feeds, to enable all load
-                // requests to be aligned with the interval, to improve performance
-                requests.push(series.loadMeta(undefined, true));
-            }
-            else if (series instanceof IntermittentPowerSeries ||
-                    series instanceof IntermittentEnergySeries) {
-                // Initialize the feeds earliest data, to enable verifications for consumption intervals
-                requests.push(series.loadEarliest(undefined, true));
-            }
-        }
-        
-        $.when.apply($, requests).done(function() {
 
-            // Callback the PowerData list with all newly fetched data series
-            callback(this.cache);
+            // Initialize the feeds earliest data, to enable verifications for consumption intervals
+            // Fixed interval feeds will initialize meta data as well, to enable all load requests
+            // to be aligned with the interval
+            requests.push(series.loadEarliest());
+        }
+        return Promise.all(requests).then(function() {
+            return this.cache;
         }.bind(this));
     }
     
-    loadPower(start, end, interval, callback) {
+    loadPower(start, end, interval) {
         // Build an array of ajax promise objects and wait for them to finish
         var requests = [];
         for (var key in this.cache.series) {
@@ -76,15 +66,12 @@ class DataCache {
                 requests.push(series.load(start, end, interval));
             }
         }
-        
-        $.when.apply($, requests).done(function() {
-
-            // Callback the PowerData list with all newly fetched data series
-            callback(this.cache);
+        return Promise.all(requests).then(function() {
+            return this.cache;
         }.bind(this));
     }
     
-    loadDailyEnergy(start, end, callback) {
+    loadDailyEnergy(start, end) {
         
         // Build an array of ajax promise objects and wait for them to finish
         var requests = [];
@@ -96,17 +83,13 @@ class DataCache {
                 requests.push(series.loadDaily(start, end));
             }
         }
-        
-        $.when.apply($, requests).done(function() {
-
-            // Callback the PowerData list with all newly fetched data series
-            callback(this.cache);
+        return Promise.all(requests).then(function() {
+            return this.cache;
         }.bind(this));
     }
     
-    update(callback, updatePowerSeries) {
-        return this.feed.getListById(function(result) {
-
+    update(updatePowerSeries) {
+        return this.feed.getListById(true).then(function(result) {
             for (var key in this.cache.series) {
                 var series = this.cache.get(key);
                 var feed = result[series.id];
@@ -129,9 +112,6 @@ class DataCache {
                     }
                 }
             }
-            
-            // Callback the updated PowerData list
-            callback(this.cache);
         }.bind(this));
     }
     
@@ -186,23 +166,17 @@ class DataCollection {
     }
     
     getEarliestTime(key) {
-        if (this.get(key) != null) {
-            if (this.get(key).earliest == null) {
-                this.get(key).loadEarliest();
-            }
+        if (this.get(key) != null && this.get(key).earliest != null) {
             return this.get(key).earliest[0];
         }
-        else return null;
+        return null;
     }
     
     getEarliestValue(key) {
-        if (this.get(key) != null) {
-            if (this.get(key).earliest == null) {
-                this.get(key).loadEarliest();
-            }
+        if (this.get(key) != null && this.get(key).earliest != null) {
             return this.get(key).earliest[1];
         }
-        else return null;
+        return null;
     }
     
     getEarliestPowerTime() {
@@ -213,7 +187,7 @@ class DataCollection {
                     series instanceof IntermittentPowerSeries) {
                 
                 var time = series.getEarliestTime();
-                if (earliestTime == null || time < earliestTime) {
+                if (time != null && (earliestTime == null || time < earliestTime)) {
                     earliestTime = time;
                 }
             }
@@ -229,7 +203,7 @@ class DataCollection {
                     series instanceof IntermittentEnergySeries) {
                 
                 var time = series.getEarliestTime();
-                if (earliestTime == null || time < earliestTime) {
+                if (time != null && (earliestTime == null || time < earliestTime)) {
                     earliestTime = time;
                 }
             }
@@ -357,13 +331,17 @@ class Series {
     }
     
     getEarliestTime() {
-        this.loadEarliest();
-        return this.earliest[0];
+        if (this.earliest != null) {
+            return this.earliest[0];
+        }
+        return null;
     }
     
     getEarliestValue() {
-        this.loadEarliest();
-        return this.earliest[1];
+        if (this.earliest != null) {
+            return this.earliest[1];
+        }
+        return null;
     }
 }
 
@@ -374,43 +352,47 @@ class FixedIntervalSeries extends Series {
         
         this.meta = null;
     }
-    
-    loadMeta(callback, async) {
-        if (this.meta == null) {
-            if (typeof callback == 'function' || async) {
-                return this.feed.getMeta(this.id, function(result) {
-                    this.meta = result;
-                    
-                    if (typeof callback == 'function') {
-                        callback(result);
-                    }
-                }.bind(this));
+
+    getTimevalue(time, async) {
+        // If the meta data is already initialized, align the requested time with the feeds meta data
+        if (this.meta != null) {
+            var metaIntervalMillis = this.meta.interval*1000;
+            var metaStartMillis = this.meta.start_time*1000;
+
+            if (time >= metaStartMillis) {
+                time = metaStartMillis + Math.round((time - metaStartMillis)/metaIntervalMillis)*metaIntervalMillis;
+            }
+            else if (typeof async !== 'undefined' && async) {
+                return $.when(null);
             }
             else {
-                this.meta = this.feed.getMeta(this.id);
+                return null;
             }
         }
+        
+        // TODO: Check if the value maybe is hold in cache
+        return this.feed.getValue(this.id, time, async);
     }
 
-    loadEarliest(callback, async) {
+    loadMeta() {
+        return this.feed.getMeta(this.id, true).then(function(result) {
+            this.meta = result;
+            return result;
+            
+        }.bind(this));
+    }
+
+    loadEarliest() {
         // For fixed interval feeds, this information is held in its meta data
-        if (this.earliest == null) {
-            if (typeof callback == 'function' || async) {
-                return this.loadMeta(function(result) {
-                    var earliestTime = this.meta.start_time*1000;
-                    this.earliest = this.getTimevalue(earliestTime);
-                    
-                    if (typeof callback == 'function') {
-                        callback(this.earliest);
-                    }
-                }.bind(this));
-            }
-            else {
-                this.loadMeta();
-                var earliestTime = this.meta.start_time*1000;
-                this.earliest = this.getTimevalue(earliestTime);
-            }
-        }
+        return this.loadMeta().then(function(result) {
+            var earliestTime = result.start_time*1000;
+            return this.getTimevalue(earliestTime, true);
+            
+        }.bind(this)).then(function(result) {
+            this.earliest = result;
+            return result;
+            
+        }.bind(this));
     }
 
     load(start, end, interval) {
@@ -442,7 +424,7 @@ class FixedIntervalSeries extends Series {
                 
                 this.interval = intervalMillis;
                 
-                return this.feed.getData(this.id, start, end, interval, true, true, function(result) {
+                return this.feed.getData(this.id, start, end, interval, true, true, true).then(function(result) {
                     this.data = result;
                     this.latest = result[result.length-1];
                     
@@ -453,32 +435,26 @@ class FixedIntervalSeries extends Series {
             this.data = [];
             this.latest = null;
         }
-    }
-
-    getTimevalue(time, callback) {
-        // If the meta data is already initialized, align the requested time with the feeds meta data
-        if (this.meta != null) {
-            var metaIntervalMillis = this.meta.interval*1000;
-            var metaStartMillis = this.meta.start_time*1000;
-
-            if (time >= metaStartMillis) {
-                time = metaStartMillis + Math.round((time - metaStartMillis)/metaIntervalMillis)*metaIntervalMillis;
-            }
-            else return null;
-        }
-        
-        // TODO: Check if the value maybe is hold in cache
-        return this.feed.getValue(this.id, time, callback);
+        return $.when(null);
     }
 }
 
 class IntermittentSeries extends Series {
 
-    getTimevalue(time, callback) {
+    getTimevalue(time, async) {
         // TODO: Check if the value maybe is hold in cache
-        return this.feed.getValue(this.id, time, callback);
+        return this.feed.getValue(this.id, time, async);
     }
-    
+
+    loadEarliest() {
+        // For intermittent feeds like for the PHPTimeseries engine, the closest value to 0
+        // will be returned as the earliest time value
+        return this.getTimevalue(0, true).then(function(result) {
+            this.earliest = result;
+            
+        }.bind(this));
+    }
+
     load(start, end, interval) {
         var intervalMillis = interval*1000;
         
@@ -490,31 +466,13 @@ class IntermittentSeries extends Series {
             
             this.interval = intervalMillis;
             
-            return this.feed.getData(this.id, start, end, interval, true, true, function(result) {
+            return this.feed.getData(this.id, start, end, interval, true, true, true).then(function(result) {
                 this.data = result;
                 this.latest = result[result.length-1];
                 
             }.bind(this));
         }
-    }
-    
-    loadEarliest(callback, async) {
-        // For intermittent feeds like for the PHPTimeseries engine, the closest value to 0
-        // will be returned as the earliest time value
-        if (this.earliest == null) {
-            if (typeof callback == 'function' || async) {
-                return this.getTimevalue(0, function(result) {
-                    this.earliest = result;
-
-                    if (typeof callback == 'function') {
-                        callback(this.earliest);
-                    }
-                }.bind(this));
-            }
-            else {
-                this.earliest = this.getTimevalue(0);
-            }
-        }
+        return $.when(null);
     }
 }
 
@@ -541,7 +499,7 @@ class FixedIntervalPowerSeries extends FixedIntervalSeries {
     }
     
     iterateTimevalue(time, interval, indices) {
-    	var index = indices[this.key];
+        var index = indices[this.key];
         var result = null;
         
         for (var i=index; i<this.data.length; i++) {
@@ -559,7 +517,7 @@ class FixedIntervalPowerSeries extends FixedIntervalSeries {
         
         if (typeof this.data[index] !== 'undefined' 
                 && Math.abs(time - this.data[index][0]) < interval) {
-        	
+            
             result = this.data[index][1];
         }
         return result;
@@ -618,7 +576,7 @@ class FixedIntervalEnergySeries extends FixedIntervalSeries {
     loadDaily(start, end) {
         // Only reload, if the requested interval is not already hold in cache
         if (this.data.length < 1 || start < this.data[0][0] || end > this.latest[0]) {
-            return this.feed.getDailyData(this.id, start, end, function(result) {
+            return this.feed.getDailyData(this.id, start, end, true).then(function(result) {
                 this.data = [];
                 
                 // Remove NaN values
@@ -627,6 +585,7 @@ class FixedIntervalEnergySeries extends FixedIntervalSeries {
                 }
             }.bind(this));
         }
+        return $.when(null);
     }
     
     getDailyEnergy(time) {
@@ -717,7 +676,8 @@ class IntermittentEnergySeries extends IntermittentSeries {
                 start <= (this.data[0][0] - interval) || 
                 end >= (this.latest[0] + interval)) {
             
-            return this.feed.getDailyData(this.id, start, end, function(result) {
+            return this.feed.getDailyData(this.id, start, end, true).then(function(result) {
+                this.data = [];
                 
                 // Remove NaN values
                 for (var i in result) {
@@ -725,6 +685,7 @@ class IntermittentEnergySeries extends IntermittentSeries {
                 }
             }.bind(this));
         }
+        return $.when(null);
     }
     
     getDailyEnergy(time) {

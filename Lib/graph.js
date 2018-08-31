@@ -15,7 +15,9 @@ class GraphView {
         this.ready = false;
     }
     
-    init(data, config) {
+    set(data, config) {
+        this.ready = false;
+        
         this.data = data;
         this.power = new PowerGraph(this);
         this.energy = new EnergyGraph(this);
@@ -23,20 +25,21 @@ class GraphView {
         this.unitCost = config.app.unitcost.value;
         this.currency = config.app.currency.value;
         
-        this.data.loadMeta(function(result) {
-            this.power.earliest = result.getEarliestPowerTime();
-            this.energy.earliest = result.getEarliestEnergyTime();
-            this.ready = true;
-            
+        return this.data.loadMeta()
+            .then(function(result) {
+                this.power.earliest = result.getEarliestPowerTime();
+                this.energy.earliest = result.getEarliestEnergyTime();
+                this.ready = true;
+                
         }.bind(this));
     }
     
-    load(callback) {
+    load() {
         if (this.mode == "power") {
-            this.power.load(callback);
+            return this.power.load();
         }
         else if (this.mode == "energy") {
-            this.energy.load(callback);
+            return this.energy.load();
         }
     }
     
@@ -66,6 +69,7 @@ class GraphView {
 class Graph {
     constructor(view) {
         this.view = view;
+        this.plot = null;
         
         this.earliest = 0;
         this.start = 0;
@@ -86,23 +90,23 @@ class Graph {
                     var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
                     var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
                     
-                    var cons = item.datapoint[1];
+                    var value = item.datapoint[1];
                     var text = "";
                     if (this.view.mode == "energy") {
                         text = "<b>"+days[date.getDay()]+", "+months[date.getMonth()]+" "+date.getDate()+"</b><br>";
                         if (this.view.unit == "energy") {
-                            text += (cons).toFixed(1)+" kWh";
+                            text += (value).toFixed(1)+" kWh";
                         } else {
-                            text += (cons).toFixed(1)+" kWh ("+this.view.currency+(cons*this.view.unitCost).toFixed(2)+")";
+                            text += (value).toFixed(1)+" kWh ("+this.view.currency+(value*this.view.unitCost).toFixed(2)+")";
                         }
                     }
                     else {
                         text = "<b>"+months[date.getMonth()]+" "+date.getDate()+", "+date.getHours()+":"+date.getMinutes()+"</b><br>";
-                        if (cons < 10000) {
-                        	text += Math.round(cons)+" W";
+                        if (value < 10000) {
+                            text += Math.round(value)+" W";
                         }
                         else {
-                        	text += (cons*0.001).toFixed(1)+" kW";
+                            text += (value*0.001).toFixed(1)+" kW";
                         }
                     }
                     var tooltip = $('.graph-tooltip').html(text).fadeIn(200);
@@ -240,11 +244,11 @@ class PowerGraph extends Graph {
         this.setTimeWindowDays(6/24.0);
     }
     
-    load(callback) {
-        this.view.data.loadPower(this.start, this.end, this.interval, function(result) {
+    load() {
+        return this.view.data.loadPower(this.start, this.end, this.interval, true).then(function(result) {
             this.draw();
+            return result;
             
-            if (callback != undefined) callback(result);
         }.bind(this));
     }
     
@@ -256,7 +260,7 @@ class PowerGraph extends Graph {
         for (var timevalue of this.view.data.iteratePower(this.start, this.end, this.interval)) {
             var time = timevalue.time;
             
-            var power = timevalue['use'];
+            var power = timevalue['use_power'];
             if (power != null) {
                 if (usePower.length > 0) {
                     var timeDelta = (time - usePower[usePower.length-1][0])*0.001;
@@ -267,6 +271,30 @@ class PowerGraph extends Graph {
                 usePower.push([time, power]);
             }
         }
+        
+        if (this.view.unit == "energy") {
+            $("#window-kwh", this.view.container).html(useEnergy.toFixed(1)+ " kWh");
+            $("#window-cost", this.view.container).html("");
+        } else {
+            $("#window-kwh", this.view.container).html(useEnergy.toFixed(1)+ " kWh");
+            $("#window-cost", this.view.container).html("("+this.view.currency+(useEnergy*this.view.unitCost).toFixed(2)+")");
+        }
+        
+        var windowStats = {};
+        windowStats["use"] = Graph.stats(usePower);
+        
+        var windowStatsOut = "";
+        for (var key in windowStats) {
+            windowStatsOut += "<tr>";
+            windowStatsOut += "<td style='text-align:left'>"+key+"</td>";
+            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].minval.toFixed(2)+"</td>";
+            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].maxval.toFixed(2)+"</td>";
+            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].diff.toFixed(2)+"</td>";
+            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].mean.toFixed(2)+"</td>";
+            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].stdev.toFixed(2)+"</td>";
+            windowStatsOut += "</tr>";
+        }
+        $("#graph-stats").html(windowStatsOut);
         
         var options = {
             lines: {
@@ -308,32 +336,7 @@ class PowerGraph extends Graph {
                 lines: { show: true, fill: 0.8, lineWidth: 0}
             });
         }
-        var plot = $.plot($('.graph'), series, options);
-        
-        if (this.view.unit == "energy") {
-            $("#window-kwh", this.view.container).html(useEnergy.toFixed(1)+ " kWh");
-            $("#window-cost", this.view.container).html("");
-        } else {
-            $("#window-kwh", this.view.container).html(useEnergy.toFixed(1)+ " kWh");
-            $("#window-cost", this.view.container).html("("+this.view.currency+(useEnergy*this.view.unitCost).toFixed(2)+")");
-        }
-        
-        var windowStats = {};
-        windowStats["use"] = Graph.stats(usePower);
-        
-        var windowStatsOut = "";
-        for (var key in windowStats) {
-            windowStatsOut += "<tr>";
-            windowStatsOut += "<td style='text-align:left'>"+key+"</td>";
-            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].minval.toFixed(2)+"</td>";
-            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].maxval.toFixed(2)+"</td>";
-            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].diff.toFixed(2)+"</td>";
-            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].mean.toFixed(2)+"</td>";
-            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].stdev.toFixed(2)+"</td>";
-            windowStatsOut += "</tr>";
-        }
-        $("#graph-stats").html(windowStatsOut);
-        
+        this.plot = $.plot($('.graph'), series, options);        
         this.events();
     }
     
@@ -450,15 +453,13 @@ class EnergyGraph extends Graph {
         this.setTimeWindowDays(30);
     }
 
-    load(callback) {
+    load() {
         // Load a day more than selected, to allow daily energy consumption for the last day
-        data.loadDailyEnergy(this.start, this.end+86400000, function(result) {
+        data.loadDailyEnergy(this.start, this.end+86400000, true).then(function(result) {
             this.draw();
+            return result;
             
-            if (callback != undefined) callback(result);
         }.bind(this));
-        
-        this.loadTimeOfUse();
     }
 
     loadTimeOfUse() {
@@ -499,18 +500,33 @@ class EnergyGraph extends Graph {
         $(".graph-info", this.view.container).hide();
         
         var periodEnergy = 0;
-        var dailyEnergy = [];
+        var importEnergy = [];
+        var exportEnergy = [];
+        var selfEnergy = [];
         for (var day of this.view.data.iterateDailyEnergy(this.start, this.end)) {
             var time = day.time;
             
-            var value = day['use_kwh'];
+            var solar = typeof day.solar_energy !== 'undefined' ? day.solar_energy : 0;
+            var imp = typeof day.import_energy !== 'undefined' ? day.import_energy : 0;
+            var use = typeof day.use_energy !== 'undefined' ? day.use_energy : 0;
             // Trim days with zero energy consumption
-            if (value > 0 || dailyEnergy.length > 0) {
-                periodEnergy += value;
-                dailyEnergy.push([time, value]);
+            if (use > 0 || importEnergy.length > 0) {
+                if (solar > 0) {
+                    var self = 0;
+                    if (imp > 0) {
+                        self = use - imp;
+                    }
+                    selfEnergy.push([time, self]);
+                    exportEnergy.push([time, self-solar]);
+                }
+                periodEnergy += use;
+                importEnergy.push([time, use]);
+            }
+            else if (solar > 0) {
+                exportEnergy.push([time, -solar]);
             }
         }
-        this.periodAverage = periodEnergy/dailyEnergy.length;
+        this.periodAverage = periodEnergy/importEnergy.length;
         
         var options = {
             xaxis: { 
@@ -523,8 +539,7 @@ class EnergyGraph extends Graph {
             yaxis: { 
                 font: {size: this.view.flotFontSize, color: "#666"}, 
                 // labelWidth: -5
-                reserveSpace: false,
-                min: 0
+                reserveSpace: false
             },
             selection: { mode: "x" },
             grid: {
@@ -538,11 +553,18 @@ class EnergyGraph extends Graph {
         
         var series = [];
         series.push({
-            data: dailyEnergy, color: "#44b3e2",
+            data: exportEnergy, color: "#ffbe14", highlightColor: '#ffcb47',
             bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 1.0, lineWidth: 0}
         });
-        $.plot($('.graph', this.view.container), series, options);
-        
+        series.push({
+            data: importEnergy, color: "#44b3e2", highlightColor: '#5cbce6',
+            bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 1.0, lineWidth: 0}
+        });
+        series.push({
+            data: selfEnergy, color: "#a2b97b", highlightColor: '#adc18a',
+            bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 1.0, lineWidth: 0}
+        });
+        this.plot = $.plot($('.graph', this.view.container), series, options);
         this.events();
     }
     
