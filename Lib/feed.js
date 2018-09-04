@@ -206,16 +206,18 @@ class Feed {
         return data;
     }
 
-    getValue(id, time, async)  {
+    getValue(id, time, interval, async)  {
         if (typeof async === 'undefined') async = false;
-        
+        if (typeof interval === 'undefined' || interval < 1000) {
+            interval = 1000;
+        }
         if (async) {
-            return this.getData(id, time, time+1000, 1, false, false, true).then(function(data) {
+            return this.getData(id, time, time+interval, interval/1000, false, false, true).then(function(data) {
                 return data.length > 0 ? data[0] : null;
             });
         }
         else {
-            var data = this.getData(id, time, time+1000, 1, false, false);
+            var data = this.getData(id, time, time+interval, interval/1000, false, false);
             return data.length > 0 ? data[0] : null;
         }
     }

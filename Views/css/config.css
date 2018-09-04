@@ -39,12 +39,16 @@
 }
 
 .app-config .feed-auto {
-	font-size:12px;
+  font-size:12px;
 }
 
 .app-config .feed-select-div {
   margin:0px;
   margin-top:5px;
   width:100%;
+}
+
+.app-config .feed-name {
+	margin-right:22px;
 }
 

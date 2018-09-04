@@ -1,43 +1,69 @@
+const DATAPOINTS_LIMIT = 800;
+
 class DataCache {
-    
+
     constructor(feed) {
         this.feed = feed;
-        this.datapointsLimit = 800;
-        
         this.cache = null;
     }
-    
+
+    static get DATAPOINTS_LIMIT() {
+        return DATAPOINTS_LIMIT;
+    }
+
     set(keys, config) {
         var data = {};
         for (var key in config.app) {
             if (config.app[key]['value'] && keys.indexOf(key) > -1) {
                 var f = config.feedsbyid[config.app[key]['value']];
                 var c = config.app[key]['class'];
-                if (c === 'power') {
-                    if (f.engine == 5 || f.engine == 6) {
-                        data[key] = new FixedIntervalPowerSeries(key, f.id, f.engine, feed);
-                    }
-                    else {
-                        data[key] = new IntermittentPowerSeries(key, f.id, f.engine, feed);
-                    }
+                if (f.engine == 5 || f.engine == 6) {
+                    data[key] = new FixedIntervalSeries(key, f.id, c, f.engine, feed);
                 }
-                else if (c === 'energy') {
-                    if (f.engine == 5 || f.engine == 6) {
-                        data[key] = new FixedIntervalEnergySeries(key, f.id, f.engine, feed);
-                    }
-                    else {
-                        data[key] = new IntermittentEnergySeries(key, f.id, f.engine, feed);
-                    }
+                else {
+                    data[key] = new Series(key, f.id, c, f.engine, feed);
                 }
             }
         }
         this.cache = new DataCollection(data);
     }
-    
+
+    has(key) {
+        return this.cache.has(key);
+    }
+
     get(key) {
         return this.cache.get(key);
     }
-    
+
+    getLatestTime(key) {
+        return this.cache.getLatestTime(key);
+    }
+
+    getLatestValue(key) {
+        return this.cache.getLatestValue(key);
+    }
+
+    getEarliestTime(key) {
+        return this.cache.getEarliestTime(key);
+    }
+
+    getEarliestValue(key) {
+        return this.cache.getEarliestValue(key);
+    }
+
+    getDailyEnergy(key, time) {
+        return this.cache.getDailyEnergy(key, time);
+    }
+
+    hasDailyEnergy(start, end) {
+        return this.cache.hasDailyEnergy(start, end);
+    }
+
+    hasPower(start, end, interval) {
+        return this.cache.hasPower(start, end, interval);
+    }
+
     loadMeta() {
         // Build an array of ajax promise objects and wait for them to finish
         var requests = [];
@@ -53,16 +79,32 @@ class DataCache {
             return this.cache;
         }.bind(this));
     }
-    
+
+    loadDailyEnergy(start, end) {
+        var now = new Date();
+        now.setHours(0,0,0,0);
+        var today = now.getTime()
+        
+        // Build an array of ajax promise objects and wait for them to finish
+        var requests = [];
+        for (var key in this.cache.series) {
+            var series = this.cache.get(key);
+            if (series.type == 'energy') {
+                series.setToday(today);
+                requests.push(series.loadDailyEnergy(start, end));
+            }
+        }
+        return Promise.all(requests).then(function() {
+            return this.cache;
+        }.bind(this));
+    }
+
     loadPower(start, end, interval) {
         // Build an array of ajax promise objects and wait for them to finish
         var requests = [];
         for (var key in this.cache.series) {
             var series = this.cache.get(key);
-            
-            if (series instanceof FixedIntervalPowerSeries ||
-                    series instanceof IntermittentPowerSeries) {
-                
+            if (series.type == 'power') {
                 requests.push(series.load(start, end, interval));
             }
         }
@@ -70,24 +112,7 @@ class DataCache {
             return this.cache;
         }.bind(this));
     }
-    
-    loadDailyEnergy(start, end) {
-        
-        // Build an array of ajax promise objects and wait for them to finish
-        var requests = [];
-        for (var key in this.cache.series) {
-            var series = this.cache.get(key);
-            
-            if (series instanceof FixedIntervalEnergySeries ||
-                    series instanceof IntermittentEnergySeries) {
-                requests.push(series.loadDaily(start, end));
-            }
-        }
-        return Promise.all(requests).then(function() {
-            return this.cache;
-        }.bind(this));
-    }
-    
+
     update(updatePowerSeries) {
         return this.feed.getListById(true).then(function(result) {
             for (var key in this.cache.series) {
@@ -99,14 +124,11 @@ class DataCache {
                     // and append latest power values to the series data cache, if the passed flag indicates it
                     series.latest = [feed.time*1000, feed.value];
                     
-                    if (updatePowerSeries != null && updatePowerSeries &&
-                            (series instanceof FixedIntervalPowerSeries ||
-                            series instanceof IntermittentPowerSeries)) {
-                        
+                    if (updatePowerSeries != null && updatePowerSeries && series.type == 'power') {
                         series.append();
                         
                         // If the cache exceeds the specified datapoint limit, trim the first value
-                        if (series.getLength() > this.datapointsLimit) {
+                        if (series.getLength() > DataCache.DATAPOINTS_LIMIT) {
                             series.trim();
                         }
                     }
@@ -114,11 +136,11 @@ class DataCache {
             }
         }.bind(this));
     }
-    
+
     iteratePower(start, end, interval) {
         return this.cache.iteratePower(start, end, interval);
     }
-    
+
     iterateDailyEnergy(start, end) {
         return this.cache.iterateDailyEnergy(start, end);
     }
@@ -128,6 +150,13 @@ class DataCollection {
     
     constructor(series) {
         this.series = series;
+    }
+    
+    has(key) {
+        if (this.series[key] != undefined) {
+            return true;
+        }
+        return false;
     }
     
     get(key) {
@@ -141,67 +170,49 @@ class DataCollection {
         if (this.get(key) != null) {
             return this.get(key).data;
         }
-        else return [];
+        return [];
     }
     
     getLength(key) {
         if (this.get(key) != null) {
             return this.get(key).data.length;
         }
-        else return null;
+        return null;
     }
     
     getLatestTime(key) {
-        if (this.get(key) != null && this.get(key).latest != null) {
-            return this.get(key).latest[0];
+        if (this.get(key) != null) {
+            return this.get(key).getLatestTime();
         }
         return null;
     }
     
     getLatestValue(key) {
-        if (this.get(key) != null && this.get(key).latest != null) {
-            return this.get(key).latest[1];
+        if (this.get(key) != null) {
+            return this.get(key).getLatestValue();
         }
         return null;
     }
     
     getEarliestTime(key) {
-        if (this.get(key) != null && this.get(key).earliest != null) {
-            return this.get(key).earliest[0];
+        if (this.get(key) != null) {
+            return this.get(key).getEarliestTime();
         }
         return null;
     }
     
     getEarliestValue(key) {
-        if (this.get(key) != null && this.get(key).earliest != null) {
-            return this.get(key).earliest[1];
+        if (this.get(key) != null) {
+            return this.get(key).getEarliestValue();
         }
         return null;
     }
-    
-    getEarliestPowerTime() {
-        var earliestTime = null;
-        for (var key in this.series) {
-            var series = this.get(key);
-            if (series instanceof FixedIntervalPowerSeries ||
-                    series instanceof IntermittentPowerSeries) {
-                
-                var time = series.getEarliestTime();
-                if (time != null && (earliestTime == null || time < earliestTime)) {
-                    earliestTime = time;
-                }
-            }
-        }
-        return earliestTime;
-    }
-    
+
     getEarliestEnergyTime() {
         var earliestTime = null;
         for (var key in this.series) {
             var series = this.get(key);
-            if (series instanceof FixedIntervalEnergySeries ||
-                    series instanceof IntermittentEnergySeries) {
-                
+            if (series.type == 'energy') {
                 var time = series.getEarliestTime();
                 if (time != null && (earliestTime == null || time < earliestTime)) {
                     earliestTime = time;
@@ -210,7 +221,87 @@ class DataCollection {
         }
         return earliestTime;
     }
-    
+
+    getEarliestPowerTime() {
+        var earliestTime = null;
+        for (var key in this.series) {
+            var series = this.get(key);
+            if (series.type == 'power') {
+                var time = series.getEarliestTime();
+                if (time != null && (earliestTime == null || time < earliestTime)) {
+                    earliestTime = time;
+                }
+            }
+        }
+        return earliestTime;
+    }
+
+    getDailyEnergy(key, time) {
+        if (this.get(key) != null) {
+            return this.get(key).getDailyEnergy(time);
+        }
+        return null;
+    }
+
+    hasDailyEnergy(start, end) {
+        for (var key in this.series) {
+            var series = this.get(key);
+            if (series.type == 'energy' && !series.hasInterval(start, end, 86400000)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    hasPower(start, end, interval) {
+        for (var key in this.series) {
+            var series = this.get(key);
+            if (series.type == 'power' && !series.hasInterval(start, end, interval)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    iterateDailyEnergy(start, end) {
+        // Each iteration will return the energy value of all configured feeds for a specific day
+        // for the passed time interval
+        var iterator = {};
+        iterator[Symbol.iterator] = function *() {
+            // The indices object is used to remember the position of the last correctly aligned
+            // time value. As the time values will never decrease with increasing index, this 
+            // enables to only loop each feeds data array once in total, while aligning the data
+            // of all available feeds
+            var indices = {};
+            
+            var date = new Date(start);
+            var time = date.getTime();
+            while (time <= end) {
+                var day = {};
+                day['time'] = time;
+                
+                // Iterate all configured energy data series and treat missing days as zero energy
+                for (var key in this.series) {
+                    var series = this.get(key);
+                    if (series.type == 'energy') {
+                        if (indices[key] == undefined) indices[key] = 0;
+                        
+                        var {index, result} = series.iterateDay(time, indices[key]);
+                        
+                        indices[key] = index;
+                        day[key] = result;
+                    }
+                }
+                yield day;
+                
+                // Add a day to the date object, to avoid DST problems
+                date.setDate(date.getDate()+1);
+                time = date.getTime();
+            }
+        }.bind(this);
+        return iterator;
+    }
+
     iteratePower(start, end, interval) {
         // Each iteration will return the power value of all configured feeds for a specific time
         // for the passed time interval
@@ -226,11 +317,12 @@ class DataCollection {
         
         var iterator = {};
         iterator[Symbol.iterator] = function *() {
-            // The index object is used to remember the position of the last correctly aligned
+            // The indices object is used to remember the position of the last correctly aligned
             // time value. As the time values will never decrease with increasing index, this 
             // enables to only loop each feeds data array once in total, while aligning the data
             // of all available feeds
-            var index = {};
+            var indices = {};
+            
             var time = start;
             while (time <= end) {
                 var timevalue = {};
@@ -239,12 +331,13 @@ class DataCollection {
                 // Iterate all configured energy data series and treat missing days as zero energy
                 for (var key in this.series) {
                     var series = this.get(key);
-                    if (series instanceof FixedIntervalPowerSeries ||
-                            series instanceof IntermittentPowerSeries) {
+                    if (series.type == 'power') {
+                        if (indices[key] == undefined) indices[key] = 0;
                         
-                        if (index[key] == undefined) index[key] = 0;
+                        var {index, result} = series.iterateTimevalue(time, intervalMillis, indices[key]);
                         
-                        timevalue[key] = series.iterateTimevalue(time, intervalMillis, index);
+                        indices[key] = index;
+                        timevalue[key] = result;
                     }
                 }
                 yield timevalue;
@@ -255,100 +348,274 @@ class DataCollection {
         
         return iterator;
     }
-    
-    iterateDailyEnergy(start, end) {
-        // Each iteration will return the energy value of all configured feeds for a specific day
-        // for the passed time interval
-        var today = new Date();
-        today.setHours(0,0,0,0);
-        var todayTime = today.getTime()
-        
-        var iterator = {};
-        iterator[Symbol.iterator] = function *() {
-            // The index object is used to remember the position of the last correctly aligned
-            // time value. As the time values will never decrease with increasing index, this 
-            // enables to only loop each feeds data array once in total, while aligning the data
-            // of all available feeds
-            var index = {};
-            var date = new Date(start);
-            var time = date.getTime();
-            while (time <= end) {
-                var day = {};
-                day['time'] = time;
-                
-                // Iterate all configured energy data series and treat missing days as zero energy
-                for (var key in this.series) {
-                    var series = this.get(key);
-                    if (series instanceof FixedIntervalEnergySeries ||
-                            series instanceof IntermittentEnergySeries) {
-                        
-                        if (index[key] == undefined) index[key] = 0;
-                        
-                        day[key] = series.iterateDay(time, todayTime, index);
-                    }
-                }
-                yield day;
-
-                // Add a day to the date object, to avoid DST problems
-                date.setDate(date.getDate()+1);
-                time = date.getTime();
-            }
-        }.bind(this);
-        return iterator;
-    }
 }
 
 class Series {
 
-    constructor(key, id, engine, feed) {
+    constructor(key, id, type, engine, feed) {
         this.feed = feed;
         this.key = key;
         this.id = id;
+        this.type = type;
         this.engine = engine;
-
-        this.interval = 0;
+        
+        this.today = null;
+        
+        this.interval = (type == 'energy') ? 86400000 : 0;
         this.earliest = null;
         this.latest = null;
         this.data = [];
     }
-    
+
+    setToday(today) {
+        this.today = today;
+    }
+
+    getToday() {
+        if (this.today == null) {
+            var now = new Date();
+            now.setHours(0,0,0,0);
+            
+            this.today = now.getTime()
+        }
+        return this.today;
+    }
+
     getLength() {
         return this.data.length;
     }
-    
+
+    getTolerance(interval) {
+        return Math.max(0.005*interval+5000, interval*0.1) + interval;
+    }
+
+    hasInterval(start, end, interval) {
+        if (this.data.length == 0) {
+            return false;
+        }
+        if (interval > 0 && this.interval < interval) {
+            return false
+        }
+        var tolerance = this.getTolerance(interval);
+        if ((start < (this.data[0][0] - tolerance) && this.getEarliestTime() < (this.data[0][0] - tolerance)) || 
+                end > (this.getLatestTime() + tolerance)) {
+            return false;
+        }
+        return true;
+    }
+
+    getTimevalue(time, async) {
+        // TODO: Check if the value maybe is hold in cache
+        return this.feed.getValue(this.id, time, this.interval, async);
+    }
+
     getLatestTime() {
         if (this.latest != null) {
-            return this.latest[0];
+            var time = parseInt(this.latest[0]);
+            if (!isNaN(time)) {
+                return time;
+            }
         }
         return null;
     }
-    
+
     getLatestValue() {
         if (this.latest != null) {
-            return this.latest[1];
+            var value = parseFloat(this.latest[1]);
+            if (!isNaN(value)) {
+                return value;
+            }
         }
         return null;
     }
     
     getEarliestTime() {
         if (this.earliest != null) {
-            return this.earliest[0];
+            var time = parseInt(this.earliest[0]);
+            if (!isNaN(time)) {
+                return time;
+            }
         }
         return null;
     }
     
     getEarliestValue() {
         if (this.earliest != null) {
-            return this.earliest[1];
+            var value = parseFloat(this.earliest[1]);
+            if (!isNaN(value)) {
+                return value;
+            }
         }
         return null;
+    }
+
+    loadEarliest() {
+        // For feeds without an interval like for the PHPTimeseries engine, the closest value to 0
+        // will be returned as the earliest time value
+        return this.getTimevalue(0, true).then(function(result) {
+            this.earliest = result;
+            
+        }.bind(this));
+    }
+
+    load(start, end, interval) {
+        var intervalMillis = interval*1000;
+        
+        // Only reload, if the requested interval is not already hold in cache
+        if (this.hasInterval(start, end, interval)) {
+            return Promise.resolve(this.data);
+        }
+        this.interval = intervalMillis;
+        
+        return this.feed.getData(this.id, start, end, interval, true, true, true).then(function(result) {
+            this.data = result;
+            this.latest = result[result.length-1];
+            return result;
+            
+        }.bind(this));
+    }
+
+    loadDailyEnergy(start, end) {
+        // Only reload, if the requested interval is not already hold in cache
+        if (this.hasInterval(start, end)) {
+            return Promise.resolve(this.data);
+        }
+        end += this.interval;
+        
+        return this.feed.getDailyData(this.id, start, end, true).then(function(result) {
+            var tolerance = this.getTolerance(this.interval);
+            var data = [];
+            
+            if (result.length == 0) {
+                this.data = [];
+                return Promise.resolve(data);
+            }
+            // Remove NaN values and align values to midnight of each day
+            var date = new Date(start);
+            var time = date.getTime();
+            
+            var index = 0;
+            while (time < end) {
+                // Iterate all configured energy data series and treat missing days as zero energy
+                for (var i=index; i<result.length; i++) {
+                    var deltaThis = Math.abs(time - result[i][0]);
+                    var deltaLast = Math.abs(time - result[index][0]);
+                    
+                    if (deltaThis > deltaLast) {
+                        break;
+                    }
+                    else if (deltaThis <= deltaLast) {
+                        index = i;
+                    }
+                }
+                if (result[index][1] != null &&
+                        Math.abs(time - result[index][0]) < tolerance) {
+                    
+                    data.push([time, result[index][1]]);
+                }
+                
+                // Add a day to the date object, to avoid DST problems
+                date.setDate(date.getDate()+1);
+                time = date.getTime();
+            }
+            this.data = data;
+            
+        }.bind(this));
+    }
+
+    getDailyEnergy(time) {
+        var {index, result} = this.iterateDay(time, 0);
+        
+        return result;
+    }
+
+    iterateDay(time, index) {
+        var result = 0;
+
+        // Calculate the daily totals by subtracting each day from the upcoming day
+        if (time == this.getToday()) {
+            var latestValue = this.getLatestValue();
+            var todayValue = null;
+            if (this.data.length > 0 && this.data[this.data.length-1][0] == time) {
+                todayValue = this.data[this.data.length-1];
+            }
+            else {
+                todayValue = this.getTimevalue(time);
+            }
+            if (todayValue == null || todayValue[1] == null) {
+                todayValue = [
+                    this.getEarliestTime(),
+                    this.getEarliestValue()
+                ];
+            }
+            result = latestValue - todayValue[1];
+        }
+        else if (this.data.length > 0) {
+            var tolerance = this.getTolerance(this.interval);
+            
+            for (var i=index; i<this.data.length; i++) {
+                if (this.data[i][0] == time) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index < this.data.length-1 && 
+                    Math.abs(time - this.data[index][0]) < tolerance &&
+                    Math.abs(this.data[index+1][0] - this.data[index][0]) < tolerance) {
+                
+                result = this.data[index+1][1] - this.data[index][1];
+            }
+        }
+        return {'index': index, 'result': result};
+    }
+
+    iterateTimevalue(time, interval, index) {
+        var result = null;
+        
+        if (this.data.length > 0) {
+            for (var i=index; i<this.data.length; i++) {
+                var deltaThis = Math.abs(time - this.data[i][0]);
+                var deltaLast = Math.abs(time - this.data[index][0]);
+                
+                if (deltaThis > deltaLast) {
+                    break;
+                }
+                else if (deltaThis <= deltaLast) {
+                    index = i;
+                }
+            }
+            var tolerance = this.getTolerance(interval);
+            if (Math.abs(time - this.data[index][0]) < tolerance) {
+                result = this.data[index][1];
+            }
+        }
+        return {'index': index, 'result': result};
+    }
+
+    append() {
+        if (this.data.length > 0) {
+            var timeDelta = this.latest[0] - this.data[this.data.length-1][0];
+            if (timeDelta >= this.interval) {
+                this.data.push(this.latest);
+                
+                console.log("Appending value to series \""+this.key+"\": "+this.latest[1]);
+            }
+        }
+        else {
+            this.data.push(this.latest);
+        }
+    }
+
+    trim() {
+        // The shift() method removes the first item of an array, and returns that item
+        this.data.shift();
     }
 }
 
 class FixedIntervalSeries extends Series {
 
-    constructor(key, id, engine, feed) {
-        super(key, id, engine, feed);
+    constructor(key, id, type, engine, feed) {
+        super(key, id, type, engine, feed);
         
         this.meta = null;
     }
@@ -359,19 +626,17 @@ class FixedIntervalSeries extends Series {
             var metaIntervalMillis = this.meta.interval*1000;
             var metaStartMillis = this.meta.start_time*1000;
 
-            if (time >= metaStartMillis) {
+            if (time > metaStartMillis) {
                 time = metaStartMillis + Math.round((time - metaStartMillis)/metaIntervalMillis)*metaIntervalMillis;
             }
-            else if (typeof async !== 'undefined' && async) {
-                return $.when(null);
-            }
-            else {
-                return null;
-            }
         }
-        
-        // TODO: Check if the value maybe is hold in cache
-        return this.feed.getValue(this.id, time, async);
+        else if (typeof async !== 'undefined' && async) {
+            return $.when(null);
+        }
+        else {
+            return null;
+        }
+        return this.feed.getValue(this.id, time, metaIntervalMillis, async);
     }
 
     loadMeta() {
@@ -417,351 +682,13 @@ class FixedIntervalSeries extends Series {
             end = metaStartMillis + Math.floor((end - metaStartMillis)/intervalMillis)*intervalMillis;
             
             // Only reload, if the requested interval is not already hold in cache
-            if (this.data.length < 1 ||
-                    start <= (this.data[0][0] - intervalMillis) || 
-                    end >= (this.data[this.data.length-1][0] + intervalMillis) ||
-                    this.interval > intervalMillis) {
-                
-                this.interval = intervalMillis;
-                
-                return this.feed.getData(this.id, start, end, interval, true, true, true).then(function(result) {
-                    this.data = result;
-                    this.latest = result[result.length-1];
-                    return result;
-                    
-                }.bind(this));
-            }
+            return super.load(start, end, interval);
         }
         else {
             this.data = [];
             this.latest = null;
         }
-        return $.when(null);
+        return Promise.resolve(this.data);
     }
 }
 
-class IntermittentSeries extends Series {
-
-    getTimevalue(time, async) {
-        // TODO: Check if the value maybe is hold in cache
-        return this.feed.getValue(this.id, time, async);
-    }
-
-    loadEarliest() {
-        // For intermittent feeds like for the PHPTimeseries engine, the closest value to 0
-        // will be returned as the earliest time value
-        return this.getTimevalue(0, true).then(function(result) {
-            this.earliest = result;
-            
-        }.bind(this));
-    }
-
-    load(start, end, interval) {
-        var intervalMillis = interval*1000;
-        
-        // Only reload, if the requested interval is not already hold in cache
-        if (this.data.length < 1 ||
-                start <= (this.data[0][0] - intervalMillis) || 
-                end >= (this.latest[0] + intervalMillis) ||
-                this.interval < intervalMillis) {
-            
-            this.interval = intervalMillis;
-            
-            return this.feed.getData(this.id, start, end, interval, true, true, true).then(function(result) {
-                this.data = result;
-                this.latest = result[result.length-1];
-                return result;
-                
-            }.bind(this));
-        }
-        return $.when(null);
-    }
-}
-
-class FixedIntervalPowerSeries extends FixedIntervalSeries {
-    
-    append() {
-        if (this.data.length > 0 && this.interval > 0) {
-            var timeDelta = this.latest[0] - this.data[this.data.length-1][0];
-            if (timeDelta == this.interval) {
-                this.data.push(this.latest);
-                
-                console.log("Appending value to power series \""+this.key+"\": "+this.latest[1]);
-            }
-        }
-        else {
-            this.data = [];
-            this.data.push(this.latest);
-        }
-    }
-    
-    trim() {
-        // The shift() method removes the first item of an array, and returns that item
-        this.data.shift();
-    }
-    
-    iterateTimevalue(time, interval, indices) {
-        var index = indices[this.key];
-        var result = null;
-        
-        for (var i=index; i<this.data.length; i++) {
-            var deltaThis = Math.abs(time - this.data[i][0]);
-            var deltaLast = Math.abs(time - this.data[index][0]);
-            
-            if (deltaThis > deltaLast) {
-                break;
-            }
-            else if (deltaThis <= deltaLast) {
-                index = i;
-            }
-        }
-        indices[this.key] = index;
-        
-        if (typeof this.data[index] !== 'undefined' 
-                && Math.abs(time - this.data[index][0]) < interval) {
-            
-            result = this.data[index][1];
-        }
-        return result;
-    }
-}
-
-class IntermittentPowerSeries extends IntermittentSeries {
-    
-    append() {
-        if (this.data.length > 0) {
-            var timeDelta = this.latest[0] - this.data[this.data.length-1][0];
-            if (timeDelta >= this.interval) {
-                this.data.push(this.latest);
-                
-                console.log("Appending value to power series \""+this.key+"\": "+this.latest[1]);
-            }
-        }
-        else {
-            this.data.push(this.latest);
-        }
-    }
-    
-    trim() {
-        // The shift() method removes the first item of an array, and returns that item
-        this.data.shift();
-    }
-    
-    iterateTimevalue(time, interval, indices) {
-        // Use a 10% tolerance for received values to be accepted
-        interval = interval + interval*0.1;
-        var index = indices[this.key];
-        var result = null;
-        
-        for (var i=index; i<this.data.length; i++) {
-            var deltaThis = Math.abs(time - this.data[i][0]);
-            var deltaLast = Math.abs(time - this.data[index][0]);
-            
-            if (deltaThis > deltaLast) {
-                break;
-            }
-            else if (deltaThis <= deltaLast) {
-                index = i;
-            }
-        }
-        indices[this.key] = index;
-        
-        if (Math.abs(time - this.data[index][0]) < interval) {
-            result = this.data[index][1];
-        }
-        return result;
-    }
-}
-
-class FixedIntervalEnergySeries extends FixedIntervalSeries {
-    
-    loadDaily(start, end) {
-        // Only reload, if the requested interval is not already hold in cache
-        if (this.data.length < 1 || start < this.data[0][0] || end > this.latest[0]) {
-            return this.feed.getDailyData(this.id, start, end, true).then(function(result) {
-                this.data = [];
-                
-                // Remove NaN values
-                for (var i in result) {
-                    if (result[i][1] != null) this.data.push(result[i]);
-                }
-            }.bind(this));
-        }
-        return $.when(null);
-    }
-    
-    getDailyEnergy(time) {
-        if (this.data.length > 0 && 
-                this.data[0][0] <= time && 
-                this.data[this.data.length-1][0] >= time) {
-            
-            // Calculate the daily total by subtracting the day from the upcoming day
-            if (this.data[this.data.length-1][0] == time) {
-                return this.latest[1] - this.data[this.data.length-1][1];
-            }
-            else {
-                var interval = 86400000;
-                var index = 0;
-                for (var i=0; i<this.data.length; i++) {
-                    var deltaThis = Math.abs(time - this.data[i][0]);
-                    var deltaLast = Math.abs(time - this.data[index][0]);
-                    
-                    if (deltaThis > deltaLast) {
-                        break;
-                    }
-                    else if (deltaThis <= deltaLast) {
-                        index = i;
-                    }
-                }
-                
-                if (index < this.data.length-1 && 
-                        Math.abs(time - this.data[index][0]) < interval &&
-                        Math.abs(this.data[index+1][0] - this.data[index][0]) <= interval) {
-                    
-                    return this.data[index+1][1] - this.data[index][1];
-                }
-            }
-        }
-        return null;
-    }
-    
-    iterateDay(time, timeToday, indices) {
-        var interval = 86400000;
-        var index = indices[this.key];
-        var result = 0;
-        
-        for (var i=index; i<this.data.length; i++) {
-            if (this.data[i][0] == time) {
-                index = i;
-                break;
-            }
-        }
-        indices[this.key] = index;
-
-        if (typeof this.data[index] !== 'undefined') {
-            // Calculate the daily totals by subtracting each day from the upcoming day
-            if (index < this.data.length-1 && 
-                    Math.abs(time - this.data[index][0]) < interval &&
-                    Math.abs(this.data[index+1][0] - this.data[index][0]) <= interval) {
-                
-                result = this.data[index+1][1] - this.data[index][1];
-            }
-            else if (this.data[index][0] == timeToday) {
-                var latest = this.getLatestValue();
-                if (latest != null && 
-                        Math.abs(time - this.data[index][0]) < interval &&
-                        Math.abs(this.latest[0] - this.data[index][0]) <= interval) {
-                
-                    result = latest - this.data[index][1];
-                }
-            }
-        }
-        
-        return result;
-    }
-}
-
-class IntermittentEnergySeries extends IntermittentSeries {
-
-    constructor(key, id, engine, feed) {
-        super(key, id, engine, feed);
-
-        // Use a 5 minute tolerance around midnight, for received values to be accepted
-        this.tolerance = 300000;
-    }
-    
-    loadDaily(start, end) {
-        var interval = 86400000 + this.tolerance;
-        
-        // Only reload, if the requested interval is not already hold in cache
-        if (this.data.length < 1 ||
-                start <= (this.data[0][0] - interval) || 
-                end >= (this.latest[0] + interval)) {
-            
-            return this.feed.getDailyData(this.id, start, end, true).then(function(result) {
-                this.data = [];
-                
-                // Remove NaN values
-                for (var i in result) {
-                    if (result[i][1] != null) this.data.push(result[i]);
-                }
-            }.bind(this));
-        }
-        return $.when(null);
-    }
-    
-    getDailyEnergy(time) {
-        if (this.data.length > 0 && 
-                this.data[0][0] <= time && 
-                this.data[this.data.length-1][0] >= time) {
-            
-            // Calculate the daily total by subtracting the day from the upcoming day
-            if (this.data[this.data.length-1][0] == time) {
-                return this.latest[1] - this.data[this.data.length-1][1];
-            }
-            else {
-                var interval = 86400000 + this.tolerance;
-                var index = 0;
-                for (var i=0; i<this.data.length; i++) {
-                    var deltaThis = Math.abs(time - this.data[i][0]);
-                    var deltaLast = Math.abs(time - this.data[index][0]);
-                    
-                    if (deltaThis > deltaLast) {
-                        break;
-                    }
-                    else if (deltaThis <= deltaLast) {
-                        index = i;
-                    }
-                }
-                
-                if (index < this.data.length-1 && 
-                        Math.abs(time - this.data[index][0]) < interval &&
-                        Math.abs(this.data[index+1][0] - this.data[index][0]) <= interval) {
-                    
-                    return this.data[index+1][1] - this.data[index][1];
-                }
-            }
-        }
-        return null;
-    }
-    
-    iterateDay(time, timeToday, indices) {
-        var interval = 86400000 + this.tolerance;
-        var index = indices[this.key];
-        var result = 0;
-        
-        for (var i=index; i<this.data.length; i++) {
-            var deltaThis = Math.abs(time - this.data[i][0]);
-            var deltaLast = Math.abs(time - this.data[index][0]);
-            
-            if (deltaThis > deltaLast) {
-                break;
-            }
-            else if (deltaThis <= deltaLast) {
-                index = i;
-            }
-        }
-        indices[this.key] = index;
-        
-        // Calculate the daily totals by subtracting each day from the upcoming day
-        if (index < this.data.length-1 && 
-                Math.abs(time - this.data[index][0]) < interval &&
-                Math.abs(this.data[index+1][0] - this.data[index][0]) <= interval) {
-            
-            result = this.data[index+1][1] - this.data[index][1];
-        }
-        else if (time == timeToday) {
-            // last day in kwh data matches start of today from the browser's perspective
-            // which means its safe to append today kwh value
-            var latest = this.getLatestValue();
-            if (latest != null && 
-                    Math.abs(time - this.data[index][0]) < interval &&
-                    Math.abs(this.latest[0] - this.data[index][0]) <= interval) {
-                
-                result = latest - this.data[index][1];
-            }
-        }
-        
-        return result;
-    }
-}

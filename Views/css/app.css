@@ -59,34 +59,55 @@
   color: #333;
   background-color: #fff;
 }
-.app-body > div {
-  display: table-cell;
+.app-body > .title,
+.app-body > .value {
+  display: table-row;
 }
-
-.app-body .energy {
-  width: 100%;
+.app-body > .title > div {
+  display: table-cell;
+  white-space: nowrap;
+}
+.app-body > .value > div {
+  display: table-cell;
+  line-height: 1em;
+}
+.app-body .title {
+  font-size: 22px;
+  font-weight: bold;
+}
+.app-body .value {
+  font-size: 52px;
+  font-weight: bold;
+}
+.app-body .consumption {
+  color: #44b3e2;
+}
+.app-body .consumption.cost {
+  color: #dd7777 !important;
+}
+.app-body .generation {
+  color: #ffcb47;
+}
+.app-body .generation.cost {
+  color: #b9cb9c !important;
+}
+.app-body .selfcons {
+  color: #e3e3e3;
+  font-size: 90%;
 }
 .app-body .power {
-  text-align: right;
+  padding-right: 30px;
+}
+.app-body .energy {
+  padding-left: 30px;
 }
 .app-body .unit {
   font-size: 75%;
 }
 
-.app-body .title {
-  font-weight: bold;
-  font-size: 22px;
-  color: #44b3e2;
-}
-.app-body .value {
-  color: #44b3e2;
-  font-size: 52px;
-  font-weight: bold;
-  line-height: 1.1;
-}
-
 .graph-body {
-  padding:10px;
+  position: relative;
+  padding: 10px;
   background-color: #44b3e210;
 }
 .graph-body .graph {
@@ -106,14 +127,19 @@
   display: table;
 }
 .graph-info > div {
+  padding: 10px;
   display: table-cell;
+  white-space: nowrap;
+}
+.graph-info .window {
+  color: #666;
+}
+.graph-info .info {
+  padding-right: 30px;
 }
 .graph-info .action:hover {
   background-color: #f5f5f5;
   color: #666;
-}
-.graph-info .energy {
-  padding: 10px;
 }
 
 .graph-stats {
@@ -137,6 +163,13 @@
   font-family: Montserrat, Veranda, sans-serif;
 }
 
+.graph-loader {
+  background-color: rgba(255, 255, 255, .5);
+}
+
+.right {
+  text-align: right;
+}
 .grow {
   width: 100%;
 }
@@ -155,13 +188,48 @@
     padding:8px;
     min-width:15px;
   }
-  .app-body .title { font-size: 16px; }
-  .app-body .value { font-size: 38px; }
   
   .dmy { display:none }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 750px) {
+  .app-body .generation,
+  .graph-info .generation,
+  .graph-info .details { display: none !important; }
+  
+  /**/
+  .graph-header .power.time { display: none !important; }
+}
+
+@media (max-width: 850px) {
+  .app-body .selfcons { display: none !important; }
+}
+
+@media (max-width: 950px) {
+  .app-body .title { font-size: 16px; }
+  .app-body .value { font-size: 38px; }
+}
+
+@media (min-width: 950px) and (max-width: 1050px) {
   .app-body .title { font-size: 18px; }
-  .app-body .value { font-size: 52px; }
+  .app-body .value { font-size: 42px; }
+}
+
+@media (min-width: 1050px) and (max-width: 1150px) {
+  .app-body .title { font-size: 20px; }
+  .app-body .value { font-size: 48px; }
+}
+
+@media (min-width: 1150px) and (max-width: 1250px) {
+  .app-body .title { font-size: 16px; }
+  .app-body .value { font-size: 38px; }
+}
+
+@media (max-width: 1300px) {
+  .graph-info .self { display: none !important; }
+}
+
+@media (min-width: 1250px) and (max-width: 1400px) {
+  .app-body .title { font-size: 18px; }
+  .app-body .value { font-size: 42px; }
 }

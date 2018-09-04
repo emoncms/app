@@ -11,12 +11,13 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/data.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/graph.js?v=<?php echo $v; ?>"></script>
 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 
-<div id="app-container" class="app">
+<div id="app-container" class="app hide">
     <div class="app-block info">
         <div class="app-header">
             <div id="app-title" class="title grow"><?php echo "MY HOUSEHOLD"; ?></div>
@@ -24,13 +25,21 @@
             <div class="action app-setup"><span class="icon-wrench icon-white"></span></div>
         </div>
         <div class="app-body">
-            <div class="energy">
-                <div class="title"><?php echo "NOW"; ?></div>
-                <div class="value"><span id="power-now">0</span></div>
+            <div class="title">
+                <div><span class="power consumption"><?php echo "NOW"; ?></span></div>
+                <div><span class="power generation hide"><?php echo "GENERATION"; ?></span></div>
+                <div class="grow"></div>
+                <div><span class="energy selfcons hide"><?php echo "SELF-CONSUMPTION"; ?></span></div>
+                <div><span class="energy generation hide"><?php echo "GENERATION"; ?></span></div>
+                <div><span class="energy consumption"><?php echo "TODAY"; ?></span></div>
             </div>
-            <div class="power">
-                <div class="title"><?php echo "TODAY"; ?></div>
-                <div class="value"><span id="energy-today">0</span></div>
+            <div class="value">
+                <div><span class="power consumption" id="cons-power">0</span></div>
+                <div><span class="power generation hide" id="gen-power">0</span></div>
+                <div class="grow"></div>
+                <div class="right"><span class="energy selfcons hide" id="selfcons-energy"></span></div>
+                <div class="right"><span class="energy generation hide" id="gen-energy">0</span></div>
+                <div class="right"><span class="energy consumption" id="cons-energy">0</span></div>
             </div>
         </div>
     </div>
@@ -43,7 +52,7 @@
     
     <div class="app-config-description">
         <div class="app-config-description-inner">
-            The Household app is a simple home energy monitoring app to explore onsite energy generation, self consumption and building consumption over time.
+            The Household app is a simple home energy monitoring app to explore onsite energy generation, self-consumption and building consumption over time.
             <br><br>
             <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
             <br><br>
@@ -62,6 +71,8 @@
 // ----------------------------------------------------------------------
 // Globals
 // ----------------------------------------------------------------------
+const INTERVAL = 5000;
+
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
@@ -81,23 +92,53 @@ config.app = {
         "name": "Title",
         "description": "Optional title for app"
     },
-    "use": {
+    "import_power": {
         "type": "feed",
         "class": "power",
-        "autoname": "use",
-        "engine": "2,5,6"
+        "autoname": "import_power",
+        "optional": false
     },
-    "use_kwh": {
+    "import_energy": {
         "type": "feed",
         "class": "energy",
-        "autoname": "use_kwh",
-        "engine": "2,5,6"
+        "autoname": "import_energy",
+        "optional": false
     },
-    "unitcost": {
+    "export_power": {
+        "type": "feed",
+        "class": "power",
+        "autoname": "export_power",
+        "optional": true
+    },
+    "export_energy": {
+        "type": "feed",
+        "class": "energy",
+        "autoname": "export_energy",
+        "optional": true
+    },
+    "solar_power": {
+        "type": "feed",
+        "class": "power",
+        "autoname": "solar_power",
+        "optional": true
+    },
+    "solar_energy": {
+        "type": "feed",
+        "class": "energy",
+        "autoname": "solar_energy",
+        "optional": true
+    },
+    "import_cost": {
         "type": "value",
         "default": 0.29,
-        "name": "Unit cost",
-        "description": "Unit cost of electricity &euro;/kWh"
+        "name": "Grid import cost",
+        "description": "Unit cost of imported electricity in &euro;/kWh"
+    },
+    "export_cost": {
+        "type": "value",
+        "default": 0.12,
+        "name": "Feed-in tariff payments",
+        "description": "Unit cost of exported electricity in &euro;/kWh"
     },
     "currency": {
         "type": "value",
@@ -123,23 +164,197 @@ config.hideapp = function() {
 // ----------------------------------------------------------------------
 // Application
 // ----------------------------------------------------------------------
-var comparisonHeating = false;
-var comparisonTransport = false;
-
 var updateTimer = false;
 
 config.init();
-
 function init() {
+    events();
+}
+
+function show() {
+    $("#app-title").html(config.app.title.value.toUpperCase());
+
     // -------------------------------------------------------------------------
-    // Initialize power and energy data
+    // Set power and energy data
     // -------------------------------------------------------------------------
-    data.init(['use', 'use_kwh'], config);
-    graph.init(data, config);
+    data.set(['import_power', 'import_energy', 'export_power', 'export_energy', 'solar_power', 'solar_energy'], config);
+    graph.mode = "energy";
+    set();
+}
+
+function hide() {
+    clearInterval(updateTimer);
+}
+
+function update() {
+    return data.update().then(function(result) {
+        draw();
+    });
+}
+
+function set() {
+    return graph.set(data, config).then(function(result) {
+        resize();
+        update();
+        updateTimer = setInterval(update, INTERVAL);
+        
+        $(".ajax-loader").hide();
+        
+    }).catch(function(error) {
+        graphError(error);
+        return set();
+        
+    }).then(function() {
+        return load();
+    });
+}
+
+function load() {
+    return graph.load().catch(function(error) {
+        graphError(error);
+        load();
+    });
+}
+
+function draw() {
+    drawPowerValues();
+    drawEnergyValues();
+}
+
+function drawPowerValues() {
+    var imp = data.getLatestValue(Graph.IMPORT+"_power");
+    if (imp == null) {
+        imp = 0;
+    }
+    var cons = imp;
+    var solar = 0;
+    if (data.has(Graph.SOLAR+"_power")) {
+        solar = data.getLatestValue(Graph.SOLAR+"_power");
+        if (solar == null) {
+            solar = 0;
+        }
+        
+        if (data.has(Graph.EXPORT+"_power")) {
+            if (Math.abs(data.getLatestTime(Graph.EXPORT+"_power") - data.getLatestTime(Graph.SOLAR+"_power")) < INTERVAL) {
+                var exp = data.getLatestValue(Graph.EXPORT+"_power");
+                var selfCons = Math.max(0, solar - exp);
+                if (selfCons != null) {
+                    cons += selfCons;
+                }
+            }
+        }
+    }
     
-    update();
-    updateTimer = setInterval(update, 5000);
+    // set the power now value
+    if (graph.unit == "energy") {
+        var unit;
+        var fixed = 0;
+        if (cons > 2000 || solar > 2000) {
+            unit = "kW";
+            cons = cons*0.001;
+            solar = solar*0.001;
+            fixed = 1;
+        }
+        else {
+            unit = "W";
+        }
+        
+        $("#cons-power").html(cons.toFixed(fixed)+"<span class='unit'>"+unit+"</span>");
+        $(".consumption.power").removeClass('cost');
+
+        if (data.has(Graph.SOLAR+"_power")) {
+            $("#gen-power").html(solar.toFixed(fixed)+"<span class='unit'>"+unit+"</span>");
+            $(".generation.power").removeClass('cost').show();
+        }
+        else {
+            $(".generation.power").hide();
+        }
+    }
+    else {
+        var costNow = imp*config.app.import_cost.value*0.001;
+        var fixed;
+        if (costNow < 0.001) {
+            fixed = 0;
+        }
+        else if (costNow >= 0.1) {
+            fixed = 2;
+        }
+        else {
+            fixed = 3;
+        }
+        $("#cons-power").html(config.app.currency.value+costNow.toFixed(fixed)+"<span class='unit'>/hr</span>");
+        $(".consumption.power").addClass('cost');
+
+        if (data.has(Graph.SOLAR+"_power") && config.app.export_cost.value > 0) {
+            var fitNow = solar*config.app.export_cost.value*0.001;
+            var fixed;
+            if (fitNow < 0.001) {
+                fixed = 0;
+            }
+            else if (fitNow >= 0.1) {
+                fixed = 2;
+            }
+            else {
+                fixed = 3;
+            }
+            $("#gen-power").html(config.app.currency.value+fitNow.toFixed(fixed)+"<span class='unit'>/hr</span>");
+            $(".generation.power").addClass('cost').show();
+        }
+        else {
+            $(".generation.power").hide();
+        }
+    }
+}
+
+function drawEnergyValues() {
+    var now = new Date();
+    now.setHours(0,0,0,0);
+    var time = now.getTime();
     
+    var cons = data.getDailyEnergy(Graph.IMPORT+"_energy", time);
+    var solar = data.getDailyEnergy(Graph.SOLAR+"_energy", time);
+    
+    if (graph.unit == "energy") {
+        if (data.has(Graph.SOLAR+"_energy")) {
+            $("#gen-energy").html(solar.toFixed(1)+"<span class='unit'>kWh</span>");
+            $(".generation.energy").removeClass('cost').show();
+            
+            var selfCons = 0;
+            if (data.has(Graph.EXPORT+"_energy")) {
+                selfCons = Math.max(0, solar - data.getDailyEnergy(Graph.EXPORT+"_energy", time));
+            }
+            cons = Math.max(0, cons+selfCons);
+            
+            var selfConsShare = 0;
+            if (solar > 0) {
+                selfConsShare = Math.min(100, selfCons/solar*100);
+            }
+            $("#selfcons-energy").html(selfConsShare.toFixed(0)+"<span class='unit'>%</span>");
+            $(".selfcons.energy").show();
+        }
+        else {
+            $(".generation.energy").hide();
+            $(".selfcons.energy").hide();
+        }
+        $("#cons-energy").html(cons.toFixed(1)+"<span class='unit'>kWh</span>");
+        $(".consumption.energy").removeClass('cost');
+    }
+    else {
+        if (data.has(Graph.SOLAR+"_energy") && config.app.export_cost.value > 0) {
+            $("#gen-energy").html(config.app.currency.value+(solar*config.app.export_cost.value).toFixed(2));
+            $(".generation.energy").addClass('cost').show();
+        }
+        else {
+            $(".generation.energy").hide();
+        }
+        $(".selfcons.energy").hide();
+        
+        $("#cons-energy").html(config.app.currency.value+(cons*config.app.import_cost.value).toFixed(2));
+        $(".consumption.energy").addClass('cost');
+    }
+}
+
+function events() {
     $(".app-unit").click(function() {
         var view = $(this).html();
         if (view == "VIEW COST") {
@@ -151,9 +366,6 @@ function init() {
         }
         graph.draw();
         draw();
-        
-        $(".graph-power-navigation").hide();
-        $(".graph-energy-navigation").show();
     });
     
     $(window).resize(function() {
@@ -165,28 +377,6 @@ function init() {
         resize();
         graph.draw(flotFontSize);
     });
-}
-
-function show() {
-    $("#app-title").html(config.app.title.value);
-
-    wait(function() {
-        if (!graph.ready) {
-            return false;
-        }
-        
-        resize();
-        console.log("Graph ready");
-        graph.load(function() {
-            console.log("Graph load");
-            $(".ajax-loader").hide();
-        });
-        return true;
-    });
-}
-
-function hide() {
-    clearInterval(updateTimer);
 }
 
 function resize() {
@@ -207,79 +397,22 @@ function resize() {
     $('.graph').height(height);
 }
 
-function update() {
-    data.update(function(result) {
-        draw();
-    });
-}
-
-function draw() {
-    drawPowerValues();
-    drawEnergyValues();
-}
-
-function drawPowerValues() {
-    var consPower = data.get("use");
-    var value = consPower.getLatestValue();
-    
-    // set the power now value
-    if (graph.unit == "energy") {
-        if (value < 10000) {
-            $("#power-now").html(Math.round(value)+"<span class='unit'>W</span>");
+function graphError(error) {
+    var message = "Failed to configure graph";
+    if (typeof error !== 'undefined') {
+        message += ": ";
+        
+        if (typeof error.responseText !== 'undefined') {
+            message += error.responseText;
+        }
+        else if (typeof error !== 'string') {
+            message += JSON.stringify(error);
         }
         else {
-            $("#power-now").html((value*0.001).toFixed(1)+"<span class='unit'>kW</span>");
-        }
-    } else {
-        // 1000W for an hour (x3600) = 3600000 Joules / 3600,000 = 1.0 kWh x 0.15p = 0.15p/kWh (scaling factor is x3600 / 3600,000 = 0.001)
-        var costNow = value*1*config.app.unitcost.value*0.001;
-        
-        if (costNow < 1.0) {
-            $("#power-now").html(config.app.currency.value+costNow.toFixed(3)+"<span class='unit'>/hr</span>");
-        }
-        else {
-            $("#power-now").html(config.app.currency.value+costNow.toFixed(2)+"<span class='unit'>/hr</span>");
+            message += error;
         }
     }
-}
-
-function drawEnergyValues() {
-    var consEnergy = data.get("use_kwh");
-    var latestValue = consEnergy.getLatestValue();
-    
-    var now = new Date();
-    now.setHours(0,0,0,0);
-    var todayTime = now.getTime();
-
-    var todayEnergy = consEnergy.getDailyEnergy(todayTime);
-    if (todayEnergy == null) {
-        var latestValue = consEnergy.getLatestValue();
-        var todayValue = consEnergy.getTimevalue(todayTime);
-        
-        if (todayValue == null || todayValue[1] == null) {
-            todayValue = [
-                consEnergy.getEarliestTime(),
-                consEnergy.getEarliestValue()
-            ];
-        }
-        todayEnergy = latestValue - todayValue[1];
-    }
-    
-    if (graph.unit == "energy") {
-        $("#energy-today").html(todayEnergy.toFixed(1)+"<span class='unit'>kWh</span>");
-    }
-    else {
-        $("#energy-today").html(config.app.currency.value+(todayEnergy*config.app.unitcost.value).toFixed(2));
-    }
-}
-
-function wait(condition) {
-	if (!condition()) {
-	    setTimeout(function() {
-		    wait(condition);
-		    
-		}, 100);
-	}
+    console.warn(message);
 }
 
 // ----------------------------------------------------------------------
