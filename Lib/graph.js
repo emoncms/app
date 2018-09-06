@@ -257,29 +257,33 @@ class Graph {
 
     static stats(data) {
         var sum = 0;
-        var stsum = 0;
         var minval = 0;
         var maxval = 0;
 
-        var i = 0;
-        for (var z in data) {
-            var val = data[z][1];
-            if (val != null) {
-                stsum += (data[z][1] - mean)*(data[z][1] - mean);
-                sum += val;
-                
-                if (i == 0) {
-                    maxval = val;
-                    minval = val;
-                }
-                if (val > maxval) maxval = val;
-                if (val < minval) minval = val;
-                
-                i++;
+        var count = 0;
+        for (var i in data) {
+            var val = data[i][1];
+            
+            if (count == 0) {
+                maxval = val;
+                minval = val;
             }
+            if (val > maxval) maxval = val;
+            if (val < minval) minval = val;
+            sum += val;
+            count++;
         }
-        var mean = sum/i;
-        var stdev = Math.sqrt(sum/i);
+        var mean = (count > 0) ? sum/count : 0;
+        
+        var sum = 0;
+        var count = 0;
+        for (var i in data) {
+            var val = data[i][1];
+            
+            sum += (val - mean)*(val - mean);
+            count++;
+        }
+        var stdev = (count > 0) ? Math.sqrt(sum/count) : 0;
         
         return {
             "minval": minval,
@@ -358,8 +362,11 @@ class PowerGraph extends Graph {
             var time = timevalue.time;
             
             let power = function(key) {
-                if (typeof timevalue[key+'_power'] !== 'undefined' && timevalue[key+'_power'] > 0) {
-                    return timevalue[key+'_power'];
+                if (typeof timevalue[key+'_power'] !== 'undefined') {
+                	var value = parseFloat(timevalue[key+'_power']);
+                	if (!isNaN(value) && value >= 0) {
+                        return value;
+                	}
                 }
                 return 0;
             }
@@ -427,9 +434,9 @@ class PowerGraph extends Graph {
         $(".window.energy", this.view.container).hide();
         
         var windowStats = {};
-        if (importPower.length > 0) windowStats["Import"] = Graph.stats(importPower);
-        if (exportPower.length > 0) windowStats["Export"] = Graph.stats(exportPower);
-        if (solarPower.length > 0) windowStats["Solar"] = Graph.stats(solarPower);
+        windowStats["Import"] = Graph.stats(importPower);
+        windowStats["Export"] = Graph.stats(exportPower);
+        windowStats["Solar"] = Graph.stats(solarPower);
         
         var windowStatsOut = "";
         for (var key in windowStats) {
@@ -731,8 +738,11 @@ class EnergyGraph extends Graph {
             var time = day.time;
             
             let energy = function(key) {
-                if (typeof day[key+'_energy'] !== 'undefined' && day[key+'_energy'] > 0) {
-                    return day[key+'_energy'];
+                if (typeof day[key+'_energy'] !== 'undefined') {
+                	var value = parseFloat(day[key+'_energy']);
+                	if (!isNaN(value) && value >= 0) {
+                        return value;
+                	}
                 }
                 return 0;
             }
@@ -811,10 +821,13 @@ class EnergyGraph extends Graph {
         
         for (var day of this.view.data.iterateDailyEnergy(this.start, this.end)) {
             var time = day.time;
-            
+
             let energy = function(key) {
-                if (typeof day[key+'_energy'] !== 'undefined' && day[key+'_energy'] > 0) {
-                    return day[key+'_energy'];
+                if (typeof day[key+'_energy'] !== 'undefined') {
+                	var value = parseFloat(day[key+'_energy']);
+                	if (!isNaN(value) && value >= 0) {
+                        return value;
+                	}
                 }
                 return 0;
             }
