@@ -19,7 +19,7 @@ class GraphView {
         this.ready = false;
     }
 
-    set(data, config) {
+    setup(data, config) {
         $(".graph-loader", this.container).hide();
         this.ready = false;
         
@@ -41,35 +41,39 @@ class GraphView {
         }.bind(this));
     }
 
-    load() {
+    graph() {
         if (this.mode == "power") {
-            return this.power.load();
+            return this.power;
         }
         else if (this.mode == "energy") {
-            return this.energy.load();
+            return this.energy;
         }
+    }
+
+    reset() {
+        return this.graph().reset();
+    }
+
+    load() {
+        return this.graph().load();
     }
 
     draw(flotFontSize) {
         if (typeof flotFontSize !== 'undefined') {
             this.flotFontSize = flotFontSize;
         }
-        
-        if (this.mode == "power") {
-            this.power.draw();
+        if (!this.ready) {
+            return;
         }
-        else if (this.mode == "energy") {
-            this.energy.draw();
-        }
+        this.graph().draw();
+    }
+
+    getTimeWindow() {
+        return this.graph().getTimeWindow();
     }
 
     setTimeWindow(start, stop) {
-        if (this.mode == "power") {
-            this.power.setTimeWindow(start, stop);
-        }
-        else if (this.mode == "energy") {
-            this.energy.setTimeWindow(start, stop);
-        }
+        this.graph().setTimeWindow(start, stop);
     }
 }
 
@@ -82,8 +86,8 @@ class Graph {
         this.earliest = 0;
         this.start = 0;
         this.end = 0;
-
-        this.panning = false;
+        
+        this.freeze = false;
         this.item = null;
     }
 
@@ -97,6 +101,34 @@ class Graph {
 
     static get SOLAR() {
         return SOLAR;
+    }
+
+    getTimeWindow() {
+        return {'start': this.start, 'end': this.end};
+    }
+
+    setTimeWindowDays(days) {
+        // Set the time windows to show a specific amount of days
+        var date = new Date();
+        var end = date.getTime();
+        
+        date.setDate(date.getDate() - (days-1));
+        date.setHours(0,0,0,0);
+        var start = date.getTime();
+        
+        this.setTimeWindow(start, end);
+    }
+
+    setTimeWindow(start, end) {
+        this.start = start;
+        this.end = end;
+    }
+
+    reset() {
+        $(".graph-footer .power.action.details", this.view.container).find('span').html("SHOW DETAIL");
+        $(".graph-stats", this.view.container).hide();
+    	
+        return load();
     }
 
     events() {
@@ -125,7 +157,12 @@ class Graph {
                         }
                     }
                     else {
-                        text = "<b>"+months[date.getMonth()]+" "+date.getDate()+", "+date.getHours()+":"+date.getMinutes()+"</b><br>";
+                        var hours = date.getHours();
+                        if (hours < 10) hours = "0"+hours;
+                        var mins = date.getMinutes();
+                        if (mins < 10) mins = "0"+mins;
+                        
+                        text = "<b>"+months[date.getMonth()]+" "+date.getDate()+", "+hours+":"+mins+"</b><br>";
 //                        text += "<span style='color:#666'>"+label+"</span>: ";
                         if (value < 10000) {
                             text += Math.round(value)+" W";
@@ -156,7 +193,7 @@ class Graph {
 
         // Auto click through to power graph
         plot.on('plotclick', function(event, pos, item) {
-            if (item && !this.panning && this.view.mode == "energy") {
+            if (item && !this.freeze && this.view.mode == "energy") {
                 var start = item.datapoint[0];
                 var end = start + 86400000;
                 
@@ -176,27 +213,17 @@ class Graph {
             
             var start = ranges.xaxis.from;
             var end = ranges.xaxis.to;
-            this.panning = true; 
+            this.freeze = true; 
             
             this.view.setTimeWindow(start, end);
             this.view.load();
             
-            setTimeout(function() { this.panning = false; }.bind(this), 250);
+            setTimeout(function() { this.freeze = false; }.bind(this), 250);
             
         }.bind(this));
-    }
 
-    setTimeWindowDays(days) {
-        // Set the time windows to show a specific amount of days
-        var end = (new Date()).getTime();
-        var start = end - 86400000*days;
-        
-        this.setTimeWindow(start, end);
-    }
-
-    setTimeWindow(start, end) {
-        this.start = start;
-        this.end = end;
+        plot.on("mousedown touchstart", function() { this.freeze = true; }.bind(this));
+        plot.on("mouseup touchend", function() { this.freeze = false; }.bind(this));
     }
 
     static roundInterval(interval) {
@@ -230,28 +257,28 @@ class Graph {
 
     static stats(data) {
         var sum = 0;
-        var i=0;
+        var stsum = 0;
         var minval = 0;
         var maxval = 0;
+
+        var i = 0;
         for (var z in data) {
             var val = data[z][1];
             if (val != null) {
-                if (i==0) {
+                stsum += (data[z][1] - mean)*(data[z][1] - mean);
+                sum += val;
+                
+                if (i == 0) {
                     maxval = val;
                     minval = val;
                 }
-                if (val>maxval) maxval = val;
-                if (val<minval) minval = val;
-                sum += val;
+                if (val > maxval) maxval = val;
+                if (val < minval) minval = val;
+                
                 i++;
             }
         }
-        var mean = sum / i;
-        sum = 0, i=0;
-        for (var z in data) {
-            sum += (data[z][1] - mean)*(data[z][1] - mean);
-            i++;
-        }
+        var mean = sum/i;
         var stdev = Math.sqrt(sum/i);
         
         return {
@@ -267,9 +294,20 @@ class Graph {
 class PowerGraph extends Graph {
     constructor(view) {
         super(view);
+        this.live = null;
         
-        //Set the initial time window to show the last 6 hours
-        this.setTimeWindowDays(6/24.0);
+        //Set the initial time window to show the last 24 hours
+        this.setTimeWindowDays(1);
+    }
+
+    setTimeWindow(start, end) {
+        this.interval = Graph.roundInterval((end - start)*0.001/DataCache.DATAPOINTS_LIMIT);
+        
+        var interval = this.interval*1000;
+        this.start = Math.ceil(start/interval)*interval;
+        this.end = Math.ceil(end/interval)*interval;
+        
+        this.live = new Date().getTime() - end < interval;
     }
 
     load() {
@@ -293,6 +331,12 @@ class PowerGraph extends Graph {
     }
 
     draw() {
+        if (this.freeze) {
+            return;
+        }
+        $(".graph-header .energy", this.view.container).hide();
+        $(".graph-header .power", this.view.container).show();
+        
         var importPower = [];
         var importWindow = 0;
         
@@ -306,12 +350,22 @@ class PowerGraph extends Graph {
         var solarWindow = 0;
         
         var timeLast = null;
+        
+        if (this.live) {
+            this.end = new Date().getTime();
+        }
         for (var timevalue of this.view.data.iteratePower(this.start, this.end, this.interval)) {
             var time = timevalue.time;
-
-            var imp = typeof timevalue[Graph.IMPORT+'_power'] !== 'undefined' ? timevalue[Graph.IMPORT+'_power'] : 0;
-            var exp = typeof timevalue[Graph.EXPORT+'_power'] !== 'undefined' ? timevalue[Graph.EXPORT+'_power'] : 0;
-            var solar = typeof timevalue[Graph.SOLAR+'_power'] !== 'undefined' ? timevalue[Graph.SOLAR+'_power'] : 0;
+            
+            let power = function(key) {
+                if (typeof timevalue[key+'_power'] !== 'undefined' && timevalue[key+'_power'] > 0) {
+                    return timevalue[key+'_power'];
+                }
+                return 0;
+            }
+            var imp = power(Graph.IMPORT);
+            var exp = power(Graph.EXPORT);
+            var solar = power(Graph.SOLAR);
             
             if (imp > 0 || solar > 0) {
                 importPower.push([time, imp]);
@@ -373,9 +427,9 @@ class PowerGraph extends Graph {
         $(".window.energy", this.view.container).hide();
         
         var windowStats = {};
-        windowStats["Import"] = Graph.stats(importPower);
-        windowStats["Export"] = Graph.stats(exportPower);
-        windowStats["Solar"] = Graph.stats(solarPower);
+        if (importPower.length > 0) windowStats["Import"] = Graph.stats(importPower);
+        if (exportPower.length > 0) windowStats["Export"] = Graph.stats(exportPower);
+        if (solarPower.length > 0) windowStats["Solar"] = Graph.stats(solarPower);
         
         var windowStatsOut = "";
         for (var key in windowStats) {
@@ -495,14 +549,6 @@ class PowerGraph extends Graph {
         }.bind(this));
     }
 
-    setTimeWindow(start, end) {
-        this.interval = Graph.roundInterval((end - start)*0.001/DataCache.DATAPOINTS_LIMIT);
-        
-        var intervalMillis = this.interval*1000;
-        this.start = Math.ceil(start/intervalMillis)*intervalMillis;
-        this.end = Math.ceil(end/intervalMillis)*intervalMillis;
-    }
-
     zoomOut() {
         var date = new Date();
         var now = date.getTime();
@@ -565,6 +611,17 @@ class EnergyGraph extends Graph {
         this.setTimeWindowDays(30);
     }
 
+    setTimeWindow(start, end) {
+        // Align the timewindow to midnight of each day
+        var startDate = new Date(start);
+        startDate.setHours(0,0,0,0);
+        this.start = Math.max(0, startDate.getTime());
+        
+        var endDate = new Date(end);
+        endDate.setHours(0,0,0,0);
+        this.end = endDate.getTime();
+    }
+
     load() {
         // Only reload, if the requested interval is not already hold in cache
         if (this.view.data.hasDailyEnergy(this.start, this.end)) {
@@ -620,6 +677,13 @@ class EnergyGraph extends Graph {
     }
 
     draw() {
+        if (this.freeze) {
+            return;
+        }
+        $(".graph-header .power", this.view.container).hide();
+        $(".graph-header .energy", this.view.container).show();
+        $(".graph-stats", this.view.container).hide();
+        
         var series = this.view.unit == "energy" ? this.drawEnergy() : this.drawCost();
         var options = {
             xaxis: {
@@ -666,9 +730,15 @@ class EnergyGraph extends Graph {
         for (var day of this.view.data.iterateDailyEnergy(this.start, this.end)) {
             var time = day.time;
             
-            var imp = typeof day[Graph.IMPORT+'_energy'] !== 'undefined' ? day[Graph.IMPORT+'_energy'] : 0;
-            var exp = typeof day[Graph.EXPORT+'_energy'] !== 'undefined' ? day[Graph.EXPORT+'_energy'] : 0;
-            var solar = typeof day[Graph.SOLAR+'_energy'] !== 'undefined' ? day[Graph.SOLAR+'_energy'] : 0;
+            let energy = function(key) {
+                if (typeof day[key+'_energy'] !== 'undefined' && day[key+'_energy'] > 0) {
+                    return day[key+'_energy'];
+                }
+                return 0;
+            }
+            var imp = energy(Graph.IMPORT);
+            var exp = energy(Graph.EXPORT);
+            var solar = energy(Graph.SOLAR);
             
             // Trim days with zero energy consumption
             if (imp > 0 || solar > 0) {
@@ -742,9 +812,15 @@ class EnergyGraph extends Graph {
         for (var day of this.view.data.iterateDailyEnergy(this.start, this.end)) {
             var time = day.time;
             
-            var imp = typeof day[Graph.IMPORT+'_energy'] !== 'undefined' ? day[Graph.IMPORT+'_energy'] : 0;
-            var exp = typeof day[Graph.EXPORT+'_energy'] !== 'undefined' ? day[Graph.EXPORT+'_energy'] : 0;
-            var solar = typeof day[Graph.SOLAR+'_energy'] !== 'undefined' ? day[Graph.SOLAR+'_energy'] : 0;
+            let energy = function(key) {
+                if (typeof day[key+'_energy'] !== 'undefined' && day[key+'_energy'] > 0) {
+                    return day[key+'_energy'];
+                }
+                return 0;
+            }
+            var imp = energy(Graph.IMPORT);
+            var exp = energy(Graph.EXPORT);
+            var solar = energy(Graph.SOLAR);
             
             // Trim days with zero energy consumption
             if (imp > 0 || solar > 0) {
@@ -815,7 +891,7 @@ class EnergyGraph extends Graph {
             var time = $(event.target);
             var text = time.data('text');
             if (text == 'all') {
-                this.setTimeWindow(this.earliest, (new Date()).getTime());
+                this.setTimeWindow(this.earliest, new Date().getTime());
             }
             else {
                 this.setTimeWindowDays(time.data('days'));
@@ -823,17 +899,6 @@ class EnergyGraph extends Graph {
             this.periodText = text;
             this.load();
         }.bind(this));
-    }
-
-    setTimeWindow(start, end) {
-        // Align the timewindow to midnight of each day
-        var startDate = new Date(start);
-        startDate.setHours(0,0,0,0);
-        this.start = Math.max(0, startDate.getTime());
-        
-        var endDate = new Date(end);
-        endDate.setHours(0,0,0,0);
-        this.end = endDate.getTime();
     }
 }
 

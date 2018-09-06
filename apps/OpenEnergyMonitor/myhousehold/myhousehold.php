@@ -71,7 +71,8 @@
 // ----------------------------------------------------------------------
 // Globals
 // ----------------------------------------------------------------------
-const INTERVAL = 5000;
+const INTERVAL_RELOAD = 300000;
+const INTERVAL_UPDATE = 5000;
 
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
@@ -165,60 +166,82 @@ config.hideapp = function() {
 // Application
 // ----------------------------------------------------------------------
 var updateTimer = false;
+var idle = new Date().getTime();
 
 config.init();
 function init() {
+    $("#app-title").html(config.app.title.value.toUpperCase());
+    
     events();
 }
 
 function show() {
-    $("#app-title").html(config.app.title.value.toUpperCase());
-
-    // -------------------------------------------------------------------------
-    // Set power and energy data
-    // -------------------------------------------------------------------------
-    data.set(['import_power', 'import_energy', 'export_power', 'export_energy', 'solar_power', 'solar_energy'], config);
-    graph.mode = "energy";
-    set();
+    setup();
+    reset();
 }
 
 function hide() {
     clearInterval(updateTimer);
 }
 
-function update() {
-    return data.update().then(function(result) {
-        draw();
-    });
+function reset() {
+    graph.mode = "power";
+    graph.unit = "energy";
+    if (graph.ready) {
+        graph.reset();
+    }
+    resize();
 }
 
-function set() {
-    return graph.set(data, config).then(function(result) {
-        resize();
+function setup() {
+    // -------------------------------------------------------------------------
+    // Set power and energy data
+    // -------------------------------------------------------------------------
+    var cache = data.setup(['import_power', 'import_energy', 'export_power', 'export_energy', 'solar_power', 'solar_energy'], config);
+    return graph.setup(data, config).then(function(result) {
         update();
-        updateTimer = setInterval(update, INTERVAL);
+        updateTimer = setInterval(update, INTERVAL_UPDATE);
         
         $(".ajax-loader").hide();
         
     }).catch(function(error) {
         graphError(error);
-        return set();
+        
+        return setup();
         
     }).then(function() {
         return load();
     });
 }
 
+function update() {
+    var time = new Date().getTime();
+    if (new Date().getTime() - idle >= INTERVAL_RELOAD) {
+        console.log("Window idle for "+INTERVAL_RELOAD/60000+" minutes and will be reset")
+        reset();
+        
+        idle = time;
+    }
+    return data.update().then(function(result) {
+        draw();
+    });
+}
+
 function load() {
-    return graph.load().catch(function(error) {
+    return graph.load().then(function(result) {
+        resize();
+        
+    }).catch(function(error) {
         graphError(error);
-        load();
+        
+        return load();
     });
 }
 
 function draw() {
     drawPowerValues();
     drawEnergyValues();
+    graph.draw();
 }
 
 function drawPowerValues() {
@@ -235,7 +258,7 @@ function drawPowerValues() {
         }
         
         if (data.has(Graph.EXPORT+"_power")) {
-            if (Math.abs(data.getLatestTime(Graph.EXPORT+"_power") - data.getLatestTime(Graph.SOLAR+"_power")) < INTERVAL) {
+            if (Math.abs(data.getLatestTime(Graph.EXPORT+"_power") - data.getLatestTime(Graph.SOLAR+"_power")) < INTERVAL_UPDATE) {
                 var exp = data.getLatestValue(Graph.EXPORT+"_power");
                 var selfCons = Math.max(0, solar - exp);
                 if (selfCons != null) {
@@ -355,7 +378,9 @@ function drawEnergyValues() {
 }
 
 function events() {
-    $(".app-unit").click(function() {
+    $(".app").on('click touchstart', function() { idle = new Date().getTime(); });
+
+    $(".app-unit").on('click', function() {
         var view = $(this).html();
         if (view == "VIEW COST") {
             $(this).html("VIEW ENERGY");
@@ -367,7 +392,7 @@ function events() {
         graph.draw();
         draw();
     });
-    
+
     $(window).resize(function() {
         var widthWindow = $(this).width();
         
@@ -420,9 +445,9 @@ function graphError(error) {
 // ----------------------------------------------------------------------
 function appLog(level, message) {
     if (level == "ERROR") {
-        alert(level + ": " + message);
+        alert(new Date().getTime+" "+level+": "+message);
     }
-    console.log(level + ": " + message);
+    console.log(level, new Date().getTime+": "+message);
 }
 
 </script>

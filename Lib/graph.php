@@ -19,37 +19,37 @@
 <div class="graph-footer">
     <div class="graph-info">
         <div>
-            <span class="window energy hide">
+            <span class="window energy">
                 <span><?php echo "Average in window:"; ?></span>
             </span>
         </div>
         <div>
-            <span class="window power">
+            <span class="window power hide">
                 <span><?php echo "Energy in window:"; ?></span>
             </span>
         </div>
         <div>
             <span class="window info">
-                <b><span id="window-cons"></span></b> <span><?php echo "consumed"; ?></span>
+                <b><span id="window-cons"></span></b> <span style="padding-right:20px;"><?php echo "consumed"; ?></span>
             </span>
         </div>
         <div>
-            <span class="window generation info hide">
-                <b><span id="window-gen"></span></b> <span><?php echo "generated"; ?></span>
+            <span class="window generation hide">
+                <b><span id="window-gen"></span></b> <span style="padding-right:20px;"><?php echo "generated"; ?></span>
             </span>
         </div>
         <div>
-            <span class="window self info hide">
-                <b><span id="window-selfcons"></span></b> <span><?php echo "self-consumed"; ?></span>
+            <span class="window self hide">
+                <b><span id="window-selfcons"></span></b> <span style="padding-right:20px;"><?php echo "self-consumed"; ?></span>
             </span>
         </div>
         <div>
-            <span class="window self info hide" >
-                <b><span id="window-selfsuff"></span></b> <span><?php echo "self-sufficient"; ?></span>
+            <span class="window self hide" >
+                <b><span id="window-selfsuff"></span></b> <span style="padding-right:20px;"><?php echo "self-sufficient"; ?></span>
             </span>
         </div>
         <div class="window grow"></div>
-        <div class='window power action details'>
+        <div class='window power action details' style="display:none;">
             <span><?php echo "SHOW DETAILS"; ?></span>
         </div>
     </div>

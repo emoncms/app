@@ -106,7 +106,7 @@ class Feed {
         }
         
         var data = [];
-        var promise = $.ajax({    
+        var promise = $.ajax({
             url: path+"feed/data.json"+this.apikey,
             data: "id="+id+"&start="+start+"&end="+end+"&interval="+interval+"&skipmissing="+skipMissing+"&limitinterval="+limitInterval,
             dataType: 'json',

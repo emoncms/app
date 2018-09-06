@@ -11,7 +11,7 @@ class DataCache {
         return DATAPOINTS_LIMIT;
     }
 
-    set(keys, config) {
+    setup(keys, config) {
         var data = {};
         for (var key in config.app) {
             if (config.app[key]['value'] && keys.indexOf(key) > -1) {
@@ -26,6 +26,8 @@ class DataCache {
             }
         }
         this.cache = new DataCollection(data);
+        
+        return this.cache;
     }
 
     has(key) {
@@ -113,7 +115,7 @@ class DataCache {
         }.bind(this));
     }
 
-    update(updatePowerSeries) {
+    update() {
         return this.feed.getListById(true).then(function(result) {
             for (var key in this.cache.series) {
                 var series = this.cache.get(key);
@@ -124,7 +126,7 @@ class DataCache {
                     // and append latest power values to the series data cache, if the passed flag indicates it
                     series.latest = [feed.time*1000, feed.value];
                     
-                    if (updatePowerSeries != null && updatePowerSeries && series.type == 'power') {
+                    if (series.type == 'power' && series.live) {
                         series.append();
                         
                         // If the cache exceeds the specified datapoint limit, trim the first value
@@ -360,6 +362,7 @@ class Series {
         this.engine = engine;
         
         this.today = null;
+        this.live = false;
         
         this.interval = (type == 'energy') ? 86400000 : 0;
         this.earliest = null;
@@ -387,6 +390,10 @@ class Series {
 
     getTolerance(interval) {
         return Math.max(0.005*interval+5000, interval*0.1) + interval;
+    }
+
+    getInterval() {
+        return this.interval;
     }
 
     hasInterval(start, end, interval) {
@@ -459,13 +466,13 @@ class Series {
     }
 
     load(start, end, interval) {
-        var intervalMillis = interval*1000;
+        this.interval = interval*1000;
         
         // Only reload, if the requested interval is not already hold in cache
-        if (this.hasInterval(start, end, interval)) {
+        if (this.hasInterval(start, end, this.interval)) {
             return Promise.resolve(this.data);
         }
-        this.interval = intervalMillis;
+        this.live = new Date().getTime() - end < this.interval;
         
         return this.feed.getData(this.id, start, end, interval, true, true, true).then(function(result) {
             this.data = result;
@@ -594,8 +601,7 @@ class Series {
 
     append() {
         if (this.data.length > 0) {
-            var timeDelta = this.latest[0] - this.data[this.data.length-1][0];
-            if (timeDelta >= this.interval) {
+            if (this.latest[0] - this.data[this.data.length-1][0] >= this.interval) {
                 this.data.push(this.latest);
                 
                 console.log("Appending value to series \""+this.key+"\": "+this.latest[1]);
@@ -623,20 +629,21 @@ class FixedIntervalSeries extends Series {
     getTimevalue(time, async) {
         // If the meta data is already initialized, align the requested time with the feeds meta data
         if (this.meta != null) {
-            var metaIntervalMillis = this.meta.interval*1000;
-            var metaStartMillis = this.meta.start_time*1000;
+            var interval = this.meta.interval*1000;
+            var start = this.meta.start_time*1000;
 
-            if (time > metaStartMillis) {
-                time = metaStartMillis + Math.round((time - metaStartMillis)/metaIntervalMillis)*metaIntervalMillis;
+            if (time > start) {
+                time = start + Math.round((time - start)/interval)*interval;
             }
+            return this.feed.getValue(this.id, time, interval, async);
         }
-        else if (typeof async !== 'undefined' && async) {
+        
+        if (typeof async !== 'undefined' && async) {
             return $.when(null);
         }
         else {
             return null;
         }
-        return this.feed.getValue(this.id, time, metaIntervalMillis, async);
     }
 
     loadMeta() {
@@ -669,17 +676,17 @@ class FixedIntervalSeries extends Series {
             interval = this.meta.interval;
         }
         var intervalMillis = interval*1000;
-        var metaStartMillis = this.meta.start_time*1000;
+        var startMeta = this.meta.start_time*1000;
         
-        if (start >= metaStartMillis) {
-            start = metaStartMillis + Math.ceil((start - metaStartMillis)/intervalMillis)*intervalMillis;
+        if (start >= startMeta) {
+            start = startMeta + Math.ceil((start - startMeta)/intervalMillis)*intervalMillis;
         }
         else {
-            start = metaStartMillis;
+            start = startMeta;
         }
         
-        if (end >= metaStartMillis) {
-            end = metaStartMillis + Math.floor((end - metaStartMillis)/intervalMillis)*intervalMillis;
+        if (end >= startMeta) {
+            end = startMeta + Math.floor((end - startMeta)/intervalMillis)*intervalMillis;
             
             // Only reload, if the requested interval is not already hold in cache
             return super.load(start, end, interval);
