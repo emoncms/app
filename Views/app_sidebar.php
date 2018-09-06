@@ -1,7 +1,5 @@
 <?php
-    global $path, $session, $user;
-    $apikey = "";
-    if ($session['write']) $apikey = "&readkey=".$user->get_apikey_read($session['userid']);
+    global $path;
 ?>
 
 <!-- Side-bar navigation -->
@@ -9,8 +7,8 @@
   <div class="sidenav-inner">
     <ul class="appmenu">
       <?php
-      foreach ($applist as $name=>$appitem) {
-          echo "<li><a href='".$path."app/view?name=".$name.$apikey."'>".$name."</a></li>";
+      foreach ($apps as $name=>$app) {
+          echo "<li class='appitem'><a href='".$path."app/view?name=".$name."'>".$name."</a></li>";
       }
       ?>
       <li><a href="<?php echo $path; ?>app/new"><i class="icon-plus icon-app-new"></i> Add new app</a></li>
@@ -22,13 +20,12 @@
 
 var max_wrapper_width = 1150;
 
-$("#app_menu").parent().attr("href","#");
-$("#app_menu").find("i").removeClass("icon-leaf").addClass("icon-th-list");
-
-var sidebar_enabled = true;
-var sidebar_visible = true;
+var sidebar_enabled = "<?php echo $show; ?>";
 
 sidebar_resize();
+
+$("#app_menu").parent().attr("href","#");
+$("#app_menu").find("i").removeClass("icon-leaf").addClass("icon-th-list");
 
 function sidebar_resize() {
     var width = $(window).width();
@@ -37,9 +34,9 @@ function sidebar_resize() {
     $(".sidenav").addClass('notransition').height(height-height_nav);
     
     if (width < max_wrapper_width) {
-        hide_sidebar();
-    } else {
-        if (sidebar_enabled) show_sidebar();
+        sidebar_hide();
+    } else if (sidebar_enabled) {
+        sidebar_show();
     }
     // Disable transitions for 350ms, which is the defined slide-in period
     setTimeout(function() {
@@ -52,31 +49,37 @@ $(window).resize(function(){
 });
 
 $("#app_menu").parent().click(function(){
-    if (sidebar_visible) {
-        sidebar_enabled = false;
-        hide_sidebar();
+    if (sidebar_enabled) {
+        sidebar_hide();
     } else {
-        sidebar_enabled = true;
-        show_sidebar();
+        sidebar_show();
     }
 });
 
-function show_sidebar() {
+$(".appmenu .appitem").click(function(){
+    sidebar_hide();
+});
+
+function sidebar_show() {
     var width = $(window).width();
-    sidebar_visible = true;
     $(".sidenav").css("left","250px");
-    if (width>=max_wrapper_width) $("#wrapper").css("padding-left","250px");
     $("#wrapper").css("margin","0");
+    if (width>=max_wrapper_width) {
+        $("#wrapper").css("padding-left","250px");
+    }
     $("#sidenav-open").hide();
     $("#sidenav-close").hide();
+
+    sidebar_enabled = true;
 }
 
-function hide_sidebar() {
-    sidebar_visible = false;
+function sidebar_hide() {
     $(".sidenav").css("left","0");
-    $("#wrapper").css("padding-left","0");
     $("#wrapper").css("margin","0 auto");
+    $("#wrapper").css("padding-left","0");
     $("#sidenav-open").show();
+
+    sidebar_enabled = false;
 }
 
 </script>

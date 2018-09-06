@@ -46,9 +46,11 @@ function app_controller()
             } else {
                 $app = get("name");
             }
+            $sidebar = false;
             
             if (!isset($applist->$app)) {
                 foreach ($applist as $key=>$val) { $app = $key; break; }
+                $sidebar = true;
             }
             
             $route->format = "html";
@@ -67,7 +69,7 @@ function app_controller()
             
             $result = "<link href='".$path."Modules/app/Views/css/sidenav.css?v=1' rel='stylesheet'>";
             $result .= "<div id='wrapper'>";
-            if ($session['write']) $result .= view("Modules/app/Views/app_sidebar.php",array("applist"=>$applist));
+            if ($session['write']) $result .= view("Modules/app/Views/app_sidebar.php",array("apps"=>$applist, "show"=>$sidebar));
             if ($app!=false) {
                 $result .= view($dir.$id.".php",array("name"=>$app, "appdir"=>$dir, "config"=>$config, "apikey"=>$apikey));
             } else {
@@ -99,7 +101,7 @@ function app_controller()
         $result = "<link href='".$path."Modules/app/Views/css/sidenav.css?v=1' rel='stylesheet'>";
         $result .= "<link href='".$path."Modules/app/Views/css/light.css?v=1' rel='stylesheet'>";
         $result .= "<div id='wrapper'>";
-        $result .= view("Modules/app/Views/app_sidebar.php",array("applist"=>$applist));
+        $result .= view("Modules/app/Views/app_sidebar.php",array("apps"=>$applist, "show"=>true));
         $result .= view("Modules/app/Views/app_view.php",array("apps"=>$appavail));
         $result .= "</div>";
     }
