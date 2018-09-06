@@ -217,7 +217,7 @@ function setup() {
 function update() {
     var time = new Date().getTime();
     if (new Date().getTime() - idle >= INTERVAL_RELOAD) {
-        console.log("Window idle for "+INTERVAL_RELOAD/60000+" minutes and will be reset")
+        appLog('INFO', "Window idle for "+INTERVAL_RELOAD/60000+" minutes and will be reset")
         reset();
         
         idle = time;
@@ -437,17 +437,27 @@ function graphError(error) {
             message += error;
         }
     }
-    console.warn(message);
+    appLog('WARN', message);
 }
 
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------
 function appLog(level, message) {
-    if (level == "ERROR") {
-        alert(new Date().getTime+" "+level+": "+message);
+	var time = new Date().toString();
+    if (level.toUpperCase() == 'ERROR') {
+        alert(time+" "+level+": "+message);
+        console.error(time, level, message);
     }
-    console.log(level, new Date().getTime+": "+message);
+    else if (level.toUpperCase() == 'WARN') {
+        console.warn(time, level, message);
+    }
+    else if (level.toUpperCase() == 'INFO') {
+        console.info(time, level, message);
+    }
+    else {
+        console.log(time, level, message);
+    }
 }
 
 </script>

@@ -165,7 +165,7 @@ class DataCollection {
         if (this.series[key] != undefined) {
             return this.series[key];
         }
-        else console.log("ERROR", "Unknown key \""+key+"\" to get data series");
+        else console.warn(new Date()+": Unknown key \""+key+"\" to get data series");
     }
     
     getData(key) {
@@ -604,7 +604,7 @@ class Series {
             if (this.latest[0] - this.data[this.data.length-1][0] >= this.interval) {
                 this.data.push(this.latest);
                 
-                console.log("Appending value to series \""+this.key+"\": "+this.latest[1]);
+                console.log(new Date()+": Appending value to series \""+this.key+"\": "+this.latest[1]);
             }
         }
         else {
