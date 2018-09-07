@@ -115,7 +115,9 @@ class Graph {
         date.setDate(date.getDate() - (days-1));
         date.setHours(0,0,0,0);
         var start = date.getTime();
-        
+        if (end - start < 21600000) {
+        	start = end - 21600000;
+        }
         this.setTimeWindow(start, end);
     }
 
@@ -375,6 +377,17 @@ class PowerGraph extends Graph {
             var solar = power(Graph.SOLAR);
             
             if (imp > 0 || solar > 0) {
+            	// If all solar power is getting exported, still display it as self-consumption
+            	if (exp > 0 && exp == solar) {
+            		if (exp >= imp) {
+                        exp -= imp;
+                        imp = 0;
+                    }
+                    else {
+                    	imp -= exp;
+                    	exp = 0;
+            		}
+            	}
                 importPower.push([time, imp]);
                 exportPower.push([time, exp]);
                 solarPower.push([time, solar]);
@@ -847,16 +860,16 @@ class EnergyGraph extends Graph {
                 
                 if (this.view.cost[Graph.EXPORT] > 0) {
                     if (cost >= income) {
-                        saving = cost - income;
+                        saving = income;
                         
-                        cost -= saving;
+                        cost -= income;
                         income = 0;
                     }
                     else {
                         saving = cost;
                         
+                        income -= cost;
                         cost = 0;
-                        income = income - cost;
                     }
                 }
                 saving += Math.max(0, solar - exp)*this.view.cost[Graph.IMPORT];
