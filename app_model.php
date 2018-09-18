@@ -132,7 +132,21 @@ class AppConfig
             if (gettype($value)=="array") return array('success'=>false, "message"=>"Config value cannot be array");
             if (gettype($value)=="resource") return array('success'=>false, "message"=>"Config value cannot be resource");
             // Value can be alphanumeric, either case plus selected char's
-            if (preg_replace("/[^A-Za-z0-9,\-:;€£$.&\s]/",'',$value)!=$value) return array('success'=>false, "message"=>"Invalid config value");
+            // using unicode categories for pattern match to allow for any currency character
+            //   \pSc (S = symbols, c = currency)
+            //   \pL (L = letters)
+            //   \pP (P = punctuation)
+            //   \pN (N = number)
+            //   \W = white space (not unicode category)
+            // also using php's strip_tags() funciton to avoid html insertion (spaces required around greater than and less than)
+            // 
+            // EXAMPLE:
+            // this input:
+            //    <script> alert(123) </script> a is < than b but c is < >  to b,/?€@#~$¢£¤¥৲৳৻૱௹฿៛₠₡₢₣₤₥₦₧₨₩₪₫₭₮₯₰₱₲₳₴₵₸₹₺₽
+            // would be recognized as:
+            //    alert(123)  a is < than b but c is < >  to b,/?€@#~$¢£¤¥৲৳৻૱௹฿៛₠₡₢₣₤₥₦₧₨₩₪₫₭₮₯₰₱₲₳₴₵₸₹₺₽
+
+            if (preg_replace("/[^\pSc\pL\pP\pN\W]/u",'',strip_tags($value))!=$value) return array('success'=>false, "message"=>"Invalid config value");
         }
         
         // Load config from database
