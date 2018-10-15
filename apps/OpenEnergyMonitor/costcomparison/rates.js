@@ -52,7 +52,7 @@ var GREENENERGYTIDE_RATE_BUCKET =
     //18:00 to 19:00
     1, 1,
     //19:00 to 20:00
-    0, 0,
+    1, 1,
     //20:00 to 21:00
     0, 0,
     //21:00 to 22:00
@@ -60,7 +60,7 @@ var GREENENERGYTIDE_RATE_BUCKET =
     //22:00 to 23:00
     0, 0,
     //23:00 to 23:59
-    2, 2
+    0, 0
   ];
   
 var ECONOMY7_MIDLANDS = [
@@ -118,15 +118,15 @@ energy_rates.push( {
 //Rate one  = premium 24.99 pence
 //rate two  = low 4.99 pence
  rates : [{
-        cost: 0.1199,
+        cost: 0.1402,
         colour: colour1
     },
     {
-        cost: 0.2499,
+        cost: 0.2999,
         colour: colour0
     },
     {
-        cost: 0.0499,
+        cost: 0.0641,
         colour: colour2
     }
  ],
