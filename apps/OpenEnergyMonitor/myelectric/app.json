@@ -1,0 +1,5 @@
+{
+    "title"          : "My Electric",
+    "description"    : "A simple electricity consumption app showing real-time power in Watts and daily consumption in kWh. Switch between energy and cost modes.",
+    "status"         : ""
+}

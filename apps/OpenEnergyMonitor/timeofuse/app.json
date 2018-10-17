@@ -1,0 +1,5 @@
+{
+    "title"          : "Time of use",
+    "description"    : "Time of use version of My Electric, showing night time and day time consumption. Night tariff start and end times can be set in the config to adjust for different tariff times.",
+    "status"         : "Development"
+}

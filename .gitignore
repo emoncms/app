@@ -1,0 +1,10 @@
+.project
+.buildpath
+
+# Ignore all Apps except core ones
+apps/*
+apps/*/
+!apps/blank
+!apps/template
+!apps/OpenEnergyMonitor
+!apps/OpenEnergyMonitor/*
