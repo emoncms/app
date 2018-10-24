@@ -143,8 +143,8 @@ var feed = new Feed(apikey);
 config.app = {
     "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"House or building use in watts"},
     "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative use in kWh"},
-    "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity £/kWh"},
-    "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$..)"}
+    "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity e.g £/kWh"},
+    "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$,€...)"}
 };
 
 config.name = "<?php echo $name; ?>";

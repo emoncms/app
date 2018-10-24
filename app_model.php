@@ -201,7 +201,7 @@ class AppConfig
     private function get($userid) 
     {
         $result = $this->mysqli->query("SELECT `data` FROM app_config WHERE `userid`='$userid'");
-        if ($row = $result->fetch_object()) {
+        if ($result && $row = $result->fetch_object()) {
             $applist = json_decode($row->data);
             if (gettype($applist)=="array" || $applist===null) $applist = new stdClass();
         } else {
