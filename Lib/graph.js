@@ -9,7 +9,7 @@ class GraphView {
             return false;
         }
         this.container = container;
-        this.container.load(path + "Modules/app/lib/graph.php");
+        this.container.load(path + "Modules/app/Lib/graph.php");
         
         if (!$('.graph-tooltip').length) $("<div class='graph-tooltip' style='display:none'></div>").appendTo("body");
 
@@ -494,8 +494,8 @@ class PowerGraph extends Graph {
             xaxis: {
                 mode: "time",
                 timezone: "browser", 
-                min: this.view.start,
-                max: this.view.end, 
+                min: this.start,
+                max: this.end, 
                 font: {
                     size: this.view.flotFontSize,
                     color: "#666"
