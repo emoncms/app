@@ -175,6 +175,24 @@ energy_rates.push({
     rate_bucket: BULBENERGY_SMART_RATE_BUCKET
 });
 
+energy_rates.push({
+
+    identifier: "EDFSTANDARD",
+    label: "Deemed Standard Tariff",
+    supplier: "EDF Energy",
+    region: "LONDON",
+    updated_epoc: 1545949488,
+    // Rate zero = standard 19.39 pence
+    rates: [{
+        cost: 0.1939,
+        colour: colour1
+    }
+    ],
+    // Daily Standing Charge  = 22.17 pence
+    dailystandingcharge: 0.2217,
+    rate_bucket: SINGLE_TIER_RATE_BUCKET
+});
+
 energy_rates.push( {
 
  identifier : "GREENENERGYTIDE20170713",
