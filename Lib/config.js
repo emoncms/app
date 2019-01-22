@@ -106,12 +106,25 @@ var config = {
             
             if (config.app[z].type=="feed") {
                 // Create list of feeds that satisfy engine requirement
-                var out = "<option value=0>Select "+z+" feed:</option>";
-                out += "<option value=auto>AUTO SELECT</option>";
-                for (var n in config.feedsbyname)  {
-                    if (config.engine_check(config.feedsbyname[n],config.app[z])) {
-                        out += "<option value="+config.feedsbyname[n].id+">"+config.feedsbyname[n].name+"</option>";
+                var out = "<option value=0>Select "+z+" feed:</option>" +
+                        "<option value=auto>AUTO SELECT</option>";
+                
+                var feedsbygroup = [];
+                for (var f in config.feedsbyid)  {
+                    if (config.engine_check(config.feedsbyid[f], config.app[z])) {
+                        var group = (config.feedsbyid[f].tag === null ? "NoGroup" : config.feedsbyid[f].tag);
+                        if (group != "Deleted") {
+                            if (!feedsbygroup[group]) feedsbygroup[group] = []
+                            feedsbygroup[group].push(config.feedsbyid[f]);
+                        }
                     }
+                }
+                for (group in feedsbygroup) {
+                    out += "<optgroup label='"+group+"'>";
+                    for (f in feedsbygroup[group]) {
+                        out += "<option value="+feedsbygroup[group][f].id+">"+feedsbygroup[group][f].name+"</option>";
+                    }
+                    out += "</optgroup>";
                 }
                 configItem.find(".feed-select").html(out);
                 
@@ -246,12 +259,12 @@ var config = {
                         }
                     } else {
                         // Overwrite with any user set feeds if applicable
-                        for (var z in config.feedsbyname) {
+                        for (var z in config.feedsbyid) {
                             // Check that the feed exists
                             // config will be shown if a previous valid feed has been deleted
-                            var feedid = config.feedsbyname[z].id;
+                            var feedid = config.feedsbyid[z].id;
                             if (config.db[key] == feedid) {
-                                if (config.engine_check(config.feedsbyname[z],config.app[key])) valid[key] = true;
+                                if (config.engine_check(config.feedsbyid[z],config.app[key])) valid[key] = true;
                                 break;
                             }
                         }
