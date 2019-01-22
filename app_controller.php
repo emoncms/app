@@ -68,6 +68,7 @@ function app_controller()
             }
             
             $result = "<link href='".$path."Modules/app/Views/css/sidenav.css?v=1' rel='stylesheet'>";
+            $result .= "<link href='".$path."Modules/app/Views/css/light.css?v=1' rel='stylesheet'>";
             $result .= "<div id='wrapper'>";
             if ($session['write']) $result .= view("Modules/app/Views/app_sidebar.php",array("apps"=>$applist, "show"=>$sidebar));
             if ($app!=false) {
