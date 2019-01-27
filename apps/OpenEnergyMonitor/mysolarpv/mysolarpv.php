@@ -341,6 +341,7 @@ function livefn()
     lastupdate = now;
     
     var feeds = feed.listbyid();
+    if (feeds === null) { return; }
     var solar_now = parseInt(feeds[config.app.solar.value].value);
     var use_now = parseInt(feeds[config.app.use.value].value);
 

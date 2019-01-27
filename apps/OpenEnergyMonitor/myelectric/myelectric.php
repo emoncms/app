@@ -382,6 +382,7 @@ function fastupdate()
     // 1) Get last value of feeds
     // --------------------------------------------------------------------
     feeds = feed.listbyid();
+    if (feeds === null) { return; }
     
     // set the power now value
     if (viewmode=="energy") {
