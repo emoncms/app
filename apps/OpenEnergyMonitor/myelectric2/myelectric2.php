@@ -574,7 +574,14 @@ function bargraph_load(start,end)
     
     data["use_kwhd"] = [];
     
-    if (elec_data.length>0) {
+    if (elec_data.length==0) {
+        // If empty, then it's a new feed and we can safely append today's value.
+        // Also append a fake value for the day before so that the calculations work.
+        var d = new Date();
+        d.setHours(0,0,0,0);
+        elec_data.push([d.getTime(),0]);
+        elec_data.push([d.getTime()+(interval*1000),feeds["use_kwh"].value]);
+    } else {
         var lastday = elec_data[elec_data.length-1][0];
         
         var d = new Date();
@@ -585,7 +592,9 @@ function bargraph_load(start,end)
             var next = elec_data[elec_data.length-1][0] + (interval*1000);
             elec_data.push([next,feeds["use_kwh"].value]);
         }
- 
+    }
+
+    if (elec_data.length>1) {
         var total_kwh = 0; 
         var n = 0;
         // Calculate the daily totals by subtracting each day from the day before
@@ -605,7 +614,7 @@ function bargraph_load(start,end)
             $("#kwh_today").html(kwh_today.toFixed(1)+"<span class='units'>kWh</span>");
         } else {
             $("#kwh_today").html(config.app.currency.value+(kwh_today*config.app.unitcost.value).toFixed(2));
-        }
+	}
     }
     
     bargraph_series = [];
