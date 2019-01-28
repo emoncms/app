@@ -99,7 +99,7 @@ $("#app-new-action").click(function(){
         dataType: 'json',
         async: true,
         success: function(result) {
-            console.log(result);
+            // console.log(result);
             window.location = path+"app/view?name="+nicename;
         }
     });
