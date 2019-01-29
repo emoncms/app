@@ -264,7 +264,7 @@ function init()
         }
     });
 
-    $("<div id='tooltip'><span id='value'></span> <span id='unit'>W</span></div>").appendTo("body");
+    $("<div id='tooltip'><span id='value'></span> <span id='unit'></span></div>").appendTo("body");
 
     // position the tooltip and insert the correct value on hover
     // hide the tooltip on mouseout  
