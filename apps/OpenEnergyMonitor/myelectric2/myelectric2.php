@@ -349,7 +349,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
 
             $("#tooltip").remove();
             var itemTime = item.datapoint[0];
-            var elec_kwh = data["use_kwhd"][z][1];
+            var elec_kwh = data.use_kwhd[z] ? data.use_kwhd[z][1]: data.use[z][1];
 
             var d = new Date(itemTime);
             var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
