@@ -393,6 +393,8 @@ function hide() {
 function updater()
 {
     feed.listbyidasync(function(result){
+        if (result === null) { return; }
+
         for (var key in config.app) {
             if (config.app[key].value) feeds[key] = result[config.app[key].value];
         }
