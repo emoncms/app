@@ -542,6 +542,7 @@ function update()
     lastupdate = now;
     
     var feeds = feed.getListById();
+    if (feeds === null) { return; }
     var solar_now = parseInt(feeds[config.app.solar.value].value);
     var use_now = parseInt(feeds[config.app.use.value].value);
     var divert_now = parseInt(feeds[config.app.divert.value].value);

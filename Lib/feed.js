@@ -12,7 +12,7 @@ class Feed {
     getList(async) {
         if (typeof async === 'undefined') async = false;
         
-        var feeds = {};
+        var feeds = null;
         var promise = $.ajax({                                      
             url: path+"feed/list.json"+this.apikey,
             dataType: 'json',
@@ -36,6 +36,7 @@ class Feed {
         if (typeof async === 'undefined') async = false;
         
         var feedsById = function(feeds) {
+            if (feeds === null) return null;
             var result = {};
             for (var i in feeds) result[feeds[i].id] = feeds[i];
             
@@ -43,7 +44,11 @@ class Feed {
         }
         if (async) {
             return this.getList(true).then(function(feeds) {
-                return feedsById(feeds);
+            	var result = feedsById(feeds);
+            	if (typeof async === 'function') {
+            		async(feeds);
+            	}
+            	return result;
             });
         }
         else {
@@ -55,15 +60,19 @@ class Feed {
         if (typeof async === 'undefined') async = false;
         
         var feedsByName = function(feeds) {
+            if (feeds === null) return null;
             var result = {};
             for (var i in feeds) result[feeds[i].name] = feeds[i];
             
             return result;
         }
-        var result;
         if (async) {
             return this.getList(true).then(function(feeds) {
-                return feedsByName(feeds);
+            	var result = feedsByName(feeds);
+            	if (typeof async === 'function') {
+            		async(result);
+            	}
+            	return result;
             });
         }
         else {
@@ -86,6 +95,9 @@ class Feed {
                     // TODO: throw Exception
                 }
                 else if(!async) meta = result;
+                else if(typeof async === 'function') {
+            		async(result);
+                }
                 return result;
             }
         });
@@ -117,6 +129,9 @@ class Feed {
                     // TODO: throw Exception
                 }
                 else if(!async) data = result;
+                else if(typeof async === 'function') {
+            		async(result);
+                }
                 return result;
             }
         });
@@ -145,6 +160,9 @@ class Feed {
                     // TODO: throw Exception
                 }
                 else if(!async) data = result;
+                else if(typeof async === 'function') {
+            		async(result);
+                }
                 return result;
             }
         });
@@ -173,6 +191,9 @@ class Feed {
                     // TODO: throw Exception
                 }
                 else if(!async) data = result;
+                else if(typeof async === 'function') {
+            		async(result);
+                }
                 return result;
             }
         });
@@ -197,6 +218,9 @@ class Feed {
                     // TODO: throw Exception
                 }
                 else if(!async) data = result;
+                else if(typeof async === 'function') {
+            		async(result);
+                }
                 return result;
             }
         });
@@ -244,6 +268,9 @@ class Feed {
                     // TODO: throw Exception
                 }
                 else if(!async) data = result;
+                else if(typeof async === 'function') {
+            		async(result);
+                }
                 return data;
             }
         });
@@ -268,6 +295,9 @@ class Feed {
                     // TODO: throw Exception
                 }
                 else if(!async) value = parseFloat(result);
+                else if(typeof async === 'function') {
+            		async(result);
+                }
                 return result;
             }
         });

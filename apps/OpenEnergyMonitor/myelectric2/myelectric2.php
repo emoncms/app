@@ -278,6 +278,7 @@ function hide() {
 function update()
 {
     feed.getListById(function(result) {
+        if (result === null) { return; }
         
         for (var key in config.app) {
             if (config.app[key].value) feeds[key] = result[config.app[key].value];
@@ -342,7 +343,15 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
 
             $("#tooltip").remove();
             var itemTime = item.datapoint[0];
-            var elec_kwh = data["use_kwhd"][z][1];
+
+            var elec_kwh, unit;
+            if (data.use_kwhd[z]) {
+                unit = "kWh";
+                elec_kwh = data.use_kwhd[z][1];
+            } else {
+                unit = "W";
+                elec_kwh = data.use[z][1];
+            }
 
             var d = new Date(itemTime);
             var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -351,9 +360,9 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             
             var text = "";
             if (viewcostenergy=="energy") {
-                text = date+"<br>"+(elec_kwh).toFixed(1)+" kWh";
+                text = date+"<br>"+(elec_kwh).toFixed(1)+" " + unit;
             } else {
-                text = date+"<br>"+(elec_kwh).toFixed(1)+" kWh ("+config.app.currency.value+(elec_kwh*config.app.unitcost.value).toFixed(2)+")";
+                text = date+"<br>"+(elec_kwh).toFixed(1)+" " + unit + " ("+config.app.currency.value+(elec_kwh*config.app.unitcost.value).toFixed(2)+")";
             }
             
             tooltip(item.pageX, item.pageY, text, "#fff");
@@ -567,7 +576,14 @@ function bargraph_load(start,end)
     
     data["use_kwhd"] = [];
     
-    if (elec_data.length>0) {
+    if (elec_data.length==0) {
+        // If empty, then it's a new feed and we can safely append today's value.
+        // Also append a fake value for the day before so that the calculations work.
+        var d = new Date();
+        d.setHours(0,0,0,0);
+        elec_data.push([d.getTime(),0]);
+        elec_data.push([d.getTime()+(interval*1000),feeds["use_kwh"].value]);
+    } else {
         var lastday = elec_data[elec_data.length-1][0];
         
         var d = new Date();
@@ -578,7 +594,9 @@ function bargraph_load(start,end)
             var next = elec_data[elec_data.length-1][0] + (interval*1000);
             elec_data.push([next,feeds["use_kwh"].value]);
         }
- 
+    }
+
+    if (elec_data.length>1) {
         var total_kwh = 0; 
         var n = 0;
         // Calculate the daily totals by subtracting each day from the day before
@@ -598,7 +616,7 @@ function bargraph_load(start,end)
             $("#kwh_today").html(kwh_today.toFixed(1)+"<span class='units'>kWh</span>");
         } else {
             $("#kwh_today").html(config.app.currency.value+(kwh_today*config.app.unitcost.value).toFixed(2));
-        }
+	}
     }
     
     bargraph_series = [];

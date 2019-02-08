@@ -52,3 +52,15 @@
 	margin-right:22px;
 }
 
+#tooltip {
+  position: absolute;
+  display: none;
+  border: 1px solid #545454;
+  border-radius: .1em;
+  padding: .3em .5em;
+  background-color: #333;
+  opacity: .8;
+  top: 0;
+  left: 0;
+  color: white
+}

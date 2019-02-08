@@ -14,7 +14,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
-    
+
 <div id="app-container" style="display:none" class="block">
   <div class="col1"><div class="col1-inner">
   
@@ -275,6 +275,7 @@ function update()
     lastupdate = now;
     
     var feeds = feed.getListById();
+    if (feeds === null) { return; }
     var solar_now = 0;
     if (config.app.solar.value)
         solar_now = parseInt(feeds[config.app.solar.value].value);

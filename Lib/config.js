@@ -10,7 +10,7 @@ var config = {
     feedsbyname: {},
     
     init: function() {
-        console.log("CONFIG: Init");
+        // console.log("CONFIG: Init");
         
         for (var z in config.feeds) config.feedsbyname[config.feeds[z].name] = config.feeds[z];
         for (var z in config.feeds) config.feedsbyid[config.feeds[z].id] = config.feeds[z];

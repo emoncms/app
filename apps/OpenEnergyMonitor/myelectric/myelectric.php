@@ -363,6 +363,7 @@ function updateFast()
     // 1) Get last value of feeds
     // --------------------------------------------------------------------
     feeds = feed.getListById();
+    if (feeds === null) { return; }
     
     // set the power now value
     if (viewmode=="energy") {
@@ -535,8 +536,17 @@ function updateSlow()
     }
     
     daily = [];
-    
-    if (data.length>0) {
+
+    if (data.length==0) {
+        // If empty, then it's a new feed and we can safely append today's value.
+        // Also append a fake value for the day before so that the calculations work.
+        if (feeds[use_kwh]!=undefined) {
+            var d = new Date();
+            d.setHours(0,0,0,0);
+            data.push([d.getTime(),0]);
+            data.push([d.getTime()+(interval*1000),feeds[use_kwh].value*1.0]);
+        }
+    } else {
         var lastday = data[data.length-1][0];
         
         var d = new Date();
@@ -549,15 +559,14 @@ function updateSlow()
                 data.push([next,feeds[use_kwh].value*1.0]);
             }
         }
+    }
     
-        // Calculate the daily totals by subtracting each day from the day before
-        
-        for (var z=1; z<data.length; z++)
-        {
-          var time = data[z-1][0];
-          var diff = (data[z][1]-data[z-1][1]);
-          daily.push([time,diff*scale]);
-        }
+    // Calculate the daily totals by subtracting each day from the day before
+    for (var z=1; z<data.length; z++)
+    {
+      var time = data[z-1][0];
+      var diff = (data[z][1]-data[z-1][1]);
+      daily.push([time,diff*scale]);
     }
     
     var usetoday_kwh = 0;

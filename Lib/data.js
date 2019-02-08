@@ -117,6 +117,7 @@ class DataCache {
 
     update() {
         return this.feed.getListById(true).then(function(result) {
+        	if (result === null) return;
             for (var key in this.cache.series) {
                 var series = this.cache.get(key);
                 var feed = result[series.id];
