@@ -262,7 +262,21 @@ function init()
             powergraph_events();
             setTimeout(function() { $(".viewhistory").html("VIEW HISTORY"); },80);
         }
-    });        
+    });
+
+    $("<div id='tooltip'><span id='value'></span> <span id='unit'></span></div>").appendTo("body");
+
+    // position the tooltip and insert the correct value on hover
+    // hide the tooltip on mouseout  
+    $("#placeholder").bind("plothover", function (event, pos, item) {
+        if (item) {
+            var value = item.datapoint[1].toFixed(2);
+            $("#tooltip #value").text(value);
+            $("#tooltip").css({top: item.pageY-30, left: item.pageX+5}).fadeIn(200);
+        } else {
+            $("#tooltip").hide();
+        }
+    });
 }
 
 function show() 
@@ -341,6 +355,7 @@ function livefn()
     lastupdate = now;
     
     var feeds = feed.listbyid();
+    if (feeds === null) { return; }
     var solar_now = parseInt(feeds[config.app.solar.value].value);
     var use_now = parseInt(feeds[config.app.use.value].value);
 
@@ -442,8 +457,8 @@ function draw_powergraph() {
     
     var datastart = timeseries.start_time("solar");
     
-    console.log(timeseries.length("solar"));
-    console.log(timeseries.length("use"));
+    // console.log(timeseries.length("solar"));
+    // console.log(timeseries.length("use"));
     
     for (var z=0; z<timeseries.length("solar"); z++) {
 
@@ -577,8 +592,8 @@ function load_bargraph(start,end) {
     var use_kwh_data = feed.getdataDMY(config.app.use_kwh.value,start,end,"daily");
     var import_kwh_data = feed.getdataDMY(config.app.import_kwh.value,start,end,"daily");
     
-    console.log(solar_kwh_data);
-    console.log(use_kwh_data);
+    // console.log(solar_kwh_data);
+    // console.log(use_kwh_data);
     
     solarused_kwhd_data = [];
     solar_kwhd_data = [];
@@ -649,7 +664,7 @@ function draw_bargraph()
         grid: {hoverable: true, clickable: true, markings:markings},
         selection: { mode: "x" }
     }
-    
+
     var plot = $.plot($('#placeholder'),historyseries,options);
     
     $('#placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use & Total Use</div>");
@@ -757,6 +772,6 @@ $(window).resize(function(){
 // ----------------------------------------------------------------------
 function app_log (level, message) {
     if (level=="ERROR") alert(level+": "+message);
-    console.log(level+": "+message);
+    // console.log(level+": "+message);
 }
 </script>

@@ -5,16 +5,18 @@ var feed = {
         var apikeystr = "";
         if (apikey!="") apikeystr = "?apikey="+apikey;
         
-        var feeds = {};
+        var feeds = null;
         $.ajax({                                      
             url: path+"feed/list.json"+apikeystr,
             dataType: 'json',
             async: true,                      
             success: function(result) {
+                feeds = result; 
                 if (!result || result===null || result==="" || result.constructor!=Array) {
                     console.log("ERROR","feed.listbyidasync invalid response: "+result);
+                    f(null);
+                    return;
                 }
-                feeds = result; 
                 
                 var byid = {};
                 for (z in feeds) byid[feeds[z].id] = feeds[z];
@@ -28,16 +30,17 @@ var feed = {
         var apikeystr = "";
         if (apikey!="") apikeystr = "?apikey="+apikey;
         
-        var feeds = {};
+        var feeds = null;
         $.ajax({                                      
             url: path+"feed/list.json"+apikeystr,
             dataType: 'json',
             async: false,                      
             success: function(result) {
+                feeds = result; 
                 if (!result || result===null || result==="" || result.constructor!=Array) {
                     console.log("ERROR","feed.list invalid response: "+result);
+                    feeds = null;
                 }
-                feeds = result; 
             } 
         });
         
@@ -46,6 +49,7 @@ var feed = {
     
     listbyid: function() {
         var feeds = feed.list();
+        if (feeds === null) { return null; }
         var byid = {};
         for (z in feeds) byid[feeds[z].id] = feeds[z];
         return byid;
@@ -53,6 +57,7 @@ var feed = {
     
     listbyname: function() {
         var feeds = feed.list();
+        if (feeds === null) { return null; }
         var byname = {};
         for (z in feeds) byname[feeds[z].name] = feeds[z];
         return byname;
