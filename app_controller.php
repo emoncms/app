@@ -66,15 +66,15 @@ function app_controller()
             }
             
             $result = "<link href='".$path."Modules/app/Views/css/pagenav.css?v=1' rel='stylesheet'>";
-            $result .= "<div id='wrapper'>";
-            if ($session['write']) $route->sidebar = view("Modules/app/Views/sidebar.php",array("applist"=>$applist));
+            $result .= "</div>";
+            // $result .= "<div id='wrapper'>";
 
             if ($app!=false) {
                 $result .= view($dir.$id.".php",array("name"=>$app, "appdir"=>$dir, "config"=>$config, "apikey"=>$apikey));
             } else {
                 $result .= view("Modules/app/Views/app_view.php",array("apps"=>$appavail));
             }
-            $result .= "</div>";
+            // $result .= "</div>";
         }
     }
     else if ($route->action == "list" && $session['read']) {
@@ -98,10 +98,10 @@ function app_controller()
         $applist = $appconfig->get_list($session['userid']);
         $route->format = "html";
         $result = "<link href='".$path."Modules/app/Views/css/pagenav.css?v=1' rel='stylesheet'>";
-        $result .= "<div id='wrapper'>";
+        // $result .= "<div id='wrapper'>";
         // $result .= view("Modules/app/Views/app_sidebar.php",array("applist"=>$applist));
         $result .= view("Modules/app/Views/app_view.php", array("apps"=>$appavail));
-        $result .= "</div>";
+        // $result .= "</div>";
     }
     else if ($route->action == "remove" && $session['write']) {
         $route->format = "json";
