@@ -44,7 +44,7 @@ function app_controller()
             if ($route->subaction) {
                 $app = $route->subaction;
             } else {
-                $app = get("name");
+                $app = urldecode(get("name"));
             }
             
             if (!isset($applist->$app)) {
