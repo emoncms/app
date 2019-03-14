@@ -249,7 +249,7 @@ class DataCollection {
     hasDailyEnergy(start, end) {
         for (var key in this.series) {
             var series = this.get(key);
-            if (series.type == 'energy' && !series.hasInterval(start, end, 86400000)) {
+            if (series.type == 'energy' && !series.hasInterval(start, end, 86400)) {
                 return false;
             }
         }
@@ -401,15 +401,14 @@ class Series {
         if (this.data.length == 0) {
             return false;
         }
-        if (interval > 0 && this.interval < interval) {
+        if (interval > 0 && this.interval > interval*1000) {
             return false
         }
-        var tolerance = this.getTolerance(interval);
-        if ((start < (this.data[0][0] - tolerance) && this.getEarliestTime() < (this.data[0][0] - tolerance)) || 
-                end > (this.getLatestTime() + tolerance)) {
-            return false;
+        var tolerance = this.getTolerance(interval*1000);
+        if (start >= this.data[0][0] - tolerance && end <= this.data[this.data.length-1][0] + tolerance) {
+        	return true;
         }
-        return true;
+        return false;
     }
 
     getTimevalue(time, async) {
@@ -467,12 +466,11 @@ class Series {
     }
 
     load(start, end, interval) {
-        this.interval = interval*1000;
-        
         // Only reload, if the requested interval is not already hold in cache
-        if (this.hasInterval(start, end, this.interval)) {
+        if (this.hasInterval(start, end, interval)) {
             return Promise.resolve(this.data);
         }
+        this.interval = interval*1000;
         this.live = new Date().getTime() - end < this.interval;
         
         return this.feed.getData(this.id, start, end, interval, true, true, true).then(function(result) {

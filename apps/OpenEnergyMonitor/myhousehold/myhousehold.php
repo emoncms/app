@@ -166,7 +166,7 @@ config.hideapp = function() {
 // Application
 // ----------------------------------------------------------------------
 var updateTimer = false;
-var idle = new Date().getTime();
+var idle = Date.now();
 
 config.init();
 function init() {
@@ -215,8 +215,8 @@ function setup() {
 }
 
 function update() {
-    var time = new Date().getTime();
-    if (new Date().getTime() - idle >= INTERVAL_RELOAD) {
+    var time = Date.now();
+    if (time - idle >= INTERVAL_RELOAD) {
         appLog('INFO', "Window idle for "+INTERVAL_RELOAD/60000+" minutes and will be reset")
         reset();
         
@@ -378,7 +378,7 @@ function drawEnergyValues() {
 }
 
 function events() {
-    $(".app").on('click touchstart', function() { idle = new Date().getTime(); });
+    $(".app").on('click touchstart', function() { idle = Date.now(); });
 
     $(".app-unit").on('click', function() {
         var view = $(this).html();
