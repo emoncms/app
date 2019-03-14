@@ -480,8 +480,16 @@ function draw_powergraph() {
         
         t += interval;
     }
-    $(".total_solar_kwh").html(total_solar_kwh.toFixed(1));
-    $(".total_use_kwh").html((total_use_kwh).toFixed(1));
+    if (total_solar_kwh < 1) {
+    	$(".total_solar_kwh").html(total_solar_kwh.toFixed(2));
+    } else {
+    	$(".total_solar_kwh").html(total_solar_kwh.toFixed(1));
+    }
+    if (total_use_kwh < 1) {
+    	$(".total_use_kwh").html((total_use_kwh).toFixed(2));
+    } else {
+    	$(".total_use_kwh").html((total_use_kwh).toFixed(1));
+    }
     
     $(".total_use_direct_kwh").html((total_use_direct_kwh).toFixed(1));
 
@@ -688,8 +696,16 @@ function bargraph_events(){
             var export_kwhd = export_kwhd_data[z][1];
             var imported_kwhd = use_kwhd-solarused_kwhd;
             
-            $(".total_solar_kwh").html((solar_kwhd).toFixed(1));
-            $(".total_use_kwh").html((use_kwhd).toFixed(1));
+            if (solar_kwhd < 1) {
+                $(".total_solar_kwh").html((solar_kwhd).toFixed(2));
+            } else {
+                $(".total_solar_kwh").html((solar_kwhd).toFixed(1));
+            }
+            if (use_kwhd < 1) {
+                $(".total_use_kwh").html((use_kwhd).toFixed(2));
+            } else {
+                $(".total_use_kwh").html((use_kwhd).toFixed(1));
+            }
             
             $(".total_use_direct_kwh").html((solarused_kwhd).toFixed(1));
             
