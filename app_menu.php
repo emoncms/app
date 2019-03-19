@@ -1,6 +1,6 @@
 <?php
     
-    $menu_left[] = array(
+    $menu_right[] = array(
         'id'=>"app_menu",
         'name'=>"Apps", 
         'path'=>"app/view" , 
