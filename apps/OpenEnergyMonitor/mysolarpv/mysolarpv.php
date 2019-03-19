@@ -262,7 +262,21 @@ function init()
             powergraph_events();
             setTimeout(function() { $(".viewhistory").html("VIEW HISTORY"); },80);
         }
-    });        
+    });
+
+    $("<div id='tooltip'><span id='value'></span> <span id='unit'></span></div>").appendTo("body");
+
+    // position the tooltip and insert the correct value on hover
+    // hide the tooltip on mouseout  
+    $("#placeholder").bind("plothover", function (event, pos, item) {
+        if (item) {
+            var value = item.datapoint[1].toFixed(2);
+            $("#tooltip #value").text(value);
+            $("#tooltip").css({top: item.pageY-30, left: item.pageX+5}).fadeIn(200);
+        } else {
+            $("#tooltip").hide();
+        }
+    });
 }
 
 function show() 
@@ -341,6 +355,7 @@ function livefn()
     lastupdate = now;
     
     var feeds = feed.listbyid();
+    if (feeds === null) { return; }
     var solar_now = parseInt(feeds[config.app.solar.value].value);
     var use_now = parseInt(feeds[config.app.use.value].value);
 
@@ -442,8 +457,8 @@ function draw_powergraph() {
     
     var datastart = timeseries.start_time("solar");
     
-    console.log(timeseries.length("solar"));
-    console.log(timeseries.length("use"));
+    // console.log(timeseries.length("solar"));
+    // console.log(timeseries.length("use"));
     
     for (var z=0; z<timeseries.length("solar"); z++) {
 
@@ -476,8 +491,16 @@ function draw_powergraph() {
         
         t += interval;
     }
-    $(".total_solar_kwh").html(total_solar_kwh.toFixed(1));
-    $(".total_use_kwh").html((total_use_kwh).toFixed(1));
+    if (total_solar_kwh < 1) {
+    	$(".total_solar_kwh").html(total_solar_kwh.toFixed(2));
+    } else {
+    	$(".total_solar_kwh").html(total_solar_kwh.toFixed(1));
+    }
+    if (total_use_kwh < 1) {
+    	$(".total_use_kwh").html((total_use_kwh).toFixed(2));
+    } else {
+    	$(".total_use_kwh").html((total_use_kwh).toFixed(1));
+    }
     
     $(".total_use_direct_kwh").html((total_use_direct_kwh).toFixed(1));
 
@@ -577,8 +600,8 @@ function load_bargraph(start,end) {
     var use_kwh_data = feed.getdataDMY(config.app.use_kwh.value,start,end,"daily");
     var import_kwh_data = feed.getdataDMY(config.app.import_kwh.value,start,end,"daily");
     
-    console.log(solar_kwh_data);
-    console.log(use_kwh_data);
+    // console.log(solar_kwh_data);
+    // console.log(use_kwh_data);
     
     solarused_kwhd_data = [];
     solar_kwhd_data = [];
@@ -649,7 +672,7 @@ function draw_bargraph()
         grid: {hoverable: true, clickable: true, markings:markings},
         selection: { mode: "x" }
     }
-    
+
     var plot = $.plot($('#placeholder'),historyseries,options);
     
     $('#placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use & Total Use</div>");
@@ -684,8 +707,16 @@ function bargraph_events(){
             var export_kwhd = export_kwhd_data[z][1];
             var imported_kwhd = use_kwhd-solarused_kwhd;
             
-            $(".total_solar_kwh").html((solar_kwhd).toFixed(1));
-            $(".total_use_kwh").html((use_kwhd).toFixed(1));
+            if (solar_kwhd < 1) {
+                $(".total_solar_kwh").html((solar_kwhd).toFixed(2));
+            } else {
+                $(".total_solar_kwh").html((solar_kwhd).toFixed(1));
+            }
+            if (use_kwhd < 1) {
+                $(".total_use_kwh").html((use_kwhd).toFixed(2));
+            } else {
+                $(".total_use_kwh").html((use_kwhd).toFixed(1));
+            }
             
             $(".total_use_direct_kwh").html((solarused_kwhd).toFixed(1));
             
@@ -757,6 +788,6 @@ $(window).resize(function(){
 // ----------------------------------------------------------------------
 function app_log (level, message) {
     if (level=="ERROR") alert(level+": "+message);
-    console.log(level+": "+message);
+    // console.log(level+": "+message);
 }
 </script>

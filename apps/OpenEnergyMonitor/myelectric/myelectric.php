@@ -153,8 +153,8 @@ if (!sessionwrite) $(".openconfig").hide();
 config.app = {
     "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"House or building use in watts"},
     "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative use in kWh"},
-    "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity £/kWh"},
-    "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$..)"}
+    "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity e.g £/kWh"},
+    "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$,€...)"}
 };
 
 config.name = "<?php echo $name; ?>";
@@ -382,6 +382,7 @@ function fastupdate()
     // 1) Get last value of feeds
     // --------------------------------------------------------------------
     feeds = feed.listbyid();
+    if (feeds === null) { return; }
     
     // set the power now value
     if (viewmode=="energy") {
@@ -554,8 +555,17 @@ function slowupdate()
     }
     
     daily = [];
-    
-    if (data.length>0) {
+
+    if (data.length==0) {
+        // If empty, then it's a new feed and we can safely append today's value.
+        // Also append a fake value for the day before so that the calculations work.
+        if (feeds[use_kwh]!=undefined) {
+            var d = new Date();
+            d.setHours(0,0,0,0);
+            data.push([d.getTime(),0]);
+            data.push([d.getTime()+(interval*1000),feeds[use_kwh].value*1.0]);
+        }
+    } else {
         var lastday = data[data.length-1][0];
         
         var d = new Date();
@@ -568,15 +578,14 @@ function slowupdate()
                 data.push([next,feeds[use_kwh].value*1.0]);
             }
         }
+    }
     
-        // Calculate the daily totals by subtracting each day from the day before
-        
-        for (var z=1; z<data.length; z++)
-        {
-          var time = data[z-1][0];
-          var diff = (data[z][1]-data[z-1][1]);
-          daily.push([time,diff*scale]);
-        }
+    // Calculate the daily totals by subtracting each day from the day before
+    for (var z=1; z<data.length; z++)
+    {
+      var time = data[z-1][0];
+      var diff = (data[z][1]-data[z-1][1]);
+      daily.push([time,diff*scale]);
     }
     
     var usetoday_kwh = 0;
