@@ -98,10 +98,7 @@ function app_controller()
         $applist = $appconfig->get_list($session['userid']);
         $route->format = "html";
         $result = "<link href='".$path."Modules/app/Views/css/pagenav.css?v=1' rel='stylesheet'>";
-        // $result .= "<div id='wrapper'>";
-        // $result .= view("Modules/app/Views/app_sidebar.php",array("applist"=>$applist));
         $result .= view("Modules/app/Views/app_view.php", array("apps"=>$appavail));
-        // $result .= "</div>";
     }
     else if ($route->action == "remove" && $session['write']) {
         $route->format = "json";

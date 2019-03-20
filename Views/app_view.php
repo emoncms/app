@@ -25,8 +25,6 @@
 
 </style>
 
-<div style="height:10px"></div>
-
 <div style="padding:20px">
 
   <h2>Available Apps</h2>
