@@ -1,5 +1,5 @@
 #app-block {
-    padding: 0 1.7rem;
+    padding: 0 0.7rem;
 }
 /*-------------------------------------*/
 
@@ -9,12 +9,25 @@ h2 {
 
 /*-------------------------------------*/
 
+#buttons {
+    margin-left: -1.1rem;
+}
 #buttons .btn{
+    opacity: .6;
+    transition: opacity .3s linear;
     color: #aaa!important;
+}
+#buttons .btn:hover,
+#buttons .btn:active{
+    opacity: 1;
 }
 #buttons .btn.active{
     color: white!important;
+    opacity: .8;
+    font-weight: bold;
+    text-decoration: underline;
 }
+
 
 .electric-title {
   color:#aaa;
@@ -117,6 +130,34 @@ h2 {
     margin-left: 0px;
     margin-right: 0px;
 }
+
+
+
+/* flexbox classes */
+.d-flex{
+    display:flex!important
+}
+.justify-content-between{
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+/** mobile first **/
+/*  only on devices > 767px  */
+@media (min-width: 576px) {
+    .text-xs-right {
+        text-align: right!important;
+    }
+}
+
+/*  only on devices > 767px  */
+@media (min-width: 767px) {
+    #app-block {
+        padding: 0 1.75rem;
+    }
+}
+
+
 
 @media (max-width: 767px) {
   body {padding:0};

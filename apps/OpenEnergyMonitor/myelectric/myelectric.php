@@ -16,22 +16,22 @@
 
 <section id="app-block" style="display:none">
 
-    <div id="buttons" class="row-fluid">
-        <div class="span6" data-style="color:#aaa">
+    <div id="buttons" class="d-flex justify-content-between">
+        <div>
             <button class="btn btn-link btn-inverse btn-large myelectric-view-cost" ><?php echo _("Cost") ?></button> | 
             <button class="btn btn-link btn-inverse btn-large myelectric-view-kwh active" ><?php echo _("kWh") ?></button>
         </div>
-        <div class="span6 text-right">
+        <div class="text-right">
             <button class="btn btn-link btn-inverse btn-large openconfig"><i class="icon-wrench icon-white"></i></button>
         </div>
     </div>
 
-    <div class="row-fluid">
-        <div class="span6">
+    <div class="d-flex justify-content-between">
+        <div>
             <h3 class="electric-title"><?php echo _("POWER NOW") ?></h3>
             <div class="power-value"><span id="powernow">0</span></div>
             </div>
-        <div class="span6 text-right">
+        <div class="text-xs-right">
             <h3 class="electric-title"><?php echo _("TODAY") ?></h3>
             <div class="power-value"><span id="usetoday_units_a"></span><span id="usetoday">0</span><span id="usetoday_units_b" style="font-size:16px"> <?php echo _("kWh") ?></span></div>
         </div>
