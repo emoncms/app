@@ -66,15 +66,12 @@ function app_controller()
             }
             
             $result = "<link href='".$path."Modules/app/Views/css/pagenav.css?v=1' rel='stylesheet'>";
-            $result .= "</div>";
-            // $result .= "<div id='wrapper'>";
 
             if ($app!=false) {
                 $result .= view($dir.$id.".php",array("name"=>$app, "appdir"=>$dir, "config"=>$config, "apikey"=>$apikey));
             } else {
                 $result .= view("Modules/app/Views/app_view.php",array("apps"=>$appavail));
             }
-            // $result .= "</div>";
         }
     }
     else if ($route->action == "list" && $session['read']) {

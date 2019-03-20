@@ -1,5 +1,5 @@
 #app-block {
-    padding:10px;
+    padding: 0 1.7rem;
 }
 /*-------------------------------------*/
 
@@ -9,11 +9,16 @@ h2 {
 
 /*-------------------------------------*/
 
+#buttons .btn{
+    color: #aaa!important;
+}
+#buttons .btn.active{
+    color: white!important;
+}
+
 .electric-title {
-  font-weight:bold;
-  font-size:22px;
   color:#aaa;
-  padding-top:20px;
+  margin: 0;
 }
 
 .power-value {
@@ -76,17 +81,17 @@ h2 {
 
 /* --------------------------------------------------------*/
 
+/*
 .col1 {
   width:100%;
 }
-.col1-inner { padding:10px; }
 
 .col2 {
   width:50%;
   float:left;
 }
 .col2-inner { padding:10px; }
-
+*/
 /*-------------------------------------*/
 
 .ajax-loader{

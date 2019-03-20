@@ -14,36 +14,28 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script> 
 
-<div id="app-block" style="display:none">
+<section id="app-block" style="display:none">
 
-  <div class="col1"><div class="col1-inner">
-
-    <div style="height:20px; border-bottom:1px solid #333; padding-bottom:8px;">
-    
-        <div style="float:left; color:#aaa">
-        <span class="myelectric-view-cost" >Cost</span> | 
-        <span class="myelectric-view-kwh" >kWh</span>
+    <div id="buttons" class="row-fluid">
+        <div class="span6" data-style="color:#aaa">
+            <button class="btn btn-link btn-inverse btn-large myelectric-view-cost" ><?php echo _("Cost") ?></button> | 
+            <button class="btn btn-link btn-inverse btn-large myelectric-view-kwh active" ><?php echo _("kWh") ?></button>
         </div>
-    
-        <div style="float:right;">
-            <i class="openconfig icon-wrench icon-white" style="cursor:pointer; padding-right:5px"></i>
+        <div class="span6 text-right">
+            <button class="btn btn-link btn-inverse btn-large openconfig"><i class="icon-wrench icon-white"></i></button>
         </div>
     </div>
-    
-    <table style="width:100%">
-        <tr>
-            <td style="border:0; width:50%">
-                <div class="electric-title">POWER NOW</div>
-                <div class="power-value"><span id="powernow">0</span></div>
-            </td>
-            <td style="text-align:right; border:0;">
-                <div class="electric-title">TODAY</div>
-                <div class="power-value"><span id="usetoday_units_a"></span><span id="usetoday">0</span><span id="usetoday_units_b" style="font-size:16px"> kWh</span></div>
-            </td>
-        </tr>
-    </table>
 
-    <br>
+    <div class="row-fluid">
+        <div class="span6">
+            <h3 class="electric-title"><?php echo _("POWER NOW") ?></h3>
+            <div class="power-value"><span id="powernow">0</span></div>
+            </div>
+        <div class="span6 text-right">
+            <h3 class="electric-title"><?php echo _("TODAY") ?></h3>
+            <div class="power-value"><span id="usetoday_units_a"></span><span id="usetoday">0</span><span id="usetoday_units_b" style="font-size:16px"> <?php echo _("kWh") ?></span></div>
+        </div>
+    </div>
 
     <div class="visnavblock" style="height:28px; padding-bottom:5px;">
         <span class='visnav myelectric-time' time='3'>3h</span>
@@ -99,28 +91,25 @@
             </td>
         </tr>
     </table>
-    
-  </div></div>
-  
-</div>   
+</section>
 
-<div id="app-setup" style="display:none; padding-top:50px" class="block">
-    <h2 class="appconfig-title">My Electric</h2>
 
+
+<section id="app-setup" style="display:none; padding-top:50px" class="block">
+    <h2 class="appconfig-title"><?php echo _("My Electric") ?></h2>
     <div class="appconfig-description">
-      <div class="appconfig-description-inner">
-        The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time. It includes a real-time view and a historic kWh per day bar graph.
-        <br><br>
-        <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
-        <br><br>
-        <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.
-        <br><br>
-        <img src="../Modules/app/images/myelectric_app.png" style="width:600px" class="img-rounded">
-        
-      </div>
+        <div class="appconfig-description-inner">
+            The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time. It includes a real-time view and a historic kWh per day bar graph.
+            <br><br>
+            <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
+            <br><br>
+            <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.
+            <br><br>
+            <img src="../Modules/app/images/myelectric_app.png" style="width:600px" class="img-rounded">
+        </div>
     </div>
     <div class="app-config"></div>
-</div>
+</section>
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
 
@@ -213,6 +202,7 @@ function init()
     $('#right').click(function () {view.panright(); reload = true; autoupdate = false; fastupdate();});
     $('#left').click(function () {view.panleft(); reload = true; autoupdate = false; fastupdate();});
     
+    // zoom graph to timescale
     $('.myelectric-time').click(function () {
         view.timewindow($(this).attr("time")/24.0); 
         reload = true; 
@@ -220,15 +210,16 @@ function init()
         fastupdate();
     });
     
-    $(".myelectric-view-cost").click(function(){
+    // toggle cost/kwh
+    $(".myelectric-view-cost").click(function(event){
         viewmode = "cost";
-        fastupdate();
+        fastupdate(event);
         slowupdate();
     });
     
-    $(".myelectric-view-kwh").click(function(){
+    $(".myelectric-view-kwh").click(function(event){
         viewmode = "energy";
-        fastupdate();
+        fastupdate(event);
         slowupdate();
     });
 }
@@ -296,25 +287,25 @@ function resize()
     graph_lines.height = height;
     
     
-    if (width<=500) {
-        $(".electric-title").css("font-size","16px");
-        $(".power-value").css("font-size","38px");
-        $(".units").hide();
-        $(".visnav").css("padding-left","5px");
-        $(".visnav").css("padding-right","5px");
-    } else if (width<=724) {
-        $(".electric-title").css("font-size","18px");
-        $(".power-value").css("font-size","52px");
-        $(".units").show();
-        $(".visnav").css("padding-left","8px");
-        $(".visnav").css("padding-right","8px");
-    } else {
-        $(".electric-title").css("font-size","22px");
-        $(".power-value").css("font-size","85px");
-        $(".units").show();
-        $(".visnav").css("padding-left","8px");
-        $(".visnav").css("padding-right","8px");
-    }
+    // if (width<=500) {
+    //     $(".electric-title").css("font-size","16px");
+    //     $(".power-value").css("font-size","38px");
+    //     $(".units").hide();
+    //     $(".visnav").css("padding-left","5px");
+    //     $(".visnav").css("padding-right","5px");
+    // } else if (width<=724) {
+    //     $(".electric-title").css("font-size","18px");
+    //     $(".power-value").css("font-size","52px");
+    //     $(".units").show();
+    //     $(".visnav").css("padding-left","8px");
+    //     $(".visnav").css("padding-right","8px");
+    // } else {
+    //     $(".electric-title").css("font-size","22px");
+    //     $(".power-value").css("font-size","85px");
+    //     $(".units").show();
+    //     $(".visnav").css("padding-left","8px");
+    //     $(".visnav").css("padding-right","8px");
+    // }
     
     reloadkwhd = true;
     fastupdate();
@@ -327,11 +318,15 @@ function hide()
     clearInterval(slowupdateinst);
 }
     
-function fastupdate()
+function fastupdate(event)
 {
    var use = config.app.use.value;
    var use_kwh = config.app.use_kwh.value;
-
+   if (event && event.target) {
+       // triggered by click
+       $target = $(event.target);
+       $target.addClass('active').siblings().removeClass('active');
+   }
     if (viewmode=="energy") {
         scale = 1;
         $("#usetoday_units_a").html("");
