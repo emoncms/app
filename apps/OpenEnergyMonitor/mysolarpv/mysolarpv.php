@@ -25,33 +25,45 @@
 
     <div class="d-flex justify-content-between">
         <div>
-            <h4 class="electric-title mb-0 text-lg-larger font-weight-normal"><?php echo _('USE NOW') ?></h4>
-            <h1 class="power-value display-4 display-md-3 display-lg-2 mt-0 text-lg-larger mb-lg-3"><span class="usenow">0</span>W</h1>
-            </div>
+            <h4 class="electric-title mb-0 text-lg-larger font-weight-normal text-light"><?php echo _('USE NOW') ?></h4>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow">0</span>W</h2>
+        </div>
         <div class="text-xs-center">
-            <h4 class="electric-title mb-0 text-lg-larger font-weight-normal"><span class="balance-label"></span></h4>
-            <h1 class="power-value display-4 display-md-3 display-lg-2 mt-0 text-lg-larger mb-lg-3"><span class="balance"></span></h1>
+            <h4 class="electric-title mb-0 text-lg-larger font-weight-normal text-light px-1"><span class="balance-label"></span></h4>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span></h2>
         </div>
         <div class="text-xs-right">
-            <h4 class="electric-title mb-0 text-lg-larger font-weight-normal"><?php echo _('SOLAR PV') ?></h4>
-            <h1 class="power-value display-4 display-md-3 display-lg-2 mt-0 text-lg-larger mb-lg-3" style="color:#dccc1f"><span class="solarnow">0</span>W</h1>
+            <h4 class="electric-title mb-0 text-lg-larger font-weight-normal text-light"><?php echo _('SOLAR PV') ?></h4>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-warning"><span class="solarnow">0</span>W</h2>
         </div>
     </div>
 
     <div class="d-flex justify-content-between">
         <?php include(dirname(__DIR__).'/graph-nav.php'); ?>
         
+        <!--
         <div class="bargraph-navigation" style="display:none">
             <span class="bargraph-viewall visnav" style="font-size:14px">VIEW ALL</span>
-            <!--
             <span class="bargraph-viewdaily visnav" style="font-size:14px">DAILY</span>
             <span class="bargraph-viewmonthly visnav" style="font-size:14px">MONTHLY</span>
             <span class="bargraph-viewannually visnav" style="font-size:14px">ANNUALLY</span>
-            -->
         </div>
-        <div class="visnavblock mb-2 d-flex justify-content-start d-flex justify-content-stretch btn-group">
-            <button class='visnav viewhistory btn btn-inverse btn-link btn-large px-2'><?php echo _('VIEW HISTORY') ?></button>
-            <button class='visnav balanceline btn btn-inverse btn-link btn-large px-2'><?php echo _('SHOW BALANCE') ?></button>
+        -->
+
+        <div class="visnavblock mb-2 d-flex justify-content-start d-flex justify-content-stretch btn-group ml-0">
+            <button class="visnav viewhistory btn btn-inverse btn-link px-2" title="<?php echo _('VIEW HISTORY') ?>">
+                <span class="d-none d-md-inline-block label-long"><?php echo _('VIEW HISTORY') ?></span>
+                <span class="d-md-none label-short"><?php echo _('HIST') ?></span>
+            </button>
+            <button class="hidden visnav viewpower btn btn-inverse btn-link px-2" title="<?php echo _('POWER VIEW') ?>">
+                <span class="d-none d-md-inline-block label-long"><?php echo _('POWER VIEW') ?></span>
+                <span class="d-md-none label-short"><?php echo _('PWR') ?></span>
+            </button>
+
+            <button class="visnav balanceline btn btn-inverse btn-link px-2" title="<?php echo _('SHOW BALANCE') ?>">
+                <span class="d-none d-md-inline-block label-long"><?php echo _('SHOW BALANCE') ?></span>
+                <span class="d-md-none label-short"><?php echo _('BAL') ?></span>
+            </button>
         </div>
     </div>
 
@@ -62,32 +74,33 @@
     <div id="breakdown" class="d-flex justify-content-between py-lg-3 text-light">
 
         <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title mb-1 text-light"><?php echo _('USE') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-lg-larger"><?php echo _('USE') ?></h5>
             <h2 class="appbox-value total_use_kwh my-0">0</h2>
             <strong class="appbox-units">kWh</strong>
         </div>
 
         <div class="appbox mb-3 text-warning">
-            <h5 class="appbox-title mb-1 text-light"><?php echo _('SOLAR') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-lg-larger px-1"><?php echo _('SOLAR') ?></h5>
             <h2 class="appbox-value total_solar_kwh my-0">0</h2>
-            <strong class="appbox-units">kWh</strong>
+            <small><strong class="appbox-units">kWh</strong></small>
         </div>
 
         <div class="appbox mb-3 text-success">
-            <h5 class="appbox-title mb-1 text-light"><?php echo _('DIRECT') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-lg-larger"><?php echo _('DIRECT') ?></h5>
             <h2 class="appbox-value total_use_direct_prc my-0">0</h2>
+            <strong class="appbox-units total_export_kwh">0</strong>
             <strong class="appbox-units">kWh</strong>
         </div>
 
         <div class="appbox mb-3 text-tertiary">
-            <h5 class="appbox-title mb-1 text-light"><?php echo _('EXPORT') ?></h5>
-            <h2 class="appbox-value total_export_kwh my-0">0</h2>
-            <strong class="appbox-units total_export_prc">0</strong>
+            <h5 class="appbox-title mb-1 text-light text-lg-larger px-1"><?php echo _('EXPORT') ?></h5>
+            <h2 class="appbox-value total_export_prc my-0">0</h2>
+            <strong class="appbox-units total_export_kwh">0</strong>
             <strong class="appbox-units">kWh</strong>
         </div>
 
         <div class="appbox mb-3 text-danger">
-            <h5 class="appbox-title mb-1 text-light"><?php echo _('GRID') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-lg-larger"><?php echo _('GRID') ?></h5>
             <h2 class="appbox-value total_import_prc my-0">0</h2>
             <strong class="appbox-units total_import_kwh">0</strong>
             <strong class="appbox-units">kWh</strong>
@@ -97,7 +110,7 @@
 
 
 
-<section id="app-setup" style="display:none;" class="block px-4">
+<section id="app-setup" style="display:none;" class="block">
 
     <div id="buttons" class="d-flex justify-content-between">
         <h4 style="opacity: .4" class="muted pl-4 pt-1 text-uppercase"><?php echo _('My Solar'); ?></h4>
@@ -222,36 +235,40 @@ function init()
     });
     
     $(".balanceline").click(function () { 
-        if ($(this).html()=="SHOW BALANCE") {
+        if (show_balance_line === 0) {
             show_balance_line = 1;
+            $(this).addClass('active');
             draw();
-            $(this).html("HIDE BALANCE");
         } else {
             show_balance_line = 0;
+            $(this).removeClass('active');
             draw();
-            $(this).html("SHOW BALANCE");
         }
     });
     
-    $(".viewhistory").click(function () { 
-        if ($(this).html()=="VIEW HISTORY") {
+    $(".viewhistory, .viewpower").click(function () { 
+        if (viewmode === "powergraph") {
             viewmode = "bargraph";
-            $(".balanceline").hide();
-            $(".powergraph-navigation").hide();
-            $(".bargraph-navigation").show();
+            $(".balanceline").attr('disabled', true);
+            // $(".powergraph-navigation").hide();
+            // $(".bargraph-navigation").show();
             
             draw();
-            setTimeout(function() { $(".viewhistory").html("POWER VIEW"); },80);
+            $(".viewpower").toggleClass('hidden', false); 
+            $(".viewhistory").toggleClass('hidden', true); 
+
         } else {
-            
             viewmode = "powergraph";
             $(".balanceline").show();
-            $(".bargraph-navigation").hide();
-            $(".powergraph-navigation").show();
+            $(".balanceline").attr('disabled', false);
+
+            // $(".bargraph-navigation").hide();
+            // $(".powergraph-navigation").show();
             
             draw();
             powergraph_events();
-            setTimeout(function() { $(".viewhistory").html("VIEW HISTORY"); },80);
+            $(".viewpower").toggleClass('hidden', true); 
+            $(".viewhistory").toggleClass('hidden', false); 
         }
     });
 
@@ -286,7 +303,7 @@ function show()
     
     resize();
     livefn();
-    live = setInterval(livefn,5000);
+    //emrys live = setInterval(livefn,5000);
 
 }
 
@@ -375,15 +392,17 @@ function livefn()
     }
     
     if (balance>0) {
-        $(".balance-label").html("EXPORTING");
-        $(".balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
+        $(".balance-label").text("EXPORTING");
+        $(".balance").text(Math.round(Math.abs(balance))+"W")
+        .toggleClass('text-danger', false)
+        .toggleClass('text-success', true);
+    } else {
+        $(".balance-label").text("IMPORTING");
+        $(".balance").text(Math.round(Math.abs(balance))+"W")
+        .toggleClass('text-danger', true)
+        .toggleClass('text-success', false);
     }
-    
-    if (balance<0) {
-        $(".balance-label").html("IMPORTING");
-        $(".balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
-    }
-    
+
     $(".solarnow").html(solar_now);
     $(".usenow").html(use_now);
     

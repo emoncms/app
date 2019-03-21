@@ -6,7 +6,7 @@
 h2 {
   /* color:#fff; */
 }
-
+h2 small {color: inherit}
 /*-------------------------------------*/
 
 #buttons {
@@ -37,18 +37,18 @@ h2 {
 }
 
 .electric-title {
-  font-weight:bold;
+  /* font-weight:bold;
   font-size:22px;
-  color:#aaa;
+  color:#aaa; */
 }
 .power-value {
-    font-weight:bold; 
-    font-size: 5rem;
-    color:#0699fa; 
+    /* font-weight:bold;  */
+    /* font-size: 5rem; */
+    /* color:#0699fa;  */
     line-height: 1.1;
 }
 .chart-placeholder > *{
-    height: 10rem;
+    height: 16rem;
 }
 .chart-placeholder.double {
     width: 100%;
@@ -89,6 +89,7 @@ h2 {
 .text-success{color:#89ae65!important}
 .text-tertiary{color:#b7aa1f!important}
 .text-danger{color:#d52e2e!important}
+.text-exporting{color:#2ed52e!important}
 
 
 /* spaces: 
@@ -105,16 +106,16 @@ h2 {
     --s5: calc(var(--spacer) * 1.5);
     --s6: calc(var(--spacer) * 2);
 }
+/*-------------------------------------*/
+/* @see: bootstrap 4 documentation for examples */
+/* remove margins */
 .my-0,.mb-0{margin-bottom:0!important}
 .my-0,.mt-0{margin-top:0!important}
+.mx-0,.ml-0{margin-left:0!important}
+.mx-0,.mr-0{margin-right:0!important}
 
-.my-1,.mb-1{margin-bottom: var(--s1)}
-.my-2,.mb-2{margin-bottom: var(--s2)}
-.my-3,.mb-3{margin-bottom: var(--s3)}
-.my-4,.mb-4{margin-bottom: var(--s4)}
-.my-5,.mb-5{margin-bottom: var(--s5)}
-.my-6,.mb-6{margin-bottom: var(--s6)}
-
+/*-------------------------------------*/
+/* margin top */
 .my-1,.mt-1{margin-top: var(--s1)}
 .my-2,.mt-2{margin-top: var(--s2)}
 .my-3,.mt-3{margin-top: var(--s3)}
@@ -122,35 +123,64 @@ h2 {
 .my-5,.mt-5{margin-top: var(--s5)}
 .my-6,.mt-6{margin-top: var(--s6)}
 
+/* margin right */
+.mx-1,.mr-1{margin-right: var(--s1)}
+.mx-2,.mr-2{margin-right: var(--s2)}
+.mx-3,.mr-3{margin-right: var(--s3)}
+.mx-4,.mr-4{margin-right: var(--s4)}
+.mx-5,.mr-5{margin-right: var(--s5)}
+.mx-6,.mr-6{margin-right: var(--s6)}
+
+/* margin bottom */
+.my-1,.mb-1{margin-bottom: var(--s1)}
+.my-2,.mb-2{margin-bottom: var(--s2)}
+.my-3,.mb-3{margin-bottom: var(--s3)}
+.my-4,.mb-4{margin-bottom: var(--s4)}
+.my-5,.mb-5{margin-bottom: var(--s5)}
+.my-6,.mb-6{margin-bottom: var(--s6)}
+
+/* margin left */
+.mx-1,.ml-1{margin-left: var(--s1)}
+.mx-2,.ml-2{margin-left: var(--s2)}
+.mx-3,.ml-3{margin-left: var(--s3)}
+.mx-4,.ml-4{margin-left: var(--s4)}
+.mx-5,.ml-5{margin-left: var(--s5)}
+.mx-6,.ml-6{margin-left: var(--s6)}
+
+/*-------------------------------------*/
+/* padding top */
 .py-1,.pt-1{padding-top: var(--s1)}
-.px-1,.pr-1{padding-right: var(--s1)}
-.py-1,.pb-1{padding-bottom: var(--s1)}
-.px-1,.pl-1{padding-left: var(--s1)}
-
 .py-2,.pt-2{padding-top: var(--s2)}
-.px-2,.pr-2{padding-right: var(--s2)}
-.py-2,.pb-2{padding-bottom: var(--s2)}
-.px-2,.pl-2{padding-left: var(--s2)}
-
 .py-3,.pt-3{padding-top: var(--s3)}
-.px-3,.pr-3{padding-right: var(--s3)}
-.py-3,.pb-3{padding-bottom: var(--s3)}
-.px-3,.pl-3{padding-left: var(--s3)}
-
 .py-4,.pt-4{padding-top: var(--s4)}
-.px-4,.pr-4{padding-right: var(--s4)}
-.py-4,.pb-4{padding-bottom: var(--s4)}
-.px-4,.pl-4{padding-left: var(--s4)}
-
 .py-5,.pt-5{padding-top: var(--s5)}
-.px-5,.pr-5{padding-right: var(--s5)}
-.py-5,.pb-5{padding-bottom: var(--s5)}
-.px-5,.pl-5{padding-left: var(--s5)}
-
 .py-6,.pt-6{padding-top: var(--s6)}
+
+/* padding right */
+.px-1,.pr-1{padding-right: var(--s1)}
+.px-2,.pr-2{padding-right: var(--s2)}
+.px-3,.pr-3{padding-right: var(--s3)}
+.px-4,.pr-4{padding-right: var(--s4)}
+.px-5,.pr-5{padding-right: var(--s5)}
 .px-6,.pr-6{padding-right: var(--s6)}
+
+/* padding bottom */
+.py-1,.pb-1{padding-bottom: var(--s1)}
+.py-2,.pb-2{padding-bottom: var(--s2)}
+.py-3,.pb-3{padding-bottom: var(--s3)}
+.py-4,.pb-4{padding-bottom: var(--s4)}
+.py-5,.pb-5{padding-bottom: var(--s5)}
 .py-6,.pb-6{padding-bottom: var(--s6)}
+
+/* padding left */
+.px-1,.pl-1{padding-left: var(--s1)}
+.px-2,.pl-2{padding-left: var(--s2)}
+.px-3,.pl-3{padding-left: var(--s3)}
+.px-4,.pl-4{padding-left: var(--s4)}
+.px-5,.pl-5{padding-left: var(--s5)}
 .px-6,.pl-6{padding-left: var(--s6)}
+
+.d-none{display:none}
 
 /* flexbox classes */
 .d-flex{
@@ -172,6 +202,13 @@ h2 {
     text-transform: uppercase;
 }
 /*-------------------------------------*/
+
+.btn[disabled],
+.btn[disabled]:hover {
+    color: #616161;
+    opacity: .8;
+    background: rgba(6, 153, 250, 0.06);
+}
 
 .visnavblock {
   color:#0699fa;
@@ -275,6 +312,18 @@ h2 {
         flex-grow: 0;
         min-width: 3em;
     }
+    .d-sm-none {
+        display: none;
+    }
+    .d-sm-inline-block {
+        display: inline-block;
+    }
+    .display-sm-3{
+        font-size: 4.5rem;
+    }
+    .display-sm-4 {
+        font-size: 3.25rem;
+    }
 }
 /* 
 // Medium devices (tablets, 768px and up)
@@ -286,15 +335,19 @@ h2 {
     .display-md-3{
         font-size: 4.5rem;
     }
+    .d-md-none {
+        display: none;
+    }
+    .d-md-inline-block {
+        display: inline-block;
+    }
 }
 /* 
 // Large devices (desktops, 992px and up)
 */
 @media (min-width: 992px) {
     .chart-placeholder > *{
-        height: 16rem;
-        border: 2px solid blue;
-
+        height: 20rem;
     }
     .chart-placeholder.double{
         width: 48.5%;
@@ -305,6 +358,9 @@ h2 {
     }
     h4.text-lg-larger{
         font-size: 1.5rem;
+    }
+    h5.text-lg-larger{
+        font-size: 1.34rem;
     }
     .display-3.text-lg-larger{
         font-size: 5.5rem;
@@ -322,7 +378,7 @@ h2 {
         font-size: 5.5rem;
     }
     #breakdown {
-        max-width: 65%;
+        max-width: 80%;
     }
 }
 /* 
