@@ -8,6 +8,3 @@
         'order' => 5,
         'icon'=>'icon-leaf icon-white'
     );
-    
-    
-

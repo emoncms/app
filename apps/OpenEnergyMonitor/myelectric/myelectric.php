@@ -16,17 +16,14 @@
 
 <div id="app-block" style="display:none">
 
-  <div class="col1"><div class="col1-inner">
-
-    <div style="height:20px; border-bottom:1px solid #333; padding-bottom:8px;">
-    
-        <div style="float:left; color:#aaa">
-        <span class="myelectric-view-cost" >Cost</span> | 
-        <span class="myelectric-view-kwh" >kWh</span>
+    <div id="buttons" class="d-flex justify-content-between">
+        <div class="btn-group">
+            <button class="btn btn-link btn-inverse btn-large myelectric-view-cost" ><?php echo _("Cost") ?></button>
+            <button class="btn btn-link btn-inverse btn-large myelectric-view-kwh active" ><?php echo _("kWh") ?></button>
         </div>
-    
-        <div style="float:right;">
-            <i class="openconfig icon-wrench icon-white" style="cursor:pointer; padding-right:5px"></i>
+        <div class="text-right">
+            <button class="btn btn-link btn-inverse btn-large openconfig text-white"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button>
+            
         </div>
     </div>
     
@@ -43,69 +40,68 @@
         </tr>
     </table>
 
-    <br>
+    <div class="d-flex justify-content-between">
+        <div>
+            <h4 class="electric-title mb-0 text-lg-larger font-weight-normal"><?php echo _("POWER NOW") ?></h4>
+            <h1 class="power-value display-4 display-md-3 display-lg-2 mt-0 text-lg-larger mb-lg-3"><span id="powernow">0</span></h1>
+        </div>
+        <div class="text-xs-right">
+            <h4 class="electric-title mb-0 text-lg-larger font-weight-normal"><?php echo _("TODAY") ?></h4>
+            <h1 class="power-value display-4 display-md-3 display-lg-2 mt-0 text-lg-larger mb-lg-3"><span id="usetoday_units_a"></span><span id="usetoday">0</span><span id="usetoday_units_b" style="font-size:16px"> <?php echo _("kWh") ?></span></h1>
+        </div>
+    </div>
 
-    <div class="visnavblock" style="height:28px; padding-bottom:5px;">
-        <span class='visnav myelectric-time' time='3'>3h</span>
-        <span class='visnav myelectric-time' time='6'>6h</span>
-        <span class='visnav myelectric-time' time='24'>D</span>
-        <span class='visnav myelectric-time' time='168'>W</span>
-        <span class='visnav myelectric-time' time='720'>M</span>
-        <span id='zoomin' class='visnav' >+</span>
-        <span id='zoomout' class='visnav' >-</span>
-        <span id='left' class='visnav' ><</span>
-        <span id='right' class='visnav' >></span>
+    <?php include(dirname(__DIR__).'/graph-nav.php'); ?>
+
+    <div class="d-flex justify-content-between">
+        <div class="chart-placeholder double" id="placeholder_bound_power">
+            <canvas id="placeholder_power"></canvas>
+        </div>
+        <div class="chart-placeholder double" id="placeholder_bound_kwhd">
+            <canvas id="placeholder_kwhd"></canvas>
+        </div>
     </div>
-    <br>
-    
-    <div id="placeholder_bound_power" style="width:100%; height:220px;">
-        <canvas id="placeholder_power"></canvas>
-    </div>
-    <br>
-    
-    <div id="placeholder_bound_kwhd" style="width:100%; height:250px;">
-        <canvas id="placeholder_kwhd"></canvas>
-    </div>
-    <br>
+
+    <div id="breakdown" class="d-flex justify-content-between py-lg-3">
+        <div class="appbox mb-3">
+            <div class="appbox-title"><?php echo _('WEEK') ?></div>
+            <div><span class="appbox-value u1a" style="color:#0699fa">£</span><span class="appbox-value" id="week_kwh" style="color:#0699fa">---</span> <span class="units appbox-units u1b" style="color:#0779c1">kWh</span></div>
+            <div style="padding-top:5px; color:#0779c1" class="appbox-units" ><span class="units u2a"></span><span id="week_kwhd">---</span><span class="units u2b"> kWh/d</span></div>
+        </div>
         
-    <table style="width:100%">
-        <tr>
-            <td class="appbox">
-                <div class="appbox-title">WEEK</div>
-                <div><span class="appbox-value u1a" style="color:#0699fa">£</span><span class="appbox-value" id="week_kwh" style="color:#0699fa">---</span> <span class="units appbox-units u1b" style="color:#0779c1">kWh</span></div>
-                
-                <div style="padding-top:5px; color:#0779c1" class="appbox-units" ><span class="units u2a"></span><span id="week_kwhd">---</span><span class="units u2b"> kWh/d</span></div>
-            </td>
-            
-            <td class="appbox">
-                <div class="appbox-title">MONTH</div>
-                <div><span class="appbox-value u1a" style="color:#0699fa">£</span><span class="appbox-value" id="month_kwh" style="color:#0699fa">---</span> <span class="units appbox-units u1b" style="color:#0779c1">kWh</span></div>
-                
-                <div style="padding-top:5px; color:#0779c1" class="appbox-units" ><span class="units u2a"></span><span id="month_kwhd">---</span><span class="units u2b"> kWh/d</span></div>
-            </td>
-            
-            <td class="appbox">
-                <div class="appbox-title">YEAR</div>
-                <div><span class="appbox-value u1a" style="color:#0699fa">£</span><span class="appbox-value" id="year_kwh" style="color:#0699fa">---</span> <span class="units appbox-units u1b" style="color:#0779c1">kWh</span></div>
-                
-                <div style="padding-top:5px; color:#0779c1" class="appbox-units" ><span class="units u2a"></span><span id="year_kwhd">---</span><span class="units u2b"> kWh/d</span></div>
-            </td>
-            
-            <td class="appbox">
-                <div class="appbox-title">ALL</div>
-                <div><span class="appbox-value u1a" style="color:#0699fa">£</span><span class="appbox-value" id="alltime_kwh" style="color:#0699fa">---</span> <span class="units appbox-units u1b" style="color:#0779c1">kWh</span></div>
-                
-                <div style="padding-top:5px; color:#0779c1" class="appbox-units" ><span class="units u2a"></span><span id="alltime_kwhd">---</span><span class="units u2b"> kWh/d</span></div>
-            </td>
-        </tr>
-    </table>
-    
-  </div></div>
-  
-</div>   
+        <div class="appbox mb-3">
+            <div class="appbox-title"><?php echo _('MONTH') ?></div>
+            <div><span class="appbox-value u1a" style="color:#0699fa">£</span><span class="appbox-value" id="month_kwh" style="color:#0699fa">---</span> <span class="units appbox-units u1b" style="color:#0779c1">kWh</span></div>
+            <div style="padding-top:5px; color:#0779c1" class="appbox-units" ><span class="units u2a"></span><span id="month_kwhd">---</span><span class="units u2b"> kWh/d</span></div>
+        </div>
+        
+        <div class="appbox mb-3">
+            <div class="appbox-title"><?php echo _('YEAR') ?></div>
+            <div><span class="appbox-value u1a" style="color:#0699fa">£</span><span class="appbox-value" id="year_kwh" style="color:#0699fa">---</span> <span class="units appbox-units u1b" style="color:#0779c1">kWh</span></div>
+            <div style="padding-top:5px; color:#0779c1" class="appbox-units" ><span class="units u2a"></span><span id="year_kwhd">---</span><span class="units u2b"> kWh/d</span></div>
+        </div>
+        
+        <div class="appbox mb-3">
+            <div class="appbox-title"><?php echo _('ALL') ?></div>
+            <div><span class="appbox-value u1a" style="color:#0699fa">£</span><span class="appbox-value" id="alltime_kwh" style="color:#0699fa">---</span> <span class="units appbox-units u1b" style="color:#0779c1">kWh</span></div>
+            <div style="padding-top:5px; color:#0779c1" class="appbox-units" ><span class="units u2a"></span><span id="alltime_kwhd">---</span><span class="units u2b"> kWh/d</span></div>
+        </div>
+    </div>
+</section>
+
 
 <div id="app-setup" style="display:none; padding-top:50px" class="block">
     <h2 class="appconfig-title">My Electric</h2>
+
+<section id="app-setup" style="display:none; padding-top:50px" class="block">
+
+    <div id="buttons" class="d-flex justify-content-end">
+        <div class="text-right">
+            <button class="close-config btn btn-link btn-inverse btn-large openconfig text-white"><svg class="icon"><use xlink:href="#icon-close"></use></svg></button>
+        </div>
+    </div>
+
+    <h2 class="appconfig-title"><?php echo _("My Electric") ?></h2>
 
     <div class="appconfig-description">
       <div class="appconfig-description-inner">
@@ -120,10 +116,10 @@
       </div>
     </div>
     <div class="app-config"></div>
-</div>
+    
+</section>
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
-
 
 <script>
 
@@ -208,16 +204,17 @@ function init()
     // Decleration of myelectric events
     // -------------------------------------------------------------------------
     
-    $("#zoomout").click(function () {view.zoomout(); reload = true; autoupdate = false; fastupdate();});
-    $("#zoomin").click(function () {view.zoomin(); reload = true; autoupdate = false; fastupdate();});
-    $('#right').click(function () {view.panright(); reload = true; autoupdate = false; fastupdate();});
-    $('#left').click(function () {view.panleft(); reload = true; autoupdate = false; fastupdate();});
+    $("#zoomout").click(function (e) {view.zoomout(); reload = true; autoupdate = false; fastupdate(e);});
+    $("#zoomin").click(function (e) {view.zoomin(); reload = true; autoupdate = false; fastupdate(e);});
+    $('#right').click(function (e) {view.panright(); reload = true; autoupdate = false; fastupdate(e);});
+    $('#left').click(function (e) {view.panleft(); reload = true; autoupdate = false; fastupdate(e);});
     
-    $('.myelectric-time').click(function () {
+    // zoom graph to timescale
+    $('.myelectric-time').click(function (event) {
         view.timewindow($(this).attr("time")/24.0); 
         reload = true; 
         autoupdate = true;
-        fastupdate();
+        fastupdate(event);
     });
     
     $(".myelectric-view-cost").click(function(){
@@ -295,30 +292,30 @@ function resize()
     $("#placeholder_power").attr('height',height); 
     graph_lines.height = height;
     
-    
-    if (width<=500) {
-        $(".electric-title").css("font-size","16px");
-        $(".power-value").css("font-size","38px");
-        $(".units").hide();
-        $(".visnav").css("padding-left","5px");
-        $(".visnav").css("padding-right","5px");
-    } else if (width<=724) {
-        $(".electric-title").css("font-size","18px");
-        $(".power-value").css("font-size","52px");
-        $(".units").show();
-        $(".visnav").css("padding-left","8px");
-        $(".visnav").css("padding-right","8px");
-    } else {
-        $(".electric-title").css("font-size","22px");
-        $(".power-value").css("font-size","85px");
-        $(".units").show();
-        $(".visnav").css("padding-left","8px");
-        $(".visnav").css("padding-right","8px");
+    // if (width<=500) {
+    //     $(".electric-title").css("font-size","16px");
+    //     $(".power-value").css("font-size","38px");
+    //     $(".units").hide();
+    //     $(".visnav").css("padding-left","5px");
+    //     $(".visnav").css("padding-right","5px");
+    // } else if (width<=724) {
+    //     $(".electric-title").css("font-size","18px");
+    //     $(".power-value").css("font-size","52px");
+    //     $(".units").show();
+    //     $(".visnav").css("padding-left","8px");
+    //     $(".visnav").css("padding-right","8px");
+    // } else {
+    //     $(".electric-title").css("font-size","22px");
+    //     $(".power-value").css("font-size","85px");
+    //     $(".units").show();
+    //     $(".visnav").css("padding-left","8px");
+    //     $(".visnav").css("padding-right","8px");
+    // }
+    if($('#app-block').is(":visible")) {
+        reloadkwhd = true;
+        fastupdate();
+        slowupdate();
     }
-    
-    reloadkwhd = true;
-    fastupdate();
-    slowupdate();
 }
     
 function hide()
@@ -603,7 +600,16 @@ function slowupdate()
     $(".ajax-loader").hide();
 }
 
-$(window).resize(function(){ resize(); });
+var resizeTimer;
+    // debounce (ish) script to improve performance
+    $(window).on("resize", function(e) {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            if($('#app-block').is(":visible")) {
+                resize();
+            }
+        },500);
+    });
 
 // ----------------------------------------------------------------------
 // App log

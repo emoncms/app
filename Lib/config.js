@@ -36,6 +36,11 @@ var config = {
             config.UI();
             config.hideapp();
         });
+        $("body").on("click",".close-config",function(){
+            $("#app-setup").hide();
+            $("#app-block").show();
+            if (typeof resize == 'function') resize();
+        });
 
         $("body").on("click",".launchapp",function(){
             $(".ajax-loader").show();
