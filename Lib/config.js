@@ -31,18 +31,22 @@ var config = {
         }
 
         $("body").on("click",".openconfig",function(){
-            $("#app-block").hide();
-            $("#app-setup").show();
+            $("#app-block").toggleClass('hide', true);
+            $("#app-setup").toggleClass('hide', false);
+            
             $('.openconfig').toggleClass('hide', true);
             $('.close-config').toggleClass('hide', false);
+            $('#buttons #tabs .btn').attr('disabled',true).css('opacity',.3);
             config.UI();
             config.hideapp();
         });
         $("body").on("click",".close-config",function(){
-            $("#app-setup").hide();
-            $("#app-block").show();
+            $("#app-block").toggleClass('hide', false);
+            $("#app-setup").toggleClass('hide', true);
+
             $('.openconfig').toggleClass('hide', false);
             $('.close-config').toggleClass('hide', true);
+            $('#buttons #tabs .btn').attr('disabled',false).css('opacity',1);
             if (typeof resize == 'function') resize();
         });
 

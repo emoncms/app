@@ -3,16 +3,12 @@
 }
 /*-------------------------------------*/
 
-h2 {
-  /* color:#fff; */
-}
 h2 small {color: inherit}
 /*-------------------------------------*/
 
 #buttons {
     margin: 0 -1.25rem;
     border-bottom: 1px solid #333;
-    /* padding: 0.2rem 0; */
 }
 #buttons .btn-group .btn:first-child{
     padding-right: .2em;
@@ -35,16 +31,7 @@ h2 small {color: inherit}
     font-weight: bold;
     text-decoration: underline;
 }
-
-.electric-title {
-  /* font-weight:bold;
-  font-size:22px;
-  color:#aaa; */
-}
 .power-value {
-    /* font-weight:bold;  */
-    /* font-size: 5rem; */
-    /* color:#0699fa;  */
     line-height: 1.1;
 }
 .chart-placeholder > *{
@@ -54,7 +41,7 @@ h2 small {color: inherit}
     width: 100%;
 }
 .chart-placeholder.double > *{
-    height: 7rem;
+    height: 10rem;
     margin-bottom: 1rem;
     width: 100%;
 }
@@ -75,8 +62,9 @@ h2 small {color: inherit}
     font-weight: normal!important;
 }
 
-
-
+body.app .container-fluid {
+    padding-bottom: 0!important;
+}
 /*-------------------------------------*/
 /* utilities */
 /*-------------------------------------*/
@@ -239,24 +227,6 @@ h2 small {color: inherit}
   vertical-align: top;
 }
 
-.appbox-title {
-  /* color: #aaa;
-  font-weight: bold;
-  font-size: 1rem;
-  padding-bottom: 15px; */
-}
-
-.appbox-value {
-  /* font-weight:bold;
-  font-size: 2.2rem; */
-}
-
-.appbox-units {
-  /* font-weight:bold;
-  font-size:16px;
-  font-size: 1rem; */
-}
-
 /*-------------------------------------*/
 
 .ajax-loader{
@@ -282,9 +252,6 @@ h2 small {color: inherit}
     margin-left: 0px;
     margin-right: 0px;
 }
-
-
-
 
 
 /** MOBILE FIRST **/
@@ -392,27 +359,3 @@ h2 small {color: inherit}
         max-width: 34rem;
     }
 }
-
-/*-------------------------------------*/
-/*
-@media (max-width: 767px) {
-  body {padding:0};
-}
-
-@media (max-width: 450px) {
-  .row { padding:10px; }  
-  .appbox { padding:5px }
-  .appbox-value { font-size:28px }
-  .appbox-title { font-size:16px }
-
-  #app-block { padding: 1.58rem 1rem }
-  .col2 { width:100%; }  
-  .col1-inner { padding:5px; }
-  .col2-inner { padding:5px; }
-}
-    
-@media (min-width: 450px) and (max-width: 960px) { 
-  .col2 { width:100%; } 
-}
-@media (min-width: 960px) { }
-*/
