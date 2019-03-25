@@ -14,40 +14,33 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script> 
 
-<div id="app-block" style="display:none">
-
-    <div id="buttons" class="d-flex justify-content-between">
-        <div class="btn-group">
-            <button class="btn btn-link btn-inverse btn-large myelectric-view-cost" ><?php echo _("Cost") ?></button>
-            <button class="btn btn-link btn-inverse btn-large myelectric-view-kwh active" ><?php echo _("kWh") ?></button>
-        </div>
-        <div class="text-right">
-            <button class="btn btn-link btn-inverse btn-large openconfig text-white"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button>
-            
-        </div>
+<div id="buttons" class="d-flex justify-content-between">
+    <div class="btn-group">
+        <button class="btn btn-link btn-inverse btn-large myelectric-view-cost" ><?php echo _("Cost") ?></button>
+        <button class="btn btn-link btn-inverse btn-large myelectric-view-kwh active" ><?php echo _("kWh") ?></button>
     </div>
-    
-    <table style="width:100%">
-        <tr>
-            <td style="border:0; width:50%">
-                <div class="electric-title">POWER NOW</div>
-                <div class="power-value"><span id="powernow">0</span></div>
-            </td>
-            <td style="text-align:right; border:0;">
-                <div class="electric-title">TODAY</div>
-                <div class="power-value"><span id="usetoday_units_a"></span><span id="usetoday">0</span><span id="usetoday_units_b" style="font-size:16px"> kWh</span></div>
-            </td>
-        </tr>
-    </table>
+    <div class="text-right">
+        <button class="btn btn-link btn-inverse btn-large openconfig text-white"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button>
+        <button class="close-config btn btn-link btn-inverse btn-large openconfig text-white"><svg class="icon"><use xlink:href="#icon-close"></use></svg></button>  
+    </div>
+</div>
+
+<div id="app-block" style="display:none">
 
     <div class="d-flex justify-content-between">
         <div>
-            <h4 class="electric-title mb-0 text-lg-larger font-weight-normal"><?php echo _("POWER NOW") ?></h4>
-            <h1 class="power-value display-4 display-md-3 display-lg-2 mt-0 text-lg-larger mb-lg-3"><span id="powernow">0</span></h1>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('POWER NOW') ?></h5>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary">
+                <span id="powernow">0</span>
+            </h2>
         </div>
         <div class="text-xs-right">
-            <h4 class="electric-title mb-0 text-lg-larger font-weight-normal"><?php echo _("TODAY") ?></h4>
-            <h1 class="power-value display-4 display-md-3 display-lg-2 mt-0 text-lg-larger mb-lg-3"><span id="usetoday_units_a"></span><span id="usetoday">0</span><span id="usetoday_units_b" style="font-size:16px"> <?php echo _("kWh") ?></span></h1>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('TODAY') ?></h5>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary">
+                <span id="usetoday_units_a"></span>
+                <span id="usetoday"></span>
+                <small id="usetoday_units_b" class="usetoday"></small>
+            </h2>
         </div>
     </div>
 
@@ -61,30 +54,92 @@
             <canvas id="placeholder_kwhd"></canvas>
         </div>
     </div>
-
-    <div id="breakdown" class="d-flex justify-content-between py-lg-3">
+<!--
         <div class="appbox mb-3">
             <div class="appbox-title"><?php echo _('WEEK') ?></div>
-            <div><span class="appbox-value u1a" style="color:#0699fa">£</span><span class="appbox-value" id="week_kwh" style="color:#0699fa">---</span> <span class="units appbox-units u1b" style="color:#0779c1">kWh</span></div>
-            <div style="padding-top:5px; color:#0779c1" class="appbox-units" ><span class="units u2a"></span><span id="week_kwhd">---</span><span class="units u2b"> kWh/d</span></div>
+            <div>
+                <span class="appbox-value u1a" style="color:#0699fa">£</span>
+                <span class="appbox-value" id="week_kwh" style="color:#0699fa">---</span>
+                <span class="units appbox-units u1b" style="color:#0779c1">kWh</span>
+            </div>
+            <div style="padding-top:5px; color:#0779c1" class="appbox-units" >
+                <span class="units u2a"></span>
+                <span id="week_kwhd">---</span>
+                <span class="units u2b"> kWh/d</span>
+            </div>
         </div>
         
         <div class="appbox mb-3">
             <div class="appbox-title"><?php echo _('MONTH') ?></div>
-            <div><span class="appbox-value u1a" style="color:#0699fa">£</span><span class="appbox-value" id="month_kwh" style="color:#0699fa">---</span> <span class="units appbox-units u1b" style="color:#0779c1">kWh</span></div>
-            <div style="padding-top:5px; color:#0779c1" class="appbox-units" ><span class="units u2a"></span><span id="month_kwhd">---</span><span class="units u2b"> kWh/d</span></div>
+            <div>
+                <span class="appbox-value u1a" style="color:#0699fa">£</span>
+                <span class="appbox-value" id="month_kwh" style="color:#0699fa">---</span>
+                <span class="units appbox-units u1b" style="color:#0779c1">kWh</span>
+            </div>
+            <div style="padding-top:5px; color:#0779c1" class="appbox-units" >
+                <span class="units u2a"></span>
+                <span id="month_kwhd">---</span>
+                <span class="units u2b"> kWh/d</span>
+            </div>
         </div>
         
         <div class="appbox mb-3">
             <div class="appbox-title"><?php echo _('YEAR') ?></div>
-            <div><span class="appbox-value u1a" style="color:#0699fa">£</span><span class="appbox-value" id="year_kwh" style="color:#0699fa">---</span> <span class="units appbox-units u1b" style="color:#0779c1">kWh</span></div>
-            <div style="padding-top:5px; color:#0779c1" class="appbox-units" ><span class="units u2a"></span><span id="year_kwhd">---</span><span class="units u2b"> kWh/d</span></div>
+            <div>
+                <span class="appbox-value u1a" style="color:#0699fa">£</span>
+                <span class="appbox-value" id="year_kwh" style="color:#0699fa">---</span>
+                <span class="units appbox-units u1b" style="color:#0779c1">kWh</span>
+            </div>
+            <div style="padding-top:5px; color:#0779c1" class="appbox-units" >
+                <span class="units u2a"></span>
+                <span id="year_kwhd">---</span>
+                <span class="units u2b"> kWh/d</span>
+            </div>
         </div>
         
         <div class="appbox mb-3">
             <div class="appbox-title"><?php echo _('ALL') ?></div>
-            <div><span class="appbox-value u1a" style="color:#0699fa">£</span><span class="appbox-value" id="alltime_kwh" style="color:#0699fa">---</span> <span class="units appbox-units u1b" style="color:#0779c1">kWh</span></div>
-            <div style="padding-top:5px; color:#0779c1" class="appbox-units" ><span class="units u2a"></span><span id="alltime_kwhd">---</span><span class="units u2b"> kWh/d</span></div>
+            <div>
+                <span class="appbox-value u1a" style="color:#0699fa">£</span>
+                <span class="appbox-value" id="alltime_kwh" style="color:#0699fa">---</span>
+                <span class="units appbox-units u1b" style="color:#0779c1">kWh</span>
+            </div>
+            <div style="padding-top:5px; color:#0779c1" class="appbox-units" >
+                <span class="units u2a"></span>
+                <span id="alltime_kwhd">---</span>
+                <span class="units u2b"> kWh/d</span>
+            </div>
+        </div>
+-->
+
+
+    <div id="breakdown" class="d-flex justify-content-between py-lg-3 text-light">
+        <div class="appbox mb-3 text-primary">
+            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('WEEK') ?></h5>
+            <h2 id="week_kwh" class="appbox-value u2a my-0">0</h2>
+            <strong class="appbox-units week_kwhd">0</strong>
+            <strong class="appbox-units u2b">kWh/d</strong>
+        </div>
+
+        <div class="appbox mb-3 text-warning">
+            <h5 class="appbox-title mb-1 text-light text-md-larger px-1"><?php echo _('MONTH') ?></h5>
+            <h2 id="month_kwh" class="appbox-value total_export_prc my-0">0</h2>
+            <strong class="appbox-units total_export_kwh">0</strong>
+            <strong class="appbox-units">kWh</strong>
+        </div>
+
+        <div class="appbox mb-3 text-success">
+            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('YEAR') ?></h5>
+            <h2 id="year_kwh" class="appbox-value total_import_prc my-0">0</h2>
+            <strong class="appbox-units total_import_kwh">0</strong>
+            <strong class="appbox-units">kWh</strong>
+        </div>
+        
+        <div class="appbox mb-3 text-danger">
+            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('ALL') ?></h5>
+            <h2 id="alltime_kwh" class="appbox-value total_import_prc my-0">0</h2>
+            <strong class="appbox-units total_import_kwh">0</strong>
+            <strong class="appbox-units">kWh</strong>
         </div>
     </div>
 </section>
@@ -608,7 +663,7 @@ var resizeTimer;
             if($('#app-block').is(":visible")) {
                 resize();
             }
-        },500);
+        }, 500);
     });
 
 // ----------------------------------------------------------------------

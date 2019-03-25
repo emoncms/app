@@ -12,7 +12,7 @@ h2 small {color: inherit}
 #buttons {
     margin: 0 -1.25rem;
     border-bottom: 1px solid #333;
-    padding: 0.2rem 0;
+    /* padding: 0.2rem 0; */
 }
 #buttons .btn-group .btn:first-child{
     padding-right: .2em;
@@ -341,6 +341,9 @@ h2 small {color: inherit}
     .d-md-inline-block {
         display: inline-block;
     }
+    h5.text-md-larger{
+        font-size: 1.34rem;
+    }
 }
 /* 
 // Large devices (desktops, 992px and up)
@@ -386,7 +389,7 @@ h2 small {color: inherit}
 */
 @media (min-width: 1200px) {
     #breakdown {
-        max-width: 60%;
+        max-width: 34rem;
     }
 }
 

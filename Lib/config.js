@@ -32,13 +32,17 @@ var config = {
 
         $("body").on("click",".openconfig",function(){
             $("#app-block").hide();
-            $("#app-setup").show();    
+            $("#app-setup").show();
+            $('.openconfig').toggleClass('hide', true);
+            $('.close-config').toggleClass('hide', false);
             config.UI();
             config.hideapp();
         });
         $("body").on("click",".close-config",function(){
             $("#app-setup").hide();
             $("#app-block").show();
+            $('.openconfig').toggleClass('hide', false);
+            $('.close-config').toggleClass('hide', true);
             if (typeof resize == 'function') resize();
         });
 

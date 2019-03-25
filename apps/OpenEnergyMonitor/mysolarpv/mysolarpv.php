@@ -15,25 +15,26 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
     
-<section id="app-block" style="display:none" class="block">
-    <div id="buttons" class="d-flex justify-content-between">
-        <h4 style="opacity: .4" class="muted pl-4 pt-1 text-uppercase"><?php echo _('My Solar'); ?></h4>
-        <div class="text-right">
-            <button class="btn btn-link btn-inverse btn-large openconfig text-white"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button>
-        </div>
+<div id="buttons" class="d-flex justify-content-between px-3">
+    <h4 style="opacity: .4" class="muted pl-4 pt-1 text-uppercase"><?php echo _('My Solar'); ?></h4>
+    <div class="text-right">
+        <button class="btn btn-link btn-inverse btn-large openconfig text-white"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button>
+        <button class="close-config btn btn-link btn-inverse btn-large text-white hide"><svg class="icon"><use xlink:href="#icon-close"></use></svg></button>
     </div>
+</div>
 
+<section id="app-block" style="display:none" class="block">
     <div class="d-flex justify-content-between">
         <div>
-            <h4 class="electric-title mb-0 text-lg-larger font-weight-normal text-light"><?php echo _('USE NOW') ?></h4>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('USE NOW') ?></h5>
             <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow">0</span>W</h2>
         </div>
         <div class="text-xs-center">
-            <h4 class="electric-title mb-0 text-lg-larger font-weight-normal text-light px-1"><span class="balance-label"></span></h4>
+            <h5 class="electric-title mb-0 text-md-larger text-light px-1"><span class="balance-label"></span></h5>
             <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span></h2>
         </div>
         <div class="text-xs-right">
-            <h4 class="electric-title mb-0 text-lg-larger font-weight-normal text-light"><?php echo _('SOLAR PV') ?></h4>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('SOLAR PV') ?></h5>
             <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-warning"><span class="solarnow">0</span>W</h2>
         </div>
     </div>
@@ -74,33 +75,33 @@
     <div id="breakdown" class="d-flex justify-content-between py-lg-3 text-light">
 
         <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title mb-1 text-light text-lg-larger"><?php echo _('USE') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('USE') ?></h5>
             <h2 class="appbox-value total_use_kwh my-0">0</h2>
             <strong class="appbox-units">kWh</strong>
         </div>
 
         <div class="appbox mb-3 text-warning">
-            <h5 class="appbox-title mb-1 text-light text-lg-larger px-1"><?php echo _('SOLAR') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-md-larger px-1"><?php echo _('SOLAR') ?></h5>
             <h2 class="appbox-value total_solar_kwh my-0">0</h2>
             <small><strong class="appbox-units">kWh</strong></small>
         </div>
 
         <div class="appbox mb-3 text-success">
-            <h5 class="appbox-title mb-1 text-light text-lg-larger"><?php echo _('DIRECT') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('DIRECT') ?></h5>
             <h2 class="appbox-value total_use_direct_prc my-0">0</h2>
             <strong class="appbox-units total_export_kwh">0</strong>
             <strong class="appbox-units">kWh</strong>
         </div>
 
         <div class="appbox mb-3 text-tertiary">
-            <h5 class="appbox-title mb-1 text-light text-lg-larger px-1"><?php echo _('EXPORT') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-md-larger px-1"><?php echo _('EXPORT') ?></h5>
             <h2 class="appbox-value total_export_prc my-0">0</h2>
             <strong class="appbox-units total_export_kwh">0</strong>
             <strong class="appbox-units">kWh</strong>
         </div>
 
         <div class="appbox mb-3 text-danger">
-            <h5 class="appbox-title mb-1 text-light text-lg-larger"><?php echo _('GRID') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('GRID') ?></h5>
             <h2 class="appbox-value total_import_prc my-0">0</h2>
             <strong class="appbox-units total_import_kwh">0</strong>
             <strong class="appbox-units">kWh</strong>
@@ -110,29 +111,22 @@
 
 
 
-<section id="app-setup" style="display:none;" class="block">
-
-    <div id="buttons" class="d-flex justify-content-between">
-        <h4 style="opacity: .4" class="muted pl-4 pt-1 text-uppercase"><?php echo _('My Solar'); ?></h4>
-        <div class="text-right">
-            <button class="close-config btn btn-link btn-inverse btn-large text-white"><svg class="icon"><use xlink:href="#icon-close"></use></svg></button>
+<section id="app-setup" style="display:none;">
+    <!-- instructions and settings -->
+    <div class="px-3">
+        <div class="row-fluid">
+            <div class="span9 xappconfig-description">
+                <div class="xappconfig-description-inner text-light">
+                    <h2 class="appconfig-title text-warning"><?php echo _('My Solar'); ?></h2>
+                    <p class="lead">The My Solar app can be used to explore onsite solar generation, self consumption, export and building consumption both in realtime with a moving power graph view and historically with a daily and monthly bargraph.</p>
+                    <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
+                    <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                    <img src="../Modules/app/images/mysolar_app.png" style="width:600px" class="img-rounded">
+                </div>
+            </div>
+            <div class="span3 app-config pt-3"></div>
         </div>
     </div>
-
-    <h2 class="appconfig-title" style="color:#dccc1f">My Solar</h2>
-
-    <div class="appconfig-description">
-        <div class="appconfig-description-inner">
-            The My Solar app can be used to explore onsite solar generation, self consumption, export and building consumption both in realtime with a moving power graph view and historically with a daily and monthly bargraph.
-            <br><br>
-            <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
-            <br><br>
-            <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.
-            <br><br>
-            <img src="../Modules/app/images/mysolar_app.png" style="width:600px" class="img-rounded">
-        </div>
-    </div>
-    <div class="app-config"></div>
 </section>
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
@@ -157,7 +151,7 @@ $(window).ready(function(){
     $("#footer").css('background-color','#181818');
     $("#footer").css('color','#999');
 });
-if (!sessionwrite) $(".openconfig").hide();
+if (!sessionwrite) $(".openconfig").addClass('hide');
 
 // ----------------------------------------------------------------------
 // Configuration
@@ -250,25 +244,18 @@ function init()
         if (viewmode === "powergraph") {
             viewmode = "bargraph";
             $(".balanceline").attr('disabled', true);
-            // $(".powergraph-navigation").hide();
-            // $(".bargraph-navigation").show();
-            
-            draw();
             $(".viewpower").toggleClass('hidden', false); 
             $(".viewhistory").toggleClass('hidden', true); 
+            draw();
 
         } else {
             viewmode = "powergraph";
-            $(".balanceline").show();
             $(".balanceline").attr('disabled', false);
-
-            // $(".bargraph-navigation").hide();
-            // $(".powergraph-navigation").show();
-            
-            draw();
-            powergraph_events();
             $(".viewpower").toggleClass('hidden', true); 
             $(".viewhistory").toggleClass('hidden', false); 
+
+            draw();
+            powergraph_events();
         }
     });
 
@@ -303,7 +290,9 @@ function show()
     
     resize();
     livefn();
-    //emrys live = setInterval(livefn,5000);
+    
+    // reload data at interval
+    live = setInterval(livefn,5000);
 
 }
 
@@ -758,10 +747,10 @@ function bargraph_events(){
             view.start = solar_kwhd_data[z][0];
             view.end = view.start + 86400*1000;
 
-            $(".balanceline").show();
-            $(".bargraph-navigation").hide();
-            $(".powergraph-navigation").show();
-            $(".viewhistory").html("VIEW HISTORY");
+            $(".balanceline").attr('disabled', false);
+            $(".viewpower").toggleClass('hidden', true); 
+            $(".viewhistory").toggleClass('hidden', false); 
+
             $('#placeholder').unbind("plotclick");
             $('#placeholder').unbind("plothover");
             $('#placeholder').unbind("plotselected");
