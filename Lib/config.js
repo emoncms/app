@@ -17,7 +17,7 @@ var config = {
         
         // Check that the config is complete first otherwise show config interface
         if (!config.check()) {
-            $("#app-setup").show();       // Show setup block
+            $("#app-setup").toggleClass('hide', false);       // Show setup block
             $(".ajax-loader").hide();     // Hide AJAX loader
             config.UI();                  // Populate setup UI options
         } else {
@@ -33,10 +33,10 @@ var config = {
         $("body").on("click",".openconfig",function(){
             $("#app-block").toggleClass('hide', true);
             $("#app-setup").toggleClass('hide', false);
-            
+
             $('.openconfig').toggleClass('hide', true);
             $('.close-config').toggleClass('hide', false);
-            $('#buttons #tabs .btn').attr('disabled',true).css('opacity',.3);
+            $('#buttons #tabs .btn').attr('disabled',true).css('opacity',.2);
             config.UI();
             config.hideapp();
         });

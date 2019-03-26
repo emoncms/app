@@ -3,7 +3,15 @@
 }
 /*-------------------------------------*/
 
-h2 small {color: inherit}
+h1 small,
+h2 small,
+h3 small,
+h4 small,
+h5 small,
+h6 small {
+    color: inherit;
+    font-weight: inherit;
+}
 /*-------------------------------------*/
 
 #buttons {
@@ -11,9 +19,6 @@ h2 small {color: inherit}
     border-bottom: 1px solid #333;
 }
 #buttons .btn-group .btn:first-child{
-    padding-right: .2em;
-}
-#buttons .btn-group .btn:last-child{
     padding-right: .2em;
 }
 #buttons .btn{
@@ -35,7 +40,7 @@ h2 small {color: inherit}
     line-height: 1.1;
 }
 .chart-placeholder > *{
-    height: 16rem;
+    height: 23rem;
 }
 .chart-placeholder.double {
     width: 100%;
@@ -63,7 +68,7 @@ h2 small {color: inherit}
 }
 
 body.app .container-fluid {
-    padding-bottom: 0!important;
+    padding-bottom: 1rem!important;
 }
 /*-------------------------------------*/
 /* utilities */
@@ -226,6 +231,9 @@ body.app .container-fluid {
   text-align: center;
   vertical-align: top;
 }
+.appbox .appbox-value {
+    line-height: 1.3em!important;
+}
 
 /*-------------------------------------*/
 
@@ -285,6 +293,9 @@ body.app .container-fluid {
     .d-sm-inline-block {
         display: inline-block;
     }
+    .d-sm-inline-block {
+        display: inline-block;
+    }
     .display-sm-3{
         font-size: 4.5rem;
     }
@@ -308,6 +319,9 @@ body.app .container-fluid {
     .d-md-inline-block {
         display: inline-block;
     }
+    h3.text-md-larger{
+        font-size: 1.78rem;
+    }
     h5.text-md-larger{
         font-size: 1.34rem;
     }
@@ -323,7 +337,7 @@ body.app .container-fluid {
         width: 48.5%;
     }
     .chart-placeholder.double > *{
-        height: 10rem;
+        height: 18.77rem;
         width: 100%;
     }
     h4.text-lg-larger{

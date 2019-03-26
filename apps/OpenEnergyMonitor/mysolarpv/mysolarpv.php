@@ -1,6 +1,6 @@
 <?php
     global $path, $session;
-    $v = 5;
+    $v = 6;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
@@ -15,11 +15,24 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
     
-<div id="buttons" class="d-flex justify-content-between px-3">
-    <h4 style="opacity: .4" class="muted pl-4 pt-1 text-uppercase"><?php echo _('My Solar'); ?></h4>
+<div id="buttons" class="d-flex justify-content-between">
+    <div id="tabs" class="btn-group">
+        <button class="active btn btn-link btn-inverse viewpower" title="<?php echo _('Power View') ?>">
+            <?php echo _('Power') ?>
+        </button>
+
+        <button class="btn btn-link btn-inverse viewhistory" title="<?php echo _('View History') ?>">
+            <?php echo _('History') ?>
+        </button>
+
+        <button class="btn btn-link btn-inverse balanceline" title="<?php echo _('Show Balance') ?>">
+            <?php echo _('Balance') ?>
+        </button>
+    </div>
+
     <div class="text-right">
-        <button class="btn btn-link btn-inverse btn-large openconfig text-white"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button>
-        <button class="close-config btn btn-link btn-inverse btn-large text-white hide"><svg class="icon"><use xlink:href="#icon-close"></use></svg></button>
+        <button class="btn btn-link btn-inverse openconfig text-white"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button>
+        <button class="close-config btn btn-link btn-inverse text-white hide"><svg class="icon"><use xlink:href="#icon-close"></use></svg></button>
     </div>
 </div>
 
@@ -35,83 +48,61 @@
         </div>
         <div class="text-xs-right">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('SOLAR PV') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-warning"><span class="solarnow">0</span>W</h2>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-warning "><span class="solarnow"></span></h2>
         </div>
     </div>
-
-    <div class="d-flex justify-content-between">
-        <?php include(dirname(__DIR__).'/graph-nav.php'); ?>
-        
-        <!--
-        <div class="bargraph-navigation" style="display:none">
-            <span class="bargraph-viewall visnav" style="font-size:14px">VIEW ALL</span>
-            <span class="bargraph-viewdaily visnav" style="font-size:14px">DAILY</span>
-            <span class="bargraph-viewmonthly visnav" style="font-size:14px">MONTHLY</span>
-            <span class="bargraph-viewannually visnav" style="font-size:14px">ANNUALLY</span>
-        </div>
-        -->
-
-        <div class="visnavblock mb-2 d-flex justify-content-start d-flex justify-content-stretch btn-group ml-0">
-            <button class="visnav viewhistory btn btn-inverse btn-link px-2" title="<?php echo _('VIEW HISTORY') ?>">
-                <span class="d-none d-md-inline-block label-long"><?php echo _('VIEW HISTORY') ?></span>
-                <span class="d-md-none label-short"><?php echo _('HIST') ?></span>
-            </button>
-            <button class="hidden visnav viewpower btn btn-inverse btn-link px-2" title="<?php echo _('POWER VIEW') ?>">
-                <span class="d-none d-md-inline-block label-long"><?php echo _('POWER VIEW') ?></span>
-                <span class="d-md-none label-short"><?php echo _('PWR') ?></span>
-            </button>
-
-            <button class="visnav balanceline btn btn-inverse btn-link px-2" title="<?php echo _('SHOW BALANCE') ?>">
-                <span class="d-none d-md-inline-block label-long"><?php echo _('SHOW BALANCE') ?></span>
-                <span class="d-md-none label-short"><?php echo _('BAL') ?></span>
-            </button>
-        </div>
-    </div>
+    
+    <?php include(dirname(__DIR__).'/graph-nav.php'); ?>
 
     <div id="placeholder_bound" class="chart-placeholder">
         <div id="placeholder"></div>
     </div>
     
     <div id="breakdown" class="d-flex justify-content-between py-lg-3 text-light">
-
         <div class="appbox mb-3 text-primary">
             <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('USE') ?></h5>
-            <h2 class="appbox-value total_use_kwh my-0">0</h2>
-            <strong class="appbox-units">kWh</strong>
+            <h2 class="appbox-value total_use_kwh my-0">--</h2>
+            <h5 class="appbox-units my-0">
+                kWh
+            </h5>
         </div>
-
         <div class="appbox mb-3 text-warning">
             <h5 class="appbox-title mb-1 text-light text-md-larger px-1"><?php echo _('SOLAR') ?></h5>
-            <h2 class="appbox-value total_solar_kwh my-0">0</h2>
-            <small><strong class="appbox-units">kWh</strong></small>
+            <h2 class="appbox-value total_solar_kwh my-0">--</h2>
+            <h5 class="appbox-units my-0">
+                kWh
+            </h5>
         </div>
-
         <div class="appbox mb-3 text-success">
             <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('DIRECT') ?></h5>
-            <h2 class="appbox-value total_use_direct_prc my-0">0</h2>
-            <strong class="appbox-units total_export_kwh">0</strong>
-            <strong class="appbox-units">kWh</strong>
+            <h2 class="appbox-value total_use_direct_prc my-0">--</h2>
+            <h5 class="appbox-units my-0">
+                <span id="total_use_direct_kwh"></span>
+                <span>kWh</span>
+            </h5>
         </div>
-
         <div class="appbox mb-3 text-tertiary">
             <h5 class="appbox-title mb-1 text-light text-md-larger px-1"><?php echo _('EXPORT') ?></h5>
-            <h2 class="appbox-value total_export_prc my-0">0</h2>
-            <strong class="appbox-units total_export_kwh">0</strong>
-            <strong class="appbox-units">kWh</strong>
+            <h2 class="appbox-value total_export_prc my-0">--</h2>
+            <h5 class="appbox-units my-0">
+                <span id="total_export_kwh"></span>
+                <span>kWh</span>
+            </h5>
         </div>
-
         <div class="appbox mb-3 text-danger">
             <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('GRID') ?></h5>
-            <h2 class="appbox-value total_import_prc my-0">0</h2>
-            <strong class="appbox-units total_import_kwh">0</strong>
-            <strong class="appbox-units">kWh</strong>
+            <h2 class="appbox-value total_import_prc my-0">--</h2>
+            <h5 class="appbox-units my-0">
+                <span id="total_import_kwh"></span>
+                <span>kWh</span>
+            </h5>
         </div>
     </div>
 </section>
 
 
 
-<section id="app-setup" style="display:none;">
+<section id="app-setup" class="hide">
     <!-- instructions and settings -->
     <div class="px-3">
         <div class="row-fluid">
@@ -121,7 +112,7 @@
                     <p class="lead">The My Solar app can be used to explore onsite solar generation, self consumption, export and building consumption both in realtime with a moving power graph view and historically with a daily and monthly bargraph.</p>
                     <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                     <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
-                    <img src="../Modules/app/images/mysolar_app.png" style="width:600px" class="img-rounded">
+                    <img src="../Modules/app/images/mysolar_app.png" class="d-none d-sm-inline-block">
                 </div>
             </div>
             <div class="span3 app-config pt-3"></div>
@@ -206,9 +197,6 @@ function init()
     
     if (solar_kwh && use_kwh && import_kwh) {
         init_bargraph();
-        $(".viewhistory").show();
-    } else {
-        $(".viewhistory").hide();
     }
     
     // The first view is the powergraph, we load the events for the power graph here.
@@ -231,11 +219,11 @@ function init()
     $(".balanceline").click(function () { 
         if (show_balance_line === 0) {
             show_balance_line = 1;
-            $(this).addClass('active');
+            $(this).toggleClass('active', true);
             draw();
         } else {
             show_balance_line = 0;
-            $(this).removeClass('active');
+            $(this).toggleClass('active', false);
             draw();
         }
     });
@@ -243,20 +231,19 @@ function init()
     $(".viewhistory, .viewpower").click(function () { 
         if (viewmode === "powergraph") {
             viewmode = "bargraph";
-            $(".balanceline").attr('disabled', true);
-            $(".viewpower").toggleClass('hidden', false); 
-            $(".viewhistory").toggleClass('hidden', true); 
-            draw();
+            $(".balanceline").toggleClass('hide', true);
+            $(".viewpower").toggleClass('active', false); 
+            $(".viewhistory").toggleClass('active', true); 
 
         } else {
             viewmode = "powergraph";
-            $(".balanceline").attr('disabled', false);
-            $(".viewpower").toggleClass('hidden', true); 
-            $(".viewhistory").toggleClass('hidden', false); 
+            $(".balanceline").toggleClass('hide', false);
+            $(".viewpower").toggleClass('active', true); 
+            $(".viewhistory").toggleClass('active', false); 
 
-            draw();
             powergraph_events();
         }
+        draw();
     });
 
     $("<div id='tooltip'><span id='value'></span> <span id='unit'></span></div>").appendTo("body");
@@ -309,32 +296,6 @@ function resize()
 
     if (height>width) height = width;
 
-    // placeholder.width(width);
-    // placeholder_bound.height(height);
-    // placeholder.height(height-top_offset);
-    
-    // if (width<=500) {
-    //     $(".electric-title").css("font-size","16px");
-    //     $(".power-value").css("font-size","32px");
-    //     $(".balanceline").hide();
-    //     $(".vistimeW").hide();
-    //     $(".vistimeM").hide();
-    //     $(".vistimeY").hide();
-    // } else if (width<=724) {
-    //     $(".electric-title").css("font-size","18px");
-    //     $(".power-value").css("font-size","52px");
-    //     $(".balanceline").show();
-    //     $(".vistimeW").show();
-    //     $(".vistimeM").show();
-    //     $(".vistimeY").show();
-    // } else {
-    //     $(".electric-title").css("font-size","22px");
-    //     $(".power-value").css("font-size","85px");
-    //     $(".balanceline").show();
-    //     $(".vistimeW").show();
-    //     $(".vistimeM").show();
-    //     $(".vistimeY").show();
-    // }
     if($('#app-block').is(":visible")) {
         draw();
     }
@@ -502,12 +463,13 @@ function draw_powergraph() {
     } else {
     	$(".total_use_kwh").html((total_use_kwh).toFixed(1));
     }
-    
     $(".total_use_direct_kwh").html((total_use_direct_kwh).toFixed(1));
 
     $(".total_export_kwh").html((total_solar_kwh-total_use_direct_kwh).toFixed(1));
-            
-    $(".total_import_prc").html(Math.round(100*(1-(total_use_direct_kwh/total_use_kwh)))+"%");
+    var import_percent = Math.round(100*(1-(total_use_direct_kwh/total_use_kwh)));
+    if(!isNaN(import_percent)) {
+        $(".total_import_prc").html(import_percent+"%");
+    }
     $(".total_import_kwh").html((total_use_kwh-total_use_direct_kwh).toFixed(1));        
     
     if (total_solar_kwh > 0) {
@@ -747,9 +709,9 @@ function bargraph_events(){
             view.start = solar_kwhd_data[z][0];
             view.end = view.start + 86400*1000;
 
-            $(".balanceline").attr('disabled', false);
-            $(".viewpower").toggleClass('hidden', true); 
-            $(".viewhistory").toggleClass('hidden', false); 
+            $(".balanceline").toggleClass('hide', false);
+            $(".viewpower").toggleClass('hide', true); 
+            $(".viewhistory").toggleClass('hide', false); 
 
             $('#placeholder').unbind("plotclick");
             $('#placeholder').unbind("plothover");
