@@ -104,6 +104,7 @@
         <span class="bluenav time dmy" time='720'>M</span>
         <span class="bluenav time dmy" time='168'>W</span>
         <span class="bluenav time" time='24'>D</span>
+        <span class="bluenav time" time='1'>H</span>
       </div>
         
       <div class="block-title">HISTORY</div>       
@@ -502,7 +503,7 @@ $('.bargraph-month').click(function () {
 function powergraph_load() 
 {
     var start = view.start; var end = view.end;
-    var npoints = 800;
+    var npoints = 1200;
     var interval = ((end-start)*0.001) / npoints;
     interval = view.round_interval(interval);
     var intervalms = interval * 1000;
