@@ -225,24 +225,29 @@ function init()
     $('#left').click(function (e) {view.panleft(); reload = true; autoupdate = false; fastupdate(e);});
     
     // zoom graph to timescale
+<<<<<<< HEAD
     $('.myelectric-time').click(function (event) {
+=======
+    $('.myelectric-time').click(function () {
+>>>>>>> 638c6c228cc029f688d079c8db1a1945696680f9
         view.timewindow($(this).attr("time")/24.0); 
         reload = true; 
         autoupdate = true;
         fastupdate(event);
     });
     
-    $(".myelectric-view-cost").click(function(){
+    // toggle cost/kwh
+    $(".myelectric-view-cost").click(function(event){
         viewmode = "cost";
-        fastupdate();
+        fastupdate(event);
         slowupdate();
         $('.myelectric-view-cost').toggleClass('active', true);
         $('.myelectric-view-kwh').toggleClass('active', false);
     });
     
-    $(".myelectric-view-kwh").click(function(){
+    $(".myelectric-view-kwh").click(function(event){
         viewmode = "energy";
-        fastupdate();
+        fastupdate(event);
         slowupdate();
         $('.myelectric-view-cost').toggleClass('active', false);
         $('.myelectric-view-kwh').toggleClass('active', true);
@@ -300,43 +305,28 @@ function resize()
     $("#placeholder_power").attr('height',height); 
     graph_lines.height = height;
     
-    // if (width<=500) {
-    //     $(".electric-title").css("font-size","16px");
-    //     $(".power-value").css("font-size","38px");
-    //     $(".units").hide();
-    //     $(".visnav").css("padding-left","5px");
-    //     $(".visnav").css("padding-right","5px");
-    // } else if (width<=724) {
-    //     $(".electric-title").css("font-size","18px");
-    //     $(".power-value").css("font-size","52px");
-    //     $(".units").show();
-    //     $(".visnav").css("padding-left","8px");
-    //     $(".visnav").css("padding-right","8px");
-    // } else {
-    //     $(".electric-title").css("font-size","22px");
-    //     $(".power-value").css("font-size","85px");
-    //     $(".units").show();
-    //     $(".visnav").css("padding-left","8px");
-    //     $(".visnav").css("padding-right","8px");
-    // }
     if($('#app-block').is(":visible")) {
         reloadkwhd = true;
         fastupdate();
         slowupdate();
     }
 }
-    
+
 function hide()
 {
     clearInterval(fastupdateinst);
     clearInterval(slowupdateinst);
 }
-    
-function fastupdate()
+
+function fastupdate(event)
 {
    var use = config.app.use.value;
    var use_kwh = config.app.use_kwh.value;
-
+   if (event && event.target) {
+       // triggered by click
+       $target = $(event.target);
+       $target.addClass('active').siblings().removeClass('active');
+   }
     if (viewmode=="energy") {
         scale = 1;
         $("#usetoday_units_a").html("");

@@ -1,5 +1,5 @@
 #app-block {
-    padding: 0;
+    padding: 0 0.7rem;
 }
 /*-------------------------------------*/
 
@@ -20,6 +20,7 @@ h6 small {
 }
 #buttons .btn-group .btn:first-child{
     padding-right: .2em;
+    margin-left: -1.1rem;
 }
 #buttons .btn{
     opacity: .6;
@@ -35,6 +36,12 @@ h6 small {
     opacity: .8;
     font-weight: bold;
     text-decoration: underline;
+}
+
+
+.electric-title {
+  color:#aaa;
+  margin: 0;
 }
 .power-value {
     line-height: 1.1;
@@ -260,6 +267,7 @@ body.app .container-fluid {
     margin-left: 0px;
     margin-right: 0px;
 }
+
 
 
 /** MOBILE FIRST **/
