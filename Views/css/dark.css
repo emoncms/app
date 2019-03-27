@@ -17,11 +17,9 @@ h6 small {
 #buttons {
     padding: .22rem 0;
     border-bottom: 1px solid #333;
+    margin-bottom: .4rem;
 }
-#buttons .btn-group .btn:first-child{
-    padding-right: .2em;
-    margin-left: -1.1rem;
-}
+
 #buttons .btn{
     opacity: .6;
     transition: opacity .3s linear;
