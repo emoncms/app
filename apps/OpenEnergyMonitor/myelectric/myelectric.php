@@ -225,11 +225,7 @@ function init()
     $('#left').click(function (e) {view.panleft(); reload = true; autoupdate = false; fastupdate(e);});
     
     // zoom graph to timescale
-<<<<<<< HEAD
     $('.myelectric-time').click(function (event) {
-=======
-    $('.myelectric-time').click(function () {
->>>>>>> 638c6c228cc029f688d079c8db1a1945696680f9
         view.timewindow($(this).attr("time")/24.0); 
         reload = true; 
         autoupdate = true;
