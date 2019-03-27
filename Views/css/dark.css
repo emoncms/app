@@ -1,5 +1,5 @@
 #app-block {
-    padding: 0;
+    padding: 0 0.7rem;
 }
 /*-------------------------------------*/
 
@@ -285,7 +285,7 @@ body.app .container-fluid {
 */
 @media (min-width: 576px) {
     #app-block {
-        padding: 0rem;
+        /* padding: 0rem; */
     }
     .visnav {
         flex-grow: 0;
@@ -305,6 +305,12 @@ body.app .container-fluid {
     }
     .display-sm-4 {
         font-size: 3.25rem;
+    }
+    h3.text-sm-larger{
+      font-size: 1.78rem;
+    }
+    h5.text-sm-larger{
+        font-size: 1.34rem;
     }
 }
 /* 

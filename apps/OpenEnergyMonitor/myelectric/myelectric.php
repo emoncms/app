@@ -28,14 +28,14 @@
 <section id="app-block" style="display:none">
     <div class="d-flex justify-content-between">
         <div>
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('POWER NOW') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary">
+            <h5 class="electric-title mb-0 text-sm-larger text-light"><?php echo _('POWER NOW') ?></h5>
+            <h2 class="power-value display-sm-4 display-sm-3 display-lg-2 mt-0 mb-lg-3 text-primary">
                 <span id="powernow">0</span>
             </h2>
         </div>
         <div class="text-xs-right">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('TODAY') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary">
+            <h5 class="electric-title mb-0 text-sm-larger text-light"><?php echo _('TODAY') ?></h5>
+            <h2 class="power-value display-sm-4 display-sm-3 display-lg-2 mt-0 mb-lg-3 text-primary">
                 <span id="usetoday_units_a"></span>
                 <span id="usetoday"></span>
                 <small id="usetoday_units_b" class="usetoday"></small>
@@ -57,8 +57,8 @@
 
     <div id="breakdown" class="d-flex justify-content-between py-lg-2 text-light">
         <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title my-0 text-light text-md-larger"><?php echo _('WEEK') ?></h5>
-            <h3 class="appbox-value mb-0 text-md-larger">
+            <h5 class="appbox-title my-0 text-light text-sm-larger"><?php echo _('WEEK') ?></h5>
+            <h3 class="appbox-value mb-0 text-sm-larger">
                 <span class="u1a"></span>
                 <span id="week_kwh"></span>
                 <small class="u1b"></small>
@@ -71,8 +71,8 @@
         </div>
 
         <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title my-0 text-light text-md-larger"><?php echo _('MONTH') ?></h5>
-            <h3 class="appbox-value mb-0 text-md-larger">
+            <h5 class="appbox-title my-0 text-light text-sm-larger"><?php echo _('MONTH') ?></h5>
+            <h3 class="appbox-value mb-0 text-sm-larger">
                 <span class="u1a"></span>
                 <span id="month_kwh"></span>
                 <small class="u1b"></small>
@@ -85,8 +85,8 @@
         </div>
 
         <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title my-0 text-light text-md-larger"><?php echo _('YEAR') ?></h5>
-            <h3 class="appbox-value mb-0 text-md-larger">
+            <h5 class="appbox-title my-0 text-light text-sm-larger"><?php echo _('YEAR') ?></h5>
+            <h3 class="appbox-value mb-0 text-sm-larger">
                 <span class="u1a"></span>
                 <span id="year_kwh"></span>
                 <small class="u1b"></small>
@@ -99,8 +99,8 @@
         </div>
 
         <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title my-0 text-light text-md-larger"><?php echo _('ALL') ?></h5>
-            <h3 class="appbox-value mb-0 text-md-larger">
+            <h5 class="appbox-title my-0 text-light text-sm-larger"><?php echo _('ALL') ?></h5>
+            <h3 class="appbox-value mb-0 text-sm-larger">
                 <span class="u1a"></span>
                 <span id="alltime_kwh"></span>
                 <small class="u1b"></small>
@@ -119,8 +119,8 @@
     <!-- instructions and settings -->
     <div class="px-3">
         <div class="row-fluid">
-            <div class="span9 xappconfig-description">
-                <div class="xappconfig-description-inner text-light">
+            <div class="span9 appconfig-description">
+                <div class="appconfig-description-inner text-light">
                     <h2 class="appconfig-title text-primary"><?php echo _('My Electric'); ?></h2>
                     <p class="lead">The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time. It includes a real-time view and a historic kWh per day bar graph.</p>
                     <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
