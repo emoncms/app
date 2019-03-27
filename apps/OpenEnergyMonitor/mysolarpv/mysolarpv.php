@@ -14,27 +14,28 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
-    
-<div id="buttons" class="d-flex justify-content-between">
-    <div id="tabs" class="btn-group">
-        <button class="active btn btn-link btn-inverse viewpower" title="<?php echo _('Power View') ?>">
-            <?php echo _('Power') ?>
-        </button>
 
-        <button class="btn btn-link btn-inverse viewhistory" title="<?php echo _('View History') ?>">
-            <?php echo _('History') ?>
-        </button>
+<nav id="buttons" class="d-flex justify-content-between">
+    <ul id="tabs" class="nav nav-pills mb-0">
+        <li><button class="viewpower active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo _('Power View') ?>">
+            <span class="d-xs-none"><?php echo _("Pwr") ?></span>
+            <span class="d-none d-xs-inline-block"><?php echo _("Power") ?></span>
+        </button></li>
+        <li><button class="viewhistory btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo _('View History') ?>">
+            <span class="d-xs-none"><?php echo _("Hist") ?></span>
+            <span class="d-none d-xs-inline-block"><?php echo _("History") ?></span>
+        </button></li>
+        <li><button class="balanceline btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo _('Show Balance') ?>">
+            <span class="d-xs-none"><?php echo _("Bal") ?></span>
+            <span class="d-none d-xs-inline-block"><?php echo _("Balance") ?></span>
+        </li>
+    </ul>
+    <ul class="text-right nav nav-pills mb-0">
+        <li><button class="btn btn-large btn-link btn-inverse openconfig"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button></li>
+        <li><button class="hide btn-large close-config btn btn-link btn-inverse"><svg class="icon"><use xlink:href="#icon-close"></use></svg></button></li>
+    </ul>
+</nav>
 
-        <button class="btn btn-link btn-inverse balanceline" title="<?php echo _('Show Balance') ?>">
-            <?php echo _('Balance') ?>
-        </button>
-    </div>
-
-    <div class="text-right">
-        <button class="btn btn-link btn-inverse openconfig text-white"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button>
-        <button class="close-config btn btn-link btn-inverse text-white hide"><svg class="icon"><use xlink:href="#icon-close"></use></svg></button>
-    </div>
-</div>
 
 <section id="app-block" style="display:none" class="block">
     <div class="d-flex justify-content-between">
@@ -102,7 +103,7 @@
 
 
 
-<section id="app-setup" class="hide">
+<section id="app-setup" class="hide pb-3">
     <!-- instructions and settings -->
     <div class="px-3">
         <div class="row-fluid">

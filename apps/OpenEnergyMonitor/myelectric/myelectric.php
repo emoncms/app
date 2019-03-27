@@ -14,19 +14,18 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script> 
 
-<div id="buttons" class="d-flex justify-content-between">
-    <div id="tabs" class="btn-group">
-        <button class="btn btn-link btn-inverse myelectric-view-cost" ><?php echo _("Cost") ?></button>
-        <button class="btn btn-link btn-inverse myelectric-view-kwh active" ><?php echo _("kWh") ?></button>
-    </div>
-    <div class="text-right">
-        <button class="btn btn-link btn-inverse openconfig text-white"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button>
-        <button class="hide close-config btn btn-link btn-inverse text-white"><svg class="icon"><use xlink:href="#icon-close"></use></svg></button>  
-    </div>
-</div>
+<nav id="buttons" class="d-flex justify-content-between">
+    <ul id="tabs" class="nav nav-pills mb-0">
+        <li><button class="btn btn-large btn-link btn-inverse myelectric-view-cost" ><?php echo _("Cost") ?></button></li>
+        <li><button class="btn btn-large btn-link btn-inverse myelectric-view-kwh active" ><?php echo _("kWh") ?></button></li>
+    </ul>
+    <ul class="text-right nav nav-pills mb-0">
+        <li><button class="btn btn-large btn-link btn-inverse openconfig text-white"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button></li>
+        <li><button class="hide btn-large close-config btn btn-link btn-inverse text-white"><svg class="icon"><use xlink:href="#icon-close"></use></svg></button></li>
+    </ul>
+</nav>
 
 <section id="app-block" style="display:none">
-
     <div class="d-flex justify-content-between">
         <div>
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('POWER NOW') ?></h5>
@@ -56,9 +55,9 @@
     </div>
 
 
-    <div id="breakdown" class="d-flex justify-content-between py-lg-3 text-light">
+    <div id="breakdown" class="d-flex justify-content-between py-lg-2 text-light">
         <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title mb-0 text-light text-md-larger"><?php echo _('WEEK') ?></h5>
+            <h5 class="appbox-title my-0 text-light text-md-larger"><?php echo _('WEEK') ?></h5>
             <h3 class="appbox-value mb-0 text-md-larger">
                 <span class="u1a"></span>
                 <span id="week_kwh"></span>
@@ -72,7 +71,7 @@
         </div>
 
         <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title mb-0 text-light text-md-larger"><?php echo _('MONTH') ?></h5>
+            <h5 class="appbox-title my-0 text-light text-md-larger"><?php echo _('MONTH') ?></h5>
             <h3 class="appbox-value mb-0 text-md-larger">
                 <span class="u1a"></span>
                 <span id="month_kwh"></span>
@@ -86,7 +85,7 @@
         </div>
 
         <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title mb-0 text-light text-md-larger"><?php echo _('YEAR') ?></h5>
+            <h5 class="appbox-title my-0 text-light text-md-larger"><?php echo _('YEAR') ?></h5>
             <h3 class="appbox-value mb-0 text-md-larger">
                 <span class="u1a"></span>
                 <span id="year_kwh"></span>
@@ -100,7 +99,7 @@
         </div>
 
         <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title mb-0 text-light text-md-larger"><?php echo _('ALL') ?></h5>
+            <h5 class="appbox-title my-0 text-light text-md-larger"><?php echo _('ALL') ?></h5>
             <h3 class="appbox-value mb-0 text-md-larger">
                 <span class="u1a"></span>
                 <span id="alltime_kwh"></span>
@@ -116,7 +115,7 @@
 </section>
 
 
-<section id="app-setup" class="hide">
+<section id="app-setup" class="hide pb-3">
     <!-- instructions and settings -->
     <div class="px-3">
         <div class="row-fluid">
