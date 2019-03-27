@@ -15,7 +15,7 @@ h6 small {
 /*-------------------------------------*/
 
 #buttons {
-    margin: 0 -1.25rem;
+    padding: .22rem 0;
     border-bottom: 1px solid #333;
 }
 #buttons .btn-group .btn:first-child{
@@ -231,7 +231,7 @@ body.app .container-fluid {
 /*-------------------------------------*/
 
 #breakdown {
-    margin: 0 auto;
+  margin: 0 auto;
 }
 
 .appbox {
@@ -256,20 +256,19 @@ body.app .container-fluid {
 
 /*-------------------------------------*/
 
-.container-fluid { padding:0 }
-
 #footer {
-    margin-left: 0px;
-    margin-right: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
 }
 
 .navbar-fixed-top {
-    margin-left: 0px;
-    margin-right: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
 }
 
-
-
+#wrap main.content-container{
+  padding-bottom: 0rem!important;
+}
 /** MOBILE FIRST **/
 /*-------------------------------------*/
 
@@ -283,13 +282,19 @@ body.app .container-fluid {
     .text-xs-center {
         text-align: center!important;
     }
+    .d-xs-none {
+        display: none;
+    }
+    .d-xs-inline-block {
+        display: inline-block;
+    }
 }
 /* 
 // Small devices (landscape phones, 576px and up)
 */
 @media (min-width: 576px) {
     #app-block {
-        padding: 0 0rem;
+        /* padding: 0rem; */
     }
     .visnav {
         flex-grow: 0;
@@ -301,7 +306,7 @@ body.app .container-fluid {
     .d-sm-inline-block {
         display: inline-block;
     }
-    .d-sm-inline-block {
+    .d-xs-inline-block {
         display: inline-block;
     }
     .display-sm-3{
@@ -310,14 +315,17 @@ body.app .container-fluid {
     .display-sm-4 {
         font-size: 3.25rem;
     }
+    h3.text-sm-larger{
+      font-size: 1.78rem;
+    }
+    h5.text-sm-larger{
+        font-size: 1.34rem;
+    }
 }
 /* 
 // Medium devices (tablets, 768px and up)
 */
 @media (min-width: 768px) {
-    #app-block {
-        padding: 0 1.28rem;
-    }
     .display-md-3{
         font-size: 4.5rem;
     }
