@@ -711,8 +711,8 @@ function bargraph_events(){
             view.end = view.start + 86400*1000;
 
             $(".balanceline").toggleClass('hide', false);
-            $(".viewpower").toggleClass('hide', true); 
-            $(".viewhistory").toggleClass('hide', false); 
+            $(".viewpower").toggleClass('active', true); 
+            $(".viewhistory").toggleClass('active', false); 
 
             $('#placeholder').unbind("plotclick");
             $('#placeholder').unbind("plothover");
