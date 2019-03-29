@@ -288,6 +288,9 @@ body.app .container-fluid {
     .d-xs-inline-block {
         display: inline-block;
     }
+    .d-xs-inline {
+        display: inline;
+    }
 }
 /* 
 // Small devices (landscape phones, 576px and up)
@@ -304,9 +307,6 @@ body.app .container-fluid {
         display: none;
     }
     .d-sm-inline-block {
-        display: inline-block;
-    }
-    .d-xs-inline-block {
         display: inline-block;
     }
     .display-sm-3{

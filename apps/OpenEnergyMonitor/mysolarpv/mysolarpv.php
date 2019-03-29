@@ -19,15 +19,15 @@
     <ul id="tabs" class="nav nav-pills mb-0">
         <li><button class="viewpower active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo _('Power View') ?>">
             <span class="d-xs-none"><?php echo _("Pwr") ?></span>
-            <span class="d-none d-xs-inline-block"><?php echo _("Power") ?></span>
+            <span class="d-none d-xs-inline"><?php echo _("Power") ?></span>
         </button></li>
         <li><button class="viewhistory btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo _('View History') ?>">
             <span class="d-xs-none"><?php echo _("Hist") ?></span>
-            <span class="d-none d-xs-inline-block"><?php echo _("History") ?></span>
+            <span class="d-none d-xs-inline"><?php echo _("History") ?></span>
         </button></li>
         <li><button class="balanceline btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo _('Show Balance') ?>">
             <span class="d-xs-none"><?php echo _("Bal") ?></span>
-            <span class="d-none d-xs-inline-block"><?php echo _("Balance") ?></span>
+            <span class="d-none d-xs-inline"><?php echo _("Balance") ?></span>
         </li>
     </ul>
     <ul class="text-right nav nav-pills mb-0">
