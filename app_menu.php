@@ -21,15 +21,15 @@
     if ($userid)
     {
         $applist = $appconfig->get_list($userid);
-        $i = 0;
+        $_i = 0;
         foreach ($applist as $name=>$appitem) {
             $menu['sidebar']['apps'][] = array(
                 'title' => $name,
                 'text' => $name,
-                'order'=> $i,
+                'order'=> $_i,
                 'path' => "app/view?name=".$name.'&apikey='.$apikey
             );
-            $i++;
+            $_i++;
         }
     }
 
