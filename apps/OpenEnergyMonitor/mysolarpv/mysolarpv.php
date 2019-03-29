@@ -232,10 +232,10 @@ function init()
     $(".viewhistory, .viewpower").click(function () { 
         if (viewmode === "powergraph") {
             viewmode = "bargraph";
-            showPowerTabs();
+            showHistoryTabs();
         } else {
             viewmode = "powergraph";
-            showHistoryTabs();
+            showPowerTabs();
             powergraph_events();
         }
         draw();
@@ -489,18 +489,18 @@ function draw_powergraph() {
     $(".ajax-loader").hide();
 }
 
-function showPowerTabs() {
+function showHistoryTabs() {
     // show the power buttons
     $(".balanceline").attr('disabled', true);
     $(".viewpower").toggleClass('active', false); 
-    $(".viewhistory").toggleClass('active', true)//.stop().animate({opacity:3},'fast');
+    $(".viewhistory").toggleClass('active', true);
 }
 
-function showHistoryTabs() {
+function showPowerTabs() {
     // show the history buttons
     $(".balanceline").attr('disabled', false);
     $(".viewpower").toggleClass('active', true); 
-    $(".viewhistory").toggleClass('active', false)//.stop().animate({opacity:6},'fast');;
+    $(".viewhistory").toggleClass('active', false);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -719,9 +719,7 @@ function bargraph_events(){
             view.end = view.start + 86400*1000;
 
             // fade the tabs back in when moving from History to Power
-            $(".balanceline").attr('disabled', false).toggleClass('disabled', false).stop().animate({opacity:0.6},'fast');
-            $(".viewpower").toggleClass('active', true); 
-            $(".viewhistory").toggleClass('active', false); 
+            showPowerTabs();
 
             $('#placeholder').unbind("plotclick");
             $('#placeholder').unbind("plothover");
