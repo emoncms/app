@@ -232,13 +232,13 @@ function init()
     $(".viewhistory, .viewpower").click(function () { 
         if (viewmode === "powergraph") {
             viewmode = "bargraph";
-            $(".balanceline").toggleClass('hide', true);
+            $(".balanceline").attr('disabled', true).toggleClass('disabled', true).stop().animate({opacity:.3},'fast');
             $(".viewpower").toggleClass('active', false); 
             $(".viewhistory").toggleClass('active', true); 
 
         } else {
             viewmode = "powergraph";
-            $(".balanceline").toggleClass('hide', false);
+            $(".balanceline").attr('disabled', false).toggleClass('disabled', false).stop().animate({opacity:1},'fast');
             $(".viewpower").toggleClass('active', true); 
             $(".viewhistory").toggleClass('active', false); 
 
