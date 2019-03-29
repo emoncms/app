@@ -224,7 +224,7 @@ function init()
     $('#left').click(function (e) {view.panleft(); reload = true; autoupdate = false; fastupdate(e);});
     
     // zoom graph to timescale
-    $('.myelectric-time').click(function (event) {
+    $('time').click(function (event) {
         view.timewindow($(this).attr("time")/24.0); 
         reload = true; 
         autoupdate = true;

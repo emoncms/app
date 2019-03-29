@@ -232,16 +232,10 @@ function init()
     $(".viewhistory, .viewpower").click(function () { 
         if (viewmode === "powergraph") {
             viewmode = "bargraph";
-            $(".balanceline").attr('disabled', true).toggleClass('disabled', true).stop().animate({opacity:.3},'fast');
-            $(".viewpower").toggleClass('active', false); 
-            $(".viewhistory").toggleClass('active', true); 
-
+            showPowerTabs();
         } else {
             viewmode = "powergraph";
-            $(".balanceline").attr('disabled', false).toggleClass('disabled', false).stop().animate({opacity:1},'fast');
-            $(".viewpower").toggleClass('active', true); 
-            $(".viewhistory").toggleClass('active', false); 
-
+            showHistoryTabs();
             powergraph_events();
         }
         draw();
@@ -495,6 +489,20 @@ function draw_powergraph() {
     $(".ajax-loader").hide();
 }
 
+function showPowerTabs() {
+    // show the power buttons
+    $(".balanceline").attr('disabled', true);
+    $(".viewpower").toggleClass('active', false); 
+    $(".viewhistory").toggleClass('active', true)//.stop().animate({opacity:3},'fast');
+}
+
+function showHistoryTabs() {
+    // show the history buttons
+    $(".balanceline").attr('disabled', false);
+    $(".viewpower").toggleClass('active', true); 
+    $(".viewhistory").toggleClass('active', false)//.stop().animate({opacity:6},'fast');;
+}
+
 // ------------------------------------------------------------------------------------------
 // POWER GRAPH EVENTS
 // ------------------------------------------------------------------------------------------
@@ -710,7 +718,8 @@ function bargraph_events(){
             view.start = solar_kwhd_data[z][0];
             view.end = view.start + 86400*1000;
 
-            $(".balanceline").toggleClass('hide', false);
+            // fade the tabs back in when moving from History to Power
+            $(".balanceline").attr('disabled', false).toggleClass('disabled', false).stop().animate({opacity:0.6},'fast');
             $(".viewpower").toggleClass('active', true); 
             $(".viewhistory").toggleClass('active', false); 
 

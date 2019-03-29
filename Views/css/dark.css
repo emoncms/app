@@ -35,7 +35,9 @@ h6 small {
     font-weight: bold;
     text-decoration: underline;
 }
-
+#buttons .btn[disabled]{
+    opacity: .2;
+}
 
 .electric-title {
   color:#aaa;
