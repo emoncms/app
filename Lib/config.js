@@ -17,7 +17,7 @@ var config = {
         
         // Check that the config is complete first otherwise show config interface
         if (!config.check()) {
-            $("#app-setup").show();       // Show setup block
+            config.showConfig();          // Show setup block
             $(".ajax-loader").hide();     // Hide AJAX loader
             config.UI();                  // Populate setup UI options
         } else {
@@ -29,18 +29,21 @@ var config = {
             config.initialized = true;    // Init app
             config.showapp();
         }
-
-        $("body").on("click",".openconfig",function(){
-            $("#app-block").hide();
-            $("#app-setup").show();    
+        
+        $("body").on("click", ".openconfig", function(event){
+            config.showConfig();
             config.UI();
-            config.hideapp();
         });
 
-        $("body").on("click",".launchapp",function(){
+        // don't save and just show app
+        $("body").on("click",".close-config", function(event){
+            config.closeConfig();
+        });
+        
+        // save and show app
+        $("body").on("click", ".launchapp", function(){
             $(".ajax-loader").show();
-            $("#app-setup").hide();
-            $("#app-block").show();
+            config.closeConfig();
             config.load();
             if (!config.initialized) { config.initapp(); config.initialized = true; }
             config.showapp();
@@ -71,7 +74,7 @@ var config = {
      */
     closeConfig: function () {
         console.log('closeConfig()');
-        $("#app-block").toggleClass('hide', false);
+        $("#app-block").toggleClass('hide', false).show();
         $("#app-setup").toggleClass('hide', true);
         
         $('.openconfig').toggleClass('hide', false);
@@ -90,7 +93,7 @@ var config = {
         $("#app-setup").toggleClass('hide', false).show();
         
         $('.openconfig').toggleClass('hide', true);
-        $('.close-config').toggleClass('hide', false).show();
+        $('.close-config').toggleClass('hide', false);
         $('#buttons #tabs .btn').attr('disabled',true).css('opacity',.2);
     },
 
