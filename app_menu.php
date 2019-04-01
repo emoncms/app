@@ -48,3 +48,11 @@
         'path' => 'app/new',
         'order'=> 99
     );
+
+    // allow default app to show at `/app/view` - hidden menu item using css li_class
+    $menu['sidebar']['apps'][] = array(
+        'text' => _('View'),
+        'path' => 'app/view',
+        'li_class'=>'hide',
+        'order'=> 99
+    );
