@@ -90,8 +90,7 @@ $("#app-new-action").click(function(){
     app_new_enable = false;
     setTimeout(function(){ app_new_enable = true; }, 500);
     $('#app-new-modal').modal('hide');
-    var nicename = $("#app-new-name").val();
-    
+    var nicename = escape($("#app-new-name").val()).replace(/%20/g, "+");
     $.ajax({                                      
         url: path+"app/add?name="+nicename+"&app="+selected_app,
         dataType: 'json',
