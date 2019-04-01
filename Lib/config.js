@@ -90,10 +90,10 @@ var config = {
     showConfig: function () {
         console.log('showConfig()');
         $("#app-block").toggleClass('hide', true);
-        $("#app-setup").toggleClass('hide', false);
+        $("#app-setup").toggleClass('hide', false).show();
         
         $('.openconfig').toggleClass('hide', true);
-        $('.close-config').toggleClass('hide', false);
+        $('.close-config').toggleClass('hide', false).show();
         $('#buttons #tabs .btn').attr('disabled',true).css('opacity',.2);
     },
 
