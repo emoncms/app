@@ -39,9 +39,9 @@
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('RENEWABLE GEN') ?></h5>
             <h2 class="power-value display-sm-4 display-md-3 display-lg-2 my-0 text-warning "><span class="gennow"></span>W</h2>
 
-            <h5 class="electric-title mt-0 mb-lg-3 text-md-larger">
-                <span style="color:#dccc1f">SOLAR: <span class="solarnow">0</span>W</span> | 
-                <span style="color:#2ed52e">WIND: <span class="windnow">0</span>W</span>
+            <h5 class="electric-title mt-0 mb-lg-3 text-md-larger ">
+                <span class="text-warning" title="<?php echo _('SOLAR') ?>"><span class="d-none d-sm-inline-block"><?php echo _('SOLAR') ?>: </span> <span class="solarnow">0</span>W</span> | 
+                <span class="text-success" title="<?php echo _('WIND') ?>"><span class="d-none d-sm-inline-block"><?php echo _('WIND') ?>: </span> <span class="windnow">0</span>W</span>
             </h5>
         </div>
     </div>
