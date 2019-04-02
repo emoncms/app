@@ -37,9 +37,9 @@
         </div>
         <div class="text-xs-right">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('RENEWABLE GEN') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 my-0 mb-lg-3 text-warning "><span class="gennow"></span>W</h2>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 my-0 text-warning "><span class="gennow"></span>W</h2>
 
-            <h5 class="electric-title mt-0">
+            <h5 class="electric-title mt-0 mb-lg-3 text-md-larger">
                 <span style="color:#dccc1f">SOLAR: <span class="solarnow">0</span>W</span> | 
                 <span style="color:#2ed52e">WIND: <span class="windnow">0</span>W</span>
             </h5>
@@ -94,11 +94,11 @@
     </div>
 </section>
 
-<section id="app-setup" class="hide pb-3">
+<section id="app-setup" class="hide pb-3 px-3">
     <!-- instructions and settings -->
     <div class="row-fluid">
-        <div class="span9 xappconfig-description">
-            <div class="xappconfig-description-inner text-light">
+        <div class="span9">
+            <div class="text-light">
                 <h2 class="appconfig-title text-warning"><?php echo _('My Solar'); ?> & <?php echo _('Wind'); ?></h2>
                 <p class="lead">This app extends the My Solar app by adding in a 'share of UK wind' estimate.</p>
                 <p>The share of wind estimate is calculated by using real-time electricity data from wind power in the uk and then scaling it so that the annual wind generation matches a percentage of annual household consumption. The default estimate assumes 60% or near 2000 kWh annually. This is close to the fuel mix quoted by two of the UK's leading green electricity suppliers.</p>
@@ -234,29 +234,7 @@ function resize()
     placeholder.width(width);
     placeholder_bound.height(height);
     placeholder.height(height-top_offset);
-    
-    if (width<=500) {
-        $(".electric-title").css("font-size","16px");
-        $(".power-value").css("font-size","32px");
-        $(".balanceline").hide();
-        $(".vistimeW").hide();
-        $(".vistimeM").hide();
-        $(".vistimeY").hide();
-    } else if (width<=724) {
-        $(".electric-title").css("font-size","18px");
-        $(".power-value").css("font-size","52px");
-        $(".balanceline").show();
-        $(".vistimeW").show();
-        $(".vistimeM").show();
-        $(".vistimeY").show();
-    } else {
-        $(".electric-title").css("font-size","22px");
-        $(".power-value").css("font-size","85px");
-        $(".balanceline").show();
-        $(".vistimeW").show();
-        $(".vistimeM").show();
-        $(".vistimeY").show();
-    }
+
     draw();
 }
 
