@@ -232,12 +232,13 @@ function init()
             $(".balanceline").toggleClass('hide', true);
             $(".viewpower").toggleClass('active', false); 
             $(".viewhistory").toggleClass('active', true); 
-
+            $('#graph-nav button').attr('disabled', true);
         } else {
             viewmode = "powergraph";
             $(".balanceline").toggleClass('hide', false);
             $(".viewpower").toggleClass('active', true); 
             $(".viewhistory").toggleClass('active', false); 
+            $('#graph-nav button').attr('disabled', false);
 
             powergraph_events();
         }
