@@ -455,14 +455,14 @@ function draw_powergraph() {
     } else {
     	$(".total_use_kwh").html((total_use_kwh).toFixed(1));
     }
-    $(".total_use_direct_kwh").html((total_use_direct_kwh).toFixed(1));
+    $("#total_use_direct_kwh").html((total_use_direct_kwh).toFixed(1));
 
-    $(".total_export_kwh").html((total_solar_kwh-total_use_direct_kwh).toFixed(1));
+    $("#total_export_kwh").html((total_solar_kwh-total_use_direct_kwh).toFixed(1));
     var import_percent = Math.round(100*(1-(total_use_direct_kwh/total_use_kwh)));
     if(!isNaN(import_percent)) {
         $(".total_import_prc").html(import_percent+"%");
     }
-    $(".total_import_kwh").html((total_use_kwh-total_use_direct_kwh).toFixed(1));        
+    $("#total_import_kwh").html((total_use_kwh-total_use_direct_kwh).toFixed(1));        
     
     if (total_solar_kwh > 0) {
         $(".total_use_direct_prc").html(Math.round(100*total_use_direct_kwh/total_use_kwh)+"%");
