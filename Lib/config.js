@@ -141,7 +141,7 @@ var config = {
                 out += "<option value=auto>AUTO SELECT</option>";
                 for (var n in config.feedsbyname)  {
                     if (config.engine_check(config.feedsbyname[n],config.app[z])) {
-                        out += "<option value="+config.feedsbyname[n].id+">"+config.feedsbyname[n].name+"</option>";
+                        out += "<option value="+config.feedsbyname[n].id+">"+config.feedsbyname[n].tag+":"+config.feedsbyname[n].name+"</option>";
                     }
                 }
                 configItem.find(".feed-select").html(out);
