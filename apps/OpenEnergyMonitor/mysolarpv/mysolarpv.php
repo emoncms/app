@@ -46,7 +46,7 @@
         </div>
         <div class="text-xs-right">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('SOLAR PV') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-warning "><span class="solarnow"></span></h2>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-warning "><span class="solarnow"></span>W</h2>
         </div>
     </div>
     
@@ -349,7 +349,8 @@ function livefn()
     $(".usenow").html(use_now);
     
     // Only redraw the graph if its the power graph and auto update is turned on
-    if (viewmode=="powergraph" && autoupdate) draw();
+    
+    if (viewmode=="powergraph" && autoupdate && $('#placeholder_bound').width() > 0) draw();
 }
 
 function draw()
