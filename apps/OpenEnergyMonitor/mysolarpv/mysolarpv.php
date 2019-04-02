@@ -229,10 +229,17 @@ function init()
     $(".viewhistory, .viewpower").click(function () { 
         if (viewmode === "powergraph") {
             viewmode = "bargraph";
-            showHistoryTabs();
+            $(".balanceline").toggleClass('hide', true);
+            $(".viewpower").toggleClass('active', false); 
+            $(".viewhistory").toggleClass('active', true); 
+            $('#graph-nav button').attr('disabled', true);
         } else {
             viewmode = "powergraph";
-            showPowerTabs();
+            $(".balanceline").toggleClass('hide', false);
+            $(".viewpower").toggleClass('active', true); 
+            $(".viewhistory").toggleClass('active', false); 
+            $('#graph-nav button').attr('disabled', false);
+
             powergraph_events();
         }
         draw();
