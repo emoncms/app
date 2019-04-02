@@ -364,7 +364,11 @@ var config = {
                     result = JSON.parse(result);
                     if (result.success!=undefined && !result.success) app_log("ERROR",result.message);
                 } catch (e) {
-                    app.log("ERROR","Could not parse /setconfig reply, error: "+e);
+                    try {
+                        app.log("ERROR","Could not parse /setconfig reply, error: "+e);
+                    } catch (e2) {
+                        console.log(e,e2);
+                    }
                 }
             } 
         });
