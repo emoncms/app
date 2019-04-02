@@ -168,7 +168,7 @@
             <div class="appconfig-description-inner text-light">
                 <h2 class="appconfig-title text-primary"><?php echo _('Time of Use - flexible'); ?></h2>
                 <p class="lead">The "Time of Use - flexible" app is a simple home energy monitoring app for exploring home or building electricity consumption and cost over time. It allows you to track multiple electricity tariffs as used in Australia.</p>
-                <p><strong>Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
                 <p><img src="<?php echo $path; ?>Modules/app/images/timeofuse_app.png" style="width:600px" class="img-rounded"></p>
                 <p>
                 As the number of configuration options for this are quite large, a shorthand has been used to specify
@@ -183,19 +183,37 @@
                 </ul>
                 <h4>Shorthand</h4>
                 <p>Tier names and tariffs are specified as a comma separated, colon separated list. If there are three
-                tariffs, Off Peak, Shoulder and Peak, costing 16.5c/kWh, 25.3c/kWh and 59.4c/kWh respectively, they
-                are specified as <b>OffPeak:0.165,Shoulder:0.253,Peak:0.594</b></p>
+                tariffs, <strong class="text-white">Off Peak</strong>, <strong class="text-white">Shoulder</strong> and <strong class="text-white">Peak</strong>, costing <strong class="text-white">16.5c/kWh</strong>, <strong class="text-white">25.3c/kWh</strong> and <strong class="text-white">59.4c/kWh</strong> respectively, they
+                are specified as:</p>
+                <p><code class="text-white">OffPeak:0.165,Shoulder:0.253,Peak:0.594</code></p>
                 <p>Tier start times are split into two definitions, weekday and weekend. They both use the same format,
-                &lt;start hour&gt;:&lt;tier&gt;,&lt;start hour&gt;:&lt;tier&gt;,... <br>
-                &lt;tier&gt; is the tier number defined above, numbered from 0<br>
-                <b>Example:</b> A weekday with the following tariff times: OffPeak: 00:00 - 06:59, Shoulder: 07:00
-                - 13:59, Peak: 14:00 - 19:59, Shoulder: 20:00 - 21:59, OffPeak: 22:00 - 23:59 would be defined as
-                <b>0:0,7:1,14:2,20:1,22:0</b></p>
+                <code>&lt;start hour&gt;:&lt;tier&gt;,&lt;start hour&gt;:&lt;tier&gt;,...
+                &lt;tier&gt;</code>
+                is the tier number defined above, numbered from 0</p>
+
+                <hr>
+                <h4 class="text-white">Example:</h4> 
+                <p>A weekday with the following tariff times:</p>
+                <blockquote>
+                OffPeak: 00:00 - 06:59, 
+                Shoulder: 07:00 - 13:59,
+                Peak: 14:00 - 19:59, 
+                Shoulder: 20:00 - 21:59, 
+                OffPeak: 22:00 - 23:59
+                </blockquote>
+                <p>would be defined as:
+                <code>0:0,7:1,14:2,20:1,22:0</code></p>
+
                 <p>To specify the public holidays that should be treated the same as weekends, specify a comma separated
-                list of days of the year (from 1-365/366) per year. <b>Example:</b> for public holiays 2017: Jan 2, Apr 14,
-                Apr 17, Apr 25, Jun 12, Oct 2, Dec 25, Dec 26; and 2018: Jan 1 you would specify
-                <b>2017:2,104,107,115,163,275,359,360;2018:1</b><br><a href="https://www.epochconverter.com/days">
-                https://www.epochconverter.com/days</a> provides an easy reference.</p>
+                list of days of the year (from 1-365/366) per year.
+                
+                <hr>
+                <h4 class="text-white">Example:</h4>
+                <p>for public holiays 2017: Jan 2, Apr 14, Apr 17, Apr 25, Jun 12, Oct 2, Dec 25, Dec 26; and 2018: Jan 1 you would specify:</p>
+                <code>
+                2017:2,104,107,115,163,275,359,360;2018:1
+                </code>
+                <p><a href="https://www.epochconverter.com/days" class="text-white">https://www.epochconverter.com/days</a> provides an easy reference.</p>
             </div>
         </div>
         <div class="span3 app-config pt-3"></div>
