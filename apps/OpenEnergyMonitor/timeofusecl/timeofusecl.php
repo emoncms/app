@@ -197,24 +197,10 @@
                 <b>2017:2,104,107,115,163,275,359,360;2018:1</b><br><a href="https://www.epochconverter.com/days">
                 https://www.epochconverter.com/days</a> provides an easy reference.</p>
             </div>
-        </d iv>
+        </div>
         <div class="span3 app-config pt-3"></div>
     </div>
 </section>
-
-
-
-<div id="app-setup" class="block">
-    <h2 class="appconfig-title">Time of Use - flexible + CL</h2>
-
-    <div class="appconfig-description">
-      <div class="appconfig-description-inner">
-        <p> </p>
-
-      </div>
-    </div>
-    <div class="app-config"></div>
-</div>
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
 
