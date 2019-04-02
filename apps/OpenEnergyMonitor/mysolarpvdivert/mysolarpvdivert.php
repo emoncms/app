@@ -149,7 +149,7 @@
         </div>
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light px-1"><?php echo _('DIVERT') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-danger"><span class="divertnow">-</span>W</h2>
+            <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-quaternary"><span class="divertnow">-</span>W</h2>
         </div>
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('TOTAL USE') ?></h5>
