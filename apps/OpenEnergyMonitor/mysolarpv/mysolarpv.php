@@ -249,16 +249,77 @@ function init()
 
     // position the tooltip and insert the correct value on hover
     // hide the tooltip on mouseout  
-    $("#placeholder").bind("plothover", function (event, pos, item) {
+
+    $('#placeholder').bind("plothover", function (event, pos, item)
+    {
         if (item) {
-            var value = item.datapoint[1].toFixed(2);
-            $("#tooltip #value").text(value);
-            $("#tooltip").css({top: item.pageY-30, left: item.pageX+5}).fadeIn(200);
+            // Show tooltip
+            var tooltip_items = [];
+            var date = new Date(item.datapoint[0]);
+
+            tooltip_items.push(["TIME", dateFormat(date, 'HH:MM'), ""]);
+
+            for (i = 0; i < powerseries.length; i++) {
+                var series = powerseries[i];
+                if (series.name.toUpperCase()=="BALANCE") {
+                    tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "kWh"]);
+                } else {
+                    if ( series.data[item.dataIndex][1] >= 1000) {
+                        tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(0)/1000 , "kW"]);
+                    } else {
+                        tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W"]);
+                    }
+                }
+            }
+            show_tooltip(pos.pageX+10, pos.pageY+5, tooltip_items);
         } else {
-            $("#tooltip").hide();
+            // Hide tooltip
+            hide_tooltip();
         }
     });
 }
+
+
+// ------------------------------------------------------------------------------------------
+// TOOLTIP HANDLING
+// Show & hide the tooltip
+// ------------------------------------------------------------------------------------------
+function show_tooltip(x, y, values) {
+    var tooltip = $('#tooltip');
+    if (!tooltip[0]) {
+        tooltip = $('<div id="tooltip"></div>')
+            .css({
+                position: "absolute",
+                display: "none",
+                border: "1px solid #545454",
+                padding: "8px",
+                "background-color": "#333",
+            })
+            .appendTo("body");
+    }
+
+    tooltip.html('');
+    var table = $('<table/>').appendTo(tooltip);
+
+    for (i = 0; i < values.length; i++) {
+        var value = values[i];
+        var row = $('<tr class="tooltip-item"/>').appendTo(table);
+        $('<td style="padding-right: 8px"><span class="tooltip-title">'+value[0]+'</span></td>').appendTo(row);
+        $('<td><span class="tooltip-value">'+value[1]+'</span> <span class="tooltip-units">'+value[2]+'</span></td>').appendTo(row);
+    }
+
+    tooltip
+        .css({
+            left: x,
+            top: y
+        })
+        .show();
+}
+
+function hide_tooltip() {
+    $('#tooltip').hide();
+}
+
 
 function show() 
 {
@@ -365,6 +426,7 @@ function draw()
     if (viewmode=="powergraph") draw_powergraph();
     if (viewmode=="bargraph") draw_bargraph();
 }
+var powerseries = null;
 
 function draw_powergraph() {
     var dp = 1;
@@ -484,12 +546,13 @@ function draw_powergraph() {
     options.xaxis.max = view.end;
     
     var series = [
-        {data:gen_data,color: "#dccc1f", lines:{lineWidth:0, fill:1.0}},
-        {data:use_data,color: "#0699fa",lines:{lineWidth:0, fill:0.8}}
+        {data:gen_data, name:'solar', color: "#dccc1f", lines:{lineWidth:0, fill:1.0}},
+        {data:use_data, name:'use', color: "#0699fa",lines:{lineWidth:0, fill:0.8}}
     ];
     
-    if (show_balance_line) series.push({data:store_data,yaxis:2, color: "#888"});
+    if (show_balance_line) series.push({data:store_data, yaxis:2, name:'balance', color: 'green',xcolor: "#888"});
     
+    powerseries = series;
     $.plot($('#placeholder'),series,options);
     $(".ajax-loader").hide();
 }
