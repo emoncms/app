@@ -74,6 +74,7 @@ var config = {
      */
     closeConfig: function () {
         $("#app-block").toggleClass('hide', false).show();
+        
         $("#app-setup").toggleClass('hide', true);
         
         $('.openconfig').toggleClass('hide', false);

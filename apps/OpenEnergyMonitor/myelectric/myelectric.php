@@ -19,10 +19,7 @@
         <li><button class="btn btn-large btn-link btn-inverse myelectric-view-cost" ><?php echo _("Cost") ?></button></li>
         <li><button class="btn btn-large btn-link btn-inverse myelectric-view-kwh active" ><?php echo _("kWh") ?></button></li>
     </ul>
-    <ul class="text-right nav nav-pills mb-0">
-        <li><button class="btn btn-large btn-link btn-inverse openconfig text-white"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button></li>
-        <li><button class="hide btn-large close-config btn btn-link btn-inverse text-white"><svg class="icon"><use xlink:href="#icon-close"></use></svg></button></li>
-    </ul>
+    <?php include(dirname(__DIR__).'/config-nav.php'); ?>
 </nav>
 
 <section id="app-block" style="display:none">

@@ -18,14 +18,11 @@
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
         <li><button class="balanceline btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo _('Show Balance') ?>">
-            <span class="d-xs-none"><?php echo _("Balance") ?></span>
-            <span class="d-none d-xs-inline"><?php echo _("Show Balance") ?></span>
+            <?php echo _("Show Balance") ?>
         </li>
     </ul>
-    <ul class="text-right nav nav-pills mb-0">
-        <li><button class="btn btn-large btn-link btn-inverse openconfig"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button></li>
-        <li><button class="hide btn-large close-config btn btn-link btn-inverse"><svg class="icon"><use xlink:href="#icon-close"></use></svg></button></li>
-    </ul>
+    <?php include(dirname(__DIR__).'/config-nav.php'); ?>
+
 </nav>
     
 <section id="app-block" style="display:none" class="block">
@@ -40,10 +37,9 @@
         </div>
         <div class="text-xs-right">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('RENEWABLE GEN') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-warning "><span class="solarnow"></span>W</h2>
-            <div class="power-value"><span class="gennow">0</span>W</div>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 my-0 mb-lg-3 text-warning "><span class="gennow"></span>W</h2>
 
-            <h5 class="electric-title">
+            <h5 class="electric-title mt-0">
                 <span style="color:#dccc1f">SOLAR: <span class="solarnow">0</span>W</span> | 
                 <span style="color:#2ed52e">WIND: <span class="windnow">0</span>W</span>
             </h5>
@@ -98,23 +94,22 @@
     </div>
 </section>
 
-
-<div id="app-setup" style="display:none; padding-top:50px" class="block">
-    <h2 class="appconfig-title" style="color:#dccc1f">My Solar <span style="color:#2ed52e">& Wind</span></h2>
-
-    <div class="appconfig-description">
-      <div class="appconfig-description-inner">
-        This app extends the My Solar app by adding in a 'share of UK wind' estimate.
-        <br><br>
-        The share of wind estimate is calculated by using real-time electricity data from wind power in the uk and then scaling it so that the annual wind generation matches a percentage of annual household consumption. The default estimate assumes 60% or near 2000 kWh annually. This is close to the fuel mix quoted by two of the UK's leading green electricity suppliers.
-        <br><br>
-        <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
-        <br><br>
-        <img src="../Modules/app/images/myenergy_app.png" style="width:600px" class="img-rounded">
-      </div>
+<section id="app-setup" class="hide pb-3">
+    <!-- instructions and settings -->
+    <div class="row-fluid">
+        <div class="span9 xappconfig-description">
+            <div class="xappconfig-description-inner text-light">
+                <h2 class="appconfig-title text-warning"><?php echo _('My Solar'); ?> & <?php echo _('Wind'); ?></h2>
+                <p class="lead">This app extends the My Solar app by adding in a 'share of UK wind' estimate.</p>
+                <p>The share of wind estimate is calculated by using real-time electricity data from wind power in the uk and then scaling it so that the annual wind generation matches a percentage of annual household consumption. The default estimate assumes 60% or near 2000 kWh annually. This is close to the fuel mix quoted by two of the UK's leading green electricity suppliers.</p>
+                <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
+                <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                <img src="../Modules/app/images/mysolar_app.png" class="d-none d-sm-inline-block">
+            </div>
+        </div>
+        <div class="span3 app-config pt-3"></div>
     </div>
-    <div class="app-config"></div>
-</div>
+</section>
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
 
@@ -206,16 +201,11 @@ function init()
         draw();
     });
     
-    $(".balanceline").click(function () { 
-        if ($(this).html()=="SHOW BALANCE") {
-            show_balance_line = 1;
-            draw();
-            $(this).html("HIDE BALANCE");
-        } else {
-            show_balance_line = 0;
-            draw();
-            $(this).html("SHOW BALANCE");
-        }
+    $(".balanceline").click(function () {
+        $link = $(this);
+        $link.toggleClass('active');
+        show_balance_line = $link.is('.active') ? 1: 0;
+        draw();
     });     
 }
 
