@@ -33,7 +33,7 @@ padding:10px;
 .selected { font-size:20pt; }
 </style>
 
-<div class="font">
+<section class="font">
     <div id="app-block" style="display:none">
         <div class="col1">
             <div class="col1-inner">
@@ -99,12 +99,33 @@ padding:10px;
             </div>
         </div>
     </div>
-</div>
+</section>
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"></div>
-<div class="block" id="app-setup">
+<section class="block px-3" id="app-setup">
+
+    <!-- instructions and settings -->
+    <div class="row-fluid">
+        <div class="span9 appconfig-description">
+            <div class="appconfig-description-inner text-light">
+                <h2 class="appconfig-title text-primary"><?php echo _('My Electric'); ?></h2>
+                <p class="lead">The Cost Comparison app allows you to compare your energy usage against energy suppliers tariffs including new time of use tariffs.</p>
+                <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
+                <p><strong>Note:</strong> If you have solar or renewable energy generation then use the import_kwh feed to view the actual cost based on energy brought from the grid</p>
+                <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                <img src="<?php echo $path; echo $appdir; ?>preview.png" class="d-none d-sm-inline-block">
+            </div>
+        </div>
+        <div class="span3 app-config pt-3"></div>
+    </div>
+
+
+
+
+
     <h2 class="appconfig-title">Cost Comparison</h2>
     <div class="appconfig-description">
-        <div class="appconfig-description-inner">The Cost Comparison app allows you to compare your energy usage against energy suppliers tariffs including new time of use tariffs.<br>
+        <div class="appconfig-description-inner">
+            <br>
         <br>
         <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.<br>
         <br>
@@ -115,7 +136,7 @@ padding:10px;
         <img class="img-rounded" src="<?php echo $path; echo $appdir; ?>preview.png" style="width:600px"></div>
     </div>
     <div class="app-config"></div>
-</div>
+</section>
 
 
 <script type="text/javascript">
