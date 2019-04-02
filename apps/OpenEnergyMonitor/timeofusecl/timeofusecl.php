@@ -170,8 +170,7 @@
                 <p class="lead">The "Time of Use - flexible + CL" app is a simple home energy monitoring app for exploring home or building electricity consumption and cost over time.</p>
                 <p>It allows you to track multiple electricity tariffs as used in Australia. This version adds a daily supply charge and a separately monitored controlled load (such as off-peak hot water).</p>
                 <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
-                <img src="<?php echo $path; ?>Modules/app/images/timeofuse_app.png" style="width:600px" class="img-rounded">
-
+                <p><img src="<?php echo $path; ?>Modules/app/images/timeofuse_app.png" style="width:600px" class="img-rounded"></p>
                 <p>As the number of configuration options for this are quite large, a shorthand has been used to specify
                 the tiers, days and times they apply and the respective costs.</p>
                 <p><b>Assumptions</b>:
