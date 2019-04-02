@@ -13,93 +13,91 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
-    
-<div id="app-block" style="display:none" class="block">
-  <div class="col1"><div class="col1-inner">
-  
-    <div style="height:20px; border-bottom:1px solid #333; padding-bottom:8px;">
-        <div style="float:right;">
-            <!--<span style="color:#fff; margin-right:10px" >Settings</span>-->
-            <i class="openconfig icon-wrench icon-white" style="cursor:pointer; padding-right:5px;"></i>
-        </div>
-    </div>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script>
 
-    <table style="width:100%">
-    <tr>
-        <td style="border:0; width:30%; vertical-align:top">
-            <div class="electric-title">USE NOW</div>
-            <div class="power-value"><span class="usenow">0</span>W</div>
-        </td>
-        <td style="text-align:left; border:0; width:40%; vertical-align:top">
-            <div class="electric-title"><span class="balance-label"></span></div>
-            <div class="power-value"><span class="balance"></span></div>
-        </td>
-        <td style="text-align:right; border:0; width:30%">
-            <div class="electric-title">RENEWABLE GEN</div>
+<nav id="buttons" class="d-flex justify-content-between">
+    <ul id="tabs" class="nav nav-pills mb-0">
+        <li><button class="balanceline btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo _('Show Balance') ?>">
+            <span class="d-xs-none"><?php echo _("Balance") ?></span>
+            <span class="d-none d-xs-inline"><?php echo _("Show Balance") ?></span>
+        </li>
+    </ul>
+    <ul class="text-right nav nav-pills mb-0">
+        <li><button class="btn btn-large btn-link btn-inverse openconfig"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button></li>
+        <li><button class="hide btn-large close-config btn btn-link btn-inverse"><svg class="icon"><use xlink:href="#icon-close"></use></svg></button></li>
+    </ul>
+</nav>
+    
+<section id="app-block" style="display:none" class="block">
+    <div class="d-flex justify-content-between">
+        <div>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('USE NOW') ?></h5>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow">0</span>W</h2>
+        </div>
+        <div class="text-xs-center">
+            <h5 class="electric-title mb-0 text-md-larger text-light px-1"><span class="balance-label"></span></h5>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span></h2>
+        </div>
+        <div class="text-xs-right">
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('RENEWABLE GEN') ?></h5>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-warning "><span class="solarnow"></span>W</h2>
             <div class="power-value"><span class="gennow">0</span>W</div>
-            <div class="electric-title"><span style="color:#dccc1f">SOLAR: <span class="solarnow">0</span>W</span> | <span style="color:#2ed52e">WIND: <span class="windnow">0</span>W</span></div>
-        </td>
-        
-    </tr>
-    </table>
-    <br>
-    
-    <div class="visnavblock" style="height:28px; padding-bottom:5px;">
-        <div class="powergraph-navigation">
-            <span class="visnav time" time='1'>1h</span>
-            <span class="visnav time" time='8'>8h</span>
-            <span class="visnav time" time='24'>D</span>
-            <span class="vistimeW visnav time" time='168'>W</span>
-            <span class="vistimeM visnav time" time='720'>M</span>
-            <span class="vistimeY visnav time" time='8760'>Y</span>
-            <span id='zoomin' class='visnav' >+</span>
-            <span id='zoomout' class='visnav' >-</span>
-            <span id='left' class='visnav' ><</span>
-            <span id='right' class='visnav' >></span>
-        </div>
 
-        <span class="visnav balanceline" style="float:right; font-size:14px">SHOW BALANCE</span>
+            <h5 class="electric-title">
+                <span style="color:#dccc1f">SOLAR: <span class="solarnow">0</span>W</span> | 
+                <span style="color:#2ed52e">WIND: <span class="windnow">0</span>W</span>
+            </h5>
+        </div>
     </div>
+
+    <?php include(dirname(__DIR__).'/graph-nav.php'); ?>
 
     <div id="placeholder_bound" style="width:100%; height:500px;">
         <div id="placeholder" style="height:500px"></div>
     </div>
-    
-    <br>
-    
-    <table style="width:100%">
-    <tr>
-        <td class="appbox">
-            <div class="appbox-title">USE</div>
-            <div><span class="appbox-value total_use_kwh" style="color:#0699fa">0</span> <span class="appbox-units" style="color:#0699fa">kWh</span></div>
-        </td>
+        
+    <div id="breakdown" class="d-flex justify-content-between py-lg-3 text-light">
+        <div class="appbox mb-3 text-primary">
+            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('USE') ?></h5>
+            <h2 class="appbox-value total_use_kwh my-0">--</h2>
+            <h5 class="appbox-units my-0">
+                kWh
+            </h5>
+        </div>
+        <div class="appbox mb-3 text-tertiary">
+            <h5 class="appbox-title mb-1 text-light text-md-larger px-1"><?php echo _('WIND') ?></h5>
+            <h2 class="appbox-value total_wind_kwh my-0">--</h2>
+            <h5 class="appbox-units my-0">
+                <span id="total_export_kwh"></span>
+                <span>kWh</span>
+            </h5>
+        </div>
+        <div class="appbox mb-3 text-warning">
+            <h5 class="appbox-title mb-1 text-light text-md-larger px-1"><?php echo _('SOLAR') ?></h5>
+            <h2 class="appbox-value total_solar_kwh my-0">--</h2>
+            <h5 class="appbox-units my-0">
+                kWh
+            </h5>
+        </div>
+        <div class="appbox mb-3 text-success">
+            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('DIRECT') ?></h5>
+            <h2 class="appbox-value total_use_direct_prc my-0">--</h2>
+            <h5 class="appbox-units my-0">
+                <span id="total_use_direct_kwh"></span>
+                <span>kWh</span>
+            </h5>
+        </div>
+        <div class="appbox mb-3 text-danger">
+            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('GRID') ?></h5>
+            <h2 class="appbox-value total_use_via_store_kwh my-0">--</h2>
+            <h5 class="appbox-units my-0">
+                <span id="total_import_kwh"></span>
+                <span>kWh</span>
+            </h5>
+        </div>
+    </div>
+</section>
 
-        <td class="appbox">
-            <div class="appbox-title">WIND</div>
-            <div><span class="appbox-value total_wind_kwh" style="color:#2ed52e">0</span> <span class="appbox-units" style="color:#2ed52e">kWh</span></div>
-        </td>
-        
-        <td class="appbox">
-            <div class="appbox-title">SOLAR</div>
-            <div><span class="appbox-value total_solar_kwh" style="color:#dccc1f">0</span> <span class="appbox-units" style="color:#dccc1f">kWh</span></div>
-        </td>
-        
-        <td class="appbox">
-            <div class="appbox-title">DIRECT</div>
-            <div style="padding-bottom:5px"><span class="appbox-value total_use_direct_prc" style="color:#89ae65">0</span></div>
-            <div><span class="appbox-units total_use_direct_kwh" style="color:#89ae65">0</span> <span class="appbox-units" style="color:#89ae65">kWh</span></div>
-        </td>
-        
-        <td class="appbox">
-            <div class="appbox-title">GRID</div>
-            <div style="padding-bottom:5px"><span class="appbox-value total_use_via_store_prc" style="color:#d52e2e">0</span></div>
-            <div><span class="appbox-units total_use_via_store_kwh" style="color:#d52e2e">0</span> <span class="appbox-units" style="color:#d52e2e">kWh</span></div>
-        </td>
-    </tr>
-    </table>
-  </div></div>
-</div>
 
 <div id="app-setup" style="display:none; padding-top:50px" class="block">
     <h2 class="appconfig-title" style="color:#dccc1f">My Solar <span style="color:#2ed52e">& Wind</span></h2>
