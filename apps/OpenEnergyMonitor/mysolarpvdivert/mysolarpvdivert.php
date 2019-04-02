@@ -905,8 +905,10 @@ function load_bargraph(start,end) {
         var use_kwh = use_kwh_data[day][1] - use_kwh_data[day-1][1];
         if (use_kwh_data[day][1]==null || use_kwh_data[day-1][1]==null) use_kwh = null;
         
-        var divert_kwh = divert_kwh_data[day][1] - divert_kwh_data[day-1][1];
-        if (divert_kwh_data[day][1]==null || divert_kwh_data[day-1][1]==null) divert_kwh = null;
+        if(divert_kwh_data[day]) {
+            var divert_kwh = divert_kwh_data[day][1] - divert_kwh_data[day-1][1];
+            if (divert_kwh_data[day][1]==null || divert_kwh_data[day-1][1]==null) divert_kwh = null;
+        }
         
         var import_kwh = import_kwh_data[day][1] - import_kwh_data[day-1][1];
         if (import_kwh_data[day][1]==null || import_kwh_data[day-1][1]==null) import_kwh = null;
