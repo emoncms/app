@@ -73,30 +73,26 @@ var config = {
      * enable the buttons in the app header
      */
     closeConfig: function () {
-        console.log('closeConfig()');
-        $("#app-block").toggleClass('hide', false);
+        $("#app-block").toggleClass('hide', false).show();
         $("#app-setup").toggleClass('hide', true);
         
         $('.openconfig').toggleClass('hide', false);
         $('.close-config').toggleClass('hide', true);
         $('#buttons #tabs .btn').attr('disabled',false).css('opacity',1);
-        // if graph resize() function available, run it.
-        if (typeof resize == 'function') resize();
     },
     /**
      * hide the app window and show the config window.
      * disable the buttons in the app header
      */
     showConfig: function () {
-        console.log('showConfig()');
         $("#app-block").toggleClass('hide', true);
         $("#app-setup").toggleClass('hide', false).show();
         
         $('.openconfig').toggleClass('hide', true);
-        $('.close-config').toggleClass('hide', false).show();
+        $('.close-config').toggleClass('hide', false);
         $('#buttons #tabs .btn').attr('disabled',true).css('opacity',.2);
     },
-
+    
     UI: function() {
         $(".app-config").html("");
         $("body").css('background-color','#222');
