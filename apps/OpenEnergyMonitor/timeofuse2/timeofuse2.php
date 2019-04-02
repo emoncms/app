@@ -168,12 +168,13 @@
             <div class="appconfig-description-inner text-light">
                 <h2 class="appconfig-title text-primary"><?php echo _('Time of Use - flexible'); ?></h2>
                 <p class="lead">The "Time of Use - flexible" app is a simple home energy monitoring app for exploring home or building electricity consumption and cost over time. It allows you to track multiple electricity tariffs as used in Australia.</p>
-                <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                <h3 class="text-white">Cumulative kWh</h3> 
+                <p> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
                 <p><img src="<?php echo $path; ?>Modules/app/images/timeofuse_app.png" style="width:600px" class="img-rounded"></p>
-                <p>
-                As the number of configuration options for this are quite large, a shorthand has been used to specify
+                <p>As the number of configuration options for this are quite large, a shorthand has been used to specify
                 the tiers, days and times they apply and the respective costs.</p>
-                <p><b>Assumptions</b>:
+                
+                <h3 class="text-white">Assumptions</h3>
                 <ul>
                     <li>Any number of tariffs can be defined, but they must be consistent across weekdays or weekends.</li>
                     <li>One cost must be defined per tariff tier.</li>
@@ -181,11 +182,12 @@
                     <li>Each weekend day (Saturday and Sunday) has the same tiers and times for each tier.</li>
                     <li>Public Holidays are treated the same as a weekend day.</li>
                 </ul>
-                <h4>Shorthand</h4>
+                
+                <h3 class="text-white">Shorthand</h3>
                 <p>Tier names and tariffs are specified as a comma separated, colon separated list. If there are three
                 tariffs, <strong class="text-white">Off Peak</strong>, <strong class="text-white">Shoulder</strong> and <strong class="text-white">Peak</strong>, costing <strong class="text-white">16.5c/kWh</strong>, <strong class="text-white">25.3c/kWh</strong> and <strong class="text-white">59.4c/kWh</strong> respectively, they
                 are specified as:</p>
-                <p><code class="text-white">OffPeak:0.165,Shoulder:0.253,Peak:0.594</code></p>
+                <p><code>OffPeak:0.165,Shoulder:0.253,Peak:0.594</code></p>
                 <p>Tier start times are split into two definitions, weekday and weekend. They both use the same format,
                 <code>&lt;start hour&gt;:&lt;tier&gt;,&lt;start hour&gt;:&lt;tier&gt;,...
                 &lt;tier&gt;</code>
@@ -194,13 +196,13 @@
                 <hr>
                 <h4 class="text-white">Example:</h4> 
                 <p>A weekday with the following tariff times:</p>
-                <blockquote>
+                <blockquote><em>
                 OffPeak: 00:00 - 06:59, 
                 Shoulder: 07:00 - 13:59,
                 Peak: 14:00 - 19:59, 
                 Shoulder: 20:00 - 21:59, 
                 OffPeak: 22:00 - 23:59
-                </blockquote>
+                </em></blockquote>
                 <p>would be defined as:
                 <code>0:0,7:1,14:2,20:1,22:0</code></p>
 
@@ -213,7 +215,7 @@
                 <code>
                 2017:2,104,107,115,163,275,359,360;2018:1
                 </code>
-                <p><a href="https://www.epochconverter.com/days" class="text-white">https://www.epochconverter.com/days</a> provides an easy reference.</p>
+                <p><a href="https://www.epochconverter.com/days" class="text-light">https://www.epochconverter.com/days</a> provides an easy reference.</p>
             </div>
         </div>
         <div class="span3 app-config pt-3"></div>
