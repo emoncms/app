@@ -155,22 +155,26 @@
 </div>    
 </div>
 
-<div id="app-setup" class="block">
-    <h2 class="appconfig-title">My Electric 2</h2>
 
-    <div class="appconfig-description">
-      <div class="appconfig-description-inner">
-        The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time.
-        <br><br>
-        <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
-        <br><br>
-        <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.
-        <br><br>
-        <img src="../Modules/app/images/myelectric_app.png" style="width:600px" class="img-rounded">
-      </div>
+
+
+<section id="app-setup" class="hide pb-3">
+    <!-- instructions and settings -->
+    <div class="px-3">
+        <div class="row-fluid">
+            <div class="span9 appconfig-description">
+                <div class="appconfig-description-inner text-light">
+                    <h2 class="appconfig-title text-primary"><?php echo _('My Electric 2'); ?></h2>
+                    <p class="lead">The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time.</p>
+                    <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
+                    <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                    <img src="../Modules/app/images/myelectric_app.png" class="d-none d-sm-inline-block">
+                </div>
+            </div>
+            <div class="span3 app-config pt-3"></div>
+        </div>
     </div>
-    <div class="app-config"></div>
-</div>
+</section>
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
 
