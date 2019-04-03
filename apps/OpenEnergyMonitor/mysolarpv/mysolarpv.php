@@ -52,6 +52,10 @@
     
     <?php include(dirname(__DIR__).'/graph-nav.php'); ?>
 
+    <div id="history-nav" class="visnavblock mb-2 d-flex justify-content-start d-flex justify-content-stretch btn-group">
+        <button id='show-all' class='visnav btn btn-inverse btn-link btn-large py-1 px-2' ><?php echo _('Show All');?></button>
+    </div>
+
     <div id="placeholder_bound" class="chart-placeholder">
         <div id="placeholder"></div>
     </div>
