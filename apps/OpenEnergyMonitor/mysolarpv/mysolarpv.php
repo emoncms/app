@@ -52,8 +52,8 @@
     
     <?php include(dirname(__DIR__).'/graph-nav.php'); ?>
 
-    <div id="history-nav" class="visnavblock mb-2 d-flex justify-content-start d-flex justify-content-stretch btn-group">
-        <button id='show-all' class='visnav btn btn-inverse btn-link btn-large py-1 px-2' ><?php echo _('Show All');?></button>
+    <div id="history-nav" class="mb-2 d-none">
+        <button id='show-all' class='bargraph-viewall visnav btn btn-inverse btn-link btn-large py-1 px-2' ><?php echo _('Show All');?></button>
     </div>
 
     <div id="placeholder_bound" class="chart-placeholder">
@@ -236,13 +236,15 @@ function init()
             $(".balanceline").toggleClass('hide', true);
             $(".viewpower").toggleClass('active', false); 
             $(".viewhistory").toggleClass('active', true); 
-            $('#graph-nav button').attr('disabled', true);
+            $('#graph-nav').toggleClass('d-none d-flex');
+            $('#history-nav').toggleClass('d-none d-flex');
         } else {
             viewmode = "powergraph";
             $(".balanceline").toggleClass('hide', false);
             $(".viewpower").toggleClass('active', true); 
             $(".viewhistory").toggleClass('active', false); 
-            $('#graph-nav button').attr('disabled', false);
+            $('#graph-nav').toggleClass('d-none d-flex');
+            $('#history-nav').toggleClass('d-none d-flex');
 
             powergraph_events();
         }
@@ -722,7 +724,7 @@ function bargraph_events(){
     $('#placeholder').unbind("plotclick");
     $('#placeholder').unbind("plothover");
     $('#placeholder').unbind("plotselected");
-    $('.bargraph-viewall').unbind("click");
+    // $('.bargraph-viewall').unbind("click");
     
     // Show day's figures on the bottom of the page
     $('#placeholder').bind("plothover", function (event, pos, item)
@@ -801,10 +803,11 @@ function bargraph_events(){
         panning = true; setTimeout(function() {panning = false; }, 100);
     });
     
-    $('.bargraph-viewall').click(function () {
+    $('.bargraph-viewall').click(function () { 
         var start = latest_start_time * 1000;
         var end = +new Date;
         load_bargraph(start,end);
+        $(this).toggleClass('active');
         draw();
     });
 }
