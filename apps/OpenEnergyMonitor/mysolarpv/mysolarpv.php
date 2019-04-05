@@ -782,11 +782,13 @@ function bargraph_events(){
             
             view.start = solar_kwhd_data[z][0];
             view.end = view.start + 86400*1000;
-
+            
             $(".balanceline").toggleClass('hide', false);
-            $(".viewpower").toggleClass('hide', true); 
-            $(".viewhistory").toggleClass('hide', false); 
-            $(".bargraph-viewall").toggleClass('hide', true); 
+            $(".viewpower").toggleClass('active', true); 
+            $(".viewhistory").toggleClass('active', false); 
+            $('#graph-nav').css({opacity: 1});
+            $('#show-all').toggleClass('hide', true);
+            $('#history-nav').toggleClass('hide d-flex');
 
             $('#placeholder').unbind("plotclick");
             $('#placeholder').unbind("plothover");
