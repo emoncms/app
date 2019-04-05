@@ -28,7 +28,11 @@
         <li><button class="balanceline btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo _('Show Balance') ?>">
             <span class="d-xs-none"><?php echo _("Bal") ?></span>
             <span class="d-none d-xs-inline-block"><?php echo _("Balance") ?></span>
-        </li>
+        </button></li>
+        <li><button id='show-all' class="hide bargraph-viewall btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo _('Show All') ?>">
+            <span class="d-xs-none"><?php echo _("All") ?></span>
+            <span class="d-none d-xs-inline-block"><?php echo _("Show All") ?></span>
+        </button></li>
     </ul>
     <?php include(dirname(__DIR__).'/config-nav.php'); ?>
 </nav>
@@ -51,10 +55,6 @@
     </div>
     
     <?php include(dirname(__DIR__).'/graph-nav.php'); ?>
-
-    <div id="history-nav" class="mb-2 d-none">
-        <button id='show-all' class='bargraph-viewall visnav btn btn-inverse btn-link btn-large py-1 px-2' ><?php echo _('Show All');?></button>
-    </div>
 
     <div id="placeholder_bound" class="chart-placeholder">
         <div id="placeholder"></div>
@@ -232,19 +232,23 @@ function init()
     
     $(".viewhistory, .viewpower").click(function () { 
         if (viewmode === "powergraph") {
+            // history
             viewmode = "bargraph";
             $(".balanceline").toggleClass('hide', true);
             $(".viewpower").toggleClass('active', false); 
             $(".viewhistory").toggleClass('active', true); 
-            $('#graph-nav').toggleClass('d-none d-flex');
-            $('#history-nav').toggleClass('d-none d-flex');
+            $('#graph-nav').css({opacity: 0});
+            $('#show-all').toggleClass('hide', false);
+            $('#history-nav').toggleClass('hide d-flex');
         } else {
+            // power
             viewmode = "powergraph";
             $(".balanceline").toggleClass('hide', false);
             $(".viewpower").toggleClass('active', true); 
             $(".viewhistory").toggleClass('active', false); 
-            $('#graph-nav').toggleClass('d-none d-flex');
-            $('#history-nav').toggleClass('d-none d-flex');
+            $('#graph-nav').css({opacity: 1});
+            $('#show-all').toggleClass('hide', true);
+            $('#history-nav').toggleClass('hide d-flex');
 
             powergraph_events();
         }
@@ -724,7 +728,7 @@ function bargraph_events(){
     $('#placeholder').unbind("plotclick");
     $('#placeholder').unbind("plothover");
     $('#placeholder').unbind("plotselected");
-    // $('.bargraph-viewall').unbind("click");
+    $('.bargraph-viewall').unbind("click");
     
     // Show day's figures on the bottom of the page
     $('#placeholder').bind("plothover", function (event, pos, item)
@@ -781,6 +785,7 @@ function bargraph_events(){
             $(".balanceline").toggleClass('hide', false);
             $(".viewpower").toggleClass('hide', true); 
             $(".viewhistory").toggleClass('hide', false); 
+            $(".bargraph-viewall").toggleClass('hide', true); 
 
             $('#placeholder').unbind("plotclick");
             $('#placeholder').unbind("plothover");
@@ -804,10 +809,20 @@ function bargraph_events(){
     });
     
     $('.bargraph-viewall').click(function () { 
-        var start = latest_start_time * 1000;
-        var end = +new Date;
-        load_bargraph(start,end);
-        $(this).toggleClass('active');
+        $btn = $(this);
+        $btn.toggleClass('active');
+        if ($btn.is('.active')) {
+            // show all
+            var start = latest_start_time * 1000;
+            var end = +new Date;
+            load_bargraph(start,end);
+        } else {
+            // show 40 days
+            var timeWindow = (3600000*24.0*40);
+            var end = +new Date;
+            var start = end - timeWindow;
+            load_bargraph(start,end);
+        }
         draw();
     });
 }
