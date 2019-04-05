@@ -139,9 +139,16 @@ var config = {
                 // Create list of feeds that satisfy engine requirement
                 var out = "<option value=0>Select "+z+" feed:</option>";
                 out += "<option value=auto>AUTO SELECT</option>";
-                for (var n in config.feedsbyname)  {
-                    if (config.engine_check(config.feedsbyname[n],config.app[z])) {
-                        out += "<option value="+config.feedsbyname[n].id+">"+config.feedsbyname[n].tag+":"+config.feedsbyname[n].name+"</option>";
+                var sortedFeeds = [];
+                for (var n in config.feedsbyname) {
+                    let feed = config.feedsbyname[n];
+                    feed.longname = config.feedsbyname[n].tag+":"+config.feedsbyname[n].name;
+                    sortedFeeds.push(feed);
+                }
+                sortedFeeds.sort(config.sortByLongname)
+                for (var n in sortedFeeds)  {
+                    if (config.engine_check(sortedFeeds[n],config.app[z])) {
+                        out += "<option value="+sortedFeeds[n].id+">"+sortedFeeds[n].tag+":"+sortedFeeds[n].name+"</option>";
                     }
                 }
                 configItem.find(".feed-select").html(out);
@@ -372,5 +379,11 @@ var config = {
                 }
             } 
         });
+    },
+
+    sortByLongname: function(a, b){
+        var aName = a.longname.toLowerCase();
+        var bName = b.longname.toLowerCase(); 
+        return ((aName < bName) ? -1 : ((aName > bName) ? 1 : 0));
     }
 }
