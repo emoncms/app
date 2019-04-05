@@ -200,7 +200,6 @@ function init()
     if (solar_kwh && use_kwh && import_kwh) {
         init_bargraph();
     }
-    
     // The first view is the powergraph, we load the events for the power graph here.
     if (viewmode=="powergraph") powergraph_events();
     
@@ -230,7 +229,8 @@ function init()
         }
     });
     
-    $(".viewhistory, .viewpower").click(function () { 
+    $(".viewhistory, .viewpower").click(function () {
+        // flip modes
         if (viewmode === "powergraph") {
             // history
             viewmode = "bargraph";
@@ -240,6 +240,9 @@ function init()
             $('#graph-nav').css({opacity: 0});
             $('#show-all').toggleClass('hide', false);
             $('#history-nav').toggleClass('hide d-flex');
+
+            bargraph_events();
+
         } else {
             // power
             viewmode = "powergraph";
@@ -257,37 +260,6 @@ function init()
 
     $("<div id='tooltip'><span id='value'></span> <span id='unit'></span></div>").appendTo("body");
 
-    // position the tooltip and insert the correct value on hover
-    // hide the tooltip on mouseout  
-
-    $('#placeholder').bind("plothover", function (event, pos, item)
-    {
-        if (item) {
-            // Show tooltip
-            var tooltip_items = [];
-            var date = new Date(item.datapoint[0]);
-
-            tooltip_items.push(["TIME", dateFormat(date, 'HH:MM'), ""]);
-            if (powerseries) {
-                for (i = 0; i < powerseries.length; i++) {
-                    var series = powerseries[i];
-                    if (series.name.toUpperCase()=="BALANCE") {
-                        tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "kWh"]);
-                    } else {
-                        if ( series.data[item.dataIndex][1] >= 1000) {
-                            tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(0)/1000 , "kW"]);
-                        } else {
-                            tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W"]);
-                        }
-                    }
-                }
-            }
-            show_tooltip(pos.pageX+10, pos.pageY+5, tooltip_items);
-        } else {
-            // Hide tooltip
-            hide_tooltip();
-        }
-    });
 }
 
 
@@ -591,6 +563,38 @@ function powergraph_events() {
 
         draw();
     });
+
+    // position the tooltip and insert the correct value on hover
+    // hide the tooltip on mouseout  
+
+    $('#placeholder').bind("plothover", function (event, pos, item)
+    {
+        if (item) {
+            // Show tooltip
+            var tooltip_items = [];
+            var date = new Date(item.datapoint[0]);
+
+            tooltip_items.push(["TIME", dateFormat(date, 'HH:MM'), ""]);
+            if (powerseries) {
+                for (i = 0; i < powerseries.length; i++) {
+                    var series = powerseries[i];
+                    if (series.name.toUpperCase()=="BALANCE") {
+                        tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "kWh"]);
+                    } else {
+                        if ( series.data[item.dataIndex][1] >= 1000) {
+                            tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(0)/1000 , "kW"]);
+                        } else {
+                            tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W"]);
+                        }
+                    }
+                }
+            }
+            show_tooltip(pos.pageX+10, pos.pageY+5, tooltip_items);
+        } else {
+            // Hide tooltip
+            hide_tooltip();
+        }
+    });
 }
 
 // ======================================================================================
@@ -790,10 +794,6 @@ function bargraph_events(){
             $('#show-all').toggleClass('hide', true);
             $('#history-nav').toggleClass('hide d-flex');
 
-            $('#placeholder').unbind("plotclick");
-            $('#placeholder').unbind("plothover");
-            $('#placeholder').unbind("plotselected");
-            
             reload = true; 
             autoupdate = false;
             viewmode = "powergraph";
