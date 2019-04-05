@@ -268,16 +268,17 @@ function init()
             var date = new Date(item.datapoint[0]);
 
             tooltip_items.push(["TIME", dateFormat(date, 'HH:MM'), ""]);
-
-            for (i = 0; i < powerseries.length; i++) {
-                var series = powerseries[i];
-                if (series.name.toUpperCase()=="BALANCE") {
-                    tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "kWh"]);
-                } else {
-                    if ( series.data[item.dataIndex][1] >= 1000) {
-                        tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(0)/1000 , "kW"]);
+            if (powerseries) {
+                for (i = 0; i < powerseries.length; i++) {
+                    var series = powerseries[i];
+                    if (series.name.toUpperCase()=="BALANCE") {
+                        tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "kWh"]);
                     } else {
-                        tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W"]);
+                        if ( series.data[item.dataIndex][1] >= 1000) {
+                            tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(0)/1000 , "kW"]);
+                        } else {
+                            tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W"]);
+                        }
                     }
                 }
             }
