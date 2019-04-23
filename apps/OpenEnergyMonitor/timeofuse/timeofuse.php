@@ -618,6 +618,9 @@ function bargraph_load(start,end)
     });
     
     if (viewcostenergy=="energy") {
+        if (typeof daytime_total_kwh === 'undefined') daytime_total_kwh = 0;
+        if (typeof nighttime_total_kwh === 'undefined') nighttime_total_kwh = 0;
+
         $("#daytime_total_kwh").html(daytime_total_kwh.toFixed(1)+" kWh");
         $("#daytime_average_kwhd").html((daytime_total_kwh/n).toFixed(1)+" kWh/d");
         
@@ -631,7 +634,12 @@ function bargraph_load(start,end)
         $("#nighttime_average_kwhd").html(config.app.currency.value+(nighttime_total_kwh*config.app.unitcost_night.value/n).toFixed(2)+"/day");
     }
 
-    var kwh_today = data["economy7"][data["economy7"].length-1][1] + data["standard"][data["standard"].length-1][1];
+    if (typeof data["economy7"][data["economy7"].length-1] !== 'undefined') {
+        var kwh_today = data["economy7"][data["economy7"].length-1][1] + data["standard"][data["standard"].length-1][1];
+    } else {
+        var kwh_today = 0;
+    }
+
     $("#kwh_today").html(kwh_today.toFixed(1)+" kWh");
     
     //if (viewcostenergy=="energy") {
