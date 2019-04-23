@@ -12,7 +12,7 @@ class GraphView {
         this.container.load(path + "Modules/app/Lib/graph.php");
         
         if (!$('.graph-tooltip').length) $("<div class='graph-tooltip' style='display:none'></div>").appendTo("body");
-
+        
         this.flotFontSize = 12;
         this.mode = "energy";
         this.unit = "energy";
@@ -302,6 +302,16 @@ class PowerGraph extends Graph {
         super(view);
         this.live = null;
         
+        // Configure external solar power to be treated as if it were selfconsumption.
+        // Relevant specifically for old german feed-in tariff systems.
+        if (data.has(Graph.SOLAR+'_power') && data.has(Graph.EXPORT+'_power') &&
+        		data.get(Graph.SOLAR+'_power').id == data.get(Graph.EXPORT+'_power').id) {
+            
+            this.external = true;
+        }
+        else {
+            this.external = false;
+        }
         //Set the initial time window to show the last 24 hours
         this.setTimeWindowDays(1);
     }
@@ -355,30 +365,30 @@ class PowerGraph extends Graph {
         var solarPower = [];
         var solarWindow = 0;
         
-        var timeLast = null;
-        
         if (this.live) {
             this.end = new Date().getTime();
         }
-        for (var timevalue of this.view.data.iteratePower(this.start, this.end, this.interval)) {
-            var time = timevalue.time;
+        var lastTime = null
+        
+        for (var timeValue of this.view.data.iteratePower(this.start, this.end, this.interval)) {
+            var time = timeValue.time;
             
-            let power = function(key) {
-                if (typeof timevalue[key+'_power'] !== 'undefined') {
-                	var value = parseFloat(timevalue[key+'_power']);
-                	if (!isNaN(value) && value >= 0) {
+            var power = function(key, def) {
+                if (typeof timeValue[key+'_power'] !== 'undefined') {
+                	var value = parseFloat(timeValue[key+'_power']);
+                	if (!isNaN(value)) {
                         return value;
                 	}
                 }
-                return 0;
-            }
-            var imp = power(Graph.IMPORT);
-            var exp = power(Graph.EXPORT);
-            var solar = power(Graph.SOLAR);
+                return def;
+            };
+            var solar = power(Graph.SOLAR, 0);
+            var imp = power(Graph.IMPORT, 0);
+            var exp = power(Graph.EXPORT, solar);
+            var selfCons = 0;
             
             if (imp > 0 || solar > 0) {
-            	// If all solar power is getting exported, still display it as self-consumption
-            	if (exp > 0 && exp == solar) {
+            	if (this.external) {
             		if (exp >= imp) {
                         exp -= imp;
                         imp = 0;
@@ -392,19 +402,19 @@ class PowerGraph extends Graph {
                 exportPower.push([time, exp]);
                 solarPower.push([time, solar]);
                 
-                var selfCons = Math.max(0, solar - exp);
+                selfCons = Math.max(0, solar - exp);
                 selfConsPower.push([time, selfCons]);
-                
-                if (timeLast != null) {
-                    var scale = (time - timeLast)/3600000000;
-
-                    importWindow += imp*scale;
-                    exportWindow += exp*scale;
-                    solarWindow += solar*scale;
-                    selfConsWindow += selfCons*scale;
-                }
-                timeLast = time;
             }
+            
+            if (lastTime != null) {
+                var scale = (time - lastTime)/3600000000;
+                
+                importWindow += imp*scale;
+                exportWindow += exp*scale;
+                solarWindow += solar*scale;
+                selfConsWindow += selfCons*scale;
+            }
+            lastTime = time;
         }
         
         if (this.view.unit == "energy") {
@@ -465,16 +475,16 @@ class PowerGraph extends Graph {
         $("#graph-stats").html(windowStatsOut);
         
         var series = [];
-        if (selfConsPower.length > 0) {
+        if (importPower.length > 0) {
             series.push({
-                label:"Self-consumption", data: selfConsPower, yaxis: 1, color: "#a1b97b", 
+                label:"Consumption", data: importPower, yaxis: 1, color: "#44b3e2", 
                 lines: { show: true, fill: 0.8, lineWidth: 0},
                 stack: 0
             });
         }
-        if (importPower.length > 0) {
+        if (selfConsPower.length > 0) {
             series.push({
-                label:"Consumption", data: importPower, yaxis: 1, color: "#44b3e2", 
+                label:"Self-consumption", data: selfConsPower, yaxis: 1, color: "#a1b97b", 
                 lines: { show: true, fill: 0.8, lineWidth: 0},
                 stack: 0
             });
