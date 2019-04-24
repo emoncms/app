@@ -1,5 +1,5 @@
 {
     "title"          : "My Solar Divert",
-    "description"    : "Explore solar generation compared to household consumption.",
+    "description"    : "Explore solar generation (optionally wind) compared to household consumption.",
     "status"         : ""
 }
