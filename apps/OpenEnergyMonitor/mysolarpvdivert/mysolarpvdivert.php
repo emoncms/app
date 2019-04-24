@@ -333,15 +333,15 @@ if (!sessionwrite) $(".openconfig").hide();
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"House or building use in watts"},
+    "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"Total use in watts (including diversion)"},
     "solar":{"type":"feed", "autoname":"solar", "engine":"5", "description":"Solar pv generation in watts"},
     "wind":{"optional":true, "type":"feed", "autoname":"wind", "engine":"5", "description":"Wind generation in watts"},
     "divert":{"type":"feed", "autoname":"divert", "engine":"5", "description":"Immersion usage in watts"},
     //"export":{"type":"feed", "autoname":"export", "engine":5, "description":"Exported solar in watts"},
-    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative use in kWh"},
+    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative total use in kWh (including diversion)"},
     "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5, "description":"Cumulative solar generation in kWh"},
     "wind_kwh":{"optional":true, "type":"feed", "autoname":"wind_kwh", "engine":5, "description":"Cumulative wind generation in kWh"},
-    "divert_kwh":{"optional":true, "type":"feed", "autoname":"divert_kwh", "engine":5, "description":"Cumulative divert usage in kWh"},
+    "divert_kwh":{"optional":true, "type":"feed", "autoname":"divert_kwh", "engine":5, "description":"Cumulative divert energy in kWh"},
     "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "engine":5, "description":"Cumulative grid import in kWh"},
     //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
 }
