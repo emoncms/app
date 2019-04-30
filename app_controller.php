@@ -11,7 +11,7 @@
 
 // no direct access
 defined('EMONCMS_EXEC') or die('Restricted access');
-
+$v = 7;
 function app_controller()
 {
     global $mysqli,$path,$session,$route,$user,$fullwidth,$app_settings;
@@ -65,7 +65,7 @@ function app_controller()
                 }
             }
             
-            $result = "<link href='".$path."Modules/app/Views/css/pagenav.css?v=1' rel='stylesheet'>";
+            $result = "<link href='".$path."Modules/app/Views/css/pagenav.css?v=".$v."' rel='stylesheet'>";
 
             if ($app!=false) {
                 $result .= view($dir.$id.".php",array("name"=>$app, "appdir"=>$dir, "config"=>$config, "apikey"=>$apikey));

@@ -1,6 +1,6 @@
 <?php
 global $path, $session;
-$v = 5;
+$v = 7;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
