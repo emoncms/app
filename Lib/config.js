@@ -17,7 +17,7 @@ var config = {
         
         // Check that the config is complete first otherwise show config interface
         if (!config.check()) {
-            $("#app-setup").show();       // Show setup block
+            config.showConfig();          // Show setup block
             $(".ajax-loader").hide();     // Hide AJAX loader
             config.UI();                  // Populate setup UI options
         } else {
@@ -29,18 +29,21 @@ var config = {
             config.initialized = true;    // Init app
             config.showapp();
         }
-
-        $("body").on("click",".openconfig",function(){
-            $("#app-block").hide();
-            $("#app-setup").show();    
+        
+        $("body").on("click", ".openconfig", function(event){
+            config.showConfig();
             config.UI();
-            config.hideapp();
         });
 
-        $("body").on("click",".launchapp",function(){
+        // don't save and just show app
+        $("body").on("click",".close-config", function(event){
+            config.closeConfig();
+        });
+        
+        // save and show app
+        $("body").on("click", ".launchapp", function(){
             $(".ajax-loader").show();
-            $("#app-setup").hide();
-            $("#app-block").show();
+            config.closeConfig();
             config.load();
             if (!config.initialized) { config.initapp(); config.initialized = true; }
             config.showapp();
@@ -64,6 +67,31 @@ var config = {
                 } 
             });
         });
+    },
+    /**
+     * hide the app config window and show the app.
+     * enable the buttons in the app header
+     */
+    closeConfig: function () {
+        $("#app-block").toggleClass('hide', false).show();
+        
+        $("#app-setup").toggleClass('hide', true);
+        
+        $('.openconfig').toggleClass('hide', false);
+        $('.close-config').toggleClass('hide', true);
+        $('#buttons #tabs .btn').attr('disabled',false).css('opacity',1);
+    },
+    /**
+     * hide the app window and show the config window.
+     * disable the buttons in the app header
+     */
+    showConfig: function () {
+        $("#app-block").toggleClass('hide', true);
+        $("#app-setup").toggleClass('hide', false).show();
+        
+        $('.openconfig').toggleClass('hide', true);
+        $('.close-config').toggleClass('hide', false);
+        $('#buttons #tabs .btn').attr('disabled',true).css('opacity',.2);
     },
 
     UI: function() {
@@ -111,9 +139,16 @@ var config = {
                 // Create list of feeds that satisfy engine requirement
                 var out = "<option value=0>Select "+z+" feed:</option>";
                 out += "<option value=auto>AUTO SELECT</option>";
-                for (var n in config.feedsbyname)  {
-                    if (config.engine_check(config.feedsbyname[n],config.app[z])) {
-                        out += "<option value="+config.feedsbyname[n].id+">"+config.feedsbyname[n].name+"</option>";
+                var sortedFeeds = [];
+                for (var n in config.feedsbyname) {
+                    let feed = config.feedsbyname[n];
+                    feed.longname = config.feedsbyname[n].tag+":"+config.feedsbyname[n].name;
+                    sortedFeeds.push(feed);
+                }
+                sortedFeeds.sort(config.sortByLongname)
+                for (var n in sortedFeeds)  {
+                    if (config.engine_check(sortedFeeds[n],config.app[z])) {
+                        out += "<option value="+sortedFeeds[n].id+">"+sortedFeeds[n].tag+":"+sortedFeeds[n].name+"</option>";
                     }
                 }
                 configItem.find(".feed-select").html(out);
@@ -336,9 +371,19 @@ var config = {
                     result = JSON.parse(result);
                     if (result.success!=undefined && !result.success) app_log("ERROR",result.message);
                 } catch (e) {
-                    app.log("ERROR","Could not parse /setconfig reply, error: "+e);
+                    try {
+                        app.log("ERROR","Could not parse /setconfig reply, error: "+e);
+                    } catch (e2) {
+                        console.log(e,e2);
+                    }
                 }
             } 
         });
+    },
+
+    sortByLongname: function(a, b){
+        var aName = a.longname.toLowerCase();
+        var bName = b.longname.toLowerCase(); 
+        return ((aName < bName) ? -1 : ((aName > bName) ? 1 : 0));
     }
 }
