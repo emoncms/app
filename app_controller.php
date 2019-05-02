@@ -14,7 +14,7 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 $v = 7;
 function app_controller()
 {
-    global $mysqli,$path,$session,$route,$user,$fullwidth,$app_settings;
+    global $mysqli,$path,$session,$route,$user,$fullwidth,$app_settings,$v;
 
     $fullwidth = true;
     $result = false;
