@@ -1,6 +1,6 @@
 <?php
     global $path, $session;
-    $v = 5;
+    $v = 7;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
@@ -169,22 +169,24 @@
 </div>    
 </div>
 
-<div id="app-setup" class="block">
-    <h2 class="appconfig-title">My Electric 2</h2>
 
-    <div class="appconfig-description">
-      <div class="appconfig-description-inner">
-        The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time.
-        <br><br>
-        <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
-        <br><br>
-        <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.
-        <br><br>
-        <img src="../Modules/app/images/myelectric_app.png" style="width:600px" class="img-rounded">
-      </div>
+
+<section id="app-setup" class="hide pb-3 px-3">
+    <!-- instructions and settings -->
+    <div class="row-fluid">
+        <div class="span9 appconfig-description">
+            <div class="appconfig-description-inner text-light">
+                <h2 class="appconfig-title text-primary"><?php echo _('Time of Use'); ?></h2>
+                <p class="lead">The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time.</p>
+                <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
+                <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+            </div>
+        </div>
+        <div class="span3 app-config pt-3"></div>
     </div>
-    <div class="app-config"></div>
-</div>
+</section>
+
+
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
 
@@ -630,6 +632,9 @@ function bargraph_load(start,end)
     });
     
     if (viewcostenergy=="energy") {
+        if (typeof daytime_total_kwh === 'undefined') daytime_total_kwh = 0;
+        if (typeof nighttime_total_kwh === 'undefined') nighttime_total_kwh = 0;
+
         $("#daytime_total_kwh").html(daytime_total_kwh.toFixed(1)+" kWh");
         $("#daytime_average_kwhd").html((daytime_total_kwh/n).toFixed(1)+" kWh/d");
         
@@ -643,7 +648,12 @@ function bargraph_load(start,end)
         $("#nighttime_average_kwhd").html(config.app.currency.value+(nighttime_total_kwh*config.app.unitcost_night.value/n).toFixed(2)+"/day");
     }
 
-    var kwh_today = data["economy7"][data["economy7"].length-1][1] + data["standard"][data["standard"].length-1][1];
+    if (typeof data["economy7"][data["economy7"].length-1] !== 'undefined') {
+        var kwh_today = data["economy7"][data["economy7"].length-1][1] + data["standard"][data["standard"].length-1][1];
+    } else {
+        var kwh_today = 0;
+    }
+
     $("#kwh_today").html(kwh_today.toFixed(1)+" kWh");
     
     //if (viewcostenergy=="energy") {

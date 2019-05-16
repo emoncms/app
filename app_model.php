@@ -78,7 +78,7 @@ class AppConfig
     {
         $userid = (int) $userid;
         if (preg_replace('/[^\p{N}\p{L}]/u','',$app)!=$app) return array('success'=>false, "message"=>"Invalid app"); 
-        if (preg_replace('/[^\p{N}\p{L}_\s-:]/u','',$name)!=$name) return array('success'=>false, "message"=>"Invalid app name"); 
+        if (preg_replace('/[^\p{N}\p{L}_\s\-:]/u','',$name)!=$name) return array('success'=>false, "message"=>"Invalid app name"); 
         
         // Load config from database
         $applist = $this->get($userid);
@@ -100,7 +100,7 @@ class AppConfig
     public function remove($userid,$name) 
     {
         $userid = (int) $userid;
-        if (preg_replace('/[^\p{N}\p{L}_\s-:]/u','',$name)!=$name) return array('success'=>false, "message"=>"Invalid app name"); 
+        if (preg_replace('/[^\p{N}\p{L}_\s\-:]/u','',$name)!=$name) return array('success'=>false, "message"=>"Invalid app name"); 
         
         // Load config from database
         $applist = $this->get($userid);
@@ -120,7 +120,7 @@ class AppConfig
     public function set_config($userid,$name,$config) 
     {
         $userid = (int) $userid;
-        if (preg_replace('/[^\p{N}\p{L}_\s-:]/u','',$name)!=$name) return array('success'=>false, "message"=>"Invalid app name");
+        if (preg_replace('/[^\p{N}\p{L}_\s\-:]/u','',$name)!=$name) return array('success'=>false, "message"=>"Invalid app name");
         // Config sanitisation 
         $config = json_decode($config);
         if (!$config || $config===null) return array('success'=>false, "message"=>"Could not parse json");
@@ -167,7 +167,7 @@ class AppConfig
     public function get_config($userid,$name) 
     {
         $userid = (int) $userid;
-        if (preg_replace('/[^\p{N}\p{L}_\s-:]/u','',$name)!=$name) return array('success'=>false, "message"=>"Invalid app name");
+        if (preg_replace('/[^\p{N}\p{L}_\s\-:]/u','',$name)!=$name) return array('success'=>false, "message"=>"Invalid app name");
         
         $applist = $this->get($userid);
         if (!isset($applist->$name)) return array('success'=>false, "message"=>"App does not exist with name $name");

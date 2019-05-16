@@ -11,10 +11,10 @@
 
 // no direct access
 defined('EMONCMS_EXEC') or die('Restricted access');
-
+$v = 7;
 function app_controller()
 {
-    global $mysqli,$path,$session,$route,$user,$fullwidth,$app_settings;
+    global $mysqli,$path,$session,$route,$user,$fullwidth,$app_settings,$v;
 
     $fullwidth = true;
     $result = false;
@@ -44,7 +44,7 @@ function app_controller()
             if ($route->subaction) {
                 $app = $route->subaction;
             } else {
-                $app = get("name");
+                $app = urldecode(get("name"));
             }
             
             if (!isset($applist->$app)) {
@@ -65,15 +65,13 @@ function app_controller()
                 }
             }
             
-            $result = "<link href='".$path."Modules/app/Views/css/pagenav.css?v=1' rel='stylesheet'>";
-            $result .= "<div id='wrapper'>";
-            if ($session['write']) $result .= view("Modules/app/Views/app_sidebar.php",array("applist"=>$applist));
+            $result = "<link href='".$path."Modules/app/Views/css/pagenav.css?v=".$v."' rel='stylesheet'>";
+
             if ($app!=false) {
                 $result .= view($dir.$id.".php",array("name"=>$app, "appdir"=>$dir, "config"=>$config, "apikey"=>$apikey));
             } else {
                 $result .= view("Modules/app/Views/app_view.php",array("apps"=>$appavail));
             }
-            $result .= "</div>";
         }
     }
     else if ($route->action == "list" && $session['read']) {
@@ -97,10 +95,7 @@ function app_controller()
         $applist = $appconfig->get_list($session['userid']);
         $route->format = "html";
         $result = "<link href='".$path."Modules/app/Views/css/pagenav.css?v=1' rel='stylesheet'>";
-        $result .= "<div id='wrapper'>";
-        $result .= view("Modules/app/Views/app_sidebar.php",array("applist"=>$applist));
-        $result .= view("Modules/app/Views/app_view.php",array("apps"=>$appavail));
-        $result .= "</div>";
+        $result .= view("Modules/app/Views/app_view.php", array("apps"=>$appavail));
     }
     else if ($route->action == "remove" && $session['write']) {
         $route->format = "json";
