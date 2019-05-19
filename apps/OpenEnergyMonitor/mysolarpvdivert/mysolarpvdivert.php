@@ -163,7 +163,7 @@
         </div>
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('SOLAR') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-warning "><span class="usenow"></span>W</h2>
+            <h2 class="power-value display-md-3 display-lg-2 my-0 text-warning "><span class="generationnow"></span>W</h2>
         </div>
     </div>
 
