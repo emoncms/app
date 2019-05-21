@@ -53,6 +53,6 @@
     $menu['sidebar']['apps'][] = array(
         'text' => _('View'),
         'path' => 'app/view',
-        'li_class'=>'hide',
+        'li_class'=>'d-none',
         'order'=> 99
     );
