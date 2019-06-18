@@ -173,7 +173,7 @@
 </div>  
 </div>    
   
-<div id="app-setup" class="block">
+<div id="app-setup" class="block py-2 px-5">
     <h2 class="appconfig-title">My Heatpump</h2>
 
     <div class="appconfig-description">
