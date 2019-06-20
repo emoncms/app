@@ -44,10 +44,11 @@
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
 <div id="app-block" style="display:none">
+
   <div class="col1"><div class="col1-inner">
     <div class="block-bound">
       <div style="float:right">
-          <div class="config" style="padding-top:10px; padding-right:10px; cursor:pointer">
+          <div class="openconfig" style="padding-top:10px; padding-right:10px; cursor:pointer">
               <i class="icon-wrench icon-white"></i>
           </div>
       </div>
@@ -172,11 +173,11 @@
 </div>  
 </div>    
   
-<div id="app-setup" class="block">
-    <h2 class="app-config-title">My Heatpump</h2>
+<div id="app-setup" class="block py-2 px-5 hide">
+    <h2 class="appconfig-title">My Heatpump</h2>
 
-    <div class="app-config-description">
-      <div class="app-config-description-inner">
+    <div class="appconfig-description">
+      <div class="appconfig-description-inner">
         The My Heatpump app can be used to explore the performance of a heatpump including, electricity consumption, heat output, COP and system temperatures.
         <br><br>
         <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
@@ -189,7 +190,7 @@
     <div class="app-config"></div>
 </div>
 
-<div class="ajax-loader"></div>
+<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
 
 <script>
 
@@ -199,9 +200,19 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".app-setup").hide();
 
-var feed = new Feed(apikey);
+apikeystr = ""; 
+if (apikey!="") apikeystr = "&apikey="+apikey;
+
+// ----------------------------------------------------------------------
+// Display
+// ----------------------------------------------------------------------
+
+$(window).ready(function(){
+
+});
+
+if (!sessionwrite) $(".openconfig").hide();
 
 // ----------------------------------------------------------------------
 // Configuration
@@ -216,14 +227,14 @@ config.app = {
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
-config.feeds = feed.getList();
+config.feeds = feed.list();
 
 config.initapp = function(){init()};
 config.showapp = function(){show()};
 config.hideapp = function(){clear()};
 
 // ----------------------------------------------------------------------
-// Application
+// APPLICATION
 // ----------------------------------------------------------------------
 var meta = {};
 var data = {};
@@ -233,7 +244,7 @@ var previousPoint = false;
 var viewmode = "bargraph";
 var panning = false;
 var flot_font_size = 12;
-var updateTimer = false;
+var updaterinst = false;
 var elec_enabled = false;
 var heat_enabled = false;
 var feeds = {};
@@ -256,6 +267,7 @@ function init()
 
 function show() 
 {
+    $("body").css('background-color','WhiteSmoke');
     // -------------------------------------------------------------------------------
     // Configurations
     // -------------------------------------------------------------------------------
@@ -264,15 +276,15 @@ function show()
     // -------------------------------------------------------------------------------
 
     if (elec_enabled) {
-        meta["heatpump_elec_kwh"] = feed.getMeta(feeds["heatpump_elec_kwh"].id);
+        meta["heatpump_elec_kwh"] = feed.getmeta(feeds["heatpump_elec_kwh"].id);
         if (meta["heatpump_elec_kwh"].start_time>start_time) start_time = meta["heatpump_elec_kwh"].start_time;
-        heatpump_elec_start = feed.getValue(feeds["heatpump_elec_kwh"].id, start_time*1000)[1];
+        heatpump_elec_start = feed.getvalue(feeds["heatpump_elec_kwh"].id, start_time*1000)[1];
     }
 
     if (heat_enabled) {
-        meta["heatpump_heat_kwh"] = feed.getMeta(feeds["heatpump_heat_kwh"].id);
+        meta["heatpump_heat_kwh"] = feed.getmeta(feeds["heatpump_heat_kwh"].id);
         if (meta["heatpump_heat_kwh"].start_time>start_time) start_time = meta["heatpump_heat_kwh"].start_time;
-        heatpump_heat_start = feed.getValue(feeds["heatpump_heat_kwh"].id, start_time*1000)[1];
+        heatpump_heat_start = feed.getvalue(feeds["heatpump_heat_kwh"].id, start_time*1000)[1];
     }
     
     resize();
@@ -302,19 +314,19 @@ function show()
     
     // LOOP
     progtime = 0;
-    update();
-    updateTimer = setInterval(update, 10000);
+    updater();
+    updaterinst = setInterval(updater,10000);
     $(".ajax-loader").hide();
 }
 
 function clear()
 {
-    clearInterval(updateTimer);
+    clearInterval(updaterinst);
 }
 
-function update()
+function updater()
 {
-    feed.getListById(function(result) {
+    feed.listbyidasync(function(result){
         if (result === null) { return; }
         
         for (var key in config.app) {
@@ -351,8 +363,8 @@ function update()
             }
             
             var elec = 0; var heat = 0;
-            if (elec_enabled) elec = feeds["heatpump_elec_kwh"].value - feed.getValue(feeds["heatpump_elec_kwh"].id, min30*1000)[1];
-            if (heat_enabled) heat = feeds["heatpump_heat_kwh"].value - feed.getValue(feeds["heatpump_heat_kwh"].id, min30*1000)[1];
+            if (elec_enabled) elec = feeds["heatpump_elec_kwh"].value - feed.getvalue(feeds["heatpump_elec_kwh"].id, min30*1000)[1];
+            if (heat_enabled) heat = feeds["heatpump_heat_kwh"].value - feed.getvalue(feeds["heatpump_heat_kwh"].id, min30*1000)[1];
             
             var COP = 0;
             if (elec>0) COP = heat / elec;
@@ -511,28 +523,28 @@ function powergraph_load()
     
     powergraph_series = [];
 
-    if (feeds["heatpump_flowT"]!=undefined) {
-        data["heatpump_flowT"] = feed.getData(feeds["heatpump_flowT"].id, start, end, interval, 1, 1);
+    if (feeds["heatpump_flowT"]!=undefined) { 
+        data["heatpump_flowT"] = feed.getdata(feeds["heatpump_flowT"].id,start,end,interval,1,1);
         powergraph_series.push({label:"Flow T", data:data["heatpump_flowT"], yaxis:2, color:2});
     }
     if (feeds["heatpump_returnT"]!=undefined) {
-        data["heatpump_returnT"] = feed.getData(feeds["heatpump_returnT"].id, start, end, interval, 1, 1);
+        data["heatpump_returnT"] = feed.getdata(feeds["heatpump_returnT"].id,start,end,interval,1,1);
         powergraph_series.push({label:"Return T", data:data["heatpump_returnT"], yaxis:2, color:3});
     }
     if (feeds["outside_temperature"]!=undefined) {
-        data["outside_temperature"] = feed.getData(feeds["outside_temperature"].id, start, end, interval, 1, 1);
+        data["outside_temperature"] = feed.getdata(feeds["outside_temperature"].id,start,end,interval,1,1);
         powergraph_series.push({label:"Outside T", data:data["outside_temperature"], yaxis:2, color:4});
     }
     if (feeds["DHW_cylinderT"]!=undefined) {
-        data["DHW_cylinderT"] = feed.getData(feeds["DHW_cylinderT"].id, start, end, interval, 1, 1);
+        data["DHW_cylinderT"] = feed.getdata(feeds["DHW_cylinderT"].id,start,end,interval,1,1);
         powergraph_series.push({label:"DHW Cylinder T", data:data["DHW_cylinderT"], yaxis:2, color:5});
     }
 
     if (feeds["heatpump_elec"]!=undefined) {
         // Where power feed is available
-        if (heat_enabled) data["heatpump_heat"] = feed.getData(feeds["heatpump_heat"].id, start, end, interval, 1, 1);
+        if (heat_enabled) data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,start,end,interval,1,1);
         if (heat_enabled) powergraph_series.push({label:"Heat Output", data:data["heatpump_heat"], yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
-        if (elec_enabled) data["heatpump_elec"] = feed.getData(feeds["heatpump_elec"].id, start, end, interval, 1, 1);
+        if (elec_enabled) data["heatpump_elec"] = feed.getdata(feeds["heatpump_elec"].id,start,end,interval,1,1);
         if (elec_enabled) powergraph_series.push({label:"Electric Input", data:data["heatpump_elec"], yaxis:1, color:1, lines:{show:true, fill:0.3, lineWidth:0.5}});
     } else {
         // Where no power feed available
@@ -545,7 +557,7 @@ function powergraph_load()
         end = Math.ceil(end/intervalms)*intervalms;
         
         if (heat_enabled) {
-            var tmp = feed.getData(feeds["heatpump_heat_kwh"].id, start, end, interval, 0, 0);
+            var tmp = feed.getdata(feeds["heatpump_heat_kwh"].id,start,end,interval,0,0);
             data["heatpump_heat"] = [];
             for (var z=1; z<tmp.length; z++) {
                 var time = tmp[z-1][0];
@@ -558,7 +570,7 @@ function powergraph_load()
         }
         
         if (elec_enabled) {
-            var tmp = feed.getData(feeds["heatpump_elec_kwh"].id, start, end, interval, 0, 0);
+            var tmp = feed.getdata(feeds["heatpump_elec_kwh"].id,start,end,interval,0,0);
             data["heatpump_elec"] = [];
             for (var z=1; z<tmp.length; z++) {
                 var time = tmp[z-1][0];
@@ -650,7 +662,7 @@ function bargraph_load(start,end)
         var heat_data = [];
         data["heatpump_heat_kwhd"] = [];
         
-        var heat_result = feed.getDailyData(feeds["heatpump_heat_kwh"].id, start, end);
+        var heat_result = feed.getdataDMY(feeds["heatpump_heat_kwh"].id,start,end,"daily")
         // remove nan values from the end.
         for (var z in heat_result) {
           if (heat_result[z][1]!=null) heat_data.push(heat_result[z]);
@@ -688,7 +700,7 @@ function bargraph_load(start,end)
         var elec_data = [];
         data["heatpump_elec_kwhd"] = [];
         
-        var elec_result = feed.getDailyData(feeds["heatpump_elec_kwh"].id, start, end);
+        var elec_result = feed.getdataDMY(feeds["heatpump_elec_kwh"].id,start,end,"daily");
         // remove nan values from the end.
         for (var z in elec_result) {
           if (elec_result[z][1]!=null) elec_data.push(elec_result[z]);
@@ -794,11 +806,8 @@ $(window).resize(function(){
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------
-function appLog(level, message) {
-    if (level == "ERROR") {
-        alert(level + ": " + message);
-    }
-    console.log(level + ": " + message);
+function app_log (level, message) {
+    if (level=="ERROR") alert(level+": "+message);
+    console.log(level+": "+message);
 }
-
 </script>
