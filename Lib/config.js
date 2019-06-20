@@ -17,11 +17,11 @@ var config = {
         
         // Check that the config is complete first otherwise show config interface
         if (!config.check()) {
-            $("#app-setup").show();       // Show setup block
-            $(".ajax-loader").hide();     // Hide AJAX loader
+            config.showConfig();          // Show setup block
             config.UI();                  // Populate setup UI options
+            $(".ajax-loader").hide();     // Hide AJAX loader
         } else {
-            $("#app-container").show();   // Show app container
+            $("#app-block").show();       // Show app container
             $(".ajax-loader").show();     // Show AJAX loader
             
             config.load();                // Merge db config into app config
@@ -30,22 +30,28 @@ var config = {
             config.showapp();
         }
 
-        $("body").on("click",".app-setup",function(){
-            $("#app-container").hide();
-            $("#app-setup").show();
+        $("body").on("click",".config-open",function() {
+            config.showConfig();
             config.UI();
-            config.hideapp();
         });
 
-        $("body").on("click",".app-launch",function(){
+        // don't save and just show app
+        $("body").on("click",".config-close", function(event){
+            config.closeConfig();
+        });
+
+        // save and show app
+        $("body").on("click",".app-launch",function() {
             $(".ajax-loader").show();
-            $("#app-setup").hide();
-            $("#app-container").show();
+            config.closeConfig();
             config.load();
-            if (!config.initialized) { config.initapp(); config.initialized = true; }
+            if (!config.initialized) {
+                config.initapp();
+                config.initialized = true;
+            }
             config.showapp();
         });
-        
+
         $("body").on("click",".app-delete",function(){
             console.log("delete: "+config.name);
             $.ajax({ 
@@ -64,6 +70,32 @@ var config = {
                 } 
             });
         });
+    },
+
+    /**
+     * hide the app config window and show the app.
+     * enable the buttons in the app header
+     */
+    closeConfig: function () {
+        $("#app-block").toggleClass('hide', false).show();
+        $("#app-setup").toggleClass('hide', true);
+        
+        $('.config-open').toggleClass('hide', false);
+        $('.config-close').toggleClass('hide', true);
+        $('#buttons #tabs .btn').attr('disabled',false).css('opacity',1);
+    },
+
+    /**
+     * hide the app window and show the config window.
+     * disable the buttons in the app header
+     */
+    showConfig: function () {
+        $("#app-block").toggleClass('hide', true);
+        $("#app-setup").toggleClass('hide', false).show();
+        
+        $('.config-open').toggleClass('hide', true);
+        $('.config-close').toggleClass('hide', false);
+        $('#buttons #tabs .btn').attr('disabled',true).css('opacity',.2);
     },
 
     UI: function() {
@@ -348,7 +380,11 @@ var config = {
                     result = JSON.parse(result);
                     if (result.success != undefined && !result.success) appLog("ERROR", result.message);
                 } catch (e) {
-                    app.log("ERROR","Could not parse /setconfig reply, error: "+e);
+                    try {
+                        app.log("ERROR","Could not parse /setconfig reply, error: "+e);
+                    } catch (e2) {
+                        console.log(e,e2);
+                    }
                 }
             } 
         });

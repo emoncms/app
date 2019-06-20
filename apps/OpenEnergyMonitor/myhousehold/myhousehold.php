@@ -2,7 +2,7 @@
     global $path, $session;
     $v = 5;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/app.css?v=<?php echo $v; ?>" rel="stylesheet">
+<link href="app.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 
@@ -17,7 +17,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 
-<div id="app-container" class="app hide">
+<div id="app-block" class="app hide">
     <div class="app-block info">
         <div class="app-header">
             <div id="app-title" class="title grow"><?php echo "MY HOUSEHOLD"; ?></div>

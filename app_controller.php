@@ -11,10 +11,10 @@
 
 // no direct access
 defined('EMONCMS_EXEC') or die('Restricted access');
-
+$v = 7;
 function app_controller()
 {
-    global $mysqli,$path,$session,$route,$user,$fullwidth,$app_settings;
+    global $mysqli,$path,$session,$route,$user,$fullwidth,$app_settings,$v;
 
     $fullwidth = true;
     $result = false;
@@ -44,13 +44,10 @@ function app_controller()
             if ($route->subaction) {
                 $app = $route->subaction;
             } else {
-                $app = get("name");
+                $app = urldecode(get("name"));
             }
-            $sidebar = false;
-            
             if (!isset($applist->$app)) {
-                foreach ($applist as $key=>$val) { $app = $key; break; }
-                $sidebar = true;
+                foreach (array_keys($applist) as $key) { $app = $key; break; }
             }
             
             $route->format = "html";
@@ -66,17 +63,13 @@ function app_controller()
                     $config = new stdClass();
                 }
             }
-            
-            $result = "<link href='".$path."Modules/app/Views/css/sidenav.css?v=1' rel='stylesheet'>";
-            $result .= "<link href='".$path."Modules/app/Views/css/light.css?v=1' rel='stylesheet'>";
-            $result .= "<div id='wrapper'>";
-            if ($session['write']) $result .= view("Modules/app/Views/app_sidebar.php",array("apps"=>$applist, "show"=>$sidebar));
+            $result = "<link href='".$path."Modules/app/Views/css/app.css?v=".$v."' rel='stylesheet'>";
+
             if ($app!=false) {
                 $result .= view($dir.$id.".php",array("name"=>$app, "appdir"=>$dir, "config"=>$config, "apikey"=>$apikey));
             } else {
                 $result .= view("Modules/app/Views/app_view.php",array("apps"=>$appavail));
             }
-            $result .= "</div>";
         }
     }
     else if ($route->action == "list" && $session['read']) {
@@ -99,12 +92,8 @@ function app_controller()
     else if ($route->action == "new" && $session['write']) {
         $applist = $appconfig->get_list($session['userid']);
         $route->format = "html";
-        $result = "<link href='".$path."Modules/app/Views/css/sidenav.css?v=1' rel='stylesheet'>";
-        $result .= "<link href='".$path."Modules/app/Views/css/light.css?v=1' rel='stylesheet'>";
-        $result .= "<div id='wrapper'>";
-        $result .= view("Modules/app/Views/app_sidebar.php",array("apps"=>$applist, "show"=>true));
-        $result .= view("Modules/app/Views/app_view.php",array("apps"=>$appavail));
-        $result .= "</div>";
+        $result = "<link href='".$path."Modules/app/Views/css/app.css?v=1' rel='stylesheet'>";
+        $result .= view("Modules/app/Views/app_view.php", array("apps"=>$appavail));
     }
     else if ($route->action == "remove" && $session['write']) {
         $route->format = "json";

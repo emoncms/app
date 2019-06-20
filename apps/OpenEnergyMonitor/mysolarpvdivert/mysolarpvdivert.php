@@ -1,6 +1,6 @@
 <?php
     global $path, $session;
-    $v = 5;
+    $v = 7;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
@@ -15,82 +15,8 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
-    
-<div id="app-container" style="display:none" class="block">
 
-  <div class="col1"><div class="col1-inner">
 
-    <div style="height:20px; border-bottom:1px solid #333; padding-bottom:8px;">
-        <div style="float:right;">
-            <!--<span style="color:#fff; margin-right:10px" >Settings</span>-->
-            <i class="config icon-wrench icon-white" style="cursor:pointer; padding-right:5px"></i>
-        </div>
-    </div>
-
-    <table style="width:100%">
-    <tr>
-        <td style="text-align:center; border:0; width:33%">
-            <div class="electric-title">HOUSE</div>
-            <div class="power-value" style="color:#82cbfc"><span class="housenow">0</span>W</div>
-        </td>
-        <td style="text-align:center; border:0; width:33%">
-            <div class="electric-title">DIVERT</div>
-            <div class="power-value" style="color:#fb7b50"><span class="divertnow">0</span>W</div>
-        </td>
-        <td style="text-align:center; border:0; width:33%">
-            <div class="electric-title">TOTAL USE</div>
-            <div class="power-value" style="color:#0598fa"><span class="usenow">0</span>W</div>
-        </td>
-    </tr>
-    <tr>
-        <td style="text-align:center; border:0; width:33%">
-            <div class="electric-title"><span class="balance-label"></span></div>
-            <div class="power-value"><span class="balance"></span></div>
-        </td>
-        <td style="border:0; width:33%">
-        </td>
-        <td style="text-align:center; border:0; width:33%">
-            <div class="electric-title"><span class="generationtitle">SOLAR</span></div>
-            <div class="power-value" style="color:#dccc1f"><span class="generationnow">0</span>W</div>
-        </td>
-    </tr>
-    </table>
-
-    <br>
-    
-    <div class="visnavblock" style="height:28px; padding-bottom:5px;">
-        <div class="powergraph-navigation">
-            <span class="visnav time" time='1'>1h</span>
-            <span class="visnav time" time='8'>8h</span>
-            <span class="visnav time" time='24'>D</span>
-            <span class="vistimeW visnav time" time='168'>W</span>
-            <span class="vistimeM visnav time" time='720'>M</span>
-            <span class="vistimeY visnav time" time='8760'>Y</span>
-            <span id='zoomin' class='visnav' >+</span>
-            <span id='zoomout' class='visnav' >-</span>
-            <span id='left' class='visnav' ><</span>
-            <span id='right' class='visnav' >></span>
-        </div>
-        
-        <div class="bargraph-navigation" style="display:none">
-            <span class="bargraph-viewall visnav" style="font-size:14px">VIEW ALL</span>
-            <!--
-            <span class="bargraph-viewdaily visnav" style="font-size:14px">DAILY</span>
-            <span class="bargraph-viewmonthly visnav" style="font-size:14px">MONTHLY</span>
-            <span class="bargraph-viewannually visnav" style="font-size:14px">ANNUALLY</span>
-            -->
-        </div>
-        
-        <span class="visnav viewhistory" style="float:right; font-size:14px">VIEW HISTORY</span>
-        <span class="visnav balanceline" style="float:right; font-size:14px">SHOW BALANCE</span>
-    </div>
-
-    <div id="placeholder_bound" style="width:100%; height:500px;">
-        <div id="placeholder" style="height:500px"></div>
-    </div>
-    
-    <br>
-    
 <style type="text/css">
 .statstable {
     width: 100%;
@@ -196,116 +122,176 @@
   font-size:10px;
 }
 </style>
-    
-    <table class="statstable">
-    
-    <tr>
-        <td class="statsbox" colspan="2">
-            <div class="statsbox-inner-unit" style="background: #dccc1f">
-                <div class="statsbox-padded" style="position: relative;">
-                    <div class="statsbox-title"><span class="generationtitle">SOLAR</span></div>
-                    <div><span class="statsbox-value total_generated_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                    <div style="position: absolute; width: 50%; left: 0%; bottom: 0%">
-                        <span class="statsbox-prc divert_total_generated_prc">0</span>
-                    </div>
-                    <div style="position: absolute; width: 50%; left: 50%; bottom: 0%">
-                        <span class="statsbox-prc house_generated_total_generated_prc">0</span>
-                    </div>
-                    <div style="position: absolute; height: 100%; right: 0%; top: 0%">
-                        <div style="display: table; height: 100%; border-spacing: 0px;">
-                        <div style="display: table-cell; vertical-align: middle;">
-                        <span class="statsbox-prc total_export_prc">0</span>
-                        </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </td>
-        
-        <td class="statsbox">
-            <div class="statsbox-inner-arrow">
-                <div class="statsbox-padded statsbox-arrow-right"><span class="statsbox-value total_export_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-            </div>
-        </td>
 
-        <td class="statsbox">
-            <div class="statsbox-padded statsbox-inner-unit" style="background: #d52e2e">
-                <div class="statsbox-title">GRID</div>
-                <div><span class="statsbox-value total_grid_balance_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-            </div>
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="statsbox">
-            <div class="statsbox-inner-arrow">
-                <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_divert_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-            </div>
-        </td>
-        
-        <td class="statsbox">
-            <div class="statsbox-inner-arrow">
-                <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_house_generated_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-            </div>
-        </td>
 
-        <td class="statsbox">
-        </td>
-        
-        <td class="statsbox">
-            <div class="statsbox-inner-arrow">
-                <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_import_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-            </div>
-        </td>
-    </tr>
-    
-    <tr>
-        <td class="statsbox">
-            <div class="statsbox-padded statsbox-inner-unit" style="background: #fb7b50">
-                <div class="statsbox-title">DIVERT</div>
-                <div><span class="statsbox-value total_divert_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-            </div>
-        </td>
-        
-        <td class="statsbox" colspan="3">
-            <div class="statsbox-inner-unit" style="background: #82cbfc">
-                <div class="statsbox-padded" style="position: relative;">
-                    <div class="statsbox-title">HOUSE</div>
-                    <div><span class="statsbox-value total_house_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                    <div style="position: absolute; width: 33.33333%; left: 0%; top: 0%">
-                        <div><span class="statsbox-prc house_generated_house_use_prc">0</span></div>
-                    </div>
-                    <div style="position: absolute; width: 33.33333%; left: 66.66667%; top: 0%">
-                        <div><span class="statsbox-prc total_import_prc">0</span></div>
-                    </div>
-                </div>
-            </div>
-        </td>
-    </tr>
-    
-    </table>
-  </div></div>
-  
-</div>
+<nav id="buttons" class="d-flex justify-content-between">
+    <ul id="tabs" class="nav nav-pills mb-0">
+        <li><button class="viewhistory btn btn-large btn-link btn-inverse" title="<?php echo _('View History') ?>">
+            <span class="d-xs-none"><?php echo _("Hist") ?></span>
+            <span class="d-none d-xs-inline"><?php echo _("History") ?></span>
+        </button></li>
+        <li><button class="balanceline btn btn-large btn-link btn-inverse" title="<?php echo _('Show Balance') ?>">
+            <span class="d-xs-none"><?php echo _("Bal") ?></span>
+            <span class="d-none d-xs-inline"><?php echo _("Balance") ?></span>
+        </li>
+    </ul>
+    <?php include(dirname(__DIR__).'/config-nav.php'); ?>
+</nav>
 
-<div id="app-setup" style="display:none; padding-top:50px" class="block">
-    <h2 class="app-config-title" style="color:#dccc1f">My Solar Divert</h2>
 
-    <div class="app-config-description">
-      <div class="app-config-description-inner">
-        The My Solar with Divert app can be used to explore onsite solar (and optionally wind) generation, self consumption, export and building consumption. It is designed for users who divert some or all of their excess generated power to something. For example an immersion heater or electric car. It shows all of this both in realtime with a moving power graph view and historically with a daily and monthly bargraph.
-        <br><br>
-        <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
-        <br><br>
-        <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.
-        <br><br>
-        <img src="../Modules/app/images/mysolar_app.png" style="width:600px" class="img-rounded">
-      </div>
+<section id="app-block" style="display:none" class="block">
+    <div class="d-flex justify-content-between">
+        <div class="text-xs-center">
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('HOUSE') ?></h5>
+            <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-info"><span class="housenow">0</span>W</h2>
+        </div>
+        <div class="text-xs-center">
+            <h5 class="electric-title mb-0 text-md-larger text-light px-1"><?php echo _('DIVERT') ?></h5>
+            <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-quaternary"><span class="divertnow">-</span>W</h2>
+        </div>
+        <div class="text-xs-center">
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('TOTAL USE') ?></h5>
+            <h2 class="power-value display-md-3 display-lg-2 my-0 text-primary"><span class="usenow"></span>W</h2>
+        </div>
+        <div class="text-xs-center">
+            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="balance-label">-</h5>
+            <h2 class="power-value display-md-3 display-lg-2 my-0 text-success ">
+                <span class="balance"></span>
+            </h2>
+        </div>
+        <div class="text-xs-center">
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('SOLAR') ?></h5>
+            <h2 class="power-value display-md-3 display-lg-2 my-0 text-warning "><span class="generationnow"></span>W</h2>
+        </div>
     </div>
-    <div class="app-config"></div>
-</div>
 
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
+    <?php include(dirname(__DIR__).'/graph-nav.php'); ?>
+    <?php /*
+    <div class="bargraph-navigation">
+        <span class="bargraph-viewall visnav" style="font-size:14px">VIEW ALL</span>
+        <!--
+        <span class="bargraph-viewdaily visnav" style="font-size:14px">DAILY</span>
+        <span class="bargraph-viewmonthly visnav" style="font-size:14px">MONTHLY</span>
+        <span class="bargraph-viewannually visnav" style="font-size:14px">ANNUALLY</span>
+        -->
+    </div>
+    */
+    ?>
+    <div id="placeholder_bound" style="width:100%; height:500px;">
+        <div id="placeholder" style="height:500px"></div>
+    </div>
+        
+    <table class="statstable">
+        <tr>
+            <td class="statsbox" colspan="2">
+                <div class="statsbox-inner-unit" style="background: #dccc1f">
+                    <div class="statsbox-padded" style="position: relative;">
+                        <div class="statsbox-title"><span class="generationtitle">SOLAR</span></div>
+                        <div><span class="statsbox-value total_generated_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                        <div style="position: absolute; width: 50%; left: 0%; bottom: 0%">
+                            <span class="statsbox-prc divert_total_generated_prc">0</span>
+                        </div>
+                        <div style="position: absolute; width: 50%; left: 50%; bottom: 0%">
+                            <span class="statsbox-prc house_generated_total_generated_prc">0</span>
+                        </div>
+                        <div style="position: absolute; height: 100%; right: 0%; top: 0%">
+                            <div style="display: table; height: 100%; border-spacing: 0px;">
+                            <div style="display: table-cell; vertical-align: middle;">
+                            <span class="statsbox-prc total_export_prc">0</span>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </td>
+            
+            <td class="statsbox">
+                <div class="statsbox-inner-arrow">
+                    <div class="statsbox-padded statsbox-arrow-right"><span class="statsbox-value total_export_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                </div>
+            </td>
+
+            <td class="statsbox">
+                <div class="statsbox-padded statsbox-inner-unit" style="background: #d52e2e">
+                    <div class="statsbox-title">GRID</div>
+                    <div><span class="statsbox-value total_grid_balance_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                </div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="statsbox">
+                <div class="statsbox-inner-arrow">
+                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_divert_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                </div>
+            </td>
+            
+            <td class="statsbox">
+                <div class="statsbox-inner-arrow">
+                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_house_generated_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                </div>
+            </td>
+
+            <td class="statsbox">
+            </td>
+            
+            <td class="statsbox">
+                <div class="statsbox-inner-arrow">
+                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_import_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                </div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="statsbox">
+                <div class="statsbox-padded statsbox-inner-unit" style="background: #fb7b50">
+                    <div class="statsbox-title">DIVERT</div>
+                    <div><span class="statsbox-value total_divert_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                </div>
+            </td>
+            
+            <td class="statsbox" colspan="3">
+                <div class="statsbox-inner-unit" style="background: #82cbfc">
+                    <div class="statsbox-padded" style="position: relative;">
+                        <div class="statsbox-title">HOUSE</div>
+                        <div><span class="statsbox-value total_house_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                        <div style="position: absolute; width: 33.33333%; left: 0%; top: 0%">
+                            <div><span class="statsbox-prc house_generated_house_use_prc">0</span></div>
+                        </div>
+                        <div style="position: absolute; width: 33.33333%; left: 66.66667%; top: 0%">
+                            <div><span class="statsbox-prc total_import_prc">0</span></div>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</section>
+
+
+<section id="app-setup" class="hide pb-3">
+    <!-- instructions and settings -->
+    <div class="px-3">
+        <div class="row-fluid">
+            <div class="span9 xappconfig-description">
+                <div class="xappconfig-description-inner text-light">
+                    <h2 class="appconfig-title text-warning"><?php echo _('My Solar Divert'); ?></h2>
+                    <p class="lead">
+                    The My Solar with Divert app can be used to explore onsite solar (and optionally wind) generation, self consumption, export and building consumption.</p>
+                    <p>It is designed for users who divert some or all of their excess generated power to something. For example an immersion heater or electric car. It shows all of this both in realtime with a moving power graph view and historically with a daily and monthly bargraph.
+                    </p>
+                    <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
+                    <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                    <img src="../Modules/app/images/mysolar_app.png" class="d-none d-sm-inline-block">
+                </div>
+            </div>
+            <div class="span3 app-config pt-3"></div>
+        </div>
+    </div>
+</section>
+
+
+<div class="ajax-loader"></div>
 
 <script>
 
@@ -323,15 +309,15 @@ var feed = new Feed(apikey);
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"House or building use in watts"},
+    "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"Total use in watts (including diversion)"},
     "solar":{"type":"feed", "autoname":"solar", "engine":"5", "description":"Solar pv generation in watts"},
     "wind":{"optional":true, "type":"feed", "autoname":"wind", "engine":"5", "description":"Wind generation in watts"},
     "divert":{"type":"feed", "autoname":"divert", "engine":"5", "description":"Immersion usage in watts"},
     //"export":{"type":"feed", "autoname":"export", "engine":5, "description":"Exported solar in watts"},
-    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative use in kWh"},
+    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative total use in kWh (including diversion)"},
     "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5, "description":"Cumulative solar generation in kWh"},
     "wind_kwh":{"optional":true, "type":"feed", "autoname":"wind_kwh", "engine":5, "description":"Cumulative wind generation in kWh"},
-    "divert_kwh":{"optional":true, "type":"feed", "autoname":"divert_kwh", "engine":5, "description":"Cumulative divert usage in kWh"},
+    "divert_kwh":{"optional":true, "type":"feed", "autoname":"divert_kwh", "engine":5, "description":"Cumulative divert energy in kWh"},
     "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "engine":5, "description":"Cumulative grid import in kWh"},
     //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
 }
@@ -387,9 +373,9 @@ function init()
     {
         console.log("INIT BARGRAPH");
         init_bargraph();
-        $(".viewhistory").show();
+        // $(".viewhistory").show();
     } else {
-        $(".viewhistory").hide();
+        // $(".viewhistory").hide();
     }
     
     // The first view is the powergraph, we load the events for the power graph here.
@@ -409,39 +395,29 @@ function init()
         draw();
     });
     
-    $(".balanceline").click(function () { 
-        if ($(this).html()=="SHOW BALANCE") {
-            show_balance_line = 1;
-            draw();
-            $(this).html("HIDE BALANCE");
-        } else {
-            show_balance_line = 0;
-            draw();
-            $(this).html("SHOW BALANCE");
-        }
+    $(".balanceline").click(function () {
+        $btn = $(this);
+        $btn.toggleClass('active');
+        $('.viewhistory').toggleClass('active', false);
+
+        show_balance_line = $btn.is('.active') ? 1 : 0;
+        draw();
     });
     
-    $(".viewhistory").click(function () { 
-        if ($(this).html()=="VIEW HISTORY") {
-            viewmode = "bargraph";
-            $(".balanceline").hide();
-            $(".powergraph-navigation").hide();
-            $(".bargraph-navigation").show();
-            
-            draw();
-            setTimeout(function() { $(".viewhistory").html("POWER VIEW"); },80);
-        } else {
-            
-            viewmode = "powergraph";
-            $(".balanceline").show();
-            $(".bargraph-navigation").hide();
-            $(".powergraph-navigation").show();
-            
-            draw();
+    $(".viewhistory").click(function () {
+        $btn = $(this);
+        $btn.toggleClass('active');
+
+        $(".powergraph-navigation").show();
+        $('.balanceline').attr('disabled', $btn.is('.active'));
+
+        viewmode = $btn.is('.active') ? 'bargraph' : 'powergraph';
+        if(viewmode==='powergraph') {
             powergraph_events();
-            setTimeout(function() { $(".viewhistory").html("VIEW HISTORY"); },80);
         }
-    });        
+
+        draw();
+    });
 }
 
 function show() 
@@ -450,9 +426,9 @@ function show()
     
     if (config.app.solar_kwh.value && config.app.use_kwh.value && config.app.import_kwh.value && config.app.divert_kwh.value) {
         if (!bargraph_initialized) init_bargraph();
-        $(".viewhistory").show();
+        // $(".viewhistory").show();
     } else {
-        $(".viewhistory").hide();
+        // $(".viewhistory").hide();
     }
     
     resize();
@@ -479,52 +455,52 @@ function resize()
     placeholder_bound.height(height);
     placeholder.height(height-top_offset);
     
-    if (width<=500) {
-        $(".electric-title").css("font-size","16px");
-        $(".power-value").css("font-size","32px");
-        $(".statstable").css("border-spacing","4px");
-        $(".statsbox-title").css("font-size","14px");
-        $(".statsbox-title").css("padding-bottom","4px");
-        $(".statsbox-value").css("font-size","20px");
-        $(".statsbox-units").css("font-size","12px");
-        $(".statsbox-units").hide();
-        $(".statsbox-prc").css("font-size","12px");
-        $(".statsbox-padded").css("padding","4px");
-        $(".balanceline").hide();
-        $(".vistimeW").hide();
-        $(".vistimeM").hide();
-        $(".vistimeY").hide();
-    } else if (width<=724) {
-        $(".electric-title").css("font-size","18px");
-        $(".power-value").css("font-size","52px");
-        $(".statstable").css("border-spacing","8px");
-        $(".statsbox-title").css("font-size","16px");
-        $(".statsbox-title").css("padding-bottom","8px");
-        $(".statsbox-value").css("font-size","22px");
-        $(".statsbox-units").css("font-size","14px");
-        $(".statsbox-units").show();
-        $(".statsbox-prc").css("font-size","14px");
-        $(".statsbox-padded").css("padding","8px");
-        $(".balanceline").show();
-        $(".vistimeW").show();
-        $(".vistimeM").show();
-        $(".vistimeY").show();
-    } else {
-        $(".electric-title").css("font-size","22px");
-        $(".power-value").css("font-size","85px");
-        $(".statstable").css("border-spacing","10px");
-        $(".statsbox-title").css("font-size","20px");
-        $(".statsbox-title").css("padding-bottom","15px");
-        $(".statsbox-value").css("font-size","36px");
-        $(".statsbox-units").css("font-size","16px");
-        $(".statsbox-units").show();
-        $(".statsbox-prc").css("font-size","16px");
-        $(".statsbox-padded").css("padding","10px");
-        $(".balanceline").show();
-        $(".vistimeW").show();
-        $(".vistimeM").show();
-        $(".vistimeY").show();
-    }
+    // if (width<=500) {
+    //     $(".electric-title").css("font-size","16px");
+    //     $(".power-value").css("font-size","32px");
+    //     $(".statstable").css("border-spacing","4px");
+    //     $(".statsbox-title").css("font-size","14px");
+    //     $(".statsbox-title").css("padding-bottom","4px");
+    //     $(".statsbox-value").css("font-size","20px");
+    //     $(".statsbox-units").css("font-size","12px");
+    //     $(".statsbox-units").hide();
+    //     $(".statsbox-prc").css("font-size","12px");
+    //     $(".statsbox-padded").css("padding","4px");
+    //     $(".balanceline").hide();
+    //     $(".vistimeW").hide();
+    //     $(".vistimeM").hide();
+    //     $(".vistimeY").hide();
+    // } else if (width<=724) {
+    //     $(".electric-title").css("font-size","18px");
+    //     $(".power-value").css("font-size","52px");
+    //     $(".statstable").css("border-spacing","8px");
+    //     $(".statsbox-title").css("font-size","16px");
+    //     $(".statsbox-title").css("padding-bottom","8px");
+    //     $(".statsbox-value").css("font-size","22px");
+    //     $(".statsbox-units").css("font-size","14px");
+    //     $(".statsbox-units").show();
+    //     $(".statsbox-prc").css("font-size","14px");
+    //     $(".statsbox-padded").css("padding","8px");
+    //     $(".balanceline").show();
+    //     $(".vistimeW").show();
+    //     $(".vistimeM").show();
+    //     $(".vistimeY").show();
+    // } else {
+    //     $(".electric-title").css("font-size","22px");
+    //     $(".power-value").css("font-size","85px");
+    //     $(".statstable").css("border-spacing","10px");
+    //     $(".statsbox-title").css("font-size","20px");
+    //     $(".statsbox-title").css("padding-bottom","15px");
+    //     $(".statsbox-value").css("font-size","36px");
+    //     $(".statsbox-units").css("font-size","16px");
+    //     $(".statsbox-units").show();
+    //     $(".statsbox-prc").css("font-size","16px");
+    //     $(".statsbox-padded").css("padding","10px");
+    //     $(".balanceline").show();
+    //     $(".vistimeW").show();
+    //     $(".vistimeM").show();
+    //     $(".vistimeY").show();
+    // }
     draw();
 }
 
@@ -888,7 +864,7 @@ function load_bargraph(start,end) {
     var divert_kwh_data = feed.getDailyData(config.app.divert_kwh.value, start, end);
     var import_kwh_data = feed.getDailyData(config.app.import_kwh.value, start, end);
     var wind_kwh_data = [];
-    if (has_wind) {
+    if (has_wind && config.wind_kwh) {
         wind_kwh_data = feed.getDailyData(config.wind_kwh.value, start, end);
     }
     
@@ -908,7 +884,7 @@ function load_bargraph(start,end) {
         if (solar_kwh_data[day][1]==null || solar_kwh_data[day-1][1]==null) solar_kwh = null;
         
         var wind_kwh = null;
-        if (has_wind) {
+        if (has_wind && wind_kwh_data[day]) {
             var wind_kwh = wind_kwh_data[day][1] - wind_kwh_data[day-1][1];
             if (wind_kwh_data[day][1]==null || wind_kwh_data[day-1][1]==null) wind_kwh = null;
         }
@@ -916,8 +892,10 @@ function load_bargraph(start,end) {
         var use_kwh = use_kwh_data[day][1] - use_kwh_data[day-1][1];
         if (use_kwh_data[day][1]==null || use_kwh_data[day-1][1]==null) use_kwh = null;
         
-        var divert_kwh = divert_kwh_data[day][1] - divert_kwh_data[day-1][1];
-        if (divert_kwh_data[day][1]==null || divert_kwh_data[day-1][1]==null) divert_kwh = null;
+        if(divert_kwh_data[day]) {
+            var divert_kwh = divert_kwh_data[day][1] - divert_kwh_data[day-1][1];
+            if (divert_kwh_data[day][1]==null || divert_kwh_data[day-1][1]==null) divert_kwh = null;
+        }
         
         var import_kwh = import_kwh_data[day][1] - import_kwh_data[day-1][1];
         if (import_kwh_data[day][1]==null || import_kwh_data[day-1][1]==null) import_kwh = null;
@@ -1074,10 +1052,10 @@ function bargraph_events() {
             view.start = solar_kwhd_data[z][0];
             view.end = view.start + 86400*1000;
 
-            $(".balanceline").show();
-            $(".bargraph-navigation").hide();
+            $(".balanceline").attr('disabled',false);
+            // $(".bargraph-navigation").hide();
             $(".powergraph-navigation").show();
-            $(".viewhistory").html("VIEW HISTORY");
+            
             $('#placeholder').unbind("plotclick");
             $('#placeholder').unbind("plothover");
             $('#placeholder').unbind("plotselected");
