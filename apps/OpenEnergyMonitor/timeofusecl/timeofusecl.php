@@ -5,6 +5,7 @@
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />    
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
 
@@ -29,10 +30,10 @@
   <div class="col1"><div class="col1-inner">
   
     <div class="block-bound">
-      <div class="bluenav app-setup"><i class="icon-wrench icon-white"></i></div>
-      <div class="bluenav viewcostenergy">ENERGY MODE</div>
-      <!--<div class="bluenav cost">Cost</div>
-      <div class="bluenav energy">Energy</div>-->
+      <div class="appnav app-setup"><i class="icon-wrench icon-white"></i></div>
+      <div class="appnav viewcostenergy">ENERGY MODE</div>
+      <!--<div class="appnav cost">Cost</div>
+      <div class="appnav energy">Energy</div>-->
       <div class="block-title">TIME OF USE</div>
     </div>
 
@@ -57,21 +58,21 @@
     <div class="block-bound">
     
       <div class="bargraph-navigation">
-        <!--<div class="bluenav bargraph-other">OTHER</div>-->
-        <div class="bluenav bargraph-alltime">ALL TIME</div>
-        <div class="bluenav bargraph-month">MONTH</div>
-        <div class="bluenav bargraph-week">WEEK</div>
+        <!--<div class="appnav bargraph-other">OTHER</div>-->
+        <div class="appnav bargraph-alltime">ALL TIME</div>
+        <div class="appnav bargraph-month">MONTH</div>
+        <div class="appnav bargraph-week">WEEK</div>
       </div>
       
       <div class="powergraph-navigation" style="display:none">
-        <div class="bluenav viewhistory">VIEW HISTORY</div>
-        <span class="bluenav" id="right" >&gt;</span>
-        <span class="bluenav" id="left" >&lt;</span>
-        <span class="bluenav" id="zoomout" >-</span>
-        <span class="bluenav" id="zoomin" >+</span>
-        <span class="bluenav time" time='720'>M</span>
-        <span class="bluenav time" time='168'>W</span>
-        <span class="bluenav time" time='24'>D</span>
+        <div class="appnav viewhistory">VIEW HISTORY</div>
+        <span class="appnav" id="right" >&gt;</span>
+        <span class="appnav" id="left" >&lt;</span>
+        <span class="appnav" id="zoomout" >-</span>
+        <span class="appnav" id="zoomin" >+</span>
+        <span class="appnav time" time='720'>M</span>
+        <span class="appnav time" time='168'>W</span>
+        <span class="appnav time" time='24'>D</span>
       </div>
         
       <div class="block-title">HISTORY</div>
@@ -85,7 +86,7 @@
     </div>
           
     <div id="power-graph-footer" style="background-color:#eee; color:#333; display:none">
-      <div id='advanced-toggle' class='bluenav' >SHOW DETAIL</div>
+      <div id='advanced-toggle' class='appnav' >SHOW DETAIL</div>
  
        <div style="padding:10px;">
         kWh in window: <b id="window-kwh"></b> <b>kWh</b>

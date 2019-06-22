@@ -134,16 +134,6 @@ if (!sessionwrite) $(".config-open").hide();
 var feed = new Feed(apikey);
 
 // ----------------------------------------------------------------------
-// Display
-// ----------------------------------------------------------------------
-$("body").css('background-color','#222');
-$(window).ready(function(){
-    $("#footer").css('background-color','#181818');
-    $("#footer").css('color','#999');
-});
-if (!sessionwrite) $(".config-open").addClass('hide');
-
-// ----------------------------------------------------------------------
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {

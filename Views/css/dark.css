@@ -35,24 +35,9 @@ Applications
 body {
   background-color: #222;
 }
-@media (max-width: 767px) {
-  body {padding:0};
-}
-
-#footer {
-  background-color: #181818;
-  color: #999;
-}
-
-.navbar-fixed-top {
-  margin-left: 0px;
-  margin-right: 0px;
-}
-
-.container-fluid { padding: 0 }
 
 #app-block {
-  padding: 10px;
+  padding: 0 0.7rem;
 }
 
 .app-title {
@@ -69,7 +54,74 @@ body {
   line-height: 1.1;
 }
 
-/*------------------------------------------------------------------*/
+h1 small,
+h2 small,
+h3 small,
+h4 small,
+h5 small,
+h6 small {
+    color: inherit;
+    font-weight: inherit;
+}
+
+#buttons {
+    padding: .22rem 0;
+    border-bottom: 1px solid #333;
+    margin-bottom: .4rem;
+}
+#buttons .btn{
+    opacity: .6;
+    transition: opacity .3s linear;
+    color: #aaa!important;
+}
+#buttons .btn:hover,
+#buttons .btn:active{
+    opacity: 1;
+}
+#buttons .btn.active{
+    color: white!important;
+    opacity: .8;
+    font-weight: bold;
+    text-decoration: underline;
+}
+.chart-placeholder > *{
+    height: 23rem;
+}
+.chart-placeholder.double {
+    width: 100%;
+}
+.chart-placeholder.double > *{
+    height: 10rem;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+/* fonts */
+.display-4{
+    font-size: 3.25rem;
+}
+.display-3{
+    font-size: 4.5rem;
+}
+.display-2{
+    font-size: 5.5rem;
+}
+[class*="display-"]{
+    line-height: 1.2;
+}
+.font-weight-normal{
+    font-weight: normal!important;
+}
+
+body.app .container-fluid {
+    padding-bottom: 1rem!important;
+}
+
+.btn[disabled],
+.btn[disabled]:hover {
+    color: #616161;
+    opacity: .8;
+    background: rgba(6, 153, 250, 0.06);
+}
 
 .visnavblock {
   color:#0699fa;
@@ -77,79 +129,165 @@ body {
 }
 
 .visnav {
-  margin-right:4px;
-  padding-left:8px;
-  padding-right:8px;
-  min-width:20px;
   background-color:rgba(6,153,250,0.1);
-  line-height:28px;
-  float:left;
-  text-align:center;
+  flex-grow: 1;
 }
 
+.visnav:focus,
+.visnav:active,
 .visnav:hover {
   color:#0699fa;
-  cursor: pointer;
+  text-decoration: none!important;
 }
 
-/*------------------------------------------------------------------*/
-
-h2 {
-  color:#fff;
+#breakdown {
+  margin: 0 auto;
 }
 
 .appbox {
-  width:20%;
-  text-align:center;
-  padding:10px;
-  vertical-align:top;
+  text-align: center;
+  vertical-align: top;
+}
+.appbox .appbox-value {
+    line-height: 1.3em!important;
 }
 
-.appbox-title {
-  color: #aaa;
-  font-weight:bold;
-  font-size:20px;
-  padding-bottom:15px;
+.navbar-fixed-top {
+  margin-left: 0px;
+  margin-right: 0px;
 }
 
-.appbox-value {
-  color: #fff;
-  font-weight:bold;
-  font-size:36px;
+#wrap main.content-container{
+  padding-bottom: 0rem!important;
 }
 
-.appbox-units {
-  color: #fff;
-  font-weight:bold;
-  font-size:16px;
+#footer {
+  margin-left: 0px;
+  margin-right: 0px;
+  background-color: #181818;
+  color: #999;
 }
 
-/*------------------------------------------------------------------*/
+/* -------------------------------------------------------------------
+   MOBILE FIRST:
 
-.col1 {
-  width:100%;
-}
-.col1-inner { padding:10px; }
-
-.col2 {
-  width:50%;
-  float:left;
-}
-.col2-inner { padding:10px; }
-
-@media (max-width: 450px) {
-  .row { padding:10px; }
-  .appbox { padding:5px }
-  .appbox-value { font-size:28px }
-  .appbox-title { font-size:16px }
-
-  #app-block { padding:5px; }
-  .col2 { width:100%; }
-  .col1-inner { padding:5px; }
-  .col2-inner { padding:5px; }
+   Extra small devices (portrait phones, 320px and up)
+--------------------------------------------------------------------*/
+@media (min-width: 320px) {
+    .text-xs-right {
+        text-align: right!important;
+    }
+    .text-xs-center {
+        text-align: center!important;
+    }
+    .d-xs-none {
+        display: none;
+    }
+    .d-xs-inline-block {
+        display: inline-block;
+    }
 }
 
-@media (min-width: 450px) and (max-width: 960px) {
-  .col2 { width:100%; }
+/* -------------------------------------------------------------------
+   Small devices (landscape phones, 576px and up)
+--------------------------------------------------------------------*/
+@media (min-width: 576px) {
+    #app-block {
+        /* padding: 0rem; */
+    }
+    .visnav {
+        flex-grow: 0;
+        min-width: 3em;
+    }
+    .d-sm-none {
+        display: none;
+    }
+    .d-sm-inline-block {
+        display: inline-block;
+    }
+    .d-xs-inline-block {
+        display: inline-block;
+    }
+    .display-sm-3{
+        font-size: 4.5rem;
+    }
+    .display-sm-4 {
+        font-size: 3.25rem;
+    }
+    h3.text-sm-larger{
+      font-size: 1.78rem;
+    }
+    h5.text-sm-larger{
+        font-size: 1.34rem;
+    }
 }
-@media (min-width: 960px) { }
+
+/* -------------------------------------------------------------------
+   Medium devices (tablets, 768px and up)
+--------------------------------------------------------------------*/
+@media (min-width: 768px) {
+    .display-md-3{
+        font-size: 4.5rem;
+    }
+    .d-md-none {
+        display: none;
+    }
+    .d-md-inline-block {
+        display: inline-block;
+    }
+    h3.text-md-larger{
+        font-size: 1.78rem;
+    }
+    h5.text-md-larger{
+        font-size: 1.34rem;
+    }
+}
+
+/* -------------------------------------------------------------------
+   Large devices (desktops, 992px and up)
+--------------------------------------------------------------------*/
+@media (min-width: 992px) {
+    .chart-placeholder > *{
+        height: 20rem;
+    }
+    .chart-placeholder.double{
+        width: 48.5%;
+    }
+    .chart-placeholder.double > *{
+        height: 18.77rem;
+        width: 100%;
+    }
+    h4.text-lg-larger{
+        font-size: 1.5rem;
+    }
+    h5.text-lg-larger{
+        font-size: 1.34rem;
+    }
+    .display-3.text-lg-larger{
+        font-size: 5.5rem;
+    }
+    .mb-lg-3{
+        margin-bottom: .3em!important;
+    }
+    .py-lg-3,.pt-lg-3{
+        padding-top: calc(var(--spacer) * .8)
+    }
+    .py-lg-3,.pb-lg-3{
+        padding-bottom: calc(var(--spacer) * .8)
+    }
+    .display-lg-2{
+        font-size: 5.5rem;
+    }
+    #breakdown {
+        max-width: 80%;
+    }
+}
+
+/* -------------------------------------------------------------------
+   Extra large devices (large desktops, 1200px and up)
+--------------------------------------------------------------------*/
+@media (min-width: 1200px) {
+    #breakdown {
+        max-width: 34rem;
+    }
+}

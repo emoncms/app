@@ -4,6 +4,7 @@
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
@@ -37,7 +38,7 @@ padding:10px;
         <div class="col1">
             <div class="col1-inner">
                 <div class="block-bound">
-                    <div class="bluenav app-setup">
+                    <div class="appnav app-setup">
                         <i class="icon-wrench icon-white"></i>
                     </div>
                     <div class="block-title">
@@ -54,19 +55,19 @@ padding:10px;
             <div class="col1-inner">
                 <div class="block-bound">
                     <div class="bargraph-navigation">
-                        <div class="bluenav bargraph-alltime">
+                        <div class="appnav bargraph-alltime">
                             ALL TIME
                         </div>
-                        <div class="bluenav bargraph-year">
+                        <div class="appnav bargraph-year">
                             YEAR
                         </div>
-                        <div class="bluenav bargraph-month">
+                        <div class="appnav bargraph-month">
                             MONTH
                         </div>
-                        <div class="bluenav bargraph-week">
+                        <div class="appnav bargraph-week">
                             WEEK
                         </div>
-                        <div class="bluenav bargraph-day">
+                        <div class="appnav bargraph-day">
                             DAY
                         </div>
                     </div>
@@ -258,7 +259,7 @@ function update() {
 }
 
 function clearHighlight() {
-    $(".bargraph-navigation .bluenav").removeClass("selected");
+    $(".bargraph-navigation .appnav").removeClass("selected");
 }
 
 

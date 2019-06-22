@@ -5,6 +5,7 @@
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />    
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
 
@@ -88,22 +89,22 @@
     <div class="block-bound">
     
       <div class="bargraph-navigation">
-        <!--<div class="bluenav bargraph-other">OTHER</div>-->
-        <div class="bluenav bargraph-alltime">ALL TIME</div>
-        <div class="bluenav bargraph-month">MONTH</div>
-        <div class="bluenav bargraph-week">WEEK</div>
+        <!--<div class="appnav bargraph-other">OTHER</div>-->
+        <div class="appnav bargraph-alltime">ALL TIME</div>
+        <div class="appnav bargraph-month">MONTH</div>
+        <div class="appnav bargraph-week">WEEK</div>
       </div>
       
       <div class="powergraph-navigation" style="display:none">
-        <div class="bluenav viewhistory">BACK</div>
-        <span class="bluenav" id="right" >></span>
-        <span class="bluenav" id="left" ><</span>
-        <span class="bluenav" id="zoomout" >-</span>
-        <span class="bluenav" id="zoomin" >+</span>
-        <span class="bluenav time dmy" time='720'>M</span>
-        <span class="bluenav time dmy" time='168'>W</span>
-        <span class="bluenav time" time='24'>D</span>
-        <span class="bluenav time" time='1'>H</span>
+        <div class="appnav viewhistory">BACK</div>
+        <span class="appnav" id="right" >></span>
+        <span class="appnav" id="left" ><</span>
+        <span class="appnav" id="zoomout" >-</span>
+        <span class="appnav" id="zoomin" >+</span>
+        <span class="appnav time dmy" time='720'>M</span>
+        <span class="appnav time dmy" time='168'>W</span>
+        <span class="appnav time" time='24'>D</span>
+        <span class="appnav time" time='1'>H</span>
       </div>
         
       <div class="block-title">HISTORY</div>       
@@ -116,7 +117,7 @@
     </div>
           
     <div style="background-color:#eee; color:#333">
-      <div id='advanced-toggle' class='bluenav' style="display:none" >SHOW DETAIL</div>
+      <div id='advanced-toggle' class='appnav' style="display:none" >SHOW DETAIL</div>
       
       <div style="padding:10px;">
         COP in window: <b id="window-cop"></b>

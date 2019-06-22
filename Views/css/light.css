@@ -30,23 +30,8 @@ Application
 body {
   background-color: #f5f5f5;
 }
-@media (max-width: 767px) {
-  body {padding:0};
-}
-
-#footer {
-  background-color: #e8e8e8;
-}
-
-.navbar-fixed-top {
-  margin-left: 0px;
-  margin-right: 0px;
-}
-
-.container-fluid {padding:0}
-
 #app-block {
-  padding: 10px;
+  padding:10px;
 }
 
 .app-title {
@@ -63,7 +48,7 @@ body {
 }
 
 .block-bound {
-  color:#fff;
+  color: #fff;
   background-color: #ccc;
 }
 
@@ -72,9 +57,7 @@ body {
   padding:10px;
 }
 
-/* --------------------------------------------------------*/
-
-.bluenav {
+.appnav {
   float:right;
   display:block;
   border-left: 1px solid rgba(255,255,255,0.5);
@@ -86,11 +69,9 @@ body {
   text-align:center;
 }
 
-.bluenav:hover {
+.appnav:hover {
   background-color:rgba(255,255,255,0.2);
 }
-
-/* --------------------------------------------------------*/
 
 .col1 {
   width:100%;
@@ -103,9 +84,25 @@ body {
 }
 .col2-inner { padding:10px; }
 
+.container-fluid { padding:0 }
+
+.navbar-fixed-top {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+#footer {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+@media (max-width: 767px) {
+  body {padding:0};
+}
+
 @media (max-width: 450px) {
   .row { padding:10px; }
-  .bluenav { font-size:12px; padding:8px; min-width:15px; }
+  .appnav { font-size:12px; padding:8px; min-width:15px; }
   .block-title { font-size:12px; padding:8px; }
   .dmy {display:none}
   
@@ -114,8 +111,9 @@ body {
   .col1-inner { padding:5px; }
   .col2-inner { padding:5px; }
 }
-    
+
 @media (min-width: 450px) and (max-width: 960px) { 
   .col2 { width:100%; } 
 }
+
 @media (min-width: 960px) { }
