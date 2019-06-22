@@ -142,26 +142,26 @@
 <section id="app-block" style="display:none" class="block">
     <div class="d-flex justify-content-between">
         <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('HOUSE') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-info"><span class="housenow">0</span>W</h2>
+            <h5 class="app-title mb-0 text-md-larger text-light"><?php echo _('HOUSE') ?></h5>
+            <h2 class="app-title-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-info"><span class="housenow">0</span>W</h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light px-1"><?php echo _('DIVERT') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-quaternary"><span class="divertnow">-</span>W</h2>
+            <h5 class="app-title mb-0 text-md-larger text-light px-1"><?php echo _('DIVERT') ?></h5>
+            <h2 class="app-title-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-quaternary"><span class="divertnow">-</span>W</h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('TOTAL USE') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-primary"><span class="usenow"></span>W</h2>
+            <h5 class="app-title mb-0 text-md-larger text-light"><?php echo _('TOTAL USE') ?></h5>
+            <h2 class="app-title-value display-md-3 display-lg-2 my-0 text-primary"><span class="usenow"></span>W</h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="balance-label">-</h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-success ">
+            <h5 class="app-title mb-0 text-md-larger text-light"><span class="balance-label">-</h5>
+            <h2 class="app-title-value display-md-3 display-lg-2 my-0 text-success ">
                 <span class="balance"></span>
             </h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('SOLAR') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-warning "><span class="generationnow"></span>W</h2>
+            <h5 class="app-title mb-0 text-md-larger text-light"><?php echo _('SOLAR') ?></h5>
+            <h2 class="app-title-value display-md-3 display-lg-2 my-0 text-warning "><span class="generationnow"></span>W</h2>
         </div>
     </div>
 
@@ -273,15 +273,15 @@
     <!-- instructions and settings -->
     <div class="px-3">
         <div class="row-fluid">
-            <div class="span9 xappconfig-description">
-                <div class="xappconfig-description-inner text-light">
-                    <h2 class="appconfig-title text-warning"><?php echo _('My Solar Divert'); ?></h2>
+            <div class="span9 xapp-config-description">
+                <div class="xapp-config-description-inner text-light">
+                    <h2 class="app-config-title text-warning"><?php echo _('My Solar Divert'); ?></h2>
                     <p class="lead">
                     The My Solar with Divert app can be used to explore onsite solar (and optionally wind) generation, self consumption, export and building consumption.</p>
                     <p>It is designed for users who divert some or all of their excess generated power to something. For example an immersion heater or electric car. It shows all of this both in realtime with a moving power graph view and historically with a daily and monthly bargraph.
                     </p>
-                    <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-                    <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                    <p><strong class="text-light">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
+                    <p><strong class="text-light">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
                     <img src="../Modules/app/images/mysolar_app.png" class="d-none d-sm-inline-block">
                 </div>
             </div>
@@ -301,7 +301,7 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".app-setup").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 var feed = new Feed(apikey);
 
@@ -456,8 +456,8 @@ function resize()
     placeholder.height(height-top_offset);
     
     // if (width<=500) {
-    //     $(".electric-title").css("font-size","16px");
-    //     $(".power-value").css("font-size","32px");
+    //     $(".app-title").css("font-size","16px");
+    //     $(".app-title-value").css("font-size","32px");
     //     $(".statstable").css("border-spacing","4px");
     //     $(".statsbox-title").css("font-size","14px");
     //     $(".statsbox-title").css("padding-bottom","4px");
@@ -471,8 +471,8 @@ function resize()
     //     $(".vistimeM").hide();
     //     $(".vistimeY").hide();
     // } else if (width<=724) {
-    //     $(".electric-title").css("font-size","18px");
-    //     $(".power-value").css("font-size","52px");
+    //     $(".app-title").css("font-size","18px");
+    //     $(".app-title-value").css("font-size","52px");
     //     $(".statstable").css("border-spacing","8px");
     //     $(".statsbox-title").css("font-size","16px");
     //     $(".statsbox-title").css("padding-bottom","8px");
@@ -486,8 +486,8 @@ function resize()
     //     $(".vistimeM").show();
     //     $(".vistimeY").show();
     // } else {
-    //     $(".electric-title").css("font-size","22px");
-    //     $(".power-value").css("font-size","85px");
+    //     $(".app-title").css("font-size","22px");
+    //     $(".app-title-value").css("font-size","85px");
     //     $(".statstable").css("border-spacing","10px");
     //     $(".statsbox-title").css("font-size","20px");
     //     $(".statsbox-title").css("padding-bottom","15px");

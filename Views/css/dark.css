@@ -1,28 +1,4 @@
 /* -------------------------------------------------------------------
-Side navigation
---------------------------------------------------------------------*/
-.sidenav {
-  background: #333;
-}
-
-/* The navigation menu links */
-.sidenav a {
-  color: #fff;
-}
-
-/* When you mouse over the navigation links, change their color */
-.sidenav a:hover, .offcanvas a:focus{
-  color: #f1f1f1;
-}
-
-.appmenu li:hover {
-  background-color: #444;
-}
-.appmenu .icon-app-new {
-  background-image: url("../../../../Lib/bootstrap/img/glyphicons-halflings-white.png");
-}
-
-/* -------------------------------------------------------------------
 Config
 --------------------------------------------------------------------*/
 .app-config-box {
@@ -74,28 +50,18 @@ body {
 
 .container-fluid { padding: 0 }
 
-/*------------------------------------------------------------------*/
-
-.ajax-loader{
-  width:32px;
-  height:32px;
-  position:fixed;
-  top:50%;
-  left:50%;
-  margin-top:-16px; /* negative half the size of height */
-  margin-left:-16px; /* negative half the size of width */
+#app-block {
+  padding:10px;
 }
 
-/*------------------------------------------------------------------*/
-
-.electric-title {
+.app-title {
   font-weight:bold;
   font-size:22px;
   color:#aaa;
   padding-top:20px;
 }
 
-.power-value {
+.app-title-value {
   font-weight:bold; 
   font-size:100px; 
   color:#0699fa; 
@@ -126,10 +92,6 @@ body {
 }
 
 /*------------------------------------------------------------------*/
-
-#app-container {
-  padding:10px;
-}
 
 h2 {
   color:#fff;
@@ -180,7 +142,7 @@ h2 {
   .appbox-value { font-size:28px }
   .appbox-title { font-size:16px }
 
-  #app-container { padding:5px; }
+  #app-block { padding:5px; }
   .col2 { width:100%; }
   .col1-inner { padding:5px; }
   .col2-inner { padding:5px; }

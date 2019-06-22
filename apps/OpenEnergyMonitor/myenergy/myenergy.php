@@ -28,18 +28,18 @@
 <section id="app-block" style="display:none" class="block">
     <div class="d-flex justify-content-between">
         <div>
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('USE NOW') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow">0</span>W</h2>
+            <h5 class="app-title mb-0 text-md-larger text-light"><?php echo _('USE NOW') ?></h5>
+            <h2 class="app-title-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow">0</span>W</h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light px-1"><span class="balance-label"></span></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span></h2>
+            <h5 class="app-title mb-0 text-md-larger text-light px-1"><span class="balance-label"></span></h5>
+            <h2 class="app-title-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span></h2>
         </div>
         <div class="text-xs-right">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('RENEWABLE GEN') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 my-0 text-warning "><span class="gennow"></span>W</h2>
+            <h5 class="app-title mb-0 text-md-larger text-light"><?php echo _('RENEWABLE GEN') ?></h5>
+            <h2 class="app-title-value display-sm-4 display-md-3 display-lg-2 my-0 text-warning "><span class="gennow"></span>W</h2>
 
-            <h5 class="electric-title mt-0 mb-lg-3 text-md-larger ">
+            <h5 class="app-title mt-0 mb-lg-3 text-md-larger ">
                 <span class="text-warning" title="<?php echo _('SOLAR') ?>"><span class="d-none d-sm-inline-block"><?php echo _('SOLAR') ?>: </span> <span class="solarnow">0</span>W</span> | 
                 <span class="text-success" title="<?php echo _('WIND') ?>"><span class="d-none d-sm-inline-block"><?php echo _('WIND') ?>: </span> <span class="windnow">0</span>W</span>
             </h5>
@@ -99,11 +99,11 @@
     <div class="row-fluid">
         <div class="span9">
             <div class="text-light">
-                <h2 class="appconfig-title text-warning"><?php echo _('My Solar'); ?> & <?php echo _('Wind'); ?></h2>
+                <h2 class="app-config-title text-warning"><?php echo _('My Solar'); ?> & <?php echo _('Wind'); ?></h2>
                 <p class="lead">This app extends the My Solar app by adding in a 'share of UK wind' estimate.</p>
                 <p>The share of wind estimate is calculated by using real-time electricity data from wind power in the uk and then scaling it so that the annual wind generation matches a percentage of annual household consumption. The default estimate assumes 60% or near 2000 kWh annually. This is close to the fuel mix quoted by two of the UK's leading green electricity suppliers.</p>
-                <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-                <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                <p><strong class="text-grey">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
+                <p><strong class="text-grey">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
                 <img src="../Modules/app/images/mysolar_app.png" class="d-none d-sm-inline-block">
             </div>
         </div>
@@ -121,7 +121,7 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".app-setup").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 var feed = new Feed(apikey);
 

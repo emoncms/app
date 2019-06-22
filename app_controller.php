@@ -47,7 +47,7 @@ function app_controller()
                 $app = urldecode(get("name"));
             }
             if (!isset($applist->$app)) {
-                foreach (array_keys($applist) as $key) { $app = $key; break; }
+                foreach (array_keys((array) $applist) as $key) { $app = $key; break; }
             }
             
             $route->format = "html";

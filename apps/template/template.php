@@ -9,7 +9,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/data.js?v=<?php echo $v; ?>"></script>
 
-<div id="app-container" style="display:none">
+<div id="app-block" style="display:none">
   <div class="col1"><div class="col1-inner">
   
     <div style="height:20px; border-bottom:1px solid #333; padding-bottom:8px;">
@@ -18,24 +18,27 @@
       </div>
     </div>
     <div style="text-align:center">
-      <div class="electric-title">POWER NOW</div>
-      <div class="power-value"><span id="powernow">0</span></div>
+      <div class="app-title">POWER NOW</div>
+      <div class="app-title-value"><span id="powernow">0</span></div>
     </div>
   
   </div></div>
 </div>    
 
-<div id="app-setup" style="display:none; padding-top:50px" class="block">
-    <h2 class="app-config-title">Template</h2>
-    <div class="app-config-description">
-        <div class="app-config-description-inner">
-            A basic app example useful for developing new apps
-            
-            <img src="<?php echo $path; echo $appdir; ?>preview.png" style="width:600px" class="img-rounded">
+<section id="app-setup" class="hide pb-3">
+    <!-- instructions and settings -->
+    <div class="px-3">
+        <div class="row-fluid">
+            <div class="span9 app-config-description">
+                <div class="app-config-description-inner text-light">
+                    <p class="lead">A basic app example useful for developing new apps.</p>
+                    <img src="<?php echo $path; echo $appdir; ?>preview.png" class="d-none d-sm-inline-block">
+                </div>
+            </div>
+            <div class="span3 app-config pt-3"></div>
         </div>
     </div>
-    <div class="app-config"></div>
-</div>
+</section>
 
 <div class="ajax-loader"></div>
 
@@ -47,7 +50,7 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".app-setup").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 var feed = new Feed(apikey);
 

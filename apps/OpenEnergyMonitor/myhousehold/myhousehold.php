@@ -19,7 +19,7 @@
 
 <div id="app-block" class="app hide">
     <div class="app-block info">
-        <div class="app-header">
+        <div class="block-title">
             <div id="app-title" class="title grow"><?php echo "MY HOUSEHOLD"; ?></div>
             <div class="action app-unit"><?php echo "VIEW COST"; ?></div>
             <div class="action app-setup"><span class="icon-wrench icon-white"></span></div>
@@ -408,7 +408,7 @@ function resize() {
     var height = $(window).height();
     
     // Subtract the height of all relevant elements
-    $('.graph-header, .app-header, .app-body').each(function() {
+    $('.graph-header, .block-title, .app-body').each(function() {
         height -= $(this).outerHeight();
     });
     // Subtract the padding height of all blocks

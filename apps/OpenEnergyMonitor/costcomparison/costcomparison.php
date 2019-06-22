@@ -105,13 +105,13 @@ padding:10px;
 <section id="app-setup" class="hide pb-3 px-3">
     <!-- instructions and settings -->
     <div class="row-fluid">
-        <div class="span9 appconfig-description">
-            <div class="appconfig-description-inner text-light">
-                <h2 class="appconfig-title text-primary"><?php echo _('Cost Comparison'); ?></h2>
+        <div class="span9 app-config-description">
+            <div class="app-config-description-inner text-light">
+                <h2 class="app-config-title text-primary"><?php echo _('Cost Comparison'); ?></h2>
                 <p class="lead">The Cost Comparison app allows you to compare your energy usage against energy suppliers tariffs including new time of use tariffs.</p>
-                <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
+                <p><strong class="text-grey">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                 <p><strong>Note:</strong> If you have solar or renewable energy generation then use the import_kwh feed to view the actual cost based on energy brought from the grid</p>
-                <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                <p><strong class="text-grey">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
                 <img src="<?php echo $path; echo $appdir; ?>preview.png" class="d-none d-sm-inline-block">
             </div>
         </div>
@@ -127,7 +127,7 @@ padding:10px;
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".app-setup").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 var feed = new Feed(apikey);
 

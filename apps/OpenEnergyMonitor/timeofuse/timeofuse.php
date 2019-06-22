@@ -18,13 +18,13 @@
 
 <style>
 
-.electric-title {
+.app-title {
     font-weight:bold;
     font-size:22px;
     color:#44b3e2;
 }
 
-.power-value {
+.app-title-value {
     font-weight:bold; 
     font-size:52px; 
     color:#44b3e2;
@@ -54,12 +54,12 @@
       <table style="width:100%">
         <tr>
           <td style="width:40%">
-              <div class="electric-title">POWER NOW</div>
-              <div class="power-value"><span id="power_now">0</span></div>
+              <div class="app-title">POWER NOW</div>
+              <div class="app-title-value"><span id="power_now">0</span></div>
           </td>
           <td style="text-align:right">
-              <div class="electric-title">USE TODAY</div>
-              <div class="power-value"><span id="kwh_today">0</span></div>
+              <div class="app-title">USE TODAY</div>
+              <div class="app-title-value"><span id="kwh_today">0</span></div>
           </td>
         </tr>
       </table>
@@ -133,14 +133,14 @@
       </div>
       
       <div style="background-color:rgba(68,179,226,0.1); padding:20px; color:#333;">
-          <div class="electric-title">DAY TIME TOTAL</div>
-          <div class="power-value"><span id="daytime_total_kwh">0</span></div><br>
-          <div class="electric-title">DAY TIME DAILY AVERAGE</div>
-          <div class="power-value"><span id="daytime_average_kwhd">0</span></div><br>
-          <div class="electric-title">NIGHT TIME TOTAL</div>
-          <div class="power-value"><span id="nighttime_total_kwh">0</span></div><br>
-          <div class="electric-title">NIGHT TIME DAILY AVERAGE</div>
-          <div class="power-value"><span id="nighttime_average_kwhd">0</span></div><br>
+          <div class="app-title">DAY TIME TOTAL</div>
+          <div class="app-title-value"><span id="daytime_total_kwh">0</span></div><br>
+          <div class="app-title">DAY TIME DAILY AVERAGE</div>
+          <div class="app-title-value"><span id="daytime_average_kwhd">0</span></div><br>
+          <div class="app-title">NIGHT TIME TOTAL</div>
+          <div class="app-title-value"><span id="nighttime_total_kwh">0</span></div><br>
+          <div class="app-title">NIGHT TIME DAILY AVERAGE</div>
+          <div class="app-title-value"><span id="nighttime_average_kwhd">0</span></div><br>
       </div>
     </div>
   </div>
@@ -172,12 +172,12 @@
 <section id="app-setup" class="hide pb-3 px-3">
     <!-- instructions and settings -->
     <div class="row-fluid">
-        <div class="span9 appconfig-description">
-            <div class="appconfig-description-inner text-light">
-                <h2 class="appconfig-title text-primary"><?php echo _('Time of Use'); ?></h2>
+        <div class="span9 app-config-description">
+            <div class="app-config-description-inner text-light">
+                <h2 class="app-config-title text-primary"><?php echo _('Time of Use'); ?></h2>
                 <p class="lead">The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time.</p>
-                <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-                <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                <p><strong class="text-grey">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
+                <p><strong class="text-grey">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
             </div>
         </div>
         <div class="span3 app-config pt-3"></div>
@@ -194,7 +194,7 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".app-setup").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 var feed = new Feed(apikey);
 
@@ -804,14 +804,14 @@ function resize() {
     placeholder.height(height-top_offset);
     
     if (width<=500) {
-        $(".electric-title").css("font-size","16px");
-        $(".power-value").css("font-size","38px");
+        $(".app-title").css("font-size","16px");
+        $(".app-title-value").css("font-size","38px");
     } else if (width<=724) {
-        $(".electric-title").css("font-size","18px");
-        $(".power-value").css("font-size","52px");
+        $(".app-title").css("font-size","18px");
+        $(".app-title-value").css("font-size","52px");
     } else {
-        $(".electric-title").css("font-size","22px");
-        $(".power-value").css("font-size","52px");
+        $(".app-title").css("font-size","22px");
+        $(".app-title-value").css("font-size","52px");
     }
 }
 

@@ -18,13 +18,13 @@
 
 <style>
 
-.electric-title {
+.app-title {
     font-weight:bold;
     font-size:18px;
     color:#44b3e2;
 }
 
-.power-value {
+.app-title-value {
     font-weight:bold; 
     font-size:28px; 
     color:#44b3e2;
@@ -54,12 +54,12 @@
       <table style="width:100%">
         <tr>
           <td style="width:40%">
-              <div class="electric-title">POWER NOW</div>
-              <div class="power-value"><span id="power_now">0</span></div>
+              <div class="app-title">POWER NOW</div>
+              <div class="app-title-value"><span id="power_now">0</span></div>
           </td>
           <td style="text-align:right">
-              <div class="electric-title">USE TODAY</div>
-              <div class="power-value"><span id="kwh_today">0</span></div>
+              <div class="app-title">USE TODAY</div>
+              <div class="app-title-value"><span id="kwh_today">0</span></div>
           </td>
         </tr>
       </table>
@@ -134,8 +134,8 @@
       
       <div style="background-color:rgba(68,179,226,0.1); padding:20px; color:#333;">
           <span id="totals">
-          <div class="electric-title">TIER 0 TOTAL</div>
-          <div class="power-value">0</div><br>
+          <div class="app-title">TIER 0 TOTAL</div>
+          <div class="app-title-value">0</div><br>
           </span>
       </div>
     </div>
@@ -149,8 +149,8 @@
       
       <div style="background-color:rgba(68,179,226,0.1); padding:20px; color:#333;">
           <span id="averages">
-          <div class="electric-title">TIER 0 DAILY AVERAGE</div>
-          <div class="power-value">0</div><br>
+          <div class="app-title">TIER 0 DAILY AVERAGE</div>
+          <div class="app-title-value">0</div><br>
           </span>
       </div>
     </div>
@@ -162,12 +162,12 @@
 <section id="app-setup" class="hide pb-3 px-3">
     <!-- instructions and settings -->
     <div class="row-fluid">
-        <div class="span9 appconfig-description">
-            <div class="appconfig-description-inner text-light">
-                <h2 class="appconfig-title text-primary"><?php echo _('Time of Use - flexible + CL'); ?></h2>
+        <div class="span9 app-config-description">
+            <div class="app-config-description-inner text-light">
+                <h2 class="app-config-title text-primary"><?php echo _('Time of Use - flexible + CL'); ?></h2>
                 <p class="lead">The "Time of Use - flexible + CL" app is a simple home energy monitoring app for exploring home or building electricity consumption and cost over time.</p>
                 <p>It allows you to track multiple electricity tariffs as used in Australia. This version adds a daily supply charge and a separately monitored controlled load (such as off-peak hot water).</p>
-                <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                <p><strong class="text-grey">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
                 <p><img src="<?php echo $path; ?>Modules/app/images/timeofuse_app.png" style="width:600px" class="img-rounded"></p>
                 <p>As the number of configuration options for this are quite large, a shorthand has been used to specify
                 the tiers, days and times they apply and the respective costs.</p>
@@ -210,7 +210,7 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".app-setup").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 var feed = new Feed(apikey);
 
@@ -854,46 +854,46 @@ function bargraph_load(start,end)
     });
     
     if (viewcostenergy=="energy") {
-        var totals_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
+        var totals_str = '<div class="app-title">COMBINED</div><div class="app-title-value">' +
             total_kwh.toFixed(1) + ' kWh</div><br>';
-        var averages_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
+        var averages_str = '<div class="app-title">COMBINED</div><div class="app-title-value">' +
            (total_kwh/n).toFixed(1) + ' kWh/d</div><br>';
         for (var a = 0; a < tier_names.length; a++) {
-            totals_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="power-value">' + tier_total_kwh[a].toFixed(1) + ' kWh</div><br>';
-            averages_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="power-value">' + (tier_total_kwh[a]/n).toFixed(1) + ' kWh/d</div><br>';
+            totals_str += '<div class="app-title">' + tier_names[a].toUpperCase() +
+               '</div><div class="app-title-value">' + tier_total_kwh[a].toFixed(1) + ' kWh</div><br>';
+            averages_str += '<div class="app-title">' + tier_names[a].toUpperCase() +
+               '</div><div class="app-title-value">' + (tier_total_kwh[a]/n).toFixed(1) + ' kWh/d</div><br>';
         }
-        totals_str += '<div class="electric-title">CONTROLLED LOAD' +
-           '</div><div class="power-value">' + tier_total_kwh[cl_idx].toFixed(1) + ' kWh</div><br>';
-        averages_str += '<div class="electric-title">CONTROLLED LOAD' + 
-           '</div><div class="power-value">' + (tier_total_kwh[cl_idx]/n).toFixed(1) + ' kWh/d</div><br>';
+        totals_str += '<div class="app-title">CONTROLLED LOAD' +
+           '</div><div class="app-title-value">' + tier_total_kwh[cl_idx].toFixed(1) + ' kWh</div><br>';
+        averages_str += '<div class="app-title">CONTROLLED LOAD' + 
+           '</div><div class="app-title-value">' + (tier_total_kwh[cl_idx]/n).toFixed(1) + ' kWh/d</div><br>';
         $("#totals").html(totals_str);
         $("#averages").html(averages_str);
     } else {
-        var totals_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
+        var totals_str = '<div class="app-title">COMBINED</div><div class="app-title-value">' +
             config.app["currency"].value + total_kwh.toFixed(2) + '</div><br>';
-        var averages_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
+        var averages_str = '<div class="app-title">COMBINED</div><div class="app-title-value">' +
            config.app["currency"].value + (total_kwh/n).toFixed(2) + '/day</div><br>';
         for (var a = 0; a < tier_names.length; a++) {
-            totals_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="power-value">' + config.app["currency"].value +
+            totals_str += '<div class="app-title">' + tier_names[a].toUpperCase() +
+               '</div><div class="app-title-value">' + config.app["currency"].value +
                tier_total_kwh[a].toFixed(2) + '</div><br>';
-            averages_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="power-value">' + config.app["currency"].value +
+            averages_str += '<div class="app-title">' + tier_names[a].toUpperCase() +
+               '</div><div class="app-title-value">' + config.app["currency"].value +
                (tier_total_kwh[a]/n).toFixed(2) + '/day</div><br>';
         }
-        totals_str += '<div class="electric-title">CONTROLLED LOAD' +
-           '</div><div class="power-value">' + config.app["currency"].value +
+        totals_str += '<div class="app-title">CONTROLLED LOAD' +
+           '</div><div class="app-title-value">' + config.app["currency"].value +
            tier_total_kwh[cl_idx].toFixed(2) + '</div><br>';
-        averages_str += '<div class="electric-title">CONTROLLED LOAD' +
-           '</div><div class="power-value">' + config.app["currency"].value +
+        averages_str += '<div class="app-title">CONTROLLED LOAD' +
+           '</div><div class="app-title-value">' + config.app["currency"].value +
            (tier_total_kwh[cl_idx]/n).toFixed(2) + '/day</div><br>';
-        totals_str += '<div class="electric-title">SUPPLY' +
-           '</div><div class="power-value">' + config.app["currency"].value +
+        totals_str += '<div class="app-title">SUPPLY' +
+           '</div><div class="app-title-value">' + config.app["currency"].value +
            tier_total_kwh[cl_idx+1].toFixed(2) + '</div><br>';
-        averages_str += '<div class="electric-title">SUPPLY' +
-           '</div><div class="power-value">' + config.app["currency"].value +
+        averages_str += '<div class="app-title">SUPPLY' +
+           '</div><div class="app-title-value">' + config.app["currency"].value +
            (tier_total_kwh[cl_idx+1]/n).toFixed(2) + '/day</div><br>';
         $("#totals").html(totals_str);
         $("#averages").html(averages_str);
@@ -983,14 +983,14 @@ function resize() {
     placeholder.height(height-top_offset);
     
     if (width<=500) {
-        $(".electric-title").css("font-size","16px");
-        $(".power-value").css("font-size","38px");
+        $(".app-title").css("font-size","16px");
+        $(".app-title-value").css("font-size","38px");
     } else if (width<=724) {
-        $(".electric-title").css("font-size","18px");
-        $(".power-value").css("font-size","42px");
+        $(".app-title").css("font-size","18px");
+        $(".app-title-value").css("font-size","42px");
     } else {
-        $(".electric-title").css("font-size","22px");
-        $(".power-value").css("font-size","42px");
+        $(".app-title").css("font-size","22px");
+        $(".app-title-value").css("font-size","42px");
     }
 }
 

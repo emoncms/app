@@ -18,13 +18,13 @@
 
 <style>
 
-.electric-title {
+.app-title {
     font-weight:bold;
     font-size:22px;
     color:#44b3e2;
 }
 
-.power-value {
+.app-title-value {
     font-weight:bold; 
     font-size:42px; 
     color:#44b3e2;
@@ -54,12 +54,12 @@
       <table style="width:100%">
         <tr>
           <td style="width:40%">
-              <div class="electric-title">POWER NOW</div>
-              <div class="power-value"><span id="power_now">0</span></div>
+              <div class="app-title">POWER NOW</div>
+              <div class="app-title-value"><span id="power_now">0</span></div>
           </td>
           <td style="text-align:right">
-              <div class="electric-title">USE TODAY</div>
-              <div class="power-value"><span id="kwh_today">0</span></div>
+              <div class="app-title">USE TODAY</div>
+              <div class="app-title-value"><span id="kwh_today">0</span></div>
           </td>
         </tr>
       </table>
@@ -134,8 +134,8 @@
       
       <div style="background-color:rgba(68,179,226,0.1); padding:20px; color:#333;">
           <span id="totals">
-          <div class="electric-title">TIER 0 TOTAL</div>
-          <div class="power-value">0</div><br>
+          <div class="app-title">TIER 0 TOTAL</div>
+          <div class="app-title-value">0</div><br>
           </span>
       </div>
     </div>
@@ -149,8 +149,8 @@
       
       <div style="background-color:rgba(68,179,226,0.1); padding:20px; color:#333;">
           <span id="averages">
-          <div class="electric-title">TIER 0 DAILY AVERAGE</div>
-          <div class="power-value">0</div><br>
+          <div class="app-title">TIER 0 DAILY AVERAGE</div>
+          <div class="app-title-value">0</div><br>
           </span>
       </div>
     </div>
@@ -163,17 +163,17 @@
 <section id="app-setup" class="hide pb-3 px-3">
     <!-- instructions and settings -->
     <div class="row-fluid">
-        <div class="span9 appconfig-description">
-            <div class="appconfig-description-inner text-light">
-                <h2 class="appconfig-title text-primary"><?php echo _('Time of Use - flexible'); ?></h2>
+        <div class="span9 app-config-description">
+            <div class="app-config-description-inner text-light">
+                <h2 class="app-config-title text-primary"><?php echo _('Time of Use - flexible'); ?></h2>
                 <p class="lead">The "Time of Use - flexible" app is a simple home energy monitoring app for exploring home or building electricity consumption and cost over time. It allows you to track multiple electricity tariffs as used in Australia.</p>
-                <h3 class="text-white">Cumulative kWh</h3> 
+                <h3 class="text-grey">Cumulative kWh</h3> 
                 <p> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
                 <p><img src="<?php echo $path; ?>Modules/app/images/timeofuse_app.png" style="width:600px" class="img-rounded"></p>
                 <p>As the number of configuration options for this are quite large, a shorthand has been used to specify
                 the tiers, days and times they apply and the respective costs.</p>
                 
-                <h3 class="text-white">Assumptions</h3>
+                <h3 class="text-grey">Assumptions</h3>
                 <ul>
                     <li>Any number of tariffs can be defined, but they must be consistent across weekdays or weekends.</li>
                     <li>One cost must be defined per tariff tier.</li>
@@ -182,9 +182,9 @@
                     <li>Public Holidays are treated the same as a weekend day.</li>
                 </ul>
                 
-                <h3 class="text-white">Shorthand</h3>
+                <h3 class="text-grey">Shorthand</h3>
                 <p>Tier names and tariffs are specified as a comma separated, colon separated list. If there are three
-                tariffs, <strong class="text-white">Off Peak</strong>, <strong class="text-white">Shoulder</strong> and <strong class="text-white">Peak</strong>, costing <strong class="text-white">16.5c/kWh</strong>, <strong class="text-white">25.3c/kWh</strong> and <strong class="text-white">59.4c/kWh</strong> respectively, they
+                tariffs, <strong class="text-light">Off Peak</strong>, <strong class="text-light">Shoulder</strong> and <strong class="text-light">Peak</strong>, costing <strong class="text-light">16.5c/kWh</strong>, <strong class="text-light">25.3c/kWh</strong> and <strong class="text-light">59.4c/kWh</strong> respectively, they
                 are specified as:</p>
                 <p><code>OffPeak:0.165,Shoulder:0.253,Peak:0.594</code></p>
                 <p>Tier start times are split into two definitions, weekday and weekend. They both use the same format,
@@ -193,7 +193,7 @@
                 is the tier number defined above, numbered from 0</p>
 
                 <hr>
-                <h4 class="text-white">Example:</h4> 
+                <h4 class="text-grey">Example:</h4> 
                 <p>A weekday with the following tariff times:</p>
                 <blockquote><em>
                 OffPeak: 00:00 - 06:59, 
@@ -209,7 +209,7 @@
                 list of days of the year (from 1-365/366) per year.
                 
                 <hr>
-                <h4 class="text-white">Example:</h4>
+                <h4 class="text-grey">Example:</h4>
                 <p>for public holiays 2017: Jan 2, Apr 14, Apr 17, Apr 25, Jun 12, Oct 2, Dec 25, Dec 26; and 2018: Jan 1 you would specify:</p>
                 <code>
                 2017:2,104,107,115,163,275,359,360;2018:1
@@ -231,7 +231,7 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".app-setup").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 var feed = new Feed(apikey);
 
@@ -789,29 +789,29 @@ function bargraph_load(start,end)
     }
     
     if (viewcostenergy=="energy") {
-        var totals_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
+        var totals_str = '<div class="app-title">COMBINED</div><div class="app-title-value">' +
             total_kwh.toFixed(1) + ' kWh</div><br>';
-        var averages_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
+        var averages_str = '<div class="app-title">COMBINED</div><div class="app-title-value">' +
            (total_kwh/n).toFixed(1) + ' kWh/d</div><br>';
         for (var a = 0; a < tier_names.length; a++) {
-            totals_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="power-value">' + tier_total_kwh[a].toFixed(1) + ' kWh</div><br>';
-            averages_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="power-value">' + (tier_total_kwh[a]/n).toFixed(1) + ' kWh/d</div><br>';
+            totals_str += '<div class="app-title">' + tier_names[a].toUpperCase() +
+               '</div><div class="app-title-value">' + tier_total_kwh[a].toFixed(1) + ' kWh</div><br>';
+            averages_str += '<div class="app-title">' + tier_names[a].toUpperCase() +
+               '</div><div class="app-title-value">' + (tier_total_kwh[a]/n).toFixed(1) + ' kWh/d</div><br>';
         }
         $("#totals").html(totals_str);
         $("#averages").html(averages_str);
     } else {
-        var totals_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
+        var totals_str = '<div class="app-title">COMBINED</div><div class="app-title-value">' +
             config.app["currency"].value + total_kwh.toFixed(2) + '</div><br>';
-        var averages_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
+        var averages_str = '<div class="app-title">COMBINED</div><div class="app-title-value">' +
            config.app["currency"].value + (total_kwh/n).toFixed(2) + '/day</div><br>';
         for (var a = 0; a < tier_names.length; a++) {
-            totals_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="power-value">' + config.app["currency"].value +
+            totals_str += '<div class="app-title">' + tier_names[a].toUpperCase() +
+               '</div><div class="app-title-value">' + config.app["currency"].value +
                tier_total_kwh[a].toFixed(2) + '</div><br>';
-            averages_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="power-value">' + config.app["currency"].value +
+            averages_str += '<div class="app-title">' + tier_names[a].toUpperCase() +
+               '</div><div class="app-title-value">' + config.app["currency"].value +
                (tier_total_kwh[a]/n).toFixed(2) + '/day</div><br>';
         }
         $("#totals").html(totals_str);
@@ -901,14 +901,14 @@ function resize() {
     placeholder.height(height-top_offset);
     
     if (width<=500) {
-        $(".electric-title").css("font-size","16px");
-        $(".power-value").css("font-size","38px");
+        $(".app-title").css("font-size","16px");
+        $(".app-title-value").css("font-size","38px");
     } else if (width<=724) {
-        $(".electric-title").css("font-size","18px");
-        $(".power-value").css("font-size","42px");
+        $(".app-title").css("font-size","18px");
+        $(".app-title-value").css("font-size","42px");
     } else {
-        $(".electric-title").css("font-size","22px");
-        $(".power-value").css("font-size","42px");
+        $(".app-title").css("font-size","22px");
+        $(".app-title-value").css("font-size","42px");
     }
 }
 

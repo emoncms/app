@@ -6,27 +6,32 @@ $v = 7;
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/data.js?v=<?php echo $v; ?>"></script>
 
-<div id="app-container" style="display:none">
-  <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
+<div id="app-block" style="display:none">
+  <div style="height:25px; border-bottom:1px solid #e8e8e8; padding:8px;">
     <div style="float:right;">
-      <i class="config icon-wrench icon-white" style="cursor:pointer"></i>
+      <i class="config-open icon-wrench" style="cursor:pointer"></i>
     </div>
   </div>
-  <div style="text-align:center">
-    <div class="electric-title">Oops something went wrong, this app does not exist!</div>
+  <div style="text-align:center; padding-top:20px">
+    <div class="app-title">Oops something went wrong, this app does not exist!</div>
   </div>
-</div>    
-
-<div id="app-setup" style="display:none; padding-top:50px" class="block">
-    <h2 class="app-config-title">Oops something went wrong, this app does not exist!</h2>
-    <div class="app-config-description">
-    <div class="app-config-description-inner">You can delete this entry on the right</div>
-    </div>
-    <div class="app-config"></div>
 </div>
+
+<section id="app-setup" class="hide pb-3">
+    <!-- instructions and settings -->
+    <div class="px-3">
+        <div class="row-fluid">
+            <div class="span9 app-config-description">
+                <div class="app-config-description-inner text-light">
+                    <h2 class="app-config-title text-primary"><?php echo _('Oops something went wrong!'); ?></h2>
+                    <p class="lead">This app does not exist.<br> You can delete this entry on the right.</p>
+                </div>
+            </div>
+            <div class="span3 pt-3 app-config"></div>
+        </div>
+    </div>
+</section>
 
 <div class="ajax-loader"></div>
 
@@ -38,9 +43,7 @@ $v = 7;
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".app-setup").hide();
-
-var feed = new Feed(apikey);
+if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
 // Configuration
@@ -48,7 +51,6 @@ var feed = new Feed(apikey);
 config.app = {};
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
-config.feeds = feed.getList();
 
 config.initapp = function() {
     init();
@@ -65,14 +67,13 @@ config.hideapp = function() {
 // ----------------------------------------------------------------------
 config.init();
 
-function init() {   
-
+function init() {
 }
-    
-function show() {   
+
+function show() {
     $(".ajax-loader").hide();
 }
-   
+
 function updater() {
 
 }

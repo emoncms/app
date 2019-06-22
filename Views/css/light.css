@@ -1,25 +1,4 @@
 /* -------------------------------------------------------------------
-Side navigation
---------------------------------------------------------------------*/
-.sidenav {
-  background: #dbdbdb;
-}
-
-/* The navigation menu links */
-.sidenav a {
-  color: #333;
-}
-
-/* When you mouse over the navigation links, change their color */
-.sidenav a:hover, .offcanvas a:focus{
-  color: #666;
-}
-
-.appmenu li:hover {
-  background-color: #e8e8e8;
-}
-
-/* -------------------------------------------------------------------
 Config
 --------------------------------------------------------------------*/
 .app-config-box {
@@ -68,8 +47,21 @@ body {
 
 .container-fluid {padding:0}
 
-#app-container {
+#app-block {
   padding:10px;
+}
+
+.app-title {
+  font-weight:bold;
+  font-size:22px;
+  color:#44b3e2;
+}
+
+.app-title-value {
+  font-weight:bold;
+  font-size:52px;
+  color:#44b3e2;
+  line-height: 1.1;
 }
 
 .block-bound {
@@ -119,7 +111,7 @@ body {
   .block-title { font-size:12px; padding:8px; }
   .dmy {display:none}
   
-  #app-container { padding:5px; }
+  #app-block { padding:5px; }
   .col2 { width:100%; }
   .col1-inner { padding:5px; }
   .col2-inner { padding:5px; }

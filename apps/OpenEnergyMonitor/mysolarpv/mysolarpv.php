@@ -41,16 +41,16 @@
 <section id="app-block" style="display:none" class="block">
     <div class="d-flex justify-content-between">
         <div>
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('USE NOW') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow">0</span>W</h2>
+            <h5 class="app-title mb-0 text-md-larger text-light"><?php echo _('USE NOW') ?></h5>
+            <h2 class="app-title-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow">0</span>W</h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light px-1"><span class="balance-label"></span></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span></h2>
+            <h5 class="app-title mb-0 text-md-larger text-light px-1"><span class="balance-label"></span></h5>
+            <h2 class="app-title-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span></h2>
         </div>
         <div class="text-xs-right">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('SOLAR PV') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-warning "><span class="solarnow"></span>W</h2>
+            <h5 class="app-title mb-0 text-md-larger text-light"><?php echo _('SOLAR PV') ?></h5>
+            <h2 class="app-title-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-warning "><span class="solarnow"></span>W</h2>
         </div>
     </div>
     
@@ -106,12 +106,12 @@
     <!-- instructions and settings -->
     <div class="px-3">
         <div class="row-fluid">
-            <div class="span9 xappconfig-description">
-                <div class="xappconfig-description-inner text-light">
-                    <h2 class="appconfig-title text-warning"><?php echo _('My Solar'); ?></h2>
+            <div class="span9 xapp-config-description">
+                <div class="xapp-config-description-inner text-light">
+                    <h2 class="app-config-title text-warning"><?php echo _('My Solar'); ?></h2>
                     <p class="lead">The My Solar app can be used to explore onsite solar generation, self consumption, export and building consumption both in realtime with a moving power graph view and historically with a daily and monthly bargraph.</p>
-                    <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-                    <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                    <p><strong class="text-grey">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
+                    <p><strong class="text-grey">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
                     <img src="../Modules/app/images/mysolar_app.png" class="d-none d-sm-inline-block">
                 </div>
             </div>
@@ -130,7 +130,7 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".app-setup").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 var feed = new Feed(apikey);
 

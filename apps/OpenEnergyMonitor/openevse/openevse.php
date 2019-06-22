@@ -16,13 +16,13 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 
 <style>
-.electric-title {
+.app-title {
     font-weight:bold;
     font-size:22px;
     color:#44b3e2;
 }
 
-.power-value {
+.app-title-value {
     font-weight:bold; 
     font-size:52px; 
     color:#44b3e2;
@@ -50,12 +50,12 @@
       <table style="width:100%">
         <tr>
           <td style="width:40%">
-              <div class="electric-title">CHARGE RATE</div>
-              <div class="power-value"><span id="power_now">0</span>W</div>
+              <div class="app-title">CHARGE RATE</div>
+              <div class="app-title-value"><span id="power_now">0</span>W</div>
           </td>
           <td style="text-align:right">
-              <div class="electric-title">CHARGE TODAY</div>
-              <div class="power-value"><span id="kwh_today">0</span> kWh</div>
+              <div class="app-title">CHARGE TODAY</div>
+              <div class="app-title-value"><span id="kwh_today">0</span> kWh</div>
           </td>
         </tr>
       </table>
@@ -152,7 +152,7 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".app-setup").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 var feed = new Feed(apikey);
 
@@ -555,22 +555,22 @@ function resize() {
     placeholder.height(height-top_offset);
     
     if (width<=500) {
-        $(".electric-title").css("font-size","16px");
-        $(".power-value").css("font-size","38px");
+        $(".app-title").css("font-size","16px");
+        $(".app-title-value").css("font-size","38px");
         //$(".midtext").css("font-size","14px");
         //$(".units").hide();
         //$(".visnav").css("padding-left","5px");
         // $(".visnav").css("padding-right","5px");
     } else if (width<=724) {
-        $(".electric-title").css("font-size","18px");
-        $(".power-value").css("font-size","52px");
+        $(".app-title").css("font-size","18px");
+        $(".app-title-value").css("font-size","52px");
         /*$(".midtext").css("font-size","18px");
         $(".units").show();
         $(".visnav").css("padding-left","8px");
         $(".visnav").css("padding-right","8px");*/
     } else {
-        $(".electric-title").css("font-size","22px");
-        $(".power-value").css("font-size","52px");
+        $(".app-title").css("font-size","22px");
+        $(".app-title-value").css("font-size","52px");
         /*$(".midtext").css("font-size","20px");
         $(".units").show();
         $(".visnav").css("padding-left","8px");

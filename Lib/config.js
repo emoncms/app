@@ -21,7 +21,7 @@ var config = {
             config.UI();                  // Populate setup UI options
             $(".ajax-loader").hide();     // Hide AJAX loader
         } else {
-            $("#app-block").show();       // Show app container
+            $("#app-block").show();       // Show app block
             $(".ajax-loader").show();     // Show AJAX loader
             
             config.load();                // Merge db config into app config

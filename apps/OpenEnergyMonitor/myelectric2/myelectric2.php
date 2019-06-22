@@ -17,19 +17,6 @@
 
 <style>
 
-.electric-title {
-    font-weight:bold;
-    font-size:22px;
-    color:#44b3e2;
-}
-
-.power-value {
-    font-weight:bold; 
-    font-size:52px; 
-    color:#44b3e2;
-    line-height: 1.1;
-}
-
 .units {
     font-size:75%;
 }
@@ -42,11 +29,11 @@
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
 <div id="app-block" style="display:none">
-    
+
   <div id="myelectric-realtime" class="col1"><div class="col1-inner">
-      
+
     <div class="block-bound">
-      <div class="bluenav app-setup"><i class="icon-wrench icon-white"></i></div>
+      <div class="bluenav config-open"><i class="icon-wrench icon-white"></i></div>
       <div class="bluenav viewcostenergy">VIEW COST</div>
       <!--<div class="bluenav cost">Cost</div>-->
       <!--<div class="bluenav energy">Energy</div>-->
@@ -57,12 +44,12 @@
       <table style="width:100%">
         <tr>
           <td style="width:40%">
-              <div class="electric-title">NOW</div>
-              <div class="power-value"><span id="power_now">0</span></div>
+              <div class="app-title">NOW</div>
+              <div class="app-title-value"><span id="power_now">0</span></div>
           </td>
           <td style="text-align:right">
-              <div class="electric-title">TODAY</div>
-              <div class="power-value"><span id="kwh_today">0</span></div>
+              <div class="app-title">TODAY</div>
+              <div class="app-title-value"><span id="kwh_today">0</span></div>
           </td>
         </tr>
       </table>
@@ -159,12 +146,12 @@
     <!-- instructions and settings -->
     <div class="px-3">
         <div class="row-fluid">
-            <div class="span9 appconfig-description">
-                <div class="appconfig-description-inner text-light">
-                    <h2 class="appconfig-title text-primary"><?php echo _('My Electric 2'); ?></h2>
+            <div class="span9 app-config-description">
+                <div class="app-config-description-inner text-light">
+                    <h2 class="app-config-title text-primary"><?php echo _('My Electric 2'); ?></h2>
                     <p class="lead">The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time.</p>
-                    <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-                    <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                    <p><strong class="text-grey">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
+                    <p><strong class="text-grey">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
                     <img src="../Modules/app/images/myelectric_app.png" class="d-none d-sm-inline-block">
                 </div>
             </div>
@@ -183,7 +170,7 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".app-setup").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 var feed = new Feed(apikey);
 
@@ -192,7 +179,7 @@ var feed = new Feed(apikey);
 // ----------------------------------------------------------------------
 config.app = {
     "title":{"type":"value", "default":"MY ELECTRIC", "name": "Title", "description":"Optional title for app"},
-    "use":{"type":"feed", "autoname":"use", "engine":"5"},
+    "use":{"type":"feed", "autoname":"use", "engine":5},
     "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5},
     "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity &pound;/kWh"},
     "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (&pound;,&euro;,&dollar;,..)"},
@@ -235,8 +222,7 @@ var use_start = 0;
 
 config.init();
 
-function init()
-{
+function init() {
     // Quick translation of feed ids
     feeds = {};
     for (var key in config.app) {
@@ -276,8 +262,7 @@ function hide() {
     clearInterval(updateTimer);
 }
 
-function update()
-{
+function update() {
     feed.getListById(function(result) {
         if (result === null) { return; }
         
@@ -790,14 +775,14 @@ function resize() {
     placeholder.height(height-top_offset);
     
     if (width<=500) {
-        $(".electric-title").css("font-size","16px");
-        $(".power-value").css("font-size","38px");
+        $(".app-title").css("font-size","16px");
+        $(".app-title-value").css("font-size","38px");
     } else if (width<=724) {
-        $(".electric-title").css("font-size","18px");
-        $(".power-value").css("font-size","52px");
+        $(".app-title").css("font-size","18px");
+        $(".app-title-value").css("font-size","52px");
     } else {
-        $(".electric-title").css("font-size","22px");
-        $(".power-value").css("font-size","52px");
+        $(".app-title").css("font-size","22px");
+        $(".app-title-value").css("font-size","52px");
     }
 }
 

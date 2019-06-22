@@ -25,14 +25,14 @@
 <section id="app-block" style="display:none">
     <div class="d-flex justify-content-between">
         <div>
-            <h5 class="electric-title mb-0 text-sm-larger text-light"><?php echo _('POWER NOW') ?></h5>
-            <h2 class="power-value display-sm-4 display-sm-3 display-lg-2 mt-0 mb-lg-3 text-primary">
+            <h5 class="app-title mb-0 text-sm-larger text-light"><?php echo _('POWER NOW') ?></h5>
+            <h2 class="app-title-value display-sm-4 display-sm-3 display-lg-2 mt-0 mb-lg-3 text-primary">
                 <span id="powernow">0</span>
             </h2>
         </div>
         <div class="text-xs-right">
-            <h5 class="electric-title mb-0 text-sm-larger text-light"><?php echo _('TODAY') ?></h5>
-            <h2 class="power-value display-sm-4 display-sm-3 display-lg-2 mt-0 mb-lg-3 text-primary">
+            <h5 class="app-title mb-0 text-sm-larger text-light"><?php echo _('TODAY') ?></h5>
+            <h2 class="app-title-value display-sm-4 display-sm-3 display-lg-2 mt-0 mb-lg-3 text-primary">
                 <span id="usetoday_units_a"></span>
                 <span id="usetoday"></span>
                 <small id="usetoday_units_b" class="usetoday"></small>
@@ -116,12 +116,12 @@
     <!-- instructions and settings -->
     <div class="px-3">
         <div class="row-fluid">
-            <div class="span9 appconfig-description">
-                <div class="appconfig-description-inner text-light">
-                    <h2 class="appconfig-title text-primary"><?php echo _('My Electric'); ?></h2>
+            <div class="span9 app-config-description">
+                <div class="app-config-description-inner text-light">
+                    <h2 class="app-config-title text-primary"><?php echo _('My Electric'); ?></h2>
                     <p class="lead">The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time. It includes a real-time view and a historic kWh per day bar graph.</p>
-                    <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-                    <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                    <p><strong class="text-grey">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
+                    <p><strong class="text-grey">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
                     <img src="../Modules/app/images/myelectric_app.png" class="d-none d-sm-inline-block">
                 </div>
             </div>
@@ -140,7 +140,7 @@
 var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".app-setup").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 var feed = new Feed(apikey);
 
@@ -236,6 +236,7 @@ function init()
 }
     
 function show()
+{
     appLog("INFO", "myelectric show");
     
     // start of all time
@@ -280,20 +281,20 @@ function resize()
     graph_lines.height = height;
     
     // if (width<=500) {
-    //     $(".electric-title").css("font-size","16px");
-    //     $(".power-value").css("font-size","38px");
+    //     $(".app-title").css("font-size","16px");
+    //     $(".app-title-value").css("font-size","38px");
     //     $(".units").hide();
     //     $(".visnav").css("padding-left","5px");
     //     $(".visnav").css("padding-right","5px");
     // } else if (width<=724) {
-    //     $(".electric-title").css("font-size","18px");
-    //     $(".power-value").css("font-size","52px");
+    //     $(".app-title").css("font-size","18px");
+    //     $(".app-title-value").css("font-size","52px");
     //     $(".units").show();
     //     $(".visnav").css("padding-left","8px");
     //     $(".visnav").css("padding-right","8px");
     // } else {
-    //     $(".electric-title").css("font-size","22px");
-    //     $(".power-value").css("font-size","85px");
+    //     $(".app-title").css("font-size","22px");
+    //     $(".app-title-value").css("font-size","85px");
     //     $(".units").show();
     //     $(".visnav").css("padding-left","8px");
     //     $(".visnav").css("padding-right","8px");
