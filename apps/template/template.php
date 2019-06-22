@@ -9,7 +9,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/data.js?v=<?php echo $v; ?>"></script>
 
-<div id="app-block" style="display:none">
+<section id="app-block" class="block hide">
   <div class="col1"><div class="col1-inner">
   
     <div style="height:20px; border-bottom:1px solid #333; padding-bottom:8px;">
@@ -23,7 +23,7 @@
     </div>
   
   </div></div>
-</div>    
+</section>    
 
 <section id="app-setup" class="hide pb-3">
     <!-- instructions and settings -->

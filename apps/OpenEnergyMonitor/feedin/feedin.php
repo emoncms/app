@@ -17,12 +17,12 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 
-<div id="app-block" class="app hide">
+<section id="app-block" class="app hide">
     <div class="app-block info">
-        <div class="block-title">
-            <div id="app-title" class="title grow"><?php echo "MY HOUSEHOLD"; ?></div>
+        <div class="app-header">
+            <div id="app-title" class="title grow"><?php echo "HOUSEHOLD"; ?></div>
             <div class="action app-unit"><?php echo "VIEW COST"; ?></div>
-            <div class="action app-setup"><span class="icon-wrench icon-white"></span></div>
+            <div class="action config-open"><span class="icon-wrench icon-white"></span></div>
         </div>
         <div class="app-body">
             <div class="title">
@@ -45,24 +45,22 @@
     </div>
     
     <div id="graph" class="app-block"></div>
-</div>
+</section>
 
-<div id="app-setup">
-    <h2 class="app-config-title"><?php echo "My Household"; ?></h2>
-    
-    <div class="app-config-description">
-        <div class="app-config-description-inner">
-            The Household app is a simple home energy monitoring app to explore onsite energy generation, self-consumption and building consumption over time.
-            <br><br>
-            <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
-            <br><br>
-            <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.
-            <br><br>
-            <img src="../Modules/app/images/myelectric_app.png" style="width:600px" class="img-rounded">
+<section id="app-setup" class="hide pb-3 px-3">
+    <!-- instructions and settings -->
+    <div class="row-fluid">
+        <div class="span9 app-config-description">
+            <div class="app-config-description-inner text-dark">
+                <h2 class="app-config-title text-primary"><?php echo _('Feed-in tariff'); ?></h2>
+                <p class="lead">The feed-in tariff app is a simple home energy monitoring app to explore onsite energy generation, feed-in and self-consumption, as well as the buildings overall consumption and cost.</p>
+                <p><strong class="text-black">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
+                <p><strong class="text-dark">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+            </div>
         </div>
+        <div class="span3 app-config pt-3"></div>
     </div>
-    <div class="app-config"></div>
-</div>
+</section>
 
 <div class="ajax-loader"></div>
 
@@ -89,7 +87,7 @@ var graph = new GraphView(path, $('#graph'));
 config.app = {
     "title": {
         "type": "value",
-        "default": "MY HOUSEHOLD",
+        "default": "HOUSEHOLD",
         "name": "Title",
         "description": "Optional title for app"
     },

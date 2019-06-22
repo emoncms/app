@@ -5,7 +5,6 @@
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 
-<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />    
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
 
@@ -17,19 +16,6 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 
 <style>
-
-.app-title {
-    font-weight:bold;
-    font-size:18px;
-    color:#44b3e2;
-}
-
-.app-title-value {
-    font-weight:bold; 
-    font-size:28px; 
-    color:#44b3e2;
-    line-height: 1.1;
-}
 
 .block-bound {
   background-color:rgb(68,179,226);
@@ -163,11 +149,11 @@
     <!-- instructions and settings -->
     <div class="row-fluid">
         <div class="span9 app-config-description">
-            <div class="app-config-description-inner text-light">
+            <div class="app-config-description-inner text-dark">
                 <h2 class="app-config-title text-primary"><?php echo _('Time of Use - flexible + CL'); ?></h2>
                 <p class="lead">The "Time of Use - flexible + CL" app is a simple home energy monitoring app for exploring home or building electricity consumption and cost over time.</p>
                 <p>It allows you to track multiple electricity tariffs as used in Australia. This version adds a daily supply charge and a separately monitored controlled load (such as off-peak hot water).</p>
-                <p><strong class="text-grey">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                <p><strong class="text-black">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
                 <p><img src="<?php echo $path; ?>Modules/app/images/timeofuse_app.png" style="width:600px" class="img-rounded"></p>
                 <p>As the number of configuration options for this are quite large, a shorthand has been used to specify
                 the tiers, days and times they apply and the respective costs.</p>

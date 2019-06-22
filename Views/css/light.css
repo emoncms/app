@@ -35,8 +35,6 @@ body {
 }
 
 #footer {
-  margin-left: 0px;
-  margin-right: 0px;
   background-color: #e8e8e8;
 }
 
@@ -48,7 +46,7 @@ body {
 .container-fluid {padding:0}
 
 #app-block {
-  padding:10px;
+  padding: 10px;
 }
 
 .app-title {

@@ -5,7 +5,6 @@
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 
-<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />    
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
 
@@ -172,7 +171,7 @@
 
 </div>  
 </div>    
-  
+
 <div id="app-setup" class="block py-2 px-5 hide">
     <h2 class="app-config-title">My Heatpump</h2>
 
@@ -190,7 +189,7 @@
     <div class="app-config"></div>
 </div>
 
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
+<div class="ajax-loader"></div>
 
 <script>
 
@@ -326,7 +325,7 @@ function clear()
 
 function updater()
 {
-    feed.listbyidasync(function(result){
+    feed.getListById(function(result){
         if (result === null) { return; }
         
         for (var key in config.app) {

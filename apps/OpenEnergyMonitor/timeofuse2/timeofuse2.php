@@ -4,8 +4,7 @@
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
-
-<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />    
+  
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
 
@@ -17,19 +16,6 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 
 <style>
-
-.app-title {
-    font-weight:bold;
-    font-size:22px;
-    color:#44b3e2;
-}
-
-.app-title-value {
-    font-weight:bold; 
-    font-size:42px; 
-    color:#44b3e2;
-    line-height: 1.1;
-}
 
 .block-bound {
   background-color:rgb(68,179,226);
@@ -164,16 +150,16 @@
     <!-- instructions and settings -->
     <div class="row-fluid">
         <div class="span9 app-config-description">
-            <div class="app-config-description-inner text-light">
+            <div class="app-config-description-inner text-dark">
                 <h2 class="app-config-title text-primary"><?php echo _('Time of Use - flexible'); ?></h2>
                 <p class="lead">The "Time of Use - flexible" app is a simple home energy monitoring app for exploring home or building electricity consumption and cost over time. It allows you to track multiple electricity tariffs as used in Australia.</p>
-                <h3 class="text-grey">Cumulative kWh</h3> 
+                <h3 class="text-black">Cumulative kWh</h3> 
                 <p> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
                 <p><img src="<?php echo $path; ?>Modules/app/images/timeofuse_app.png" style="width:600px" class="img-rounded"></p>
                 <p>As the number of configuration options for this are quite large, a shorthand has been used to specify
                 the tiers, days and times they apply and the respective costs.</p>
                 
-                <h3 class="text-grey">Assumptions</h3>
+                <h3 class="text-black">Assumptions</h3>
                 <ul>
                     <li>Any number of tariffs can be defined, but they must be consistent across weekdays or weekends.</li>
                     <li>One cost must be defined per tariff tier.</li>
@@ -182,9 +168,9 @@
                     <li>Public Holidays are treated the same as a weekend day.</li>
                 </ul>
                 
-                <h3 class="text-grey">Shorthand</h3>
+                <h3 class="text-black">Shorthand</h3>
                 <p>Tier names and tariffs are specified as a comma separated, colon separated list. If there are three
-                tariffs, <strong class="text-light">Off Peak</strong>, <strong class="text-light">Shoulder</strong> and <strong class="text-light">Peak</strong>, costing <strong class="text-light">16.5c/kWh</strong>, <strong class="text-light">25.3c/kWh</strong> and <strong class="text-light">59.4c/kWh</strong> respectively, they
+                tariffs, <strong class="text-grey">Off Peak</strong>, <strong class="text-grey">Shoulder</strong> and <strong class="text-grey">Peak</strong>, costing <strong class="text-grey">16.5c/kWh</strong>, <strong class="text-grey">25.3c/kWh</strong> and <strong class="text-grey">59.4c/kWh</strong> respectively, they
                 are specified as:</p>
                 <p><code>OffPeak:0.165,Shoulder:0.253,Peak:0.594</code></p>
                 <p>Tier start times are split into two definitions, weekday and weekend. They both use the same format,
@@ -193,7 +179,7 @@
                 is the tier number defined above, numbered from 0</p>
 
                 <hr>
-                <h4 class="text-grey">Example:</h4> 
+                <h4 class="text-black">Example:</h4> 
                 <p>A weekday with the following tariff times:</p>
                 <blockquote><em>
                 OffPeak: 00:00 - 06:59, 
@@ -209,12 +195,12 @@
                 list of days of the year (from 1-365/366) per year.
                 
                 <hr>
-                <h4 class="text-grey">Example:</h4>
+                <h4 class="text-black">Example:</h4>
                 <p>for public holiays 2017: Jan 2, Apr 14, Apr 17, Apr 25, Jun 12, Oct 2, Dec 25, Dec 26; and 2018: Jan 1 you would specify:</p>
                 <code>
                 2017:2,104,107,115,163,275,359,360;2018:1
                 </code>
-                <p><a href="https://www.epochconverter.com/days" class="text-light">https://www.epochconverter.com/days</a> provides an easy reference.</p>
+                <p><a href="https://www.epochconverter.com/days" class="text-grey">https://www.epochconverter.com/days</a> provides an easy reference.</p>
             </div>
         </div>
         <div class="span3 app-config pt-3"></div>

@@ -4,7 +4,6 @@
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
-<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
@@ -106,12 +105,12 @@ padding:10px;
     <!-- instructions and settings -->
     <div class="row-fluid">
         <div class="span9 app-config-description">
-            <div class="app-config-description-inner text-light">
+            <div class="app-config-description-inner text-dark">
                 <h2 class="app-config-title text-primary"><?php echo _('Cost Comparison'); ?></h2>
                 <p class="lead">The Cost Comparison app allows you to compare your energy usage against energy suppliers tariffs including new time of use tariffs.</p>
-                <p><strong class="text-grey">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
+                <p><strong class="text-black">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                 <p><strong>Note:</strong> If you have solar or renewable energy generation then use the import_kwh feed to view the actual cost based on energy brought from the grid</p>
-                <p><strong class="text-grey">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                <p><strong class="text-black">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
                 <img src="<?php echo $path; echo $appdir; ?>preview.png" class="d-none d-sm-inline-block">
             </div>
         </div>
