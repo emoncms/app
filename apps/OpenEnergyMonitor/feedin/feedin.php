@@ -27,7 +27,7 @@
         </div>
         <div class="app-body">
             <div class="title">
-                <div><span class="power consumption"><?php echo "NOW"; ?></span></div>
+                <div><span class="power consumption hide"><?php echo "NOW"; ?></span></div>
                 <div><span class="power generation hide"><?php echo "GENERATION"; ?></span></div>
                 <div class="grow"></div>
                 <div><span class="energy selfcons hide"><?php echo "SELF-CONSUMPTION"; ?></span></div>
@@ -35,12 +35,12 @@
                 <div><span class="energy consumption"><?php echo "TODAY"; ?></span></div>
             </div>
             <div class="value">
-                <div><span class="power consumption" id="cons-power">0</span></div>
-                <div><span class="power generation hide" id="gen-power">0</span></div>
+                <div><span class="power consumption" id="cons-power"></span></div>
+                <div><span class="power generation hide" id="gen-power"></span></div>
                 <div class="grow"></div>
                 <div class="right"><span class="energy selfcons hide" id="selfcons-energy"></span></div>
-                <div class="right"><span class="energy generation hide" id="gen-energy">0</span></div>
-                <div class="right"><span class="energy consumption" id="cons-energy">0</span></div>
+                <div class="right"><span class="energy generation hide" id="gen-energy"></span></div>
+                <div class="right"><span class="energy consumption" id="cons-energy"></span></div>
             </div>
         </div>
     </div>
@@ -92,40 +92,19 @@ config.app = {
         "name": "Title",
         "description": "Optional title for app"
     },
-    "import_power": {
+    "solar": {
         "type": "feed",
-        "class": "power",
-        "autoname": "import_power",
-        "optional": false
+        "autoname": "solar_energy",
+        "optional": true
     },
-    "import_energy": {
+    "import": {
         "type": "feed",
-        "class": "energy",
         "autoname": "import_energy",
         "optional": false
     },
-    "export_power": {
+    "export": {
         "type": "feed",
-        "class": "power",
-        "autoname": "export_power",
-        "optional": true
-    },
-    "export_energy": {
-        "type": "feed",
-        "class": "energy",
         "autoname": "export_energy",
-        "optional": true
-    },
-    "solar_power": {
-        "type": "feed",
-        "class": "power",
-        "autoname": "solar_power",
-        "optional": true
-    },
-    "solar_energy": {
-        "type": "feed",
-        "class": "energy",
-        "autoname": "solar_energy",
         "optional": true
     },
     "import_cost": {
@@ -167,6 +146,9 @@ config.hideapp = function() {
 var updateTimer = false;
 var idle = Date.now();
 
+var times = {}
+var values = {};
+
 config.init();
 function init() {
     $("#app-title").html(config.app.title.value.toUpperCase());
@@ -196,12 +178,13 @@ function setup() {
     // -------------------------------------------------------------------------
     // Set power and energy data
     // -------------------------------------------------------------------------
-    var cache = data.setup(['import_power', 'import_energy', 'export_power', 'export_energy', 'solar_power', 'solar_energy'], config);
+    data.setup(Graph.POWER, [Graph.SOLAR, Graph.IMPORT, Graph.EXPORT], config);
+    data.setup(Graph.ENERGY, [Graph.SOLAR, Graph.IMPORT, Graph.EXPORT], config);
     return graph.setup(data, config).then(function(result) {
         update();
         updateTimer = setInterval(update, INTERVAL_UPDATE);
         
-        $(".ajax-loader").hide();
+        $('.ajax-loader').hide();
         
     }).catch(function(error) {
         graphError(error);
@@ -244,21 +227,20 @@ function draw() {
 }
 
 function drawPowerValues() {
-    var imp = data.getLatestValue(Graph.IMPORT+"_power");
+    var power = data.getGroup(Graph.POWER);
+    
+    var imp = getPowerValue(Graph.IMPORT, power);
     if (imp == null) {
-        imp = 0;
+    	return;
     }
     var cons = imp;
     var solar = 0;
-    if (data.has(Graph.SOLAR+"_power")) {
-        solar = data.getLatestValue(Graph.SOLAR+"_power");
-        if (solar == null) {
-            solar = 0;
-        }
+    if (power.has(Graph.SOLAR)) {
+        solar = getPowerValue(Graph.SOLAR, power);
         
-        if (data.has(Graph.EXPORT+"_power")) {
-            if (Math.abs(data.getLatestTime(Graph.EXPORT+"_power") - data.getLatestTime(Graph.SOLAR+"_power")) < INTERVAL_UPDATE) {
-                var exp = data.getLatestValue(Graph.EXPORT+"_power");
+        if (solar != null && power.has(Graph.EXPORT)) {
+            if (Math.abs(power.getLatestTime(Graph.EXPORT) - power.getLatestTime(Graph.SOLAR)) < INTERVAL_UPDATE) {
+                var exp = getPowerValue(Graph.EXPORT, power);
                 var selfCons = Math.max(0, solar - exp);
                 if (selfCons != null) {
                     cons += selfCons;
@@ -282,9 +264,9 @@ function drawPowerValues() {
         }
         
         $("#cons-power").html(cons.toFixed(fixed)+"<span class='unit'>"+unit+"</span>");
-        $(".consumption.power").removeClass('cost');
-
-        if (data.has(Graph.SOLAR+"_power")) {
+        $(".consumption.power").removeClass('cost').show();
+        
+        if (power.has(Graph.SOLAR) && solar != null) {
             $("#gen-power").html(solar.toFixed(fixed)+"<span class='unit'>"+unit+"</span>");
             $(".generation.power").removeClass('cost').show();
         }
@@ -305,9 +287,11 @@ function drawPowerValues() {
             fixed = 3;
         }
         $("#cons-power").html(config.app.currency.value+costNow.toFixed(fixed)+"<span class='unit'>/hr</span>");
-        $(".consumption.power").addClass('cost');
-
-        if (data.has(Graph.SOLAR+"_power") && config.app.export_cost.value > 0) {
+        $(".consumption.power").addClass('cost').show();
+        
+        if (power.has(Graph.SOLAR) && solar != null && 
+                config.app.export_cost.value > 0) {
+            
             var fitNow = solar*config.app.export_cost.value*0.001;
             var fixed;
             if (fitNow < 0.001) {
@@ -328,22 +312,59 @@ function drawPowerValues() {
     }
 }
 
+function getPowerValue(key, power) {
+    if (times[key] == undefined || values[key] == undefined) {
+        // This works only if the currently used graph view loads the latest power value on initialization
+        var data = power.getData(key);
+        var time = null;
+        var value = null;
+        if (data.length > 1) {
+            var time = data[data.length-2][0];
+            var value = parseFloat(data[data.length-2][1]);
+        }
+        else if (data.length > 0) {
+            var time = data[data.length-1][0]
+            var value = parseFloat(data[data.length-1][1]);
+        }
+        if (!isNaN(value)) {
+            times[key] = time;
+            values[key] = value
+        }
+    }
+    if (times[key] != undefined && values[key] != undefined) {
+        var time = power.getLatestTime(key);
+        if (time - times[key] > 0) {
+            var hours = (time - times[key])/3600000000;
+            var value = parseFloat(power.getLatestValue(key));
+            var power = (value - values[key])/hours;
+            if (!isNaN(power) && power >= 0) {
+                times[key] = time;
+                values[key] = value;
+                
+                return power;
+            }
+        }
+    }
+    return null;
+};
+
 function drawEnergyValues() {
     var now = new Date();
     now.setHours(0,0,0,0);
     var time = now.getTime();
+
+    var energy = data.getGroup(Graph.ENERGY);
+    var cons = energy.getDailyValue(Graph.IMPORT, time);
+    var solar = energy.getDailyValue(Graph.SOLAR, time);
     
-    var cons = data.getDailyEnergy(Graph.IMPORT+"_energy", time);
-    var solar = data.getDailyEnergy(Graph.SOLAR+"_energy", time);
-    
-    if (graph.unit == "energy") {
-        if (data.has(Graph.SOLAR+"_energy")) {
+    if (graph.unit == Graph.ENERGY) {
+        if (energy.has(Graph.SOLAR)) {
             $("#gen-energy").html(solar.toFixed(1)+"<span class='unit'>kWh</span>");
             $(".generation.energy").removeClass('cost').show();
             
             var selfCons = 0;
-            if (data.has(Graph.EXPORT+"_energy")) {
-                selfCons = Math.max(0, solar - data.getDailyEnergy(Graph.EXPORT+"_energy", time));
+            if (energy.has(Graph.EXPORT)) {
+                selfCons = Math.max(0, solar - energy.getDailyValue(Graph.EXPORT, time));
             }
             cons = Math.max(0, cons+selfCons);
             
@@ -362,7 +383,7 @@ function drawEnergyValues() {
         $(".consumption.energy").removeClass('cost');
     }
     else {
-        if (data.has(Graph.SOLAR+"_energy") && config.app.export_cost.value > 0) {
+        if (energy.has(Graph.SOLAR) && config.app.export_cost.value > 0) {
             $("#gen-energy").html(config.app.currency.value+(solar*config.app.export_cost.value).toFixed(2));
             $(".generation.energy").addClass('cost').show();
         }
@@ -443,7 +464,7 @@ function graphError(error) {
 // App log
 // ----------------------------------------------------------------------
 function appLog(level, message) {
-	var time = new Date().toString();
+    var time = new Date().toString();
     if (level.toUpperCase() == 'ERROR') {
         alert(time+" "+level+": "+message);
         console.error(time, level, message);
