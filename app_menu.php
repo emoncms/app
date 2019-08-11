@@ -1,6 +1,8 @@
 <?php
     
-    global $mysqli,$path,$session,$route,$user,$app_settings;
+global $mysqli,$path,$session,$route,$user,$app_settings;
+
+if ($session["write"]) {
 
     require_once "Modules/app/app_model.php";
     $appconfig = new AppConfig($mysqli, $app_settings);
@@ -56,3 +58,5 @@
         'li_class'=>'d-none',
         'order'=> 99
     );
+    
+}
