@@ -559,10 +559,12 @@ class PowerGraph extends Graph {
 //                noColumns: 4
             }
         }
-        this.plot = $.plot($('.graph'), series, options);        
-        this.events();
+    	if (!$('.graph').is(":hidden")) {
+            this.plot = $.plot($('.graph'), series, options);        
+            this.events();
 
-        $(".graph-loader", this.view.container).hide();
+            $(".graph-loader", this.view.container).hide();
+    	}
     }
 
     events() {

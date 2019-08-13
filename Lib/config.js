@@ -30,13 +30,13 @@ var config = {
             config.showapp();
         }
 
-        $("body").on("click",".config-open",function() {
+        $("body").on("click",".config-open", function() {
             config.showConfig();
             config.UI();
         });
 
         // don't save and just show app
-        $("body").on("click",".config-close", function(event){
+        $("body").on("click",".config-close", function(event) {
             config.closeConfig();
         });
 
@@ -77,11 +77,11 @@ var config = {
      * enable the buttons in the app header
      */
     closeConfig: function () {
-        $("#app-block").toggleClass('hide', false).show();
-        $("#app-setup").toggleClass('hide', true);
+        $("#app-block").show();
+        $("#app-setup").hide();
         
-        $('.config-open').toggleClass('hide', false);
-        $('.config-close').toggleClass('hide', true);
+        $('.config-open').show();
+        $('.config-close').hide();
         $('#buttons #tabs .btn').attr('disabled',false).css('opacity',1);
     },
 
@@ -90,11 +90,11 @@ var config = {
      * disable the buttons in the app header
      */
     showConfig: function () {
-        $("#app-block").toggleClass('hide', true);
-        $("#app-setup").toggleClass('hide', false).show();
+        $("#app-block").hide();
+        $("#app-setup").show();
         
-        $('.config-open').toggleClass('hide', true);
-        $('.config-close').toggleClass('hide', false);
+        $('.config-open').hide();
+        $('.config-close').show();
         $('#buttons #tabs .btn').attr('disabled',true).css('opacity',.2);
     },
 
