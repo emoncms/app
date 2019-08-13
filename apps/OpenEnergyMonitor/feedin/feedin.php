@@ -92,17 +92,32 @@ config.app = {
         "name": "Title",
         "description": "Optional title for app"
     },
-    "solar": {
+    "solar_power": {
+        "type": "feed",
+        "autoname": "solar_power",
+        "optional": true
+    },
+    "solar_energy": {
         "type": "feed",
         "autoname": "solar_energy",
         "optional": true
     },
-    "import": {
+    "import_power": {
+        "type": "feed",
+        "autoname": "import_power",
+        "optional": false
+    },
+    "import_energy": {
         "type": "feed",
         "autoname": "import_energy",
         "optional": false
     },
-    "export": {
+    "export_power": {
+        "type": "feed",
+        "autoname": "export_power",
+        "optional": true
+    },
+    "export_energy": {
         "type": "feed",
         "autoname": "export_energy",
         "optional": true
@@ -180,6 +195,9 @@ function setup() {
     // -------------------------------------------------------------------------
     data.setup(Graph.POWER, [Graph.SOLAR, Graph.IMPORT, Graph.EXPORT], config);
     data.setup(Graph.ENERGY, [Graph.SOLAR, Graph.IMPORT, Graph.EXPORT], config);
+    data.register([Graph.SOLAR, Graph.IMPORT, Graph.EXPORT, 
+        "solar_power", "import_power", "export_power"], config);
+    
     return graph.setup(data, config).then(function(result) {
         update();
         updateTimer = setInterval(update, INTERVAL_UPDATE);
@@ -205,7 +223,7 @@ function update() {
         idle = time;
     }
     return data.update().then(function(result) {
-        draw();
+        draw(result);
     });
 }
 
@@ -220,31 +238,37 @@ function load() {
     });
 }
 
-function draw() {
-    drawPowerValues();
+function draw(values) {
+    if (typeof values === 'undefined') {
+    	values = data.latest();
+    }
+    drawPowerValues(values);
     drawEnergyValues();
     graph.draw();
 }
 
-function drawPowerValues() {
-    var power = data.getGroup(Graph.POWER);
-    
-    var imp = getPowerValue(Graph.IMPORT, power);
+function drawPowerValues(values) {
+	var getPowerValue = function(key, values) {
+		if (values[key] == undefined) {
+			return null;
+		}
+		return parseFloat(values[key][1]);
+	};
+    var imp = getPowerValue("import_power", values);
     if (imp == null) {
     	return;
     }
     var cons = imp;
-    var solar = 0;
-    if (power.has(Graph.SOLAR)) {
-        solar = getPowerValue(Graph.SOLAR, power);
-        
-        if (solar != null && power.has(Graph.EXPORT)) {
-            if (Math.abs(power.getLatestTime(Graph.EXPORT) - power.getLatestTime(Graph.SOLAR)) < INTERVAL_UPDATE) {
-                var exp = getPowerValue(Graph.EXPORT, power);
-                var selfCons = Math.max(0, solar - exp);
-                if (selfCons != null) {
-                    cons += selfCons;
-                }
+    var solar = getPowerValue("solar_power", values);
+    if (solar == null) {
+        solar = 0;
+    }
+    else {
+        var exp = getPowerValue("export_power", values);
+        if (exp != null) {
+            var selfCons = Math.max(0, solar - exp);
+            if (selfCons != null) {
+                cons += selfCons;
             }
         }
     }
@@ -266,7 +290,7 @@ function drawPowerValues() {
         $("#cons-power").html(cons.toFixed(fixed)+"<span class='unit'>"+unit+"</span>");
         $(".consumption.power").removeClass('cost').show();
         
-        if (power.has(Graph.SOLAR) && solar != null) {
+        if (values["solar_power"] != undefined && solar != null) {
             $("#gen-power").html(solar.toFixed(fixed)+"<span class='unit'>"+unit+"</span>");
             $(".generation.power").removeClass('cost').show();
         }
@@ -289,7 +313,7 @@ function drawPowerValues() {
         $("#cons-power").html(config.app.currency.value+costNow.toFixed(fixed)+"<span class='unit'>/hr</span>");
         $(".consumption.power").addClass('cost').show();
         
-        if (power.has(Graph.SOLAR) && solar != null && 
+        if (values["solar_power"] != undefined && solar != null && 
                 config.app.export_cost.value > 0) {
             
             var fitNow = solar*config.app.export_cost.value*0.001;
@@ -311,42 +335,6 @@ function drawPowerValues() {
         }
     }
 }
-
-function getPowerValue(key, power) {
-    if (times[key] == undefined || values[key] == undefined) {
-        // This works only if the currently used graph view loads the latest power value on initialization
-        var data = power.getData(key);
-        var time = null;
-        var value = null;
-        if (data.length > 1) {
-            var time = data[data.length-2][0];
-            var value = parseFloat(data[data.length-2][1]);
-        }
-        else if (data.length > 0) {
-            var time = data[data.length-1][0]
-            var value = parseFloat(data[data.length-1][1]);
-        }
-        if (!isNaN(value)) {
-            times[key] = time;
-            values[key] = value
-        }
-    }
-    if (times[key] != undefined && values[key] != undefined) {
-        var time = power.getLatestTime(key);
-        if (time - times[key] > 0) {
-            var hours = (time - times[key])/3600000000;
-            var value = parseFloat(power.getLatestValue(key));
-            var power = (value - values[key])/hours;
-            if (!isNaN(power) && power >= 0) {
-                times[key] = time;
-                values[key] = value;
-                
-                return power;
-            }
-        }
-    }
-    return null;
-};
 
 function drawEnergyValues() {
     var now = new Date();
@@ -428,17 +416,19 @@ function resize() {
     var height = $(window).height();
     
     // Subtract the height of all relevant elements
-    $('.graph-header, .block-title, .app-body').each(function() {
+    $('.graph-info .graph-header, .app-header, .app-body').each(function() {
         height -= $(this).outerHeight();
     });
     // Subtract the padding height of all blocks
     $('.app-block').each(function() {
         var block = $(this);
-        height -= (block.innerHeight() - block.height());
+        height -= (block.outerHeight(true) - block.height());
     });
     // Subtract the heigt of the graph and emoncms footer and navbar
-    height -= 162;
-    
+    var container = $('.content-container');
+    height -= (container.outerHeight(true) - container.height());
+    height -= 146;
+
     $('.graph').height(height);
 }
 

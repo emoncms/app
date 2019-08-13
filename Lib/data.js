@@ -6,10 +6,22 @@ class DataCache {
         this.api = api;
         this.cache = {};
         this.groups = {};
+        this.updates = {};
     }
 
     static get DATAPOINTS_LIMIT() {
         return DATAPOINTS_LIMIT;
+    }
+
+    register(keys, config) {
+        for (var i in keys) {
+        	var key = keys[i];
+        	
+            if (this.cache[key] == undefined && config.app[key] != undefined && config.app[key]['value']) {
+                this.setupFeed(key, config);
+            }
+        }
+        this.updates = keys;
     }
 
     setup(name, keys, config) {
@@ -20,23 +32,28 @@ class DataCache {
             if (keys.indexOf(key) < 0 || !config.app[key]['value']) {
             	continue;
             }
-            var feed = this.cache[key];
-            if (feed == undefined) {
-                var f = config.feedsbyid[config.app[key]['value']];
-                if (f.engine == 5 || f.engine == 6) {
-                    feed = new FixedIntervalFeed(f.id, f.engine, this.api);
-                }
-                else {
-                    feed = new DataFeed(f.id, f.engine, this.api);
-                }
-                this.cache[key] = feed;
-            }
+            var feed = this.setupFeed(key, config);
             data[key] = new DataSeries(key, feed);
         }
         var group = new DataCollection(name, data);
         this.groups[name] = group;
         
         return group;
+    }
+
+    setupFeed(key, config) {
+        var feed = this.cache[key];
+        if (feed == undefined) {
+            var f = config.feedsbyid[config.app[key]['value']];
+            if (f.engine == 5 || f.engine == 6) {
+                feed = new FixedIntervalFeed(f.id, f.engine, this.api);
+            }
+            else {
+                feed = new DataFeed(f.id, f.engine, this.api);
+            }
+            this.cache[key] = feed;
+        }
+        return feed;
     }
 
     hasGroup(group) {
@@ -71,31 +88,54 @@ class DataCache {
         return getGroup(group).loadDailyData(start, end);
     }
 
+    latest() {
+    	var values = {};
+    	for (let i in this.updates) {
+    		var key = this.updates[i];
+    		var feed = this.cache[key];
+        	if (feed != undefined) {
+            	values[key] = feed.latest;
+        	}
+    	}
+    	return values;
+    }
+
     update() {
         return this.api.getListById(true).then(function(result) {
-        	if (result === null) return;
-        	for (var name in this.groups) {
-        		var group = this.groups[name];
-                for (var key in group.series) {
+        	var values = {};
+        	if (result === null) return values;
+        	
+        	for (let i in this.updates) {
+        		var key = this.updates[i];
+        		var feed = this.cache[key];
+                var data = result[feed.id];
+                if (data.value == null) {
+                	continue;
+                }
+            	var value = [data.time*1000, data.value];
+            	values[key] = value;
+                
+                // Update the latest cached time value
+            	feed.latest = value;
+                
+                // Append latest cached values to the cached series, if the passed flag indicates it
+            	for (var name in this.groups) {
+            		var group = this.groups[name];
+            		if (!group.has(key)) continue;
+            		
                 	var series = group.get(key);
-                	var feed = series.feed;
-                    var data = result[feed.id];
-                    if (data.value != null) {
-                        // Update the latest cached time value
-                        // and append latest cached values to the feed data cache, if the passed flag indicates it
-                        feed.latest = [data.time*1000, data.value];
+                    if (series.live) {
+                        series.append();
                         
-                        if (series.live) {
-                            series.append();
-                            
-                            // If the cache exceeds the specified datapoint limit, trim the first value
-                            if (series.getLength() > DataCache.DATAPOINTS_LIMIT) {
-                                series.trim();
-                            }
+                        // If the cache exceeds the specified datapoint limit, trim the first value
+                        if (series.getLength() > DataCache.DATAPOINTS_LIMIT) {
+                            series.trim();
                         }
                     }
-                }
+            	}
         	}
+        	return values;
+        	
         }.bind(this));
     }
 }

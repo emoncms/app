@@ -1,8 +1,8 @@
 const POWER = "power";
 const ENERGY = "energy"
-const IMPORT = "import";
-const EXPORT = "export";
-const SOLAR = "solar";
+const IMPORT = "import_energy";
+const EXPORT = "export_energy";
+const SOLAR = "solar_energy";
 
 class GraphView {
     constructor(path, container) {
