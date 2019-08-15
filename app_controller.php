@@ -16,7 +16,6 @@ function app_controller()
 {
     global $mysqli,$path,$session,$route,$user,$fullwidth,$app_settings,$v;
 
-    $fullwidth = true;
     $result = false;
 
     require_once "Modules/app/app_model.php";
@@ -65,7 +64,7 @@ function app_controller()
                 }
             }
             
-            $result = "<link href='".$path."Modules/app/Views/css/pagenav.css?v=".$v."' rel='stylesheet'>";
+            $result = "<link href='".$path."Modules/app/Views/css/app.css?v=".$v."' rel='stylesheet'>";
 
             if ($app!=false) {
                 $result .= view($dir.$id.".php",array("name"=>$app, "appdir"=>$dir, "config"=>$config, "apikey"=>$apikey));
@@ -94,7 +93,7 @@ function app_controller()
     else if ($route->action == "new" && $session['write']) {
         $applist = $appconfig->get_list($session['userid']);
         $route->format = "html";
-        $result = "<link href='".$path."Modules/app/Views/css/pagenav.css?v=1' rel='stylesheet'>";
+        $result = "<link href='".$path."Modules/app/Views/css/app.css?v=1' rel='stylesheet'>";
         $result .= view("Modules/app/Views/app_view.php", array("apps"=>$appavail));
     }
     else if ($route->action == "remove" && $session['write']) {

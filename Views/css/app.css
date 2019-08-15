@@ -1,0 +1,6 @@
+body.app #wrap .content-container {
+    max-width: 1150px;
+}
+body.app.fullwidth #wrap .content-container {
+    max-width: 100%;
+}

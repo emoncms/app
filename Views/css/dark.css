@@ -132,7 +132,7 @@ body.app .container-fluid {
   margin-right: 0px;
 }
 
-#wrap main.content-container{
+#wrap .content-container{
   padding-bottom: 0rem!important;
 }
 /** MOBILE FIRST **/
@@ -253,5 +253,12 @@ body.app .container-fluid {
 @media (min-width: 1200px) {
     #breakdown {
         max-width: 34rem;
+    }
+    .chart-placeholder.double{
+        width: 100%;
+    }
+    .chart-placeholder.double > *{
+        height: 22rem;
+        width: 100%;
     }
 }
