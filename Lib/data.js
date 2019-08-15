@@ -620,9 +620,9 @@ class DataFeed {
         this.latest = null;
     }
 
-    loadTimevalue(time, interval, async) {
+    loadTimevalue(time, async) {
         // TODO: Check if the value maybe is hold in cache
-        return this.api.getValue(this.id, time, interval, async);
+        return this.api.getValue(this.id, time, 1000, async);
     }
 
     loadEarliest() {
