@@ -34,7 +34,7 @@ if ($session["write"]) {
             $_i++;
         }
     }
-
+    textdomain ("messages");
     $menu['tabs'][] = array(
         'icon'=>'apps',
         'text'=> _("Apps"),
