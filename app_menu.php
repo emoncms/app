@@ -37,7 +37,7 @@ if ($session["write"]) {
 
     $menu['tabs'][] = array(
         'icon'=>'apps',
-        'title'=> _("Apps"),
+        'text'=> _("Apps"),
         'path'=> 'app/view',
         'order'=> 2,
         'data'=> array('sidebar' => '#sidebar_apps')
