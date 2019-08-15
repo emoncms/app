@@ -26,22 +26,39 @@
 </nav>
     
 <section id="app-block" style="display:none" class="block">
-    <div class="d-flex justify-content-between">
+    <div id="summary" class="d-flex justify-content-between">
         <div>
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('USE NOW') ?></h5>
             <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow">0</span>W</h2>
         </div>
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light px-1"><span class="balance-label"></span></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span></h2>
+            <h2 class="power-value display-sm-4 display-md-3 mt-0 mb-lg-3"><span class="balance"></span></h2>
         </div>
         <div class="text-xs-right">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('RENEWABLE GEN') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 my-0 text-warning "><span class="gennow"></span>W</h2>
+            <h2 class="power-value display-sm-4 display-md-3 my-0 text-warning "><span class="gennow"></span>W</h2>
 
-            <h5 class="electric-title mt-0 mb-lg-3 text-md-larger ">
-                <span class="text-warning" title="<?php echo _('SOLAR') ?>"><span class="d-none d-sm-inline-block"><?php echo _('SOLAR') ?>: </span> <span class="solarnow">0</span>W</span> | 
-                <span class="text-success" title="<?php echo _('WIND') ?>"><span class="d-none d-sm-inline-block"><?php echo _('WIND') ?>: </span> <span class="windnow">0</span>W</span>
+            <h5 class="electric-title mt-0 mb-lg-3 text-lg-larger">
+                <span class="text-warning" title="<?php echo _('SOLAR') ?>">
+                    <span class="d-none d-md-inline-block">
+                        <?php echo _('SOLAR') ?>: 
+                    </span> 
+                    <span class="d-inline-block d-md-none">
+                        <?php echo strtoupper(substr(_('SOLAR'),0,1)) ?>: 
+                    </span> 
+                    <span class="solarnow">0</span>W
+                </span>
+                     | 
+                <span class="text-success" title="<?php echo _('WIND') ?>">
+                    <span class="d-none d-md-inline-block">
+                        <?php echo _('WIND') ?>: 
+                    </span> 
+                    <span class="d-inline-block d-md-none">
+                        <?php echo strtoupper(substr(_('WIND'),0,1)) ?>: 
+                    </span> 
+                        <span class="windnow">0</span>W
+                </span>
             </h5>
         </div>
     </div>

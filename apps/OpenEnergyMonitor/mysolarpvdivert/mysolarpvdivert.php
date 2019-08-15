@@ -145,25 +145,25 @@
     <div class="d-flex justify-content-between">
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('HOUSE') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-info"><span class="housenow">0</span>W</h2>
+            <h2 class="power-value display-md-4 display-lg-3 mt-0 mb-lg-3 text-info"><span class="housenow">0</span>W</h2>
         </div>
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light px-1"><?php echo _('DIVERT') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-quaternary"><span class="divertnow">-</span>W</h2>
+            <h2 class="power-value display-md-4 display-lg-3 mt-0 mb-lg-3 text-quaternary"><span class="divertnow">-</span>W</h2>
         </div>
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('TOTAL USE') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-primary"><span class="usenow"></span>W</h2>
+            <h2 class="power-value display-md-4 display-lg-3 my-0 text-primary"><span class="usenow"></span>W</h2>
         </div>
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light"><span class="balance-label">-</h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-success ">
+            <h2 class="power-value display-md-4 display-lg-3 my-0 text-success ">
                 <span class="balance"></span>
             </h2>
         </div>
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('SOLAR') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-warning "><span class="generationnow"></span>W</h2>
+            <h2 class="power-value display-md-4 display-lg-3 my-0 text-warning "><span class="generationnow"></span>W</h2>
         </div>
     </div>
 
