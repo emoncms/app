@@ -65,7 +65,7 @@ function app_controller()
                 }
             }
             
-            $result = "<link href='".$path."Modules/app/Views/css/pagenav.css?v=".$v."' rel='stylesheet'>";
+            $result = "<link href='".$path."Modules/app/Views/css/app.css?v=".$v."' rel='stylesheet'>";
 
             if ($app!=false) {
                 $result .= view($dir.$id.".php",array("name"=>$app, "appdir"=>$dir, "config"=>$config, "apikey"=>$apikey));
