@@ -14,9 +14,8 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 $v = 7;
 function app_controller()
 {
-    global $mysqli,$path,$session,$route,$user,$fullwidth,$app_settings,$v;
-
-    $fullwidth = true;
+    global $mysqli,$path,$session,$route,$user,$app_settings,$v;
+    
     $result = false;
 
     require_once "Modules/app/app_model.php";
@@ -130,5 +129,5 @@ function app_controller()
         $result = json_decode(file_get_contents("https://openenergymonitor.org/ukgrid/api.php?q=data&id=1&start=$start&end=$end&interval=$interval"));
     }
 
-    return array('content'=>$result, 'fullwidth'=>$fullwidth);
+    return array('content'=>$result);
 }
