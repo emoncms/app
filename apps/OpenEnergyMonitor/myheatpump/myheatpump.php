@@ -771,6 +771,8 @@ function bargraph_draw()
 // -------------------------------------------------------------------------------
 // RESIZE
 // -------------------------------------------------------------------------------
+$(window).resize(app_resize);
+
 function resize() {
     var top_offset = 0;
     var placeholder_bound = $('#placeholder_bound');
@@ -787,7 +789,7 @@ function resize() {
     placeholder.height(height-top_offset);
 }
 
-$(window).resize(function(){
+function app_resize() {
     var window_width = $(this).width();
 
     flot_font_size = 12;
@@ -800,7 +802,9 @@ $(window).resize(function(){
     } else {
         powergraph_draw();
     }
-});
+}
+
+
 
 // ----------------------------------------------------------------------
 // App log
