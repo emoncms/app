@@ -1,30 +1,5 @@
 <?php global $path; ?>
 
-<style>
-.app-item {
-  padding:15px;
-  border-bottom: 1px solid #ccc;
-  border-left: 1px solid #ccc;
-  border-right: 1px solid #ccc;
-}
-
-.app-item:hover {
-  background-color:#eee;
-  cursor:pointer;
-}
-
-.app-item-title {
-  font-weight:bold;
-  font-size:14px;
-}
-
-.col1 {
-  width:100%;
-}
-.col1-inner { padding:10px; }
-
-</style>
-
 <div style="padding:20px">
 
   <h2>Available Apps</h2>
