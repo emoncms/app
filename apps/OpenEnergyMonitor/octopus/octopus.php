@@ -387,6 +387,7 @@ function graph_load()
         for (var z=1; z<use.length; z++) {
             var time = use[z-1][0];
             var kwh = (use[z][1]-use[z-1][1]);
+            if (kwh<0.0) kwh = 0.0;
             var cost = data.agile[z-1][1]*0.01;
             data["use"].push([time,kwh]);
             total_kwh += kwh
