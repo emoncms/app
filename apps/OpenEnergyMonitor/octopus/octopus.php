@@ -1,6 +1,6 @@
 <?php
     global $path, $session;
-    $v = 7;
+    $v = 8;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
@@ -76,10 +76,13 @@
     <div class="block-bound">
       
       <div class="graph-navigation">
+        <span class="bluenav" id="fastright" >>></span>
+        <span class="bluenav" id="fastleft" ><<</span>
         <span class="bluenav" id="right" >></span>
         <span class="bluenav" id="left" ><</span>
-        <span class="bluenav" id="zoomout" >-</span>
-        <span class="bluenav" id="zoomin" >+</span>
+        <!--<span class="bluenav" id="zoomout" >-</span>-->
+        <!--<span class="bluenav" id="zoomin" >+</span>-->
+        <span class="bluenav time" time='1440'>2M</span>
         <span class="bluenav time" time='720'>M</span>
         <span class="bluenav time" time='168'>W</span>
         <span class="bluenav time" time='24'>D</span>
@@ -97,29 +100,19 @@
           
     <div id="power-graph-footer" style="background-color:#eee; color:#333; display:none">
  
-       <div style="padding:10px;">
-        <b>In window:</b> <b id="window-kwh"></b> <b id="window-cost"></b>
+      <div style="padding:10px;">
+      <table style="width:100%">
+      <tr>
+      <td style="width:32%; text-align:center">Energy<div id="window-energy"></div></td>
+      <td style="width:32%; text-align:center">Cost<div id="window-cost"></div></td>
+      <td style="width:32%; text-align:center">Unit Cost<div id="window-unitcost"></div></td>
+      </tr>
+      </table>
+       
       </div>
       
       <div style="clear:both"></div>
     </div>
-          
-    <div id="advanced-block" style="background-color:#eee; padding:10px; display:none">
-      <div style="color:#000">
-        <table class="table">
-          <tr>
-          <th></th>
-          <th style="text-align:center">Min</th>
-          <th style="text-align:center">Max</th>
-          <th style="text-align:center">Diff</th>
-          <th style="text-align:center">Mean</th>
-          <th style="text-align:center">StDev</th>
-          </tr>
-          <tbody id="stats"></tbody>
-        </table>
-      </div>
-    </div>
-
   </div></div>
 </div>    
 </div>
@@ -176,7 +169,8 @@ if (!sessionwrite) $(".openconfig").hide();
 config.app = {
     "title":{"type":"value", "default":"OCTOPUS AGILE", "name": "Title", "description":"Optional title for app"},
     "use":{"type":"feed", "autoname":"use", "engine":"5"},
-    "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5}
+    "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5},
+    "region":{"type":"select", "name":"Select region:", "default":"D_Merseyside_and_Northern_Wales", "options":["A_Eastern_England","B_East_Midlands","C_London","E_West_Midlands","D_Merseyside_and_Northern_Wales","F_North_Eastern_England","G_North_Western_England","H_Southern_England","J_South_Eastern_England","K_Southern_Wales","L_South_Western_England","M_Yorkshire","N_Southern_Scotland","P_Northern_Scotland"]}
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
@@ -185,6 +179,23 @@ config.feeds = feed.list();
 config.initapp = function(){init()};
 config.showapp = function(){show()};
 config.hideapp = function(){hide()};
+
+var regions = {
+  "A_Eastern_England":396124,
+  "B_East_Midlands":396125,
+  "C_London":396126,
+  "E_West_Midlands":396127,
+  "D_Merseyside_and_Northern_Wales":396105,
+  "F_North_Eastern_England":396128,
+  "G_North_Western_England":396129,
+  "H_Southern_England":396138,
+  "J_South_Eastern_England":396139,
+  "K_Southern_Wales":396140,
+  "L_South_Western_England":396141,
+  "M_Yorkshire":396142,
+  "N_Southern_Scotland":396143,
+  "P_Northern_Scotland":396144
+}
 
 // ----------------------------------------------------------------------
 // APPLICATION
@@ -202,9 +213,7 @@ var period_average = 0;
 var comparison_heating = false;
 var comparison_transport = false;
 var flot_font_size = 12;
-var start_time = 0;
 var updaterinst = false;
-var use_start = 0;
 
 config.init();
 
@@ -222,10 +231,6 @@ function show() {
     
     $("#app-title").html(config.app.title.value);
     
-    meta["use_kwh"] = feed.getmeta(feeds["use_kwh"].id);
-    if (meta["use_kwh"].start_time>start_time) start_time = meta["use_kwh"].start_time;
-    use_start = feed.getvalue(feeds["use_kwh"].id, start_time*1000)[1];
-
     resize();
 
     var timeWindow = (3600000*24.0*1);
@@ -271,8 +276,11 @@ function updater()
 // The events are loaded at the start here and dont need to be unbinded and binded again.
 $("#zoomout").click(function () {view.zoomout(); graph_load(); graph_draw(); });
 $("#zoomin").click(function () {view.zoomin(); graph_load(); graph_draw(); });
-$('#right').click(function () {view.panright(); graph_load(); graph_draw(); });
-$('#left').click(function () {view.panleft(); graph_load(); graph_draw(); });
+$('#right').click(function () {view.pan_speed = 0.5; view.panright(); graph_load(); graph_draw(); });
+$('#left').click(function () {view.pan_speed = 0.5; view.panleft(); graph_load(); graph_draw(); });
+$('#fastright').click(function () {view.pan_speed = 1.0; view.panright(); graph_load(); graph_draw(); });
+$('#fastleft').click(function () {view.pan_speed = 1.0; view.panleft(); graph_load(); graph_draw(); });
+
 
 $('.time').click(function () {
     view.timewindow($(this).attr("time")/24.0);
@@ -302,9 +310,6 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             var itemTime = item.datapoint[0];
             var itemValue = item.datapoint[1];
             
-            var unit = "W";
-            var elec_kwh = itemValue; // data["use"][z][1];
-
             var d = new Date(itemTime);
             var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
             var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -312,10 +317,11 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             if (hours<10) hours = "0"+hours;
             var minutes = d.getMinutes();
             if (minutes<10) minutes = "0"+minutes;
-            
             var date = hours+":"+minutes+", "+days[d.getDay()]+" "+months[d.getMonth()]+" "+d.getDate();
             
-            var text = date+"<br>"+(elec_kwh).toFixed(1)+" kWh";
+            var text = "";
+            if (item.seriesIndex==0) text = date+"<br>"+(itemValue).toFixed(3)+" kWh";
+            if (item.seriesIndex==1) text = date+"<br>"+(itemValue).toFixed(1)+" p/kWh";
             
             tooltip(item.pageX, item.pageY, text, "#fff");
         }
@@ -368,7 +374,12 @@ function graph_load()
 
     var use_tmp = feed.getdata(feeds["use_kwh"].id,start,end,interval,0,0);
     
-    data["agile"] = feed.getdataremote(396105,start,end,interval);
+    data = [];
+    
+    data["agile"] = []
+    if (config.app.region!=undefined && regions[config.app.region.value]!=undefined) {
+        data["agile"] = feed.getdataremote(regions[config.app.region.value],start,end,interval);
+    }
     
     // remove nan values from the end.
     var use = [];
@@ -396,8 +407,10 @@ function graph_load()
     }
     
     var unit_cost = (total_cost/total_kwh);
-    
-    $("#window-cost").html(total_kwh.toFixed(1)+" kWh, Cost: £"+total_cost.toFixed(2)+", Average unit cost: "+(unit_cost*100*1.05).toFixed(1)+"p/kWh (inc VAT)")
+
+    $("#window-energy").html(total_kwh.toFixed(1)+" kWh");
+    $("#window-cost").html("£"+total_cost.toFixed(2));
+    $("#window-unitcost").html((unit_cost*100*1.05).toFixed(1)+"p/kWh (inc VAT)");
     
     graph_series = [];
     graph_series.push({data:data["use"], yaxis:1, color:"#44b3e2", bars: { show: true, align: "center", barWidth: 0.75*1800*1000, fill: 1.0, lineWidth:0}});
