@@ -76,10 +76,13 @@
     <div class="block-bound">
       
       <div class="graph-navigation">
+        <span class="bluenav" id="fastright" >>></span>
+        <span class="bluenav" id="fastleft" ><<</span>
         <span class="bluenav" id="right" >></span>
         <span class="bluenav" id="left" ><</span>
-        <span class="bluenav" id="zoomout" >-</span>
-        <span class="bluenav" id="zoomin" >+</span>
+        <!--<span class="bluenav" id="zoomout" >-</span>-->
+        <!--<span class="bluenav" id="zoomin" >+</span>-->
+        <span class="bluenav time" time='1440'>2M</span>
         <span class="bluenav time" time='720'>M</span>
         <span class="bluenav time" time='168'>W</span>
         <span class="bluenav time" time='24'>D</span>
@@ -210,9 +213,7 @@ var period_average = 0;
 var comparison_heating = false;
 var comparison_transport = false;
 var flot_font_size = 12;
-var start_time = 0;
 var updaterinst = false;
-var use_start = 0;
 
 config.init();
 
@@ -230,10 +231,6 @@ function show() {
     
     $("#app-title").html(config.app.title.value);
     
-    meta["use_kwh"] = feed.getmeta(feeds["use_kwh"].id);
-    if (meta["use_kwh"].start_time>start_time) start_time = meta["use_kwh"].start_time;
-    use_start = feed.getvalue(feeds["use_kwh"].id, start_time*1000)[1];
-
     resize();
 
     var timeWindow = (3600000*24.0*1);
@@ -279,8 +276,11 @@ function updater()
 // The events are loaded at the start here and dont need to be unbinded and binded again.
 $("#zoomout").click(function () {view.zoomout(); graph_load(); graph_draw(); });
 $("#zoomin").click(function () {view.zoomin(); graph_load(); graph_draw(); });
-$('#right').click(function () {view.panright(); graph_load(); graph_draw(); });
-$('#left').click(function () {view.panleft(); graph_load(); graph_draw(); });
+$('#right').click(function () {view.pan_speed = 0.5; view.panright(); graph_load(); graph_draw(); });
+$('#left').click(function () {view.pan_speed = 0.5; view.panleft(); graph_load(); graph_draw(); });
+$('#fastright').click(function () {view.pan_speed = 1.0; view.panright(); graph_load(); graph_draw(); });
+$('#fastleft').click(function () {view.pan_speed = 1.0; view.panleft(); graph_load(); graph_draw(); });
+
 
 $('.time').click(function () {
     view.timewindow($(this).attr("time")/24.0);
@@ -373,6 +373,8 @@ function graph_load()
     end = Math.ceil(end/intervalms)*intervalms;
 
     var use_tmp = feed.getdata(feeds["use_kwh"].id,start,end,interval,0,0);
+    
+    data = [];
     
     data["agile"] = []
     if (config.app.region!=undefined && regions[config.app.region.value]!=undefined) {
