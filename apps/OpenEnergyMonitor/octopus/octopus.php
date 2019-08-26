@@ -97,29 +97,19 @@
           
     <div id="power-graph-footer" style="background-color:#eee; color:#333; display:none">
  
-       <div style="padding:10px;">
-        <b>In window:</b> <b id="window-kwh"></b> <b id="window-cost"></b>
+      <div style="padding:10px;">
+      <table style="width:100%">
+      <tr>
+      <td style="width:32%; text-align:center">Energy<div id="window-energy"></div></td>
+      <td style="width:32%; text-align:center">Cost<div id="window-cost"></div></td>
+      <td style="width:32%; text-align:center">Unit Cost<div id="window-unitcost"></div></td>
+      </tr>
+      </table>
+       
       </div>
       
       <div style="clear:both"></div>
     </div>
-          
-    <div id="advanced-block" style="background-color:#eee; padding:10px; display:none">
-      <div style="color:#000">
-        <table class="table">
-          <tr>
-          <th></th>
-          <th style="text-align:center">Min</th>
-          <th style="text-align:center">Max</th>
-          <th style="text-align:center">Diff</th>
-          <th style="text-align:center">Mean</th>
-          <th style="text-align:center">StDev</th>
-          </tr>
-          <tbody id="stats"></tbody>
-        </table>
-      </div>
-    </div>
-
   </div></div>
 </div>    
 </div>
@@ -320,9 +310,6 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             var itemTime = item.datapoint[0];
             var itemValue = item.datapoint[1];
             
-            var unit = "W";
-            var elec_kwh = itemValue; // data["use"][z][1];
-
             var d = new Date(itemTime);
             var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
             var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -330,10 +317,11 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             if (hours<10) hours = "0"+hours;
             var minutes = d.getMinutes();
             if (minutes<10) minutes = "0"+minutes;
-            
             var date = hours+":"+minutes+", "+days[d.getDay()]+" "+months[d.getMonth()]+" "+d.getDate();
             
-            var text = date+"<br>"+(elec_kwh).toFixed(1)+" kWh";
+            var text = "";
+            if (item.seriesIndex==0) text = date+"<br>"+(itemValue).toFixed(3)+" kWh";
+            if (item.seriesIndex==1) text = date+"<br>"+(itemValue).toFixed(1)+" p/kWh";
             
             tooltip(item.pageX, item.pageY, text, "#fff");
         }
@@ -417,8 +405,10 @@ function graph_load()
     }
     
     var unit_cost = (total_cost/total_kwh);
-    
-    $("#window-cost").html(total_kwh.toFixed(1)+" kWh, Cost: £"+total_cost.toFixed(2)+", Average unit cost: "+(unit_cost*100*1.05).toFixed(1)+"p/kWh (inc VAT)")
+
+    $("#window-energy").html(total_kwh.toFixed(1)+" kWh");
+    $("#window-cost").html("£"+total_cost.toFixed(2));
+    $("#window-unitcost").html((unit_cost*100*1.05).toFixed(1)+"p/kWh (inc VAT)");
     
     graph_series = [];
     graph_series.push({data:data["use"], yaxis:1, color:"#44b3e2", bars: { show: true, align: "center", barWidth: 0.75*1800*1000, fill: 1.0, lineWidth:0}});
