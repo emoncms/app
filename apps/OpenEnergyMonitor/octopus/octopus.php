@@ -1,6 +1,6 @@
 <?php
     global $path, $session;
-    $v = 7;
+    $v = 8;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
@@ -176,7 +176,8 @@ if (!sessionwrite) $(".openconfig").hide();
 config.app = {
     "title":{"type":"value", "default":"OCTOPUS AGILE", "name": "Title", "description":"Optional title for app"},
     "use":{"type":"feed", "autoname":"use", "engine":"5"},
-    "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5}
+    "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5},
+    "region":{"type":"select", "name":"Select region:", "default":"D_Merseyside_and_Northern_Wales", "options":["A_Eastern_England","B_East_Midlands","C_London","E_West_Midlands","D_Merseyside_and_Northern_Wales","F_North_Eastern_England","G_North_Western_England","H_Southern_England","J_South_Eastern_England","K_Southern_Wales","L_South_Western_England","M_Yorkshire","N_Southern_Scotland","P_Northern_Scotland"]}
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
@@ -185,6 +186,23 @@ config.feeds = feed.list();
 config.initapp = function(){init()};
 config.showapp = function(){show()};
 config.hideapp = function(){hide()};
+
+var regions = {
+  "A_Eastern_England":396124,
+  "B_East_Midlands":396125,
+  "C_London":396126,
+  "E_West_Midlands":396127,
+  "D_Merseyside_and_Northern_Wales":396105,
+  "F_North_Eastern_England":396128,
+  "G_North_Western_England":396129,
+  "H_Southern_England":396138,
+  "J_South_Eastern_England":396139,
+  "K_Southern_Wales":396140,
+  "L_South_Western_England":396141,
+  "M_Yorkshire":396142,
+  "N_Southern_Scotland":396143,
+  "P_Northern_Scotland":396144
+}
 
 // ----------------------------------------------------------------------
 // APPLICATION
@@ -368,7 +386,10 @@ function graph_load()
 
     var use_tmp = feed.getdata(feeds["use_kwh"].id,start,end,interval,0,0);
     
-    data["agile"] = feed.getdataremote(396105,start,end,interval);
+    data["agile"] = []
+    if (config.app.region!=undefined && regions[config.app.region.value]!=undefined) {
+        data["agile"] = feed.getdataremote(regions[config.app.region.value],start,end,interval);
+    }
     
     // remove nan values from the end.
     var use = [];

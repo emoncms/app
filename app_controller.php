@@ -11,7 +11,7 @@
 
 // no direct access
 defined('EMONCMS_EXEC') or die('Restricted access');
-$v = 8;
+$v = 9;
 function app_controller()
 {
     global $mysqli,$path,$session,$route,$user,$app_settings,$v;
