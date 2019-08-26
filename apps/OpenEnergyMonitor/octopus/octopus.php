@@ -321,8 +321,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             
             var text = "";
             if (item.seriesIndex==0) text = date+"<br>"+(itemValue).toFixed(3)+" kWh";
-            if (item.seriesIndex==1) text = date+"<br>"+(itemValue).toFixed(1)+" p/kWh";
-            
+            if (item.seriesIndex==1) text = date+"<br>"+(itemValue*1.05).toFixed(1)+" p/kWh (inc VAT)";
             tooltip(item.pageX, item.pageY, text, "#fff");
         }
     } else $("#tooltip").remove();
