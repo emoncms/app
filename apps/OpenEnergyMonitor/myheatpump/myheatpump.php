@@ -48,7 +48,7 @@
   <div class="col1"><div class="col1-inner">
     <div class="block-bound">
       <div style="float:right">
-          <div class="openconfig" style="padding-top:10px; padding-right:10px; cursor:pointer">
+          <div class="config-open" style="padding-top:10px; padding-right:10px; cursor:pointer">
               <i class="icon-wrench icon-white"></i>
           </div>
       </div>

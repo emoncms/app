@@ -42,11 +42,11 @@
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
 <div id="app-block" style="display:none">
-    
+
   <div id="octopus-realtime" class="col1"><div class="col1-inner">
-      
+
     <div class="block-bound">
-      <div class="appnav openconfig"><i class="icon-wrench icon-white"></i></div>
+      <div class="appnav config-open"><i class="icon-wrench icon-white"></i></div>
       <!--<div class="appnav viewcostenergy">VIEW COST</div>-->
       <!--<div class="appnav cost">Cost</div>-->
       <!--<div class="appnav energy">Energy</div>-->
@@ -69,12 +69,12 @@
         </tr>
       </table>
     </div>
-    
+
   </div></div>
   <div class="col1"><div class="col1-inner">
-  
+
     <div class="block-bound">
-      
+
       <div class="graph-navigation">
         <span class="appnav" id="fastright" >>></span>
         <span class="appnav" id="fastleft" ><<</span>
@@ -87,19 +87,19 @@
         <span class="appnav time" time='168'>W</span>
         <span class="appnav time" time='24'>D</span>
       </div>
-        
+
       <div class="block-title">HISTORY</div>
-         
+
     </div>
-    
+
     <div style="background-color:rgba(68,179,226,0.1); padding:10px;">
       <div id="placeholder_bound" style="width:100%; height:500px;">
         <div id="placeholder" style="height:500px"></div>
       </div>
     </div>
-          
+
     <div id="power-graph-footer" style="background-color:#eee; color:#333; display:none">
- 
+
       <div style="padding:10px;">
       <table style="width:100%">
       <tr>
@@ -108,9 +108,9 @@
       <td style="width:32%; text-align:center">Unit Cost<div id="window-unitcost"></div></td>
       </tr>
       </table>
-       
+
       </div>
-      
+
       <div style="clear:both"></div>
     </div>
   </div></div>
