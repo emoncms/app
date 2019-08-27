@@ -3,6 +3,7 @@ var view =
   'start':0,
   'end':0,
   'first_data':0,
+  'pan_speed':0.2,
 
   'zoomout':function ()
   {
@@ -25,7 +26,7 @@ var view =
   'panright':function ()
   {
     var time_window = this.end - this.start;
-    var shiftsize = time_window * 0.2;
+    var shiftsize = time_window * view.pan_speed;
     var now = this.now();
     if (this.end + shiftsize > now) {
       shiftsize = now - this.end;
@@ -37,7 +38,7 @@ var view =
   'panleft':function ()
   {
     var time_window = this.end - this.start;
-    var shiftsize = time_window * 0.2;
+    var shiftsize = time_window * view.pan_speed;
     if (this.start - shiftsize < this.first_data) {
       shiftsize = this.start - this.first_data;
     }

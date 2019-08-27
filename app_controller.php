@@ -11,7 +11,7 @@
 
 // no direct access
 defined('EMONCMS_EXEC') or die('Restricted access');
-$v = 7;
+$v = 9;
 function app_controller()
 {
     global $mysqli,$path,$session,$route,$user,$app_settings,$v;
@@ -91,6 +91,8 @@ function app_controller()
     else if ($route->action == "new" && $session['write']) {
         $applist = $appconfig->get_list($session['userid']);
         $route->format = "html";
+        $result = "<link href='".$path."Modules/app/Views/css/pagenav.css?v=1' rel='stylesheet'>";
+        $result .= "<link href='".$path."Modules/app/Views/css/app.css?v=".$v."' rel='stylesheet'>";
         $result .= view("Modules/app/Views/app_view.php", array("apps"=>$appavail));
     }
     else if ($route->action == "remove" && $session['write']) {

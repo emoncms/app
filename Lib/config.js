@@ -125,6 +125,13 @@ var config = {
                 out += "<br><span class='app-config-info'></span>";
                 var checked = ""; if (config.app[z].default) checked = "checked";
                 out += " <input class='app-config-value' type='checkbox' key='"+z+"' "+checked+" / >";
+            } else if (config.app[z].type=="select") {
+                out += "<i class='status icon-ok-sign icon-white'></i> <b>"+config.app[z].name+"</b>";
+                out += "<select class='app-config-value' key='"+z+"' style='margin-top:5px; width:100%'>";
+                for (var o in config.app[z].options) {
+                    out += "<option>"+config.app[z].options[o]+"</option>";
+                }
+                out += "</select>";
             }
             out += "</div>";
         }
@@ -203,6 +210,10 @@ var config = {
             if (config.app[z].type=="checkbox") {
                 if (config.db[z]!=undefined) configItem.find(".app-config-value")[0].checked = config.db[z];
             }
+
+            if (config.app[z].type=="select") {
+                if (config.db[z]!=undefined) configItem.find(".app-config-value").val(config.db[z]);
+            }
                         
             // Set description
             configItem.find(".app-config-info").html(config.app[z].description);
@@ -266,6 +277,8 @@ var config = {
                 value = $(this).val();
             } else if (config.app[key].type=="checkbox") {
                 value = $(this)[0].checked;
+            } else if (config.app[key].type=="select") {
+                value = $(this).val();
             }
             
             config.db[key] = value;
@@ -339,6 +352,14 @@ var config = {
             }
             
             if (config.app[key].type=="checkbox") {
+                if (config.db[key]!=undefined) {
+                    config.app[key].value = config.db[key];
+                } else {
+                    config.app[key].value = config.app[key].default;
+                }
+            }
+
+            if (config.app[key].type=="select") {
                 if (config.db[key]!=undefined) {
                     config.app[key].value = config.db[key];
                 } else {
