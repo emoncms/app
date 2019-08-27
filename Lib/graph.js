@@ -127,7 +127,7 @@ class Graph {
         date.setHours(0,0,0,0);
         var start = date.getTime();
         if (end - start < 21600000) {
-        	start = end - 21600000;
+            start = end - 21600000;
         }
         this.setTimeWindow(start, end);
     }
@@ -140,7 +140,7 @@ class Graph {
     reset() {
         $(".graph-footer .power.action.details", this.view.container).find('span').html("SHOW DETAIL");
         $(".graph-stats", this.view.container).hide();
-    	
+        
         return load();
     }
 
@@ -314,8 +314,8 @@ class PowerGraph extends Graph {
         this.live = null;
         
         if (this.data.has(Graph.SOLAR) && this.data.has(Graph.EXPORT)) {
-        	this.solar = true;
-        	
+            this.solar = true;
+            
             // Configure external solar power to be treated as if it were selfconsumption.
             // Relevant specifically for old german feed-in tariff systems.
             this.feedin = this.data.get(Graph.SOLAR).feed.id == this.data.get(Graph.EXPORT).feed.id;
@@ -336,8 +336,8 @@ class PowerGraph extends Graph {
 
     load() {
         // Only reload, if the requested interval is not already hold in cache
-    	// As the power needs to be derived from the energy, an additional step needs to be requested
-    	var start = this.start-this.interval*1000;
+        // As the power needs to be derived from the energy, an additional step needs to be requested
+        var start = this.start-this.interval*1000;
         if (this.data.hasData(start, this.end, this.interval)) {
             this.draw();
             
@@ -378,69 +378,102 @@ class PowerGraph extends Graph {
         if (this.live) {
             this.end = new Date().getTime();
         }
-        var lastValue = null;
+        var lastValues = {};
+        var newValues = {};
         
         for (var timeValue of this.data.iterateData(this.start, this.end, this.interval)) {
-        	if (lastValue == null) {
-        		lastValue = timeValue;
-        		continue;
-        	}
-            var energy = function(key) {
-                if (typeof timeValue[key] !== 'undefined') {
-                	var value = parseFloat(timeValue[key]) - parseFloat(lastValue[key]);
-            		if (!isNaN(value) && value >= 0) {
-                        return value;
-            	    }
+            var energyValue = function(key) {
+                if (typeof lastValues[key] === 'undefined') {
+                    if (typeof timeValue[key] !== 'undefined') {
+                        lastValues[key] = {
+                                'time':parseFloat(timeValue.time),
+                                'value':parseFloat(timeValue[key])
+                        };
+                    }
+                    return null;
                 }
-                return null;
+                var time = null;
+                var energy = null;
+                if (typeof timeValue[key] !== 'undefined') {
+                    time = parseFloat(timeValue.time);
+                    energy = parseFloat(timeValue[key]);
+                }
+                if (typeof newValues[key] !== 'undefined' && isNaN(energy)
+                        && newValues[key].time > lastValues[key].time) {
+                    time = newValues[key].time;
+                    energy = newValues[key].value;
+                }
+                if (isNaN(energy) || time <= lastValues[key].time) {
+                    return null;
+                }
+                newValues[key] = {
+                        'time':time,
+                        'value':energy
+                };
+                
+                var value = energy - parseFloat(lastValues[key].value);
+                if (isNaN(value) || value < 0) {
+                    return null;
+                }
+                return value;
             };
-            var time = timeValue.time;
-            var mins = (time - lastValue.time)/60000;
-            var scale = mins/60000;
+            var powerValue = function(key, energy) {
+                var time = newValues[key].time;
+                var timeLast = lastValues[key].time;
+                var scale = (time - timeLast)/3600000000;
+                if (scale <= 0) {
+                    return [time, 0];
+                }
+                return [time, energy/scale];
+            }
+            var elapsedTime = function(key) {
+                var seconds = 0;
+                if (typeof newValues[key] !== 'undefined' && typeof lastValues[key] !== 'undefined') {
+                    seconds = (newValues[key].time - lastValues[key].time)/1000;
+                }
+                return seconds;
+            }
             
-            var imp = energy(Graph.IMPORT);
-            if (imp == null || (imp <= 0 && !(solar != null || solar > 0))) {
-            	if (mins < 15) {
-                	continue;
-            	}
-        		imp = 0;
+            var solar = energyValue(Graph.SOLAR);
+            var exp = energyValue(Graph.EXPORT);
+            var imp = energyValue(Graph.IMPORT);
+            if ((imp == null || imp == 0) && !(solar != null || solar > 0)) {
+                if (elapsedTime(Graph.IMPORT) < 900) {
+                    continue;
+                }
+                imp = 0;
             }
             if (this.solar) {
-                var selfCons = 0;
-                var solar = energy(Graph.SOLAR);
-                var exp = energy(Graph.EXPORT);
-                
-                if (solar == null || solar <= 0 || exp == null) {
-                	if (mins < 15) {
-                    	continue;
-                	}
-                	solar = 0;
-                	exp = 0;
+                if (solar == null || solar == 0 || exp == null) {
+                    if (elapsedTime(Graph.SOLAR) < 900) {
+                        continue;
+                    }
+                    solar = 0;
                 }
-            	if (this.feedin) {
-            		if (exp >= imp) {
+                if (this.feedin) {
+                    if (exp >= imp) {
                         exp -= imp;
                         imp = 0;
                     }
                     else {
-                    	imp -= exp;
-                    	exp = 0;
-            		}
-            	}
-                exportSeries.push([time, exp/scale]);
+                        imp -= exp;
+                        exp = 0;
+                    }
+                }
+                exportSeries.push(powerValue(Graph.EXPORT, (imp>0)?0:exp));
                 exportWindow += exp;
                 
-                solarSeries.push([time, solar/scale]);
+                solarSeries.push(powerValue(Graph.SOLAR, solar));
                 solarWindow += solar;
                 
-                selfCons = Math.max(0, solar - exp);
-                selfConsSeries.push([time, selfCons/scale]);
+                var selfCons = Math.max(0, solar - exp);
+                selfConsSeries.push(powerValue(Graph.SOLAR, selfCons));
                 selfConsWindow += selfCons;
             }
-            importSeries.push([time, imp/scale]);
+            importSeries.push(powerValue(Graph.IMPORT, imp));
             importWindow += imp;
             
-        	lastValue = timeValue;
+            Object.assign(lastValues, newValues);
         }
         
         if (this.view.unit == "energy") {
@@ -559,12 +592,12 @@ class PowerGraph extends Graph {
 //                noColumns: 4
             }
         }
-    	if (!$('.graph').is(":hidden")) {
+        if (!$('.graph').is(":hidden")) {
             this.plot = $.plot($('.graph'), series, options);        
             this.events();
 
             $(".graph-loader", this.view.container).hide();
-    	}
+        }
     }
 
     events() {
@@ -788,18 +821,18 @@ class EnergyGraph extends Graph {
         for (var day of this.data.iterateDailyData(this.start, this.end)) {
             var time = day.time;
             
-            let energy = function(key) {
+            var energyValue = function(key) {
                 if (typeof day[key] !== 'undefined') {
-                	var value = parseFloat(day[key]);
-                	if (!isNaN(value) && value >= 0) {
+                    var value = parseFloat(day[key]);
+                    if (!isNaN(value) && value >= 0) {
                         return value;
-                	}
+                    }
                 }
                 return 0;
             }
-            var imp = energy(Graph.IMPORT);
-            var exp = energy(Graph.EXPORT);
-            var solar = energy(Graph.SOLAR);
+            var imp = energyValue(Graph.IMPORT);
+            var exp = energyValue(Graph.EXPORT);
+            var solar = energyValue(Graph.SOLAR);
             
             // Trim days with zero energy consumption
             if (imp > 0 || solar > 0) {
@@ -872,19 +905,19 @@ class EnergyGraph extends Graph {
         
         for (var day of this.data.iterateDailyData(this.start, this.end)) {
             var time = day.time;
-
-            let energy = function(key) {
+            
+            let energyValue = function(key) {
                 if (typeof day[key] !== 'undefined') {
-                	var value = parseFloat(day[key]);
-                	if (!isNaN(value) && value >= 0) {
+                    var value = parseFloat(day[key]);
+                    if (!isNaN(value) && value >= 0) {
                         return value;
-                	}
+                    }
                 }
                 return 0;
             }
-            var imp = energy(Graph.IMPORT);
-            var exp = energy(Graph.EXPORT);
-            var solar = energy(Graph.SOLAR);
+            var imp = energyValue(Graph.IMPORT);
+            var exp = energyValue(Graph.EXPORT);
+            var solar = energyValue(Graph.SOLAR);
             
             // Trim days with zero energy consumption
             if (imp > 0 || solar > 0) {
