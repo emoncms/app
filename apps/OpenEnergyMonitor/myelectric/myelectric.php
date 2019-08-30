@@ -610,16 +610,13 @@ function slowupdate()
 }
 
 var resizeTimer;
+window.addEventListener("resize", function() {
     // debounce (ish) script to improve performance
-    $(window).on("resize", function(e) {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function() {
-            if($('#app-block').is(":visible")) {
-                resize();
-            }
-        }, 500);
-    });
-
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+        resize()
+    }, 200)
+})
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------
