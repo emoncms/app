@@ -36,7 +36,7 @@
 </style>
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
-<div id="app-block" style="display:none">
+<section id="app-block" style="display:none">
 
   <div class="col1"><div class="col1-inner">
     <div class="block-bound">
@@ -123,9 +123,10 @@
   </div></div>
     
 </div>    
-</div>
+</section>
 
-<div id="app-setup" class="block">
+
+<section id="app-setup" class="hide py-2 px-5">
     <h2 class="appconfig-title">OpenEVSE</h2>
 
     <div class="appconfig-description">
@@ -475,7 +476,7 @@ function bargraph_load(start,end)
     
     // remove nan values from the end.
     for (var z in elec_result) {
-      if (elec_result[z][1]!=null) elec_data.push(elec_result[z]);
+        if (elec_result[z][1]!=null) elec_data.push(elec_result[z]);
     }
     
     data["use_kwhd"] = [];
@@ -505,7 +506,7 @@ function bargraph_load(start,end)
         }
         period_average = total_kwh / n;
     }
-
+    
     bargraph_series = [];
     
     bargraph_series.push({
@@ -513,7 +514,11 @@ function bargraph_load(start,end)
         bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 1.0, lineWidth:0}
     });
     
-    var kwh_today = data["use_kwhd"][data["use_kwhd"].length-1][1];
+    var kwh_today = 0;
+    if (data["use_kwhd"][data["use_kwhd"].length-1]) {
+        kwh_today = data["use_kwhd"][data["use_kwhd"].length-1][1];
+    }
+
     $("#kwh_today").html(kwh_today.toFixed(1));
 }
 
