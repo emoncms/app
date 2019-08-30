@@ -615,7 +615,7 @@ window.addEventListener("resize", function() {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(function() {
         resize()
-    }, 200)
+    }, 400)
 })
 // ----------------------------------------------------------------------
 // App log
