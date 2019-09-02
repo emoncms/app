@@ -602,6 +602,7 @@ $(function(){
     $('body').on('config.closed', function() {
         $('#app-block').removeClass('hide');
         $('#app-setup').addClass('hide');
+        resize();
     })
 })
 
