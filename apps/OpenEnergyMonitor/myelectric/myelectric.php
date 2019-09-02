@@ -613,10 +613,16 @@ var resizeTimer;
 window.addEventListener("resize", function() {
     // debounce (ish) script to improve performance
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function() {
-        resize()
-    }, 200)
+    resizeTimer = setTimeout(resize, 400)
 })
+
+$(function(){
+    // listen to the config.closed event before resizing the graph
+    $('body').on('config.closed', function() {
+        resize()
+    })
+})
+
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------

@@ -80,6 +80,8 @@ var config = {
         $('.openconfig').toggleClass('hide', false);
         $('.close-config').toggleClass('hide', true);
         $('#buttons #tabs .btn').attr('disabled',false).css('opacity',1);
+        // allow app to react to closing config window
+        $('body').trigger('config.closed')
     },
     /**
      * hide the app window and show the config window.
