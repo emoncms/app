@@ -429,26 +429,28 @@ class PowerGraph extends Graph {
                 }
                 return [time, energy/scale];
             }
-            var elapsedTime = function(key) {
-                var seconds = 0;
-                if (typeof newValues[key] !== 'undefined' && typeof lastValues[key] !== 'undefined') {
-                    seconds = (newValues[key].time - lastValues[key].time)/1000;
+            var elapsedTime = function(key, timeValue) {
+                if (typeof lastValues[key] === 'undefined') {
+                	return 0;
                 }
-                return seconds;
+                if (typeof newValues[key] === 'undefined') {
+                    return (timeValue - lastValues[key].time)/1000;
+                }
+                return (newValues[key].time - lastValues[key].time)/1000;;
             }
             
             var solar = energyValue(Graph.SOLAR);
             var exp = energyValue(Graph.EXPORT);
             var imp = energyValue(Graph.IMPORT);
             if ((imp == null || imp == 0) && !(solar != null || solar > 0)) {
-                if (elapsedTime(Graph.IMPORT) < 900) {
+                if (elapsedTime(Graph.IMPORT, timeValue.time) < 900) {
                     continue;
                 }
                 imp = 0;
             }
             if (this.solar) {
                 if (solar == null || solar == 0 || exp == null) {
-                    if (elapsedTime(Graph.SOLAR) < 900) {
+                    if (elapsedTime(Graph.SOLAR, timeValue.time) < 900) {
                         continue;
                     }
                     solar = 0;
