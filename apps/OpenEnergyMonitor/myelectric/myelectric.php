@@ -297,25 +297,6 @@ function resize()
     $("#placeholder_power").attr('height',height); 
     graph_lines.height = height;
     
-    // if (width<=500) {
-    //     $(".electric-title").css("font-size","16px");
-    //     $(".power-value").css("font-size","38px");
-    //     $(".units").hide();
-    //     $(".visnav").css("padding-left","5px");
-    //     $(".visnav").css("padding-right","5px");
-    // } else if (width<=724) {
-    //     $(".electric-title").css("font-size","18px");
-    //     $(".power-value").css("font-size","52px");
-    //     $(".units").show();
-    //     $(".visnav").css("padding-left","8px");
-    //     $(".visnav").css("padding-right","8px");
-    // } else {
-    //     $(".electric-title").css("font-size","22px");
-    //     $(".power-value").css("font-size","85px");
-    //     $(".units").show();
-    //     $(".visnav").css("padding-left","8px");
-    //     $(".visnav").css("padding-right","8px");
-    // }
     if($('#app-block').is(":visible")) {
         reloadkwhd = true;
         fastupdate();
@@ -610,15 +591,20 @@ function slowupdate()
 }
 
 var resizeTimer;
+window.addEventListener("resize", function() {
     // debounce (ish) script to improve performance
-    $(window).on("resize", function(e) {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function() {
-            if($('#app-block').is(":visible")) {
-                resize();
-            }
-        }, 500);
-    });
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resize, 400)
+})
+
+$(function(){
+    // listen to the config.closed event before resizing the graph
+    $('body').on('config.closed', function() {
+        $('#app-block').removeClass('hide');
+        $('#app-setup').addClass('hide');
+        resize();
+    })
+})
 
 // ----------------------------------------------------------------------
 // App log
