@@ -743,12 +743,12 @@ function bargraph_events(){
                 $(".total_use_kwh").html((use_kwhd).toFixed(1));
             }
             
-            $(".total_use_direct_kwh").html((solarused_kwhd).toFixed(1));
+            $("#total_use_direct_kwh").html((solarused_kwhd).toFixed(1));
             
-            $(".total_export_kwh").html((export_kwhd*-1).toFixed(1));
+            $("#total_export_kwh").html((export_kwhd*-1).toFixed(1));
             
             $(".total_import_prc").html(((imported_kwhd/use_kwhd)*100).toFixed(0)+"%");
-            $(".total_import_kwh").html((imported_kwhd).toFixed(1));
+            $("#total_import_kwh").html((imported_kwhd).toFixed(1));
     
             if (solar_kwhd > 0) {
                 $(".total_use_direct_prc").html(((solarused_kwhd/use_kwhd)*100).toFixed(0)+"%");
