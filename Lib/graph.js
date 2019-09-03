@@ -417,7 +417,10 @@ class PowerGraph extends Graph {
                 }
                 return value;
             };
-            var powerValue = function(key, energy) {
+            var powerValue = function(key, energy, timeValue) {
+            	if (typeof newValues[key] === 'undefined') {
+                    return [timeValue, 0];
+            	}
                 var time = newValues[key].time;
                 var timeLast = lastValues[key].time;
                 var scale = (time - timeLast)/3600000000;
@@ -460,17 +463,17 @@ class PowerGraph extends Graph {
                         exp = 0;
                     }
                 }
-                exportSeries.push(powerValue(Graph.EXPORT, (imp>0)?0:exp));
+                exportSeries.push(powerValue(Graph.EXPORT, (imp>0)?0:exp, timeValue.time));
                 exportWindow += exp;
                 
-                solarSeries.push(powerValue(Graph.SOLAR, solar));
+                solarSeries.push(powerValue(Graph.SOLAR, solar, timeValue.time));
                 solarWindow += solar;
                 
                 var selfCons = Math.max(0, solar - exp);
-                selfConsSeries.push(powerValue(Graph.SOLAR, selfCons));
+                selfConsSeries.push(powerValue(Graph.SOLAR, selfCons, timeValue.time));
                 selfConsWindow += selfCons;
             }
-            importSeries.push(powerValue(Graph.IMPORT, imp));
+            importSeries.push(powerValue(Graph.IMPORT, imp, timeValue.time));
             importWindow += imp;
             
             Object.assign(lastValues, newValues);
@@ -534,16 +537,16 @@ class PowerGraph extends Graph {
         $("#graph-stats").html(windowStatsOut);
         
         var series = [];
-        if (importSeries.length > 0) {
+        if (selfConsSeries.length > 0) {
             series.push({
-                label:"Consumption", data: importSeries, yaxis: 1, color: "#44b3e2", 
+                label:"Self-consumption", data: selfConsSeries, yaxis: 1, color: "#a1b97b", 
                 lines: { show: true, fill: 0.8, lineWidth: 0},
                 stack: 0
             });
         }
-        if (selfConsSeries.length > 0) {
+        if (importSeries.length > 0) {
             series.push({
-                label:"Self-consumption", data: selfConsSeries, yaxis: 1, color: "#a1b97b", 
+                label:"Consumption", data: importSeries, yaxis: 1, color: "#44b3e2", 
                 lines: { show: true, fill: 0.8, lineWidth: 0},
                 stack: 0
             });
