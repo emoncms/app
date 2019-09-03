@@ -1,7 +1,8 @@
 <?php
     global $path, $session;
-    $v = 7;
+    $v = 8;
 ?>
+<link href="<?php echo $path; ?>Modules/app/Views/css/app.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
@@ -123,7 +124,19 @@
 </section>
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
-
+<script src="<?php echo $path; ?>Lib/misc/gettext.js?v=<?php echo $v; ?>"></script> 
+<script>
+function getTranslations(){
+    return {
+        'House or building use in watts': "<?php echo _('House or building use in watts') ?>",
+        'Solar pv generation in watts': "<?php echo _('Solar pv generation in watts') ?>",
+        'Cumulative use in kWh': "<?php echo _('Cumulative use in kWh') ?>",
+        'Cumulative solar generation in kWh': "<?php echo _('Cumulative solar generation in kWh') ?>",
+        'Cumulative grid import in kWh': "<?php echo _('Cumulative grid import in kWh') ?>",
+        'Display power as kW': "<?php echo _('Display power as kW') ?>",
+    }
+}
+</script>
 <script>
 
 // ----------------------------------------------------------------------
@@ -150,12 +163,13 @@ if (!sessionwrite) $(".openconfig").addClass('hide');
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"House or building use in watts"},
-    "solar":{"type":"feed", "autoname":"solar", "engine":"5", "description":"Solar pv generation in watts"},
+    "use":{"type":"feed", "autoname":"use", "engine":"5", "description":_("House or building use in watts")},
+    "solar":{"type":"feed", "autoname":"solar", "engine":"5", "description":_("Solar pv generation in watts")},
     //"export":{"type":"feed", "autoname":"export", "engine":5, "description":"Exported solar in watts"},
-    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative use in kWh"},
-    "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5, "description":"Cumulative solar generation in kWh"},
-    "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "engine":5, "description":"Cumulative grid import in kWh"}
+    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":_("Cumulative use in kWh")},
+    "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5, "description":_("Cumulative solar generation in kWh")},
+    "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "engine":5, "description":_("Cumulative grid import in kWh")},
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
     //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
 };
 config.name = "<?php echo $name; ?>";
