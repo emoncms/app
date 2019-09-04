@@ -438,14 +438,10 @@ function show()
     
     if (config.app.solar_kwh.value && config.app.use_kwh.value && config.app.import_kwh.value && config.app.divert_kwh.value) {
         if (!bargraph_initialized) init_bargraph();
-        // $(".viewhistory").show();
-    } else {
-        // $(".viewhistory").hide();
     }
     
     resize();
     
-    // this.reload = true;
     livefn();
     live = setInterval(livefn,5000);
 
@@ -468,52 +464,6 @@ function resize()
     placeholder_bound.height(height);
     placeholder.height(height-top_offset);
     
-    // if (width<=500) {
-    //     $(".electric-title").css("font-size","16px");
-    //     $(".power-value").css("font-size","32px");
-    //     $(".statstable").css("border-spacing","4px");
-    //     $(".statsbox-title").css("font-size","14px");
-    //     $(".statsbox-title").css("padding-bottom","4px");
-    //     $(".statsbox-value").css("font-size","20px");
-    //     $(".statsbox-units").css("font-size","12px");
-    //     $(".statsbox-units").hide();
-    //     $(".statsbox-prc").css("font-size","12px");
-    //     $(".statsbox-padded").css("padding","4px");
-    //     $(".balanceline").hide();
-    //     $(".vistimeW").hide();
-    //     $(".vistimeM").hide();
-    //     $(".vistimeY").hide();
-    // } else if (width<=724) {
-    //     $(".electric-title").css("font-size","18px");
-    //     $(".power-value").css("font-size","52px");
-    //     $(".statstable").css("border-spacing","8px");
-    //     $(".statsbox-title").css("font-size","16px");
-    //     $(".statsbox-title").css("padding-bottom","8px");
-    //     $(".statsbox-value").css("font-size","22px");
-    //     $(".statsbox-units").css("font-size","14px");
-    //     $(".statsbox-units").show();
-    //     $(".statsbox-prc").css("font-size","14px");
-    //     $(".statsbox-padded").css("padding","8px");
-    //     $(".balanceline").show();
-    //     $(".vistimeW").show();
-    //     $(".vistimeM").show();
-    //     $(".vistimeY").show();
-    // } else {
-    //     $(".electric-title").css("font-size","22px");
-    //     $(".power-value").css("font-size","85px");
-    //     $(".statstable").css("border-spacing","10px");
-    //     $(".statsbox-title").css("font-size","20px");
-    //     $(".statsbox-title").css("padding-bottom","15px");
-    //     $(".statsbox-value").css("font-size","36px");
-    //     $(".statsbox-units").css("font-size","16px");
-    //     $(".statsbox-units").show();
-    //     $(".statsbox-prc").css("font-size","16px");
-    //     $(".statsbox-padded").css("padding","10px");
-    //     $(".balanceline").show();
-    //     $(".vistimeW").show();
-    //     $(".vistimeM").show();
-    //     $(".vistimeY").show();
-    // }
     draw();
 }
 
@@ -1138,9 +1088,11 @@ function hide_tooltip() {
     $('#tooltip').hide();
 }
 
-$(window).resize(function(){
-    resize();
-});
+$(function() {
+    $(document).on('window.resized hidden.sidebar.collapse shown.sidebar.collapse', function(){
+        resize()
+    })
+})
 
 // ----------------------------------------------------------------------
 // App log

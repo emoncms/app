@@ -589,12 +589,9 @@ function slowupdate()
     graph_bars.draw('placeholder_kwhd',[daily]);
     $(".ajax-loader").hide();
 }
-
-var resizeTimer;
-window.addEventListener("resize", function() {
-    // debounce (ish) script to improve performance
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(resize, 400)
+// on finish sidebar hide/show
+$(function() {
+    $(document).on('window.resized hidden.sidebar.collapse shown.sidebar.collapse', resize)
 })
 
 $(function(){
