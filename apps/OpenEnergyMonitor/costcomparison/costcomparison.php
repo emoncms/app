@@ -763,14 +763,17 @@ function resize() {
     placeholder.height(height - top_offset);
 }
 
-$(window).resize(function() {
-    var window_width = $(this).width();
-    flot_font_size = 12;
-    if (window_width < 450) flot_font_size = 10;
-    resize();
-    bargraph_draw();
-    halfhour_usage_bargraph_draw();
-});
+// on finish sidebar hide/show
+$(function() {
+    $(document).on('window.resized hidden.sidebar.collapse shown.sidebar.collapse', function(){
+        var window_width = $(this).width();
+        flot_font_size = 12;
+        if (window_width < 450) flot_font_size = 10;
+        resize();
+        bargraph_draw();
+        halfhour_usage_bargraph_draw();
+    })
+})
 
 // ----------------------------------------------------------------------
 // App log

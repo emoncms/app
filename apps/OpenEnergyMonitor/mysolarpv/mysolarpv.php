@@ -843,16 +843,9 @@ function bargraph_events(){
         draw();
     });
 }
-    var resizeTimer;
-    // debounce (ish) script to improve performance
-    $(window).on("resize", function(e) {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function() {
-            if($('#app-block').is(":visible")) {
-                resize();
-            }
-        },500);
-    });
+$(function() {
+    $(document).on('window.resized hidden.sidebar.collapse shown.sidebar.collapse', resize)
+})
 
 
 // ----------------------------------------------------------------------
