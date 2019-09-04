@@ -500,7 +500,7 @@ function livefn()
     var now = +new Date();
     if ((now-lastupdate)>60000) reload = true;
     lastupdate = now;
-    var powerUnit = config.app.kw.value===true ? 'kW' : 'W';
+    var powerUnit = config.app && config.app.kw && config.app.kw.value===true ? 'kW' : 'W';
 
     var feeds = feed.listbyid();
     if (feeds === null) { return; }

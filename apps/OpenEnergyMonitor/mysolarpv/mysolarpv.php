@@ -43,7 +43,7 @@
     <div class="d-flex justify-content-between">
         <div>
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('USE NOW') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow">0</span>W</h2>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow">0</span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light px-1"><span class="balance-label"></span></h5>
@@ -51,7 +51,7 @@
         </div>
         <div class="text-xs-right">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('SOLAR PV') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-warning "><span class="solarnow"></span>W</h2>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-warning "><span class="solarnow"></span><span class="power-unit"></span></h2>
         </div>
     </div>
     
@@ -134,6 +134,9 @@ function getTranslations(){
         'Cumulative solar generation in kWh': "<?php echo _('Cumulative solar generation in kWh') ?>",
         'Cumulative grid import in kWh': "<?php echo _('Cumulative grid import in kWh') ?>",
         'Display power as kW': "<?php echo _('Display power as kW') ?>",
+        'PERFECT BALANCE': "<?php echo _('PERFECT BALANCE') ?>",
+        'EXPORTING': "<?php echo _('EXPORTING') ?>",
+        'IMPORTING': "<?php echo _('IMPORTING') ?>",
     }
 }
 </script>
@@ -184,6 +187,7 @@ config.hideapp = function(){hide()};
 // APPLICATION
 // ----------------------------------------------------------------------
 var feeds = {};
+var powerUnit = config.app && config.app.kw && config.app.kw.value===true ? 'kW' : 'W';
 
 var live = false;
 var show_balance_line = 0;
@@ -362,7 +366,15 @@ function hide()
 {
     clearInterval(live);
 }
-
+/**
+ * return input (w) divided by 1000 if input
+ * @param {Number} w number in Watts
+ */
+function w_to_kw(w) {
+    var kw = w > 0 ? w / 1000: 0
+    if (kw < 1) kw = Math.round(kw)
+    return kw
+}
 function livefn()
 {
     // Check if the updater ran in the last 60s if it did not the app was sleeping
@@ -394,24 +406,35 @@ function livefn()
     var balance = solar_now - use_now;
     
     if (balance==0) {
-        $(".balance-label").html("PERFECT BALANCE");
+        $(".balance-label").html(_("PERFECT BALANCE"));
         $(".balance").html("");
     }
     
     if (balance>0) {
-        $(".balance-label").text("EXPORTING");
-        $(".balance").text(Math.round(Math.abs(balance))+"W")
-        .toggleClass('text-danger', false)
-        .toggleClass('text-success', true);
+        $(".balance-label").text(_("EXPORTING"))
+        .removeClass('text-danger')
+        .addClass('text-success')
     } else {
-        $(".balance-label").text("IMPORTING");
-        $(".balance").text(Math.round(Math.abs(balance))+"W")
-        .toggleClass('text-danger', true)
-        .toggleClass('text-success', false);
+        $(".balance-label").text(_("IMPORTING"))
+        .addClass('text-danger')
+        .removeClass('text-success')
     }
+    balance = Math.round(Math.abs(balance))
 
-    $(".solarnow").html(solar_now);
-    $(".usenow").html(use_now);
+    // convert W to kW
+    if(powerUnit === 'kW') {
+        solar_now = w_to_kw(solar_now)
+        use_now = w_to_kw(use_now)
+        balance = w_to_kw(balance)
+        $('#app-block').addClass('in_kw')
+    } else {
+        $('.power-unit').text(powerUnit)
+        $('#app-block').removeClass('in_kw')
+    }
+    $('.power-unit').text(powerUnit)
+    $(".solarnow").html(solar_now)
+    $(".usenow").html(use_now)
+    $(".balance").text(balance)
     
     // Only redraw the graph if its the power graph and auto update is turned on
     
