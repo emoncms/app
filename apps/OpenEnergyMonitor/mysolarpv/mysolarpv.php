@@ -47,7 +47,7 @@
         </div>
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light px-1"><span class="balance-label"></span></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span></h2>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-right">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('SOLAR PV') ?></h5>
@@ -187,8 +187,6 @@ config.hideapp = function(){hide()};
 // APPLICATION
 // ----------------------------------------------------------------------
 var feeds = {};
-var powerUnit = config.app && config.app.kw && config.app.kw.value===true ? 'kW' : 'W';
-
 var live = false;
 var show_balance_line = 0;
 var reload = true;
@@ -206,7 +204,6 @@ config.init();
 function init()
 {        
     app_log("INFO","mysolarpv init");
-    
     var solar_kwh = config.app.solar_kwh.value;
     var use_kwh = config.app.use_kwh.value;
     var import_kwh = config.app.import_kwh.value;
@@ -404,7 +401,6 @@ function livefn()
     if (solar_now<10) solar_now = 0;
     
     var balance = solar_now - use_now;
-    
     if (balance==0) {
         $(".balance-label").html(_("PERFECT BALANCE"));
         $(".balance").html("");
@@ -412,14 +408,17 @@ function livefn()
     
     if (balance>0) {
         $(".balance-label").text(_("EXPORTING"))
+        $(".balance").parent()
         .removeClass('text-danger')
         .addClass('text-success')
     } else {
         $(".balance-label").text(_("IMPORTING"))
+        $(".balance").parent()
         .addClass('text-danger')
         .removeClass('text-success')
     }
     balance = Math.round(Math.abs(balance))
+    var powerUnit = config.app && config.app.kw && config.app.kw.value===true ? 'kW' : 'W';
 
     // convert W to kW
     if(powerUnit === 'kW') {
