@@ -48,37 +48,40 @@ for (var z in available_apps) {
     out += '<div class="app-item-description">'+available_apps[z].description+'</div>';
     out += '</div>';
 }
-$("#available-apps").html(out);
-$(".app-item").first().css("border-top","1px solid #ccc");
+$(function() {
+    $("#available-apps").html(out);
+    $(".app-item").first().css("border-top","1px solid #ccc");
 
-$(".app-item").click(function(){
-    if (app_new_enable) {
-        var app = $(this).attr("app");
-        selected_app = app;
-        $("#app-new-modal-label").html("Create app: "+available_apps[app].title);
-        $("#app-new-name").val(available_apps[app].title);
-        $('#app-new-modal').modal('show');
-    }
-});
-
-$("#app-new-action").click(function(){
-    app_new_enable = false;
-    setTimeout(function(){ app_new_enable = true; }, 500);
-    $('#app-new-modal').modal('hide');
-    var nicename = escape($("#app-new-name").val()).replace(/%20/g, "+");
-    $.ajax({                                      
-        url: path+"app/add?name="+nicename+"&app="+selected_app,
-        dataType: 'json',
-        async: true,
-        success: function(result) {
-            // console.log(result);
-            window.location = path+"app/view?name="+nicename;
+    $(".app-item").click(function(){
+        if (app_new_enable) {
+            var app = $(this).attr("app");
+            selected_app = app;
+            $("#app-new-modal-label").html("Create app: "+available_apps[app].title);
+            $("#app-new-name").val(available_apps[app].title);
+            $('#app-new-modal').modal('show');
         }
     });
-});
 
-$("#app-new-cancel").click(function(){
-    app_new_enable = false;
-    setTimeout(function(){ app_new_enable = true; }, 500);
-});
+    $("#app-new-action").click(function(){
+        app_new_enable = false;
+        setTimeout(function(){ app_new_enable = true; }, 500);
+        $('#app-new-modal').modal('hide');
+        var nicename = escape($("#app-new-name").val()).replace(/%20/g, "+");
+        $.ajax({                                      
+            url: path+"app/add?name="+nicename+"&app="+selected_app,
+            dataType: 'json',
+            async: true,
+            success: function(result) {
+                // console.log(result);
+                window.location = path+"app/view?name="+nicename;
+            }
+        });
+    });
+
+    $("#app-new-cancel").click(function(){
+        app_new_enable = false;
+        setTimeout(function(){ app_new_enable = true; }, 500);
+    });
+})
+
 </script>

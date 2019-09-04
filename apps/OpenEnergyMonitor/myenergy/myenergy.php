@@ -468,10 +468,10 @@ function powergraph_events() {
     });
 }
 
-$(window).resize(function(){
-    resize();
-});
-
+// on finish sidebar hide/show
+$(function() {
+    $(document).on('window.resized hidden.sidebar.collapse shown.sidebar.collapse', resize)
+})
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------

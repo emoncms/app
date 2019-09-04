@@ -479,16 +479,18 @@ function resize() {
     }
 }
 
-$(window).resize(function(){
-    var window_width = $(this).width();
+$(function() {
+    $(document).on('window.resized hidden.sidebar.collapse shown.sidebar.collapse', function(){
+        var window_width = $(this).width();
 
-    flot_font_size = 12;
-    if (window_width<450) flot_font_size = 10;
+        flot_font_size = 12;
+        if (window_width<450) flot_font_size = 10;
 
-    resize(); 
-   
-    graph_draw();
-});
+        resize(); 
+    
+        graph_draw();
+    })
+})
 
 // ----------------------------------------------------------------------
 // App log
