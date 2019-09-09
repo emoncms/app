@@ -32,7 +32,6 @@
 
 <script>
 
-var path = "<?php echo $path; ?>";
 var available_apps = JSON.parse('<?php echo json_encode($apps); ?>');
 var selected_app = "";
 var app_new_enable = true;
