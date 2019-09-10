@@ -1,7 +1,8 @@
 <?php
     global $path, $session;
-    $v = 7;
+    $v = 8;
 ?>
+<link href="<?php echo $path; ?>Modules/app/Views/css/app.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
@@ -42,15 +43,15 @@
     <div class="d-flex justify-content-between">
         <div>
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('USE NOW') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow">0</span>W</h2>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow">0</span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light px-1"><span class="balance-label"></span></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span></h2>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-right">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('SOLAR PV') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-warning "><span class="solarnow"></span>W</h2>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-warning "><span class="solarnow"></span><span class="power-unit"></span></h2>
         </div>
     </div>
     
@@ -123,7 +124,22 @@
 </section>
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
-
+<script src="<?php echo $path; ?>Lib/misc/gettext.js?v=<?php echo $v; ?>"></script> 
+<script>
+function getTranslations(){
+    return {
+        'House or building use in watts': "<?php echo _('House or building use in watts') ?>",
+        'Solar pv generation in watts': "<?php echo _('Solar pv generation in watts') ?>",
+        'Cumulative use in kWh': "<?php echo _('Cumulative use in kWh') ?>",
+        'Cumulative solar generation in kWh': "<?php echo _('Cumulative solar generation in kWh') ?>",
+        'Cumulative grid import in kWh': "<?php echo _('Cumulative grid import in kWh') ?>",
+        'Display power as kW': "<?php echo _('Display power as kW') ?>",
+        'PERFECT BALANCE': "<?php echo _('PERFECT BALANCE') ?>",
+        'EXPORTING': "<?php echo _('EXPORTING') ?>",
+        'IMPORTING': "<?php echo _('IMPORTING') ?>",
+    }
+}
+</script>
 <script>
 
 // ----------------------------------------------------------------------
@@ -150,12 +166,13 @@ if (!sessionwrite) $(".openconfig").addClass('hide');
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"House or building use in watts"},
-    "solar":{"type":"feed", "autoname":"solar", "engine":"5", "description":"Solar pv generation in watts"},
+    "use":{"type":"feed", "autoname":"use", "engine":"5", "description":_("House or building use in watts")},
+    "solar":{"type":"feed", "autoname":"solar", "engine":"5", "description":_("Solar pv generation in watts")},
     //"export":{"type":"feed", "autoname":"export", "engine":5, "description":"Exported solar in watts"},
-    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative use in kWh"},
-    "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5, "description":"Cumulative solar generation in kWh"},
-    "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "engine":5, "description":"Cumulative grid import in kWh"}
+    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":_("Cumulative use in kWh")},
+    "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5, "description":_("Cumulative solar generation in kWh")},
+    "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "engine":5, "description":_("Cumulative grid import in kWh")},
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
     //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
 };
 config.name = "<?php echo $name; ?>";
@@ -170,7 +187,6 @@ config.hideapp = function(){hide()};
 // APPLICATION
 // ----------------------------------------------------------------------
 var feeds = {};
-
 var live = false;
 var show_balance_line = 0;
 var reload = true;
@@ -188,7 +204,6 @@ config.init();
 function init()
 {        
     app_log("INFO","mysolarpv init");
-    
     var solar_kwh = config.app.solar_kwh.value;
     var use_kwh = config.app.use_kwh.value;
     var import_kwh = config.app.import_kwh.value;
@@ -348,7 +363,15 @@ function hide()
 {
     clearInterval(live);
 }
-
+/**
+ * return input (w) divided by 1000 if input
+ * @param {Number} w number in Watts
+ */
+function w_to_kw(w) {
+    var kw = w > 0 ? w / 1000: 0
+    if (kw < 1) kw = Math.round(kw)
+    return kw
+}
 function livefn()
 {
     // Check if the updater ran in the last 60s if it did not the app was sleeping
@@ -378,26 +401,39 @@ function livefn()
     if (solar_now<10) solar_now = 0;
     
     var balance = solar_now - use_now;
-    
     if (balance==0) {
-        $(".balance-label").html("PERFECT BALANCE");
+        $(".balance-label").html(_("PERFECT BALANCE"));
         $(".balance").html("");
     }
     
     if (balance>0) {
-        $(".balance-label").text("EXPORTING");
-        $(".balance").text(Math.round(Math.abs(balance))+"W")
-        .toggleClass('text-danger', false)
-        .toggleClass('text-success', true);
+        $(".balance-label").text(_("EXPORTING"))
+        $(".balance").parent()
+        .removeClass('text-danger')
+        .addClass('text-success')
     } else {
-        $(".balance-label").text("IMPORTING");
-        $(".balance").text(Math.round(Math.abs(balance))+"W")
-        .toggleClass('text-danger', true)
-        .toggleClass('text-success', false);
+        $(".balance-label").text(_("IMPORTING"))
+        $(".balance").parent()
+        .addClass('text-danger')
+        .removeClass('text-success')
     }
+    balance = Math.round(Math.abs(balance))
+    var powerUnit = config.app && config.app.kw && config.app.kw.value===true ? 'kW' : 'W';
 
-    $(".solarnow").html(solar_now);
-    $(".usenow").html(use_now);
+    // convert W to kW
+    if(powerUnit === 'kW') {
+        solar_now = w_to_kw(solar_now)
+        use_now = w_to_kw(use_now)
+        balance = w_to_kw(balance)
+        $('#app-block').addClass('in_kw')
+    } else {
+        $('.power-unit').text(powerUnit)
+        $('#app-block').removeClass('in_kw')
+    }
+    $('.power-unit').text(powerUnit)
+    $(".solarnow").html(solar_now)
+    $(".usenow").html(use_now)
+    $(".balance").text(balance)
     
     // Only redraw the graph if its the power graph and auto update is turned on
     

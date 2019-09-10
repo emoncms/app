@@ -1,7 +1,8 @@
 <?php
     global $path, $session;
-    $v = 7;
+    $v = 8;
 ?>
+<link href="<?php echo $path; ?>Modules/app/Views/css/app.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
@@ -14,7 +15,6 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script>
-
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
         <li><button class="balanceline btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo _('Show Balance') ?>">
@@ -26,22 +26,22 @@
 </nav>
     
 <section id="app-block" style="display:none" class="block">
-    <div class="d-flex justify-content-between">
-        <div>
+    <div id="summary" class="d-flex justify-content-between">
+        <div class="text-center">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('USE NOW') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow">0</span>W</h2>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
         </div>
-        <div class="text-xs-center">
+        <div class="text-center">
             <h5 class="electric-title mb-0 text-md-larger text-light px-1"><span class="balance-label"></span></h5>
             <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span></h2>
         </div>
-        <div class="text-xs-right">
+        <div class="text-center">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('RENEWABLE GEN') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 my-0 text-warning "><span class="gennow"></span>W</h2>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 my-0 text-warning "><span class="gennow"></span><span class="power-unit"></span></h2>
 
             <h5 class="electric-title mt-0 mb-lg-3 text-md-larger ">
-                <span class="text-warning" title="<?php echo _('SOLAR') ?>"><span class="d-none d-sm-inline-block"><?php echo _('SOLAR') ?>: </span> <span class="solarnow">0</span>W</span> | 
-                <span class="text-success" title="<?php echo _('WIND') ?>"><span class="d-none d-sm-inline-block"><?php echo _('WIND') ?>: </span> <span class="windnow">0</span>W</span>
+                <span class="text-warning" title="<?php echo _('SOLAR') ?>"><span class="d-none d-sm-inline-block"><?php echo _('SOLAR') ?>: </span> <span class="solarnow">0</span><span class="power-unit"></span></span> | 
+                <span class="text-success" title="<?php echo _('WIND') ?>"><span class="d-none d-sm-inline-block"><?php echo _('WIND') ?>: </span> <span class="windnow">0</span><span class="power-unit"></span></span>
             </h5>
         </div>
     </div>
@@ -113,6 +113,17 @@
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
 
+<script src="<?php echo $path; ?>Lib/misc/gettext.js?v=<?php echo $v; ?>"></script> 
+<script>
+function getTranslations(){
+    return {
+        'House or building use in watts': "<?php echo _('House or building use in watts') ?>",
+        'Solar pv generation in watts': "<?php echo _('Solar pv generation in watts') ?>",
+        'kWh of wind energy bought annually': "<?php echo _('kWh of wind energy bought annually') ?>",
+        'Display power as kW': "<?php echo _('Display power as kW') ?>",
+    }
+}
+</script>
 <script>
 
 // ----------------------------------------------------------------------
@@ -139,9 +150,10 @@ if (!sessionwrite) $(".openconfig").hide();
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"House or building use in watts"},
-    "solar":{"optional":true, "type":"feed", "autoname":"solar", "engine":"5", "description":"Solar pv generation in watts"},
-    "windkwh":{"type":"value", "default":2000, "name": "kWh Wind", "description":"kWh of wind energy bought annually"}
+    "use":{"type":"feed", "autoname":"use", "engine":"5", "description":_("House or building use in watts")},
+    "solar":{"optional":true, "type":"feed", "autoname":"solar", "engine":"5", "description":_("Solar pv generation in watts")},
+    "windkwh":{"type":"value", "default":2000, "name": "kWh Wind", "description":_("kWh of wind energy bought annually")},
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
@@ -242,7 +254,15 @@ function hide()
 {
     clearInterval(live);
 }
-
+/**
+ * return input (w) divided by 1000 if input
+ * @param {Number} w number in Watts
+ */
+function w_to_kw(w) {
+    var kw = w > 0 ? w / 1000: 0
+    if (kw < 1) kw = Math.round(kw)
+    return kw
+}
 function livefn()
 {
     // Check if the updater ran in the last 60s if it did not the app was sleeping
@@ -250,7 +270,7 @@ function livefn()
     var now = +new Date();
     if ((now-lastupdate)>60000) reload = true;
     lastupdate = now;
-    
+    var powerUnit = config.app.kw.value===true ? 'kW' : 'W';
     var feeds = feed.listbyid();
     if (feeds === null) { return; }
     var solar_now = 0;
@@ -258,7 +278,6 @@ function livefn()
         solar_now = parseInt(feeds[config.app.solar.value].value);
         
     var use_now = parseInt(feeds[config.app.use.value].value);
-    
     var gridwind = feed.getvalueremote(67088);
     var average_power = ((config.app.windkwh.value/365.0)/0.024);
     var wind_now = Math.round((average_power / average_wind_power) * gridwind);
@@ -292,17 +311,35 @@ function livefn()
     
     if (balance>0) {
         $(".balance-label").html("EXCESS");
-        $(".balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
+        $(".balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+powerUnit+"</b></span>");
     }
     
     if (balance<0) {
         $(".balance-label").html("BACKUP");
-        $(".balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
+        $(".balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+powerUnit+"</b></span>");
     }
-    
-    $(".gennow").html(Math.round(gen_now));
+
+    // convert W to kW
+    if(powerUnit === 'kW') {
+        solar_now = w_to_kw(solar_now)
+        use_now = w_to_kw(use_now)
+        gridwind = w_to_kw(gridwind)
+        average_power = w_to_kw(average_power)
+        wind_now = w_to_kw(wind_now)
+        gen_now = w_to_kw(gen_now)
+        balance = w_to_kw(balance)
+        $('.power-unit').text('kW')
+        $('#app-block').addClass('in_kw');
+    } else {
+        $('.power-unit').text('W')
+        gen_now = Math.round(gen_now)
+        wind_now = Math.round(wind_now)
+        $('#app-block').removeClass('in_kw');
+    }
+
+    $(".gennow").html(gen_now);
     $(".solarnow").html(solar_now);
-    $(".windnow").html(Math.round(wind_now));
+    $(".windnow").html(wind_now);
     $(".usenow").html(use_now);
     
     // Only redraw the graph if its the power graph and auto update is turned on

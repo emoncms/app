@@ -1,8 +1,8 @@
 <?php
     global $path, $session;
-    $v = 7;
+    $v = 8;
 ?>
-
+<link href="<?php echo $path; ?>Modules/app/Views/css/app.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
@@ -132,6 +132,18 @@
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
 
+<script src="<?php echo $path; ?>Lib/misc/gettext.js?v=<?php echo $v; ?>"></script> 
+<script>
+function getTranslations(){
+    return {
+        'House or building use in watts': "<?php echo _('House or building use in watts') ?>",
+        'Cumulative use in kWh': "<?php echo _('Cumulative use in kWh') ?>",
+        'Unit cost of electricity e.g £/kWh': "<?php echo _('Unit cost of electricity e.g £/kWh') ?>",
+        'Currency symbol (£,$,€...)': "<?php echo _('Currency symbol (£,$,€...)') ?>",
+        'Display power as kW': "<?php echo _('Display power as kW') ?>",
+    }
+}
+</script>
 <script>
 
 // ----------------------------------------------------------------------
@@ -161,7 +173,8 @@ config.app = {
     "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"House or building use in watts"},
     "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative use in kWh"},
     "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity e.g £/kWh"},
-    "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$,€...)"}
+    "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$,€...)"},
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
 };
 
 config.name = "<?php echo $name; ?>";
@@ -335,7 +348,8 @@ function fastupdate(event)
     
     var now = new Date();
     var timenow = now.getTime();
-    
+    var powerUnit = config.app && config.app.kw && config.app.kw.value===true ? 'kW' : 'W';
+
     // --------------------------------------------------------------------------------------------------------
     // REALTIME POWER GRAPH
     // -------------------------------------------------------------------------------------------------------- 
@@ -373,7 +387,7 @@ function fastupdate(event)
     
     // set the power now value
     if (viewmode=="energy") {
-        if (feeds[use].value<10000) {
+        if (powerUnit==='W') {
             $("#powernow").html((feeds[use].value*1).toFixed(0)+"W");
         } else {
             $("#powernow").html((feeds[use].value*0.001).toFixed(1)+"kW");

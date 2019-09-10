@@ -1,7 +1,9 @@
 <?php
     global $path, $session;
-    $v = 7;
+    $v = 8;
 ?>
+
+<link href="<?php echo $path; ?>Modules/app/Views/css/app.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
@@ -145,15 +147,15 @@
     <div class="d-flex justify-content-between">
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('HOUSE') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-info"><span class="housenow">0</span>W</h2>
+            <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-info"><span class="housenow">0</span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light px-1"><?php echo _('DIVERT') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-quaternary"><span class="divertnow">-</span>W</h2>
+            <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-quaternary"><span class="divertnow">-</span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('TOTAL USE') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-primary"><span class="usenow"></span>W</h2>
+            <h2 class="power-value display-md-3 display-lg-2 my-0 text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light"><span class="balance-label">-</h5>
@@ -163,7 +165,7 @@
         </div>
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('SOLAR') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-warning "><span class="generationnow"></span>W</h2>
+            <h2 class="power-value display-md-3 display-lg-2 my-0 text-warning "><span class="generationnow"></span><span class="power-unit"></span></h2>
         </div>
     </div>
 
@@ -295,6 +297,14 @@
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
 
+<script src="<?php echo $path; ?>Lib/misc/gettext.js?v=<?php echo $v; ?>"></script> 
+<script>
+function getTranslations(){
+    return {
+        'Display power as kW': "<?php echo _('Display power as kW') ?>",
+    }
+}
+</script>
 <script>
 
 // ----------------------------------------------------------------------
@@ -331,6 +341,7 @@ config.app = {
     "wind_kwh":{"optional":true, "type":"feed", "autoname":"wind_kwh", "engine":5, "description":"Cumulative wind generation in kWh"},
     "divert_kwh":{"optional":true, "type":"feed", "autoname":"divert_kwh", "engine":5, "description":"Cumulative divert energy in kWh"},
     "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "engine":5, "description":"Cumulative grid import in kWh"},
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
     //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
 }
 config.name = "<?php echo $name; ?>";
@@ -455,8 +466,9 @@ function resize()
     var placeholder_bound = $('#placeholder_bound');
     var placeholder = $('#placeholder');
 
+    var is_landscape = $(window).height() < $(window).width();
     var width = placeholder_bound.width();
-    var height = $(window).height()*0.55;
+    var height = $(window).height()*(is_landscape ? 0.3: 0.6);
 
     if (height>width) height = width;
 
@@ -472,6 +484,15 @@ function hide()
     clearInterval(live);
 }
 
+/**
+ * return input (w) divided by 1000 if input
+ * @param {Number} w number in Watts
+ */
+function w_to_kw(w) {
+    var kw = w > 0 ? w / 1000: 0
+    if (kw < 1) kw = Math.round(kw)
+    return kw
+}
 function livefn()
 {
     // Check if the updater ran in the last 60s if it did not the app was sleeping
@@ -479,7 +500,8 @@ function livefn()
     var now = +new Date();
     if ((now-lastupdate)>60000) reload = true;
     lastupdate = now;
-    
+    var powerUnit = config.app && config.app.kw && config.app.kw.value===true ? 'kW' : 'W';
+
     var feeds = feed.listbyid();
     if (feeds === null) { return; }
     var solar_now = parseInt(feeds[config.app.solar.value].value);
@@ -519,6 +541,27 @@ function livefn()
 
     var house_now = use_now - divert_now;
     
+    // convert W to kW
+    if(powerUnit === 'kW') {
+        solar_now = w_to_kw(solar_now)
+        house_now = w_to_kw(house_now)
+        divert_now = w_to_kw(divert_now)
+        wind_now = w_to_kw(wind_now)
+        use_now = w_to_kw(use_now)
+        gen_now = Math.round(Number(solar_now) + Number(wind_now))
+        // balance = w_to_kw(Math.round(Math.abs(balance)))
+        $('.power-unit').text('kW')
+        $('#app-block').addClass('in_kw');
+    } else {
+        $('.power-unit').text('W')
+        wind_now = Math.round(wind_now)
+        solar_now = Math.round(solar_now)
+        balance = Math.round(Math.abs(balance))
+        gen_now = solar_now + wind_now
+        $('#app-block').removeClass('in_kw');
+    }
+    // console.log('solar_now',solar_now)
+
     if (balance==0) {
         $(".balance-label").html("PERFECT BALANCE");
         $(".balance").html("");
@@ -526,15 +569,15 @@ function livefn()
     
     if (balance>0) {
         $(".balance-label").html("EXPORTING");
-        $(".balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
+        $(".balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+powerUnit+"</b></span>");
     }
     
     if (balance<0) {
         $(".balance-label").html("IMPORTING");
-        $(".balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
+        $(".balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+powerUnit+"</b></span>");
     }
     
-    $(".generationnow").html(solar_now + wind_now);
+    $(".generationnow").html(gen_now);
     $(".housenow").html(house_now);
     $(".divertnow").html(divert_now);
     $(".usenow").html(use_now);
