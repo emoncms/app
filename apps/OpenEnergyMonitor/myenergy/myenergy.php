@@ -254,15 +254,7 @@ function hide()
 {
     clearInterval(live);
 }
-/**
- * return input (w) divided by 1000 if input
- * @param {Number} w number in Watts
- */
-function w_to_kw(w) {
-    var kw = w > 0 ? w / 1000: 0
-    if (kw < 1) kw = Math.round(kw)
-    return kw
-}
+
 function livefn()
 {
     // Check if the updater ran in the last 60s if it did not the app was sleeping
@@ -321,19 +313,19 @@ function livefn()
 
     // convert W to kW
     if(powerUnit === 'kW') {
-        solar_now = w_to_kw(solar_now)
-        use_now = w_to_kw(use_now)
-        gridwind = w_to_kw(gridwind)
-        average_power = w_to_kw(average_power)
-        wind_now = w_to_kw(wind_now)
-        gen_now = w_to_kw(gen_now)
-        balance = w_to_kw(balance)
+        solar_now = Math.round(solar_now / 1000)
+        use_now = Math.round(use_now / 1000)
+        gridwind = gridwind / 1000
+        average_power = average_power / 1000
+        wind_now = Math.round(wind_now / 1000)
+        gen_now = Math.round(gen_now / 1000)
+        balance = balance / 1000
         $('.power-unit').text('kW')
         $('#app-block').addClass('in_kw');
     } else {
-        $('.power-unit').text('W')
         gen_now = Math.round(gen_now)
         wind_now = Math.round(wind_now)
+        $('.power-unit').text('W')
         $('#app-block').removeClass('in_kw');
     }
 
