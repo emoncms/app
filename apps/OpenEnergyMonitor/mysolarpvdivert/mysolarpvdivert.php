@@ -484,15 +484,6 @@ function hide()
     clearInterval(live);
 }
 
-/**
- * return input (w) divided by 1000 if input
- * @param {Number} w number in Watts
- */
-function w_to_kw(w) {
-    var kw = w > 0 ? w / 1000: 0
-    if (kw < 1) kw = Math.round(kw)
-    return kw
-}
 function livefn()
 {
     // Check if the updater ran in the last 60s if it did not the app was sleeping
@@ -543,28 +534,27 @@ function livefn()
     
     // convert W to kW
     if(powerUnit === 'kW') {
-        solar_now = w_to_kw(solar_now)
-        house_now = w_to_kw(house_now)
-        divert_now = w_to_kw(divert_now)
-        wind_now = w_to_kw(wind_now)
-        use_now = w_to_kw(use_now)
+        solar_now = solar_now / 1000
+        house_now = Math.round(house_now / 1000)
+        divert_now = divert_now / 1000
+        wind_now = wind_now / 1000
+        use_now = Math.round(use_now / 1000)
+        balance = balance / 1000
         gen_now = Math.round(Number(solar_now) + Number(wind_now))
-        // balance = w_to_kw(Math.round(Math.abs(balance)))
         $('.power-unit').text('kW')
         $('#app-block').addClass('in_kw');
     } else {
-        $('.power-unit').text('W')
         wind_now = Math.round(wind_now)
         solar_now = Math.round(solar_now)
-        balance = Math.round(Math.abs(balance))
         gen_now = solar_now + wind_now
+        balance = Math.round(balance)
+        $('.power-unit').text('W')
         $('#app-block').removeClass('in_kw');
     }
-    // console.log('solar_now',solar_now)
 
     if (balance==0) {
         $(".balance-label").html("PERFECT BALANCE");
-        $(".balance").html("");
+        $(".balance").html("--");
     }
     
     if (balance>0) {
