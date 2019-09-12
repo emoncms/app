@@ -313,13 +313,13 @@ function livefn()
 
     // convert W to kW
     if(powerUnit === 'kW') {
-        solar_now = Math.round(solar_now / 1000)
-        use_now = Math.round(use_now / 1000)
-        gridwind = gridwind / 1000
-        average_power = average_power / 1000
-        wind_now = Math.round(wind_now / 1000)
-        gen_now = Math.round(gen_now / 1000)
-        balance = balance / 1000
+        solar_now = as_kw(solar_now)
+        use_now = as_kw(use_now)
+        gridwind = as_kw(gridwind)
+        average_power = as_kw(average_power)
+        wind_now = as_kw(wind_now)
+        gen_now = as_kw(gen_now)
+        balance = as_kw(balance)
         $('.power-unit').text('kW')
         $('#app-block').addClass('in_kw');
     } else {
