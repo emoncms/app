@@ -414,9 +414,9 @@ function livefn()
 
     // convert W to kW
     if(powerUnit === 'kW') {
-        solar_now = Math.round(solar_now / 1000)
-        use_now = Math.round(use_now / 1000)
-        balance = Math.round(balance / 1000)
+        solar_now = as_kw(solar_now)
+        use_now = as_kw(use_now)
+        balance = as_kw(balance)
         $('#app-block').addClass('in_kw')
     } else {
         $('.power-unit').text(powerUnit)
