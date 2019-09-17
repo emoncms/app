@@ -129,7 +129,6 @@ function getTranslations(){
 // ----------------------------------------------------------------------
 // Globals
 // ----------------------------------------------------------------------
-var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 
