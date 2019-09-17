@@ -11,14 +11,15 @@
 
 // no direct access
 defined('EMONCMS_EXEC') or die('Restricted access');
-$v = 9;
+
 function app_controller()
 {
-    global $mysqli,$path,$session,$route,$user,$app_settings,$v;
+    global $mysqli,$path,$session,$route,$user,$app_settings;
     
     $result = false;
 
     require_once "Modules/app/app_model.php";
+    $v = 9;
     $appconfig = new AppConfig($mysqli, $app_settings);
     $appavail = $appconfig->get_available();
 
