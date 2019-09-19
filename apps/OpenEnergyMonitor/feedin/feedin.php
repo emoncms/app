@@ -72,7 +72,6 @@
 const INTERVAL_RELOAD = 300000;
 const INTERVAL_UPDATE = 5000;
 
-var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 if (!sessionwrite) $(".app-setup").hide();
@@ -399,16 +398,6 @@ function events() {
         graph.draw();
         draw();
     });
-
-    $(window).resize(function() {
-        var widthWindow = $(this).width();
-        
-        var flotFontSize = 12;
-        if (widthWindow < 450) flotFontSize = 10;
-        
-        resize();
-        graph.draw(flotFontSize);
-    });
 }
 
 function resize() {
@@ -448,6 +437,20 @@ function graphError(error) {
     }
     appLog('WARN', message);
 }
+
+// on finish sidebar hide/show
+$(function() {
+    $(document).on('window.resized hidden.sidebar.collapse shown.sidebar.collapse', resize)
+})
+
+$(function(){
+    // listen to the config.closed event before resizing the graph
+    $('body').on('config.closed', function() {
+        $('#app-block').removeClass('hide');
+        $('#app-setup').addClass('hide');
+        resize();
+    })
+})
 
 // ----------------------------------------------------------------------
 // App log
