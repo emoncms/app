@@ -83,6 +83,8 @@ var config = {
         $('.config-open').show();
         $('.config-close').hide();
         $('#buttons #tabs .btn').attr('disabled',false).css('opacity',1);
+        // allow app to react to closing config window
+        $('body').trigger('config.closed')
     },
 
     /**

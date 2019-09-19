@@ -34,6 +34,10 @@
   display: inline-block;
   font-size:18px;
 }
+.col1-inner{
+    display: flex;
+    flex-direction: column;
+}
 
 @media (max-width: 450px) {  
   .title1 { font-size:12px }
@@ -111,7 +115,7 @@
     </div>
     
     <div style="background-color:#fff; padding:10px;">
-      <div id="placeholder_bound" style="width:100%; height:500px;">
+      <div id="placeholder_bound" style="width:100%; height:500px;overflow:hidden">
         <div id="placeholder" style="height:500px"></div>
       </div>
     </div>
@@ -197,7 +201,6 @@
 // ----------------------------------------------------------------------
 // Globals
 // ----------------------------------------------------------------------
-var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 
@@ -771,9 +774,13 @@ function bargraph_draw()
 // -------------------------------------------------------------------------------
 // RESIZE
 // -------------------------------------------------------------------------------
-$(window).resize(app_resize);
 
 function resize() {
+    var window_width = $(this).width();
+
+    flot_font_size = 12;
+    if (window_width<450) flot_font_size = 10;
+
     var top_offset = 0;
     var placeholder_bound = $('#placeholder_bound');
     var placeholder = $('#placeholder');
@@ -787,25 +794,17 @@ function resize() {
     placeholder.width(width);
     placeholder_bound.height(height);
     placeholder.height(height-top_offset);
-}
 
-function app_resize() {
-    var window_width = $(this).width();
-
-    flot_font_size = 12;
-    if (window_width<450) flot_font_size = 10;
-
-    resize(); 
-   
     if (viewmode=="bargraph") {
         bargraph_draw();
     } else {
         powergraph_draw();
     }
 }
-
-
-
+// on finish sidebar hide/show
+$(function() {
+    $(document).on('window.resized hidden.sidebar.collapse shown.sidebar.collapse', resize)
+})
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------

@@ -24,3 +24,122 @@
 .col1-inner {
   padding: 10px;
 }
+
+.col1-inner { padding:10px; }
+
+#app-block.in_kw .power-value {
+    font-size: 1rem;
+}
+
+/* -------------------------------------------------------------------
+   MOBILE FIRST:
+
+   Extra small devices (portrait phones, 320px and up)
+--------------------------------------------------------------------*/
+@media (min-width: 320px) {
+    .text-xs-right {
+        text-align: right!important;
+    }
+    .text-xs-center {
+        text-align: center!important;
+    }
+    .d-xs-none {
+        display: none;
+    }
+    .d-xs-inline-block {
+        display: inline-block;
+    }
+}
+
+/* -------------------------------------------------------------------
+   Small devices (landscape phones, 576px and up)
+--------------------------------------------------------------------*/
+@media (min-width: 576px) {
+    .d-sm-none {
+        display: none;
+    }
+    .d-sm-inline-block {
+        display: inline-block;
+    }
+    .d-xs-inline-block {
+        display: inline-block;
+    }
+    .display-sm-3{
+        font-size: 4.5rem;
+    }
+    .display-sm-4 {
+        font-size: 3.25rem;
+    }
+    h3.text-sm-larger{
+      font-size: 1.78rem;
+    }
+    h5.text-sm-larger{
+        font-size: 1.34rem;
+    }
+    #app-block.in_kw .power-value.display-sm-4 {
+        font-size: 2rem;
+    }
+}
+
+/* -------------------------------------------------------------------
+   Medium devices (tablets, 768px and up)
+--------------------------------------------------------------------*/
+@media (min-width: 768px) {
+    .display-md-3{
+        font-size: 4.5rem;
+    }
+    .d-md-none {
+        display: none;
+    }
+    .d-md-inline-block {
+        display: inline-block;
+    }
+    h3.text-md-larger{
+        font-size: 1.78rem;
+    }
+    h5.text-md-larger{
+        font-size: 1.34rem;
+    }
+    #app-block.in_kw .power-value.display-md-3 {
+        font-size: 3rem;
+    }
+}
+
+/* -------------------------------------------------------------------
+   Large devices (desktops, 992px and up)
+--------------------------------------------------------------------*/
+@media (min-width: 992px) {
+    h4.text-lg-larger{
+        font-size: 1.5rem;
+    }
+    h5.text-lg-larger{
+        font-size: 1.34rem;
+    }
+    .display-3.text-lg-larger{
+        font-size: 5.5rem;
+    }
+    .mb-lg-3{
+        margin-bottom: .3em!important;
+    }
+    .py-lg-3,.pt-lg-3{
+        padding-top: calc(var(--spacer) * .8)
+    }
+    .py-lg-3,.pb-lg-3{
+        padding-bottom: calc(var(--spacer) * .8)
+    }
+    .display-lg-2{
+        font-size: 5.5rem;
+    }
+    #app-block.in_kw .power-value.display-lg-2 {
+        font-size: 4.4rem;
+    }
+}
+
+/* -------------------------------------------------------------------
+   Extra large devices (large desktops, 1200px and up)
+--------------------------------------------------------------------*/
+@media (min-width: 1200px) {
+    #app-block.in_kw .power-value.display-lg-2 {
+        font-size: 5rem;
+    }
+}

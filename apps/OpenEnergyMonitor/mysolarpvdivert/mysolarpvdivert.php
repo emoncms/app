@@ -1,7 +1,9 @@
 <?php
     global $path, $session;
-    $v = 7;
+    $v = 8;
 ?>
+
+<link href="<?php echo $path; ?>Modules/app/Views/css/app.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
@@ -143,15 +145,15 @@
     <div class="d-flex justify-content-between">
         <div class="text-xs-center">
             <h5 class="app-title mb-0 text-md-larger text-light"><?php echo _('HOUSE') ?></h5>
-            <h2 class="app-title-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-info"><span class="housenow">0</span>W</h2>
+            <h2 class="app-title-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-info"><span class="housenow">0</span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
             <h5 class="app-title mb-0 text-md-larger text-light px-1"><?php echo _('DIVERT') ?></h5>
-            <h2 class="app-title-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-quaternary"><span class="divertnow">-</span>W</h2>
+            <h2 class="app-title-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-quaternary"><span class="divertnow">-</span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
             <h5 class="app-title mb-0 text-md-larger text-light"><?php echo _('TOTAL USE') ?></h5>
-            <h2 class="app-title-value display-md-3 display-lg-2 my-0 text-primary"><span class="usenow"></span>W</h2>
+            <h2 class="app-title-value display-md-3 display-lg-2 my-0 text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
             <h5 class="app-title mb-0 text-md-larger text-light"><span class="balance-label">-</h5>
@@ -161,7 +163,7 @@
         </div>
         <div class="text-xs-center">
             <h5 class="app-title mb-0 text-md-larger text-light"><?php echo _('SOLAR') ?></h5>
-            <h2 class="app-title-value display-md-3 display-lg-2 my-0 text-warning "><span class="generationnow"></span>W</h2>
+            <h2 class="app-title-value display-md-3 display-lg-2 my-0 text-warning "><span class="generationnow"></span><span class="power-unit"></span></h2>
         </div>
     </div>
 
@@ -293,12 +295,19 @@
 
 <div class="ajax-loader"></div>
 
+<script src="<?php echo $path; ?>Lib/misc/gettext.js?v=<?php echo $v; ?>"></script> 
+<script>
+function getTranslations(){
+    return {
+        'Display power as kW': "<?php echo _('Display power as kW') ?>",
+    }
+}
+</script>
 <script>
 
 // ----------------------------------------------------------------------
 // Globals
 // ----------------------------------------------------------------------
-var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 if (!sessionwrite) $(".config-open").hide();
@@ -319,6 +328,7 @@ config.app = {
     "wind_kwh":{"optional":true, "type":"feed", "autoname":"wind_kwh", "engine":5, "description":"Cumulative wind generation in kWh"},
     "divert_kwh":{"optional":true, "type":"feed", "autoname":"divert_kwh", "engine":5, "description":"Cumulative divert energy in kWh"},
     "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "engine":5, "description":"Cumulative grid import in kWh"},
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
     //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
 }
 config.name = "<?php echo $name; ?>";
@@ -426,14 +436,10 @@ function show()
     
     if (config.app.solar_kwh.value && config.app.use_kwh.value && config.app.import_kwh.value && config.app.divert_kwh.value) {
         if (!bargraph_initialized) init_bargraph();
-        // $(".viewhistory").show();
-    } else {
-        // $(".viewhistory").hide();
     }
     
     resize();
     
-    // this.reload = true;
     update();
     updateTimer = setInterval(update, 5000);
 }
@@ -446,8 +452,9 @@ function resize()
     var placeholder_bound = $('#placeholder_bound');
     var placeholder = $('#placeholder');
 
+    var is_landscape = $(window).height() < $(window).width();
     var width = placeholder_bound.width();
-    var height = $(window).height()*0.55;
+    var height = $(window).height()*(is_landscape ? 0.3: 0.6);
 
     if (height>width) height = width;
 
@@ -455,52 +462,6 @@ function resize()
     placeholder_bound.height(height);
     placeholder.height(height-top_offset);
     
-    // if (width<=500) {
-    //     $(".app-title").css("font-size","16px");
-    //     $(".app-title-value").css("font-size","32px");
-    //     $(".statstable").css("border-spacing","4px");
-    //     $(".statsbox-title").css("font-size","14px");
-    //     $(".statsbox-title").css("padding-bottom","4px");
-    //     $(".statsbox-value").css("font-size","20px");
-    //     $(".statsbox-units").css("font-size","12px");
-    //     $(".statsbox-units").hide();
-    //     $(".statsbox-prc").css("font-size","12px");
-    //     $(".statsbox-padded").css("padding","4px");
-    //     $(".balanceline").hide();
-    //     $(".vistimeW").hide();
-    //     $(".vistimeM").hide();
-    //     $(".vistimeY").hide();
-    // } else if (width<=724) {
-    //     $(".app-title").css("font-size","18px");
-    //     $(".app-title-value").css("font-size","52px");
-    //     $(".statstable").css("border-spacing","8px");
-    //     $(".statsbox-title").css("font-size","16px");
-    //     $(".statsbox-title").css("padding-bottom","8px");
-    //     $(".statsbox-value").css("font-size","22px");
-    //     $(".statsbox-units").css("font-size","14px");
-    //     $(".statsbox-units").show();
-    //     $(".statsbox-prc").css("font-size","14px");
-    //     $(".statsbox-padded").css("padding","8px");
-    //     $(".balanceline").show();
-    //     $(".vistimeW").show();
-    //     $(".vistimeM").show();
-    //     $(".vistimeY").show();
-    // } else {
-    //     $(".app-title").css("font-size","22px");
-    //     $(".app-title-value").css("font-size","85px");
-    //     $(".statstable").css("border-spacing","10px");
-    //     $(".statsbox-title").css("font-size","20px");
-    //     $(".statsbox-title").css("padding-bottom","15px");
-    //     $(".statsbox-value").css("font-size","36px");
-    //     $(".statsbox-units").css("font-size","16px");
-    //     $(".statsbox-units").show();
-    //     $(".statsbox-prc").css("font-size","16px");
-    //     $(".statsbox-padded").css("padding","10px");
-    //     $(".balanceline").show();
-    //     $(".vistimeW").show();
-    //     $(".vistimeM").show();
-    //     $(".vistimeY").show();
-    // }
     draw();
 }
 
@@ -517,6 +478,7 @@ function update()
     if ((now-lastupdate)>60000) reload = true;
     lastupdate = now;
     
+    var powerUnit = config.app && config.app.kw && config.app.kw.value===true ? 'kW' : 'W';
     var feeds = feed.getListById();
     if (feeds === null) { return; }
     var solar_now = parseInt(feeds[config.app.solar.value].value);
@@ -556,22 +518,42 @@ function update()
 
     var house_now = use_now - divert_now;
     
+    // convert W to kW
+    if(powerUnit === 'kW') {
+        gen_now = as_kw(solar_now + wind_now)
+        solar_now = as_kw(solar_now)
+        house_now = as_kw(house_now)
+        divert_now = as_kw(divert_now)
+        wind_now = as_kw(wind_now)
+        use_now = as_kw(use_now)
+        balance = as_kw(balance)
+        $('.power-unit').text('kW')
+        $('#app-block').addClass('in_kw');
+    } else {
+        wind_now = Math.round(wind_now)
+        solar_now = Math.round(solar_now)
+        gen_now = solar_now + wind_now
+        balance = Math.round(balance)
+        $('.power-unit').text('W')
+        $('#app-block').removeClass('in_kw');
+    }
+
     if (balance==0) {
         $(".balance-label").html("PERFECT BALANCE");
-        $(".balance").html("");
+        $(".balance").html("--");
     }
     
     if (balance>0) {
         $(".balance-label").html("EXPORTING");
-        $(".balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
+        $(".balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+powerUnit+"</b></span>");
     }
     
     if (balance<0) {
         $(".balance-label").html("IMPORTING");
-        $(".balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+"W</b></span>");
+        $(".balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+powerUnit+"</b></span>");
     }
     
-    $(".generationnow").html(solar_now + wind_now);
+    $(".generationnow").html(gen_now);
     $(".housenow").html(house_now);
     $(".divertnow").html(divert_now);
     $(".usenow").html(use_now);
@@ -1125,9 +1107,11 @@ function hide_tooltip() {
     $('#tooltip').hide();
 }
 
-$(window).resize(function(){
-    resize();
-});
+$(function() {
+    $(document).on('window.resized hidden.sidebar.collapse shown.sidebar.collapse', function(){
+        resize()
+    })
+})
 
 // ----------------------------------------------------------------------
 // App log

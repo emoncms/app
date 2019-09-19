@@ -1,8 +1,8 @@
 <?php
     global $path, $session;
-    $v = 7;
+    $v = 8;
 ?>
-
+<link href="<?php echo $path; ?>Modules/app/Views/css/app.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
@@ -132,12 +132,23 @@
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
 
+<script src="<?php echo $path; ?>Lib/misc/gettext.js?v=<?php echo $v; ?>"></script> 
+<script>
+function getTranslations(){
+    return {
+        'House or building use in watts': "<?php echo _('House or building use in watts') ?>",
+        'Cumulative use in kWh': "<?php echo _('Cumulative use in kWh') ?>",
+        'Unit cost of electricity e.g £/kWh': "<?php echo _('Unit cost of electricity e.g £/kWh') ?>",
+        'Currency symbol (£,$,€...)': "<?php echo _('Currency symbol (£,$,€...)') ?>",
+        'Display power as kW': "<?php echo _('Display power as kW') ?>",
+    }
+}
+</script>
 <script>
 
 // ----------------------------------------------------------------------
 // Globals
 // ----------------------------------------------------------------------
-var path = "<?php print $path; ?>";
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 if (!sessionwrite) $(".config-open").hide();
@@ -151,7 +162,8 @@ config.app = {
     "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"House or building use in watts"},
     "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative use in kWh"},
     "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity e.g £/kWh"},
-    "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$,€...)"}
+    "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$,€...)"},
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
 };
 
 config.name = "<?php echo $name; ?>";
@@ -280,25 +292,6 @@ function resize()
     $("#placeholder_power").attr('height',height); 
     graph_lines.height = height;
     
-    // if (width<=500) {
-    //     $(".app-title").css("font-size","16px");
-    //     $(".app-title-value").css("font-size","38px");
-    //     $(".units").hide();
-    //     $(".visnav").css("padding-left","5px");
-    //     $(".visnav").css("padding-right","5px");
-    // } else if (width<=724) {
-    //     $(".app-title").css("font-size","18px");
-    //     $(".app-title-value").css("font-size","52px");
-    //     $(".units").show();
-    //     $(".visnav").css("padding-left","8px");
-    //     $(".visnav").css("padding-right","8px");
-    // } else {
-    //     $(".app-title").css("font-size","22px");
-    //     $(".app-title-value").css("font-size","85px");
-    //     $(".units").show();
-    //     $(".visnav").css("padding-left","8px");
-    //     $(".visnav").css("padding-right","8px");
-    // }
     if($('#app-block').is(":visible")) {
         reloadkwhd = true;
         updateFast();
@@ -337,7 +330,8 @@ function updateFast(event)
     
     var now = new Date();
     var timenow = now.getTime();
-    
+    var powerUnit = config.app && config.app.kw && config.app.kw.value===true ? 'kW' : 'W';
+
     // --------------------------------------------------------------------------------------------------------
     // REALTIME POWER GRAPH
     // -------------------------------------------------------------------------------------------------------- 
@@ -375,7 +369,7 @@ function updateFast(event)
     
     // set the power now value
     if (viewmode=="energy") {
-        if (feeds[use].value<10000) {
+        if (powerUnit==='W') {
             $("#powernow").html((feeds[use].value*1).toFixed(0)+"W");
         } else {
             $("#powernow").html((feeds[use].value*0.001).toFixed(1)+"kW");
@@ -591,17 +585,19 @@ function updateSlow()
     graph_bars.draw('placeholder_kwhd',[daily]);
     $(".ajax-loader").hide();
 }
+// on finish sidebar hide/show
+$(function() {
+    $(document).on('window.resized hidden.sidebar.collapse shown.sidebar.collapse', resize)
+})
 
-var resizeTimer;
-    // debounce (ish) script to improve performance
-    $(window).on("resize", function(e) {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function() {
-            if($('#app-block').is(":visible")) {
-                resize();
-            }
-        }, 500);
-    });
+$(function(){
+    // listen to the config.closed event before resizing the graph
+    $('body').on('config.closed', function() {
+        $('#app-block').removeClass('hide');
+        $('#app-setup').addClass('hide');
+        resize();
+    })
+})
 
 // ----------------------------------------------------------------------
 // App log
