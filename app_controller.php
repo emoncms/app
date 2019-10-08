@@ -14,13 +14,13 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 
 function app_controller()
 {
-    global $mysqli,$path,$session,$route,$user,$app_settings;
+    global $mysqli,$path,$session,$route,$user;
     
     $result = false;
 
     require_once "Modules/app/app_model.php";
     $v = 9;
-    $appconfig = new AppConfig($mysqli, $app_settings);
+    $appconfig = new AppConfig($mysqli);
     $appavail = $appconfig->get_available();
 
     if ($route->action == "view") {

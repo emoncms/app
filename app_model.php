@@ -15,12 +15,10 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 class AppConfig
 {
     private $mysqli;
-    private $settings;
 
-    public function __construct($mysqli, $settings)
+    public function __construct($mysqli)
     {
         $this->mysqli = $mysqli;
-        $this->settings = $settings;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -34,25 +32,34 @@ class AppConfig
         $it = new RecursiveIteratorIterator($dirs);
         foreach($it as $file) {
             // Restrict iteration to two levels
-            if ($it->getDepth() > 2) continue;
+            if ($it->getDepth() > 2) {
+                continue;
+            }
             
             // Replace all backslashes to avoid conflicts with paths on windows machines
             $file = str_replace('\\', '/', $file);
-            if(basename($file ,".json") == 'app') {
-                $dir = dirname($file);
-                
-                $content = (array) json_decode(file_get_contents($file));
-                if (json_last_error() == 0 && array_key_exists("title", $content) && array_key_exists("description", $content)) {
-                    $content['dir'] = stripslashes($dir.'/');
-                    
-                    $id = basename($dir);
-                    if ($id != 'template' && (!isset($this->settings) || !isset($this->settings['hidden']) 
-                        || !in_array($id, $this->settings['hidden']))) {
-                        
-                        $list[$id] = $content;
-                    }
-                }
+            if(basename($file ,".json") != 'app') {
+                continue;
             }
+            $dir = dirname($file);
+            
+            $content = (array) json_decode(file_get_contents($file));
+            if (json_last_error() != 0 || !array_key_exists("title", $content) || !array_key_exists("description", $content)) {
+                continue;
+            }
+            
+            $id = basename($dir);
+            if ($id == 'template') {
+                continue;
+            }
+            
+            global $settings;
+            if (isset($settings['app']) && isset($settings['app']['hidden']) && in_array($id, $settings['app']['hidden'])) {
+                continue;
+            }
+            $content['dir'] = stripslashes($dir.'/');
+            
+            $list[$id] = $content;
         }
         uasort($list, function($a1, $a2) {
             if($a1['status'] == $a2['status'])
