@@ -64,8 +64,10 @@ function app_controller()
                 }
             }
             
-            $result = "<link href='".$path."Modules/app/Views/css/app.css?v=".$v."' rel='stylesheet'>";
-            $result = '<script src="'. $path . 'Modules/app/Views/js/app.js?v="'.$v.'"></script>';
+            $result = "\n<!-- global app css and js -->";
+            $result .= "\n" . '<link href="' . $path . 'Modules/app/Views/css/app.css?v=' . $v . '" rel="stylesheet">';
+            $result .= "\n" . '<script src="' . $path . 'Modules/app/Views/js/app.js?v=' . $v . '"></script>';
+            $result .= "\n\n <!-- app specific view -->\n";
 
             if ($app!=false) {
                 $result .= view($dir.$id.".php",array("name"=>$app, "appdir"=>$dir, "config"=>$config, "apikey"=>$apikey));
