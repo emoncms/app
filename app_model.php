@@ -54,8 +54,11 @@ class AppConfig
             }
             
             global $settings;
-            if (isset($settings['app']) && isset($settings['app']['hidden']) && in_array($id, $settings['app']['hidden'])) {
-                continue;
+            if (isset($settings['app']) && isset($settings['app']['hidden'])) {
+                if (!is_array($settings['app']['hidden'])) $settings['app']['hidden'] = explode(',', $settings['app']['hidden']);
+                if (in_array($id, $settings['app']['hidden'])) {
+                    continue;
+                }
             }
             $content['dir'] = stripslashes($dir.'/');
             
