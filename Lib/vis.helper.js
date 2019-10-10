@@ -4,6 +4,7 @@ var view =
   'end':0,
   'first_data':0,
   'pan_speed':0.2,
+  'limit_x':true,
 
   'zoomout':function ()
   {
@@ -28,7 +29,7 @@ var view =
     var time_window = this.end - this.start;
     var shiftsize = time_window * view.pan_speed;
     var now = this.now();
-    if (this.end + shiftsize > now) {
+    if (this.end + shiftsize > now && this.limit_x) {
       shiftsize = now - this.end;
     }
     this.start += shiftsize;
@@ -39,7 +40,7 @@ var view =
   {
     var time_window = this.end - this.start;
     var shiftsize = time_window * view.pan_speed;
-    if (this.start - shiftsize < this.first_data) {
+    if (this.start - shiftsize < this.first_data && this.limit_x) {
       shiftsize = this.start - this.first_data;
     }
     this.start -= shiftsize;

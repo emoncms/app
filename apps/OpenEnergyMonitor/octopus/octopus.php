@@ -1,6 +1,6 @@
 <?php
     global $path, $session;
-    $v = 8;
+    $v = 9;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
@@ -30,12 +30,23 @@
     line-height: 1.1;
 }
 
+.halfhour-value {
+    font-weight:bold; 
+    font-size:42px; 
+    color:#44b3e2;
+    line-height: 1.1;
+}
+
 .units {
     font-size:75%;
 }
 
 .block-bound {
   background-color:rgb(68,179,226);
+}
+
+.appnav-active {
+  background-color:rgba(255,255,255,0.2);
 }
 
 </style>
@@ -48,8 +59,8 @@
     <div class="block-bound">
       <div class="appnav config-open"><i class="icon-wrench icon-white"></i></div>
       <!--<div class="appnav viewcostenergy">VIEW COST</div>-->
-      <!--<div class="appnav cost">Cost</div>-->
-      <!--<div class="appnav energy">Energy</div>-->
+      <div class="appnav cost">Cost</div>
+      <div class="appnav energy">Energy</div>
       <div id="app-title" class="block-title">MY ELECTRIC</div>
     </div>
 
@@ -57,15 +68,20 @@
       <table style="width:100%">
         <tr>
           <td style="width:40%">
-              <div class="electric-title">NOW</div>
+              <div class="electric-title">POWER NOW</div>
               <div class="power-value"><span id="power_now">0</span></div>
           </td>
-          <!--
-          <td style="text-align:right">
-              <div class="electric-title">TODAY</div>
-              <div class="power-value"><span id="kwh_today">0</span></div>
+          
+          <td style="text-align:center" class="last_halfhour_stats">
+              <div class="electric-title">CURRENT PRICE</div>
+              <div class="power-value"><span id="unit_price"></span></div>
           </td>
-          -->
+          
+          <td style="text-align:right" class="last_halfhour_stats">
+              <div class="electric-title">LAST HALF HOUR</div>
+              <div class="halfhour-value"><span id="kwh_halfhour"></span> <span id="cost_halfhour"></span></div>
+          </td>
+          
         </tr>
       </table>
     </div>
@@ -148,6 +164,9 @@ if (!sessionwrite) $(".config-open").hide();
 
 var feed = new Feed(apikey);
 
+var view_mode = "energy";
+
+
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
@@ -208,6 +227,9 @@ var comparison_heating = false;
 var comparison_transport = false;
 var flot_font_size = 12;
 var updateTimer = false;
+var this_halfhour_present = false;
+// disable x axis limit
+view.limit_x = false;
 
 config.init();
 
@@ -230,6 +252,7 @@ function show() {
     var timeWindow = (3600000*24.0*1);
     view.end = (new Date()).getTime();
     view.start = view.end - timeWindow;
+    view.end += 3600*4*1000; // show 4h of forecast
     graph_load();
     graph_draw();
 
@@ -314,7 +337,10 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             var date = hours+":"+minutes+", "+days[d.getDay()]+" "+months[d.getMonth()]+" "+d.getDate();
             
             var text = "";
-            if (item.seriesIndex==0) text = date+"<br>"+(itemValue).toFixed(3)+" kWh";
+            if (item.seriesIndex==0) {
+                if (view_mode=="energy") text = date+"<br>"+(itemValue).toFixed(3)+" kWh";
+                if (view_mode=="cost") text = date+"<br>"+(itemValue*100).toFixed(1)+"p";
+            }
             if (item.seriesIndex==1) text = date+"<br>"+(itemValue*1.05).toFixed(1)+" p/kWh (inc VAT)";
             tooltip(item.pageX, item.pageY, text, "#fff");
         }
@@ -349,6 +375,20 @@ $(".viewcostenergy").click(function(){
     //show();
 });
 
+$(".energy").click(function() {
+    view_mode = "energy";
+    graph_draw()
+    $(this).addClass("appnav-active");
+    $(".cost").removeClass("appnav-active");
+});
+
+$(".cost").click(function() {
+    view_mode = "cost";
+    graph_draw()
+    $(this).addClass("appnav-active");
+    $(".energy").removeClass("appnav-active");
+});
+
 // -------------------------------------------------------------------------------
 // FUNCTIONS
 // -------------------------------------------------------------------------------
@@ -359,19 +399,23 @@ $(".viewcostenergy").click(function(){
 function graph_load() 
 {
     $("#power-graph-footer").show();
-    var start = view.start; var end = view.end;
     var interval = 1800;
     var intervalms = interval * 1000;
-    start = Math.ceil(start/intervalms)*intervalms;
-    end = Math.ceil(end/intervalms)*intervalms;
-
-    var use_tmp = feed.getData(feeds["use_kwh"].id,start,end,interval,0,0);
+    view.start = Math.ceil(view.start/intervalms)*intervalms;
+    view.end = Math.ceil(view.end/intervalms)*intervalms;
     
-    data = [];
+    // var date = new Date();
+    // date.setTime(view.start);
+    // date.setHours(0,0,0,0);
+    // view.start = date.getTime();
+
+    var use_tmp = feed.getData(feeds["use_kwh"].id,view.start,view.end,interval,0,0);
+    
+    data = {};
     
     data["agile"] = []
     if (config.app.region!=undefined && regions[config.app.region.value]!=undefined) {
-        data["agile"] = feed.getRemoteData(regions[config.app.region.value],start,end,interval);
+        data["agile"] = feed.getRemoteData(regions[config.app.region.value],view.start,view.end,interval);
     }
     
     // remove nan values from the end.
@@ -383,9 +427,18 @@ function graph_load()
     }
     
     data["use"] = [];
+    data["cost"] = [];
     
     var total_cost = 0
     var total_kwh = 0
+    this_halfhour_present = false;
+    
+    // Add last half hour
+    var this_halfhour = Math.floor((new Date()).getTime()/1800000)*1800000
+    if (use.length>0 && this_halfhour==use[use.length-1][0]) {
+        use.push([this_halfhour+1800000,feeds["use_kwh"].value])
+        this_halfhour_present = true;
+    }
 
     if (use.length>1) {
         for (var z=1; z<use.length; z++) {
@@ -396,6 +449,7 @@ function graph_load()
             data["use"].push([time,kwh]);
             total_kwh += kwh
             total_cost += kwh*cost
+            data["cost"].push([time,kwh*cost]);
         }
     }
     
@@ -404,14 +458,31 @@ function graph_load()
     $("#window-energy").html(total_kwh.toFixed(1)+" kWh");
     $("#window-cost").html("£"+total_cost.toFixed(2));
     $("#window-unitcost").html((unit_cost*100*1.05).toFixed(1)+"p/kWh (inc VAT)");
-    
-    graph_series = [];
-    graph_series.push({data:data["use"], yaxis:1, color:"#44b3e2", bars: { show: true, align: "center", barWidth: 0.75*1800*1000, fill: 1.0, lineWidth:0}});
-    graph_series.push({data:data["agile"], yaxis:2, color:"#000", lines: { show: true, align: "center", lineWidth:1}});
 }
 
 function graph_draw() 
 {
+    if (this_halfhour_present) {
+    
+        let kwh_last_halfhour = data["use"][data["use"].length-1][1];
+        $("#kwh_halfhour").html(kwh_last_halfhour.toFixed(2)+"<span class='units'>kWh</span>");
+
+        let cost_last_halfhour = data["cost"][data["cost"].length-1][1]*100;
+        $("#cost_halfhour").html("("+cost_last_halfhour.toFixed(1)+"<span class='units'>p</span>)");
+
+        let unit_price = data["agile"][data["cost"].length-1][1]*1.05;
+        $("#unit_price").html(unit_price.toFixed(1)+"<span class='units'>p</span>");
+        
+        $(".last_halfhour_stats").show();
+    } else {
+        $(".last_halfhour_stats").hide();
+    }
+    
+    graph_series = [];
+    if (view_mode=="energy") graph_series.push({data:data["use"], yaxis:1, color:"#44b3e2", bars: { show: true, align: "center", barWidth: 0.75*1800*1000, fill: 1.0, lineWidth:0}});
+    if (view_mode=="cost") graph_series.push({data:data["cost"], yaxis:1, color:"#44b3e2", bars: { show: true, align: "center", barWidth: 0.75*1800*1000, fill: 1.0, lineWidth:0}});
+    graph_series.push({data:data["agile"], yaxis:2, color:"#fb1a80", lines: { show: true, align: "center", lineWidth:1}});
+    
     var options = {
         xaxis: { 
             mode: "time", timezone: "browser", 
@@ -464,12 +535,16 @@ function resize() {
     if (width<=500) {
         $(".electric-title").css("font-size","16px");
         $(".power-value").css("font-size","38px");
+        $(".halfhour-value").css("font-size","28px");
+        
     } else if (width<=724) {
         $(".electric-title").css("font-size","18px");
         $(".power-value").css("font-size","52px");
+        $(".halfhour-value").css("font-size","42px");
     } else {
         $(".electric-title").css("font-size","22px");
         $(".power-value").css("font-size","52px");
+        $(".halfhour-value").css("font-size","42px");
     }
 }
 
