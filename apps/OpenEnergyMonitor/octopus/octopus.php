@@ -12,6 +12,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 
@@ -61,7 +62,7 @@
       <!--<div class="bluenav viewcostenergy">VIEW COST</div>-->
       <div class="bluenav cost">Cost</div>
       <div class="bluenav energy bluenav-active">Energy</div>
-      <div id="app-title" class="block-title">MY ELECTRIC</div>
+      <div id="app-title" class="block-title">OCTOPUS AGILE</div>
     </div>
 
     <div style="background-color:#fff; color:#333; padding:10px;">
@@ -114,20 +115,35 @@
       </div>
     </div>
           
-    <div id="power-graph-footer" style="background-color:#eee; color:#333; display:none">
- 
-      <div style="padding:10px;">
-      <table style="width:100%">
+    <div class="power-graph-footer" style="background-color:#f0f0f0; color:#333; display:none">
+      <div style="padding:20px;">
+      <table style="width:100%" class="table">
+      <tr><th></th><th>Energy</th><th>Cost / Value</th><th>Unit price</th></tr>
       <tr>
-      <td style="width:32%; text-align:center">Energy<div id="window-energy"></div></td>
-      <td style="width:32%; text-align:center">Cost<div id="window-cost"></div></td>
-      <td style="width:32%; text-align:center">Unit Cost<div id="window-unitcost"></div></td>
+        <td>Import</td>
+        <td><div id="window-energy-import"></div></td>
+        <td><div id="window-cost-import"></div></td>
+        <td><div id="window-unitcost-import"></div></td>
+      </tr>
+      <tr>
+        <td>Export</td>
+        <td><div id="window-energy-export"></div></td>
+        <td><div id="window-cost-export"></div></td>
+        <td><div id="window-unitcost-export"></div></td>
+      </tr>
+      <tr>
+        <td>Solar self-consumption</td>
+        <td><div id="window-energy-solar"></div></td>
+        <td><div id="window-cost-solar"></div></td>
+        <td><div id="window-unitcost-solar"></div></td>
+      </tr>
+      <tr>
+        <td>Solar + Export</td>
+        <td><div id="window-energy-solar-combined"></div></td>
+        <td><div id="window-cost-solar-combined"></div></td>
+        <td><div id="window-unitcost-solar-combined"></div></td>
       </tr>
       </table>
-       
-      </div>
-      
-      <div style="clear:both"></div>
     </div>
   </div></div>
 </div>    
@@ -188,6 +204,10 @@ config.app = {
     "title":{"type":"value", "default":"OCTOPUS AGILE", "name": "Title", "description":"Optional title for app"},
     "use":{"type":"feed", "autoname":"use", "engine":"5"},
     "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5},
+    "import":{"optional":true, "type":"feed", "autoname":"import", "engine":"5"},
+    "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "engine":5},
+    "solar":{"optional":true, "type":"feed", "autoname":"solar", "engine":"5"},
+    "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5},
     "region":{"type":"select", "name":"Select region:", "default":"D_Merseyside_and_Northern_Wales", "options":["A_Eastern_England","B_East_Midlands","C_London","E_West_Midlands","D_Merseyside_and_Northern_Wales","F_North_Eastern_England","G_North_Western_England","H_Southern_England","J_South_Eastern_England","K_Southern_Wales","L_South_Western_England","M_Yorkshire","N_Southern_Scotland","P_Northern_Scotland"]}
 };
 config.name = "<?php echo $name; ?>";
@@ -198,7 +218,7 @@ config.initapp = function(){init()};
 config.showapp = function(){show()};
 config.hideapp = function(){hide()};
 
-var regions = {
+var regions_import = {
   "A_Eastern_England":396124,
   "B_East_Midlands":396125,
   "C_London":396126,
@@ -213,6 +233,23 @@ var regions = {
   "M_Yorkshire":396142,
   "N_Southern_Scotland":396143,
   "P_Northern_Scotland":396144
+}
+
+var regions_outgoing = {
+  "A_Eastern_England":399374,
+  "B_East_Midlands":399361,
+  "C_London":399362,
+  "E_West_Midlands":399363,
+  "D_Merseyside_and_Northern_Wales":399364,
+  "F_North_Eastern_England":399365,
+  "G_North_Western_England":399366,
+  "H_Southern_England":399367,
+  "J_South_Eastern_England":399368,
+  "K_Southern_Wales":399369,
+  "L_South_Western_England":399370,
+  "M_Yorkshire":399371,
+  "N_Southern_Scotland":399372,
+  "P_Northern_Scotland":399373
 }
 
 // ----------------------------------------------------------------------
@@ -235,6 +272,7 @@ var updaterinst = false;
 var this_halfhour_present = false;
 // disable x axis limit
 view.limit_x = false;
+var solarpv_mode = false;
 
 config.init();
 
@@ -280,13 +318,13 @@ function updater()
         }
         
         if (viewcostenergy=="energy") {
-            if (feeds["use"].value<10000) {
-                $("#power_now").html(Math.round(feeds["use"].value)+"<span class='units'>W</span>");
+            if (feeds["import"].value<10000) {
+                $("#power_now").html(Math.round(feeds["import"].value)+"<span class='units'>W</span>");
             } else {
-                $("#power_now").html((feeds["use"].value*0.001).toFixed(1)+"<span class='units'>kW</span>");
+                $("#power_now").html((feeds["import"].value*0.001).toFixed(1)+"<span class='units'>kW</span>");
             }
         } else {
-            $("#power_now").html(config.app.currency.value+(feeds["use"].value*1*config.app.unitcost.value*0.001).toFixed(3)+"<span class='units'>/hr</span>");
+            $("#power_now").html(config.app.currency.value+(feeds["import"].value*1*config.app.unitcost.value*0.001).toFixed(3)+"<span class='units'>/hr</span>");
         }
     });
 }
@@ -327,7 +365,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
         
         if (previousPoint != item.datapoint) {
             previousPoint = item.datapoint;
-
+            
             $("#tooltip").remove();
             var itemTime = item.datapoint[0];
             var itemValue = item.datapoint[1];
@@ -342,11 +380,11 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             var date = hours+":"+minutes+", "+days[d.getDay()]+" "+months[d.getMonth()]+" "+d.getDate();
             
             var text = "";
-            if (item.seriesIndex==0) {
-                if (view_mode=="energy") text = date+"<br>"+(itemValue).toFixed(3)+" kWh";
-                if (view_mode=="cost") text = date+"<br>"+(itemValue*100).toFixed(1)+"p";
+            if (item.seriesIndex==0 || item.seriesIndex==1 || item.seriesIndex==2) {
+                if (view_mode=="energy") text = item.series.label+"<br>"+date+"<br>"+(itemValue).toFixed(3)+" kWh";
+                if (view_mode=="cost") text = item.series.label+"<br>"+date+"<br>"+(itemValue*100).toFixed(1)+"p";
             }
-            if (item.seriesIndex==1) text = date+"<br>"+(itemValue*1.05).toFixed(1)+" p/kWh (inc VAT)";
+            if (item.seriesIndex==3 || item.seriesIndex==4) text = item.series.label+"<br>"+date+"<br>"+(itemValue*1.05).toFixed(1)+" p/kWh (inc VAT)";
             tooltip(item.pageX, item.pageY, text, "#fff");
         }
     } else $("#tooltip").remove();
@@ -373,11 +411,6 @@ $(".viewcostenergy").click(function(){
         $(this).html("VIEW COST");
         viewcostenergy = "energy";
     }
-    
-    //$(".graph-navigation").hide();
-    //viewmode = "bargraph";
-    //$(".bargraph-navigation").show();
-    //show();
 });
 
 $(".energy").click(function() {
@@ -403,73 +436,167 @@ $(".cost").click(function() {
 
 function graph_load() 
 {
-    $("#power-graph-footer").show();
+    $(".power-graph-footer").show();
     var interval = 1800;
     var intervalms = interval * 1000;
     view.start = Math.ceil(view.start/intervalms)*intervalms;
     view.end = Math.ceil(view.end/intervalms)*intervalms;
     
-    // var date = new Date();
-    // date.setTime(view.start);
-    // date.setHours(0,0,0,0);
-    // view.start = date.getTime();
-
+    if (feeds["import_kwh"]!=undefined && feeds["solar_kwh"]!=undefined) solarpv_mode = true;
+    
     var use_tmp = feed.getdata(feeds["use_kwh"].id,view.start,view.end,interval,0,0);
+    
+    var import_tmp = [];
+    if (solarpv_mode) import_tmp = feed.getdata(feeds["import_kwh"].id,view.start,view.end,interval,0,0);
+    var solar_tmp = [];
+    if (solarpv_mode) solar_tmp = feed.getdata(feeds["solar_kwh"].id,view.start,view.end,interval,0,0);    
     
     data = {};
     
     data["agile"] = []
-    if (config.app.region!=undefined && regions[config.app.region.value]!=undefined) {
-        data["agile"] = feed.getdataremote(regions[config.app.region.value],view.start,view.end,interval);
+    data["outgoing"] = []
+    if (config.app.region!=undefined && regions_import[config.app.region.value]!=undefined) {
+        data["agile"] = feed.getdataremote(regions_import[config.app.region.value],view.start,view.end,interval);
+        data["outgoing"] = feed.getdataremote(regions_outgoing[config.app.region.value],view.start,view.end,interval);
     }
+    // Invert export tariff
+    for (var z in data["outgoing"]) data["outgoing"][z][1] *= -1;
     
     // remove nan values from the end.
-    var use = [];
+    var use_kwh = [];
+    var import_kwh = [];
+    var solar_kwh = [];
     for (var z in use_tmp) {
         if (use_tmp[z][1]!=null) {
-            use.push(use_tmp[z]);
+            use_kwh.push(use_tmp[z]);
+        }
+        if (solarpv_mode) {
+            if (import_tmp[z][1]!=null) {
+                import_kwh.push(import_tmp[z]);
+            }
+            if (solar_tmp[z][1]!=null) {
+                solar_kwh.push(solar_tmp[z]);
+            }
         }
     }
-    
+
     data["use"] = [];
-    data["cost"] = [];
+    data["import"] = [];
+    data["import_cost"] = [];
+    data["export"] = [];
+    data["export_cost"] = [];
+    data["solar_used"] = []
+    data["solar_used_cost"] = [];
     
-    var total_cost = 0
-    var total_kwh = 0
+    var total_cost_import = 0
+    var total_kwh_import = 0
+    var total_cost_export = 0
+    var total_kwh_export = 0
+    var total_cost_solar_used = 0
+    var total_kwh_solar_used = 0
+    
     this_halfhour_present = false;
     
     // Add last half hour
     var this_halfhour = Math.floor((new Date()).getTime()/1800000)*1800000
-    if (use.length>0 && this_halfhour==use[use.length-1][0]) {
-        use.push([this_halfhour+1800000,feeds["use_kwh"].value])
+    if (import_kwh.length>0 && this_halfhour==import_kwh[import_kwh.length-1][0]) {
+        use_kwh.push([this_halfhour+1800000,feeds["use_kwh"].value])
+        if (solarpv_mode) {
+            import_kwh.push([this_halfhour+1800000,feeds["import_kwh"].value])
+            solar_kwh.push([this_halfhour+1800000,feeds["solar_kwh"].value])
+        }
         this_halfhour_present = true;
     }
+    
+    if (use_kwh.length>1) {
+        for (var z=1; z<use_kwh.length; z++) {
+            let time = use_kwh[z-1][0];
+            
+            if (solarpv_mode) {
+                // ----------------------------------------------------
+                // Solar PV agile outgoing
+                // ----------------------------------------------------
+                // calculate half hour kwh
+                let kwh_use = (use_kwh[z][1]-use_kwh[z-1][1]);
+                let kwh_import = (import_kwh[z][1]-import_kwh[z-1][1]);
+                let kwh_solar = (solar_kwh[z][1]-solar_kwh[z-1][1]);
+                
+                // limits
+                if (kwh_use<0.0) kwh_use = 0.0;
+                if (kwh_import<0.0) kwh_import = 0.0;
+                if (kwh_solar<0.0) kwh_solar = 0.0;
+                
+                // calc export & self consumption
+                let kwh_solar_used = kwh_use - kwh_import;
+                let kwh_export = kwh_solar - kwh_solar_used;
+                
+                // half hourly datasets for graph
+                data["use"].push([time,kwh_use]);
+                data["import"].push([time,kwh_import]);
+                data["export"].push([time,kwh_export*-1]);
+                data["solar_used"].push([time,kwh_solar_used]);
+                
+                // energy totals
+                total_kwh_import += kwh_import
+                total_kwh_export += kwh_export
+                total_kwh_solar_used += kwh_solar_used
+                
+                // costs
+                let cost_import = data.agile[z-1][1]*0.01;
+                let cost_export = data.outgoing[z-1][1]*0.01*-1;
+                
+                // half hourly datasets for graph      
+                data["import_cost"].push([time,kwh_import*cost_import]);
+                data["export_cost"].push([time,kwh_export*cost_export*-1]);
+                data["solar_used_cost"].push([time,kwh_solar_used*cost_import]);
 
-    if (use.length>1) {
-        for (var z=1; z<use.length; z++) {
-            var time = use[z-1][0];
-            var kwh = (use[z][1]-use[z-1][1]);
-            if (kwh<0.0) kwh = 0.0;
-            var cost = data.agile[z-1][1]*0.01;
-            data["use"].push([time,kwh]);
-            total_kwh += kwh
-            total_cost += kwh*cost
-            data["cost"].push([time,kwh*cost]);
+                // cost totals
+                total_cost_import += kwh_import*cost_import
+                total_cost_export += kwh_export*cost_export
+                total_cost_solar_used += kwh_solar_used*cost_import
+            } else {
+                // ----------------------------------------------------
+                // Import mode only
+                // ----------------------------------------------------
+                let kwh_import = (use_kwh[z][1]-use_kwh[z-1][1]);
+                if (kwh_import<0.0) kwh_import = 0.0;
+                data["import"].push([time,kwh_import]);
+                total_kwh_import += kwh_import
+                let cost_import = data.agile[z-1][1]*0.01;
+                data["import_cost"].push([time,kwh_import*cost_import]);
+                total_cost_import += kwh_import*cost_import
+            }
         }
     }
     
-    var unit_cost = (total_cost/total_kwh);
+    var unit_cost_import = (total_cost_import/total_kwh_import);
+    $("#window-energy-import").html(total_kwh_import.toFixed(1)+" kWh");
+    $("#window-cost-import").html("£"+total_cost_import.toFixed(2));
+    $("#window-unitcost-import").html((unit_cost_import*100*1.05).toFixed(1)+"p/kWh (inc VAT)");
 
-    $("#window-energy").html(total_kwh.toFixed(1)+" kWh");
-    $("#window-cost").html("£"+total_cost.toFixed(2));
-    $("#window-unitcost").html((unit_cost*100*1.05).toFixed(1)+"p/kWh (inc VAT)");
+    if (solarpv_mode) {
+        var unit_cost_export = (total_cost_export/total_kwh_export);
+        $("#window-energy-export").html(total_kwh_export.toFixed(1)+" kWh");
+        $("#window-cost-export").html("£"+total_cost_export.toFixed(2));
+        $("#window-unitcost-export").html((unit_cost_export*100*1.05).toFixed(1)+"p/kWh (inc VAT)");
+
+        var unit_cost_solar_used = (total_cost_solar_used/total_kwh_solar_used);
+        $("#window-energy-solar").html(total_kwh_solar_used.toFixed(1)+" kWh");
+        $("#window-cost-solar").html("£"+total_cost_solar_used.toFixed(2));
+        $("#window-unitcost-solar").html((unit_cost_solar_used*100*1.05).toFixed(1)+"p/kWh (inc VAT)");
+
+        var unit_cost_solar_combined = ((total_cost_solar_used+total_cost_export)/(total_kwh_solar_used+total_kwh_export));
+        $("#window-energy-solar-combined").html((total_kwh_solar_used+total_kwh_export).toFixed(1)+" kWh");
+        $("#window-cost-solar-combined").html("£"+(total_cost_solar_used+total_cost_export).toFixed(2));
+        $("#window-unitcost-solar-combined").html((unit_cost_solar_combined*100*1.05).toFixed(1)+"p/kWh (inc VAT)");
+    }
 }
 
 function graph_draw() 
 {
     if (this_halfhour_present) {
     
-        let kwh_last_halfhour = data["use"][data["use"].length-1][1];
+        let kwh_last_halfhour = data["import"][data["import"].length-1][1];
         $("#kwh_halfhour").html(kwh_last_halfhour.toFixed(2)+"<span class='units'>kWh</span>");
 
         let cost_last_halfhour = data["cost"][data["cost"].length-1][1]*100;
@@ -483,11 +610,24 @@ function graph_draw()
         $(".last_halfhour_stats").hide();
     }
     
-    graph_series = [];
-    if (view_mode=="energy") graph_series.push({data:data["use"], yaxis:1, color:"#44b3e2", bars: { show: true, align: "center", barWidth: 0.75*1800*1000, fill: 1.0, lineWidth:0}});
-    if (view_mode=="cost") graph_series.push({data:data["cost"], yaxis:1, color:"#44b3e2", bars: { show: true, align: "center", barWidth: 0.75*1800*1000, fill: 1.0, lineWidth:0}});
-    graph_series.push({data:data["agile"], yaxis:2, color:"#fb1a80", lines: { show: true, align: "center", lineWidth:1}});
+    var bars = { show: true, align: "center", barWidth: 0.75*1800*1000, fill: 1.0, lineWidth:0 };
     
+    graph_series = [];
+    if (view_mode=="energy") {
+        if (solarpv_mode) graph_series.push({label: "Used Solar", data:data["solar_used"], yaxis:1, color:"#bec745", stack: true, bars: bars});
+        graph_series.push({label: "Import", data:data["import"], yaxis:1, color:"#44b3e2", stack: true, bars: bars});
+        if (solarpv_mode) graph_series.push({label: "Export", data:data["export"], yaxis:1, color:"#dccc1f", stack: false, bars: bars});
+
+    }
+    else if (view_mode=="cost") {
+        if (solarpv_mode) graph_series.push({label: "Used Solar", data:data["solar_used_cost"], yaxis:1, color:"#bec745", stack: true, bars: bars});
+        graph_series.push({label: "Import", data:data["import_cost"], yaxis:1, color:"#44b3e2", stack: true, bars: bars});
+        if (solarpv_mode) graph_series.push({label: "Export", data:data["export_cost"], yaxis:1, color:"#dccc1f", stack: false, bars: bars});
+    }
+    // price signals
+    graph_series.push({label: "Agile", data:data["agile"], yaxis:2, color:"#fb1a80", lines: { show: true, align: "center", lineWidth:1}});
+    if (solarpv_mode) graph_series.push({label: "Outgoing", data:data["outgoing"], yaxis:2, color:"#941afb", lines: { show: true, align: "center", lineWidth:1}}); 
+       
     var options = {
         xaxis: { 
             mode: "time", timezone: "browser", 
@@ -496,7 +636,7 @@ function graph_draw()
             reserveSpace:false
         },
         yaxes: [
-            { min: 0,font: {size:flot_font_size, color:"#666"},reserveSpace:false},
+            {font: {size:flot_font_size, color:"#666"},reserveSpace:false},
             {font: {size:flot_font_size, color:"#666"},reserveSpace:false}
         ],
         grid: {
