@@ -119,30 +119,7 @@
       <div style="padding:20px;">
       <table style="width:100%" class="table">
       <tr><th></th><th>Energy</th><th>Cost / Value</th><th>Unit price</th></tr>
-      <tr>
-        <td>Import</td>
-        <td><div id="window-energy-import"></div></td>
-        <td><div id="window-cost-import"></div></td>
-        <td><div id="window-unitcost-import"></div></td>
-      </tr>
-      <tr>
-        <td>Export</td>
-        <td><div id="window-energy-export"></div></td>
-        <td><div id="window-cost-export"></div></td>
-        <td><div id="window-unitcost-export"></div></td>
-      </tr>
-      <tr>
-        <td>Solar self-consumption</td>
-        <td><div id="window-energy-solar"></div></td>
-        <td><div id="window-cost-solar"></div></td>
-        <td><div id="window-unitcost-solar"></div></td>
-      </tr>
-      <tr>
-        <td>Solar + Export</td>
-        <td><div id="window-energy-solar-combined"></div></td>
-        <td><div id="window-cost-solar-combined"></div></td>
-        <td><div id="window-unitcost-solar-combined"></div></td>
-      </tr>
+      <tbody id="octopus_totals"></tbody>
       </table>
     </div>
   </div></div>
@@ -379,12 +356,13 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             if (minutes<10) minutes = "0"+minutes;
             var date = hours+":"+minutes+", "+days[d.getDay()]+" "+months[d.getMonth()]+" "+d.getDate();
             
-            var text = "";
-            if (item.seriesIndex==0 || item.seriesIndex==1 || item.seriesIndex==2) {
-                if (view_mode=="energy") text = item.series.label+"<br>"+date+"<br>"+(itemValue).toFixed(3)+" kWh";
-                if (view_mode=="cost") text = item.series.label+"<br>"+date+"<br>"+(itemValue*100).toFixed(1)+"p";
+            var text = item.series.label+"<br>"+date+"<br>";
+            if (item.series.label=='Agile' || item.series.label=='Outgoing') {
+                text += (itemValue*1.05).toFixed(1)+" p/kWh (inc VAT)";
+            } else {
+                if (view_mode=="energy") text += (itemValue).toFixed(3)+" kWh";
+                if (view_mode=="cost") text += (itemValue*100).toFixed(1)+"p";
             }
-            if (item.seriesIndex==3 || item.seriesIndex==4) text = item.series.label+"<br>"+date+"<br>"+(itemValue*1.05).toFixed(1)+" p/kWh (inc VAT)";
             tooltip(item.pageX, item.pageY, text, "#fff");
         }
     } else $("#tooltip").remove();
@@ -499,7 +477,7 @@ function graph_load()
     
     // Add last half hour
     var this_halfhour = Math.floor((new Date()).getTime()/1800000)*1800000
-    if (import_kwh.length>0 && this_halfhour==import_kwh[import_kwh.length-1][0]) {
+    if (use_kwh.length>0 && this_halfhour==use_kwh[use_kwh.length-1][0]) {
         use_kwh.push([this_halfhour+1800000,feeds["use_kwh"].value])
         if (solarpv_mode) {
             import_kwh.push([this_halfhour+1800000,feeds["import_kwh"].value])
@@ -568,28 +546,44 @@ function graph_load()
             }
         }
     }
-    
-    var unit_cost_import = (total_cost_import/total_kwh_import);
-    $("#window-energy-import").html(total_kwh_import.toFixed(1)+" kWh");
-    $("#window-cost-import").html("£"+total_cost_import.toFixed(2));
-    $("#window-unitcost-import").html((unit_cost_import*100*1.05).toFixed(1)+"p/kWh (inc VAT)");
 
+    var unit_cost_import = (total_cost_import/total_kwh_import);
+    
+    var out = "";
+    out += "<tr>";
+    out += "<td>Import</td>";
+    out += "<td>"+total_kwh_import.toFixed(1)+" kWh</td>";
+    out += "<td>£"+total_cost_import.toFixed(2)+"</td>";
+    out += "<td>"+(unit_cost_import*100*1.05).toFixed(1)+"p/kWh (inc VAT)</td>";
+    out += "</tr>";
+    
     if (solarpv_mode) {
         var unit_cost_export = (total_cost_export/total_kwh_export);
-        $("#window-energy-export").html(total_kwh_export.toFixed(1)+" kWh");
-        $("#window-cost-export").html("£"+total_cost_export.toFixed(2));
-        $("#window-unitcost-export").html((unit_cost_export*100*1.05).toFixed(1)+"p/kWh (inc VAT)");
+        out += "<tr>";
+        out += "<td>Export</td>";
+        out += "<td>"+total_kwh_export.toFixed(1)+" kWh</td>";
+        out += "<td>£"+total_cost_export.toFixed(2)+"</td>";
+        out += "<td>"+(unit_cost_export*100*1.05).toFixed(1)+"p/kWh (inc VAT)</td>";
+        out += "</tr>";
 
         var unit_cost_solar_used = (total_cost_solar_used/total_kwh_solar_used);
-        $("#window-energy-solar").html(total_kwh_solar_used.toFixed(1)+" kWh");
-        $("#window-cost-solar").html("£"+total_cost_solar_used.toFixed(2));
-        $("#window-unitcost-solar").html((unit_cost_solar_used*100*1.05).toFixed(1)+"p/kWh (inc VAT)");
+        out += "<tr>";
+        out += "<td>Solar self consumption</td>";
+        out += "<td>"+total_kwh_solar_used.toFixed(1)+" kWh</td>";
+        out += "<td>£"+total_cost_solar_used.toFixed(2)+"</td>";
+        out += "<td>"+(unit_cost_solar_used*100*1.05).toFixed(1)+"p/kWh (inc VAT)</td>";
+        out += "</tr>";
 
         var unit_cost_solar_combined = ((total_cost_solar_used+total_cost_export)/(total_kwh_solar_used+total_kwh_export));
-        $("#window-energy-solar-combined").html((total_kwh_solar_used+total_kwh_export).toFixed(1)+" kWh");
-        $("#window-cost-solar-combined").html("£"+(total_cost_solar_used+total_cost_export).toFixed(2));
-        $("#window-unitcost-solar-combined").html((unit_cost_solar_combined*100*1.05).toFixed(1)+"p/kWh (inc VAT)");
+        out += "<tr>";
+        out += "<td>Solar + Export</td>";
+        out += "<td>"+(total_kwh_solar_used+total_kwh_export).toFixed(1)+" kWh</td>";
+        out += "<td>£"+(total_cost_solar_used+total_cost_export).toFixed(2)+"</td>";
+        out += "<td>"+(unit_cost_solar_combined*100*1.05).toFixed(1)+"p/kWh (inc VAT)</td>";
+        out += "</tr>";
     }
+    
+    $("#octopus_totals").html(out);
 }
 
 function graph_draw() 
@@ -599,10 +593,10 @@ function graph_draw()
         let kwh_last_halfhour = data["import"][data["import"].length-1][1];
         $("#kwh_halfhour").html(kwh_last_halfhour.toFixed(2)+"<span class='units'>kWh</span>");
 
-        let cost_last_halfhour = data["cost"][data["cost"].length-1][1]*100;
+        let cost_last_halfhour = data["import_cost"][data["import_cost"].length-1][1]*100;
         $("#cost_halfhour").html("("+cost_last_halfhour.toFixed(1)+"<span class='units'>p</span>)");
 
-        let unit_price = data["agile"][data["cost"].length-1][1]*1.05;
+        let unit_price = data["agile"][data["import_cost"].length-1][1]*1.05;
         $("#unit_price").html(unit_price.toFixed(1)+"<span class='units'>p</span>");
         
         $(".last_halfhour_stats").show();
