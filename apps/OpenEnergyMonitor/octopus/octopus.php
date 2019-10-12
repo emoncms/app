@@ -179,11 +179,9 @@ if (!sessionwrite) $(".openconfig").hide();
 // ----------------------------------------------------------------------
 config.app = {
     "title":{"type":"value", "default":"OCTOPUS AGILE", "name": "Title", "description":"Optional title for app"},
-    "use":{"type":"feed", "autoname":"use", "engine":"5"},
-    "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5},
-    "import":{"optional":true, "type":"feed", "autoname":"import", "engine":"5"},
-    "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "engine":5},
-    "solar":{"optional":true, "type":"feed", "autoname":"solar", "engine":"5"},
+    "import":{"type":"feed", "autoname":"import", "engine":"5"},
+    "import_kwh":{"type":"feed", "autoname":"import_kwh", "engine":5},
+    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5},
     "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5},
     "region":{"type":"select", "name":"Select region:", "default":"D_Merseyside_and_Northern_Wales", "options":["A_Eastern_England","B_East_Midlands","C_London","E_West_Midlands","D_Merseyside_and_Northern_Wales","F_North_Eastern_England","G_North_Western_England","H_Southern_England","J_South_Eastern_England","K_Southern_Wales","L_South_Western_England","M_Yorkshire","N_Southern_Scotland","P_Northern_Scotland"]}
 };
@@ -420,15 +418,14 @@ function graph_load()
     view.start = Math.ceil(view.start/intervalms)*intervalms;
     view.end = Math.ceil(view.end/intervalms)*intervalms;
     
-    if (feeds["import_kwh"]!=undefined && feeds["solar_kwh"]!=undefined) solarpv_mode = true;
+    if (feeds["use_kwh"]!=undefined && feeds["solar_kwh"]!=undefined) solarpv_mode = true;
+
+    var import_tmp = feed.getdata(feeds["import_kwh"].id,view.start,view.end,interval,0,0);
     
-    var use_tmp = feed.getdata(feeds["use_kwh"].id,view.start,view.end,interval,0,0);
-    
-    var import_tmp = [];
-    if (solarpv_mode) import_tmp = feed.getdata(feeds["import_kwh"].id,view.start,view.end,interval,0,0);
+    var use_tmp = [];
+    if (solarpv_mode) use_tmp = feed.getdata(feeds["use_kwh"].id,view.start,view.end,interval,0,0);
     var solar_tmp = [];
     if (solarpv_mode) solar_tmp = feed.getdata(feeds["solar_kwh"].id,view.start,view.end,interval,0,0);    
-    
     data = {};
     
     data["agile"] = []
@@ -444,19 +441,21 @@ function graph_load()
     var use_kwh = [];
     var import_kwh = [];
     var solar_kwh = [];
-    for (var z in use_tmp) {
-        if (use_tmp[z][1]!=null) {
-            use_kwh.push(use_tmp[z]);
+    for (var z in import_tmp) {
+        if (import_tmp[z][1]!=null) {
+            import_kwh.push(import_tmp[z]);
         }
         if (solarpv_mode) {
-            if (import_tmp[z][1]!=null) {
-                import_kwh.push(import_tmp[z]);
+            if (use_tmp[z][1]!=null) {
+                use_kwh.push(use_tmp[z]);
             }
             if (solar_tmp[z][1]!=null) {
                 solar_kwh.push(solar_tmp[z]);
             }
         }
     }
+    
+
 
     data["use"] = [];
     data["import"] = [];
@@ -477,18 +476,18 @@ function graph_load()
     
     // Add last half hour
     var this_halfhour = Math.floor((new Date()).getTime()/1800000)*1800000
-    if (use_kwh.length>0 && this_halfhour==use_kwh[use_kwh.length-1][0]) {
-        use_kwh.push([this_halfhour+1800000,feeds["use_kwh"].value])
+    if (import_kwh.length>0 && this_halfhour==import_kwh[import_kwh.length-1][0]) {
+        import_kwh.push([this_halfhour+1800000,feeds["import_kwh"].value])
         if (solarpv_mode) {
-            import_kwh.push([this_halfhour+1800000,feeds["import_kwh"].value])
+            use_kwh.push([this_halfhour+1800000,feeds["use_kwh"].value])
             solar_kwh.push([this_halfhour+1800000,feeds["solar_kwh"].value])
         }
         this_halfhour_present = true;
     }
     
-    if (use_kwh.length>1) {
-        for (var z=1; z<use_kwh.length; z++) {
-            let time = use_kwh[z-1][0];
+    if (import_kwh.length>1) {
+        for (var z=1; z<import_kwh.length; z++) {
+            let time = import_kwh[z-1][0];
             
             if (solarpv_mode) {
                 // ----------------------------------------------------
@@ -536,7 +535,7 @@ function graph_load()
                 // ----------------------------------------------------
                 // Import mode only
                 // ----------------------------------------------------
-                let kwh_import = (use_kwh[z][1]-use_kwh[z-1][1]);
+                let kwh_import = (import_kwh[z][1]-import_kwh[z-1][1]);
                 if (kwh_import<0.0) kwh_import = 0.0;
                 data["import"].push([time,kwh_import]);
                 total_kwh_import += kwh_import
