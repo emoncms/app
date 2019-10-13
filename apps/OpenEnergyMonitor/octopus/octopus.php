@@ -138,8 +138,10 @@
                     <h2 class="appconfig-title text-primary"><?php echo _('Octopus Agile'); ?></h2>
                     <p class="lead">Explore Octopus Agile tariff costs over time.</p>
                     <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-                    <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
-                    <img src="../Modules/app/images/myelectric_app.png" class="d-none d-sm-inline-block">
+                    <p><strong class="text-white">Import & Import kWh</strong> The standard naming for electricity imported from the grid in a household without solar PV is 'use' and 'use_kwh', this app expects 'import' and 'import_kwh' in order to provide compatibility with the Solar PV option as well. Select relevant house consumption feeds using the dropdown feed selectors as required. Feeds 'use_kwh' and 'solar_kwh' are optional.</p>
+                    <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor. To create cumulative kWh feeds from historic power data try the postprocess module.</p>
+                    <p><strong class="text-white">Optional: Octopus Outgoing</strong> Include total house consumption (use_kwh) and solar PV (solar_kwh) feeds to explore octopus outgoing feed-in-tariff potential.</p>
+                    <img src="../Modules/app/images/agile_app.png" class="d-none d-sm-inline-block">
                 </div>
             </div>
             <div class="span3 app-config pt-3"></div>
@@ -494,9 +496,13 @@ function graph_load()
                 // Solar PV agile outgoing
                 // ----------------------------------------------------
                 // calculate half hour kwh
-                let kwh_use = (use_kwh[z][1]-use_kwh[z-1][1]);
-                let kwh_import = (import_kwh[z][1]-import_kwh[z-1][1]);
-                let kwh_solar = (solar_kwh[z][1]-solar_kwh[z-1][1]);
+                let kwh_use = 0;
+                let kwh_import = 0;
+                let kwh_solar = 0;
+                
+                if (use_kwh[z]!=undefined && use_kwh[z-1]!=undefined) kwh_use = (use_kwh[z][1]-use_kwh[z-1][1]);
+                if (import_kwh[z]!=undefined && import_kwh[z-1]!=undefined) kwh_import = (import_kwh[z][1]-import_kwh[z-1][1]);
+                if (solar_kwh[z]!=undefined && solar_kwh[z-1]!=undefined) kwh_solar = (solar_kwh[z][1]-solar_kwh[z-1][1]);
                 
                 // limits
                 if (kwh_use<0.0) kwh_use = 0.0;
@@ -535,7 +541,8 @@ function graph_load()
                 // ----------------------------------------------------
                 // Import mode only
                 // ----------------------------------------------------
-                let kwh_import = (import_kwh[z][1]-import_kwh[z-1][1]);
+                let kwh_import = 0;
+                if (import_kwh[z]!=undefined && import_kwh[z-1]!=undefined) kwh_import = (import_kwh[z][1]-import_kwh[z-1][1]);
                 if (kwh_import<0.0) kwh_import = 0.0;
                 data["import"].push([time,kwh_import]);
                 total_kwh_import += kwh_import
@@ -660,11 +667,7 @@ function resize() {
     var topblock = $("#octopus-realtime").height();
     
     var width = placeholder_bound.width();
-    var height = width*0.6;
-    if (height>500) height = 500;
-    if (height>width) height = width;
-    
-    height = window_height - topblock - 200;
+    var height = window_height - topblock - 250;
 
     placeholder.width(width);
     placeholder_bound.height(height);
