@@ -255,17 +255,18 @@ config.init();
 
 function init()
 {
+
+}
+
+function show() {
+    $("body").css('background-color','WhiteSmoke');
+    $("#app-title").html(config.app.title.value);
+    
     // Quick translation of feed ids
     feeds = {};
     for (var key in config.app) {
         if (config.app[key].value) feeds[key] = config.feedsbyid[config.app[key].value];
     }
-}
-
-function show() {
-    $("body").css('background-color','WhiteSmoke');
-    
-    $("#app-title").html(config.app.title.value);
     
     resize();
 
