@@ -246,7 +246,7 @@ var comparison_heating = false;
 var comparison_transport = false;
 var flot_font_size = 12;
 var updaterinst = false;
-var this_halfhour_present = false;
+var this_halfhour_index = -1;
 // disable x axis limit
 view.limit_x = false;
 var solarpv_mode = false;
@@ -423,12 +423,12 @@ function graph_load()
     
     if (feeds["use_kwh"]!=undefined && feeds["solar_kwh"]!=undefined) solarpv_mode = true;
 
-    var import_tmp = feed.getdata(feeds["import_kwh"].id,view.start,view.end,interval,0,0);
+    var import_kwh = feed.getdata(feeds["import_kwh"].id,view.start,view.end,interval,0,0);
     
-    var use_tmp = [];
-    if (solarpv_mode) use_tmp = feed.getdata(feeds["use_kwh"].id,view.start,view.end,interval,0,0);
-    var solar_tmp = [];
-    if (solarpv_mode) solar_tmp = feed.getdata(feeds["solar_kwh"].id,view.start,view.end,interval,0,0);    
+    var use_kwh = [];
+    if (solarpv_mode) use_kwh = feed.getdata(feeds["use_kwh"].id,view.start,view.end,interval,0,0);
+    var solar_kwh = [];
+    if (solarpv_mode) solar_kwh = feed.getdata(feeds["solar_kwh"].id,view.start,view.end,interval,0,0);    
     data = {};
     
     data["agile"] = []
@@ -439,26 +439,6 @@ function graph_load()
     }
     // Invert export tariff
     for (var z in data["outgoing"]) data["outgoing"][z][1] *= -1;
-    
-    // remove nan values from the end.
-    var use_kwh = [];
-    var import_kwh = [];
-    var solar_kwh = [];
-    for (var z in import_tmp) {
-        if (import_tmp[z][1]!=null) {
-            import_kwh.push(import_tmp[z]);
-        }
-        if (solarpv_mode) {
-            if (use_tmp[z][1]!=null) {
-                use_kwh.push(use_tmp[z]);
-            }
-            if (solar_tmp[z][1]!=null) {
-                solar_kwh.push(solar_tmp[z]);
-            }
-        }
-    }
-    
-
 
     data["use"] = [];
     data["import"] = [];
@@ -475,17 +455,19 @@ function graph_load()
     var total_cost_solar_used = 0
     var total_kwh_solar_used = 0
     
-    this_halfhour_present = false;
-    
+    this_halfhour_index = -1;
     // Add last half hour
     var this_halfhour = Math.floor((new Date()).getTime()/1800000)*1800000
-    if (import_kwh.length>0 && this_halfhour==import_kwh[import_kwh.length-1][0]) {
-        import_kwh.push([this_halfhour+1800000,feeds["import_kwh"].value])
-        if (solarpv_mode) {
-            use_kwh.push([this_halfhour+1800000,feeds["use_kwh"].value])
-            solar_kwh.push([this_halfhour+1800000,feeds["solar_kwh"].value])
+    for (var z=1; z<import_kwh.length; z++) {
+        if (import_kwh[z][0]==this_halfhour) {
+            import_kwh[z+1] = [this_halfhour+1800000,feeds["import_kwh"].value]
+            this_halfhour_index = z
+            if (solarpv_mode) {
+                use_kwh[z+1] = [this_halfhour+1800000,feeds["use_kwh"].value]
+                solar_kwh[z+1] = [this_halfhour+1800000,feeds["solar_kwh"].value]
+            }
+            break;
         }
-        this_halfhour_present = true;
     }
     
     if (import_kwh.length>1) {
@@ -595,15 +577,15 @@ function graph_load()
 
 function graph_draw() 
 {
-    if (this_halfhour_present) {
+    if (this_halfhour_index!=-1) {
     
-        let kwh_last_halfhour = data["import"][data["import"].length-1][1];
+        let kwh_last_halfhour = data["import"][this_halfhour_index][1];
         $("#kwh_halfhour").html(kwh_last_halfhour.toFixed(2)+"<span class='units'>kWh</span>");
 
-        let cost_last_halfhour = data["import_cost"][data["import_cost"].length-1][1]*100;
+        let cost_last_halfhour = data["import_cost"][this_halfhour_index][1]*100;
         $("#cost_halfhour").html("("+cost_last_halfhour.toFixed(1)+"<span class='units'>p</span>)");
 
-        let unit_price = data["agile"][data["import_cost"].length-1][1]*1.05;
+        let unit_price = data["agile"][this_halfhour_index][1]*1.05;
         $("#unit_price").html(unit_price.toFixed(1)+"<span class='units'>p</span>");
         
         $(".last_halfhour_stats").show();
