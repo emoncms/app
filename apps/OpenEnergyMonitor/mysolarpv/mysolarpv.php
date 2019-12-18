@@ -376,7 +376,9 @@ function livefn()
     var use_now = parseInt(feeds[config.app.use.value].value);
 
     if (autoupdate) {
-        var updatetime = feeds[config.app.solar.value].time;
+        var updatetimesolar = feeds[config.app.solar.value].time;
+        var updatetimeuse = feeds[config.app.use.value].time;
+        var updatetime = Math.max(updatetimesolar, updatetimeuse);
         timeseries.append("solar",updatetime,solar_now);
         timeseries.trim_start("solar",view.start*0.001);
         timeseries.append("use",updatetime,use_now);
