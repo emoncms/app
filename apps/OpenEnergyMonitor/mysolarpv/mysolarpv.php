@@ -4,7 +4,49 @@
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
+<style>
+/* mobile version offset is default */
+.chart-placeholder {
+    --height-offset: 24rem;
+}
 
+/*
+--------------
+    adjust the full height offset for other specific devices
+    based on width,height,orientation or dpi 
+    @see: list of popular devices... https://css-tricks.com/snippets/css/media-queries-for-standard-devices/
+-----------------
+*/
+
+/* ----------- bootstrap break points ----------- */
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) {
+    .chart-placeholder { --height-offset: 25rem; }
+}
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+    .chart-placeholder { --height-offset: 26rem; }
+}
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+    .chart-placeholder { --height-offset: 27rem; }
+}
+/* DEVICE SPECIFIC: */
+/* ----------- Galaxy Tab 2 ----------- */
+/* Portrait and Landscape */
+@media (min-device-width: 800px) 
+  and (max-device-width: 1280px) {
+    .chart-placeholder {
+        --height-offset: 27rem;
+    }
+}
+
+
+/* set chart height to full screen height (100vh) minus an offset to cover the large value indicators and menus */
+.chart-placeholder > * {
+    height: calc(100vh - var(--height-offset))!important;
+}
+</style>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
 
