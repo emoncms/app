@@ -34,6 +34,7 @@ var feed = {
         $.ajax({                                      
             url: path+"feed/list.json"+apikeystr,
             dataType: 'json',
+            cache: false,
             async: false,                      
             success: function(result) {
                 feeds = result; 
