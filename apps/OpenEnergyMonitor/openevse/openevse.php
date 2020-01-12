@@ -297,7 +297,12 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
 
             $("#tooltip").remove();
             var itemTime = item.datapoint[0];
-            var elec_kwh = data["use_kwhd"][z][1];
+            var elec_kwh = 0
+            try {
+                elec_kwh = data["use_kwhd"][z][1];
+            } catch (error) {
+                console.error('openEVSE app error. line 304');
+            }
 
             var d = new Date(itemTime);
             var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -345,8 +350,8 @@ $('.bargraph-alltime').click(function () {
     bargraph_load(start,end);
     bargraph_draw();
     period_text = "period";
-    timeofuse_load();
-    energystacks_draw();
+    // timeofuse_load();
+    // energystacks_draw();
 });
 
 $('.bargraph-week').click(function () {
@@ -356,8 +361,8 @@ $('.bargraph-week').click(function () {
     bargraph_load(start,end);
     bargraph_draw();
     period_text = "week";
-    timeofuse_load();
-    energystacks_draw();
+    // timeofuse_load();
+    // energystacks_draw();
 });
 
 $('.bargraph-month').click(function () {
@@ -367,8 +372,8 @@ $('.bargraph-month').click(function () {
     bargraph_load(start,end);
     bargraph_draw();
     period_text = "month";
-    timeofuse_load();
-    energystacks_draw();
+    // timeofuse_load();
+    // energystacks_draw();
 });
 
 // -------------------------------------------------------------------------------
@@ -399,7 +404,12 @@ function powergraph_load()
     var feedstats = {};
     feedstats["use"] = stats(data["use"]);
     
-    var time_elapsed = (data["use"][data["use"].length-1][0] - data["use"][0][0])*0.001;
+    var time_elapsed = 0;
+    try {
+        time_elapsed = (data["use"][data["use"].length-1][0] - data["use"][0][0])*0.001;
+    } catch (error) {
+        console.log('openEVSE app error. line 409');
+    }
     var kwh_in_window = 0.0; // (feedstats["use"].mean * time_elapsed) / 3600000;
     
     for (var z=0; z<data["use"].length-1; z++) {
@@ -418,11 +428,11 @@ function powergraph_load()
     for (var z in feedstats) {
         out += "<tr>";
         out += "<td style='text-align:left'>"+z+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].minval.toFixed(2)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].maxval.toFixed(2)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].diff.toFixed(2)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].mean.toFixed(2)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].stdev.toFixed(2)+"</td>";
+        out += "<td style='text-align:center'>"+(!isNaN(feedstats[z].minval) ? feedstats[z].minval.toFixed(2) : feedstats[z].minval )+"</td>";
+        out += "<td style='text-align:center'>"+(!isNaN(feedstats[z].maxval) ? feedstats[z].maxval.toFixed(2) : feedstats[z].maxval )+"</td>";
+        out += "<td style='text-align:center'>"+(!isNaN(feedstats[z].diff) ? feedstats[z].diff.toFixed(2) : feedstats[z].diff )+"</td>";
+        out += "<td style='text-align:center'>"+(!isNaN(feedstats[z].mean) ? feedstats[z].mean.toFixed(2) : feedstats[z].mean )+"</td>";
+        out += "<td style='text-align:center'>"+(!isNaN(feedstats[z].stdev) ? feedstats[z].stdev.toFixed(2) : feedstats[z].stdev )+"</td>";
         out += "</tr>";
     }
     $("#stats").html(out);
