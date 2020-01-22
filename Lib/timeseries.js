@@ -9,6 +9,10 @@ var timeseries = {
     
     load: function (name,data)
     {
+        // If data is empty, don't do anything
+        if (!data || data.length === 0) {
+            return
+        }
         datastore[name] = {};
         datastore[name].data = data;
         datastore[name].start = datastore[name].data[0][0] * 0.001;

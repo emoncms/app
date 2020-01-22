@@ -18,8 +18,8 @@ var config = {
         // Check that the config is complete first otherwise show config interface
         if (!config.check()) {
             config.showConfig();          // Show setup block
-            $(".ajax-loader").hide();     // Hide AJAX loader
             config.UI();                  // Populate setup UI options
+            $(".ajax-loader").hide();     // Hide AJAX loader
         } else {
             $("#app-block").show();       // Show app block
             $(".ajax-loader").show();     // Show AJAX loader
@@ -45,7 +45,10 @@ var config = {
             $(".ajax-loader").show();
             config.closeConfig();
             config.load();
-            if (!config.initialized) { config.initapp(); config.initialized = true; }
+            if (!config.initialized) {
+                config.initapp();
+                config.initialized = true;
+            }
             config.showapp();
         });
         
@@ -68,6 +71,7 @@ var config = {
             });
         });
     },
+
     /**
      * hide the app config window and show the app.
      * enable the buttons in the app header
@@ -83,6 +87,7 @@ var config = {
         // allow app to react to closing config window
         $('body').trigger('config.closed')
     },
+
     /**
      * hide the app window and show the config window.
      * disable the buttons in the app header
@@ -146,19 +151,25 @@ var config = {
             
             if (config.app[z].type=="feed") {
                 // Create list of feeds that satisfy engine requirement
-                var out = "<option value=0>Select "+z+" feed:</option>";
-                out += "<option value=auto>AUTO SELECT</option>";
-                var sortedFeeds = [];
-                for (var n in config.feedsbyname) {
-                    let feed = config.feedsbyname[n];
-                    feed.longname = config.feedsbyname[n].tag+":"+config.feedsbyname[n].name;
-                    sortedFeeds.push(feed);
-                }
-                sortedFeeds.sort(config.sortByLongname)
-                for (var n in sortedFeeds)  {
-                    if (config.engine_check(sortedFeeds[n],config.app[z])) {
-                        out += "<option value="+sortedFeeds[n].id+">"+sortedFeeds[n].tag+":"+sortedFeeds[n].name+"</option>";
+                var out = "<option value=0>Select "+z+" feed:</option>" +
+                        "<option value=auto>AUTO SELECT</option>";
+                
+                var feedsbygroup = [];
+                for (var f in config.feedsbyid)  {
+                    if (config.engine_check(config.feedsbyid[f], config.app[z])) {
+                        var group = (config.feedsbyid[f].tag === null ? "NoGroup" : config.feedsbyid[f].tag);
+                        if (group != "Deleted") {
+                            if (!feedsbygroup[group]) feedsbygroup[group] = []
+                            feedsbygroup[group].push(config.feedsbyid[f]);
+                        }
                     }
+                }
+                for (group in feedsbygroup) {
+                    out += "<optgroup label='"+group+"'>";
+                    for (f in feedsbygroup[group]) {
+                        out += "<option value="+feedsbygroup[group][f].id+">"+feedsbygroup[group][f].name+"</option>";
+                    }
+                    out += "</optgroup>";
                 }
                 configItem.find(".feed-select").html(out);
                 
@@ -299,12 +310,12 @@ var config = {
                         }
                     } else {
                         // Overwrite with any user set feeds if applicable
-                        for (var z in config.feedsbyname) {
+                        for (var z in config.feedsbyid) {
                             // Check that the feed exists
                             // config will be shown if a previous valid feed has been deleted
-                            var feedid = config.feedsbyname[z].id;
+                            var feedid = config.feedsbyid[z].id;
                             if (config.db[key] == feedid) {
-                                if (config.engine_check(config.feedsbyname[z],config.app[key])) valid[key] = true;
+                                if (config.engine_check(config.feedsbyid[z],config.app[key])) valid[key] = true;
                                 break;
                             }
                         }
@@ -368,6 +379,9 @@ var config = {
 
     engine_check: function(feed,conf)
     {
+        if (typeof conf.engine === 'undefined') {
+            return true;
+        }
         if (isNaN(conf.engine)) {
             var engines = conf.engine.split(",");
             if (engines.length>0) {
@@ -378,7 +392,6 @@ var config = {
         } else {
             if (feed.engine*1==conf.engine*1) return true;
         }
-
         return false;
     },
 
