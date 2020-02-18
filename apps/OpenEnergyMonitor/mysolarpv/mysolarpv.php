@@ -205,12 +205,12 @@ if (!sessionwrite) $(".openconfig").addClass('hide');
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "use":{"type":"feed", "autoname":"use", "engine":"5", "description":_("House or building use in watts")},
-    "solar":{"type":"feed", "autoname":"solar", "engine":"5", "description":_("Solar pv generation in watts")},
+    "use":{"type":"feed", "autoname":"use", "description":_("House or building use in watts")},
+    "solar":{"type":"feed", "autoname":"solar", "description":_("Solar pv generation in watts")},
     //"export":{"type":"feed", "autoname":"export", "engine":5, "description":"Exported solar in watts"},
-    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":_("Cumulative use in kWh")},
-    "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5, "description":_("Cumulative solar generation in kWh")},
-    "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "engine":5, "description":_("Cumulative grid import in kWh")},
+    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "description":_("Cumulative use in kWh")},
+    "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "description":_("Cumulative solar generation in kWh")},
+    "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "description":_("Cumulative grid import in kWh")},
     "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
     //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
 };
@@ -533,15 +533,16 @@ function draw_powergraph() {
     
     var datastart = timeseries.start_time("solar");
     
-    // console.log(timeseries.length("solar"));
-    // console.log(timeseries.length("use"));
-    
-    for (var z=0; z<timeseries.length("solar"); z++) {
+    //console.log(timeseries.length("solar"));
+    //console.log(timeseries.length("use"));
+    var sample_size = Math.min(timeseries.length("solar"), timeseries.length("use"));
+
+    for (var z=0; z<sample_size; z++) {
 
         // -------------------------------------------------------------------------------------------------------
         // Get solar or use values
         // -------------------------------------------------------------------------------------------------------
-        if (timeseries.value("solar",z)!=null) solar_now = timeseries.value("solar",z);  
+        if (timeseries.value("solar",z)!=null) solar_now = timeseries.value("solar",z);
         if (timeseries.value("use",z)!=null) use_now = timeseries.value("use",z);
         
         // -------------------------------------------------------------------------------------------------------
