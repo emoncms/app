@@ -632,7 +632,7 @@ function graph_draw()
             margin:{top:30}
         },
         selection: { mode: "x" },
-        legend:{position:"NW", noColumns:4}
+        legend:{position:"NW", noColumns:5}
     }
     $.plot($('#placeholder'),graph_series,options);
 }
