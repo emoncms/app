@@ -325,7 +325,7 @@ class PowerGraph extends Graph {
     }
 
     setTimeWindow(start, end) {
-        this.interval = Graph.roundInterval((end - start)*0.001/DataCache.DATAPOINTS_LIMIT);
+        this.interval = Graph.roundInterval((end - start)*0.001/Data.DATAPOINTS_LIMIT);
         
         var interval = this.interval*1000;
         this.start = Math.ceil(start/interval)*interval;

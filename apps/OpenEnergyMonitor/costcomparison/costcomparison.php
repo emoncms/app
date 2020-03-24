@@ -37,7 +37,7 @@ padding:10px;
         <div class="col1">
             <div class="col1-inner">
                 <div class="block-bound">
-                    <div class="appnav app-setup">
+                    <div class="bluenav config-open">
                         <i class="icon-wrench icon-white"></i>
                     </div>
                     <div class="block-title">
@@ -54,19 +54,19 @@ padding:10px;
             <div class="col1-inner">
                 <div class="block-bound">
                     <div class="bargraph-navigation">
-                        <div class="appnav bargraph-alltime">
+                        <div class="bluenav bargraph-alltime">
                             ALL TIME
                         </div>
-                        <div class="appnav bargraph-year">
+                        <div class="bluenav bargraph-year">
                             YEAR
                         </div>
-                        <div class="appnav bargraph-month">
+                        <div class="bluenav bargraph-month">
                             MONTH
                         </div>
-                        <div class="appnav bargraph-week">
+                        <div class="bluenav bargraph-week">
                             WEEK
                         </div>
-                        <div class="appnav bargraph-day">
+                        <div class="bluenav bargraph-day">
                             DAY
                         </div>
                     </div>
@@ -119,15 +119,16 @@ padding:10px;
 </section>
 
 <script type="text/javascript">
-
 // ----------------------------------------------------------------------
 // Globals
 // ----------------------------------------------------------------------
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".config-open").hide();
 
-var feed = new Feed(apikey);
+apikeystr = "";
+if (apikey != "") {apikeystr = "&apikey=" + apikey;}
+
+if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
 // Configuration
@@ -154,7 +155,7 @@ config.app = {
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
-config.feeds = feed.getList();
+config.feeds = feed.list();
 
 config.initapp = function() {
     init()
@@ -167,7 +168,7 @@ config.hideapp = function() {
 };
 
 // ----------------------------------------------------------------------
-// Application
+// APPLICATION
 // ----------------------------------------------------------------------
 var feeds = {};
 var meta = {};
@@ -181,17 +182,17 @@ var previousPointHalfHour = false;
 
 var flot_font_size = 12;
 
-// Time of first data reading
+//Time of first data reading
 var start_time = 0;
-// Currently selected tariff
+//Currently selected tariff
 var selected_energy_rate = null;
 
-// These should be in a resource file for regionalization
+//These should be in a resource file for regionalization
 var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 var selected_start, selected_end;
-var updateTimer = false;
+var updaterinst = false;
 
 // ----------------------------------------------------------------------
 // Display
@@ -232,9 +233,11 @@ function init() {
 }
 
 function show() {
+    $("body").css('background-color', 'WhiteSmoke');
+    
     console.log(feeds);
     
-    meta["use_kwh"] = feed.getMeta(feeds.use_kwh.id);
+    meta["use_kwh"] = feed.getmeta(feeds.use_kwh.id);
 
     if (meta.use_kwh.start_time > start_time) {
         //Wind back start time to midnight on first reading day
@@ -246,18 +249,18 @@ function show() {
 
     resize();
     
-    update();
+    updater();
     
     //Update every 45 seconds
-    updateTimer = setInterval(update, 45000);
+    updaterinst = setInterval(updater,45000);
 }
 
-function update() {
-    if (selected_start == null) {    oneweek(); $(".bargraph-week").addClass("selected");} else { reloadExistingRange(); }
+function updater() {
+    if (selected_start==null) {    oneweek(); $(".bargraph-week").addClass("selected");} else { reloadExistingRange(); }
 }
 
 function clearHighlight() {
-    $(".bargraph-navigation .appnav").removeClass("selected");
+    $(".bargraph-navigation .bluenav").removeClass("selected");
 }
 
 
@@ -358,7 +361,7 @@ function timeFormatter(ms) {
 
 function hide() {
     //We should stop any timers we have started here
-    clearInterval(updateTimer);
+    clearInterval(updaterinst);
 }
 
 $("#halfhour_placeholder").bind("plothover", function(event, pos, item) {
@@ -453,7 +456,7 @@ function bargraph_load(start, end) {
           
     var halfhour =  [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, 20.5, 21, 21.5, 22, 22.5, 23, 23.5];
     
-    var elec_data = feed.getDailyTimeOfUse(feeds.use_kwh.id, start, end, JSON.stringify(halfhour));
+    var elec_data = feed.getdataDMY_time_of_use(feeds.use_kwh.id, start, end, "daily", JSON.stringify(halfhour));
 
     //console.log(elec_data);
     
@@ -772,11 +775,8 @@ $(function() {
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------
-function appLog(level, message) {
-    if (level == "ERROR") {
-        alert(level + ": " + message);
-    }
+function app_log(level, message) {
+    if (level == "ERROR") alert(level + ": " + message);
     console.log(level + ": " + message);
 }
-
 </script>

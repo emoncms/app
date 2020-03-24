@@ -78,19 +78,20 @@
     <?php include(dirname(__DIR__).'/config-nav.php'); ?>
 </nav>
 
+
 <section id="app-block" style="display:none" class="block">
     <div class="d-flex justify-content-between">
         <div>
-            <h5 class="app-title mb-0 text-md-larger text-light"><?php echo _('USE NOW') ?></h5>
-            <h2 class="app-title-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow">0</span><span class="power-unit"></span></h2>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('USE NOW') ?></h5>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow">0</span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="app-title mb-0 text-md-larger text-light px-1"><span class="balance-label"></span></h5>
-            <h2 class="app-title-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span><span class="power-unit"></span></h2>
+            <h5 class="electric-title mb-0 text-md-larger text-light px-1"><span class="balance-label"></span></h5>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-right">
-            <h5 class="app-title mb-0 text-md-larger text-light"><?php echo _('SOLAR PV') ?></h5>
-            <h2 class="app-title-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-warning "><span class="solarnow"></span><span class="power-unit"></span></h2>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('SOLAR PV') ?></h5>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-warning "><span class="solarnow"></span><span class="power-unit"></span></h2>
         </div>
     </div>
     
@@ -142,6 +143,8 @@
     </div>
 </section>
 
+
+
 <section id="app-setup" class="hide pb-3">
     <!-- instructions and settings -->
     <div class="px-3">
@@ -161,7 +164,6 @@
 </section>
 
 <div class="ajax-loader"></div>
-
 <script src="<?php echo $path; ?>Lib/misc/gettext.js?v=<?php echo $v; ?>"></script> 
 <script>
 function getTranslations(){
@@ -185,9 +187,19 @@ function getTranslations(){
 // ----------------------------------------------------------------------
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".config-open").hide();
 
-var feed = new Feed(apikey);
+apikeystr = ""; 
+if (apikey!="") apikeystr = "&apikey="+apikey;
+
+// ----------------------------------------------------------------------
+// Display
+// ----------------------------------------------------------------------
+$("body").css('background-color','#222');
+$(window).ready(function(){
+    $("#footer").css('background-color','#181818');
+    $("#footer").css('color','#999');
+});
+if (!sessionwrite) $(".config-open").addClass('hide');
 
 // ----------------------------------------------------------------------
 // Configuration
@@ -204,18 +216,17 @@ config.app = {
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
-config.feeds = feed.getList();
+config.feeds = feed.list();
 
 config.initapp = function(){init()};
 config.showapp = function(){show()};
 config.hideapp = function(){hide()};
 
 // ----------------------------------------------------------------------
-// Application
+// APPLICATION
 // ----------------------------------------------------------------------
 var feeds = {};
-
-var updateTimer = false;
+var live = false;
 var show_balance_line = 0;
 var reload = true;
 var autoupdate = true;
@@ -230,8 +241,8 @@ config.init();
 
 // App start function
 function init()
-{
-    appLog("INFO", "mysolarpv init");
+{        
+    app_log("INFO","mysolarpv init");
     var solar_kwh = config.app.solar_kwh.value;
     var use_kwh = config.app.use_kwh.value;
     var import_kwh = config.app.import_kwh.value;
@@ -349,7 +360,7 @@ function hide_tooltip() {
 
 function show() 
 {
-    appLog("INFO", "mysolarpv show");
+    app_log("INFO","mysolarpv show");
     var solar_kwh = config.app.solar_kwh.value;
     var use_kwh = config.app.use_kwh.value;
     var import_kwh = config.app.import_kwh.value;
@@ -362,13 +373,16 @@ function show()
     }
     
     resize();
-    update();
-    updateTimer = setInterval(update, 5000);
+    livefn();
+    
+    // reload data at interval
+    live = setInterval(livefn,5000);
+
 }
 
 function resize() 
 {
-    appLog("INFO", "mysolarpv resize");
+    app_log("INFO","mysolarpv resize");
     
     var top_offset = 0;
     var placeholder_bound = $('#placeholder_bound');
@@ -386,10 +400,10 @@ function resize()
 
 function hide() 
 {
-    clearInterval(updateTimer);
+    clearInterval(live);
 }
 
-function update()
+function livefn()
 {
     // Check if the updater ran in the last 60s if it did not the app was sleeping
     // and so the data needs a full reload.
@@ -397,7 +411,7 @@ function update()
     if ((now-lastupdate)>60000) reload = true;
     lastupdate = now;
     
-    feeds = feed.getListById();
+    var feeds = feed.listbyid();
     if (feeds === null) { return; }
     var solar_now = parseInt(feeds[config.app.solar.value].value);
     var use_now = parseInt(feeds[config.app.use.value].value);
@@ -498,8 +512,8 @@ function draw_powergraph() {
         reload = false;
         view.start = 1000*Math.floor((view.start/1000)/interval)*interval;
         view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
-        timeseries.load("solar", feed.getData(config.app.solar.value, view.start, view.end, interval, 0, 0));
-        timeseries.load("use", feed.getData(config.app.use.value, view.start, view.end, interval, 0, 0));
+        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,interval,0,0));
+        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,interval,0,0));
     }
     // -------------------------------------------------------------------------------------------------------
     
@@ -665,9 +679,9 @@ function init_bargraph() {
     bargraph_initialized = true;
     // Fetch the start_time covering all kwh feeds - this is used for the 'all time' button
     latest_start_time = 0;
-    var solar_meta = feed.getMeta(config.app.solar_kwh.value);
-    var use_meta = feed.getMeta(config.app.use_kwh.value);
-    var import_meta = feed.getMeta(config.app.import_kwh.value);
+    var solar_meta = feed.getmeta(config.app.solar_kwh.value);
+    var use_meta = feed.getmeta(config.app.use_kwh.value);
+    var import_meta = feed.getmeta(config.app.import_kwh.value);
     if (solar_meta.start_time > latest_start_time) latest_start_time = solar_meta.start_time;
     if (use_meta.start_time > latest_start_time) latest_start_time = use_meta.start_time;
     if (import_meta.start_time > latest_start_time) latest_start_time = import_meta.start_time;
@@ -692,9 +706,9 @@ function load_bargraph(start,end) {
     start = Math.floor(start/intervalms)*intervalms;
     
     // Load kWh data
-    var solar_kwh_data = feed.getDailyData(config.app.solar_kwh.value, start, end);
-    var use_kwh_data = feed.getDailyData(config.app.use_kwh.value, start, end);
-    var import_kwh_data = feed.getDailyData(config.app.import_kwh.value, start, end);
+    var solar_kwh_data = feed.getdataDMY(config.app.solar_kwh.value,start,end,"daily");
+    var use_kwh_data = feed.getdataDMY(config.app.use_kwh.value,start,end,"daily");
+    var import_kwh_data = feed.getdataDMY(config.app.import_kwh.value,start,end,"daily");
     
     // console.log(solar_kwh_data);
     // console.log(use_kwh_data);
@@ -899,11 +913,8 @@ $(function() {
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------
-function appLog(level, message) {
-    if (level == "ERROR") {
-        alert(level + ": " + message);
-    }
-    // console.log(level + ": " + message);
+function app_log (level, message) {
+    if (level=="ERROR") alert(level+": "+message);
+    // console.log(level+": "+message);
 }
-
 </script>

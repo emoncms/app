@@ -1,9 +1,14 @@
 const DATAPOINTS_LIMIT = 800;
 
-class DataCache {
+class Data {
 
-    constructor(api) {
-        this.api = api;
+    constructor(apikey) {
+        if (typeof apikey !== 'undefined' || this.apikey != "") {
+            this.auth = "?apikey=" + apikey;
+        }
+        else {
+            this.auth = "";
+        }
         this.cache = {};
         this.groups = {};
         this.updates = {};
@@ -11,6 +16,14 @@ class DataCache {
 
     static get DATAPOINTS_LIMIT() {
         return DATAPOINTS_LIMIT;
+    }
+
+    hasGroup(group) {
+        return this.groups[group] != undefined;
+    }
+
+    getGroup(group) {
+        return this.groups[group];
     }
 
     register(keys, config) {
@@ -46,22 +59,31 @@ class DataCache {
         if (feed == undefined) {
             var f = config.feedsbyid[config.app[key]['value']];
             if (f.engine == 5 || f.engine == 6) {
-                feed = new FixedIntervalFeed(f.id, f.engine, this.api);
+                feed = new FixedIntervalFeed(f.id, f.engine, this.auth);
             }
             else {
-                feed = new DataFeed(f.id, f.engine, this.api);
+                feed = new DataFeed(f.id, f.engine, this.auth);
             }
             this.cache[key] = feed;
         }
         return feed;
     }
 
-    hasGroup(group) {
-        return this.groups[group] != undefined;
-    }
-
-    getGroup(group) {
-        return this.groups[group];
+    loadFeeds() {
+        return $.ajax({
+            url: path+"feed/list.json"+this.auth,
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success(result) {
+                if (!result || result === null || result === "" || result.constructor != Array) {
+                	var error = "data.loadFeeds() received invalid result: " + result.message;
+                    console.log("ERROR", error);
+                    throw error;
+                }
+                return result;
+            }
+        });
     }
 
     loadMeta() {
@@ -101,14 +123,17 @@ class DataCache {
     }
 
     update() {
-        return this.api.getListById(true).then(function(result) {
+        return this.loadFeeds().then(function(result) {
+            var feeds = {};
         	var values = {};
         	if (result === null) return values;
-        	
+            for (var i in result) {
+            	feeds[result[i].id] = result[i];
+            }
         	for (let i in this.updates) {
         		var key = this.updates[i];
         		var feed = this.cache[key];
-                var data = result[feed.id];
+                var data = feeds[feed.id];
                 if (data.value == null) {
                 	continue;
                 }
@@ -128,7 +153,7 @@ class DataCache {
                         series.append();
                         
                         // If the cache exceeds the specified datapoint limit, trim the first value
-                        if (series.getLength() > DataCache.DATAPOINTS_LIMIT) {
+                        if (series.getLength() > Data.DATAPOINTS_LIMIT) {
                             series.trim();
                         }
                     }
@@ -537,7 +562,7 @@ class DataSeries {
                 todayValue = this.data[this.data.length-1];
             }
             else {
-                todayValue = this.feed.loadTimevalue(time);
+                //todayValue = this.feed.loadTimevalue(time);
             }
             if (todayValue == null || todayValue[1] == null) {
                 todayValue = [
@@ -611,8 +636,8 @@ class DataSeries {
 
 class DataFeed {
 
-    constructor(id, engine, api) {
-        this.api = api;
+    constructor(id, engine, auth) {
+        this.auth = auth;
         this.id = id;
         
         this.engine = engine;
@@ -620,30 +645,57 @@ class DataFeed {
         this.latest = null;
     }
 
-    loadTimevalue(time, async) {
+    loadTimevalue(time) {
         // TODO: Check if the value maybe is hold in cache
-        return this.api.getValue(this.id, time, 1000, async);
+        return this.loadData(time, time+1000, 1).then(function(data) {
+            return data.length > 0 ? data[0] : null;
+        });
     }
 
     loadEarliest() {
         // For feeds without an interval like for the PHPTimeseries engine, the closest value to 0
         // will be returned as the earliest time value
-        return this.loadTimevalue(0, true).then(function(result) {
+        return this.loadTimevalue(0).then(function(result) {
             this.earliest = result;
             
         }.bind(this));
     }
 
     loadData(start, end, interval) {
-        return this.api.getData(this.id, start, end, interval, true, true, true).then(function(result) {
-            this.latest = result[result.length-1];
-            return result;
-            
-        }.bind(this));
+        return $.ajax({
+            url: path+"feed/data.json"+this.auth,
+            data: "id="+this.id+"&start="+start+"&end="+end+"&interval="+interval+"&skipmissing="+1+"&limitinterval="+1,
+            dataType: 'json',
+            context: this,
+            cache: false,
+            async: true,
+            success(result) {
+                if (!result || result === null || result === "" || result.constructor != Array) {
+                	var error = "data.loadData() received invalid result: " + result.message;
+                    console.log("ERROR", error);
+                    throw error;
+                }
+                this.latest = result[result.length-1];
+                return result;
+            }
+        });
     }
 
     loadDailyData(start, end) {
-        return this.api.getDailyData(this.id, start, end, true);
+        return $.ajax({
+            url: path+"feed/data.json"+this.auth,
+            data: "id="+this.id+"&start="+start+"&end="+end+"&mode=daily",
+            dataType: 'json',
+            async: true,
+            success(result) {
+                if (!result || result === null || result === "" || result.constructor != Array) {
+                	var error = "data.loadDailyData() received invalid result: " + result.message;
+                    console.log("ERROR", error);
+                    throw error;
+                }
+                return result;
+            }
+        });
     }
 }
 
@@ -654,7 +706,7 @@ class FixedIntervalFeed extends DataFeed {
         this.meta = null;
     }
 
-    loadTimevalue(time, async) {
+    loadTimevalue(time) {
         // If the meta data is already initialized, align the requested time with the feeds meta data
         if (this.meta != null) {
             var interval = this.meta.interval*1000;
@@ -663,22 +715,16 @@ class FixedIntervalFeed extends DataFeed {
             if (time > start) {
                 time = start + Math.round((time - start)/interval)*interval;
             }
-            return this.api.getValue(this.id, time, interval, async);
+            return super.loadTimevalue(time);
         }
-        
-        if (typeof async !== 'undefined' && async) {
-            return $.when(null);
-        }
-        else {
-            return null;
-        }
+        return Promise.resolve(null);
     }
 
     loadEarliest() {
         // For fixed interval feeds, this information is held in its meta data
         return this.loadMeta().then(function(result) {
             var earliestTime = result.start_time*1000;
-            return this.loadTimevalue(earliestTime, true);
+            return this.loadTimevalue(earliestTime);
             
         }.bind(this)).then(function(result) {
             this.earliest = result;
@@ -688,11 +734,23 @@ class FixedIntervalFeed extends DataFeed {
     }
 
     loadMeta() {
-        return this.api.getMeta(this.id, true).then(function(result) {
-            this.meta = result;
-            return result;
-            
-        }.bind(this));
+    	return $.ajax({                                      
+            url: path+"feed/getmeta.json"+this.auth,
+            data: "id="+this.id,
+            dataType: 'json',
+            context: this,
+            cache: false,
+            async: true,
+            success(result) {
+                if (!result || result === null || result === "" || result.constructor != Object) {
+                	var error = "data.loadMeta() received invalid result: " + result.message;
+                    console.log("ERROR", error);
+                    throw error;
+                }
+                this.meta = result;
+                return result;
+            }
+        });
     }
 
     loadData(start, end, interval) {
@@ -715,6 +773,9 @@ class FixedIntervalFeed extends DataFeed {
         
         if (end >= startMeta) {
             end = startMeta + Math.floor((end - startMeta)/intervalMillis)*intervalMillis;
+            if (end == start) {
+            	end += intervalMillis;
+            }
             
             // Only reload, if the requested interval is not already hold in cache
             return super.loadData(start, end, interval);

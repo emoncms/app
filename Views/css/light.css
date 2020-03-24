@@ -57,7 +57,7 @@ body {
   padding:10px;
 }
 
-.appnav {
+.bluenav {
   float:right;
   display:block;
   border-left: 1px solid rgba(255,255,255,0.5);
@@ -69,7 +69,7 @@ body {
   text-align:center;
 }
 
-.appnav:hover {
+.bluenav:hover {
   background-color:rgba(255,255,255,0.2);
 }
 
@@ -103,7 +103,7 @@ body {
 
 @media (max-width: 450px) {
   .row { padding:10px; }
-  .appnav { font-size:12px; padding:8px; min-width:15px; }
+  .bluenav { font-size:12px; padding:8px; min-width:15px; }
   .block-title { font-size:12px; padding:8px; }
   .dmy {display:none}
   

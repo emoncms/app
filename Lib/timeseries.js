@@ -22,7 +22,7 @@ var timeseries = {
     append: function (name,time,value)
     {
         if (datastore[name]==undefined) {
-            appLog("ERROR", "timeseries.append datastore["+name+"] is undefined");
+            app_log("ERROR","timeseries.append datastore["+name+"] is undefined");
             return false;
         }
         
@@ -58,7 +58,7 @@ var timeseries = {
     trim_start: function (name,newstart)
     {
         if (datastore[name]==undefined) {
-            appLog("ERROR", "timeseries.trim_start datastore["+name+"] is undefined");
+            app_log("ERROR","timeseries.trim_start datastore["+name+"] is undefined");
             return false;
         }
         
@@ -84,12 +84,12 @@ var timeseries = {
     value: function (name, index)
     {
         if (datastore[name]==undefined) {
-            appLog("ERROR", "timeseries.value datastore["+name+"] is undefined");
+            app_log("ERROR","timeseries.value datastore["+name+"] is undefined");
             return false;
         }
         
         if (datastore[name].data[index]==undefined) {
-            appLog("ERROR", "timeseries.value datastore["+name+"].data["+index+"] is undefined, data length: "+datastore[name].data.length);
+            app_log("ERROR","timeseries.value datastore["+name+"].data["+index+"] is undefined, data length: "+datastore[name].data.length);
             return null;
         } else {
             return datastore[name].data[index][1];
@@ -98,7 +98,7 @@ var timeseries = {
     
     length: function(name) {
         if (datastore[name]==undefined) {
-            appLog("ERROR", "timeseries.value datastore["+name+"] is undefined");
+            app_log("ERROR","timeseries.value datastore["+name+"] is undefined");
             return false;
         }
         
@@ -107,7 +107,7 @@ var timeseries = {
     
     start_time: function(name) {
         if (datastore[name]==undefined) {
-            appLog("ERROR", "timeseries.value datastore["+name+"] is undefined");
+            app_log("ERROR","timeseries.value datastore["+name+"] is undefined");
             return false;
         }
         
@@ -117,7 +117,7 @@ var timeseries = {
     data: function(name)
     {
         if (datastore[name]==undefined) {
-            //appLog("ERROR", "timeseries.data datastore["+name+"] is undefined");
+            //app_log("ERROR","timeseries.data datastore["+name+"] is undefined");
             return [];
         }
         

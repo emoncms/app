@@ -17,6 +17,19 @@
 
 <style>
 
+.electric-title {
+    font-weight:bold;
+    font-size:22px;
+    color:#44b3e2;
+}
+
+.power-value {
+    font-weight:bold; 
+    font-size:42px; 
+    color:#44b3e2;
+    line-height: 1.1;
+}
+
 .block-bound {
   background-color:rgb(68,179,226);
 }
@@ -24,15 +37,15 @@
 </style>
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
-<div id="app-container" style="display:none">
+<div id="app-block" style="display:none">
     
   <div class="col1"><div class="col1-inner">
   
     <div class="block-bound">
-      <div class="appnav app-setup"><i class="icon-wrench icon-white"></i></div>
-      <div class="appnav viewcostenergy">ENERGY MODE</div>
-      <!--<div class="appnav cost">Cost</div>
-      <div class="appnav energy">Energy</div>-->
+      <div class="bluenav config-open"><i class="icon-wrench icon-white"></i></div>
+      <div class="bluenav viewcostenergy">ENERGY MODE</div>
+      <!--<div class="bluenav cost">Cost</div>
+      <div class="bluenav energy">Energy</div>-->
       <div class="block-title">TIME OF USE</div>
     </div>
 
@@ -40,12 +53,12 @@
       <table style="width:100%">
         <tr>
           <td style="width:40%">
-              <div class="app-title">POWER NOW</div>
-              <div class="app-title-value"><span id="power_now">0</span></div>
+              <div class="electric-title">POWER NOW</div>
+              <div class="power-value"><span id="power_now">0</span></div>
           </td>
           <td style="text-align:right">
-              <div class="app-title">USE TODAY</div>
-              <div class="app-title-value"><span id="kwh_today">0</span></div>
+              <div class="electric-title">USE TODAY</div>
+              <div class="power-value"><span id="kwh_today">0</span></div>
           </td>
         </tr>
       </table>
@@ -57,21 +70,21 @@
     <div class="block-bound">
     
       <div class="bargraph-navigation">
-        <!--<div class="appnav bargraph-other">OTHER</div>-->
-        <div class="appnav bargraph-alltime">ALL TIME</div>
-        <div class="appnav bargraph-month">MONTH</div>
-        <div class="appnav bargraph-week">WEEK</div>
+        <!--<div class="bluenav bargraph-other">OTHER</div>-->
+        <div class="bluenav bargraph-alltime">ALL TIME</div>
+        <div class="bluenav bargraph-month">MONTH</div>
+        <div class="bluenav bargraph-week">WEEK</div>
       </div>
       
       <div class="powergraph-navigation" style="display:none">
-        <div class="appnav viewhistory">VIEW HISTORY</div>
-        <span class="appnav" id="right" >&gt;</span>
-        <span class="appnav" id="left" >&lt;</span>
-        <span class="appnav" id="zoomout" >-</span>
-        <span class="appnav" id="zoomin" >+</span>
-        <span class="appnav time" time='720'>M</span>
-        <span class="appnav time" time='168'>W</span>
-        <span class="appnav time" time='24'>D</span>
+        <div class="bluenav viewhistory">VIEW HISTORY</div>
+        <span class="bluenav" id="right" >&gt;</span>
+        <span class="bluenav" id="left" >&lt;</span>
+        <span class="bluenav" id="zoomout" >-</span>
+        <span class="bluenav" id="zoomin" >+</span>
+        <span class="bluenav time" time='720'>M</span>
+        <span class="bluenav time" time='168'>W</span>
+        <span class="bluenav time" time='24'>D</span>
       </div>
         
       <div class="block-title">HISTORY</div>
@@ -85,7 +98,7 @@
     </div>
           
     <div id="power-graph-footer" style="background-color:#eee; color:#333; display:none">
-      <div id='advanced-toggle' class='appnav' >SHOW DETAIL</div>
+      <div id='advanced-toggle' class='bluenav' >SHOW DETAIL</div>
  
        <div style="padding:10px;">
         kWh in window: <b id="window-kwh"></b> <b>kWh</b>
@@ -120,8 +133,8 @@
       
       <div style="background-color:rgba(68,179,226,0.1); padding:20px; color:#333;">
           <span id="totals">
-          <div class="app-title">TIER 0 TOTAL</div>
-          <div class="app-title-value">0</div><br>
+          <div class="electric-title">TIER 0 TOTAL</div>
+          <div class="power-value">0</div><br>
           </span>
       </div>
     </div>
@@ -135,8 +148,8 @@
       
       <div style="background-color:rgba(68,179,226,0.1); padding:20px; color:#333;">
           <span id="averages">
-          <div class="app-title">TIER 0 DAILY AVERAGE</div>
-          <div class="app-title-value">0</div><br>
+          <div class="electric-title">TIER 0 DAILY AVERAGE</div>
+          <div class="power-value">0</div><br>
           </span>
       </div>
     </div>
@@ -144,6 +157,7 @@
   
 </div>    
 </div>
+
 
 
 <section id="app-setup" class="hide pb-3 px-3">
@@ -216,9 +230,20 @@
 // ----------------------------------------------------------------------
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".config-open").hide();
 
-var feed = new Feed(apikey);
+apikeystr = ""; 
+if (apikey!="") apikeystr = "&apikey="+apikey;
+
+// ----------------------------------------------------------------------
+// Display
+// ----------------------------------------------------------------------
+$("body").css('background-color','WhiteSmoke');
+$(window).ready(function(){
+    //$("#footer").css('background-color','#181818');
+    //$("#footer").css('color','#999');
+});
+
+if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
 // Configuration
@@ -242,14 +267,14 @@ config.app = {
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
-config.feeds = feed.getList();
+config.feeds = feed.list();
 
 config.initapp = function(){init()};
 config.showapp = function(){show()};
 config.hideapp = function(){hide()};
 
 // ----------------------------------------------------------------------
-// Application
+// APPLICATION
 // ----------------------------------------------------------------------
 var feeds = {};
 var meta = {};
@@ -267,7 +292,7 @@ var comparison_heating = false;
 var comparison_transport = false;
 var flot_font_size = 12;
 var start_time = 0;
-var updateTimer = false;
+var updaterinst = false;
 var use_start = 0;
 
 // cents/kWh rates, one for each tier.
@@ -343,9 +368,11 @@ function init()
 }
 
 function show() {
-    meta["use_kwh"] = feed.getMeta(feeds["use_kwh"].id);
+    $("body").css('background-color','WhiteSmoke');
+    
+    meta["use_kwh"] = feed.getmeta(feeds["use_kwh"].id);
     if (meta["use_kwh"].start_time>start_time) start_time = meta["use_kwh"].start_time;
-    use_start = feed.getValue(feeds["use_kwh"].id, start_time*1000)[1];
+    use_start = feed.getvalue(feeds["use_kwh"].id, start_time*1000)[1];
 
     resize();
 
@@ -355,18 +382,18 @@ function show() {
     bargraph_load(start,end);
     bargraph_draw();
 
-    update();
-    updateTimer = setInterval(update, 5000);
+    updater();
+    updaterinst = setInterval(updater,5000);
     $(".ajax-loader").hide();
 }
 
 function hide() {
-    clearInterval(updateTimer);
+    clearInterval(updaterinst);
 }
 
-function update()
+function updater()
 {
-    feed.getListById(function(result) {
+    feed.listbyidasync(function(result){
         if (result === null) { return; }
 
         for (var key in config.app) {
@@ -555,7 +582,7 @@ function powergraph_load()
     start = Math.ceil(start/intervalms)*intervalms;
     end = Math.ceil(end/intervalms)*intervalms;
 
-    data["use"] = feed.getData(feeds["use"].id, start, end, interval, 1, 1);
+    data["use"] = feed.getdata(feeds["use"].id,start,end,interval,1,1);
     for (var b = 0; b < tier_names.length; b++) {
         data_tier[b] = [];
     }
@@ -668,7 +695,7 @@ function bargraph_load(start,end)
     var hourly = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
     
     //console.log(JSON.stringify(hourly));
-    var elec_result = feed.getDailyTimeOfUse(feeds["use_kwh"].id, start, end, JSON.stringify(hourly));
+    var elec_result = feed.getdataDMY_time_of_use(feeds["use_kwh"].id,start,end,"daily",JSON.stringify(hourly));
 
     var cur_use = feeds["use_kwh"].value;
     
@@ -774,29 +801,29 @@ function bargraph_load(start,end)
     }
     
     if (viewcostenergy=="energy") {
-        var totals_str = '<div class="app-title">COMBINED</div><div class="app-title-value">' +
+        var totals_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
             total_kwh.toFixed(1) + ' kWh</div><br>';
-        var averages_str = '<div class="app-title">COMBINED</div><div class="app-title-value">' +
+        var averages_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
            (total_kwh/n).toFixed(1) + ' kWh/d</div><br>';
         for (var a = 0; a < tier_names.length; a++) {
-            totals_str += '<div class="app-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="app-title-value">' + tier_total_kwh[a].toFixed(1) + ' kWh</div><br>';
-            averages_str += '<div class="app-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="app-title-value">' + (tier_total_kwh[a]/n).toFixed(1) + ' kWh/d</div><br>';
+            totals_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
+               '</div><div class="power-value">' + tier_total_kwh[a].toFixed(1) + ' kWh</div><br>';
+            averages_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
+               '</div><div class="power-value">' + (tier_total_kwh[a]/n).toFixed(1) + ' kWh/d</div><br>';
         }
         $("#totals").html(totals_str);
         $("#averages").html(averages_str);
     } else {
-        var totals_str = '<div class="app-title">COMBINED</div><div class="app-title-value">' +
+        var totals_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
             config.app["currency"].value + total_kwh.toFixed(2) + '</div><br>';
-        var averages_str = '<div class="app-title">COMBINED</div><div class="app-title-value">' +
+        var averages_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
            config.app["currency"].value + (total_kwh/n).toFixed(2) + '/day</div><br>';
         for (var a = 0; a < tier_names.length; a++) {
-            totals_str += '<div class="app-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="app-title-value">' + config.app["currency"].value +
+            totals_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
+               '</div><div class="power-value">' + config.app["currency"].value +
                tier_total_kwh[a].toFixed(2) + '</div><br>';
-            averages_str += '<div class="app-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="app-title-value">' + config.app["currency"].value +
+            averages_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
+               '</div><div class="power-value">' + config.app["currency"].value +
                (tier_total_kwh[a]/n).toFixed(2) + '/day</div><br>';
         }
         $("#totals").html(totals_str);
@@ -886,14 +913,14 @@ function resize() {
     placeholder.height(height-top_offset);
     
     if (width<=500) {
-        $(".app-title").css("font-size","16px");
-        $(".app-title-value").css("font-size","38px");
+        $(".electric-title").css("font-size","16px");
+        $(".power-value").css("font-size","38px");
     } else if (width<=724) {
-        $(".app-title").css("font-size","18px");
-        $(".app-title-value").css("font-size","42px");
+        $(".electric-title").css("font-size","18px");
+        $(".power-value").css("font-size","42px");
     } else {
-        $(".app-title").css("font-size","22px");
-        $(".app-title-value").css("font-size","42px");
+        $(".electric-title").css("font-size","22px");
+        $(".power-value").css("font-size","42px");
     }
 }
 
@@ -929,11 +956,8 @@ function we_ph (datetocheck) {
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------
-function appLog(level, message) {
-    if (level == "ERROR") {
-        alert(level + ": " + message);
-    }
-    console.log(level + ": " + message);
+function app_log (level, message) {
+    if (level=="ERROR") alert(level+": "+message);
+    console.log(level+": "+message);
 }
-
 </script>

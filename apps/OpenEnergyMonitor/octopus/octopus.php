@@ -57,7 +57,7 @@
   <div id="octopus-realtime" class="col1"><div class="col1-inner">
       
     <div class="block-bound">
-      <div class="bluenav openconfig"><i class="icon-wrench icon-white"></i></div>
+      <div class="bluenav config-open"><i class="icon-wrench icon-white"></i></div>
       <!--<div class="bluenav viewcostenergy">VIEW COST</div>-->
       <div class="bluenav cost">Cost</div>
       <div class="bluenav energy bluenav-active">Energy</div>
@@ -133,13 +133,13 @@
     <div class="px-3">
         <div class="row-fluid">
             <div class="span9 appconfig-description">
-                <div class="appconfig-description-inner text-light">
+                <div class="appconfig-description-inner text-dark">
                     <h2 class="appconfig-title text-primary"><?php echo _('Octopus Agile'); ?></h2>
                     <p class="lead">Explore Octopus Agile tariff costs over time.</p>
-                    <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-                    <p><strong class="text-white">Import & Import kWh</strong> The standard naming for electricity imported from the grid in a household without solar PV is 'use' and 'use_kwh', this app expects 'import' and 'import_kwh' in order to provide compatibility with the Solar PV option as well. Select relevant house consumption feeds using the dropdown feed selectors as required. Feeds 'use_kwh' and 'solar_kwh' are optional.</p>
-                    <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor. To create cumulative kWh feeds from historic power data try the postprocess module.</p>
-                    <p><strong class="text-white">Optional: Octopus Outgoing</strong> Include total house consumption (use_kwh) and solar PV (solar_kwh) feeds to explore octopus outgoing feed-in-tariff potential.</p>
+                    <p><strong class="text-black">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
+                    <p><strong class="text-black">Import & Import kWh</strong> The standard naming for electricity imported from the grid in a household without solar PV is 'use' and 'use_kwh', this app expects 'import' and 'import_kwh' in order to provide compatibility with the Solar PV option as well. Select relevant house consumption feeds using the dropdown feed selectors as required. Feeds 'use_kwh' and 'solar_kwh' are optional.</p>
+                    <p><strong class="text-black">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor. To create cumulative kWh feeds from historic power data try the postprocess module.</p>
+                    <p><strong class="text-black">Optional: Octopus Outgoing</strong> Include total house consumption (use_kwh) and solar PV (solar_kwh) feeds to explore octopus outgoing feed-in-tariff potential.</p>
                     <img src="../Modules/app/images/agile_app.png" class="d-none d-sm-inline-block">
                 </div>
             </div>
@@ -148,7 +148,7 @@
     </div>
 </section>
 
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
+<div class="ajax-loader"></div>
 
 <script>
 
@@ -173,7 +173,7 @@ $(window).ready(function(){
     //$("#footer").css('color','#999');
 });
 
-if (!sessionwrite) $(".openconfig").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
 // Configuration

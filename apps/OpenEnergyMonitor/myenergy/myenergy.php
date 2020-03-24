@@ -22,22 +22,22 @@
     <?php include(dirname(__DIR__).'/config-nav.php'); ?>
 
 </nav>
-
+    
 <section id="app-block" style="display:none" class="block">
     <div id="summary" class="d-flex justify-content-between">
         <div class="text-center">
-            <h5 class="app-title mb-0 text-md-larger text-light"><?php echo _('USE NOW') ?></h5>
-            <h2 class="app-title-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('USE NOW') ?></h5>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
         </div>
         <div class="text-center">
-            <h5 class="app-title mb-0 text-md-larger text-light px-1"><span class="balance-label"></span></h5>
-            <h2 class="app-title-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span></h2>
+            <h5 class="electric-title mb-0 text-md-larger text-light px-1"><span class="balance-label"></span></h5>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span></h2>
         </div>
         <div class="text-center">
-            <h5 class="app-title mb-0 text-md-larger text-light"><?php echo _('RENEWABLE GEN') ?></h5>
-            <h2 class="app-title-value display-sm-4 display-md-3 display-lg-2 my-0 text-warning "><span class="gennow"></span><span class="power-unit"></span></h2>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('RENEWABLE GEN') ?></h5>
+            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 my-0 text-warning "><span class="gennow"></span><span class="power-unit"></span></h2>
 
-            <h5 class="app-title mt-0 mb-lg-3 text-md-larger ">
+            <h5 class="electric-title mt-0 mb-lg-3 text-md-larger ">
                 <span class="text-warning" title="<?php echo _('SOLAR') ?>"><span class="d-none d-sm-inline-block"><?php echo _('SOLAR') ?>: </span> <span class="solarnow">0</span><span class="power-unit"></span></span> | 
                 <span class="text-success" title="<?php echo _('WIND') ?>"><span class="d-none d-sm-inline-block"><?php echo _('WIND') ?>: </span> <span class="windnow">0</span><span class="power-unit"></span></span>
             </h5>
@@ -49,7 +49,7 @@
     <div id="placeholder_bound" style="width:100%; height:500px;">
         <div id="placeholder" style="height:500px"></div>
     </div>
-
+        
     <div id="breakdown" class="d-flex justify-content-between py-lg-3 text-light">
         <div class="appbox mb-3 text-primary">
             <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('USE') ?></h5>
@@ -129,9 +129,19 @@ function getTranslations(){
 // ----------------------------------------------------------------------
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".config-open").hide();
 
-var feed = new Feed(apikey);
+apikeystr = ""; 
+if (apikey!="") apikeystr = "&apikey="+apikey;
+
+// ----------------------------------------------------------------------
+// Display
+// ----------------------------------------------------------------------
+$("body").css('background-color','#222');
+$(window).ready(function(){
+    $("#footer").css('background-color','#181818');
+    $("#footer").css('color','#999');
+});
+if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
 // Configuration
@@ -144,18 +154,18 @@ config.app = {
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
-config.feeds = feed.getList();
+config.feeds = feed.list();
 
 config.initapp = function(){init()};
 config.showapp = function(){show()};
 config.hideapp = function(){hide()};
 
 // ----------------------------------------------------------------------
-// Application
+// APPLICATION
 // ----------------------------------------------------------------------
 var feeds = {};
 
-var updateTimer = false;
+var live = false;
 var show_balance_line = 0;
 var reload = true;
 var autoupdate = true;
@@ -175,7 +185,7 @@ config.init();
 // App start function
 function init()
 {        
-    appLog("INFO", "mysolarpv init");
+    app_log("INFO","mysolarpv init");
     
     my_wind_cap = ((annual_wind_gen / 365) / 0.024) / capacity_factor;
 
@@ -210,15 +220,16 @@ function init()
 
 function show() 
 {
-    appLog("INFO", "mysolarpv show");
+    app_log("INFO","mysolarpv show");
     resize();
-    update();
-    updateTimer = setInterval(update, 5000);
+    livefn();
+    live = setInterval(livefn,5000);
+
 }
 
 function resize() 
 {
-    appLog("INFO", "mysolarpv resize");
+    app_log("INFO","mysolarpv resize");
     
     var top_offset = 0;
     var placeholder_bound = $('#placeholder_bound');
@@ -238,26 +249,25 @@ function resize()
 
 function hide() 
 {
-    clearInterval(updateTimer);
+    clearInterval(live);
 }
 
-function update()
+function livefn()
 {
     // Check if the updater ran in the last 60s if it did not the app was sleeping
     // and so the data needs a full reload.
     var now = +new Date();
     if ((now-lastupdate)>60000) reload = true;
     lastupdate = now;
-
     var powerUnit = config.app.kw.value===true ? 'kW' : 'W';
-    var feeds = feed.getListById();
+    var feeds = feed.listbyid();
     if (feeds === null) { return; }
     var solar_now = 0;
     if (config.app.solar.value)
         solar_now = parseInt(feeds[config.app.solar.value].value);
-    
+        
     var use_now = parseInt(feeds[config.app.use.value].value);
-    var gridwind = feed.getRemoteValue(67088);
+    var gridwind = feed.getvalueremote(67088);
     var average_power = ((config.app.windkwh.value/365.0)/0.024);
     var wind_now = Math.round((average_power / average_wind_power) * gridwind);
 
@@ -364,13 +374,13 @@ function draw_powergraph() {
         view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
 
         var feedid = config.app.solar.value;
-        if (feedid!=false) {
-            timeseries.load("solar", feed.getData(feedid, view.start, view.end, interval, 0, 0));
-        }
-        var feedid = config.app.use.value;
-        timeseries.load("use", feed.getData(config.app.use.value, view.start, view.end, interval, 0, 0));
+        if (feedid!=false)
+            timeseries.load("solar",feed.getdata(feedid,view.start,view.end,interval,0,0));
         
-        timeseries.load("remotewind", feed.getRemoteData(67088, view.start, view.end, interval));    
+        var feedid = config.app.use.value;
+        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,interval,0,0));
+        
+        timeseries.load("remotewind",feed.getdataremote(67088,view.start,view.end,interval));    
     }
     // -------------------------------------------------------------------------------------------------------
     
@@ -491,11 +501,8 @@ $(function() {
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------
-function appLog(level, message) {
-    if (level == "ERROR") {
-        alert(level + ": " + message);
-    }
-    console.log(level + ": " + message);
+function app_log (level, message) {
+    if (level=="ERROR") alert(level+": "+message);
+    console.log(level+": "+message);
 }
-
 </script>

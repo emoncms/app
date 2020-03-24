@@ -17,6 +17,8 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
 
 
+
+
 <style type="text/css">
 .statstable {
     width: 100%;
@@ -142,26 +144,26 @@
 <section id="app-block" style="display:none" class="block">
     <div class="d-flex justify-content-between">
         <div class="text-xs-center">
-            <h5 class="app-title mb-0 text-md-larger text-light"><?php echo _('HOUSE') ?></h5>
-            <h2 class="app-title-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-info"><span class="housenow">0</span><span class="power-unit"></span></h2>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('HOUSE') ?></h5>
+            <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-info"><span class="housenow">0</span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="app-title mb-0 text-md-larger text-light px-1"><?php echo _('DIVERT') ?></h5>
-            <h2 class="app-title-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-quaternary"><span class="divertnow">-</span><span class="power-unit"></span></h2>
+            <h5 class="electric-title mb-0 text-md-larger text-light px-1"><?php echo _('DIVERT') ?></h5>
+            <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-quaternary"><span class="divertnow">-</span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="app-title mb-0 text-md-larger text-light"><?php echo _('TOTAL USE') ?></h5>
-            <h2 class="app-title-value display-md-3 display-lg-2 my-0 text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('TOTAL USE') ?></h5>
+            <h2 class="power-value display-md-3 display-lg-2 my-0 text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="app-title mb-0 text-md-larger text-light"><span class="balance-label">-</h5>
-            <h2 class="app-title-value display-md-3 display-lg-2 my-0 text-success ">
+            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="balance-label">-</h5>
+            <h2 class="power-value display-md-3 display-lg-2 my-0 text-success ">
                 <span class="balance"></span>
             </h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="app-title mb-0 text-md-larger text-light"><?php echo _('SOLAR') ?></h5>
-            <h2 class="app-title-value display-md-3 display-lg-2 my-0 text-warning "><span class="generationnow"></span><span class="power-unit"></span></h2>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('SOLAR') ?></h5>
+            <h2 class="power-value display-md-3 display-lg-2 my-0 text-warning "><span class="generationnow"></span><span class="power-unit"></span></h2>
         </div>
     </div>
 
@@ -308,9 +310,19 @@ function getTranslations(){
 // ----------------------------------------------------------------------
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".config-open").hide();
 
-var feed = new Feed(apikey);
+apikeystr = ""; 
+if (apikey!="") apikeystr = "&apikey="+apikey;
+
+// ----------------------------------------------------------------------
+// Display
+// ----------------------------------------------------------------------
+$("body").css('background-color','#222');
+$(window).ready(function(){
+    $("#footer").css('background-color','#181818');
+    $("#footer").css('color','#999');
+});
+if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
 // Configuration
@@ -331,18 +343,18 @@ config.app = {
 }
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
-config.feeds = feed.getList();
+config.feeds = feed.list();
 
 config.initapp = function(){init()};
 config.showapp = function(){show()};
 config.hideapp = function(){hide()};
 
 // ----------------------------------------------------------------------
-// Application
+// APPLICATION
 // ----------------------------------------------------------------------
 var feeds = {};
 
-var updateTimer = false;
+var live = false;
 var show_balance_line = 0;
 var has_wind = false;
 var reload = true;
@@ -360,7 +372,7 @@ config.init();
 // App start function
 function init()
 {        
-    appLog("INFO", "mysolarpvdivert init");
+    app_log("INFO","mysolarpvdivert init");
 
     var timeWindow = (3600000*6.0*1);
     view.end = +new Date;
@@ -430,7 +442,7 @@ function init()
 
 function show() 
 {
-    appLog("INFO", "mysolarpvdivert show");
+    app_log("INFO","mysolarpvdivert show");
     
     if (config.app.solar_kwh.value && config.app.use_kwh.value && config.app.import_kwh.value && config.app.divert_kwh.value) {
         if (!bargraph_initialized) init_bargraph();
@@ -438,13 +450,14 @@ function show()
     
     resize();
     
-    update();
-    updateTimer = setInterval(update, 5000);
+    livefn();
+    live = setInterval(livefn,5000);
+
 }
 
 function resize() 
 {
-    appLog("INFO", "mysolarpvdivert resize");
+    app_log("INFO","mysolarpvdivert resize");
     
     var top_offset = 0;
     var placeholder_bound = $('#placeholder_bound');
@@ -465,19 +478,19 @@ function resize()
 
 function hide() 
 {
-    clearInterval(updateTimer);
+    clearInterval(live);
 }
 
-function update()
+function livefn()
 {
     // Check if the updater ran in the last 60s if it did not the app was sleeping
     // and so the data needs a full reload.
     var now = +new Date();
     if ((now-lastupdate)>60000) reload = true;
     lastupdate = now;
-    
     var powerUnit = config.app && config.app.kw && config.app.kw.value===true ? 'kW' : 'W';
-    var feeds = feed.getListById();
+
+    var feeds = feed.listbyid();
     if (feeds === null) { return; }
     var solar_now = parseInt(feeds[config.app.solar.value].value);
     var use_now = parseInt(feeds[config.app.use.value].value);
@@ -599,11 +612,11 @@ function draw_powergraph() {
         reload = false;
         view.start = 1000*Math.floor((view.start/1000)/interval)*interval;
         view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
-        timeseries.load("solar", feed.getData(config.app.solar.value, view.start, view.end, interval, 0, 0));
-        timeseries.load("use", feed.getData(config.app.use.value, view.start,view.end,interval, 0, 0));
-        timeseries.load("divert", feed.getData(config.app.divert.value, view.start,view.end,interval, 0, 0));
+        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,interval,0,0));
+        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,interval,0,0));
+        timeseries.load("divert",feed.getdata(config.app.divert.value,view.start,view.end,interval,0,0));
         if (has_wind) {
-          timeseries.load("wind", feed.getData(config.app.wind.value, view.start,view.end,interval, 0, 0));
+          timeseries.load("wind",feed.getdata(config.app.wind.value,view.start,view.end,interval,0,0));
         }
     }
     // -------------------------------------------------------------------------------------------------------
@@ -809,10 +822,10 @@ function init_bargraph() {
     bargraph_initialized = true;
     // Fetch the start_time covering all kwh feeds - this is used for the 'all time' button
     latest_start_time = 0;
-    var solar_meta = feed.getMeta(config.app.solar_kwh.value);
-    var use_meta = feed.getMeta(config.app.use_kwh.value);
-    var divert_meta = feed.getMeta(config.app.divert_kwh.value);
-    var import_meta = feed.getMeta(config.app.import_kwh.value);
+    var solar_meta = feed.getmeta(config.app.solar_kwh.value);
+    var use_meta = feed.getmeta(config.app.use_kwh.value);
+    var divert_meta = feed.getmeta(config.app.divert_kwh.value);
+    var import_meta = feed.getmeta(config.app.import_kwh.value);
     if (solar_meta.start_time > latest_start_time) latest_start_time = solar_meta.start_time;
     if (use_meta.start_time > latest_start_time) latest_start_time = use_meta.start_time;
     if (divert_meta.start_time > latest_start_time) latest_start_time = divert_meta.start_time;
@@ -839,13 +852,13 @@ function load_bargraph(start,end) {
     start = Math.floor(start/intervalms)*intervalms;
     
     // Load kWh data
-    var solar_kwh_data = feed.getDailyData(config.app.solar_kwh.value, start, end);
-    var use_kwh_data = feed.getDailyData(config.app.use_kwh.value, start, end);
-    var divert_kwh_data = feed.getDailyData(config.app.divert_kwh.value, start, end);
-    var import_kwh_data = feed.getDailyData(config.app.import_kwh.value, start, end);
+    var solar_kwh_data = feed.getdataDMY(config.app.solar_kwh.value,start,end,"daily");
+    var use_kwh_data = feed.getdataDMY(config.app.use_kwh.value,start,end,"daily");
+    var divert_kwh_data = feed.getdataDMY(config.app.divert_kwh.value,start,end,"daily");
+    var import_kwh_data = feed.getdataDMY(config.app.import_kwh.value,start,end,"daily");
     var wind_kwh_data = [];
     if (has_wind && config.wind_kwh) {
-        wind_kwh_data = feed.getDailyData(config.wind_kwh.value, start, end);
+        wind_kwh_data = feed.getdataDMY(config.wind_kwh.value,start,end,"daily");
     }
     
     house_generated_kwhd_data = [];
@@ -1114,11 +1127,8 @@ $(function() {
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------
-function appLog(level, message) {
-    if (level == "ERROR") {
-        alert(level + ": " + message);
-    }
-    console.log(level + ": " + message);
+function app_log (level, message) {
+    if (level=="ERROR") alert(level+": "+message);
+    console.log(level+": "+message);
 }
-
 </script>

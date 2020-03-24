@@ -10,31 +10,6 @@
        url('../../fonts/montserrat.svg#Montserrat') format('svg'); /* Legacy iOS */
 }
 
-.content-container { max-width:1150px; }
-
-.app-item {
-  padding:15px;
-  border-bottom: 1px solid #ccc;
-  border-left: 1px solid #ccc;
-  border-right: 1px solid #ccc;
-}
-
-.app-item:hover {
-  background-color:#eee;
-  cursor:pointer;
-}
-
-.app-item-title {
-  font-weight:bold;
-  font-size:14px;
-}
-
-.col1 {
-  width:100%;
-}
-
-.col1-inner { padding:10px; }
-
 .app {
   font-family: Montserrat, Veranda, sans-serif;
 }

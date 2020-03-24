@@ -1,10 +1,9 @@
 <?php
-    global $path, $session;
-    $v = 5;
+    global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/blocks.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
+<link href="<?php echo $path; ?>Modules/app/Views/css/graph.css?v=<?php echo $v; ?>" rel="stylesheet">
 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
@@ -76,8 +75,7 @@ var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 if (!sessionwrite) $(".app-setup").hide();
 
-var feed = new Feed(apikey);
-var data = new DataCache(feed);
+var data = new Data(apikey);
 var graph = new GraphView(path, $('#graph'));
 
 // ----------------------------------------------------------------------
@@ -141,7 +139,6 @@ config.app = {
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
-config.feeds = feed.getList();
 
 config.initapp = function() {
     init();
@@ -162,7 +159,10 @@ var idle = Date.now();
 var times = {}
 var values = {};
 
-config.init();
+data.loadFeeds().then(function(feeds) {
+	config.feeds = feeds;
+	config.init();
+});
 function init() {
     $("#app-title").html(config.app.title.value.toUpperCase());
     
@@ -425,7 +425,10 @@ function graphError(error) {
     if (typeof error !== 'undefined') {
         message += ": ";
         
-        if (typeof error.responseText !== 'undefined') {
+        if (typeof error.message !== 'undefined') {
+            message += error.message;
+        }
+        else  if (typeof error.responseText !== 'undefined') {
             message += error.responseText;
         }
         else if (typeof error !== 'string') {

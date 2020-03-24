@@ -7,10 +7,10 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/graph_bars.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/graph_lines.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; echo $appdir; ?>graph_bars.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; echo $appdir; ?>graph_lines.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script> 
 
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
@@ -23,14 +23,14 @@
 <section id="app-block" style="display:none">
     <div class="d-flex justify-content-between">
         <div>
-            <h5 class="app-title mb-0 text-sm-larger text-light"><?php echo _('POWER NOW') ?></h5>
-            <h2 class="app-title-value display-sm-4 display-sm-3 display-lg-2 mt-0 mb-lg-3 text-primary">
+            <h5 class="electric-title mb-0 text-sm-larger text-light"><?php echo _('POWER NOW') ?></h5>
+            <h2 class="power-value display-sm-4 display-sm-3 display-lg-2 mt-0 mb-lg-3 text-primary">
                 <span id="powernow">0</span>
             </h2>
         </div>
         <div class="text-xs-right">
-            <h5 class="app-title mb-0 text-sm-larger text-light"><?php echo _('TODAY') ?></h5>
-            <h2 class="app-title-value display-sm-4 display-sm-3 display-lg-2 mt-0 mb-lg-3 text-primary">
+            <h5 class="electric-title mb-0 text-sm-larger text-light"><?php echo _('TODAY') ?></h5>
+            <h2 class="power-value display-sm-4 display-sm-3 display-lg-2 mt-0 mb-lg-3 text-primary">
                 <span id="usetoday_units_a"></span>
                 <span id="usetoday"></span>
                 <small id="usetoday_units_b" class="usetoday"></small>
@@ -128,7 +128,7 @@
     </div>
 </section>
 
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
+<div class="ajax-loader"></div>
 
 <script src="<?php echo $path; ?>Lib/misc/gettext.js?v=<?php echo $v; ?>"></script> 
 <script>
@@ -149,9 +149,19 @@ function getTranslations(){
 // ----------------------------------------------------------------------
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-if (!sessionwrite) $(".config-open").hide();
 
-var feed = new Feed(apikey);
+apikeystr = ""; 
+if (apikey!="") apikeystr = "&apikey="+apikey;
+
+// ----------------------------------------------------------------------
+// Display
+// ----------------------------------------------------------------------
+$("body").css('background-color','#222');
+$(window).ready(function(){
+    $("#footer").css('background-color','#181818');
+    $("#footer").css('color','#999');
+});
+if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
 // Configuration
@@ -166,22 +176,22 @@ config.app = {
 
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
-config.feeds = feed.getList();
+config.feeds = feed.list();
 
 config.initapp = function(){init()};
 config.showapp = function(){show()};
 config.hideapp = function(){hide()};
 
 // ----------------------------------------------------------------------
-// Application
+// App variable init
 // ----------------------------------------------------------------------
 var daily_data = [];
 var daily = [];
 var raw_kwh_data = [];
 var kwhdtmp = [];
 
-var updateTimerFast = false;
-var updateTimerSlow = false;
+var fastupdateinst = false;
+var slowupdateinst = false;
 
 var viewmode = "energy";
 
@@ -205,7 +215,7 @@ config.init();
 
 function init()
 {   
-    appLog("INFO", "myelectric init");
+    app_log("INFO","myelectric init");
 
     var timewindow = (3600000*3.0*1);
     view.end = +new Date;
@@ -214,43 +224,50 @@ function init()
     // -------------------------------------------------------------------------
     // Decleration of myelectric events
     // -------------------------------------------------------------------------
-    $("#zoomout").click(function (e) {view.zoomout(); reload = true; autoupdate = false; updateFast(e);});
-    $("#zoomin").click(function (e) {view.zoomin(); reload = true; autoupdate = false; updateFast(e);});
-    $('#right').click(function (e) {view.panright(); reload = true; autoupdate = false; updateFast(e);});
-    $('#left').click(function (e) {view.panleft(); reload = true; autoupdate = false; updateFast(e);});
+    
+    $("#zoomout").click(function (e) {view.zoomout(); reload = true; autoupdate = false; fastupdate(e);});
+    $("#zoomin").click(function (e) {view.zoomin(); reload = true; autoupdate = false; fastupdate(e);});
+    $('#right').click(function (e) {view.panright(); reload = true; autoupdate = false; fastupdate(e);});
+    $('#left').click(function (e) {view.panleft(); reload = true; autoupdate = false; fastupdate(e);});
     
     // zoom graph to timescale
     $('.time').click(function (event) {
         view.timewindow($(this).attr("time")/24.0); 
         reload = true; 
         autoupdate = true;
-        updateFast(event);
+        fastupdate(event);
     });
     
     // toggle cost/kwh
     $(".myelectric-view-cost").click(function(event){
         viewmode = "cost";
-        updateFast(event);
-        updateSlow();
+        fastupdate(event);
+        slowupdate();
         $('.myelectric-view-cost').toggleClass('active', true);
         $('.myelectric-view-kwh').toggleClass('active', false);
     });
     
     $(".myelectric-view-kwh").click(function(event){
         viewmode = "energy";
-        updateFast(event);
-        updateSlow();
+        fastupdate(event);
+        slowupdate();
         $('.myelectric-view-cost').toggleClass('active', false);
         $('.myelectric-view-kwh').toggleClass('active', true);
     });
 }
     
 function show()
-{
-    appLog("INFO", "myelectric show");
-    
+{      
+    app_log("INFO","myelectric show");
     // start of all time
-    var meta = feed.getMeta(config.app.use_kwh.value);
+    var meta = {};
+    $.ajax({                                      
+        url: path+"feed/getmeta.json",                         
+        data: "id="+config.app.use_kwh.value+apikeystr,
+        dataType: 'json',
+        async: false,                      
+        success: function(data_in) { meta = data_in; }
+    });
     startalltime = meta.start_time;
     view.first_data = meta.start_time * 1000;
     
@@ -259,16 +276,16 @@ function show()
     // resize and start updaters
     resize();
     // called from withing resize:
-    updateFast();
-    updateSlow();
+    fastupdate();
+    slowupdate();
     
-    updateTimerFast = setInterval(updateFast, 5000);
-    updateTimerSlow = setInterval(updateSlow, 60000);
+    fastupdateinst = setInterval(fastupdate,5000);
+    slowupdateinst = setInterval(slowupdate,60000);
 }
     
 function resize() 
 {
-    appLog("INFO", "myelectric resize");
+    app_log("INFO","myelectric resize");
     
     var windowheight = $(window).height();
     
@@ -292,18 +309,18 @@ function resize()
     
     if($('#app-block').is(":visible")) {
         reloadkwhd = true;
-        updateFast();
-        updateSlow();
+        fastupdate();
+        slowupdate();
     }
 }
-
+    
 function hide()
 {
-    clearInterval(updateTimerFast);
-    clearInterval(updateTimerSlow);
+    clearInterval(fastupdateinst);
+    clearInterval(slowupdateinst);
 }
-
-function updateFast(event)
+    
+function fastupdate(event)
 {
    var use = config.app.use.value;
    var use_kwh = config.app.use_kwh.value;
@@ -356,13 +373,13 @@ function updateFast(event)
         view.start = 1000*Math.floor((view.start/1000)/interval)*interval;
         view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
         
-        timeseries.load("use", feed.getData(use, view.start, view.end, interval, 0, 0));
+        timeseries.load("use",feed.getdata(use,view.start,view.end,interval,0,0));
     }
     
     // --------------------------------------------------------------------
     // 1) Get last value of feeds
     // --------------------------------------------------------------------
-    feeds = feed.getListById();
+    feeds = feed.listbyid();
     if (feeds === null) { return; }
     
     // set the power now value
@@ -455,7 +472,7 @@ function updateFast(event)
 
     var time = new Date(now.getFullYear(),now.getMonth(),now.getDate()-dayofweek).getTime();
     if (time!=last_startofweektime) {
-        startofweek = feed.getValue(use_kwh, time);
+        startofweek = feed.getvalue(use_kwh,time);
         last_startofweektime = time;
     }
     if (startofweek===false) startofweek = [startalltime*1000,0];
@@ -469,7 +486,7 @@ function updateFast(event)
     // MONTH: repeat same process as above (scale is unitcost)
     var time = new Date(now.getFullYear(),now.getMonth(),1).getTime();
     if (time!=last_startofmonthtime) {
-        startofmonth = feed.getValue(use_kwh, time);
+        startofmonth = feed.getvalue(use_kwh,time);
         last_startofmonthtime = time;
     }
     if (startofmonth===false) startofmonth = [startalltime*1000,0];
@@ -483,7 +500,7 @@ function updateFast(event)
     // YEAR: repeat same process as above (scale is unitcost)
     var time = new Date(now.getFullYear(),0,1).getTime();
     if (time!=last_startofyeartime) {
-        startofyear = feed.getValue(use_kwh, time);
+        startofyear = feed.getvalue(use_kwh,time);
         last_startofyeartime = time;
     }
     if (startofyear===false) startofyear = [startalltime*1000,0];     
@@ -501,7 +518,7 @@ function updateFast(event)
     // --------------------------------------------------------------------------------------------------------        
 }
     
-function updateSlow()
+function slowupdate()
 {
    var use = config.app.use.value;
    var use_kwh = config.app.use_kwh.value;
@@ -525,7 +542,7 @@ function updateSlow()
     var end = Math.floor(now.getTime() * 0.001);
     var start = end - interval * Math.round(graph_bars.width/30);
     
-    var result = feed.getDailyData(use_kwh, start*1000, end*1000);
+    var result = feed.getdataDMY(use_kwh,start*1000,end*1000,"daily");
 
     var data = [];
     // remove nan values from the end.
@@ -600,11 +617,8 @@ $(function(){
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------
-function appLog(level, message) {
-    if (level == "ERROR") {
-        alert(level + ": " + message);
-    }
-    console.log(level + ": " + message);
+function app_log (level, message) {
+    if (level=="ERROR") alert(level+": "+message);
+    console.log(level+": "+message);
 }
-
 </script>

@@ -5,32 +5,26 @@ global $path, $session, $v;
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
 
 <div id="app-block" style="display:none">
-  <div style="height:25px; border-bottom:1px solid #e8e8e8; padding:8px;">
+  <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
     <div style="float:right;">
       <i class="config-open icon-wrench" style="cursor:pointer"></i>
     </div>
   </div>
-  <div style="text-align:center; padding-top:20px">
-    <div class="app-title">Oops something went wrong, this app does not exist!</div>
+  <div style="text-align:center">
+    <div class="electric-title">Oops something went wrong, this app does not exist!</div>
   </div>
 </div>
 
-<section id="app-setup" class="hide pb-3">
-    <!-- instructions and settings -->
-    <div class="px-3">
-        <div class="row-fluid">
-            <div class="span9 app-config-description">
-                <div class="app-config-description-inner text-light">
-                    <h2 class="app-config-title text-primary"><?php echo _('Oops something went wrong!'); ?></h2>
-                    <p class="lead">This app does not exist.<br> You can delete this entry on the right.</p>
-                </div>
-            </div>
-            <div class="span3 pt-3 app-config"></div>
-        </div>
+<div id="app-setup" style="display:none; padding-top:50px" class="block">
+    <h2 class="app-config-title">Oops something went wrong, this app does not exist!</h2>
+    <div class="app-config-description">
+    <div class="app-config-description-inner">You can delete this entry on the right</div>
     </div>
-</section>
+    <div class="app-config"></div>
+</div>
 
 <div class="ajax-loader"></div>
 
@@ -41,6 +35,18 @@ global $path, $session, $v;
 // ----------------------------------------------------------------------
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
+
+apikeystr = ""; 
+if (apikey!="") apikeystr = "&apikey="+apikey;
+
+// ----------------------------------------------------------------------
+// Display
+// ----------------------------------------------------------------------
+$("body").css('background-color','#222');
+$(window).ready(function(){
+    $("#footer").css('background-color','#181818');
+    $("#footer").css('color','#999');
+});
 if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
@@ -49,49 +55,47 @@ if (!sessionwrite) $(".config-open").hide();
 config.app = {};
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
+config.feeds = feed.list();
 
-config.initapp = function() {
-    init();
-};
-config.showapp = function() {
-    show();
-};
-config.hideapp = function() {
-    clear();
-};
+config.initapp = function(){init()};
+config.showapp = function(){show()};
+config.hideapp = function(){clear()};
 
 // ----------------------------------------------------------------------
-// Application
+// APPLICATION
 // ----------------------------------------------------------------------
 config.init();
 
-function init() {
-}
+function init()
+{   
 
-function show() {
+}
+    
+function show()
+{   
     $(".ajax-loader").hide();
 }
-
-function updater() {
-
-}
-
-function resize() {
+   
+function updater()
+{
 
 }
 
-function clear() {
+function resize() 
+{
+
+}
+
+function clear()
+{
 
 }
 
 // ----------------------------------------------------------------------
 // App log
 // ----------------------------------------------------------------------
-function appLog(level, message) {
-    if (level == "ERROR") {
-        alert(level + ": " + message);
-    }
-    console.log(level + ": " + message);
+function app_log (level, message) {
+    if (level=="ERROR") alert(level+": "+message);
+    console.log(level+": "+message);
 }
-
 </script>
