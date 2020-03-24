@@ -1,10 +1,51 @@
 <?php
-    global $path, $session;
-    $v = 8;
+    global $path, $session, $v;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
+<style>
+/* mobile version offset is default */
+.chart-placeholder {
+    --height-offset: 24rem;
+}
 
+/*
+--------------
+    adjust the full height offset for other specific devices
+    based on width,height,orientation or dpi 
+    @see: list of popular devices... https://css-tricks.com/snippets/css/media-queries-for-standard-devices/
+-----------------
+*/
+
+/* ----------- bootstrap break points ----------- */
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) {
+    .chart-placeholder { --height-offset: 25rem; }
+}
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+    .chart-placeholder { --height-offset: 26rem; }
+}
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+    .chart-placeholder { --height-offset: 27rem; }
+}
+/* DEVICE SPECIFIC: */
+/* ----------- Galaxy Tab 2 ----------- */
+/* Portrait and Landscape */
+@media (min-device-width: 800px) 
+  and (max-device-width: 1280px) {
+    .chart-placeholder {
+        --height-offset: 27rem;
+    }
+}
+
+
+/* set chart height to full screen height (100vh) minus an offset to cover the large value indicators and menus */
+.chart-placeholder > * {
+    height: calc(100vh - var(--height-offset))!important;
+}
+</style>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
 
@@ -362,7 +403,9 @@ function update()
     var use_now = parseInt(feeds[config.app.use.value].value);
 
     if (autoupdate) {
-        var updatetime = feeds[config.app.solar.value].time;
+        var updatetimesolar = feeds[config.app.solar.value].time;
+        var updatetimeuse = feeds[config.app.use.value].time;
+        var updatetime = Math.max(updatetimesolar, updatetimeuse);
         timeseries.append("solar",updatetime,solar_now);
         timeseries.trim_start("solar",view.start*0.001);
         timeseries.append("use",updatetime,use_now);
@@ -668,19 +711,26 @@ function load_bargraph(start,end) {
         var solar_kwh = solar_kwh_data[day][1] - solar_kwh_data[day-1][1];
         if (solar_kwh_data[day][1]==null || solar_kwh_data[day-1][1]==null) solar_kwh = null;
         
-        var use_kwh = use_kwh_data[day][1] - use_kwh_data[day-1][1];
-        if (use_kwh_data[day][1]==null || use_kwh_data[day-1][1]==null) use_kwh = null;
+        var use_kwh = null;
+        if (use_kwh_data[day]!=undefined) {
+            use_kwh = use_kwh_data[day][1] - use_kwh_data[day-1][1];
+            if (use_kwh_data[day][1]==null || use_kwh_data[day-1][1]==null) use_kwh = null;
+        }
         
-        var import_kwh = import_kwh_data[day][1] - import_kwh_data[day-1][1];
-        if (import_kwh_data[day][1]==null || import_kwh_data[day-1][1]==null) import_kwh = null;
+        var import_kwh = null;
+        if (import_kwh_data[day]!=undefined) {
+            import_kwh = import_kwh_data[day][1] - import_kwh_data[day-1][1];
+            if (import_kwh_data[day][1]==null || import_kwh_data[day-1][1]==null) import_kwh = null;
+        }
         
         var export_kwh = solar_kwh - (use_kwh - import_kwh);
         
         if (solar_kwh!=null && use_kwh!=null & export_kwh!=null) {
-            solarused_kwhd_data.push([solar_kwh_data[day-1][0],solar_kwh - export_kwh]);
-            solar_kwhd_data.push([solar_kwh_data[day-1][0],solar_kwh]);
-            use_kwhd_data.push([use_kwh_data[day-1][0],use_kwh]);
-            export_kwhd_data.push([import_kwh_data[day-1][0],export_kwh*-1]);
+            let time = solar_kwh_data[day-1][0];
+            solarused_kwhd_data.push([time,solar_kwh - export_kwh]);
+            solar_kwhd_data.push([time,solar_kwh]);
+            use_kwhd_data.push([time,use_kwh]);
+            export_kwhd_data.push([time,export_kwh*-1]);
         }
     }
     

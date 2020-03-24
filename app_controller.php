@@ -14,12 +14,13 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 
 function app_controller()
 {
-    global $mysqli,$path,$session,$route,$user;
-    
+    global $mysqli,$path,$session,$route,$user,$v;
+    // Force cache reload of css and javascript
+    $v = 10;
+
     $result = false;
 
     require_once "Modules/app/app_model.php";
-    $v = 9;
     $appconfig = new AppConfig($mysqli);
     $appavail = $appconfig->get_available();
 

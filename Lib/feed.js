@@ -13,9 +13,10 @@ class Feed {
         if (typeof async === 'undefined') async = false;
         
         var feeds = null;
-        var promise = $.ajax({                                      
+        var promise = $.ajax({
             url: path+"feed/list.json"+this.apikey,
             dataType: 'json',
+            cache: false,
             async: async,
             success(result) {
                 if (!result || result === null || result === "" || result.constructor != Array) {
@@ -88,6 +89,7 @@ class Feed {
             url: path+"feed/getmeta.json"+this.apikey,
             data: "id="+id,
             dataType: 'json',
+            cache: false,
             async: async,
             success(result) {
                 if (!result || result === null || result === "" || result.constructor != Object) {
