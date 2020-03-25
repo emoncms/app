@@ -180,7 +180,7 @@ if (!sessionwrite) $(".openconfig").hide();
 // ----------------------------------------------------------------------
 config.app = {
     "title":{"type":"value", "default":"OCTOPUS AGILE", "name": "Title", "description":"Optional title for app"},
-    "import":{"type":"feed", "autoname":"import", "engine":"5"},
+    "import":{"optional":true, "type":"feed", "autoname":"import", "engine":"5"},
     "import_kwh":{"type":"feed", "autoname":"import_kwh", "engine":5},
     "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5},
     "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5},
@@ -294,14 +294,16 @@ function updater()
             if (config.app[key].value) feeds[key] = result[config.app[key].value];
         }
         
-        if (viewcostenergy=="energy") {
-            if (feeds["import"].value<10000) {
-                $("#power_now").html(Math.round(feeds["import"].value)+"<span class='units'>W</span>");
+        if (feeds["import"]!=undefined) {
+            if (viewcostenergy=="energy") {
+                if (feeds["import"].value<10000) {
+                    $("#power_now").html(Math.round(feeds["import"].value)+"<span class='units'>W</span>");
+                } else {
+                    $("#power_now").html((feeds["import"].value*0.001).toFixed(1)+"<span class='units'>kW</span>");
+                }
             } else {
-                $("#power_now").html((feeds["import"].value*0.001).toFixed(1)+"<span class='units'>kW</span>");
+                $("#power_now").html(config.app.currency.value+(feeds["import"].value*1*config.app.unitcost.value*0.001).toFixed(3)+"<span class='units'>/hr</span>");
             }
-        } else {
-            $("#power_now").html(config.app.currency.value+(feeds["import"].value*1*config.app.unitcost.value*0.001).toFixed(3)+"<span class='units'>/hr</span>");
         }
     });
 }
