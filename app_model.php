@@ -46,7 +46,7 @@ class AppConfig
                     $content['dir'] = stripslashes($dir.'/');
                     
                     $id = basename($dir);
-                    if ($id != 'template' && (!isset($this->settings) || !isset($this->settings['hidden']) 
+                    if ((!isset($this->settings) || !isset($this->settings['hidden']) 
                         || !in_array($id, $this->settings['hidden']))) {
                         
                         $list[$id] = $content;
