@@ -239,6 +239,7 @@ function resize()
     var height = $(window).height()*0.55;
 
     if (height>width) height = width;
+    if (height<180) height = 180;
 
     placeholder.width(width);
     placeholder_bound.height(height);

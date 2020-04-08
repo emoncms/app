@@ -652,6 +652,7 @@ function resize() {
     
     var width = placeholder_bound.width();
     var height = window_height - topblock - 250;
+    if (height<250) height = 250;
 
     placeholder.width(width);
     placeholder_bound.height(height);
