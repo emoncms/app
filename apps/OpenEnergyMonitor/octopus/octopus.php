@@ -4,15 +4,15 @@
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 
-<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />    
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 
 <style>
@@ -24,15 +24,15 @@
 }
 
 .power-value {
-    font-weight:bold; 
-    font-size:52px; 
+    font-weight:bold;
+    font-size:52px;
     color:#44b3e2;
     line-height: 1.1;
 }
 
 .halfhour-value {
-    font-weight:bold; 
-    font-size:42px; 
+    font-weight:bold;
+    font-size:42px;
     color:#44b3e2;
     line-height: 1.1;
 }
@@ -53,9 +53,9 @@
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
 <div id="app-block" style="display:none">
-    
+
   <div id="octopus-realtime" class="col1"><div class="col1-inner">
-      
+
     <div class="block-bound">
       <div class="bluenav openconfig"><i class="icon-wrench icon-white"></i></div>
       <!--<div class="bluenav viewcostenergy">VIEW COST</div>-->
@@ -68,29 +68,29 @@
       <table style="width:100%">
         <tr>
           <td style="width:40%">
-              <div class="electric-title">POWER NOW</div>
+              <div class="electric-title">IMPORT NOW</div>
               <div class="power-value"><span id="power_now">0</span></div>
           </td>
-          
+
           <td style="text-align:center" class="last_halfhour_stats">
               <div class="electric-title">CURRENT PRICE</div>
               <div class="power-value"><span id="unit_price"></span></div>
           </td>
-          
+
           <td style="text-align:right" class="last_halfhour_stats">
               <div class="electric-title">LAST HALF HOUR</div>
               <div class="halfhour-value"><span id="kwh_halfhour"></span> <span id="cost_halfhour"></span></div>
           </td>
-          
+
         </tr>
       </table>
     </div>
-    
+
   </div></div>
   <div class="col1"><div class="col1-inner">
-  
+
     <div class="block-bound">
-      
+
       <div class="graph-navigation">
         <span class="bluenav" id="fastright" >>></span>
         <span class="bluenav" id="fastleft" ><<</span>
@@ -98,22 +98,27 @@
         <span class="bluenav" id="left" ><</span>
         <!--<span class="bluenav" id="zoomout" >-</span>-->
         <!--<span class="bluenav" id="zoomin" >+</span>-->
-        <span class="bluenav time" time='1440'>2M</span>
-        <span class="bluenav time" time='720'>M</span>
-        <span class="bluenav time" time='168'>W</span>
-        <span class="bluenav time" time='24'>D</span>
+        <span class="bluenav time" time='1440' title='Previous 60 days'>60d</span>
+        <span class="bluenav time" time='720' title='Previous 30 days'>30d</span>
+        <span class="bluenav time" time='168' title='Previous 7 days'>7d</span>
+        <span class="bluenav time" time='24' title='Previous 24 hours'>1d</span>
+	<span class="bluenav time" time='12' title='Previous 12 hours'>12h</span>
+        <span class="bluenav time" time='M' title='Since midnight 1st of month'>Month</span>
+        <span class="bluenav time" time='W' title='Since midnight Sunday'>Week</span>
+	<span class="bluenav time" time='Y' title='Yesterday'>Yesterday</span>
+	<span class="bluenav time" time='T' title='Today since midnight'>Today</span>
       </div>
-        
+
       <div class="block-title">HISTORY</div>
-         
+
     </div>
-    
+
     <div style="background-color:rgba(68,179,226,0.1); padding:10px;">
       <div id="placeholder_bound" style="width:100%; height:500px;">
         <div id="placeholder" style="height:500px"></div>
       </div>
     </div>
-          
+
     <div class="power-graph-footer" style="background-color:#f0f0f0; color:#333; display:none">
       <div style="padding:20px;">
       <table style="width:100%" class="table">
@@ -122,7 +127,7 @@
       </table>
     </div>
   </div></div>
-</div>    
+</div>
 </div>
 
 
@@ -158,7 +163,7 @@
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 
-apikeystr = ""; 
+apikeystr = "";
 if (apikey!="") apikeystr = "&apikey="+apikey;
 
 var view_mode = "energy";
@@ -260,25 +265,80 @@ function init()
 function show() {
     $("body").css('background-color','WhiteSmoke');
     $("#app-title").html(config.app.title.value);
-    
+
     // Quick translation of feed ids
     feeds = {};
     for (var key in config.app) {
         if (config.app[key].value) feeds[key] = config.feedsbyid[config.app[key].value];
     }
-    
+
     resize();
 
-    var timeWindow = (3600000*24.0*1);
-    view.end = (new Date()).getTime();
-    view.start = view.end - timeWindow;
-    view.end += 3600*4*1000; // show 4h of forecast
+    setPeriod('T');
     graph_load();
     graph_draw();
 
     updater();
     updaterinst = setInterval(updater,5000);
     $(".ajax-loader").hide();
+}
+
+function setPeriod(period) {
+        switch (period) {
+        case 'T':
+                //Today
+                var d = new Date();
+                d.setHours(0,0,0,0);
+                view.start = d.getTime();
+                d.setHours(24,0,0,0);
+                view.end = d.getTime();
+		//view.timewindow(3600000);
+                break;
+        case 'Y':
+                //Yesterday
+                var d = new Date();
+		d.setHours(0,0,0,0);
+                view.end =  d.getTime();
+                d.setHours(-24);
+                view.start = d.getTime();
+		//view.timewindow(3600000);
+                break;
+        case 'W':
+                //Week
+                var d = new Date();
+		view.end = d.getTime();
+		d.setHours(0,0,0,0);
+                d.setHours(-24 * d.getDay());
+                view.start = d.getTime();
+		//view.timewindow(3600000);
+                break;
+        case 'M':
+		//Month
+                var d = new Date();
+                view.end = d.getTime();
+		d.setHours(0,0,0,0);
+                d.setHours(-24 * (d.getDate()-1));
+                view.start = d.getTime();
+		//view.timewindow(3600000);
+                break;
+        case '12':
+        case '24':
+	case '168':
+        case '720':
+        case '1440':
+                var timeWindow = (3600000*period);
+                view.end = (new Date()).getTime();
+                view.start = view.end - timeWindow;
+
+                if (period<=24) {
+                view.end += 3600*4*1000; // show 4h of forecast for short time ranges
+                }
+		//view.timewindow(timeWindow);
+                break;
+	default:
+		alert('Invalid time period');
+		break;
+        }
 }
 
 function hide() {
@@ -289,11 +349,11 @@ function updater()
 {
     feed.listbyidasync(function(result){
         if (result === null) { return; }
-        
+
         for (var key in config.app) {
             if (config.app[key].value) feeds[key] = result[config.app[key].value];
         }
-        
+
         if (feeds["import"]!=undefined) {
             if (viewcostenergy=="energy") {
                 if (feeds["import"].value<10000) {
@@ -322,16 +382,17 @@ $('#fastleft').click(function () {view.pan_speed = 1.0; view.panleft(); graph_lo
 
 
 $('.time').click(function () {
-    view.timewindow($(this).attr("time")/24.0);
-    graph_load(); graph_draw(); 
+	setPeriod($(this).attr("time"));
+//    	view.timewindow(period);
+    	graph_load();
+	graph_draw();
 });
 
-$("#advanced-toggle").click(function () { 
+$("#advanced-toggle").click(function () {
     var mode = $(this).html();
     if (mode=="SHOW DETAIL") {
         $("#advanced-block").show();
         $(this).html("HIDE DETAIL");
-        
     } else {
         $("#advanced-block").hide();
         $(this).html("SHOW DETAIL");
@@ -341,14 +402,14 @@ $("#advanced-toggle").click(function () {
 $('#placeholder').bind("plothover", function (event, pos, item) {
     if (item) {
         var z = item.dataIndex;
-        
+
         if (previousPoint != item.datapoint) {
             previousPoint = item.datapoint;
-            
+
             $("#tooltip").remove();
             var itemTime = item.datapoint[0];
             var itemValue = item.datapoint[1];
-            
+
             var d = new Date(itemTime);
             var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
             var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
