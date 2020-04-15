@@ -488,6 +488,7 @@ function resize()
     var height = $(window).height()*(is_landscape ? 0.3: 0.6);
 
     if (height>width) height = width;
+    if (height<180) height = 180;
 
     placeholder.width(width);
     placeholder_bound.height(height);
