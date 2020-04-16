@@ -316,7 +316,7 @@ function setPeriod(period) {
         // Month
         var d = new Date();
         view.end = d.getTime();
-            .setHours(0,0,0,0);
+        d.setHours(0,0,0,0);
         d.setHours(-24 * (d.getDate()-1));
         view.start = d.getTime();
         // view.timewindow(3600000);
