@@ -284,61 +284,61 @@ function show() {
 }
 
 function setPeriod(period) {
-        switch (period) {
-        case 'T':
-                //Today
-                var d = new Date();
-                d.setHours(0,0,0,0);
-                view.start = d.getTime();
-                d.setHours(24,0,0,0);
-                view.end = d.getTime();
-		//view.timewindow(3600000);
-                break;
-        case 'Y':
-                //Yesterday
-                var d = new Date();
-		d.setHours(0,0,0,0);
-                view.end =  d.getTime();
-                d.setHours(-24);
-                view.start = d.getTime();
-		//view.timewindow(3600000);
-                break;
-        case 'W':
-                //Week
-                var d = new Date();
-		view.end = d.getTime();
-		d.setHours(0,0,0,0);
-                d.setHours(-24 * d.getDay());
-                view.start = d.getTime();
-		//view.timewindow(3600000);
-                break;
-        case 'M':
-		//Month
-                var d = new Date();
-                view.end = d.getTime();
-		d.setHours(0,0,0,0);
-                d.setHours(-24 * (d.getDate()-1));
-                view.start = d.getTime();
-		//view.timewindow(3600000);
-                break;
-        case '12':
-        case '24':
-	case '168':
-        case '720':
-        case '1440':
-                var timeWindow = (3600000*period);
-                view.end = (new Date()).getTime();
-                view.start = view.end - timeWindow;
+    switch (period) {
+    case 'T':
+        //Today
+        var d = new Date();
+        d.setHours(0,0,0,0);
+        view.start = d.getTime();
+        d.setHours(24,0,0,0);
+        view.end = d.getTime();
+        //view.timewindow(3600000);
+        break;
+    case 'Y':
+        //Yesterday
+        var d = new Date();
+        d.setHours(0,0,0,0);
+        view.end =  d.getTime();
+        d.setHours(-24);
+        view.start = d.getTime();
+        //view.timewindow(3600000);
+        break;
+    case 'W':
+        //Week
+        var d = new Date();
+        view.end = d.getTime();
+        d.setHours(0,0,0,0);
+        d.setHours(-24 * d.getDay());
+        view.start = d.getTime();
+        // view.timewindow(3600000);
+        break;
+    case 'M':
+        // Month
+        var d = new Date();
+        view.end = d.getTime();
+            .setHours(0,0,0,0);
+        d.setHours(-24 * (d.getDate()-1));
+        view.start = d.getTime();
+        // view.timewindow(3600000);
+        break;
+    case '12':
+    case '24':
+    case '168':
+    case '720':
+    case '1440':
+        var timeWindow = (3600000*period);
+        view.end = (new Date()).getTime();
+        view.start = view.end - timeWindow;
 
-                if (period<=24) {
-                view.end += 3600*4*1000; // show 4h of forecast for short time ranges
-                }
-		//view.timewindow(timeWindow);
-                break;
-	default:
-		alert('Invalid time period');
-		break;
+        if (period<=24) {
+            view.end += 3600*4*1000; // show 4h of forecast for short time ranges
         }
+        // view.timewindow(timeWindow);
+        break;
+	  default:
+		    alert('Invalid time period');
+		    break;
+    }
 }
 
 function hide() {
@@ -499,21 +499,18 @@ function graph_load()
     data["agile"] = []
     data["outgoing"] = []
     if (config.app.region!=undefined && regions_import[config.app.region.value]!=undefined) {
-	//Add 30 minutes to each reading to get a stepped graph
-	agile = feed.getdataremote(regions_import[config.app.region.value],view.start,view.end,interval);
-
-	for (var z in agile) {
-		data["agile"].push(agile[z]);
-		data["agile"].push([agile[z][0]+(intervalms-1), agile[z][1]]);
-	}
-
-        outgoing =  feed.getdataremote(regions_outgoing[config.app.region.value],view.start,view.end,interval);
-
-  	for (var z in outgoing) {
-                data["outgoing"].push(outgoing[z]);
-                data["outgoing"].push([ outgoing[z][0]+(intervalms-1), outgoing[z][1]   ]);
+        //Add 30 minutes to each reading to get a stepped graph
+        agile = feed.getdataremote(regions_import[config.app.region.value],view.start,view.end,interval);
+        for (var z in agile) {
+            data["agile"].push(agile[z]);
+            data["agile"].push([agile[z][0]+(intervalms-1), agile[z][1]]);
         }
 
+        outgoing =  feed.getdataremote(regions_outgoing[config.app.region.value],view.start,view.end,interval);
+        for (var z in outgoing) {
+            data["outgoing"].push(outgoing[z]);
+            data["outgoing"].push([ outgoing[z][0]+(intervalms-1), outgoing[z][1]]);
+        }
     }
     // Invert export tariff
     for (var z in data["outgoing"]) data["outgoing"][z][1] *= -1;
