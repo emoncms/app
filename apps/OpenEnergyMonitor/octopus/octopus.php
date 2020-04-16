@@ -49,6 +49,21 @@
   background-color:rgba(255,255,255,0.2);
 }
 
+.time-select {
+  width:165px; 
+  margin:4px 5px 0px 0px; 
+  float:right; 
+  background-color: #44b3e2;
+}
+
+@media(max-width: 610px) {
+  .time-select {
+    margin:4px 0px 0px 5px; 
+    float:none;
+  }
+  #history-title {display:none;}
+}
+
 </style>
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
@@ -89,7 +104,7 @@
   </div></div>
   <div class="col1"><div class="col1-inner">
 
-    <div class="block-bound">
+    <div class="block-bound" style="min-height:36px">
 
       <div class="graph-navigation">
         <span class="bluenav" id="fastright" >>></span>
@@ -97,19 +112,31 @@
         <span class="bluenav" id="right" >></span>
         <span class="bluenav" id="left" ><</span>
         <!--<span class="bluenav" id="zoomout" >-</span>-->
-        <!--<span class="bluenav" id="zoomin" >+</span>-->
+        <!--<span class="bluenav" id="zoomin" >+</span>
         <span class="bluenav time" time='1440' title='Previous 60 days'>60d</span>
         <span class="bluenav time" time='720' title='Previous 30 days'>30d</span>
         <span class="bluenav time" time='168' title='Previous 7 days'>7d</span>
         <span class="bluenav time" time='24' title='Previous 24 hours'>1d</span>
-	<span class="bluenav time" time='12' title='Previous 12 hours'>12h</span>
+        <span class="bluenav time" time='12' title='Previous 12 hours'>12h</span>
         <span class="bluenav time" time='M' title='Since midnight 1st of month'>Month</span>
         <span class="bluenav time" time='W' title='Since midnight Sunday'>Week</span>
-	<span class="bluenav time" time='Y' title='Yesterday'>Yesterday</span>
-	<span class="bluenav time" time='T' title='Today since midnight'>Today</span>
+        <span class="bluenav time" time='Y' title='Yesterday'>Yesterday</span>
+        <span class="bluenav time" time='T' title='Today since midnight'>Today</span>-->
+        
+        <select class="time-select">
+            <option value='1440'>Previous 60 days</option>
+            <option value='720'>Previous 30 days</option>
+            <option value='168'>Previous 7 days</option>
+            <option value='24'>Previous 24 hours</option>
+            <option value='12>Previous 12 hours</option>
+            <option value='M'>Since midnight 1st of month</option>
+            <option value='W'>Since midnight Sunday</option>
+            <option value='Y'>Yesterday</option>
+            <option value='T' selected>Today since midnight</option>
+        </select>
       </div>
 
-      <div class="block-title">HISTORY</div>
+      <div id="history-title" class="block-title">HISTORY</div>
 
     </div>
 
@@ -382,10 +409,17 @@ $('#fastleft').click(function () {view.pan_speed = 1.0; view.panleft(); graph_lo
 
 
 $('.time').click(function () {
-	setPeriod($(this).attr("time"));
-//    	view.timewindow(period);
-    	graph_load();
-	graph_draw();
+    setPeriod($(this).attr("time"));
+    // view.timewindow(period);
+    graph_load();
+    graph_draw();
+});
+
+$('.time-select').change(function () {
+    setPeriod($(this).val());
+    // view.timewindow(period);
+    graph_load();
+    graph_draw();
 });
 
 $("#advanced-toggle").click(function () {
@@ -736,7 +770,7 @@ function resize() {
     if (width<=500) {
         $(".electric-title").css("font-size","14px");
         $(".power-value").css("font-size","36px");
-        $(".halfhour-value").css("font-size","26px");       
+        $(".halfhour-value").css("font-size","26px");  
     } else if (width<=724) {
         $(".electric-title").css("font-size","16px");
         $(".power-value").css("font-size","50px");
