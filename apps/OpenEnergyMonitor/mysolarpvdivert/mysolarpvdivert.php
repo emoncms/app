@@ -30,6 +30,7 @@
     width: 25%;
     text-align: center;
     vertical-align: middle;
+    background: #262626;
 }
 
 .statsbox-inner-unit {
@@ -123,6 +124,25 @@
   font-weight:bold;
   font-size:10px;
 }
+
+/*Small devices (landscape phones, 576px and up)*/
+@media (max-width: 576px) {
+  #statsbox-generation { padding-bottom:18px; }
+  .statsbox-padded { padding: 4px; }
+  .statsbox-title { font-size: 14px; padding-bottom: 5px; } /* 20px */
+  .statsbox-value { font-size:28px; } /* 36px */
+  .statsbox-units { font-size:14px; } /* 16px */
+  .statsbox-prc { font-size: 14px; } /* 16px */
+  .statsbox-arrow-down:after {
+    border-width: 10px;
+    margin-left: -10px;
+  }
+  .statsbox-arrow-right:after {
+    border-width: 10px;
+    margin-top: -10px;
+  }
+}
+
 </style>
 
 
@@ -185,9 +205,9 @@
         
     <table class="statstable">
         <tr>
-            <td class="statsbox" colspan="2">
-                <div class="statsbox-inner-unit" style="background: #dccc1f">
-                    <div class="statsbox-padded" style="position: relative;">
+            <td class="statsbox" colspan="2" style="background: #dccc1f">
+                <div class="statsbox-inner-unit">
+                    <div id="statsbox-generation" class="statsbox-padded" style="position: relative;">
                         <div class="statsbox-title"><span class="generationtitle">SOLAR</span></div>
                         <div><span class="statsbox-value total_generated_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                         <div style="position: absolute; width: 50%; left: 0%; bottom: 0%">
@@ -213,8 +233,8 @@
                 </div>
             </td>
 
-            <td class="statsbox">
-                <div class="statsbox-padded statsbox-inner-unit" style="background: #d52e2e">
+            <td class="statsbox" style="background: #d52e2e">
+                <div class="statsbox-padded statsbox-inner-unit">
                     <div class="statsbox-title">GRID</div>
                     <div><span class="statsbox-value total_grid_balance_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
@@ -245,15 +265,15 @@
         </tr>
         
         <tr>
-            <td class="statsbox">
-                <div class="statsbox-padded statsbox-inner-unit" style="background: #fb7b50">
+            <td class="statsbox" style="background: #fb7b50">
+                <div class="statsbox-padded statsbox-inner-unit">
                     <div class="statsbox-title">DIVERT</div>
                     <div><span class="statsbox-value total_divert_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
             
-            <td class="statsbox" colspan="3">
-                <div class="statsbox-inner-unit" style="background: #82cbfc">
+            <td class="statsbox" colspan="3" style="background: #82cbfc">
+                <div class="statsbox-inner-unit">
                     <div class="statsbox-padded" style="position: relative;">
                         <div class="statsbox-title">HOUSE</div>
                         <div><span class="statsbox-value total_house_kwh">0</span> <span class="statsbox-units">kWh</span></div>
