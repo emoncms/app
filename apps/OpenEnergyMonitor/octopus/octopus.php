@@ -78,7 +78,7 @@
           </td>
 
           <td style="text-align:right" class="last_halfhour_stats">
-              <div class="electric-title">LAST HALF HOUR</div>
+              <div class="electric-title">CURRENT HALF HOUR</div>
               <div class="halfhour-value"><span id="kwh_halfhour"></span> <span id="cost_halfhour"></span></div>
           </td>
 
@@ -737,18 +737,17 @@ function resize() {
     placeholder.height(height-top_offset);
 
     if (width<=500) {
-        $(".electric-title").css("font-size","16px");
-        $(".power-value").css("font-size","38px");
-        $(".halfhour-value").css("font-size","28px");
-
+        $(".electric-title").css("font-size","14px");
+        $(".power-value").css("font-size","36px");
+        $(".halfhour-value").css("font-size","26px");       
     } else if (width<=724) {
-        $(".electric-title").css("font-size","18px");
-        $(".power-value").css("font-size","52px");
-        $(".halfhour-value").css("font-size","42px");
+        $(".electric-title").css("font-size","16px");
+        $(".power-value").css("font-size","50px");
+        $(".halfhour-value").css("font-size","40px");
     } else {
-        $(".electric-title").css("font-size","22px");
-        $(".power-value").css("font-size","52px");
-        $(".halfhour-value").css("font-size","42px");
+        $(".electric-title").css("font-size","20px");
+        $(".power-value").css("font-size","50px");
+        $(".halfhour-value").css("font-size","40px");
     }
 }
 
