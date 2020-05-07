@@ -29,29 +29,16 @@ Make sure to check for database updates in **Emoncms > Admin**.
 
 ## Settings
 
-Optionally, if certain applications should not be possible to be created, as e.g. their configurations do not apply for certain countrys, a blacklist may be maintained in the `settings.php` file.  
+Optionally, if certain apps should not be possible to be created, as e.g. their configurations do not apply for certain countrys, a blacklist may be maintained in the `settings.php` file.  
 To use this functionality, simply edit the default settings file
 
-    sudo nano /var/www/emoncms/settings.php
+    sudo nano /var/www/emoncms/settings.ini
 
 And add the following lines to the bottom of the file, to e.g. blacklist all *Time of use* apps:
 
-~~~~
-#   App module settings
-    $app_settings = array(
-        // Blacklisted Apps. Uncommented apps will not be available for users to create.
-        'hidden' => array(
-            //'myelectric',
-            //'mysolarpv',
-            //'mysolarpvdivert',
-            //'myenergy',
-            //'myelectric2',
-            'timeofuse',
-            'timeofuse2',
-            'timeofusecl',
-            //'costcomparison',
-            //'myheatpump',
-            //'openevse'
-        )
-    );
-~~~~
+#### App module settings
+
+    [app]
+    ; csv list of hidden apps
+    hidden = template
+

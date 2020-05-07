@@ -792,6 +792,8 @@ function resize() {
     if (height>width) height = width;
     
     if (!config.app.showcomparison.value) height = window_height - topblock - 200;
+    
+    if (height<180) height = 180;
 
     placeholder.width(width);
     placeholder_bound.height(height);
