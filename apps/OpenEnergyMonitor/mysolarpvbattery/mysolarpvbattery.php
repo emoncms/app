@@ -296,9 +296,9 @@
         <div class="row-fluid">
             <div class="span9 xappconfig-description">
                 <div class="xappconfig-description-inner text-light">
-                    <h2 class="appconfig-title text-warning"><?php echo _('Solar & Battery'); ?></h2>
+                    <h2 class="appconfig-title text-warning"><?php echo _('My Solar & Battery'); ?></h2>
                     <p class="lead">
-                    The Solar and Battery app can be used to explore onsite solar generation, self consumption, battery integration, export and building consumption.</p>
+                    This app can be used to explore onsite solar generation, self consumption, battery integration, export and building consumption.</p>
                     <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                     <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
                     <img src="../Modules/app/images/mysolar_app.png" class="d-none d-sm-inline-block">
@@ -536,14 +536,12 @@ function livefn()
     if (battery_charge_now<10) battery_charge_now = 0;
     if (battery_discharge_now<10) battery_discharge_now = 0;
     
-    var balance = solar_now - use_now;
+    var balance = solar_now - use_now - battery_charge_now + battery_discharge_now;
     
     // convert W to kW
     if(powerUnit === 'kW') {
         gen_now = as_kw(solar_now)
         solar_now = as_kw(solar_now)
-        // house_now = as_kw(house_now)
-        // divert_now = as_kw(divert_now)
         use_now = as_kw(use_now)
         balance = as_kw(balance)
         $('.power-unit').text('kW')
