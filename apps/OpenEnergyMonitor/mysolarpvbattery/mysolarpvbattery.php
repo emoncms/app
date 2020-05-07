@@ -576,7 +576,7 @@ function livefn()
     
     $(".generationnow").html(gen_now);
     $(".usenow").html(use_now);
-    $(".battery_soc").html(Math.round(100*battery_soc_now/7.0));
+    $(".battery_soc").html(battery_soc_now);
     
     if (battery_charge_now>0) {
         $(".battery_charge_discharge_title").html("BATTERY CHARGING");
