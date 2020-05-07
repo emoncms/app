@@ -261,7 +261,7 @@
             <td class="statsbox" style="background: #fb7b50">
                 <div class="statsbox-padded statsbox-inner-unit">
                     <div class="statsbox-title">BATTERY</div>
-                    <div><span class="statsbox-value total_charge_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                    <div><span class="statsbox-value battery_soc_change">0</span> <span class="statsbox-units">%</span></div>
                 </div>
             </td>
 
@@ -276,6 +276,9 @@
                     <div class="statsbox-padded" style="position: relative;">
                         <div class="statsbox-title">HOUSE</div>
                         <div><span class="statsbox-value total_use_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                        <div style="position: absolute; width: 0%; left: 3px; top: 40%">
+                            <div><span class="statsbox-prc use_from_battery_prc">0</span></div>
+                        </div>
                         <div style="position: absolute; width: 33.33333%; left: 0%; top: 0%">
                             <div><span class="statsbox-prc use_from_solar_prc">0</span></div>
                         </div>
@@ -751,6 +754,12 @@ function draw_powergraph() {
     $(".use_from_import_prc").html((100*total_import_kwh/total_use_kwh).toFixed(0)+"%");
     $(".total_battery_charge_kwh").html(total_battery_charge_kwh.toFixed(1));
     $(".total_battery_discharge_kwh").html(total_battery_discharge_kwh.toFixed(1));
+    $(".use_from_battery_prc").html((100*total_battery_discharge_kwh/total_use_kwh).toFixed(0)+"%");
+    
+    
+    var soc_change = battery_soc_now-timeseries.value("battery_soc",0);
+    var sign = ""; if (soc_change>0) sign = "+";
+    $(".battery_soc_change").html(sign+soc_change.toFixed(1));
     
     options.xaxis.min = view.start;
     options.xaxis.max = view.end;
@@ -762,7 +771,7 @@ function draw_powergraph() {
     series.push({data:battery_charge_data, label: "Charge", color: "#fb7b50", stack:2, lines:{lineWidth:0, fill:0.8}});
     series.push({data:battery_discharge_data, label: "Discharge", color: "#fbb450", stack:1, lines:{lineWidth:0, fill:0.8}});
     
-    if (show_battery_soc) series.push({data:battery_soc_data, label: "Balance", yaxis:2, color: "#888"});
+    if (show_battery_soc) series.push({data:battery_soc_data, label: "SOC", yaxis:2, color: "#888"});
 
     powerseries = series;
     
@@ -790,8 +799,8 @@ function powergraph_events() {
 
             for (i = 0; i < powerseries.length; i++) {
                 var series = powerseries[i];
-                if (series.label.toUpperCase()=="BALANCE") {
-                    tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "kWh"]);
+                if (series.label.toUpperCase()=="SOC") {
+                    tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "%"]);
                 } else {
                     if ( series.data[item.dataIndex][1] >= 1000) {
                         tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(0)/1000 , "kW"]);
