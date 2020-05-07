@@ -351,7 +351,7 @@ if (!sessionwrite) $(".openconfig").hide();
 // ----------------------------------------------------------------------
 config.app = {
     // Standard mysolar feeds
-    "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"Total use in watts (including diversion)"},
+    "use":{"type":"feed", "autoname":"use", "engine":"5", "description":"Building consumption in watts (not including battery charging)"},
     "solar":{"type":"feed", "autoname":"solar", "engine":"5", "description":"Solar pv generation in watts"},
     // Battery feeds
     "battery_charge":{"type":"feed", "autoname":"battery_charge", "engine":"5", "description":"Battery charge power in watts"},
@@ -359,7 +359,7 @@ config.app = {
     "battery_soc":{"type":"feed", "autoname":"battery_soc", "engine":"5", "description":"Battery state of charge %"},
 
     // History feeds
-    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative total use in kWh (including diversion)"},
+    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":"Building consumption in kWh (not including battery charging)"},
     "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5, "description":"Cumulative solar generation in kWh"},
     "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "engine":5, "description":"Cumulative grid import in kWh"},
     "battery_charge_kwh":{"optional":true, "type":"feed", "autoname":"battery_charge_kwh", "engine":"5", "description":"Battery charge energy in kWh"},
@@ -669,6 +669,10 @@ function draw_powergraph() {
     
     var last_solar = 0;
     var last_use = 0;
+    var last_charge = 0;
+    var last_discharge = 0;
+    var last_soc = 0;
+    
     var timeout = 600*1000;
     
     for (var z=0; z<timeseries.length("solar"); z++) {
@@ -687,18 +691,18 @@ function draw_powergraph() {
         }
         if (timeseries.value("battery_charge",z)!=null) {
             battery_charge_now = timeseries.value("battery_charge",z);
-            //last_use = time;
+            last_charge = time;
         }
         if (timeseries.value("battery_discharge",z)!=null) {
             battery_discharge_now = timeseries.value("battery_discharge",z);
-            //last_use = time;
+            last_discharge = time;
         }
         if (timeseries.value("battery_soc",z)!=null) {
             battery_soc_now = timeseries.value("battery_soc",z);
-            //last_use = time;
+            last_soc = time;
         }
                 
-        if ((time-last_solar)<timeout && (time-last_use)<timeout) {
+        if ((time-last_solar)<timeout && (time-last_use)<timeout && (time-last_charge)<timeout && (time-last_discharge)<timeout && (time-last_soc)<timeout) {
             
             // -------------------------------------------------------------------------------------------------------
             // Supply / demand balance calculation
