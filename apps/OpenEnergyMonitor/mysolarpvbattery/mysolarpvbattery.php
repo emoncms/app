@@ -152,10 +152,6 @@
             <span class="d-xs-none"><?php echo _("Hist") ?></span>
             <span class="d-none d-xs-inline"><?php echo _("History") ?></span>
         </button></li>
-        <li><button class="balanceline btn btn-large btn-link btn-inverse" title="<?php echo _('Show Balance') ?>">
-            <span class="d-xs-none"><?php echo _("Bal") ?></span>
-            <span class="d-none d-xs-inline"><?php echo _("Balance") ?></span>
-        </li>
     </ul>
     <?php include(dirname(__DIR__).'/config-nav.php'); ?>
 </nav>
@@ -385,13 +381,22 @@ var live = false;
 var show_battery_soc = 1;
 var reload = true;
 var autoupdate = true;
-var lastupdate = 0;
+var lastupdate = +new Date;
 var viewmode = "powergraph";
 var historyseries = [];
 var powerseries = [];
 var latest_start_time = 0;
 var panning = false;
 var bargraph_initialized = false;
+var bargraph_loaded = false;
+
+var timeWindow = (3600000*24.0*30);
+var history_end = +new Date;
+var history_start = history_end - timeWindow;
+
+timeWindow = (3600000*6.0*1);
+var power_end = +new Date;
+var power_start = power_end - timeWindow;
 
 config.init();
 
@@ -400,61 +405,57 @@ function init()
 {        
     app_log("INFO","solar & battery init");
 
-    var timeWindow = (3600000*6.0*1);
-    view.end = +new Date;
-    view.start = view.end - timeWindow;
-    
-    $(".generationtitle").html("SOLAR");
+    view.end = power_end;
+    view.start = power_start;
   
     if (config.app.solar_kwh.value && config.app.use_kwh.value && config.app.import_kwh.value && config.app.battery_charge_kwh.value && config.app.battery_discharge_kwh.value) {
         init_bargraph();
-        // $(".viewhistory").show();
+        $(".viewhistory").show();
     } else {
-        // $(".viewhistory").hide();
+        $(".viewhistory").hide();
     }
-    
-    // The first view is the powergraph, we load the events for the power graph here.
-    if (viewmode=="powergraph") powergraph_events();
     
     // The buttons for these powergraph events are hidden when in historic mode 
     // The events are loaded at the start here and dont need to be unbinded and binded again.
-    $("#zoomout").click(function () {view.zoomout(); reload = true; autoupdate = false; draw();});
-    $("#zoomin").click(function () {view.zoomin(); reload = true; autoupdate = false; draw();});
-    $('#right').click(function () {view.panright(); reload = true; autoupdate = false; draw();});
-    $('#left').click(function () {view.panleft(); reload = true; autoupdate = false; draw();});
+    $("#zoomout").click(function () {view.zoomout(); reload = true; autoupdate = false; draw(true);});
+    $("#zoomin").click(function () {view.zoomin(); reload = true; autoupdate = false; draw(true);});
+    $('#right').click(function () {view.panright(); reload = true; autoupdate = false; draw(true);});
+    $('#left').click(function () {view.panleft(); reload = true; autoupdate = false; draw(true);});
     
     $('.time').click(function () {
         view.timewindow($(this).attr("time")/24.0); 
         reload = true; 
         autoupdate = true;
-        draw();
-    });
-    
-    $(".balanceline").click(function () {
-        $btn = $(this);
-        $btn.toggleClass('active');
-        $('.viewhistory').toggleClass('active', false);
-
-        show_battery_soc = $btn.is('.active') ? 1 : 0;
-        draw();
+        draw(true);
     });
     
     $(".viewhistory").click(function () {
         $btn = $(this);
         $btn.toggleClass('active');
-
-        $(".powergraph-navigation").show();
+        
         $('.balanceline').attr('disabled', $btn.is('.active'));
-
         viewmode = $btn.is('.active') ? 'bargraph' : 'powergraph';
-        if(viewmode==='powergraph') {
-            powergraph_events();
+        
+        if (viewmode=="bargraph") {
+            power_start = view.start
+            power_end = view.end
+            view.start = history_start
+            view.end = history_end
+            if (bargraph_loaded) {
+                draw(false); 
+            } else {
+                bargraph_loaded = true;
+                draw(true);
+            }
+            bargraph_events();
         } else {
-            var timeWindow = (3600000*24.0*30);
-            view.end = +new Date;
-            view.start = view.end - timeWindow;
+            history_start = view.start
+            history_end = view.end
+            view.start = power_start
+            view.end = power_end
+            draw(false);
+            powergraph_events();
         }
-        draw();
     });
 }
 
@@ -466,7 +467,9 @@ function show()
         if (!bargraph_initialized) init_bargraph();
     }
     
+    load_powergraph();
     resize();
+    powergraph_events();
     
     livefn();
     live = setInterval(livefn,5000);
@@ -483,7 +486,7 @@ function resize()
 
     var is_landscape = $(window).height() < $(window).width();
     var width = placeholder_bound.width();
-    var height = $(window).height()*(is_landscape ? 0.3: 0.6);
+    var height = $(window).height()*(is_landscape ? 0.3: 0.3);
 
     if (height>width) height = width;
     if (height<180) height = 180;
@@ -492,7 +495,7 @@ function resize()
     placeholder_bound.height(height);
     placeholder.height(height-top_offset);
     
-    draw();
+    draw(false)
 }
 
 function hide() 
@@ -590,34 +593,21 @@ function livefn()
     }
     
     // Only redraw the graph if its the power graph and auto update is turned on
-    if (viewmode=="powergraph" && autoupdate) draw();
+    if (viewmode=="powergraph" && autoupdate) draw(true);
 }
 
-function draw()
-{
-    console.log("draw");
-    if (viewmode=="powergraph") draw_powergraph();
+function draw(load) {
+    if (viewmode=="powergraph") {
+        if (load) load_powergraph();
+        draw_powergraph();
+    }
     if (viewmode=="bargraph") {
-        load_bargraph(view.start,view.end)
+        if (load) load_bargraph();
         draw_bargraph();
     }
 }
 
-function draw_powergraph() {
-    var dp = 1;
-    var units = "C";
-    var fill = false;
-    var plotColour = 0;
-    
-    var options = {
-        lines: { fill: fill },
-        xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end},
-        yaxes: [{ min: 0 }],
-        grid: { hoverable: true, clickable: true },
-        selection: { mode: "x" },
-        legend: { show: false }
-    }
-    
+function load_powergraph() {
     var npoints = 1500;
     interval = Math.round(((view.end - view.start)/npoints)/1000);
     interval = view.round_interval(interval);
@@ -634,8 +624,6 @@ function draw_powergraph() {
     // -------------------------------------------------------------------------------------------------------
     if (reload) {
         reload = false;
-        view.start = 1000*Math.floor((view.start/1000)/interval)*interval;
-        view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
         timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,interval,0,0));
         timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,interval,0,0));
         timeseries.load("battery_charge",feed.getdata(config.app.battery_charge.value,view.start,view.end,interval,0,0));
@@ -771,20 +759,29 @@ function draw_powergraph() {
     var sign = ""; if (soc_change>0) sign = "+";
     $(".battery_soc_change").html(sign+soc_change.toFixed(1));
     
+    powerseries = [];
+    
+    powerseries.push({data:solar_data, label: "Solar", color: "#dccc1f", stack:1, lines:{lineWidth:0, fill:1.0}});
+    powerseries.push({data:use_data, label: "House", color: "#82cbfc", stack:2, lines:{lineWidth:0, fill:0.8}});
+    powerseries.push({data:battery_charge_data, label: "Charge", color: "#fb7b50", stack:2, lines:{lineWidth:0, fill:0.8}});
+    powerseries.push({data:battery_discharge_data, label: "Discharge", color: "#fbb450", stack:1, lines:{lineWidth:0, fill:0.8}});
+    
+    if (show_battery_soc) powerseries.push({data:battery_soc_data, label: "SOC", yaxis:2, color: "#888"});
+}
+
+function draw_powergraph() {
+
+    var options = {
+        lines: { fill: false },
+        xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end},
+        yaxes: [{ min: 0 }],
+        grid: { hoverable: true, clickable: true },
+        selection: { mode: "x" },
+        legend: { show: false }
+    }
+    
     options.xaxis.min = view.start;
     options.xaxis.max = view.end;
-    
-    var series = [];
-    
-    series.push({data:solar_data, label: "Solar", color: "#dccc1f", stack:1, lines:{lineWidth:0, fill:1.0}});
-    series.push({data:use_data, label: "House", color: "#82cbfc", stack:2, lines:{lineWidth:0, fill:0.8}});
-    series.push({data:battery_charge_data, label: "Charge", color: "#fb7b50", stack:2, lines:{lineWidth:0, fill:0.8}});
-    series.push({data:battery_discharge_data, label: "Discharge", color: "#fbb450", stack:1, lines:{lineWidth:0, fill:0.8}});
-    
-    if (show_battery_soc) series.push({data:battery_soc_data, label: "SOC", yaxis:2, color: "#888"});
-
-    powerseries = series;
-    
     $.plot($('#placeholder'),powerseries,options);
     $(".ajax-loader").hide();
 }
@@ -793,7 +790,11 @@ function draw_powergraph() {
 // POWER GRAPH EVENTS
 // ------------------------------------------------------------------------------------------
 function powergraph_events() {
-
+    $(".visnav[time=1]").show();
+    $(".visnav[time=3]").show();
+    $(".visnav[time=6]").show();
+    $(".visnav[time=24]").show();
+            
     $('#placeholder').unbind("plotclick");
     $('#placeholder').unbind("plothover");
     $('#placeholder').unbind("plotselected");
@@ -838,7 +839,7 @@ function powergraph_events() {
             autoupdate = true;
         }
 
-        draw();
+        draw(true);
     });
 }
 
@@ -867,16 +868,15 @@ function init_bargraph() {
     earliest_start_time = Math.min(earliest_start_time, use_meta.start_time);
     earliest_start_time = Math.min(earliest_start_time, import_meta.start_time);
     view.first_data = latest_start_time * 1000;
-
-    var timeWindow = (3600000*24.0*40);
-    var end = +new Date;
-    var start = end - timeWindow;
-    load_bargraph(start,end);
 }
 
-function load_bargraph(start,end) {
+function load_bargraph() {
     var interval = 3600*24;
     var intervalms = interval * 1000;
+    
+    end = view.end
+    start = view.start
+    
     end = Math.ceil(end/intervalms)*intervalms;
     start = Math.floor(start/intervalms)*intervalms;
     
@@ -972,10 +972,8 @@ function load_bargraph(start,end) {
 // the data loading part to init and the draw part here just draws the bargraph to the flot
 // placeholder overwritting the power graph as the view is changed.
 // ------------------------------------------------------------------------------------------    
-function draw_bargraph() 
+function draw_bargraph()
 {
-    console.log("draw_bargraph");
-    console.log(historyseries);
     var markings = [];
     markings.push({ color: "#ccc", lineWidth: 1, yaxis: { from: 0, to: 0 } });
     
@@ -990,8 +988,6 @@ function draw_bargraph()
     
     $('#placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use & Total Use</div>");
     $('#placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> Exported solar</div>");
-    // Because the bargraph is only drawn once when the view is changed we attach the events at this point
-    bargraph_events();
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1000,7 +996,11 @@ function draw_bargraph()
 // - click through to power graph
 // ------------------------------------------------------------------------------------------
 function bargraph_events() {
-
+    $(".visnav[time=1]").hide();
+    $(".visnav[time=3]").hide();
+    $(".visnav[time=6]").hide();
+    $(".visnav[time=24]").hide();
+            
     $('#placeholder').unbind("plotclick");
     $('#placeholder').unbind("plothover");
     $('#placeholder').unbind("plotselected");
@@ -1055,25 +1055,19 @@ function bargraph_events() {
         if (item && !panning) {
             var z = item.dataIndex;
             
+            history_start = view.start
+            history_end = view.end
             view.start = solar_kwhd_data[z][0];
             view.end = view.start + 86400*1000;
 
             $(".balanceline").attr('disabled',false);
-            // $(".bargraph-navigation").hide();
-            $(".powergraph-navigation").show();
-            
-            $('#placeholder').unbind("plotclick");
-            $('#placeholder').unbind("plothover");
-            $('#placeholder').unbind("plotselected");
- 
- 
             $(".viewhistory").toggleClass('active');
             
             reload = true; 
             autoupdate = false;
             viewmode = "powergraph";
             
-            draw();
+            draw(true);
             powergraph_events();
         }
     });
@@ -1082,14 +1076,14 @@ function bargraph_events() {
     $('#placeholder').bind("plotselected", function (event, ranges) {
         view.start = ranges.xaxis.from;
         view.end = ranges.xaxis.to;
-        draw();
+        draw(true);
         panning = true; setTimeout(function() {panning = false; }, 100);
     });
     
     $('.bargraph-viewall').click(function () {
         view.start = latest_start_time * 1000;
         view.end = +new Date;
-        draw();
+        draw(true);
     });
 }
 
