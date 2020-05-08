@@ -774,7 +774,7 @@ function draw_powergraph() {
     var options = {
         lines: { fill: false },
         xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end},
-        yaxes: [{ min: 0 }],
+        yaxes: [{ min: 0 },{ min: 0, max: 100 }],
         grid: { hoverable: true, clickable: true },
         selection: { mode: "x" },
         legend: { show: false }
