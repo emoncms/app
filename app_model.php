@@ -15,10 +15,12 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 class AppConfig
 {
     private $mysqli;
+    private $settings;
 
-    public function __construct($mysqli)
+    public function __construct($mysqli, $settings)
     {
         $this->mysqli = $mysqli;
+        $this->settings = $settings;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -38,26 +40,19 @@ class AppConfig
             
             // Replace all backslashes to avoid conflicts with paths on windows machines
             $file = str_replace('\\', '/', $file);
-            if(basename($file ,".json") != 'app') {
-                continue;
-            }
-            $dir = dirname($file);
-            
-            $content = (array) json_decode(file_get_contents($file));
-            if (json_last_error() != 0 || !array_key_exists("title", $content) || !array_key_exists("description", $content)) {
-                continue;
-            }
-            
-            $id = basename($dir);
-            if ($id == 'template') {
-                continue;
-            }
-            
-            global $settings;
-            if (isset($settings['app']) && isset($settings['app']['hidden'])) {
-                if (!is_array($settings['app']['hidden'])) $settings['app']['hidden'] = explode(',', $settings['app']['hidden']);
-                if (in_array($id, $settings['app']['hidden'])) {
-                    continue;
+            if(basename($file ,".json") == 'app') {
+                $dir = dirname($file);
+                
+                $content = (array) json_decode(file_get_contents($file));
+                if (json_last_error() == 0 && array_key_exists("title", $content) && array_key_exists("description", $content)) {
+                    $content['dir'] = stripslashes($dir.'/');
+                    
+                    $id = basename($dir);
+                    if ((!isset($this->settings) || !isset($this->settings['hidden']) 
+                        || !in_array($id, $this->settings['hidden']))) {
+                        
+                        $list[$id] = $content;
+                    }
                 }
             }
             $content['dir'] = stripslashes($dir.'/');

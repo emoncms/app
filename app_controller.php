@@ -14,14 +14,28 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 
 function app_controller()
 {
-    global $mysqli,$path,$session,$route,$user,$v;
+    global $mysqli,$path,$session,$route,$user,$settings,$v;
     // Force cache reload of css and javascript
     $v = 10;
 
     $result = false;
+    
+    // Apps can be hidden from the settings object e.g:
+    // [app]
+    // hidden = template
+    
+    if (isset($settings['app'])) {
+        if (isset($settings['app']['hidden'])) {
+            $settings['app']['hidden'] = explode(",",$settings['app']['hidden']);
+        }
+    } else {
+        $settings['app'] = array(
+        // 'hidden'=>array('template')
+        );
+    }
 
     require_once "Modules/app/app_model.php";
-    $appconfig = new AppConfig($mysqli);
+    $appconfig = new AppConfig($mysqli, $settings['app']);
     $appavail = $appconfig->get_available();
 
     if ($route->action == "view") {

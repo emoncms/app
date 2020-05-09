@@ -44,6 +44,7 @@
 /* set chart height to full screen height (100vh) minus an offset to cover the large value indicators and menus */
 .chart-placeholder > * {
     height: calc(100vh - var(--height-offset))!important;
+    min-height:180px;
 }
 </style>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
@@ -392,6 +393,7 @@ function resize()
     var height = $(window).height()*0.55;
 
     if (height>width) height = width;
+    if (height<180) height = 180;
 
     if($('#app-block').is(":visible")) {
         draw();

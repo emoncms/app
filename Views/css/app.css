@@ -114,7 +114,7 @@
         font-size: 1.34rem;
     }
     .display-3.text-lg-larger{
-        font-size: 5.5rem;
+        font-size: 4.5rem;
     }
     .mb-lg-3{
         margin-bottom: .3em!important;
@@ -126,7 +126,7 @@
         padding-bottom: calc(var(--spacer) * .8)
     }
     .display-lg-2{
-        font-size: 5.5rem;
+        font-size: 4.5rem;
     }
     #app-block.in_kw .power-value.display-lg-2 {
         font-size: 4.4rem;
@@ -138,6 +138,6 @@
 --------------------------------------------------------------------*/
 @media (min-width: 1200px) {
     #app-block.in_kw .power-value.display-lg-2 {
-        font-size: 5rem;
+        font-size: 4.5rem;
     }
 }

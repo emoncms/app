@@ -7,6 +7,22 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
 
+<style>
+.title {
+   margin-top:100px;
+   color:#aaa;
+   font-weight:bold;
+   font-size:32px;
+   line-height:32px;
+}
+.value {
+   color:#888;
+   font-weight:bold;
+   font-size:64px;
+   line-height:64px;
+}
+</style>
+
 <div id="app-block" style="display:none">
   <div class="col1"><div class="col1-inner">
   
@@ -16,8 +32,8 @@
       </div>
     </div>
     <div style="text-align:center">
-      <div class="electric-title">POWER NOW</div>
-      <div class="power-value"><span id="powernow">0</span></div>
+      <div class="title">POWER NOW</div>
+      <div class="value"><span id="powernow">0</span></div>
     </div>
   
   </div></div>
