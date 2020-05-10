@@ -461,7 +461,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 text += (itemValue*1.05).toFixed(2)+" p/kWh (inc VAT)";
             } else {
                 if (view_mode=="energy") text += (itemValue).toFixed(3)+" kWh";
-                if (view_mode=="cost") text += (itemValue*100).toFixed(1)+"p";
+                if (view_mode=="cost") text += (itemValue*100*1.05).toFixed(2)+"p";
             }
             tooltip(item.pageX, item.pageY, text, "#fff");
         }
@@ -543,7 +543,7 @@ function graph_load()
         outgoing =  feed.getdataremote(regions_outgoing[config.app.region.value],view.start,view.end,interval);
         for (var z in outgoing) {
             data["outgoing"].push(outgoing[z]);
-            data["outgoing"].push([ outgoing[z][0]+(intervalms-1), outgoing[z][1]]);
+            data["outgoing"].push([outgoing[z][0]+(intervalms-1), outgoing[z][1]]);
         }
     }
     // Invert export tariff
@@ -618,8 +618,8 @@ function graph_load()
                 total_kwh_solar_used += kwh_solar_used
 
                 // costs
-                let cost_import = data.agile[z-1][1]*0.01;
-                let cost_export = data.outgoing[z-1][1]*0.01*-1;
+                let cost_import = data.agile[2*(z-1)][1]*0.01;
+                let cost_export = data.outgoing[2*(z-1)][1]*0.01*-1;
 
                 // half hourly datasets for graph
                 data["import_cost"].push([time,kwh_import*cost_import]);
@@ -639,7 +639,7 @@ function graph_load()
                 if (kwh_import<0.0) kwh_import = 0.0;
                 data["import"].push([time,kwh_import]);
                 total_kwh_import += kwh_import
-                let cost_import = data.agile[z-1][1]*0.01;
+                let cost_import = data.agile[2*(z-1)][1]*0.01;
                 data["import_cost"].push([time,kwh_import*cost_import]);
                 total_cost_import += kwh_import*cost_import
             }
