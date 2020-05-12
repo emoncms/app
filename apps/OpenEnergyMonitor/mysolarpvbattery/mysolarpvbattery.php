@@ -374,7 +374,7 @@ config.app = {
     // Battery feeds
     "battery_charge":{"type":"feed", "autoname":"battery_charge", "engine":"5", "description":"Battery charge power in watts"},
     "battery_discharge":{"type":"feed", "autoname":"battery_discharge", "engine":"5", "description":"Battery discharge power in watts"},
-    "battery_soc":{"type":"feed", "autoname":"battery_soc", "engine":"5", "description":"Battery state of charge %"},
+    "battery_soc":{"optional":true, "type":"feed", "autoname":"battery_soc", "engine":"5", "description":"Battery state of charge %"},
 
     // History feeds
     "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":"Building consumption in kWh (not including battery charging)"},
@@ -541,7 +541,11 @@ function livefn()
     var use_now = parseInt(feeds[config.app.use.value].value);
     var battery_charge_now = parseInt(feeds[config.app.battery_charge.value].value);
     var battery_discharge_now = parseInt(feeds[config.app.battery_discharge.value].value);
-    var battery_soc_now = parseInt(feeds[config.app.battery_soc.value].value);
+    
+    var battery_soc_now = "---";
+    if (config.app.battery_soc.value) {
+        battery_soc_now = parseInt(feeds[config.app.battery_soc.value].value);
+    }
     
     if (autoupdate) {
         var updatetime = feeds[config.app.solar.value].time;
@@ -554,8 +558,11 @@ function livefn()
         timeseries.trim_start("battery_charge",view.start*0.001);
         timeseries.append("battery_discharge",updatetime,battery_discharge_now);
         timeseries.trim_start("battery_discharge",view.start*0.001);
-        timeseries.append("battery_soc",updatetime,battery_soc_now);
-        timeseries.trim_start("battery_soc",view.start*0.001);
+        
+        if (config.app.battery_soc.value) {
+            timeseries.append("battery_soc",updatetime,battery_soc_now);
+            timeseries.trim_start("battery_soc",view.start*0.001);
+        }
        
         // Advance view
         var timerange = view.end - view.start;
@@ -575,6 +582,8 @@ function livefn()
         solar_now = as_kw(solar_now)
         use_now = as_kw(use_now)
         balance = as_kw(balance)
+        battery_charge_now = as_kw(battery_charge_now)
+        battery_discharge_now = as_kw(battery_discharge_now)
         $('.power-unit').text('kW')
         $('#app-block').addClass('in_kw');
     } else {
@@ -651,7 +660,10 @@ function load_powergraph() {
         timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,interval,0,0));
         timeseries.load("battery_charge",feed.getdata(config.app.battery_charge.value,view.start,view.end,interval,0,0));
         timeseries.load("battery_discharge",feed.getdata(config.app.battery_discharge.value,view.start,view.end,interval,0,0));
-        timeseries.load("battery_soc",feed.getdata(config.app.battery_soc.value,view.start,view.end,interval,0,0));
+        
+        if (config.app.battery_soc.value) {
+            timeseries.load("battery_soc",feed.getdata(config.app.battery_soc.value,view.start,view.end,interval,0,0));
+        }
     }
     // -------------------------------------------------------------------------------------------------------
     
@@ -707,12 +719,12 @@ function load_powergraph() {
             battery_discharge_now = timeseries.value("battery_discharge",z);
             last_discharge = time;
         }
-        if (timeseries.value("battery_soc",z)!=null) {
+        if (config.app.battery_soc.value && timeseries.value("battery_soc",z)!=null) {
             battery_soc_now = timeseries.value("battery_soc",z);
             last_soc = time;
         }
                 
-        if ((time-last_solar)<timeout && (time-last_use)<timeout && (time-last_charge)<timeout && (time-last_discharge)<timeout && (time-last_soc)<timeout) {
+        if ((time-last_solar)<timeout && (time-last_use)<timeout && (time-last_charge)<timeout && (time-last_discharge)<timeout) {
             
             // -------------------------------------------------------------------------------------------------------
             // Supply / demand balance calculation
@@ -788,7 +800,10 @@ function load_powergraph() {
     }
     
     
-    var soc_change = battery_soc_now-timeseries.value("battery_soc",0);
+    var soc_change = 0; 
+    if (config.app.battery_soc.value) {
+        soc_change = battery_soc_now-timeseries.value("battery_soc",0);
+    }
     var sign = ""; if (soc_change>0) sign = "+";
     $(".battery_soc_change").html(sign+soc_change.toFixed(1));
     
@@ -799,7 +814,7 @@ function load_powergraph() {
     powerseries.push({data:battery_charge_data, label: "Charge", color: "#fb7b50", stack:2, lines:{lineWidth:0, fill:0.8}});
     powerseries.push({data:battery_discharge_data, label: "Discharge", color: "#fbb450", stack:1, lines:{lineWidth:0, fill:0.8}});
     
-    if (show_battery_soc) powerseries.push({data:battery_soc_data, label: "SOC", yaxis:2, color: "#888"});
+    if (show_battery_soc && config.app.battery_soc.value) powerseries.push({data:battery_soc_data, label: "SOC", yaxis:2, color: "#888"});
 }
 
 function draw_powergraph() {
