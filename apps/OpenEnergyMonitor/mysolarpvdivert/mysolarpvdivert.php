@@ -227,16 +227,21 @@
                 </div>
             </td>
             
-            <td class="statsbox">
-                <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-right"><span class="statsbox-value total_export_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+            <td class="statsbox" style="background: #2ed52e">
+                <div class="statsbox-padded  statsbox-arrow-right">
+                    <div class="statsbox-title">EXPORT</div>
+                    <div><span class="statsbox-value total_export_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
 
             <td class="statsbox" style="background: #d52e2e">
                 <div class="statsbox-padded statsbox-inner-unit">
-                    <div class="statsbox-title">GRID</div>
-                    <div><span class="statsbox-value total_grid_balance_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                    <div class="statsbox-title">GRID<span class="statsbox-units"> (IMPORT / BALANCE)</span></div>
+                    <div>
+                        <span class="statsbox-value total_import_kwh">0</span> <span class="statsbox-units">kWh</span>
+                        <span class="statsbox-value"> / </span>
+                        <span class="statsbox-value total_grid_balance_kwh">0</span> <span class="statsbox-units">kWh</span>
+                    </div>
                 </div>
             </td>
         </tr>
