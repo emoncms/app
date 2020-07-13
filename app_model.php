@@ -55,9 +55,6 @@ class AppConfig
                     }
                 }
             }
-            $content['dir'] = stripslashes($dir.'/');
-            
-            $list[$id] = $content;
         }
         uasort($list, function($a1, $a2) {
             if($a1['status'] == $a2['status'])
