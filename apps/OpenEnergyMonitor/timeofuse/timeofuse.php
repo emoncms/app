@@ -350,27 +350,30 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             previousPoint = item.datapoint;
 
             $("#tooltip").remove();
-            var itemTime = item.datapoint[0];
-            var standard_kwh = bargraph_series[1].data[z][1];
-            var economy7_kwh = bargraph_series[0].data[z][1];
             
-            var d = new Date(itemTime);
-            var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-            var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-            var date = days[d.getDay()]+", "+months[d.getMonth()]+" "+d.getDate();
-           
-            var text = "";
-            if (viewcostenergy=="energy") {
-                text = date+"<br>Day:"+(standard_kwh).toFixed(1)+" kWh<br>Night:"+(economy7_kwh).toFixed(1)+" kWh<br>Total:"+(economy7_kwh+standard_kwh).toFixed(1)+" kWh";
-            } else {
-                var daycost = config.app.currency.value+(standard_kwh*config.app.unitcost_day.value).toFixed(2);
-                var nightcost = config.app.currency.value+(economy7_kwh*config.app.unitcost_night.value).toFixed(2);
-                var totalcost = config.app.currency.value+((standard_kwh*config.app.unitcost_day.value)+(economy7_kwh*config.app.unitcost_night.value)).toFixed(2);
-                            
-                text = date+"<br>Day:"+(standard_kwh).toFixed(1)+" kWh ("+daycost+")<br>Night:"+(economy7_kwh).toFixed(1)+" kWh ("+nightcost+")<br>Total:"+(economy7_kwh+standard_kwh).toFixed(1)+" kWh ("+totalcost+")";
+            if (viewmode=="bargraph") {
+                var itemTime = item.datapoint[0];
+                var standard_kwh = bargraph_series[1].data[z][1];
+                var economy7_kwh = bargraph_series[0].data[z][1];
+                
+                var d = new Date(itemTime);
+                var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+                var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                var date = days[d.getDay()]+", "+months[d.getMonth()]+" "+d.getDate();
+               
+                var text = "";
+                if (viewcostenergy=="energy") {
+                    text = date+"<br>Day:"+(standard_kwh).toFixed(1)+" kWh<br>Night:"+(economy7_kwh).toFixed(1)+" kWh<br>Total:"+(economy7_kwh+standard_kwh).toFixed(1)+" kWh";
+                } else {
+                    var daycost = config.app.currency.value+(standard_kwh*config.app.unitcost_day.value).toFixed(2);
+                    var nightcost = config.app.currency.value+(economy7_kwh*config.app.unitcost_night.value).toFixed(2);
+                    var totalcost = config.app.currency.value+((standard_kwh*config.app.unitcost_day.value)+(economy7_kwh*config.app.unitcost_night.value)).toFixed(2);
+                                
+                    text = date+"<br>Day:"+(standard_kwh).toFixed(1)+" kWh ("+daycost+")<br>Night:"+(economy7_kwh).toFixed(1)+" kWh ("+nightcost+")<br>Total:"+(economy7_kwh+standard_kwh).toFixed(1)+" kWh ("+totalcost+")";
+                }
+                
+                tooltip(item.pageX, item.pageY, text, "#fff");
             }
-            
-            tooltip(item.pageX, item.pageY, text, "#fff");
         }
     } else $("#tooltip").remove();
 });
