@@ -152,6 +152,7 @@
       <tr><th></th><th>Energy</th><th>Cost / Value</th><th>Unit price</th></tr>
       <tbody id="octopus_totals"></tbody>
       </table>
+      <div id="use_meter_kwh_hh_bound" class="hide"><input id="use_meter_kwh_hh" type="checkbox" checked /> <span style="font-size:12px">Show energy and costs based on Octopus smart meter data where available</span></div>
     </div>
   </div></div>
 </div>
@@ -171,6 +172,7 @@
                     <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                     <p><strong class="text-white">Import & Import kWh</strong> The standard naming for electricity imported from the grid in a household without solar PV is 'use' and 'use_kwh', this app expects 'import' and 'import_kwh' in order to provide compatibility with the Solar PV option as well. Select relevant house consumption feeds using the dropdown feed selectors as required. Feeds 'use_kwh' and 'solar_kwh' are optional.</p>
                     <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor. To create cumulative kWh feeds from historic power data try the postprocess module.</p>
+                    <p><strong class="text-white">meter_kwh_hh</strong> If you have half hourly Octopus smart meter data available select the applicable feed.</p>
                     <p><strong class="text-white">Optional: Octopus Outgoing</strong> Include total house consumption (use_kwh) and solar PV (solar_kwh) feeds to explore octopus outgoing feed-in-tariff potential.</p>
                     <img src="../Modules/app/images/agile_app.png" class="d-none d-sm-inline-block">
                 </div>
@@ -216,6 +218,7 @@ config.app = {
     "import_kwh":{"type":"feed", "autoname":"import_kwh", "engine":5},
     "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5},
     "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5},
+    "meter_kwh_hh":{"optional":true, "type":"feed", "autoname":"meter_kwh_hh", "engine":5},
     "region":{"type":"select", "name":"Select region:", "default":"D_Merseyside_and_Northern_Wales", "options":["A_Eastern_England","B_East_Midlands","C_London","E_West_Midlands","D_Merseyside_and_Northern_Wales","F_North_Eastern_England","G_North_Western_England","H_Southern_England","J_South_Eastern_England","K_Southern_Wales","L_South_Western_England","M_Yorkshire","N_Southern_Scotland","P_Northern_Scotland"]}
 };
 config.name = "<?php echo $name; ?>";
@@ -281,6 +284,8 @@ var this_halfhour_index = -1;
 // disable x axis limit
 view.limit_x = false;
 var solarpv_mode = false;
+var smart_meter_data = false;
+var use_meter_kwh_hh = true;
 
 config.init();
 
@@ -505,6 +510,11 @@ $(".cost").click(function() {
     $(".energy").removeClass("bluenav-active");
 });
 
+$("#use_meter_kwh_hh").click(function() {
+    use_meter_kwh_hh = $(this)[0].checked;
+    graph_load(); graph_draw();
+});
+
 // -------------------------------------------------------------------------------
 // FUNCTIONS
 // -------------------------------------------------------------------------------
@@ -521,6 +531,10 @@ function graph_load()
     view.end = Math.ceil(view.end/intervalms)*intervalms;
 
     if (feeds["use_kwh"]!=undefined && feeds["solar_kwh"]!=undefined) solarpv_mode = true;
+    if (feeds["meter_kwh_hh"]!=undefined) { 
+        smart_meter_data = true;
+        $("#use_meter_kwh_hh_bound").show();
+    }
 
     var import_kwh = feed.getdata(feeds["import_kwh"].id,view.start,view.end,interval,0,0);
 
@@ -528,8 +542,11 @@ function graph_load()
     if (solarpv_mode) use_kwh = feed.getdata(feeds["use_kwh"].id,view.start,view.end,interval,0,0);
     var solar_kwh = [];
     if (solarpv_mode) solar_kwh = feed.getdata(feeds["solar_kwh"].id,view.start,view.end,interval,0,0);    
+    var meter_kwh_hh = []
+    if (smart_meter_data) meter_kwh_hh = feed.getdata(feeds["meter_kwh_hh"].id,view.start,view.end,interval,0,0); 
+    
     data = {};
-
+    
     data["agile"] = []
     data["outgoing"] = []
     if (config.app.region!=undefined && regions_import[config.app.region.value]!=undefined) {
@@ -557,13 +574,22 @@ function graph_load()
     data["export_cost"] = [];
     data["solar_used"] = []
     data["solar_used_cost"] = [];
-
+    data["meter_kwh_hh"] = meter_kwh_hh;
+    data["meter_kwh_hh_cost"] = [];
+    
     var total_cost_import = 0
     var total_kwh_import = 0
     var total_cost_export = 0
     var total_kwh_export = 0
     var total_cost_solar_used = 0
     var total_kwh_solar_used = 0
+    
+    // line of best fit
+    var sumX = 0
+    var sumY = 0
+    var sumXY = 0
+    var sumX2 = 0
+    var n = 0
 
     this_halfhour_index = -1;
     // Add last half hour
@@ -638,11 +664,56 @@ function graph_load()
                 if (import_kwh[z]!=undefined && import_kwh[z-1]!=undefined) kwh_import = (import_kwh[z][1]-import_kwh[z-1][1]);
                 if (kwh_import<0.0) kwh_import = 0.0;
                 data["import"].push([time,kwh_import]);
-                total_kwh_import += kwh_import
                 let cost_import = data.agile[2*(z-1)][1]*0.01;
                 data["import_cost"].push([time,kwh_import*cost_import]);
-                total_cost_import += kwh_import*cost_import
+                
+                // If we have octopus smart meter data available use instead
+                let smart_meter_hh_available = false;
+                if (smart_meter_data) {
+                    if (meter_kwh_hh[z-1]!=undefined && import_kwh[z]!=undefined && import_kwh[z-1]!=undefined) {
+                        if (meter_kwh_hh[z-1][1]!=null) {
+                            smart_meter_hh_available = true;
+                            // Calculate line of best fit variables
+                            // Suggested calibration
+                            var XY = 1.0*kwh_import * meter_kwh_hh[z-1][1];
+                            var X2 = 1.0*kwh_import * kwh_import;
+                            sumX += 1.0*kwh_import;
+                            sumY += 1.0*meter_kwh_hh[z-1][1];
+                            sumXY += XY;
+                            sumX2 += X2;
+                            n++;
+                        
+                        }
+                    }
+                }
+                
+                if (smart_meter_hh_available) {
+                    data["meter_kwh_hh_cost"].push([time,meter_kwh_hh[z-1][1]*cost_import]);
+                } else {
+                    data["meter_kwh_hh_cost"].push([time,null]);
+                }
+                
+                if (smart_meter_hh_available && use_meter_kwh_hh) {
+                    total_kwh_import +=  meter_kwh_hh[z-1][1]
+                    total_cost_import +=  meter_kwh_hh[z-1][1]*cost_import         
+                } else {
+                    total_kwh_import += kwh_import
+                    total_cost_import += kwh_import*cost_import  
+                }
             }
+        }
+    }
+    
+    if (n>1) {
+        var slope = ((n * sumXY - (sumX*sumY)) / (n * sumX2 - (sumX*sumX)));
+        var intercept = (sumY - slope*sumX) / n;
+        console.log("Suggested calibration:\nslope:"+slope.toFixed(6)+" intercept:"+intercept.toFixed(6));
+        var prc_error = (1.0 - (sumY/sumX))*100;
+        
+        if (prc_error>0) {
+            console.log("Realtime feed is: "+prc_error.toFixed(2)+"% above meter data");
+        } else {
+            console.log("Realtime feed is: "+Math.abs(prc_error).toFixed(2)+"% below meter data")  
         }
     }
 
@@ -710,12 +781,13 @@ function graph_draw()
         if (solarpv_mode) graph_series.push({label: "Used Solar", data:data["solar_used"], yaxis:1, color:"#bec745", stack: true, bars: bars});
         graph_series.push({label: "Import", data:data["import"], yaxis:1, color:"#44b3e2", stack: true, bars: bars});
         if (solarpv_mode) graph_series.push({label: "Export", data:data["export"], yaxis:1, color:"#dccc1f", stack: false, bars: bars});
-
+        if (smart_meter_data && !solarpv_mode) graph_series.push({label: "Import Actual", data:data["meter_kwh_hh"], yaxis:1, color:"#1d8dbc", stack: false, bars: bars});
     }
     else if (view_mode=="cost") {
         if (solarpv_mode) graph_series.push({label: "Used Solar", data:data["solar_used_cost"], yaxis:1, color:"#bec745", stack: true, bars: bars});
         graph_series.push({label: "Import", data:data["import_cost"], yaxis:1, color:"#44b3e2", stack: true, bars: bars});
         if (solarpv_mode) graph_series.push({label: "Export", data:data["export_cost"], yaxis:1, color:"#dccc1f", stack: false, bars: bars});
+        if (smart_meter_data && !solarpv_mode) graph_series.push({label: "Import Actual", data:data["meter_kwh_hh_cost"], yaxis:1, color:"#1d8dbc", stack: false, bars: bars});
     }
     // price signals
     graph_series.push({label: "Agile", data:data["agile"], yaxis:2, color:"#fb1a80", lines: { show: true, align: "left", lineWidth:1}});
