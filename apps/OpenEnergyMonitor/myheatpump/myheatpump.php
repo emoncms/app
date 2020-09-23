@@ -51,7 +51,7 @@
   <div class="col1"><div class="col1-inner">
     <div class="block-bound">
       <div style="float:right">
-          <div class="openconfig" style="padding-top:10px; padding-right:10px; cursor:pointer">
+          <div class="config-open" style="padding-top:10px; padding-right:10px; cursor:pointer">
               <i class="icon-wrench icon-white"></i>
           </div>
       </div>
@@ -177,10 +177,10 @@
 </div>    
   
 <div id="app-setup" class="block py-2 px-5 hide">
-    <h2 class="appconfig-title">My Heatpump</h2>
+    <h2 class="app-config-title">My Heatpump</h2>
 
-    <div class="appconfig-description">
-      <div class="appconfig-description-inner">
+    <div class="app-config-description">
+      <div class="app-config-description-inner">
         The My Heatpump app can be used to explore the performance of a heatpump including, electricity consumption, heat output, COP and system temperatures.
         <br><br>
         <b>Auto configure:</b> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.
@@ -193,7 +193,7 @@
     <div class="app-config"></div>
 </div>
 
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
+<div class="ajax-loader"></div>
 
 <script>
 
@@ -214,7 +214,7 @@ $(window).ready(function(){
 
 });
 
-if (!sessionwrite) $(".openconfig").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
 // Configuration

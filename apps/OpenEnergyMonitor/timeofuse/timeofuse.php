@@ -42,7 +42,7 @@
   <div class="col1"><div class="col1-inner">
   
     <div class="block-bound">
-      <div class="bluenav openconfig"><i class="icon-wrench icon-white"></i></div>
+      <div class="bluenav config-open"><i class="icon-wrench icon-white"></i></div>
       <div class="bluenav viewcostenergy">ENERGY MODE</div>
       <!--<div class="bluenav cost">Cost</div>
       <div class="bluenav energy">Energy</div>-->
@@ -173,9 +173,9 @@
 <section id="app-setup" class="hide pb-3 px-3">
     <!-- instructions and settings -->
     <div class="row-fluid">
-        <div class="span9 appconfig-description">
-            <div class="appconfig-description-inner text-light">
-                <h2 class="appconfig-title text-primary"><?php echo _('Time of Use'); ?></h2>
+        <div class="span9 app-config-description">
+            <div class="app-config-description-inner text-light">
+                <h2 class="app-config-title text-primary"><?php echo _('Time of Use'); ?></h2>
                 <p class="lead">The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time.</p>
                 <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                 <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
@@ -187,7 +187,7 @@
 
 
 
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
+<div class="ajax-loader"></div>
 
 <script>
 

@@ -17,7 +17,7 @@ function app_controller()
     global $mysqli,$path,$session,$route,$user,$settings,$v;
     // Force cache reload of css and javascript
     $v = 10;
-    
+
     $result = false;
     
     // Apps can be hidden from the settings object e.g:
@@ -61,9 +61,8 @@ function app_controller()
             } else {
                 $app = urldecode(get("name"));
             }
-            
             if (!isset($applist->$app)) {
-                foreach ($applist as $key=>$val) { $app = $key; break; }
+                foreach (array_keys((array) $applist) as $key) { $app = $key; break; }
             }
             
             $route->format = "html";

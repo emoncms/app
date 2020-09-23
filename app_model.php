@@ -34,7 +34,9 @@ class AppConfig
         $it = new RecursiveIteratorIterator($dirs);
         foreach($it as $file) {
             // Restrict iteration to two levels
-            if ($it->getDepth() > 2) continue;
+            if ($it->getDepth() > 2) {
+                continue;
+            }
             
             // Replace all backslashes to avoid conflicts with paths on windows machines
             $file = str_replace('\\', '/', $file);

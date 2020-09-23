@@ -1,51 +1,54 @@
 
+.app-config-box {
+  margin-bottom:8px;
+  padding:10px;
+}
+
+.app-config-title {
+  color:#0699fa;
+}
+
+.app-config-description {
+  width:70%;
+  float:left;
+}
+
+.xapp-config-description-inner,
+.xappconfig-description-inner,
+.appconfig-description-inner,
+.app-config-description-inner {
+  padding-right:20px;
+  font-size:18px;
+  line-height:22px;
+}
 .app-config {
   width:30%;
   float:left
 }
 
-.appconfig-box {
-  border: 1px solid #fff;
-  margin-bottom:8px;
-  padding:10px;
-  color:#fff;
+.app-config select {
+  margin:0px;
+  width:85%;
 }
 
-.appconfig-title {
-  color:#0699fa;
+.app-config input[type=text] {
+  margin:0px;
+  margin-top:5px;
+  width:90%;
 }
 
-.appconfig-description {
-  width:70%;
-  float:left;
+.app-config .feed-auto {
+  font-size:12px;
 }
 
-.appconfig-description-inner {
-  padding-right:20px;
-  color: #ccc;
-  font-size:18px;
-  line-height:22px;
-}
-
-.feed-select-div {
+.app-config .feed-select-div {
   margin:0px;
   margin-top:5px;
   width:100%;
 }
 
-select {
-  background-color:#333;
-  color:#fff;
-  margin:0px;
-  width:85%;
-}
-
-input[type=text] {
-  background-color:#333;
-  color:#fff;
-  margin:0px;
-  margin-top:5px;
-  width:90%;
+.app-config .feed-name {
+	margin-right:22px;
 }
 
 #tooltip {

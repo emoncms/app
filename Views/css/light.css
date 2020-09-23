@@ -1,9 +1,59 @@
+/* -------------------------------------------------------------------
+   Config
+--------------------------------------------------------------------*/
+.app-config-box {
+  border: 1px solid #fff;
+  color: #fff;
+}
+.app-config-description-inner {
+  padding-right: 20px;
+  color: #ccc;
+}
+
+.app-config select {
+  background-color: #333;
+  color: #fff;
+}
+.app-config select optgroup {
+  background-color: #666;
+}
+.app-config input[type=text] {
+  background-color: #333;
+  color: #fff;
+}
+.app-config .icon-app-config {
+  background-image: url("../../../../Lib/bootstrap/img/glyphicons-halflings-white.png");
+}
+
+.app-config .feed-auto {
+  color: #ccc;
+}
+
+/* -------------------------------------------------------------------
+   Application
+--------------------------------------------------------------------*/
+body {
+  /*background-color: #f5f5f5;*/
+}
 #app-block {
-    padding:10px;
+  padding:10px;
+}
+
+.app-title {
+  font-weight:bold;
+  font-size:22px;
+  color:#44b3e2;
+}
+
+.app-title-value {
+  font-weight:bold;
+  font-size:52px;
+  color:#44b3e2;
+  line-height: 1.1;
 }
 
 .block-bound {
-  color:#fff;
+  color: #fff;
   background-color: #ccc;
 }
 
@@ -11,8 +61,6 @@
   font-weight:bold;
   padding:10px;
 }
-
-/* --------------------------------------------------------*/
 
 .bluenav {
   float:right;
@@ -30,8 +78,6 @@
   background-color:rgba(255,255,255,0.2);
 }
 
-/* --------------------------------------------------------*/
-
 .col1 {
   width:100%;
 }
@@ -43,28 +89,15 @@
 }
 .col2-inner { padding:10px; }
 
-/* --------------------------------------------------------*/
-
-.ajax-loader{
-  width:32px;
-  height:32px;
-  position:fixed;
-  top:50%;
-  left:50%;
-  margin-top:-16px; /* negative half the size of height */
-  margin-left:-16px; /* negative half the size of width */
-}
-
-/* --------------------------------------------------------*/
-
 .container-fluid { padding:0 }
 
-#footer {
+.navbar-fixed-top {
     margin-left: 0px;
     margin-right: 0px;
 }
 
-.navbar-fixed-top {
+#footer {
+	background-color: #eee;
     margin-left: 0px;
     margin-right: 0px;
 }
@@ -84,9 +117,9 @@
   .col1-inner { padding:5px; }
   .col2-inner { padding:5px; }
 }
-    
+
 @media (min-width: 450px) and (max-width: 960px) { 
   .col2 { width:100%; } 
 }
-@media (min-width: 960px) { }
 
+@media (min-width: 960px) { }

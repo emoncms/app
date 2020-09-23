@@ -1,7 +1,58 @@
-#app-block {
-    padding: 0 0.7rem;
+/* -------------------------------------------------------------------
+   Config
+--------------------------------------------------------------------*/
+.app-config-box {
+  border: 1px solid #fff;
+  color: #fff;
 }
-/*-------------------------------------*/
+.app-config-description-inner {
+  padding-right: 20px;
+  color: #ccc;
+}
+
+.app-config select {
+  background-color: #333;
+  color: #fff;
+}
+.app-config select optgroup {
+  background-color: #666;
+}
+.app-config input[type=text] {
+  background-color: #333;
+  color: #fff;
+}
+.app-config .icon-app-config {
+  background-image: url("../../../../Lib/bootstrap/img/glyphicons-halflings-white.png");
+}
+
+.app-config .feed-auto {
+  color: #ccc;
+}
+
+/* -------------------------------------------------------------------
+   Applications
+--------------------------------------------------------------------*/
+body {
+  background-color: #222;
+}
+
+#app-block {
+  padding: 0 0.7rem;
+}
+
+.app-title {
+  font-weight:bold;
+  font-size:22px;
+  color:#aaa;
+  padding-top:20px;
+}
+
+.app-title-value {
+  font-weight:bold; 
+  font-size:100px; 
+  color:#0699fa; 
+  line-height: 1.1;
+}
 
 h1 small,
 h2 small,
@@ -12,7 +63,6 @@ h6 small {
     color: inherit;
     font-weight: inherit;
 }
-/*-------------------------------------*/
 
 #buttons {
     padding: .22rem 0;
@@ -33,9 +83,6 @@ h6 small {
     opacity: .8;
     font-weight: bold;
     text-decoration: underline;
-}
-.power-value {
-    line-height: 1.1;
 }
 .chart-placeholder > *{
     height: 23rem;
@@ -93,9 +140,6 @@ body.app .container-fluid {
   text-decoration: none!important;
 }
 
-
-/*-------------------------------------*/
-
 #breakdown {
   margin: 0 auto;
 }
@@ -108,25 +152,6 @@ body.app .container-fluid {
     line-height: 1.3em!important;
 }
 
-/*-------------------------------------*/
-
-.ajax-loader{
-  width:32px;
-  height:32px;
-  position:fixed;
-  top:50%;
-  left:50%;
-  margin-top:-16px; /* negative half the size of height */
-  margin-left:-16px; /* negative half the size of width */
-}
-
-/*-------------------------------------*/
-
-#footer {
-  margin-left: 0px;
-  margin-right: 0px;
-}
-
 .navbar-fixed-top {
   margin-left: 0px;
   margin-right: 0px;
@@ -135,34 +160,50 @@ body.app .container-fluid {
 #wrap main.content-container{
   padding-bottom: 0rem!important;
 }
-/** MOBILE FIRST
-   as screen gets larger the css below overwrites the properties above */
-/*-------------------------------------*/
 
-/* 
+#footer {
+  margin-left: 0px;
+  margin-right: 0px;
+  background-color: #181818;
+  color: #999;
+}
+
+.ajax-loader {
+  background: #222
+        url(../../images/ajax-loader.gif)
+        center
+        no-repeat;
+}
+
+/* -------------------------------------------------------------------
+   MOBILE FIRST:
+
    Extra small devices (portrait phones, 320px and up)
-*/
+--------------------------------------------------------------------*/
 @media (min-width: 320px) {
  
 }
-/* 
+
+/* -------------------------------------------------------------------
    Small devices (landscape phones, 576px and up)
-*/
+--------------------------------------------------------------------*/
 @media (min-width: 576px) {
     .visnav {
         flex-grow: 0;
         min-width: 3em;
     }
 }
-/* 
+
+/* -------------------------------------------------------------------
    Medium devices (tablets, 768px and up)
-*/
+--------------------------------------------------------------------*/
 @media (min-width: 768px) {
    
 }
-/* 
+
+/* -------------------------------------------------------------------
    Large devices (desktops, 992px and up)
-*/
+--------------------------------------------------------------------*/
 @media (min-width: 992px) {
     .chart-placeholder > *{
         height: 20rem;
@@ -178,9 +219,10 @@ body.app .container-fluid {
         max-width: 80%;
     }
 }
-/* 
+
+/* -------------------------------------------------------------------
    Extra large devices (large desktops, 1200px and up)
-*/
+--------------------------------------------------------------------*/
 @media (min-width: 1200px) {
     #breakdown {
         max-width: 34rem;

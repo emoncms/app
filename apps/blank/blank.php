@@ -10,23 +10,23 @@ global $path, $session, $v;
 <div id="app-block" style="display:none">
   <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
     <div style="float:right;">
-      <i class="openconfig icon-wrench icon-white" style="cursor:pointer"></i>
+      <i class="config-open icon-wrench icon-white" style="cursor:pointer"></i>
     </div>
   </div>
   <div style="text-align:center">
     <div class="electric-title">Oops something went wrong, this app does not exist!</div>
   </div>
-</div>    
+</div>
 
 <div id="app-setup" style="display:none; padding-top:50px" class="block">
-    <h2 class="appconfig-title">Oops something went wrong, this app does not exist!</h2>
-    <div class="appconfig-description">
-    <div class="appconfig-description-inner">You can delete this entry on the right</div>
+    <h2 class="app-config-title">Oops something went wrong, this app does not exist!</h2>
+    <div class="app-config-description">
+    <div class="app-config-description-inner">You can delete this entry on the right</div>
     </div>
     <div class="app-config"></div>
 </div>
 
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
+<div class="ajax-loader"></div>
 
 <script>
 
@@ -47,7 +47,7 @@ $(window).ready(function(){
     $("#footer").css('background-color','#181818');
     $("#footer").css('color','#999');
 });
-if (!sessionwrite) $(".openconfig").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
 // Configuration

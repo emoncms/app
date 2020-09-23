@@ -72,7 +72,7 @@
   <div id="octopus-realtime" class="col1"><div class="col1-inner">
 
     <div class="block-bound">
-      <div class="bluenav openconfig"><i class="icon-wrench icon-white"></i></div>
+      <div class="bluenav config-open"><i class="icon-wrench icon-white"></i></div>
       <!--<div class="bluenav viewcostenergy">VIEW COST</div>-->
       <div class="bluenav cost">Cost</div>
       <div class="bluenav energy bluenav-active">Energy</div>
@@ -180,7 +180,7 @@
     </div>
 </section>
 
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
+<div class="ajax-loader"></div>
 
 <script>
 
@@ -205,7 +205,7 @@ $(window).ready(function(){
     //$("#footer").css('color','#999');
 });
 
-if (!sessionwrite) $(".openconfig").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
 // Configuration

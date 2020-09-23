@@ -97,7 +97,7 @@
     <div class="row-fluid">
         <div class="span9">
             <div class="text-light">
-                <h2 class="appconfig-title text-warning"><?php echo _('My Solar'); ?> & <?php echo _('Wind'); ?></h2>
+                <h2 class="app-config-title text-warning"><?php echo _('My Solar'); ?> & <?php echo _('Wind'); ?></h2>
                 <p class="lead">This app extends the My Solar app by adding in a 'share of UK wind' estimate.</p>
                 <p>The share of wind estimate is calculated by using real-time electricity data from wind power in the uk and then scaling it so that the annual wind generation matches a percentage of annual household consumption. The default estimate assumes 60% or near 2000 kWh annually. This is close to the fuel mix quoted by two of the UK's leading green electricity suppliers.</p>
                 <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
@@ -109,7 +109,7 @@
     </div>
 </section>
 
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
+<div class="ajax-loader"></div>
 
 <script src="<?php echo $path; ?>Lib/misc/gettext.js?v=<?php echo $v; ?>"></script> 
 <script>
@@ -141,7 +141,7 @@ $(window).ready(function(){
     $("#footer").css('background-color','#181818');
     $("#footer").css('color','#999');
 });
-if (!sessionwrite) $(".openconfig").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
 // Configuration

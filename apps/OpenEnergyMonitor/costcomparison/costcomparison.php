@@ -37,7 +37,7 @@ padding:10px;
         <div class="col1">
             <div class="col1-inner">
                 <div class="block-bound">
-                    <div class="bluenav openconfig">
+                    <div class="bluenav config-open">
                         <i class="icon-wrench icon-white"></i>
                     </div>
                     <div class="block-title">
@@ -99,15 +99,14 @@ padding:10px;
         </div>
     </div>
 </section>
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"></div>
-
+<div class="ajax-loader"></div>
 
 <section id="app-setup" class="hide pb-3 px-3">
     <!-- instructions and settings -->
     <div class="row-fluid">
-        <div class="span9 appconfig-description">
-            <div class="appconfig-description-inner text-light">
-                <h2 class="appconfig-title text-primary"><?php echo _('Cost Comparison'); ?></h2>
+        <div class="span9 app-config-description">
+            <div class="app-config-description-inner text-light">
+                <h2 class="app-config-title text-primary"><?php echo _('Cost Comparison'); ?></h2>
                 <p class="lead">The Cost Comparison app allows you to compare your energy usage against energy suppliers tariffs including new time of use tariffs.</p>
                 <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                 <p><strong>Note:</strong> If you have solar or renewable energy generation then use the import_kwh feed to view the actual cost based on energy brought from the grid</p>
@@ -129,7 +128,7 @@ var sessionwrite = <?php echo $session['write']; ?>;
 apikeystr = "";
 if (apikey != "") {apikeystr = "&apikey=" + apikey;}
 
-if (!sessionwrite) $(".openconfig").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
 // Configuration

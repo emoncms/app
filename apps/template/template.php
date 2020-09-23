@@ -28,7 +28,7 @@
   
     <div style="height:20px; border-bottom:1px solid #333; padding-bottom:8px;">
       <div style="float:right;">
-        <i class="openconfig icon-wrench icon-white" style="cursor:pointer; padding-right:5px;"></i>
+        <i class="config-open icon-wrench icon-white" style="cursor:pointer; padding-right:5px;"></i>
       </div>
     </div>
     <div style="text-align:center">
@@ -40,9 +40,9 @@
 </div>    
 
 <div id="app-setup" style="display:none; padding-top:50px" class="block">
-    <h2 class="appconfig-title">Template</h2>
-    <div class="appconfig-description">
-        <div class="appconfig-description-inner">
+    <h2 class="app-config-title">Template</h2>
+    <div class="app-config-description">
+        <div class="app-config-description-inner">
             A basic app example useful for developing new apps
             
             <img src="<?php echo $path; ?><?php echo $appdir; ?>preview.png" style="width:600px" class="img-rounded">
@@ -51,7 +51,7 @@
     <div class="app-config"></div>
 </div>
 
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
+<div class="ajax-loader"></div>
 
 <script>
 
@@ -72,7 +72,7 @@ $(window).ready(function(){
     $("#footer").css('background-color','#181818');
     $("#footer").css('color','#999');
 });
-if (!sessionwrite) $(".openconfig").hide();
+if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
 // Configuration
