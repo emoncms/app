@@ -54,6 +54,7 @@
   margin:4px 5px 0px 0px; 
   float:right; 
   background-color: #44b3e2;
+  color:#fff;
 }
 
 @media(max-width: 610px) {
