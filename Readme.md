@@ -41,4 +41,14 @@ And add the following lines to the bottom of the file, to e.g. blacklist all *Ti
     [app]
     ; csv list of hidden apps
     hidden = template
+    
+## ❤️ Contributors
+
+Thanks go to these wonderful people:
+
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/emrysr"><img src="https://avatars2.githubusercontent.com/u/1466013?s=460&v=4" width="100px;" alt="Emrys Roberts"/><br /><sub><b>Dung Emrys Roberts</b></sub></a><br /></td>
+   </tr>
+</table>    
 
