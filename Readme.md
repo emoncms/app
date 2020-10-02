@@ -12,10 +12,10 @@ Solar power generated Vs. consumed
 Solar power generated Vs. consumed, with special handling for excess generation that's been diverted to an immersion/electric car/etc.
 
 * **MyHeatpump**
-Heatpump statistics
+Statistics
 
 * **MyEnergy**
-Same as MySolar plus live grid carbon intensity and wind turbine output
+Same as My Solar plus live grid carbon intensity and wind turbine output
 
 
 ![image](images/dark_app.png)
@@ -29,7 +29,7 @@ Make sure to check for database updates in **Emoncms > Admin**.
 
 ## Settings
 
-Optionally, if certain apps should not be possible to be created, as e.g. their configurations do not apply for certain countrys, a blacklist may be maintained in the `settings.php` file.  
+Optionally, if certain apps are not possible to be created, as e.g. their configurations do not apply for certain countries, a blacklist may be maintained in the `settings.php` file.  
 To use this functionality, simply edit the default settings file
 
     sudo nano /var/www/emoncms/settings.ini
