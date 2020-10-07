@@ -279,14 +279,20 @@ function show()
 
     if (elec_enabled) {
         meta["heatpump_elec_kwh"] = feed.getmeta(feeds["heatpump_elec_kwh"].id);
+        meta["heatpump_elec"] = feed.getmeta(feeds["heatpump_elec"].id);
         if (meta["heatpump_elec_kwh"].start_time>start_time) start_time = meta["heatpump_elec_kwh"].start_time;
-        heatpump_elec_start = feed.getvalue(feeds["heatpump_elec_kwh"].id, start_time*1000)[1];
     }
 
     if (heat_enabled) {
         meta["heatpump_heat_kwh"] = feed.getmeta(feeds["heatpump_heat_kwh"].id);
+        meta["heatpump_heat"] = feed.getmeta(feeds["heatpump_heat"].id);
         if (meta["heatpump_heat_kwh"].start_time>start_time) start_time = meta["heatpump_heat_kwh"].start_time;
         heatpump_heat_start = feed.getvalue(feeds["heatpump_heat_kwh"].id, start_time*1000)[1];
+    }
+    
+    // Load elec start here after start_time may have been modified by heat start time
+    if (elec_enabled) {
+        heatpump_elec_start = feed.getvalue(feeds["heatpump_elec_kwh"].id, start_time*1000)[1];
     }
     
     resize();
@@ -309,6 +315,7 @@ function show()
     } else {
         var timeWindow = (3600000*24.0*30);
         var start = end - timeWindow;
+        if (start<(start_time*1000)) start = start_time * 1000;
         bargraph_load(start,end);
         bargraph_draw();
         $("#advanced-toggle").hide();
@@ -403,6 +410,7 @@ $(".viewhistory").click(function () {
     var timeWindow = (3600000*24.0*30);
     var end = (new Date()).getTime();
     var start = end - timeWindow;
+    if (start<(start_time*1000)) start = start_time * 1000;
     viewmode = "bargraph";
     bargraph_load(start,end);
     bargraph_draw();
@@ -443,7 +451,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
                 var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
                 var date = days[d.getDay()]+", "+months[d.getMonth()]+" "+d.getDate();
-                tooltip(item.pageX, item.pageY, date+"<br>Electric: "+(elec_kwh).toFixed(1)+" kWh<br>Heat: "+(heat_kwh).toFixed(1)+" kWh<br>COP: "+(COP).toFixed(1), "#fff");
+                tooltip(item.pageX, item.pageY, date+"<br>Electric: "+(elec_kwh).toFixed(1)+" kWh<br>Heat: "+(heat_kwh).toFixed(1)+" kWh<br>COP: "+(COP).toFixed(2), "#fff");
             }
         }
     } else $("#tooltip").remove();
@@ -492,6 +500,7 @@ $('.bargraph-week').click(function () {
     var timeWindow = (3600000*24.0*7);
     var end = (new Date()).getTime();
     var start = end - timeWindow;
+    if (start<(start_time*1000)) start = start_time * 1000;
     bargraph_load(start,end);
     bargraph_draw();
 });
@@ -500,6 +509,7 @@ $('.bargraph-month').click(function () {
     var timeWindow = (3600000*24.0*30);
     var end = (new Date()).getTime();
     var start = end - timeWindow;
+    if (start<(start_time*1000)) start = start_time * 1000;
     bargraph_load(start,end);
     bargraph_draw();
 });
@@ -519,6 +529,10 @@ function powergraph_load()
     var npoints = 1200;
     var interval = ((end-start)*0.001) / npoints;
     interval = view.round_interval(interval);
+    
+    if (elec_enabled) interval = Math.round(interval/meta["heatpump_elec"].interval)*meta["heatpump_elec"].interval
+    if (heat_enabled) interval = Math.round(interval/meta["heatpump_heat"].interval)*meta["heatpump_heat"].interval
+    
     var intervalms = interval * 1000;
     start = Math.ceil(start/intervalms)*intervalms;
     end = Math.ceil(end/intervalms)*intervalms;
@@ -544,10 +558,22 @@ function powergraph_load()
 
     if (feeds["heatpump_elec"]!=undefined) {
         // Where power feed is available
-        if (heat_enabled) data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,start,end,interval,1,1);
-        if (heat_enabled) powergraph_series.push({label:"Heat Output", data:data["heatpump_heat"], yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
-        if (elec_enabled) data["heatpump_elec"] = feed.getdata(feeds["heatpump_elec"].id,start,end,interval,1,1);
-        if (elec_enabled) powergraph_series.push({label:"Electric Input", data:data["heatpump_elec"], yaxis:1, color:1, lines:{show:true, fill:0.3, lineWidth:0.5}});
+        if (heat_enabled) {
+            if (interval==meta["heatpump_heat"].interval) {
+                data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,start,end,interval,1,1);
+            } else {
+                data["heatpump_heat"] = feed.getaverage(feeds["heatpump_heat"].id,start,end,interval,1,1);
+            }
+            powergraph_series.push({label:"Heat Output", data:data["heatpump_heat"], yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
+        }
+        if (elec_enabled) {
+            if (interval==meta["heatpump_elec"].interval) {
+                data["heatpump_elec"] = feed.getdata(feeds["heatpump_elec"].id,start,end,interval,1,1);
+            } else {
+                data["heatpump_elec"] = feed.getaverage(feeds["heatpump_elec"].id,start,end,interval,1,1);
+            }
+            powergraph_series.push({label:"Electric Input", data:data["heatpump_elec"], yaxis:1, color:1, lines:{show:true, fill:0.3, lineWidth:0.5}});
+        }
     } else {
         // Where no power feed available
         var npoints = 50;
@@ -595,7 +621,7 @@ function powergraph_load()
         var elec_mean = 0; var heat_mean = 0;
         if (elec_enabled) elec_mean = feedstats["heatpump_elec"].mean;
         if (heat_enabled) heat_mean = feedstats["heatpump_heat"].mean;
-        if (elec_mean>0) $("#window-cop").html((heat_mean / elec_mean).toFixed(1));
+        if (elec_mean>0) $("#window-cop").html((heat_mean / elec_mean).toFixed(2));
     }
     
     var out = "";
@@ -738,7 +764,7 @@ function bargraph_load(start,end)
     
     var cop_in_window =  heat_kwh_in_window/elec_kwh_in_window;
     if (cop_in_window<0) cop_in_window = 0;
-    $("#window-cop").html((cop_in_window).toFixed(1));
+    $("#window-cop").html((cop_in_window).toFixed(2));
 }
 
 function bargraph_draw() 
