@@ -151,7 +151,8 @@ var config = {
             if (config.app[z].type=="feed") {
                 // Create list of feeds that satisfy engine requirement
                 var out = "<option value=0>Select "+z+" feed:</option>" +
-                        "<option value=auto>AUTO SELECT</option>";
+                        "<option value=auto>AUTO SELECT</option>" + 
+                        "<option value=unselect>DO NOT SELECT</option>"
                 
                 var feedsbygroup = [];
                 for (var f in config.feedsbyid)  {
@@ -246,7 +247,7 @@ var config = {
             
             var feedid = $(this).parent().find(".feed-select").val();
             
-            if (feedid!="auto" && feedid!=0) {
+            if (feedid!="auto" && feedid!=0 && feedid!="unselect") {
                 config.db[key] = feedid;
                 var keyappend = ""; if (key!=config.feedsbyid[feedid].name) keyappend = key+": ";
                 configItem.find(".feed-name").html(keyappend+config.feedsbyid[feedid].name);
@@ -256,6 +257,11 @@ var config = {
             }
             
             if (feedid=="auto") {
+                delete config.db[key];
+                configItem.find(".feed-name").html(config.app[key].autoname+" <span class='feed-auto'>[AUTO]</span>");
+            }
+            
+            if (feedid=="unselect") {
                 delete config.db[key];
                 configItem.find(".feed-name").html(config.app[key].autoname+" <span class='feed-auto'>[AUTO]</span>");
             }

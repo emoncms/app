@@ -148,12 +148,16 @@
     </div>
 
     <div class="power-graph-footer" style="background-color:#f0f0f0; color:#333; display:none">
-      <div style="padding:20px;">
+      <div style="padding:20px;">      
       <table style="width:100%" class="table">
       <tr><th></th><th>Energy</th><th>Cost / Value</th><th>Unit price</th></tr>
       <tbody id="octopus_totals"></tbody>
       </table>
-      <div id="use_meter_kwh_hh_bound" class="hide"><input id="use_meter_kwh_hh" type="checkbox" checked /> <span style="font-size:12px">Show energy and costs based on Octopus smart meter data where available</span></div>
+      <button class="btn hide" style="float:right" id="show_profile">Show Profile</button>
+      <div id="use_meter_kwh_hh_bound" class="hide"><input id="use_meter_kwh_hh" type="checkbox" checked /> <span style="font-size:12px">Show energy and costs based on Octopus smart meter data where available</span><div id="meter_kwh_hh_comparison" style="font-size:12px; padding-left:22px"></div>
+
+      </div>
+
     </div>
   </div></div>
 </div>
@@ -288,6 +292,9 @@ var solarpv_mode = false;
 var smart_meter_data = false;
 var use_meter_kwh_hh = true;
 
+var profile_kwh = {};
+var profile_cost = {};
+
 config.init();
 
 function init()
@@ -301,9 +308,12 @@ function show() {
 
     // Quick translation of feed ids
     feeds = {};
+    
     for (var key in config.app) {
         if (config.app[key].value) feeds[key] = config.feedsbyid[config.app[key].value];
     }
+    
+    solarpv_mode = false;
 
     resize();
 
@@ -516,6 +526,10 @@ $("#use_meter_kwh_hh").click(function() {
     graph_load(); graph_draw();
 });
 
+$("#show_profile").click(function() {
+    profile_draw();
+});
+
 // -------------------------------------------------------------------------------
 // FUNCTIONS
 // -------------------------------------------------------------------------------
@@ -578,6 +592,20 @@ function graph_load()
     data["meter_kwh_hh"] = meter_kwh_hh;
     data["meter_kwh_hh_cost"] = [];
     
+    // Used to generate averaged profile
+    profile_kwh = [];
+    profile_cost = [];
+    
+    var d = new Date();
+    d.setHours(0,0,0,0);
+    var profile_start = d.getTime();
+    
+    for (var hh=0; hh<48; hh++) {
+        let profile_time = profile_start + hh*1800*1000;
+        profile_kwh[hh] = [profile_time,0.0]
+        profile_cost[hh] = [profile_time,0.0]
+    }
+    
     var total_cost_import = 0
     var total_kwh_import = 0
     var total_cost_export = 0
@@ -607,9 +635,11 @@ function graph_load()
         }
     }
 
-    if (import_kwh.length>1) {
+    if (import_kwh.length>1) {        
         for (var z=1; z<import_kwh.length; z++) {
             let time = import_kwh[z-1][0];
+            d.setTime(time)
+            let hh = d.getHours()*2 + d.getMinutes()/30
 
             if (solarpv_mode) {
                 // ----------------------------------------------------
@@ -683,7 +713,6 @@ function graph_load()
                             sumXY += XY;
                             sumX2 += X2;
                             n++;
-                        
                         }
                     }
                 }
@@ -701,6 +730,10 @@ function graph_load()
                     total_kwh_import += kwh_import
                     total_cost_import += kwh_import*cost_import  
                 }
+                
+                // Generate profile
+                profile_kwh[hh][1] += kwh_import
+                profile_cost[hh][1] += kwh_import*cost_import
             }
         }
     }
@@ -713,8 +746,10 @@ function graph_load()
         
         if (prc_error>0) {
             console.log("Realtime feed is: "+prc_error.toFixed(2)+"% above meter data");
+            $("#meter_kwh_hh_comparison").html("Realtime feed is: "+prc_error.toFixed(2)+"% above meter data");
         } else {
             console.log("Realtime feed is: "+Math.abs(prc_error).toFixed(2)+"% below meter data")  
+            $("#meter_kwh_hh_comparison").html("Realtime feed is: "+Math.abs(prc_error).toFixed(2)+"% below meter data");
         }
     }
 
@@ -752,6 +787,10 @@ function graph_load()
         out += "<td>£"+(total_cost_solar_used+total_cost_export).toFixed(2)+"</td>";
         out += "<td>"+(unit_cost_solar_combined*100*1.05).toFixed(1)+"p/kWh (inc VAT)</td>";
         out += "</tr>";
+        
+        $("#show_profile").hide();
+    } else {
+        $("#show_profile").show();
     }
 
     $("#octopus_totals").html(out);
@@ -798,6 +837,55 @@ function graph_draw()
         xaxis: {
             mode: "time", timezone: "browser", 
             min: view.start, max: view.end, 
+            font: {size:flot_font_size, color:"#666"},
+            reserveSpace:false
+        },
+        yaxes: [
+            {position:'left', font: {size:flot_font_size, color:"#666"},reserveSpace:false},
+            {position:'left', alignTicksWithAxis:1, font:{size:flot_font_size, color:"#666"},reserveSpace:false}
+        ],
+        grid: {
+            show:true, 
+            color:"#aaa",
+            borderWidth:0,
+            hoverable: true, 
+            clickable: true,
+            // labelMargin:0,
+            // axisMargin:0
+            margin:{top:30}
+        },
+        selection: { mode: "x" },
+        legend:{position:"NW", noColumns:5}
+    }
+    $.plot($('#placeholder'),graph_series,options);
+}
+
+function profile_draw() 
+{
+    var profile_unitprice = [];
+    
+    for (var z=0; z<48; z++) {
+        let time = profile_kwh[z][0]
+        let value = 100 * profile_cost[z][1] / profile_kwh[z][1]
+        profile_unitprice[z*2] = [time,value];
+        profile_unitprice[z*2+1] = [time+1800000,value];
+    }
+
+    var bars = { show: true, align: "left", barWidth: 0.9*1800*1000, fill: 1.0, lineWidth:0 };
+
+    graph_series = [];
+    if (view_mode=="energy") {
+        graph_series.push({label: "Import", data:profile_kwh, yaxis:1, color:"#44b3e2", stack: true, bars: bars});
+    }
+    else if (view_mode=="cost") {
+        graph_series.push({label: "Import", data:profile_cost, yaxis:1, color:"#44b3e2", stack: true, bars: bars});
+    }
+    graph_series.push({label: "Agile", data:profile_unitprice, yaxis:2, color:"#fb1a80", lines: { show: true, align: "left", lineWidth:1}});
+
+    var options = {
+        xaxis: {
+            mode: "time", timezone: "browser", 
+            // min: start, max: end, 
             font: {size:flot_font_size, color:"#666"},
             reserveSpace:false
         },
