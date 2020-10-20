@@ -118,7 +118,11 @@ var config = {
         for (var z in config.app) {
             out += "<div class='app-config-box' key='"+z+"'>";
             if (config.app[z].type=="feed") {
-                out += "<i class='status icon-ok-sign icon-app-config'></i> <b class='feed-name' key='"+z+"'>"+config.app[z].autoname+" <span class='feed-auto'>[AUTO]</span></b><i class='app-config-edit icon-pencil icon-app-config' style='float:right; cursor:pointer'></i>";
+                
+                var selection_mode = "AUTO";
+                if (config.db[z]=="unselect") selection_mode = "NOT SELECTED";
+                
+                out += "<i class='status icon-ok-sign icon-app-config'></i> <b class='feed-name' key='"+z+"'>"+config.app[z].autoname+" <span class='feed-auto'>["+selection_mode+"]</span></b><i class='app-config-edit icon-pencil icon-app-config' style='float:right; cursor:pointer'></i>";
                 out += "<br><span class='app-config-info'></span>";
                 out += "<div class='feed-select-div input-append'><select class='feed-select'></select><button class='btn feed-select-ok'>ok</button></div>";
             } else if (config.app[z].type=="value") {
@@ -262,8 +266,8 @@ var config = {
             }
             
             if (feedid=="unselect") {
-                delete config.db[key];
-                configItem.find(".feed-name").html(config.app[key].autoname+" <span class='feed-auto'>[AUTO]</span>");
+                config.db[key] = "unselect"
+                configItem.find(".feed-name").html(config.app[key].autoname+" <span class='feed-auto'>[NOT SELECTED]</span>");
             }
             
             if (feedid!=0 ) {
