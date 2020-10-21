@@ -138,7 +138,6 @@
       </div>
 
       <div id="history-title" class="block-title">HISTORY</div>
-
     </div>
 
     <div style="background-color:rgba(68,179,226,0.1); padding:10px;">
@@ -201,6 +200,7 @@ apikeystr = "";
 if (apikey!="") apikeystr = "&apikey="+apikey;
 
 var view_mode = "energy";
+var profile_mode = false;
 
 
 // ----------------------------------------------------------------------
@@ -470,15 +470,27 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             var seconds = d.getSeconds();
             if (seconds<10) seconds = "0"+seconds;
 
-            var date = hours+":"+minutes+":"+seconds+", "+days[d.getDay()]+" "+months[d.getMonth()]+" "+d.getDate();
+            var date = hours+":"+minutes;
+            if (!profile_mode) date += ", "+days[d.getDay()]+" "+months[d.getMonth()]+" "+d.getDate();
 
-            var text = item.series.label+"<br>"+date+"<br>";
+            var text = "";
+            if (profile_mode) {
+                if (item.series.label=='Agile' || item.series.label=='Outgoing') {
+                    text += "Average ";
+                } else {
+                    text += "Cumulative ";
+                }
+            }
+            
+            text += item.series.label
+            text += "<br>"+date+"<br>";
             if (item.series.label=='Agile' || item.series.label=='Outgoing') {
                 text += (itemValue*1.05).toFixed(2)+" p/kWh (inc VAT)";
             } else {
                 if (view_mode=="energy") text += (itemValue).toFixed(3)+" kWh";
                 if (view_mode=="cost") text += (itemValue*100*1.05).toFixed(2)+"p";
             }
+            
             tooltip(item.pageX, item.pageY, text, "#fff");
         }
     } else $("#tooltip").remove();
@@ -527,6 +539,7 @@ $("#use_meter_kwh_hh").click(function() {
 });
 
 $("#show_profile").click(function() {
+    profile_mode = true;
     profile_draw();
 });
 
