@@ -120,7 +120,7 @@ var config = {
             if (config.app[z].type=="feed") {
                 
                 var selection_mode = "AUTO";
-                if (config.db[z]=="unselect") selection_mode = "NOT SELECTED";
+                if (config.db[z]=="disable") selection_mode = "DISABLED";
                 
                 out += "<i class='status icon-ok-sign icon-app-config'></i> <b class='feed-name' key='"+z+"'>"+config.app[z].autoname+" <span class='feed-auto'>["+selection_mode+"]</span></b><i class='app-config-edit icon-pencil icon-app-config' style='float:right; cursor:pointer'></i>";
                 out += "<br><span class='app-config-info'></span>";
@@ -156,7 +156,7 @@ var config = {
                 // Create list of feeds that satisfy engine requirement
                 var out = "<option value=0>Select "+z+" feed:</option>" +
                         "<option value=auto>AUTO SELECT</option>" + 
-                        "<option value=unselect>DO NOT SELECT</option>"
+                        "<option value=disable>DISABLE</option>"
                 
                 var feedsbygroup = [];
                 for (var f in config.feedsbyid)  {
@@ -251,7 +251,7 @@ var config = {
             
             var feedid = $(this).parent().find(".feed-select").val();
             
-            if (feedid!="auto" && feedid!=0 && feedid!="unselect") {
+            if (feedid!="auto" && feedid!=0 && feedid!="disable") {
                 config.db[key] = feedid;
                 var keyappend = ""; if (key!=config.feedsbyid[feedid].name) keyappend = key+": ";
                 configItem.find(".feed-name").html(keyappend+config.feedsbyid[feedid].name);
@@ -265,9 +265,9 @@ var config = {
                 configItem.find(".feed-name").html(config.app[key].autoname+" <span class='feed-auto'>[AUTO]</span>");
             }
             
-            if (feedid=="unselect") {
-                config.db[key] = "unselect"
-                configItem.find(".feed-name").html(config.app[key].autoname+" <span class='feed-auto'>[NOT SELECTED]</span>");
+            if (feedid=="disable") {
+                config.db[key] = "disable"
+                configItem.find(".feed-name").html(config.app[key].autoname+" <span class='feed-auto'>[DISABLED]</span>");
             }
             
             if (feedid!=0 ) {
