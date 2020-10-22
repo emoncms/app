@@ -539,7 +539,6 @@ $("#use_meter_kwh_hh").click(function() {
 });
 
 $("#show_profile").click(function() {
-    profile_mode = true;
     profile_draw();
 });
 
@@ -811,6 +810,9 @@ function graph_load()
 
 function graph_draw() 
 {
+    profile_mode = false;
+    $("#history-title").html("HISTORY");
+    
     if (this_halfhour_index!=-1) {
 
         let kwh_last_halfhour = data["import"][this_halfhour_index][1];
@@ -875,6 +877,9 @@ function graph_draw()
 
 function profile_draw() 
 {
+    profile_mode = true;
+    $("#history-title").html("PROFILE");
+    
     var profile_unitprice = [];
     
     for (var z=0; z<48; z++) {
