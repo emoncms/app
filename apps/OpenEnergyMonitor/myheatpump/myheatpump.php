@@ -43,6 +43,19 @@
   .value1 { font-size:18px }
 }
 
+.ledgend-box {
+    margin:2px;
+    padding:2px;
+    width:10px;
+    background-color:#aaa;
+}
+
+.ledgend-box-in {
+    width:10px;
+    height:10px;
+    background-color:#ccc;
+}
+
 </style>
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
@@ -136,6 +149,7 @@
           <th style="text-align:center">Max</th>
           <th style="text-align:center">Diff</th>
           <th style="text-align:center">Mean</th>
+          <th style="text-align:center">kWh</th>
           <th style="text-align:center">StDev</th>
           </tr>
           <tbody id="stats"></tbody>
@@ -225,7 +239,8 @@ config.app = {
     "heatpump_heat":{"type":"feed", "autoname":"heatpump_heat", "engine":"5", "optional":true, "description":"House or building use in watts"},
     "heatpump_heat_kwh":{"type":"feed", "autoname":"heatpump_heat_kwh", "engine":5, "optional":true, "description":"House or building use in watts"},
     "heatpump_flowT":{"type":"feed", "autoname":"heatpump_flowT", "engine":5, "optional":true, "description":"House or building use in watts"},
-    "heatpump_returnT":{"type":"feed", "autoname":"heatpump_returnT", "engine":5, "optional":true, "description":"House or building use in watts"}
+    "heatpump_returnT":{"type":"feed", "autoname":"heatpump_returnT", "engine":5, "optional":true, "description":"House or building use in watts"},
+    "heatpump_outsideT":{"type":"feed", "autoname":"heatpump_outsideT", "engine":5, "optional":true, "description":"Outside temperature"}
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
@@ -453,6 +468,31 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 var date = days[d.getDay()]+", "+months[d.getMonth()]+" "+d.getDate();
                 tooltip(item.pageX, item.pageY, date+"<br>Electric: "+(elec_kwh).toFixed(1)+" kWh<br>Heat: "+(heat_kwh).toFixed(1)+" kWh<br>COP: "+(COP).toFixed(2), "#fff");
             }
+            
+            if (viewmode=="powergraph")
+            {
+                var itemTime = item.datapoint[0];
+                var itemValue = item.datapoint[1];
+                
+                var d = new Date(itemTime);
+                var h = d.getHours();
+                if (h<10) h = "0"+h;
+                var m = d.getMinutes();
+                if (m<10) m = "0"+m;
+                var time = h+":"+m;
+                
+                var name = "";
+                var unit = "";
+                var dp = 0;
+                
+                if (item.series.label=="Flow T") { name = "FlowT"; unit = "C"; dp = 1; }
+                else if (item.series.label=="Return T") { name = "ReturnT"; unit = "C"; dp = 1; }
+                else if (item.series.label=="Outside T") { name = "Outside"; unit = "C"; dp = 1; }
+                else if (item.series.label=="Electric Input") { name = "Elec"; unit = "W"; }
+                else if (item.series.label=="Heat Output") { name = "Heat"; unit = "W"; }
+                
+                tooltip(item.pageX, item.pageY, time+": "+name+" "+itemValue.toFixed(dp)+unit, "#fff");
+            }
         }
     } else $("#tooltip").remove();
 });
@@ -547,9 +587,9 @@ function powergraph_load()
         data["heatpump_returnT"] = feed.getdata(feeds["heatpump_returnT"].id,start,end,interval,1,1);
         powergraph_series.push({label:"Return T", data:data["heatpump_returnT"], yaxis:2, color:3});
     }
-    if (feeds["outside_temperature"]!=undefined) {
-        data["outside_temperature"] = feed.getdata(feeds["outside_temperature"].id,start,end,interval,1,1);
-        powergraph_series.push({label:"Outside T", data:data["outside_temperature"], yaxis:2, color:4});
+    if (feeds["heatpump_outsideT"]!=undefined) {
+        data["heatpump_outsideT"] = feed.getdata(feeds["heatpump_outsideT"].id,start,end,interval,1,1);
+        powergraph_series.push({label:"Outside T", data:data["heatpump_outsideT"], yaxis:2, color:4});
     }
     if (feeds["DHW_cylinderT"]!=undefined) {
         data["DHW_cylinderT"] = feed.getdata(feeds["DHW_cylinderT"].id,start,end,interval,1,1);
@@ -616,6 +656,7 @@ function powergraph_load()
     if (heat_enabled) feedstats["heatpump_heat"] = stats(data["heatpump_heat"]);
     feedstats["heatpump_flowT"] = stats(data["heatpump_flowT"]);
     feedstats["heatpump_returnT"] = stats(data["heatpump_returnT"]);
+    if (data["heatpump_outsideT"]!=undefined) feedstats["heatpump_outsideT"] = stats(data["heatpump_outsideT"]);
     
     if (feedstats["heatpump_elec"].mean>0) {
         var elec_mean = 0; var heat_mean = 0;
@@ -627,11 +668,14 @@ function powergraph_load()
     var out = "";
     for (var z in feedstats) {
         out += "<tr>";
+        // out += "<td><div class='ledgend-box'><div class='ledgend-box-in'></div></div></td>";
         out += "<td style='text-align:left'>"+z+"</td>";
         out += "<td style='text-align:center'>"+feedstats[z].minval.toFixed(2)+"</td>";
         out += "<td style='text-align:center'>"+feedstats[z].maxval.toFixed(2)+"</td>";
         out += "<td style='text-align:center'>"+feedstats[z].diff.toFixed(2)+"</td>";
         out += "<td style='text-align:center'>"+feedstats[z].mean.toFixed(2)+"</td>";
+        var kwhstr = ""; if (z=="heatpump_elec" || z=="heatpump_heat") kwhstr = feedstats[z].kwh.toFixed(3)
+        out += "<td style='text-align:center'>"+kwhstr+"</td>";
         out += "<td style='text-align:center'>"+feedstats[z].stdev.toFixed(2)+"</td>";
         out += "</tr>";
     }
@@ -666,7 +710,7 @@ function powergraph_draw()
             margin:{top:30}
         },
         selection: { mode: "x" },
-        legend:{position:"NW", noColumns:4}
+        legend:{position:"NW", noColumns:5}
     }
     $.plot($('#placeholder'),powergraph_series,options);
 }

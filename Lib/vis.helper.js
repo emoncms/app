@@ -96,6 +96,8 @@ function stats(data)
     var i=0;
     var minval = 0;
     var maxval = 0;
+    var start_time = -1;
+    var end_time = 0;
     for (z in data)
     {
         var val = data[z][1];
@@ -109,6 +111,9 @@ function stats(data)
             if (val<minval) minval = val;
             sum += val;
             i++;
+            
+            if (start_time==-1) start_time = data[z][0]
+            end_time = data[z][0]
         }
     }
     var mean = sum / i;
@@ -120,12 +125,18 @@ function stats(data)
     }
     var stdev = Math.sqrt(sum / i);
     
+    var time_elapsed = end_time - start_time;
+    
+    var kwh = (mean*time_elapsed*0.001)/3600000.0
+    
     return {
         "minval":minval,
         "maxval":maxval,
         "diff":maxval-minval,
         "mean":mean,
-        "stdev":stdev
+        "stdev":stdev,
+        "time_elapsed":time_elapsed,
+        "kwh":kwh
     }
 }
 
