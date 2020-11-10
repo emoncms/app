@@ -353,13 +353,14 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             $("#tooltip").remove();
             var itemTime = item.datapoint[0];
 
-            var elec_kwh, unit;
+            var elec_use, elec_kwh, unit;
             if (data.use_kwhd[z]) {
                 unit = "kWh";
-                elec_kwh = data.use_kwhd[z][1];
+                elec_use = elec_kwh = data.use_kwhd[z][1];
             } else {
                 unit = "W";
-                elec_kwh = data.use[z][1];
+                elec_use = data.use[z][1];
+                elec_kwh = elec_use * 0.001;
             }
 
             var d = new Date(itemTime);
@@ -369,9 +370,9 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             
             var text = "";
             if (viewcostenergy=="energy") {
-                text = date+"<br>"+(elec_kwh).toFixed(1)+" " + unit;
+                text = date+"<br>"+(elec_use).toFixed(1)+" " + unit;
             } else {
-                text = date+"<br>"+(elec_kwh).toFixed(1)+" " + unit + " ("+config.app.currency.value+(elec_kwh*config.app.unitcost.value).toFixed(2)+")";
+                text = date+"<br>"+(elec_use).toFixed(1)+" " + unit + " ("+config.app.currency.value+(elec_kwh*config.app.unitcost.value).toFixed(2)+")";
             }
             
             tooltip(item.pageX, item.pageY, text, "#fff");
