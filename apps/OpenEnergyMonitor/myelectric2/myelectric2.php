@@ -371,7 +371,8 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             if (viewcostenergy=="energy") {
                 text = date+"<br>"+(elec_kwh).toFixed(1)+" " + unit;
             } else {
-                text = date+"<br>"+(elec_kwh).toFixed(1)+" " + unit + " ("+config.app.currency.value+(elec_kwh*config.app.unitcost.value).toFixed(2)+")";
+                text = date+"<br>"+(elec_kwh).toFixed(1)+" " + unit;
+                if (unit=="kWh") text += " ("+config.app.currency.value+(elec_kwh*config.app.unitcost.value).toFixed(2)+")";
             }
             
             tooltip(item.pageX, item.pageY, text, "#fff");
