@@ -136,6 +136,7 @@
             <option value='W'>Since midnight Sunday</option>
             <option value='Y'>Yesterday</option>
             <option value='T' selected>Today since midnight</option>
+            <option value='C'>Custom</option>
         </select>
       </div>
 
@@ -539,6 +540,8 @@ $('#placeholder').bind("plotselected", function (event, ranges) {
     view.start = start; view.end = end;
     graph_load();
     graph_draw();
+
+    $(".time-select").val("C");
     
     setTimeout(function() { panning = false; }, 100);
 });
@@ -615,6 +618,7 @@ $('#datetimepicker1').on("changeDate", function (e) {
     view.start = timewindowStart*1000;
     graph_load();
     graph_draw();
+    $(".time-select").val("C");
 });
 
 $('#datetimepicker2').on("changeDate", function (e) {
@@ -625,6 +629,7 @@ $('#datetimepicker2').on("changeDate", function (e) {
     view.end = timewindowEnd*1000;
     graph_load();
     graph_draw();
+    $(".time-select").val("C");
 });
 
 // -------------------------------------------------------------------------------
