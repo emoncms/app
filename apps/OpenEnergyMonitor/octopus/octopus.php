@@ -152,6 +152,7 @@
       <tr><th></th><th>Energy</th><th>Cost / Value</th><th>Unit price</th></tr>
       <tbody id="octopus_totals"></tbody>
       </table>
+      <button class="btn" style="float:right" id="download-csv">Download CSV</button>
       <button class="btn hide" style="float:right" id="show_profile">Show Profile</button>
       <div id="use_meter_kwh_hh_bound" class="hide"><input id="use_meter_kwh_hh" type="checkbox" checked /> <span style="font-size:12px">Show energy and costs based on Octopus smart meter data where available</span><div id="meter_kwh_hh_comparison" style="font-size:12px; padding-left:22px"></div>
 
@@ -274,6 +275,7 @@ var regions_outgoing = {
 var feeds = {};
 var meta = {};
 var data = {};
+var csv = [];
 var graph_series = [];
 var previousPoint = false;
 var viewmode = "graph";
@@ -542,6 +544,36 @@ $("#show_profile").click(function() {
     profile_draw();
 });
 
+$("#download-csv").click(function(){
+
+    var csv = [];
+    
+    if (solarpv_mode) {
+        keys = ["agile","outgoing","use","import","import_cost","export","export_cost","solar_used","solar_used_cost","meter_kwh_hh","meter_kwh_hh_cost"]
+    } else {
+        keys = ["agile","import","import_cost","meter_kwh_hh","meter_kwh_hh_cost"]
+    }
+    
+    csv.push("time,"+keys.join(","))
+    
+    for (var z in data["import"]) {
+        var time = data["import"][z][0]
+        
+        var line = [];
+        line.push(datetime_string(time))
+        
+        for (var i in keys) {
+            var value = data[keys[i]][z][1];
+            if (!isNaN(value) && value!=null) value = value.toFixed(3)
+            line.push(value)
+        }
+        
+        csv.push(line.join(","));
+    }
+
+    download_data("agile-data.csv",csv.join("\n"));    
+});
+
 // -------------------------------------------------------------------------------
 // FUNCTIONS
 // -------------------------------------------------------------------------------
@@ -746,6 +778,9 @@ function graph_load()
                 // Generate profile
                 profile_kwh[hh][1] += kwh_import
                 profile_cost[hh][1] += kwh_import*cost_import
+                
+                // CSV Download
+                // csv.push([time,kwh_import]);
             }
         }
     }
@@ -980,5 +1015,37 @@ $(function() {
 function app_log (level, message) {
     if (level=="ERROR") alert(level+": "+message);
     console.log(level+": "+message);
+}
+
+function datetime_string(time) {
+    var t = new Date(time);
+    var year = t.getFullYear();
+    var month = t.getMonth()+1;
+    if (month<10) month = "0"+month;
+    var day = t.getDate();
+    if (day<10) day = "0"+day;
+    var hours = t.getHours();
+    if (hours<10) hours = "0"+hours;
+    var minutes = t.getMinutes();
+    if (minutes<10) minutes = "0"+minutes;
+    var seconds = t.getSeconds();
+    if (seconds<10) seconds = "0"+seconds;
+
+    return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
+}
+
+function download_data(filename, data) {
+    var blob = new Blob([data], {type: 'text/csv'});
+    if(window.navigator.msSaveOrOpenBlob) {
+        window.navigator.msSaveBlob(blob, filename);
+    }
+    else{
+        var elem = window.document.createElement('a');
+        elem.href = window.URL.createObjectURL(blob);
+        elem.download = filename;        
+        document.body.appendChild(elem);
+        elem.click();        
+        document.body.removeChild(elem);
+    }
 }
 </script>
