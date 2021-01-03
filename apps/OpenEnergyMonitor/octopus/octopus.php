@@ -3,6 +3,7 @@
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
+<link href="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
@@ -14,6 +15,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
+<script src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
 
 <style>
 
@@ -152,6 +154,24 @@
       <tr><th></th><th>Energy</th><th>Cost / Value</th><th>Unit price</th></tr>
       <tbody id="octopus_totals"></tbody>
       </table>
+      
+      <div class="input-prepend input-append" style="padding-right:5px">
+          <span class="add-on" style="width:50px"><?php echo _('Start') ?></span>
+          <span id="datetimepicker1">
+              <input id="request-start" data-format="dd/MM/yyyy hh:mm:ss" type="text" style="width:140px" />
+              <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
+          </span>
+      </div>
+      
+      <div class="input-prepend input-append" style="padding-right:5px">
+          <span class="add-on" style="width:50px"><?php echo _('End') ?></span>
+          <span id="datetimepicker2">
+              <input id="request-end" data-format="dd/MM/yyyy hh:mm:ss" type="text" style="width:140px" />
+              <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
+          </span>
+          <button class="btn" id="custom">Ok</button>
+      </div>
+      
       <button class="btn" style="float:right" id="download-csv">Download CSV</button>
       <button class="btn hide" style="float:right" id="show_profile">Show Profile</button>
       <div id="use_meter_kwh_hh_bound" class="hide"><input id="use_meter_kwh_hh" type="checkbox" checked /> <span style="font-size:12px">Show energy and costs based on Octopus smart meter data where available</span><div id="meter_kwh_hh_comparison" style="font-size:12px; padding-left:22px"></div>
@@ -275,7 +295,6 @@ var regions_outgoing = {
 var feeds = {};
 var meta = {};
 var data = {};
-var csv = [];
 var graph_series = [];
 var previousPoint = false;
 var viewmode = "graph";
@@ -301,7 +320,16 @@ config.init();
 
 function init()
 {
+    $("#datetimepicker1").datetimepicker({
+        language: 'en-EN'
+    });
 
+    $("#datetimepicker2").datetimepicker({
+        language: 'en-EN'
+    });
+    
+    datetimepicker1 = $('#datetimepicker1').data('datetimepicker');
+    datetimepicker2 = $('#datetimepicker2').data('datetimepicker');
 }
 
 function show() {
@@ -434,10 +462,16 @@ $('.time').click(function () {
 });
 
 $('.time-select').change(function () {
-    setPeriod($(this).val());
-    // view.timewindow(period);
-    graph_load();
-    graph_draw();
+    var val = $(this).val();
+    
+    if (val=="C") {
+    
+    } else {
+        setPeriod(val);
+        // view.timewindow(period);
+        graph_load();
+        graph_draw();
+    }
 });
 
 $("#advanced-toggle").click(function () {
@@ -574,6 +608,19 @@ $("#download-csv").click(function(){
     download_data("agile-data.csv",csv.join("\n"));    
 });
 
+$("#custom").click(function(){
+    var timewindowStart = parseTimepickerTime($("#request-start").val());
+    var timewindowEnd = parseTimepickerTime($("#request-end").val());
+    if (!timewindowStart) { alert("Please enter a valid start date."); return false; }
+    if (!timewindowEnd) { alert("Please enter a valid end date."); return false; }
+    if (timewindowStart>=timewindowEnd) { alert("Start date must be further back in time than end date."); return false; }
+
+    view.start = timewindowStart*1000;
+    view.end = timewindowEnd*1000;
+    graph_load();
+    graph_draw();
+});
+
 // -------------------------------------------------------------------------------
 // FUNCTIONS
 // -------------------------------------------------------------------------------
@@ -588,6 +635,15 @@ function graph_load()
     var intervalms = interval * 1000;
     view.start = Math.ceil(view.start/intervalms)*intervalms;
     view.end = Math.ceil(view.end/intervalms)*intervalms;
+
+    if(datetimepicker1) {
+        datetimepicker1.setLocalDate(new Date(view.start));
+        datetimepicker1.setEndDate(new Date(view.end));
+    }
+    if(datetimepicker2) {
+        datetimepicker2.setLocalDate(new Date(view.end));
+        datetimepicker2.setStartDate(new Date(view.start));
+    }
 
     if (feeds["use_kwh"]!=undefined && feeds["solar_kwh"]!=undefined) solarpv_mode = true;
     if (feeds["meter_kwh_hh"]!=undefined) { 
@@ -778,9 +834,6 @@ function graph_load()
                 // Generate profile
                 profile_kwh[hh][1] += kwh_import
                 profile_cost[hh][1] += kwh_import*cost_import
-                
-                // CSV Download
-                // csv.push([time,kwh_import]);
             }
         }
     }
@@ -1047,5 +1100,18 @@ function download_data(filename, data) {
         elem.click();        
         document.body.removeChild(elem);
     }
+}
+
+function parseTimepickerTime(timestr){
+    var tmp = timestr.split(" ");
+    if (tmp.length!=2) return false;
+
+    var date = tmp[0].split("/");
+    if (date.length!=3) return false;
+
+    var time = tmp[1].split(":");
+    if (time.length!=3) return false;
+
+    return new Date(date[2],date[1]-1,date[0],time[0],time[1],time[2],0).getTime() / 1000;
 }
 </script>
