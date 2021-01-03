@@ -169,7 +169,6 @@
               <input id="request-end" data-format="dd/MM/yyyy hh:mm:ss" type="text" style="width:140px" />
               <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
           </span>
-          <button class="btn" id="custom">Ok</button>
       </div>
       
       <button class="btn" style="float:right" id="download-csv">Download CSV</button>
@@ -608,14 +607,21 @@ $("#download-csv").click(function(){
     download_data("agile-data.csv",csv.join("\n"));    
 });
 
-$("#custom").click(function(){
+$('#datetimepicker1').on("changeDate", function (e) {
     var timewindowStart = parseTimepickerTime($("#request-start").val());
-    var timewindowEnd = parseTimepickerTime($("#request-end").val());
     if (!timewindowStart) { alert("Please enter a valid start date."); return false; }
-    if (!timewindowEnd) { alert("Please enter a valid end date."); return false; }
-    if (timewindowStart>=timewindowEnd) { alert("Start date must be further back in time than end date."); return false; }
+    if (timewindowStart*1000>=view.end) { alert("Start date must be further back in time than end date."); return false; }
 
     view.start = timewindowStart*1000;
+    graph_load();
+    graph_draw();
+});
+
+$('#datetimepicker2').on("changeDate", function (e) {
+    var timewindowEnd = parseTimepickerTime($("#request-end").val());
+    if (!timewindowEnd) { alert("Please enter a valid end date."); return false; }
+    if (view.start>=timewindowEnd*1000) { alert("Start date must be further back in time than end date."); return false; }
+    
     view.end = timewindowEnd*1000;
     graph_load();
     graph_draw();
