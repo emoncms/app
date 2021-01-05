@@ -174,10 +174,8 @@
       
       <button class="btn" style="float:right" id="download-csv">Download CSV</button>
       <button class="btn hide" style="float:right" id="show_profile">Show Profile</button>
-      <div id="use_meter_kwh_hh_bound" class="hide"><input id="use_meter_kwh_hh" type="checkbox" checked /> <span style="font-size:12px">Show energy and costs based on Octopus smart meter data where available</span><div id="meter_kwh_hh_comparison" style="font-size:12px; padding-left:22px"></div>
-      <div id="show_carbonintensity_bound"><input id="show_carbonintensity" type="checkbox" /> <span style="font-size:12px">Show grid carbon intensity</span><div id="carbonintensity_result" style="font-size:12px; padding-left:22px"></div>
-      </div>
-
+      <div id="use_meter_kwh_hh_bound" class="hide"><input id="use_meter_kwh_hh" type="checkbox" checked /> <span style="font-size:12px">Show energy and costs based on Octopus smart meter data where available</span><div id="meter_kwh_hh_comparison" style="font-size:12px; padding-left:22px"></div></div>
+      <div id="show_carbonintensity_bound"><input id="show_carbonintensity" type="checkbox" /> <span style="font-size:12px">Show grid carbon intensity</span><div id="carbonintensity_result" style="font-size:12px; padding-left:22px"></div></div>
     </div>
   </div></div>
 </div>
