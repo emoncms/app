@@ -175,7 +175,7 @@
       <button class="btn" style="float:right" id="download-csv">Download CSV</button>
       <button class="btn hide" style="float:right" id="show_profile">Show Profile</button>
       <div id="use_meter_kwh_hh_bound" class="hide"><input id="use_meter_kwh_hh" type="checkbox" checked /> <span style="font-size:12px">Show energy and costs based on Octopus smart meter data where available</span><div id="meter_kwh_hh_comparison" style="font-size:12px; padding-left:22px"></div>
-
+      <div id="show_carbonintensity_bound"><input id="show_carbonintensity" type="checkbox" /> <span style="font-size:12px">Show grid carbon intensity</span><div id="carbonintensity_result" style="font-size:12px; padding-left:22px"></div>
       </div>
 
     </div>
@@ -223,6 +223,7 @@ if (apikey!="") apikeystr = "&apikey="+apikey;
 var view_mode = "energy";
 var profile_mode = false;
 
+var show_carbonintensity = $("#show_carbonintensity")[0].checked;
 
 // ----------------------------------------------------------------------
 // Display
@@ -522,6 +523,8 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             text += "<br>"+date+"<br>";
             if (item.series.label=='Agile' || item.series.label=='Outgoing') {
                 text += (itemValue*1.05).toFixed(2)+" p/kWh (inc VAT)";
+            } else if (item.series.label=='Carbon Intensity') {
+                text += itemValue+" gCO2/kWh";
             } else {
                 if (view_mode=="energy") text += (itemValue).toFixed(3)+" kWh";
                 if (view_mode=="cost") text += (itemValue*100*1.05).toFixed(2)+"p";
@@ -574,6 +577,12 @@ $(".cost").click(function() {
 $("#use_meter_kwh_hh").click(function() {
     use_meter_kwh_hh = $(this)[0].checked;
     graph_load(); graph_draw();
+});
+
+$("#show_carbonintensity").click(function() {
+    show_carbonintensity = $(this)[0].checked;
+    graph_load(); graph_draw();
+    if (!show_carbonintensity) $("#carbonintensity_result").html("");
 });
 
 $("#show_profile").click(function() {
@@ -675,6 +684,8 @@ function graph_load()
     
     data["agile"] = []
     data["outgoing"] = []
+    data["carbonintensity"] = []
+    
     if (config.app.region!=undefined && regions_import[config.app.region.value]!=undefined) {
         //Add 30 minutes to each reading to get a stepped graph
         agile = feed.getdataremote(regions_import[config.app.region.value],view.start,view.end,interval);
@@ -687,6 +698,15 @@ function graph_load()
         for (var z in outgoing) {
             data["outgoing"].push(outgoing[z]);
             data["outgoing"].push([outgoing[z][0]+(intervalms-1), outgoing[z][1]]);
+        }
+        
+        if (show_carbonintensity) {
+            //Add 30 minutes to each reading to get a stepped graph
+            carbonintensity = feed.getdataremote(428391,view.start,view.end,interval);
+            for (var z in carbonintensity) {
+                data["carbonintensity"].push(carbonintensity[z]);
+                data["carbonintensity"].push([carbonintensity[z][0]+(intervalms-1), carbonintensity[z][1]]);
+            }
         }
     }
     // Invert export tariff
@@ -723,6 +743,10 @@ function graph_load()
     var total_kwh_export = 0
     var total_cost_solar_used = 0
     var total_kwh_solar_used = 0
+    
+    var total_co2 = 0;
+    var sum_co2 = 0;
+    var sum_co2_n = 0;
     
     // line of best fit
     var sumX = 0
@@ -798,6 +822,15 @@ function graph_load()
                 total_cost_import += kwh_import*cost_import
                 total_cost_export += kwh_export*cost_export
                 total_cost_solar_used += kwh_solar_used*cost_import
+
+                if (show_carbonintensity) {
+                    let co2intensity = data.carbonintensity[2*(z-1)][1];
+                    let co2_hh = kwh_import * (co2intensity * 0.001)
+                    total_co2 += co2_hh
+                    sum_co2 += co2intensity
+                    sum_co2_n++;
+                }
+
             } else {
                 // ----------------------------------------------------
                 // Import mode only
@@ -845,6 +878,14 @@ function graph_load()
                 // Generate profile
                 profile_kwh[hh][1] += kwh_import
                 profile_cost[hh][1] += kwh_import*cost_import
+                
+                if (show_carbonintensity) {
+                    let co2intensity = data.carbonintensity[2*(z-1)][1];
+                    let co2_hh = kwh_import * (co2intensity * 0.001)
+                    total_co2 += co2_hh
+                    sum_co2 += co2intensity
+                    sum_co2_n++;
+                }
             }
         }
     }
@@ -873,6 +914,13 @@ function graph_load()
     out += "<td>£"+total_cost_import.toFixed(2)+"</td>";
     out += "<td>"+(unit_cost_import*100*1.05).toFixed(1)+"p/kWh (inc VAT)</td>";
     out += "</tr>";
+    
+    if (show_carbonintensity) {
+        var window_co2_intensity = 1000*total_co2 / total_kwh_import;
+        var mean_co2 = sum_co2 / sum_co2_n;
+
+        $("#carbonintensity_result").html("Total CO2: "+(total_co2).toFixed(1)+"kgCO2, Consumption intensity: "+window_co2_intensity.toFixed(0)+" gCO2/kWh, Average intensity: "+mean_co2.toFixed(0)+" gCO2/kWh")
+    }
 
     if (solarpv_mode) {
         var unit_cost_export = (total_cost_export/total_kwh_export);
@@ -946,6 +994,7 @@ function graph_draw()
     // price signals
     graph_series.push({label: "Agile", data:data["agile"], yaxis:2, color:"#fb1a80", lines: { show: true, align: "left", lineWidth:1}});
     if (solarpv_mode) graph_series.push({label: "Outgoing", data:data["outgoing"], yaxis:2, color:"#941afb", lines: { show: true, align: "center", lineWidth:1}}); 
+    if (show_carbonintensity) graph_series.push({label: "Carbon Intensity", data:data["carbonintensity"], yaxis:2, color:"#888", lines: { show: true, align: "left", lineWidth:1}});
 
     var options = {
         xaxis: {
