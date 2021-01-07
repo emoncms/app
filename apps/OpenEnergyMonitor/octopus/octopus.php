@@ -917,7 +917,8 @@ function graph_load()
         var window_co2_intensity = 1000*total_co2 / total_kwh_import;
         var mean_co2 = sum_co2 / sum_co2_n;
 
-        $("#carbonintensity_result").html("Total CO2: "+(total_co2).toFixed(1)+"kgCO2, Consumption intensity: "+window_co2_intensity.toFixed(0)+" gCO2/kWh, Average intensity: "+mean_co2.toFixed(0)+" gCO2/kWh")
+        $("#carbonintensity_result").html("Total CO2: "+(total_co2).toFixed(1)+"kgCO2, Consumption intensity: "+window_co2_intensity.toFixed(0)+" gCO2/kWh")
+        // , Average intensity: "+mean_co2.toFixed(0)+" gCO2/kWh"
     }
 
     if (solarpv_mode) {
