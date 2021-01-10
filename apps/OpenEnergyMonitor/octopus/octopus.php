@@ -834,7 +834,11 @@ function graph_load()
                 // Import mode only
                 // ----------------------------------------------------
                 let kwh_import = 0;
-                if (import_kwh[z]!=undefined && import_kwh[z-1]!=undefined) kwh_import = (import_kwh[z][1]-import_kwh[z-1][1]);
+                if (import_kwh[z]!=undefined && import_kwh[z-1]!=undefined) {
+                    if (import_kwh[z][1]!=null && import_kwh[z-1][1]!=null) {
+                        kwh_import = (import_kwh[z][1]-import_kwh[z-1][1]);
+                    }
+                }
                 if (kwh_import<0.0) kwh_import = 0.0;
                 data["import"].push([time,kwh_import]);
                 let cost_import = data.agile[2*(z-1)][1]*0.01;
