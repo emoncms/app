@@ -1,8 +1,11 @@
 <?php
     
-global $mysqli,$path,$session,$route,$user,$app_settings;
+global $mysqli,$session,$user,$app_settings;
 
 if ($session["write"]) {
+
+    // Level 1 top bar
+    $menu["app"] = array("name"=>"Apps", "order"=>2, "icon"=>"apps", "l2"=>array());
 
     require_once "Modules/app/app_model.php";
     $appconfig = new AppConfig($mysqli, $app_settings);
@@ -25,38 +28,21 @@ if ($session["write"]) {
         $applist = $appconfig->get_list($userid);
         $_i = 0;
         foreach ($applist as $name=>$appitem) {
-            $menu['sidebar']['apps'][] = array(
-                'title' => $name,
-                'text' => $name,
-                'order'=> $_i,
-                'path' => "app/view?name=".$name.'&apikey='.$apikey
+            $menu["app"]['l2']["$_i"] = array(
+                "name"=>$name,
+                "href"=>"app/view?name=".urlencode($name).'&apikey='.$apikey, 
+                "icon"=>"apps", 
+                "order"=>$_i
             );
             $_i++;
         }
     }
-
-    $menu['tabs'][] = array(
-        'icon'=>'apps',
-        'text'=> _("Apps"),
-        'path'=> 'app/view',
-        'order'=> 2,
-        'data'=> array('sidebar' => '#sidebar_apps')
-    );
-
-
-    $menu['sidebar']['apps'][] = array(
-        'text' => _('New'),
-        'icon' => 'plus',
-        'path' => 'app/new',
-        'order'=> 99
-    );
-
-    // allow default app to show at `/app/view` - hidden menu item using css li_class
-    $menu['sidebar']['apps'][] = array(
-        'text' => _('View'),
-        'path' => 'app/view',
-        'li_class'=>'d-none',
-        'order'=> 99
+    
+    $menu["app"]['l2']['new'] = array(
+        "name"=>_('New'),
+        "href"=>"app/new", 
+        "icon"=>"plus", 
+        "order"=>$_i
     );
     
 }
