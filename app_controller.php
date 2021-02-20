@@ -133,12 +133,12 @@ function app_controller()
         $start = (float) get("start");
         $end = (float) get("end");
         $interval = (int) get("interval");
-        $result = json_decode(file_get_contents("http://emoncms.org/feed/data.json?id=$id&start=$start&end=$end&interval=$interval&skipmissing=0&limitinterval=0"));
+        $result = json_decode(file_get_contents("https://emoncms.org/feed/data.json?id=$id&start=$start&end=$end&interval=$interval&skipmissing=0&limitinterval=0"));
     }
     else if ($route->action == "valueremote") {
         $route->format = "json";
         $id = (int) get("id");
-        $result = (float) json_decode(file_get_contents("http://emoncms.org/feed/value.json?id=$id"));
+        $result = (float) json_decode(file_get_contents("https://emoncms.org/feed/value.json?id=$id"));
     }
     else if ($route->action == "ukgridremote") {
         $route->format = "json";
