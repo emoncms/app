@@ -76,7 +76,6 @@
 
     <div class="block-bound">
       <div class="bluenav config-open"><i class="icon-wrench icon-white"></i></div>
-      <!--<div class="bluenav viewcostenergy">VIEW COST</div>-->
       <div class="bluenav cost">Cost</div>
       <div class="bluenav energy bluenav-active">Energy</div>
       <div id="app-title" class="block-title">OCTOPUS AGILE</div>
@@ -114,18 +113,6 @@
         <span class="bluenav" id="fastleft" >&lt;&lt;</span>
         <span class="bluenav" id="right" >&gt;</span>
         <span class="bluenav" id="left" >&lt;</span>
-        <!--<span class="bluenav" id="zoomout" >-</span>-->
-        <!--<span class="bluenav" id="zoomin" >+</span>
-        <span class="bluenav time" time='1440' title='Previous 60 days'>60d</span>
-        <span class="bluenav time" time='720' title='Previous 30 days'>30d</span>
-        <span class="bluenav time" time='168' title='Previous 7 days'>7d</span>
-        <span class="bluenav time" time='24' title='Previous 24 hours'>1d</span>
-        <span class="bluenav time" time='12' title='Previous 12 hours'>12h</span>
-        <span class="bluenav time" time='M' title='Since midnight 1st of month'>Month</span>
-        <span class="bluenav time" time='W' title='Since midnight Sunday'>Week</span>
-        <span class="bluenav time" time='Y' title='Yesterday'>Yesterday</span>
-        <span class="bluenav time" time='T' title='Today since midnight'>Today</span>-->
-        
         <select class="time-select">
             <option value='1440'>Previous 60 days</option>
             <option value='720'>Previous 30 days</option>
