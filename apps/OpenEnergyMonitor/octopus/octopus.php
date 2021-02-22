@@ -226,6 +226,7 @@ if (!sessionwrite) $(".config-open").hide();
 // ----------------------------------------------------------------------
 config.app = {
     "title":{"type":"value", "default":"OCTOPUS AGILE", "name": "Title", "description":"Optional title for app"},
+    "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£, $, ...)"},
     "import":{"optional":true, "type":"feed", "autoname":"import", "engine":"5"},
     "import_kwh":{"type":"feed", "autoname":"import_kwh", "engine":5},
     "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5},
@@ -283,8 +284,6 @@ var meta = {};
 var data = {};
 var graph_series = [];
 var previousPoint = false;
-var viewmode = "graph";
-var viewcostenergy = "energy";
 var panning = false;
 var period_text = "month";
 var period_average = 0;
@@ -413,17 +412,8 @@ function updater()
             if (config.app[key].value) feeds[key] = result[config.app[key].value];
         }
 
-        if (feeds["import"]!=undefined) {
-            if (viewcostenergy=="energy") {
-                if (feeds["import"].value<10000) {
-                    $("#power_now").html(Math.round(feeds["import"].value)+"<span class='units'>W</span>");
-                } else {
-                    $("#power_now").html((feeds["import"].value*0.001).toFixed(1)+"<span class='units'>kW</span>");
-                }
-            } else {
-                $("#power_now").html(config.app.currency.value+(feeds["import"].value*1*config.app.unitcost.value*0.001).toFixed(3)+"<span class='units'>/hr</span>");
-            }
-        }
+        graph_load()
+        graph_draw()
     });
 }
 
@@ -532,17 +522,6 @@ $('#placeholder').bind("plotselected", function (event, ranges) {
     $(".time-select").val("C");
     
     setTimeout(function() { panning = false; }, 100);
-});
-
-$(".viewcostenergy").click(function(){
-    var view = $(this).html();
-    if (view=="VIEW COST") {
-        $(this).html("VIEW ENERGY");
-        viewcostenergy = "cost";
-    } else {
-        $(this).html("VIEW COST");
-        viewcostenergy = "energy";
-    }
 });
 
 $(".energy").click(function() {
@@ -961,8 +940,32 @@ function graph_draw()
         let unit_price = data["agile"][2*this_halfhour_index][1]*1.05;
         $("#unit_price").html(unit_price.toFixed(2)+"<span class='units'>p</span>");
 
+        if (feeds["import"]!=undefined) {
+            if (view_mode=="energy") {
+                if (feeds["import"].value<10000) {
+                    $("#power_now").html(Math.round(feeds["import"].value)+"<span class='units'>W</span>");
+                } else {
+                   $("#power_now").html((feeds["import"].value*0.001).toFixed(1)+"<span class='units'>kW</span>");
+                }
+            } else {
+                $("#power_now").html(config.app.currency.value+(unit_price*feeds["import"].value*1e-5).toFixed(3)+"<span class='units'>/hr</span>");
+            }
+            $("#power_now").show();
+        }
+
         $(".last_halfhour_stats").show();
     } else {
+        if (feeds["import"]!=undefined && view_mode=="energy") {
+            if (feeds["import"].value<10000) {
+                $("#power_now").html(Math.round(feeds["import"].value)+"<span class='units'>W</span>");
+            } else {
+               $("#power_now").html((feeds["import"].value*0.001).toFixed(1)+"<span class='units'>kW</span>");
+            }
+            $("#power_now").show();
+        } else {
+            $("#power_now").hide();
+        }
+
         $(".last_halfhour_stats").hide();
     }
 
