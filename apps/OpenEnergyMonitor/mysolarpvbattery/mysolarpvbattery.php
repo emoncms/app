@@ -612,13 +612,14 @@ function livefn()
     $(".generationnow").html(gen_now);
     $(".usenow").html(use_now);
     $(".battery_soc").html(battery_soc_now);
-    
-    if (battery_charge_now>0) {
+
+    const net_battery_charge = battery_charge_now - battery_discharge_now;
+    if (net_battery_charge>0) {
         $(".battery_charge_discharge_title").html("BATTERY CHARGING");
-        $(".battery_charge_discharge").html(battery_charge_now)
-    } else if (battery_discharge_now>0) {
+        $(".battery_charge_discharge").html(net_battery_charge)
+    } else if (net_battery_charge<0) {
         $(".battery_charge_discharge_title").html("BATTERY DISCHARGING");
-        $(".battery_charge_discharge").html(battery_discharge_now)
+        $(".battery_charge_discharge").html(-net_battery_charge)
     } else {
         $(".battery_charge_discharge_title").html("BATTERY POWER");
         $(".battery_charge_discharge").html(0)
