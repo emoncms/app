@@ -31,7 +31,7 @@ if ($session["write"]) {
             $menu["app"]['l2']["$_i"] = array(
                 "name"=>$name,
                 "href"=>"app/view?name=".urlencode($name).'&apikey='.$apikey, 
-                "icon"=>"apps", 
+                "icon"=>"star_border", 
                 "order"=>$_i
             );
             $_i++;
