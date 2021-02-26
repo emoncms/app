@@ -450,17 +450,6 @@ $('.time-select').change(function () {
     }
 });
 
-$("#advanced-toggle").click(function () {
-    var mode = $(this).html();
-    if (mode=="SHOW DETAIL") {
-        $("#advanced-block").show();
-        $(this).html("HIDE DETAIL");
-    } else {
-        $("#advanced-block").hide();
-        $(this).html("SHOW DETAIL");
-    }
-});
-
 $('#placeholder').bind("plothover", function (event, pos, item) {
     if (item) {
         var z = item.dataIndex;
