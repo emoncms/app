@@ -412,7 +412,7 @@ function updater()
             if (config.app[key].value) feeds[key] = result[config.app[key].value];
         }
 
-        graph_load()
+        graph_reload()
         graph_draw()
     });
 }
@@ -624,15 +624,6 @@ function graph_load()
         $("#use_meter_kwh_hh_bound").show();
     }
 
-    var import_kwh = feed.getdata(feeds["import_kwh"].id,view.start,view.end,interval,0,0);
-
-    var use_kwh = [];
-    if (solarpv_mode) use_kwh = feed.getdata(feeds["use_kwh"].id,view.start,view.end,interval,0,0);
-    var solar_kwh = [];
-    if (solarpv_mode) solar_kwh = feed.getdata(feeds["solar_kwh"].id,view.start,view.end,interval,0,0);    
-    var meter_kwh_hh = []
-    if (smart_meter_data) meter_kwh_hh = feed.getdata(feeds["meter_kwh_hh"].id,view.start,view.end,interval,0,0); 
-    
     data = {};
     
     data["agile"] = []
@@ -665,7 +656,18 @@ function graph_load()
     // Invert export tariff
     for (var z in data["outgoing"]) data["outgoing"][z][1] *= -1;
 
+    graph_reload()
+}
+function graph_reload() {
+    var interval = 1800;
+    var import_kwh = feed.getdata(feeds["import_kwh"].id,view.start,view.end,interval,0,0);
 
+    var use_kwh = [];
+    if (solarpv_mode) use_kwh = feed.getdata(feeds["use_kwh"].id,view.start,view.end,interval,0,0);
+    var solar_kwh = [];
+    if (solarpv_mode) solar_kwh = feed.getdata(feeds["solar_kwh"].id,view.start,view.end,interval,0,0);
+    var meter_kwh_hh = []
+    if (smart_meter_data) meter_kwh_hh = feed.getdata(feeds["meter_kwh_hh"].id,view.start,view.end,interval,0,0);
     data["use"] = [];
     data["import"] = [];
     data["import_cost"] = [];
