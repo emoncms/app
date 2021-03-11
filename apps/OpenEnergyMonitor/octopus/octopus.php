@@ -684,18 +684,27 @@ function graph_load()
     data["outgoing"] = []
     data["carbonintensity"] = []
     
+    var fixed_export = false;
+    
     if (config.app.region!=undefined && regions_import[config.app.region.value]!=undefined) {
         //Add 30 minutes to each reading to get a stepped graph
         agile = feed.getdataremote(regions_import[config.app.region.value],view.start,view.end,interval);
         for (var z in agile) {
             data["agile"].push(agile[z]);
             data["agile"].push([agile[z][0]+(intervalms-1), agile[z][1]]);
+            
+            if (fixed_export!=false) {
+                data["outgoing"].push([agile[z][0], fixed_export]);           
+                data["outgoing"].push([agile[z][0]+(intervalms-1), fixed_export]);           
+            }
         }
 
-        outgoing =  feed.getdataremote(regions_outgoing[config.app.region.value],view.start,view.end,interval);
-        for (var z in outgoing) {
-            data["outgoing"].push(outgoing[z]);
-            data["outgoing"].push([outgoing[z][0]+(intervalms-1), outgoing[z][1]]);
+        if (!fixed_export) {
+            outgoing =  feed.getdataremote(regions_outgoing[config.app.region.value],view.start,view.end,interval);
+            for (var z in outgoing) {
+                data["outgoing"].push(outgoing[z]);
+                data["outgoing"].push([outgoing[z][0]+(intervalms-1), outgoing[z][1]]);
+            }
         }
         
         if (show_carbonintensity) {
