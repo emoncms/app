@@ -237,8 +237,8 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             {
                 var itemTime = item.datapoint[0];
                 var elec_kwh = 0; var heat_kwh = 0;
-                if (elec_enabled) elec_kwh = data["heatpump_elec_kwhd"][z][1];
-                if (heat_enabled) heat_kwh = data["heatpump_heat_kwhd"][z][1];
+                if (elec_enabled && data["heatpump_elec_kwhd"].length) elec_kwh = data["heatpump_elec_kwhd"][z][1];
+                if (heat_enabled && data["heatpump_heat_kwhd"].length) heat_kwh = data["heatpump_heat_kwhd"][z][1];
                 var COP = heat_kwh / elec_kwh;
 
                 var d = new Date(itemTime);
