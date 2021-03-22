@@ -110,10 +110,10 @@
     <div class="block-bound" style="min-height:36px">
 
       <div class="graph-navigation">
-        <span class="bluenav" id="fastright" >>></span>
-        <span class="bluenav" id="fastleft" ><<</span>
-        <span class="bluenav" id="right" >></span>
-        <span class="bluenav" id="left" ><</span>
+        <span class="bluenav" id="fastright" >&gt;&gt;</span>
+        <span class="bluenav" id="fastleft" >&lt;&lt;</span>
+        <span class="bluenav" id="right" >&gt;</span>
+        <span class="bluenav" id="left" >&lt;</span>
         <!--<span class="bluenav" id="zoomout" >-</span>-->
         <!--<span class="bluenav" id="zoomin" >+</span>
         <span class="bluenav time" time='1440' title='Previous 60 days'>60d</span>
@@ -131,7 +131,7 @@
             <option value='720'>Previous 30 days</option>
             <option value='168'>Previous 7 days</option>
             <option value='24'>Previous 24 hours</option>
-            <option value='12>Previous 12 hours</option>
+            <option value='12'>Previous 12 hours</option>
             <option value='M'>Since midnight 1st of month</option>
             <option value='W'>Since midnight Sunday</option>
             <option value='Y'>Yesterday</option>
