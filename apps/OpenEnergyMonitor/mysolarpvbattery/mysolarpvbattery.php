@@ -199,6 +199,10 @@
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="battery_charge_discharge">-</span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
+            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="discharge_time_left_title"><?php echo _('BATTERY TIME LEFT') ?></span></h5>
+            <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="discharge_time_left">-</span></h2>
+        </div>
+        <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('STATE OF CHARGE') ?></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="battery_soc">-</span>%</h2>
         </div>
@@ -385,7 +389,8 @@ config.app = {
     "battery_discharge_kwh":{"optional":true, "type":"feed", "autoname":"battery_discharge_kwh", "engine":"5", "description":"Battery discharge energy in kWh"},
 
     // Other options
-    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description": "Display power as kW"},
+    "battery_capacity_kwh":{"type":"value", "default":0, "name":"Battery Capacity", "description":"Battery capacity in kWh"}
 }
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
@@ -612,16 +617,32 @@ function livefn()
     $(".generationnow").html(gen_now);
     $(".usenow").html(use_now);
     $(".battery_soc").html(battery_soc_now);
-    
-    if (battery_charge_now>0) {
+
+    const net_battery_charge = battery_charge_now - battery_discharge_now;
+    if (net_battery_charge>0) {
         $(".battery_charge_discharge_title").html("BATTERY CHARGING");
-        $(".battery_charge_discharge").html(battery_charge_now)
-    } else if (battery_discharge_now>0) {
+        $(".battery_charge_discharge").html(net_battery_charge);
+        $(".discharge_time_left").html("--");
+    } else if (net_battery_charge<0) {
+        if (config.app && config.app.kw && config.app.battery_capacity_kwh.value > 0 && battery_soc_now >= 0) {
+            const total_capacity = config.app.battery_capacity_kwh.value * 1000;
+            const energy_remaining = total_capacity * battery_soc_now / 100;
+            const total_time_left_mins = (energy_remaining / -(net_battery_charge)) * 60;
+
+            const hours_left = Math.floor(total_time_left_mins / 60);
+            const mins_left = Math.floor(total_time_left_mins % 60);
+            const battery_time_left_text = `${hours_left}h ${mins_left}m`
+            $(".discharge_time_left").html(battery_time_left_text);
+        } else {
+            $(".discharge_time_left").html("--");
+        }
+
         $(".battery_charge_discharge_title").html("BATTERY DISCHARGING");
-        $(".battery_charge_discharge").html(battery_discharge_now)
+        $(".battery_charge_discharge").html(-net_battery_charge);
     } else {
         $(".battery_charge_discharge_title").html("BATTERY POWER");
-        $(".battery_charge_discharge").html(0)
+        $(".battery_charge_discharge").html(0);
+        $(".discharge_time_left").html("--");
     }
     
     // Only redraw the graph if its the power graph and auto update is turned on
