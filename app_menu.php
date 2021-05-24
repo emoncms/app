@@ -5,7 +5,7 @@ global $mysqli,$session,$user,$app_settings;
 if ($session["write"]) {
 
     // Level 1 top bar
-    $menu["app"] = array("name"=>"Apps", "order"=>2, "icon"=>"apps", "l2"=>array());
+    $menu["app"] = array("name"=>"Apps", "order"=>2, "icon"=>"apps", "default"=>"app/view", "l2"=>array());
 
     require_once "Modules/app/app_model.php";
     $appconfig = new AppConfig($mysqli, $app_settings);
