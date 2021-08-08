@@ -64,7 +64,7 @@ var feed = {
         return byname;
     },
     
-    getdata: function(id,start,end,interval,skipmissing,limitinterval)
+    getdata: function(id,start,end,interval,average,skipmissing,limitinterval)
     {
         var apikeystr = "";
         if (apikey!="") apikeystr = "?apikey="+apikey;
@@ -72,54 +72,12 @@ var feed = {
         var data = [];
         $.ajax({                                      
             url: path+"feed/data.json"+apikeystr,                         
-            data: "id="+id+"&start="+start+"&end="+end+"&interval="+interval+"&skipmissing="+skipmissing+"&limitinterval="+limitinterval,
+            data: "id="+id+"&start="+start+"&end="+end+"&interval="+interval+"&average="+average+"&skipmissing="+skipmissing+"&limitinterval="+limitinterval,
             dataType: 'json',
             async: false,                      
             success: function(result) {
                 if (!result || result===null || result==="" || result.constructor!=Array) {
                     console.log("ERROR","feed.getdata invalid response: "+result);
-                }
-                data = result; 
-            }
-        });
-        return data;
-    },
-    
-    getaverage: function(id,start,end,interval,skipmissing,limitinterval)
-    {
-        var apikeystr = "";
-        if (apikey!="") apikeystr = "?apikey="+apikey;
-        
-        var data = [];
-        $.ajax({                                      
-            url: path+"feed/average.json"+apikeystr,                         
-            data: "id="+id+"&start="+start+"&end="+end+"&interval="+interval,
-            dataType: 'json',
-            async: false,                      
-            success: function(result) {
-                if (!result || result===null || result==="" || result.constructor!=Array) {
-                    console.log("ERROR","feed.getdata invalid response: "+result);
-                }
-                data = result; 
-            }
-        });
-        return data;
-    },
-    
-    getdataDMY: function(id,start,end,mode)
-    {
-        var apikeystr = "";
-        if (apikey!="") apikeystr = "?apikey="+apikey;
-        
-        var data = [];
-        $.ajax({                                      
-            url: path+"feed/data.json"+apikeystr,                         
-            data: "id="+id+"&start="+start+"&end="+end+"&mode="+mode,
-            dataType: 'json',
-            async: false,                      
-            success: function(result) {
-                if (!result || result===null || result==="" || result.constructor!=Array) {
-                    console.log("ERROR","feed.getdataDMY invalid response: "+result);
                 }
                 data = result; 
             }

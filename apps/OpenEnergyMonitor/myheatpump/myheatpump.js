@@ -359,19 +359,19 @@ function powergraph_load()
     powergraph_series = [];
 
     if (feeds["heatpump_flowT"]!=undefined) { 
-        data["heatpump_flowT"] = feed.getdata(feeds["heatpump_flowT"].id,start,end,interval,1,1);
+        data["heatpump_flowT"] = feed.getdata(feeds["heatpump_flowT"].id,start,end,interval,0,1,1);
         powergraph_series.push({label:"Flow T", data:data["heatpump_flowT"], yaxis:2, color:2});
     }
     if (feeds["heatpump_returnT"]!=undefined) {
-        data["heatpump_returnT"] = feed.getdata(feeds["heatpump_returnT"].id,start,end,interval,1,1);
+        data["heatpump_returnT"] = feed.getdata(feeds["heatpump_returnT"].id,start,end,interval,0,1,1);
         powergraph_series.push({label:"Return T", data:data["heatpump_returnT"], yaxis:2, color:3});
     }
     if (feeds["heatpump_outsideT"]!=undefined) {
-        data["heatpump_outsideT"] = feed.getdata(feeds["heatpump_outsideT"].id,start,end,interval,1,1);
+        data["heatpump_outsideT"] = feed.getdata(feeds["heatpump_outsideT"].id,start,end,interval,0,1,1);
         powergraph_series.push({label:"Outside T", data:data["heatpump_outsideT"], yaxis:2, color:4});
     }
     if (feeds["DHW_cylinderT"]!=undefined) {
-        data["DHW_cylinderT"] = feed.getdata(feeds["DHW_cylinderT"].id,start,end,interval,1,1);
+        data["DHW_cylinderT"] = feed.getdata(feeds["DHW_cylinderT"].id,start,end,interval,0,1,1);
         powergraph_series.push({label:"DHW Cylinder T", data:data["DHW_cylinderT"], yaxis:2, color:5});
     }
 
@@ -379,17 +379,17 @@ function powergraph_load()
         // Where power feed is available
         if (heat_enabled) {
             if (interval==meta["heatpump_heat"].interval) {
-                data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,start,end,interval,1,1);
+                data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,start,end,interval,0,1,1);
             } else {
-                data["heatpump_heat"] = feed.getaverage(feeds["heatpump_heat"].id,start,end,interval,1,1);
+                data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,start,end,interval,1,1,1);
             }
             powergraph_series.push({label:"Heat Output", data:data["heatpump_heat"], yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
         }
         if (elec_enabled && meta["heatpump_elec"]!=undefined) {
             if (interval==meta["heatpump_elec"].interval) {
-                data["heatpump_elec"] = feed.getdata(feeds["heatpump_elec"].id,start,end,interval,1,1);
+                data["heatpump_elec"] = feed.getdata(feeds["heatpump_elec"].id,start,end,interval,0,1,1);
             } else {
-                data["heatpump_elec"] = feed.getaverage(feeds["heatpump_elec"].id,start,end,interval,1,1);
+                data["heatpump_elec"] = feed.getdata(feeds["heatpump_elec"].id,start,end,interval,1,1,1);
             }
             powergraph_series.push({label:"Electric Input", data:data["heatpump_elec"], yaxis:1, color:1, lines:{show:true, fill:0.3, lineWidth:0.5}});
         }
@@ -404,7 +404,7 @@ function powergraph_load()
         end = Math.ceil(end/intervalms)*intervalms;
         
         if (heat_enabled) {
-            var tmp = feed.getdata(feeds["heatpump_heat_kwh"].id,start,end,interval,0,0);
+            var tmp = feed.getdata(feeds["heatpump_heat_kwh"].id,start,end,interval,0,0,0);
             data["heatpump_heat"] = [];
             for (var z=1; z<tmp.length; z++) {
                 var time = tmp[z-1][0];
@@ -417,7 +417,7 @@ function powergraph_load()
         }
         
         if (elec_enabled) {
-            var tmp = feed.getdata(feeds["heatpump_elec_kwh"].id,start,end,interval,0,0);
+            var tmp = feed.getdata(feeds["heatpump_elec_kwh"].id,start,end,interval,0,0,0);
             data["heatpump_elec"] = [];
             for (var z=1; z<tmp.length; z++) {
                 var time = tmp[z-1][0];
@@ -513,7 +513,7 @@ function bargraph_load(start,end)
         var heat_data = [];
         data["heatpump_heat_kwhd"] = [];
         
-        var heat_result = feed.getdataDMY(feeds["heatpump_heat_kwh"].id,start,end,"daily")
+        var heat_result = feed.getdata(feeds["heatpump_heat_kwh"].id,start,end,"daily",0,0,0)
         // remove nan values from the end.
         for (var z in heat_result) {
           if (heat_result[z][1]!=null) heat_data.push(heat_result[z]);
@@ -551,7 +551,7 @@ function bargraph_load(start,end)
         var elec_data = [];
         data["heatpump_elec_kwhd"] = [];
         
-        var elec_result = feed.getdataDMY(feeds["heatpump_elec_kwh"].id,start,end,"daily");
+        var elec_result = feed.getdata(feeds["heatpump_elec_kwh"].id,start,end,"daily",0,0,0);
         // remove nan values from the end.
         for (var z in elec_result) {
           if (elec_result[z][1]!=null) elec_data.push(elec_result[z]);
