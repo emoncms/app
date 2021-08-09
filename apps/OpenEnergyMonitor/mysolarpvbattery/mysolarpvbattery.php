@@ -950,12 +950,12 @@ function load_bargraph() {
     start = Math.floor(start/intervalms)*intervalms;
     
     // Load kWh data
-    var solar_kwh_data = feed.getdataDMY(config.app.solar_kwh.value,start,end,"daily");
-    var use_kwh_data = feed.getdataDMY(config.app.use_kwh.value,start,end,"daily");
-    var import_kwh_data = feed.getdataDMY(config.app.import_kwh.value,start,end,"daily");
-    var battery_charge_kwh_data = feed.getdataDMY(config.app.battery_charge_kwh.value,start,end,"daily");
-    var battery_discharge_kwh_data = feed.getdataDMY(config.app.battery_discharge_kwh.value,start,end,"daily");
-    var solar_direct_kwh_data = feed.getdataDMY(config.app.solar_direct_kwh.value,start,end,"daily");
+    var solar_kwh_data = feed.getdata(config.app.solar_kwh.value,start,end,"daily");
+    var use_kwh_data = feed.getdata(config.app.use_kwh.value,start,end,"daily");
+    var import_kwh_data = feed.getdata(config.app.import_kwh.value,start,end,"daily");
+    var battery_charge_kwh_data = feed.getdata(config.app.battery_charge_kwh.value,start,end,"daily");
+    var battery_discharge_kwh_data = feed.getdata(config.app.battery_discharge_kwh.value,start,end,"daily");
+    var solar_direct_kwh_data = feed.getdata(config.app.solar_direct_kwh.value,start,end,"daily");
     
     solar_kwhd_data = [];
     use_kwhd_data = [];

@@ -64,7 +64,7 @@ var feed = {
         return byname;
     },
     
-    getdata: function(id,start,end,interval,average,skipmissing,limitinterval)
+    getdata: function(id,start,end,interval,average=0,skipmissing=0,limitinterval=0)
     {
         var apikeystr = "";
         if (apikey!="") apikeystr = "?apikey="+apikey;
@@ -98,7 +98,7 @@ var feed = {
             async: false,                      
             success: function(result) {
                 if (!result || result===null || result==="" || result.constructor!=Array) {
-                    console.log("ERROR","feed.getdataDMY invalid response: "+result);
+                    console.log("ERROR","feed.getdataDMY_time_of_use invalid response: "+result);
                 }
                 data = result; 
             }

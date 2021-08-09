@@ -513,7 +513,7 @@ function bargraph_load(start,end)
         var heat_data = [];
         data["heatpump_heat_kwhd"] = [];
         
-        var heat_result = feed.getdata(feeds["heatpump_heat_kwh"].id,start,end,"daily",0,0,0)
+        var heat_result = feed.getdata(feeds["heatpump_heat_kwh"].id,start,end,"daily")
         // remove nan values from the end.
         for (var z in heat_result) {
           if (heat_result[z][1]!=null) heat_data.push(heat_result[z]);
@@ -551,7 +551,7 @@ function bargraph_load(start,end)
         var elec_data = [];
         data["heatpump_elec_kwhd"] = [];
         
-        var elec_result = feed.getdata(feeds["heatpump_elec_kwh"].id,start,end,"daily",0,0,0);
+        var elec_result = feed.getdata(feeds["heatpump_elec_kwh"].id,start,end,"daily");
         // remove nan values from the end.
         for (var z in elec_result) {
           if (elec_result[z][1]!=null) elec_data.push(elec_result[z]);

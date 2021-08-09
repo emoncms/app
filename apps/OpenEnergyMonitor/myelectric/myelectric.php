@@ -542,7 +542,7 @@ function slowupdate()
     var end = Math.floor(now.getTime() * 0.001);
     var start = end - interval * Math.round(graph_bars.width/30);
     
-    var result = feed.getdataDMY(use_kwh,start*1000,end*1000,"daily");
+    var result = feed.getdata(use_kwh,start*1000,end*1000,"daily");
 
     var data = [];
     // remove nan values from the end.

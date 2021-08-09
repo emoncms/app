@@ -575,7 +575,7 @@ function bargraph_load(start,end)
     end = Math.ceil(end/intervalms)*intervalms;
     start = Math.floor(start/intervalms)*intervalms;
     
-    var elec_result = feed.getdataDMY(feeds["use_kwh"].id,start,end,"daily");
+    var elec_result = feed.getdata(feeds["use_kwh"].id,start,end,"daily")
     
     var elec_data = [];
     

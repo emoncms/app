@@ -708,9 +708,9 @@ function load_bargraph(start,end) {
     start = Math.floor(start/intervalms)*intervalms;
     
     // Load kWh data
-    var solar_kwh_data = feed.getdataDMY(config.app.solar_kwh.value,start,end,"daily");
-    var use_kwh_data = feed.getdataDMY(config.app.use_kwh.value,start,end,"daily");
-    var import_kwh_data = feed.getdataDMY(config.app.import_kwh.value,start,end,"daily");
+    var solar_kwh_data = feed.getdata(config.app.solar_kwh.value,start,end,"daily");
+    var use_kwh_data = feed.getdata(config.app.use_kwh.value,start,end,"daily");
+    var import_kwh_data = feed.getdata(config.app.import_kwh.value,start,end,"daily");
     
     // console.log(solar_kwh_data);
     // console.log(use_kwh_data);
