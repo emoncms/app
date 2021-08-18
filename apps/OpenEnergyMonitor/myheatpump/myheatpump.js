@@ -371,6 +371,7 @@ $("#starting_power").change(function(){
 function powergraph_load() 
 {
     var simulate_heat_output = $("#carnot_enable")[0].checked;
+    
 
     var start = view.start; var end = view.end;
     var npoints = 1200;
@@ -467,31 +468,35 @@ function powergraph_load()
     
     
     if (simulate_heat_output) {
-        data["heatpump_heat_carnot"] = [];
-        
-        var condensing_offset = parseFloat($("#condensing_offset").val());
-        var evaporator_offset = parseFloat($("#evaporator_offset").val());
-        var heatpump_factor = parseFloat($("#heatpump_factor").val());
-        var starting_power = parseFloat($("#starting_power").val());
-        
-        // Carnot COP simulator
-        var carnot_heat_sum = 0;
-        for (var z in data["heatpump_elec"]) {
-            let time = data["heatpump_elec"][z][0];
-            let power = data["heatpump_elec"][z][1];
-            let flowT = data["heatpump_flowT"][z][1];
-            let ambientT = data["heatpump_outsideT"][z][1];
+        if (data["heatpump_outsideT"]!=undefined && data["heatpump_elec"]!=undefined && data["heatpump_flowT"]!=undefined) {
+            data["heatpump_heat_carnot"] = [];
             
-            let COP = heatpump_factor * ((flowT+condensing_offset+273) / ((flowT+condensing_offset+273) - (ambientT+evaporator_offset+273)));
-            let carnot_heat = power * COP;
-            if (power<starting_power) carnot_heat = 0;
+            var condensing_offset = parseFloat($("#condensing_offset").val());
+            var evaporator_offset = parseFloat($("#evaporator_offset").val());
+            var heatpump_factor = parseFloat($("#heatpump_factor").val());
+            var starting_power = parseFloat($("#starting_power").val());
             
-            carnot_heat_sum += carnot_heat;
-        
-            data["heatpump_heat_carnot"][z] = [time,carnot_heat]
+            // Carnot COP simulator
+            var carnot_heat_sum = 0;
+            for (var z in data["heatpump_elec"]) {
+                let time = data["heatpump_elec"][z][0];
+                let power = data["heatpump_elec"][z][1];
+                let flowT = data["heatpump_flowT"][z][1];
+                let ambientT = data["heatpump_outsideT"][z][1];
+                
+                let COP = heatpump_factor * ((flowT+condensing_offset+273) / ((flowT+condensing_offset+273) - (ambientT+evaporator_offset+273)));
+                let carnot_heat = power * COP;
+                if (power<starting_power) carnot_heat = 0;
+                
+                carnot_heat_sum += carnot_heat;
+            
+                data["heatpump_heat_carnot"][z] = [time,carnot_heat]
+            }
+            var carnot_heat_mean = carnot_heat_sum / data["heatpump_elec"].length;
+            powergraph_series.push({label:"Carnot Heat Output", data:data["heatpump_heat_carnot"], yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
+        } else {
+            simulate_heat_output = false;
         }
-        var carnot_heat_mean = carnot_heat_sum / data["heatpump_elec"].length;
-        powergraph_series.push({label:"Carnot Heat Output", data:data["heatpump_heat_carnot"], yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
     }
     
     var feedstats = {};
