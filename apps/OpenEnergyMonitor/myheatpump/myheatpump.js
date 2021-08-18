@@ -487,6 +487,7 @@ function powergraph_load()
                         
             // Carnot COP simulator
             var carnot_heat_sum = 0;
+            var carnot_heat_n = 0;
             for (var z in data["heatpump_elec"]) {
                 let time = data["heatpump_elec"][z][0];
                 let power = data["heatpump_elec"][z][1];
@@ -497,14 +498,18 @@ function powergraph_load()
                 }
                 
                 let COP = heatpump_factor * ((flowT+condensing_offset+273) / ((flowT+condensing_offset+273) - (ambientT+evaporator_offset+273)));
-                let carnot_heat = power * COP;
-                if (power<starting_power) carnot_heat = 0;
+                let carnot_heat = null;
                 
-                carnot_heat_sum += carnot_heat;
+                if (power!=null) {
+                    let carnot_heat = power * COP;
+                    if (power<starting_power) carnot_heat = 0;
+                    carnot_heat_sum += carnot_heat;
+                    carnot_heat_n++;
+                }
             
                 data["heatpump_heat_carnot"][z] = [time,carnot_heat]
             }
-            var carnot_heat_mean = carnot_heat_sum / data["heatpump_elec"].length;
+            var carnot_heat_mean = carnot_heat_sum / carnot_heat_n;
             powergraph_series.push({label:"Carnot Heat Output", data:data["heatpump_heat_carnot"], yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
         } else {
             simulate_heat_output = false;
@@ -676,6 +681,7 @@ function bargraph_load(start,end)
     var cop_in_window =  heat_kwh_in_window/elec_kwh_in_window;
     if (cop_in_window<0) cop_in_window = 0;
     $("#window-cop").html((cop_in_window).toFixed(2));
+    $("#window-carnot-cop").html("");
 }
 
 function bargraph_draw() 
