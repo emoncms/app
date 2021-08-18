@@ -95,7 +95,7 @@ function show()
 
     // If this is a new dashboard there will be less than a days data 
     // show power graph directly in this case
-    if (((end*0.001)-start_time)<86400*1) {
+    if (((end*0.001)-start_time)<86400*3) {
         var timeWindow = (end - start_time*1000);
         var start = end - timeWindow;
         view.start = start;
@@ -359,6 +359,11 @@ $("#starting_power").change(function(){
     powergraph_draw();
 });
 
+$("#fixed_outside_temperature").change(function(){
+    powergraph_load();
+    powergraph_draw();
+});
+
 // -------------------------------------------------------------------------------
 // FUNCTIONS
 // -------------------------------------------------------------------------------
@@ -468,21 +473,28 @@ function powergraph_load()
     
     
     if (simulate_heat_output) {
-        if (data["heatpump_outsideT"]!=undefined && data["heatpump_elec"]!=undefined && data["heatpump_flowT"]!=undefined) {
+        if (data["heatpump_elec"]!=undefined && data["heatpump_flowT"]!=undefined) {
             data["heatpump_heat_carnot"] = [];
             
             var condensing_offset = parseFloat($("#condensing_offset").val());
             var evaporator_offset = parseFloat($("#evaporator_offset").val());
             var heatpump_factor = parseFloat($("#heatpump_factor").val());
             var starting_power = parseFloat($("#starting_power").val());
+            var fixed_outside_temperature = parseFloat($("#fixed_outside_temperature").val());
             
+            var heatpump_outsideT_available = false;
+            if (data["heatpump_outsideT"]!=undefined) heatpump_outsideT_available = true;
+                        
             // Carnot COP simulator
             var carnot_heat_sum = 0;
             for (var z in data["heatpump_elec"]) {
                 let time = data["heatpump_elec"][z][0];
                 let power = data["heatpump_elec"][z][1];
                 let flowT = data["heatpump_flowT"][z][1];
-                let ambientT = data["heatpump_outsideT"][z][1];
+                let ambientT = fixed_outside_temperature; 
+                if (heatpump_outsideT_available) {
+                    ambientT = data["heatpump_outsideT"][z][1];
+                }
                 
                 let COP = heatpump_factor * ((flowT+condensing_offset+273) / ((flowT+condensing_offset+273) - (ambientT+evaporator_offset+273)));
                 let carnot_heat = power * COP;

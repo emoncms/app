@@ -117,17 +117,20 @@
         <br>
         <div class="input-prepend input-append" style="margin-top:5px">
           <span class="add-on">Condensing offset (K)</span>
-          <input type="text" style="width:80px" id="condensing_offset" value="4">
+          <input type="text" style="width:50px" id="condensing_offset" value="4">
           <span class="add-on">Evaporator offset (K)</span>
-          <input type="text" style="width:80px" id="evaporator_offset" value="-6">
+          <input type="text" style="width:50px" id="evaporator_offset" value="-6">
         </div>
         <div class="input-prepend input-append" style="margin-top:5px">
           <span class="add-on">Heatpump factor</span>
-          <input type="text" style="width:80px" id="heatpump_factor" value="0.49">
+          <input type="text" style="width:50px" id="heatpump_factor" value="0.49">
           <span class="add-on">Starting power (W)</span>
-          <input type="text" style="width:80px" id="starting_power" value="100">
+          <input type="text" style="width:50px" id="starting_power" value="100">
         </div>
-        
+        <div class="input-prepend input-append" style="margin-top:5px">
+          <span class="add-on">Fixed outside temperature (C)</span>
+          <input type="text" style="width:50px" id="fixed_outside_temperature" value="6.0">
+        </div>        
       </div>
     </div>
 
