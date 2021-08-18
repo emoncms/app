@@ -93,7 +93,7 @@
       <div id='advanced-toggle' class='bluenav' style="display:none" >SHOW DETAIL</div>
       
       <div style="padding:10px;">
-        COP in window: <b id="window-cop"></b>
+        COP in window: <b id="window-cop"></b> <span id="window-carnot-cop"></span>
       </div>
     </div>
           
@@ -111,6 +111,22 @@
           </tr>
           <tbody id="stats"></tbody>
         </table>
+        
+        <b>Simulate heat output using carnot COP equation</b><input id="carnot_enable" type="checkbox" style="margin-top:-4px; margin-left:7px">
+        <br>
+        <div class="input-prepend input-append" style="margin-top:5px">
+          <span class="add-on">Condensing offset (K)</span>
+          <input type="text" style="width:80px" id="condensing_offset" value="4">
+          <span class="add-on">Evaporator offset (K)</span>
+          <input type="text" style="width:80px" id="evaporator_offset" value="-6">
+        </div>
+        <div class="input-prepend input-append" style="margin-top:5px">
+          <span class="add-on">Heatpump factor</span>
+          <input type="text" style="width:80px" id="heatpump_factor" value="0.49">
+          <span class="add-on">Starting power (W)</span>
+          <input type="text" style="width:80px" id="starting_power" value="100">
+        </div>
+        
       </div>
     </div>
 
