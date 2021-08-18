@@ -501,7 +501,7 @@ function powergraph_load()
                 let carnot_heat = null;
                 
                 if (power!=null) {
-                    let carnot_heat = power * COP;
+                    carnot_heat = power * COP;
                     if (power<starting_power) carnot_heat = 0;
                     carnot_heat_sum += carnot_heat;
                     carnot_heat_n++;
