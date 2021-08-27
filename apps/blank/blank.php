@@ -1,4 +1,5 @@
 <?php
+defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
