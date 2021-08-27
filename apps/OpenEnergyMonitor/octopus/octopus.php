@@ -15,7 +15,7 @@ global $path, $session, $v;
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
 
 <style>
@@ -529,7 +529,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 if (view_mode=="cost") text += (itemValue*100*1.05).toFixed(2)+"p";
             }
             
-            tooltip(item.pageX, item.pageY, text, "#fff");
+            tooltip(item.pageX, item.pageY, text, "#fff", "#000");
         }
     } else $("#tooltip").remove();
 });
@@ -650,6 +650,7 @@ $('#datetimepicker2').on("changeDate", function (e) {
 function graph_load() 
 {
     $(".power-graph-footer").show();
+    
     var interval = 1800;
     var intervalms = interval * 1000;
     view.start = Math.ceil(view.start/intervalms)*intervalms;

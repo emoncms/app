@@ -55,7 +55,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
 
 <nav id="buttons" class="d-flex justify-content-between">
@@ -497,26 +497,15 @@ function draw_powergraph() {
         selection: { mode: "x" }
     }
     
-    var npoints = 1500;
-    interval = Math.round(((view.end - view.start)/npoints)/1000);
-    interval = view.round_interval(interval);
-    if (interval<10) interval = 10;
-    var intervalms = interval * 1000;
-
-    view.start = Math.ceil(view.start/intervalms)*intervalms;
-    view.end = Math.ceil(view.end/intervalms)*intervalms;
-
-    var npoints = parseInt((view.end-view.start)/(interval*1000));
+    view.calc_interval(1500); // npoints = 1500
     
     // -------------------------------------------------------------------------------------------------------
     // LOAD DATA ON INIT OR RELOAD
     // -------------------------------------------------------------------------------------------------------
     if (reload) {
         reload = false;
-        view.start = 1000*Math.floor((view.start/1000)/interval)*interval;
-        view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
-        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,interval,0,0));
-        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,interval,0,0));
+        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,view.interval,0,0));
+        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0));
     }
     // -------------------------------------------------------------------------------------------------------
     
@@ -539,6 +528,7 @@ function draw_powergraph() {
     // console.log(timeseries.length("solar"));
     // console.log(timeseries.length("use"));
     
+    var interval = view.interval;
     for (var z=0; z<timeseries.length("solar"); z++) {
 
         // -------------------------------------------------------------------------------------------------------

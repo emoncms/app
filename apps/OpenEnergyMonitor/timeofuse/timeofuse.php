@@ -14,7 +14,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 
 <style>
 
@@ -279,7 +279,6 @@ function show() {
     var start = end - timeWindow;
     bargraph_load(start,end);
     bargraph_draw();
-    timeofuse_load();
     energystacks_draw();
 
     updater();
@@ -373,7 +372,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                     text = date+"<br>Day:"+(standard_kwh).toFixed(1)+" kWh ("+daycost+")<br>Night:"+(economy7_kwh).toFixed(1)+" kWh ("+nightcost+")<br>Total:"+(economy7_kwh+standard_kwh).toFixed(1)+" kWh ("+totalcost+")";
                 }
                 
-                tooltip(item.pageX, item.pageY, text, "#fff");
+                tooltip(item.pageX, item.pageY, text, "#fff","#000");
             }
         }
     } else $("#tooltip").remove();
@@ -416,7 +415,6 @@ $('.bargraph-alltime').click(function () {
     bargraph_load(start,end);
     bargraph_draw();
     period_text = "period";
-    timeofuse_load();
     energystacks_draw();
 });
 
@@ -427,7 +425,6 @@ $('.bargraph-week').click(function () {
     bargraph_load(start,end);
     bargraph_draw();
     period_text = "week";
-    timeofuse_load();
     energystacks_draw();
 });
 
@@ -438,7 +435,6 @@ $('.bargraph-month').click(function () {
     bargraph_load(start,end);
     bargraph_draw();
     period_text = "month";
-    timeofuse_load();
     energystacks_draw();
 });
 
@@ -482,15 +478,9 @@ $(".viewcostenergy").click(function(){
 function powergraph_load() 
 {
     $("#power-graph-footer").show();
-    var start = view.start; var end = view.end;
-    var npoints = 1200;
-    var interval = ((end-start)*0.001) / npoints;
-    interval = view.round_interval(interval);
-    var intervalms = interval * 1000;
-    start = Math.ceil(start/intervalms)*intervalms;
-    end = Math.ceil(end/intervalms)*intervalms;
-
-    data["use"] = feed.getdata(feeds["use"].id,start,end,interval,1,1);
+    
+    view.calc_interval(1200); // npoints = 1200
+    data["use"] = feed.getdata(feeds["use"].id,view.start,view.end,view.interval,0,1,1);
     
     powergraph_series = [];
     powergraph_series.push({data:data["use"], yaxis:1, color:"#44b3e2", lines:{show:true, fill:0.8, lineWidth:0}});
@@ -693,41 +683,6 @@ function bargraph_draw()
 
     var plot = $.plot($('#placeholder'),bargraph_series,options);
     $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'></div>");
-}
-
-function timeofuse_load() 
-{
-  /*
-  $.ajax({                                      
-      url: path+"household/data?id="+feeds["use"].id,
-      dataType: 'json',                  
-      success: function(result) {
-          console.log("here...");
-          var prc = Math.round(100*((result.overnightkwh + result.middaykwh) / result.totalkwh));
-          $("#prclocal").html(prc);
-          
-          if (prc>20) $("#star1").attr("src",path+"files/star.png");
-          if (prc>40) setTimeout(function() { $("#star2").attr("src",path+"files/star.png"); }, 100);
-          if (prc>60) setTimeout(function() { $("#star3").attr("src",path+"files/star.png"); }, 200);
-          if (prc>80) setTimeout(function() { $("#star4").attr("src",path+"files/star.png"); }, 300);
-          if (prc>90) setTimeout(function() { $("#star5").attr("src",path+"files/star.png"); }, 400);
-          
-          var data = [
-            {name:"AM PEAK", value: result.morningkwh, color:"rgba(68,179,226,0.8)"},
-            {name:"DAYTIME", value: result.middaykwh, color:"rgba(68,179,226,0.6)"},
-            {name:"PM PEAK", value: result.eveningkwh, color:"rgba(68,179,226,0.9)"},
-            {name:"NIGHT", value: result.overnightkwh, color:"rgba(68,179,226,0.4)"},
-            // {name:"HYDRO", value: 2.0, color:"rgba(255,255,255,0.2)"}   
-          ];
-          
-          var options = {
-            "color": "#333",
-            "centertext": "THIS "+period_text.toUpperCase()
-          }; 
-          
-          piegraph("piegraph",data,options);
-      } 
-  });*/
 }
 
 function energystacks_draw()
