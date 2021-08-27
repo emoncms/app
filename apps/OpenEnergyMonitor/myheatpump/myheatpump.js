@@ -81,12 +81,12 @@ function show()
         meta["heatpump_heat_kwh"] = feed.getmeta(feeds["heatpump_heat_kwh"].id);
         meta["heatpump_heat"] = feed.getmeta(feeds["heatpump_heat"].id);
         if (meta["heatpump_heat_kwh"].start_time>start_time) start_time = meta["heatpump_heat_kwh"].start_time;
-        heatpump_heat_start = feed.getvalue(feeds["heatpump_heat_kwh"].id, start_time*1000)[1];
+        heatpump_heat_start = feed.getvalue(feeds["heatpump_heat_kwh"].id, start_time);
     }
     
     // Load elec start here after start_time may have been modified by heat start time
     if (elec_enabled) {
-        heatpump_elec_start = feed.getvalue(feeds["heatpump_elec_kwh"].id, start_time*1000)[1];
+        heatpump_elec_start = feed.getvalue(feeds["heatpump_elec_kwh"].id, start_time);
     }
     
     resize();
@@ -166,8 +166,8 @@ function updater()
             }
             
             var elec = 0; var heat = 0;
-            if (elec_enabled) elec = feeds["heatpump_elec_kwh"].value - feed.getvalue(feeds["heatpump_elec_kwh"].id, min30*1000)[1];
-            if (heat_enabled) heat = feeds["heatpump_heat_kwh"].value - feed.getvalue(feeds["heatpump_heat_kwh"].id, min30*1000)[1];
+            if (elec_enabled) elec = feeds["heatpump_elec_kwh"].value - feed.getvalue(feeds["heatpump_elec_kwh"].id, min30);
+            if (heat_enabled) heat = feeds["heatpump_heat_kwh"].value - feed.getvalue(feeds["heatpump_heat_kwh"].id, min30);
             
             var COP = 0;
             if (elec>0) COP = heat / elec;

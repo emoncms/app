@@ -6,7 +6,7 @@
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/graph_bars.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/graph_lines.js?v=<?php echo $v; ?>"></script> 
@@ -473,7 +473,7 @@ function fastupdate(event)
 
     var time = new Date(now.getFullYear(),now.getMonth(),now.getDate()-dayofweek).getTime();
     if (time!=last_startofweektime) {
-        startofweek = feed.getvalue(use_kwh,time);
+        startofweek = feed.getvalue(use_kwh,time*0.001);
         last_startofweektime = time;
     }
     if (startofweek===false) startofweek = [startalltime*1000,0];
@@ -487,7 +487,7 @@ function fastupdate(event)
     // MONTH: repeat same process as above (scale is unitcost)
     var time = new Date(now.getFullYear(),now.getMonth(),1).getTime();
     if (time!=last_startofmonthtime) {
-        startofmonth = feed.getvalue(use_kwh,time);
+        startofmonth = feed.getvalue(use_kwh,time*0.001);
         last_startofmonthtime = time;
     }
     if (startofmonth===false) startofmonth = [startalltime*1000,0];
@@ -501,7 +501,7 @@ function fastupdate(event)
     // YEAR: repeat same process as above (scale is unitcost)
     var time = new Date(now.getFullYear(),0,1).getTime();
     if (time!=last_startofyeartime) {
-        startofyear = feed.getvalue(use_kwh,time);
+        startofyear = feed.getvalue(use_kwh,time*0.001);
         last_startofyeartime = time;
     }
     if (startofyear===false) startofyear = [startalltime*1000,0];     
