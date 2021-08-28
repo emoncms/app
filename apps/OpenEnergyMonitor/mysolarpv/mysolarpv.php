@@ -504,8 +504,8 @@ function draw_powergraph() {
     // -------------------------------------------------------------------------------------------------------
     if (reload) {
         reload = false;
-        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,view.interval,0,0));
-        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0));
+        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,view.interval,0,0,0));
+        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0,0));
     }
     // -------------------------------------------------------------------------------------------------------
     

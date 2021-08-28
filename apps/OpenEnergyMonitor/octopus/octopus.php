@@ -671,14 +671,14 @@ function graph_load()
         $("#use_meter_kwh_hh_bound").show();
     }
 
-    var import_kwh = feed.getdata(feeds["import_kwh"].id,view.start,view.end,interval,0,0);
+    var import_kwh = feed.getdata(feeds["import_kwh"].id,view.start,view.end,interval,0,0,0);
 
     var use_kwh = [];
-    if (solarpv_mode) use_kwh = feed.getdata(feeds["use_kwh"].id,view.start,view.end,interval,0,0);
+    if (solarpv_mode) use_kwh = feed.getdata(feeds["use_kwh"].id,view.start,view.end,interval,0,0,0);
     var solar_kwh = [];
-    if (solarpv_mode) solar_kwh = feed.getdata(feeds["solar_kwh"].id,view.start,view.end,interval,0,0);    
+    if (solarpv_mode) solar_kwh = feed.getdata(feeds["solar_kwh"].id,view.start,view.end,interval,0,0,0);    
     var meter_kwh_hh = []
-    if (smart_meter_data) meter_kwh_hh = feed.getdata(feeds["meter_kwh_hh"].id,view.start,view.end,interval,0,0); 
+    if (smart_meter_data) meter_kwh_hh = feed.getdata(feeds["meter_kwh_hh"].id,view.start,view.end,interval,0,0,0); 
     
     data = {};
     

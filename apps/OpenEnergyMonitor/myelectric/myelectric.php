@@ -367,7 +367,7 @@ function fastupdate(event)
     if (reload) {
         reload = false;
         view.calc_interval(1500); // npoints = 1500
-        timeseries.load("use",feed.getdata(use,view.start,view.end,view.interval,0,0));
+        timeseries.load("use",feed.getdata(use,view.start,view.end,view.interval,0,0,0));
     }
     
     // --------------------------------------------------------------------

@@ -628,11 +628,11 @@ function draw_powergraph() {
     // -------------------------------------------------------------------------------------------------------
     if (reload) {
         reload = false;
-        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,view.interval,0,0));
-        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0));
-        timeseries.load("divert",feed.getdata(config.app.divert.value,view.start,view.end,view.interval,0,0));
+        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,view.interval,0,0,0));
+        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0,0));
+        timeseries.load("divert",feed.getdata(config.app.divert.value,view.start,view.end,view.interval,0,0,0));
         if (has_wind) {
-          timeseries.load("wind",feed.getdata(config.app.wind.value,view.start,view.end,view.interval,0,0));
+          timeseries.load("wind",feed.getdata(config.app.wind.value,view.start,view.end,view.interval,0,0,0));
         }
     }
     // -------------------------------------------------------------------------------------------------------

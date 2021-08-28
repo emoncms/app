@@ -669,13 +669,13 @@ function load_powergraph() {
     // -------------------------------------------------------------------------------------------------------
     if (reload) {
         reload = false;
-        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,view.interval,0,0));
-        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0));
-        timeseries.load("battery_charge",feed.getdata(config.app.battery_charge.value,view.start,view.end,view.interval,0,0));
-        timeseries.load("battery_discharge",feed.getdata(config.app.battery_discharge.value,view.start,view.end,view.interval,0,0));
+        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,view.interval,0,0,0));
+        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0,0));
+        timeseries.load("battery_charge",feed.getdata(config.app.battery_charge.value,view.start,view.end,view.interval,0,0,0));
+        timeseries.load("battery_discharge",feed.getdata(config.app.battery_discharge.value,view.start,view.end,view.interval,0,0,0));
         
         if (config.app.battery_soc.value) {
-            timeseries.load("battery_soc",feed.getdata(config.app.battery_soc.value,view.start,view.end,view.interval,0,0));
+            timeseries.load("battery_soc",feed.getdata(config.app.battery_soc.value,view.start,view.end,view.interval,0,0,0));
         }
     }
     // -------------------------------------------------------------------------------------------------------
