@@ -394,16 +394,31 @@ function powergraph_load()
     powergraph_series = [];
 
     if (feeds["heatpump_flowT"]!=undefined) { 
-        data["heatpump_flowT"] = feed.getdata(feeds["heatpump_flowT"].id,view.start,view.end,view.interval,0,skipmissing,limitinterval);
-        powergraph_series.push({label:"Flow T", data:data["heatpump_flowT"], yaxis:2, color:2});
+        data["heatpump_flowT"] = feed.getdata(feeds["heatpump_flowT"].id,start,end,interval,0,skipmissing,limitinterval);
+        
+        if (simulate_heat_output) {
+            powergraph_series.push({label:"Flow T", data:remove_null_values(data["heatpump_flowT"]), yaxis:2, color:2});
+        } else {
+            powergraph_series.push({label:"Flow T", data:data["heatpump_flowT"], yaxis:2, color:2});
+        }
     }
     if (feeds["heatpump_returnT"]!=undefined) {
-        data["heatpump_returnT"] = feed.getdata(feeds["heatpump_returnT"].id,view.start,view.end,view.interval,0,skipmissing,limitinterval);
-        powergraph_series.push({label:"Return T", data:data["heatpump_returnT"], yaxis:2, color:3});
+        data["heatpump_returnT"] = feed.getdata(feeds["heatpump_returnT"].id,start,end,interval,0,skipmissing,limitinterval);
+        
+        if (simulate_heat_output) { 
+            powergraph_series.push({label:"Return T", data:remove_null_values(data["heatpump_returnT"]), yaxis:2, color:3});
+        } else {
+            powergraph_series.push({label:"Return T", data:data["heatpump_returnT"], yaxis:2, color:3});
+        }
     }
     if (feeds["heatpump_outsideT"]!=undefined) {
-        data["heatpump_outsideT"] = feed.getdata(feeds["heatpump_outsideT"].id,view.start,view.end,view.interval,0,skipmissing,limitinterval);
-        powergraph_series.push({label:"Outside T", data:data["heatpump_outsideT"], yaxis:2, color:4});
+        data["heatpump_outsideT"] = feed.getdata(feeds["heatpump_outsideT"].id,start,end,interval,0,skipmissing,limitinterval);
+        
+        if (simulate_heat_output) { 
+            powergraph_series.push({label:"Outside T", data:remove_null_values(data["heatpump_outsideT"]), yaxis:2, color:4});
+        } else {
+            powergraph_series.push({label:"Outside T", data:data["heatpump_outsideT"], yaxis:2, color:4});
+        }
     }
     if (feeds["DHW_cylinderT"]!=undefined) {
         data["DHW_cylinderT"] = feed.getdata(feeds["DHW_cylinderT"].id,view.start,view.end,view.interval,0,skipmissing,limitinterval);
@@ -418,7 +433,12 @@ function powergraph_load()
             } else {
                 data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,view.start,view.end,view.interval,1,skipmissing,limitinterval);
             }
-            powergraph_series.push({label:"Heat Output", data:data["heatpump_heat"], yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
+            
+            if (simulate_heat_output) { 
+                powergraph_series.push({label:"Heat Output", data:remove_null_values(data["heatpump_heat"]), yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
+            } else {
+                powergraph_series.push({label:"Heat Output", data:data["heatpump_heat"], yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
+            }
         }
         if (elec_enabled && meta["heatpump_elec"]!=undefined) {
             if (view.interval==meta["heatpump_elec"].interval) {
@@ -477,12 +497,18 @@ function powergraph_load()
             // Carnot COP simulator
             var carnot_heat_sum = 0;
             var carnot_heat_n = 0;
+            
+            var flowT = 0;
+            var ambientT = 0;
+            var power = 0;
+            
             for (var z in data["heatpump_elec"]) {
                 let time = data["heatpump_elec"][z][0];
-                let power = data["heatpump_elec"][z][1];
-                let flowT = data["heatpump_flowT"][z][1];
-                let ambientT = fixed_outside_temperature; 
-                if (heatpump_outsideT_available) {
+                if (data["heatpump_elec"][z][1]!=null) power = data["heatpump_elec"][z][1];
+                if (data["heatpump_flowT"][z][1]!=null) flowT = data["heatpump_flowT"][z][1];
+                ambientT = fixed_outside_temperature;
+                
+                if (heatpump_outsideT_available && data["heatpump_outsideT"][z][1]!=null) {
                     ambientT = data["heatpump_outsideT"][z][1];
                 }
                 
@@ -742,4 +768,15 @@ $(function() {
 function app_log (level, message) {
     if (level=="ERROR") alert(level+": "+message);
     console.log(level+": "+message);
+}
+
+// Remove null values from feed data
+function remove_null_values(data_in) {
+    var tmp = []
+    for (var z in data_in) {
+        if (data_in[z][1]!=null) {
+            tmp.push(data_in[z]);
+        }
+    }
+    return tmp;
 }
