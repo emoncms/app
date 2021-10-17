@@ -11,7 +11,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/graph_bars.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/graph_lines.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script> 
 
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
@@ -366,15 +366,8 @@ function fastupdate(event)
     // reload power data
     if (reload) {
         reload = false;
-        
-        var npoints = 1500;
-        interval = Math.round(((view.end - view.start)/npoints)/1000);
-        if (interval<1) interval = 1;
-        
-        view.start = 1000*Math.floor((view.start/1000)/interval)*interval;
-        view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
-        
-        timeseries.load("use",feed.getdata(use,view.start,view.end,interval,0,0));
+        view.calc_interval(1500); // npoints = 1500
+        timeseries.load("use",feed.getdata(use,view.start,view.end,view.interval,0,0));
     }
     
     // --------------------------------------------------------------------

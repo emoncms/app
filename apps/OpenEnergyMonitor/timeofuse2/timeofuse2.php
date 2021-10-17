@@ -14,7 +14,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 
 <style>
 
@@ -483,7 +483,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 var date = days[d.getDay()]+", "+("0" + d.getHours()).slice(-2)+":"+("0" + d.getMinutes()).slice(-2);
                 text = date + "<br>" + item.datapoint[1] + "W";
             }
-            tooltip(item.pageX, item.pageY, text, "#fff");
+            tooltip(item.pageX, item.pageY, text, "#fff", "#000");
         }
     } else $("#tooltip").remove();
 });
@@ -575,15 +575,9 @@ function powergraph_load()
 {
     $("#power-graph-footer").show();
     var data_tier = [];
-    var start = view.start; var end = view.end;
-    var npoints = 1200;
-    var interval = ((end-start)*0.001) / npoints;
-    interval = view.round_interval(interval);
-    var intervalms = interval * 1000;
-    start = Math.ceil(start/intervalms)*intervalms;
-    end = Math.ceil(end/intervalms)*intervalms;
+    view.calc_interval(1200); // npoints = 1200
 
-    data["use"] = feed.getdata(feeds["use"].id,start,end,interval,1,1);
+    data["use"] = feed.getdata(feeds["use"].id,view.start,view.end,view.interval,1,1);
     for (var b = 0; b < tier_names.length; b++) {
         data_tier[b] = [];
     }

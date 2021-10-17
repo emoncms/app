@@ -245,7 +245,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
                 var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
                 var date = days[d.getDay()]+", "+months[d.getMonth()]+" "+d.getDate();
-                tooltip(item.pageX, item.pageY, date+"<br>Electric: "+(elec_kwh).toFixed(1)+" kWh<br>Heat: "+(heat_kwh).toFixed(1)+" kWh<br>COP: "+(COP).toFixed(2), "#fff");
+                tooltip(item.pageX, item.pageY, date+"<br>Electric: "+(elec_kwh).toFixed(1)+" kWh<br>Heat: "+(heat_kwh).toFixed(1)+" kWh<br>COP: "+(COP).toFixed(2), "#fff", "#000");
             }
             
             if (viewmode=="powergraph")
@@ -271,7 +271,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 else if (item.series.label=="Heat Output") { name = "Heat"; unit = "W"; }
                 else if (item.series.label=="Carnot Heat Output") { name = "Carnot Heat"; unit = "W"; }
                 
-                tooltip(item.pageX, item.pageY, time+": "+name+" "+itemValue.toFixed(dp)+unit, "#fff");
+                tooltip(item.pageX, item.pageY, time+": "+name+" "+itemValue.toFixed(dp)+unit, "#fff", "#000");
             }
         }
     } else $("#tooltip").remove();

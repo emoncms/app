@@ -14,7 +14,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; echo $appdir; ?>rates.js?v=<?php echo $v; ?>"></script>
 
 <style>
@@ -378,7 +378,7 @@ $("#halfhour_placeholder").bind("plothover", function(event, pos, item) {
                 "<br>" +
                 halfhour_usage_series[seriesIndex].data[z][1].toFixed(4) +
                 " kWh @ " + config.app.currency.value + selected_energy_rate.rates[seriesIndex].cost.toFixed(4) + "/kWh <br>";
-            tooltip(item.pageX, item.pageY, text, "#eee");
+            tooltip(item.pageX, item.pageY, text, "#eee","#000");
         }
 
     } else $("#tooltip").remove();
@@ -422,7 +422,7 @@ $("#placeholder").bind("plothover", function(event, pos, item) {
 
                 text += "Total: " + config.app.currency.value + totalcost.toFixed(2) + " / " + totalkwh.toFixed(3) + "kWh";
 
-                tooltip(item.pageX, item.pageY, text, "#eee");
+                tooltip(item.pageX, item.pageY, text, "#eee", "#000");
             }
         }
     } else $("#tooltip").remove();
@@ -448,12 +448,6 @@ function newFilledArray(len, val) {
 function bargraph_load(start, end) {
     
     $(".ajax-loader").show();
-    //console.log('bargraph_load',new Date(start),new Date(end));
-    //console.log('bargraph_load',start,end);
-
-    //var intervalms = (3600 * 48) * 1000;
-    //end = Math.ceil(end / intervalms) * intervalms;
-    //start = Math.floor(start / intervalms) * intervalms;
           
     var halfhour =  [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, 20.5, 21, 21.5, 22, 22.5, 23, 23.5];
     

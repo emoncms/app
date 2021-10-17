@@ -13,7 +13,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 
 <style>
 
@@ -376,7 +376,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 if (unit=="kWh") text += " ("+config.app.currency.value+(elec_kwh*config.app.unitcost.value).toFixed(2)+")";
             }
             
-            tooltip(item.pageX, item.pageY, text, "#fff");
+            tooltip(item.pageX, item.pageY, text, "#fff", "#000");
         }
     } else $("#tooltip").remove();
 });
@@ -484,15 +484,9 @@ $(".viewcostenergy").click(function(){
 function powergraph_load() 
 {
     $("#power-graph-footer").show();
-    var start = view.start; var end = view.end;
-    var npoints = 800;
-    var interval = ((end-start)*0.001) / npoints;
-    interval = view.round_interval(interval);
-    var intervalms = interval * 1000;
-    start = Math.ceil(start/intervalms)*intervalms;
-    end = Math.ceil(end/intervalms)*intervalms;
-
-    data["use"] = feed.getdata(feeds["use"].id,start,end,interval,1,1);
+    
+    view.calc_interval(800); // npoints = 800
+    data["use"] = feed.getdata(feeds["use"].id,view.start,view.end,view.interval,1,1);
     
     powergraph_series = [];
     powergraph_series.push({data:data["use"], yaxis:1, color:"#44b3e2", lines:{show:true, fill:0.8, lineWidth:0}});
