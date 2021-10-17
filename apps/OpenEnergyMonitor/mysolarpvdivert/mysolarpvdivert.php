@@ -7,7 +7,7 @@
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
@@ -628,11 +628,11 @@ function draw_powergraph() {
     // -------------------------------------------------------------------------------------------------------
     if (reload) {
         reload = false;
-        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,view.interval,0,0));
-        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0));
-        timeseries.load("divert",feed.getdata(config.app.divert.value,view.start,view.end,view.interval,0,0));
+        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,view.interval,0,0,0));
+        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0,0));
+        timeseries.load("divert",feed.getdata(config.app.divert.value,view.start,view.end,view.interval,0,0,0));
         if (has_wind) {
-          timeseries.load("wind",feed.getdata(config.app.wind.value,view.start,view.end,view.interval,0,0));
+          timeseries.load("wind",feed.getdata(config.app.wind.value,view.start,view.end,view.interval,0,0,0));
         }
     }
     // -------------------------------------------------------------------------------------------------------
@@ -869,13 +869,13 @@ function load_bargraph(start,end) {
     start = Math.floor(start/intervalms)*intervalms;
     
     // Load kWh data
-    var solar_kwh_data = feed.getdataDMY(config.app.solar_kwh.value,start,end,"daily");
-    var use_kwh_data = feed.getdataDMY(config.app.use_kwh.value,start,end,"daily");
-    var divert_kwh_data = feed.getdataDMY(config.app.divert_kwh.value,start,end,"daily");
-    var import_kwh_data = feed.getdataDMY(config.app.import_kwh.value,start,end,"daily");
+    var solar_kwh_data = feed.getdata(config.app.solar_kwh.value,start,end,"daily");
+    var use_kwh_data = feed.getdata(config.app.use_kwh.value,start,end,"daily");
+    var divert_kwh_data = feed.getdata(config.app.divert_kwh.value,start,end,"daily");
+    var import_kwh_data = feed.getdata(config.app.import_kwh.value,start,end,"daily");
     var wind_kwh_data = [];
     if (has_wind && config.wind_kwh) {
-        wind_kwh_data = feed.getdataDMY(config.wind_kwh.value,start,end,"daily");
+        wind_kwh_data = feed.getdata(config.wind_kwh.value,start,end,"daily");
     }
     
     house_generated_kwhd_data = [];

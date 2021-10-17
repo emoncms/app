@@ -7,7 +7,7 @@
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
@@ -669,13 +669,13 @@ function load_powergraph() {
     // -------------------------------------------------------------------------------------------------------
     if (reload) {
         reload = false;
-        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,view.interval,0,0));
-        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0));
-        timeseries.load("battery_charge",feed.getdata(config.app.battery_charge.value,view.start,view.end,view.interval,0,0));
-        timeseries.load("battery_discharge",feed.getdata(config.app.battery_discharge.value,view.start,view.end,view.interval,0,0));
+        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,view.interval,0,0,0));
+        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0,0));
+        timeseries.load("battery_charge",feed.getdata(config.app.battery_charge.value,view.start,view.end,view.interval,0,0,0));
+        timeseries.load("battery_discharge",feed.getdata(config.app.battery_discharge.value,view.start,view.end,view.interval,0,0,0));
         
         if (config.app.battery_soc.value) {
-            timeseries.load("battery_soc",feed.getdata(config.app.battery_soc.value,view.start,view.end,view.interval,0,0));
+            timeseries.load("battery_soc",feed.getdata(config.app.battery_soc.value,view.start,view.end,view.interval,0,0,0));
         }
     }
     // -------------------------------------------------------------------------------------------------------
@@ -943,12 +943,12 @@ function load_bargraph() {
     start = Math.floor(start/intervalms)*intervalms;
     
     // Load kWh data
-    var solar_kwh_data = feed.getdataDMY(config.app.solar_kwh.value,start,end,"daily");
-    var use_kwh_data = feed.getdataDMY(config.app.use_kwh.value,start,end,"daily");
-    var import_kwh_data = feed.getdataDMY(config.app.import_kwh.value,start,end,"daily");
-    var battery_charge_kwh_data = feed.getdataDMY(config.app.battery_charge_kwh.value,start,end,"daily");
-    var battery_discharge_kwh_data = feed.getdataDMY(config.app.battery_discharge_kwh.value,start,end,"daily");
-    var solar_direct_kwh_data = feed.getdataDMY(config.app.solar_direct_kwh.value,start,end,"daily");
+    var solar_kwh_data = feed.getdata(config.app.solar_kwh.value,start,end,"daily");
+    var use_kwh_data = feed.getdata(config.app.use_kwh.value,start,end,"daily");
+    var import_kwh_data = feed.getdata(config.app.import_kwh.value,start,end,"daily");
+    var battery_charge_kwh_data = feed.getdata(config.app.battery_charge_kwh.value,start,end,"daily");
+    var battery_discharge_kwh_data = feed.getdata(config.app.battery_discharge_kwh.value,start,end,"daily");
+    var solar_direct_kwh_data = feed.getdata(config.app.solar_direct_kwh.value,start,end,"daily");
     
     solar_kwhd_data = [];
     use_kwhd_data = [];

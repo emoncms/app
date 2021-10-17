@@ -81,12 +81,12 @@ function show()
         meta["heatpump_heat_kwh"] = feed.getmeta(feeds["heatpump_heat_kwh"].id);
         meta["heatpump_heat"] = feed.getmeta(feeds["heatpump_heat"].id);
         if (meta["heatpump_heat_kwh"].start_time>start_time) start_time = meta["heatpump_heat_kwh"].start_time;
-        heatpump_heat_start = feed.getvalue(feeds["heatpump_heat_kwh"].id, start_time*1000)[1];
+        heatpump_heat_start = feed.getvalue(feeds["heatpump_heat_kwh"].id, start_time);
     }
     
     // Load elec start here after start_time may have been modified by heat start time
     if (elec_enabled) {
-        heatpump_elec_start = feed.getvalue(feeds["heatpump_elec_kwh"].id, start_time*1000)[1];
+        heatpump_elec_start = feed.getvalue(feeds["heatpump_elec_kwh"].id, start_time);
     }
     
     resize();
@@ -166,8 +166,8 @@ function updater()
             }
             
             var elec = 0; var heat = 0;
-            if (elec_enabled) elec = feeds["heatpump_elec_kwh"].value - feed.getvalue(feeds["heatpump_elec_kwh"].id, min30*1000)[1];
-            if (heat_enabled) heat = feeds["heatpump_heat_kwh"].value - feed.getvalue(feeds["heatpump_heat_kwh"].id, min30*1000)[1];
+            if (elec_enabled) elec = feeds["heatpump_elec_kwh"].value - feed.getvalue(feeds["heatpump_elec_kwh"].id, min30);
+            if (heat_enabled) heat = feeds["heatpump_heat_kwh"].value - feed.getvalue(feeds["heatpump_heat_kwh"].id, min30);
             
             var COP = 0;
             if (elec>0) COP = heat / elec;
@@ -376,12 +376,9 @@ $("#fixed_outside_temperature").change(function(){
 function powergraph_load() 
 {
     var simulate_heat_output = $("#carnot_enable")[0].checked;
-    
 
-    var start = view.start; var end = view.end;
-    var npoints = 1200;
-    var interval = ((end-start)*0.001) / npoints;
-    interval = view.round_interval(interval);
+
+    
     var skipmissing = 1;
     var limitinterval = 1;
     
@@ -390,13 +387,10 @@ function powergraph_load()
         limitinterval = 0;
     }
     
-    if (elec_enabled && meta["heatpump_elec"]!=undefined) interval = Math.round(interval/meta["heatpump_elec"].interval)*meta["heatpump_elec"].interval
-    if (heat_enabled) interval = Math.round(interval/meta["heatpump_heat"].interval)*meta["heatpump_heat"].interval
-    
-    var intervalms = interval * 1000;
-    start = Math.ceil(start/intervalms)*intervalms;
-    end = Math.ceil(end/intervalms)*intervalms;
-    
+    //if (elec_enabled && meta["heatpump_elec"]!=undefined) interval = Math.round(interval/meta["heatpump_elec"].interval)*meta["heatpump_elec"].interval
+    //if (heat_enabled) interval = Math.round(interval/meta["heatpump_heat"].interval)*meta["heatpump_heat"].interval
+    view.calc_interval(1200);
+      
     powergraph_series = [];
 
     if (feeds["heatpump_flowT"]!=undefined) { 
@@ -427,17 +421,19 @@ function powergraph_load()
         }
     }
     if (feeds["DHW_cylinderT"]!=undefined) {
-        data["DHW_cylinderT"] = feed.getdata(feeds["DHW_cylinderT"].id,start,end,interval,0,skipmissing,limitinterval);
+        data["DHW_cylinderT"] = feed.getdata(feeds["DHW_cylinderT"].id,view.start,view.end,view.interval,0,skipmissing,limitinterval);
         powergraph_series.push({label:"DHW Cylinder T", data:data["DHW_cylinderT"], yaxis:2, color:5});
     }
 
     if (feeds["heatpump_elec"]!=undefined) {
         // Where power feed is available
         if (heat_enabled) {
-            if (interval==meta["heatpump_heat"].interval) {
-                data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,start,end,interval,0,1,1);
+            if (view.interval==meta["heatpump_heat"].interval) {
+                data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,view.start,view.end,view.interval,0,skipmissing,limitinterval);
             } else {
-                data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,start,end,interval,1,1,1);    
+                data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,view.start,view.end,view.interval,1,skipmissing,limitinterval);
+            }
+            
             if (simulate_heat_output) { 
                 powergraph_series.push({label:"Heat Output", data:remove_null_values(data["heatpump_heat"]), yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
             } else {
@@ -445,47 +441,42 @@ function powergraph_load()
             }
         }
         if (elec_enabled && meta["heatpump_elec"]!=undefined) {
-            if (interval==meta["heatpump_elec"].interval) {
-                data["heatpump_elec"] = feed.getdata(feeds["heatpump_elec"].id,start,end,interval,0,1,1);
+            if (view.interval==meta["heatpump_elec"].interval) {
+                data["heatpump_elec"] = feed.getdata(feeds["heatpump_elec"].id,view.start,view.end,view.interval,0,skipmissing,limitinterval);
             } else {
-                data["heatpump_elec"] = feed.getdata(feeds["heatpump_elec"].id,start,end,interval,1,1,1);
+                data["heatpump_elec"] = feed.getdata(feeds["heatpump_elec"].id,view.start,view.end,view.interval,1,skipmissing,limitinterval);
             }
             powergraph_series.push({label:"Electric Input", data:data["heatpump_elec"], yaxis:1, color:1, lines:{show:true, fill:0.3, lineWidth:0.5}});
         }
     } else {
         // Where no power feed available
-        var npoints = 50;
-        var interval = ((end-start)*0.001) / npoints;
-        interval = view.round_interval(interval);
-        if (interval<120) interval = 120;
-        var intervalms = interval * 1000;
-        start = Math.ceil(start/intervalms)*intervalms;
-        end = Math.ceil(end/intervalms)*intervalms;
+        // need a check here to limit interval to no lower than 120s     
+        view.calc_interval(50,120);
         
         if (heat_enabled) {
-            var tmp = feed.getdata(feeds["heatpump_heat_kwh"].id,start,end,interval,0,0,0);
+            var tmp = feed.getdata(feeds["heatpump_heat_kwh"].id,view.start,view.end,view.interval,0,0,0);
             data["heatpump_heat"] = [];
             for (var z=1; z<tmp.length; z++) {
                 var time = tmp[z-1][0];
                 var diff = tmp[z][1] - tmp[z-1][1];
-                var power = (diff * 3600000) / interval;
+                var power = (diff * 3600000) / view.interval;
                 if (power<0) power = 0;
                 data["heatpump_heat"].push([time,power]);
             }
-            powergraph_series.push({label:"Heat Output", data:data["heatpump_heat"], yaxis:1, color:0, bars:{show:true, barWidth: intervalms * 0.8, fill:0.2}});
+            powergraph_series.push({label:"Heat Output", data:data["heatpump_heat"], yaxis:1, color:0, bars:{show:true, barWidth: view.interval * 1000 * 0.8, fill:0.2}});
         }
         
         if (elec_enabled) {
-            var tmp = feed.getdata(feeds["heatpump_elec_kwh"].id,start,end,interval,0,0,0);
+            var tmp = feed.getdata(feeds["heatpump_elec_kwh"].id,view.start,view.end,view.interval,0,0,0);
             data["heatpump_elec"] = [];
             for (var z=1; z<tmp.length; z++) {
                 var time = tmp[z-1][0];
                 var diff = tmp[z][1] - tmp[z-1][1];  // diff in kWh
-                var power = (diff * 3600000) / interval;
+                var power = (diff * 3600000) / view.interval;
                 if (power<0) power = 0;
                 data["heatpump_elec"].push([time,power]);
             }
-            powergraph_series.push({label:"Electric Input", data:data["heatpump_elec"], yaxis:1, color:1, bars:{show:true, barWidth: intervalms * 0.8, fill:0.3}});
+            powergraph_series.push({label:"Electric Input", data:data["heatpump_elec"], yaxis:1, color:1, bars:{show:true, barWidth: view.interval * 1000 * 0.8, fill:0.3}});
         }
     }
     
@@ -564,7 +555,6 @@ function powergraph_load()
     var out = "";
     for (var z in feedstats) {
         out += "<tr>";
-        // out += "<td><div class='ledgend-box'><div class='ledgend-box-in'></div></div></td>";
         out += "<td style='text-align:left'>"+z+"</td>";
         out += "<td style='text-align:center'>"+feedstats[z].minval.toFixed(2)+"</td>";
         out += "<td style='text-align:center'>"+feedstats[z].maxval.toFixed(2)+"</td>";
@@ -630,7 +620,7 @@ function bargraph_load(start,end)
         var heat_data = [];
         data["heatpump_heat_kwhd"] = [];
         
-        var heat_result = feed.getdata(feeds["heatpump_heat_kwh"].id,start,end,"daily",0,0,0)
+        var heat_result = feed.getdata(feeds["heatpump_heat_kwh"].id,start,end,"daily")
         // remove nan values from the end.
         for (var z in heat_result) {
           if (heat_result[z][1]!=null) heat_data.push(heat_result[z]);
@@ -668,7 +658,7 @@ function bargraph_load(start,end)
         var elec_data = [];
         data["heatpump_elec_kwhd"] = [];
         
-        var elec_result = feed.getdata(feeds["heatpump_elec_kwh"].id,start,end,"daily",0,0,0);
+        var elec_result = feed.getdata(feeds["heatpump_elec_kwh"].id,start,end,"daily");
         // remove nan values from the end.
         for (var z in elec_result) {
           if (elec_result[z][1]!=null) elec_data.push(elec_result[z]);
