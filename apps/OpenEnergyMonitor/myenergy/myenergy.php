@@ -366,21 +366,12 @@ function draw_powergraph() {
 
         var feedid = config.app.solar.value;
         if (feedid!=false)
-<<<<<<< HEAD
-            timeseries.load("solar",feed.getdata(feedid,view.start,view.end,view.interval,0,0));
-        
-        var feedid = config.app.use.value;
-        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0));
-        
-        timeseries.load("remotewind",feed.getdataremote(67088,view.start,view.end,view.interval));    
-=======
             timeseries.load("solar",feed.getdata(feedid,view.start,view.end,view.interval,0,0,0));
         
         var feedid = config.app.use.value;
         timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0,0));
         
-        timeseries.load("remotewind",getdataremote(67088,view.start,view.end,view.interval));    
->>>>>>> 7cd49b1cee7d576f9135878009d9e6d5e52a6460
+        timeseries.load("remotewind",getdataremote(67088,view.start,view.end,view.interval));   
     }
     // -------------------------------------------------------------------------------------------------------
     
