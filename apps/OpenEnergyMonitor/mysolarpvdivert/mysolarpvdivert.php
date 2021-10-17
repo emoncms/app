@@ -1,4 +1,5 @@
 <?php
+    defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
 
@@ -13,7 +14,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
 
 
@@ -620,29 +621,18 @@ function draw_powergraph() {
         legend: { show: false }
     }
     
-    var npoints = 1500;
-    interval = Math.round(((view.end - view.start)/npoints)/1000);
-    interval = view.round_interval(interval);
-    if (interval<10) interval = 10;
-    var intervalms = interval * 1000;
-
-    view.start = Math.ceil(view.start/intervalms)*intervalms;
-    view.end = Math.ceil(view.end/intervalms)*intervalms;
-
-    var npoints = parseInt((view.end-view.start)/(interval*1000));
+    view.calc_interval(1500); // npoints = 1500
     
     // -------------------------------------------------------------------------------------------------------
     // LOAD DATA ON INIT OR RELOAD
     // -------------------------------------------------------------------------------------------------------
     if (reload) {
         reload = false;
-        view.start = 1000*Math.floor((view.start/1000)/interval)*interval;
-        view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
-        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,interval,0,0));
-        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,interval,0,0));
-        timeseries.load("divert",feed.getdata(config.app.divert.value,view.start,view.end,interval,0,0));
+        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,view.interval,0,0));
+        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0));
+        timeseries.load("divert",feed.getdata(config.app.divert.value,view.start,view.end,view.interval,0,0));
         if (has_wind) {
-          timeseries.load("wind",feed.getdata(config.app.wind.value,view.start,view.end,interval,0,0));
+          timeseries.load("wind",feed.getdata(config.app.wind.value,view.start,view.end,view.interval,0,0));
         }
     }
     // -------------------------------------------------------------------------------------------------------
@@ -672,6 +662,7 @@ function draw_powergraph() {
     
     var datastart = timeseries.start_time("solar");
     
+    var interval = view.interval;
     for (var z=0; z<timeseries.length("solar"); z++) {
 
         // -------------------------------------------------------------------------------------------------------

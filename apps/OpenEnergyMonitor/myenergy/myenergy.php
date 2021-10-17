@@ -1,4 +1,5 @@
 <?php
+    defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
@@ -11,7 +12,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script>
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
@@ -127,7 +128,7 @@ function getTranslations(){
 // ----------------------------------------------------------------------
 // Globals
 // ----------------------------------------------------------------------
-var apikey = "<?php print $apikey; ?>";
+var apikey = "<?php echo $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 
 apikeystr = ""; 
@@ -355,33 +356,22 @@ function draw_powergraph() {
         selection: { mode: "x" }
     }
     
-    var npoints = 1500;
-    interval = Math.round(((view.end - view.start)/npoints)/1000);
-    interval = view.round_interval(interval);
-    if (interval<10) interval = 10;
-    var intervalms = interval * 1000;
-
-    view.start = Math.ceil(view.start/intervalms)*intervalms;
-    view.end = Math.ceil(view.end/intervalms)*intervalms;
-
-    var npoints = parseInt((view.end-view.start)/(interval*1000));
+    view.calc_interval(1500); // npoints = 1500
     
     // -------------------------------------------------------------------------------------------------------
     // LOAD DATA ON INIT OR RELOAD
     // -------------------------------------------------------------------------------------------------------
     if (reload) {
         reload = false;
-        view.start = 1000*Math.floor((view.start/1000)/interval)*interval;
-        view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
 
         var feedid = config.app.solar.value;
         if (feedid!=false)
-            timeseries.load("solar",feed.getdata(feedid,view.start,view.end,interval,0,0));
+            timeseries.load("solar",feed.getdata(feedid,view.start,view.end,view.interval,0,0));
         
         var feedid = config.app.use.value;
-        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,interval,0,0));
+        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0));
         
-        timeseries.load("remotewind",feed.getdataremote(67088,view.start,view.end,interval));    
+        timeseries.load("remotewind",feed.getdataremote(67088,view.start,view.end,view.interval));    
     }
     // -------------------------------------------------------------------------------------------------------
     
@@ -405,6 +395,7 @@ function draw_powergraph() {
     
     var datastart = timeseries.start_time("use");
     
+    var interval = view.interval;
     for (var z=0; z<timeseries.length("use"); z++) {
 
         // -------------------------------------------------------------------------------------------------------

@@ -95,7 +95,7 @@ function show()
 
     // If this is a new dashboard there will be less than a days data 
     // show power graph directly in this case
-    if (((end*0.001)-start_time)<86400*1) {
+    if (((end*0.001)-start_time)<86400*3) {
         var timeWindow = (end - start_time*1000);
         var start = end - timeWindow;
         view.start = start;
@@ -245,7 +245,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
                 var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
                 var date = days[d.getDay()]+", "+months[d.getMonth()]+" "+d.getDate();
-                tooltip(item.pageX, item.pageY, date+"<br>Electric: "+(elec_kwh).toFixed(1)+" kWh<br>Heat: "+(heat_kwh).toFixed(1)+" kWh<br>COP: "+(COP).toFixed(2), "#fff");
+                tooltip(item.pageX, item.pageY, date+"<br>Electric: "+(elec_kwh).toFixed(1)+" kWh<br>Heat: "+(heat_kwh).toFixed(1)+" kWh<br>COP: "+(COP).toFixed(2), "#fff", "#000");
             }
             
             if (viewmode=="powergraph")
@@ -269,8 +269,9 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 else if (item.series.label=="Outside T") { name = "Outside"; unit = "C"; dp = 1; }
                 else if (item.series.label=="Electric Input") { name = "Elec"; unit = "W"; }
                 else if (item.series.label=="Heat Output") { name = "Heat"; unit = "W"; }
+                else if (item.series.label=="Carnot Heat Output") { name = "Carnot Heat"; unit = "W"; }
                 
-                tooltip(item.pageX, item.pageY, time+": "+name+" "+itemValue.toFixed(dp)+unit, "#fff");
+                tooltip(item.pageX, item.pageY, time+": "+name+" "+itemValue.toFixed(dp)+unit, "#fff", "#000");
             }
         }
     } else $("#tooltip").remove();
@@ -333,6 +334,36 @@ $('.bargraph-month').click(function () {
     bargraph_draw();
 });
 
+$("#carnot_enable").click(function(){
+    powergraph_load();
+    powergraph_draw();
+});
+
+$("#condensing_offset").change(function(){
+    powergraph_load();
+    powergraph_draw();
+});
+
+$("#evaporator_offset").change(function(){
+    powergraph_load();
+    powergraph_draw();
+});
+
+$("#heatpump_factor").change(function(){
+    powergraph_load();
+    powergraph_draw();
+});
+
+$("#starting_power").change(function(){
+    powergraph_load();
+    powergraph_draw();
+});
+
+$("#fixed_outside_temperature").change(function(){
+    powergraph_load();
+    powergraph_draw();
+});
+
 // -------------------------------------------------------------------------------
 // FUNCTIONS
 // -------------------------------------------------------------------------------
@@ -344,10 +375,20 @@ $('.bargraph-month').click(function () {
 
 function powergraph_load() 
 {
+    var simulate_heat_output = $("#carnot_enable")[0].checked;
+    
+
     var start = view.start; var end = view.end;
     var npoints = 1200;
     var interval = ((end-start)*0.001) / npoints;
     interval = view.round_interval(interval);
+    var skipmissing = 1;
+    var limitinterval = 1;
+    
+    if (simulate_heat_output) {
+        skipmissing = 0;
+        limitinterval = 0;
+    }
     
     if (elec_enabled && meta["heatpump_elec"]!=undefined) interval = Math.round(interval/meta["heatpump_elec"].interval)*meta["heatpump_elec"].interval
     if (heat_enabled) interval = Math.round(interval/meta["heatpump_heat"].interval)*meta["heatpump_heat"].interval
@@ -359,19 +400,34 @@ function powergraph_load()
     powergraph_series = [];
 
     if (feeds["heatpump_flowT"]!=undefined) { 
-        data["heatpump_flowT"] = feed.getdata(feeds["heatpump_flowT"].id,start,end,interval,0,1,1);
-        powergraph_series.push({label:"Flow T", data:data["heatpump_flowT"], yaxis:2, color:2});
+        data["heatpump_flowT"] = feed.getdata(feeds["heatpump_flowT"].id,start,end,interval,0,skipmissing,limitinterval);
+        
+        if (simulate_heat_output) {
+            powergraph_series.push({label:"Flow T", data:remove_null_values(data["heatpump_flowT"]), yaxis:2, color:2});
+        } else {
+            powergraph_series.push({label:"Flow T", data:data["heatpump_flowT"], yaxis:2, color:2});
+        }
     }
     if (feeds["heatpump_returnT"]!=undefined) {
-        data["heatpump_returnT"] = feed.getdata(feeds["heatpump_returnT"].id,start,end,interval,0,1,1);
-        powergraph_series.push({label:"Return T", data:data["heatpump_returnT"], yaxis:2, color:3});
+        data["heatpump_returnT"] = feed.getdata(feeds["heatpump_returnT"].id,start,end,interval,0,skipmissing,limitinterval);
+        
+        if (simulate_heat_output) { 
+            powergraph_series.push({label:"Return T", data:remove_null_values(data["heatpump_returnT"]), yaxis:2, color:3});
+        } else {
+            powergraph_series.push({label:"Return T", data:data["heatpump_returnT"], yaxis:2, color:3});
+        }
     }
     if (feeds["heatpump_outsideT"]!=undefined) {
-        data["heatpump_outsideT"] = feed.getdata(feeds["heatpump_outsideT"].id,start,end,interval,0,1,1);
-        powergraph_series.push({label:"Outside T", data:data["heatpump_outsideT"], yaxis:2, color:4});
+        data["heatpump_outsideT"] = feed.getdata(feeds["heatpump_outsideT"].id,start,end,interval,0,skipmissing,limitinterval);
+        
+        if (simulate_heat_output) { 
+            powergraph_series.push({label:"Outside T", data:remove_null_values(data["heatpump_outsideT"]), yaxis:2, color:4});
+        } else {
+            powergraph_series.push({label:"Outside T", data:data["heatpump_outsideT"], yaxis:2, color:4});
+        }
     }
     if (feeds["DHW_cylinderT"]!=undefined) {
-        data["DHW_cylinderT"] = feed.getdata(feeds["DHW_cylinderT"].id,start,end,interval,0,1,1);
+        data["DHW_cylinderT"] = feed.getdata(feeds["DHW_cylinderT"].id,start,end,interval,0,skipmissing,limitinterval);
         powergraph_series.push({label:"DHW Cylinder T", data:data["DHW_cylinderT"], yaxis:2, color:5});
     }
 
@@ -381,9 +437,12 @@ function powergraph_load()
             if (interval==meta["heatpump_heat"].interval) {
                 data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,start,end,interval,0,1,1);
             } else {
-                data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,start,end,interval,1,1,1);
+                data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,start,end,interval,1,1,1);    
+            if (simulate_heat_output) { 
+                powergraph_series.push({label:"Heat Output", data:remove_null_values(data["heatpump_heat"]), yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
+            } else {
+                powergraph_series.push({label:"Heat Output", data:data["heatpump_heat"], yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
             }
-            powergraph_series.push({label:"Heat Output", data:data["heatpump_heat"], yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
         }
         if (elec_enabled && meta["heatpump_elec"]!=undefined) {
             if (interval==meta["heatpump_elec"].interval) {
@@ -430,6 +489,57 @@ function powergraph_load()
         }
     }
     
+    
+    if (simulate_heat_output) {
+        if (data["heatpump_elec"]!=undefined && data["heatpump_flowT"]!=undefined) {
+            data["heatpump_heat_carnot"] = [];
+            
+            var condensing_offset = parseFloat($("#condensing_offset").val());
+            var evaporator_offset = parseFloat($("#evaporator_offset").val());
+            var heatpump_factor = parseFloat($("#heatpump_factor").val());
+            var starting_power = parseFloat($("#starting_power").val());
+            var fixed_outside_temperature = parseFloat($("#fixed_outside_temperature").val());
+            
+            var heatpump_outsideT_available = false;
+            if (data["heatpump_outsideT"]!=undefined) heatpump_outsideT_available = true;
+                        
+            // Carnot COP simulator
+            var carnot_heat_sum = 0;
+            var carnot_heat_n = 0;
+            
+            var flowT = 0;
+            var ambientT = 0;
+            var power = 0;
+            
+            for (var z in data["heatpump_elec"]) {
+                let time = data["heatpump_elec"][z][0];
+                if (data["heatpump_elec"][z][1]!=null) power = data["heatpump_elec"][z][1];
+                if (data["heatpump_flowT"][z][1]!=null) flowT = data["heatpump_flowT"][z][1];
+                ambientT = fixed_outside_temperature;
+                
+                if (heatpump_outsideT_available && data["heatpump_outsideT"][z][1]!=null) {
+                    ambientT = data["heatpump_outsideT"][z][1];
+                }
+                
+                let COP = heatpump_factor * ((flowT+condensing_offset+273) / ((flowT+condensing_offset+273) - (ambientT+evaporator_offset+273)));
+                let carnot_heat = null;
+                
+                if (power!=null) {
+                    carnot_heat = power * COP;
+                    if (power<starting_power) carnot_heat = 0;
+                    carnot_heat_sum += carnot_heat;
+                    carnot_heat_n++;
+                }
+            
+                data["heatpump_heat_carnot"][z] = [time,carnot_heat]
+            }
+            var carnot_heat_mean = carnot_heat_sum / carnot_heat_n;
+            powergraph_series.push({label:"Carnot Heat Output", data:data["heatpump_heat_carnot"], yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
+        } else {
+            simulate_heat_output = false;
+        }
+    }
+    
     var feedstats = {};
     if (elec_enabled) feedstats["heatpump_elec"] = stats(data["heatpump_elec"]);
     if (heat_enabled) feedstats["heatpump_heat"] = stats(data["heatpump_heat"]);
@@ -441,7 +551,14 @@ function powergraph_load()
         var elec_mean = 0; var heat_mean = 0;
         if (elec_enabled) elec_mean = feedstats["heatpump_elec"].mean;
         if (heat_enabled) heat_mean = feedstats["heatpump_heat"].mean;
-        if (elec_mean>0) $("#window-cop").html((heat_mean / elec_mean).toFixed(2));
+        if (elec_mean>0) {
+            $("#window-cop").html((heat_mean / elec_mean).toFixed(2));
+            if (simulate_heat_output) {
+                $("#window-carnot-cop").html("(Simulated: <b>"+(carnot_heat_mean / elec_mean).toFixed(2)+"</b>)");
+            } else {
+                $("#window-carnot-cop").html("");
+            }
+        }
     }
     
     var out = "";
@@ -588,6 +705,7 @@ function bargraph_load(start,end)
     var cop_in_window =  heat_kwh_in_window/elec_kwh_in_window;
     if (cop_in_window<0) cop_in_window = 0;
     $("#window-cop").html((cop_in_window).toFixed(2));
+    $("#window-carnot-cop").html("");
 }
 
 function bargraph_draw() 
@@ -660,4 +778,15 @@ $(function() {
 function app_log (level, message) {
     if (level=="ERROR") alert(level+": "+message);
     console.log(level+": "+message);
+}
+
+// Remove null values from feed data
+function remove_null_values(data_in) {
+    var tmp = []
+    for (var z in data_in) {
+        if (data_in[z][1]!=null) {
+            tmp.push(data_in[z]);
+        }
+    }
+    return tmp;
 }

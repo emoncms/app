@@ -1,4 +1,5 @@
 <?php
+    defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
@@ -54,7 +55,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
 
 <nav id="buttons" class="d-flex justify-content-between">
@@ -206,12 +207,12 @@ if (!sessionwrite) $(".config-open").addClass('hide');
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "use":{"type":"feed", "autoname":"use", "engine":"5", "description":_("House or building use in watts")},
-    "solar":{"type":"feed", "autoname":"solar", "engine":"5", "description":_("Solar pv generation in watts")},
+    "use":{"type":"feed", "autoname":"use", "description":_("House or building use in watts")},
+    "solar":{"type":"feed", "autoname":"solar", "description":_("Solar pv generation in watts")},
     //"export":{"type":"feed", "autoname":"export", "engine":5, "description":"Exported solar in watts"},
-    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5, "description":_("Cumulative use in kWh")},
-    "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5, "description":_("Cumulative solar generation in kWh")},
-    "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "engine":5, "description":_("Cumulative grid import in kWh")},
+    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "description":_("Cumulative use in kWh")},
+    "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "description":_("Cumulative solar generation in kWh")},
+    "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "description":_("Cumulative grid import in kWh")},
     "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
     //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
 };
@@ -496,26 +497,15 @@ function draw_powergraph() {
         selection: { mode: "x" }
     }
     
-    var npoints = 1500;
-    interval = Math.round(((view.end - view.start)/npoints)/1000);
-    interval = view.round_interval(interval);
-    if (interval<10) interval = 10;
-    var intervalms = interval * 1000;
-
-    view.start = Math.ceil(view.start/intervalms)*intervalms;
-    view.end = Math.ceil(view.end/intervalms)*intervalms;
-
-    var npoints = parseInt((view.end-view.start)/(interval*1000));
+    view.calc_interval(1500); // npoints = 1500
     
     // -------------------------------------------------------------------------------------------------------
     // LOAD DATA ON INIT OR RELOAD
     // -------------------------------------------------------------------------------------------------------
     if (reload) {
         reload = false;
-        view.start = 1000*Math.floor((view.start/1000)/interval)*interval;
-        view.end = 1000*Math.ceil((view.end/1000)/interval)*interval;
-        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,interval,0,0));
-        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,interval,0,0));
+        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,view.interval,0,0));
+        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0));
     }
     // -------------------------------------------------------------------------------------------------------
     
@@ -535,15 +525,15 @@ function draw_powergraph() {
     
     var datastart = timeseries.start_time("solar");
     
-    // console.log(timeseries.length("solar"));
-    // console.log(timeseries.length("use"));
-    
-    for (var z=0; z<timeseries.length("solar"); z++) {
+    var interval = view.interval;
+    var sample_size = Math.min(timeseries.length("solar"), timeseries.length("use"));
+
+    for (var z=0; z<sample_size; z++) {
 
         // -------------------------------------------------------------------------------------------------------
         // Get solar or use values
         // -------------------------------------------------------------------------------------------------------
-        if (timeseries.value("solar",z)!=null) solar_now = timeseries.value("solar",z);  
+        if (timeseries.value("solar",z)!=null) solar_now = timeseries.value("solar",z);
         if (timeseries.value("use",z)!=null) use_now = timeseries.value("use",z);
         
         // -------------------------------------------------------------------------------------------------------

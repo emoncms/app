@@ -1,4 +1,5 @@
 <?php
+    defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
@@ -12,7 +13,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=<?php echo $v; ?>" rel="stylesheet">
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
@@ -93,7 +94,7 @@
       <div id='advanced-toggle' class='bluenav' style="display:none" >SHOW DETAIL</div>
       
       <div style="padding:10px;">
-        COP in window: <b id="window-cop"></b>
+        COP in window: <b id="window-cop"></b> <span id="window-carnot-cop"></span>
       </div>
     </div>
           
@@ -111,6 +112,25 @@
           </tr>
           <tbody id="stats"></tbody>
         </table>
+        
+        <b>Simulate heat output using carnot COP equation</b><input id="carnot_enable" type="checkbox" style="margin-top:-4px; margin-left:7px">
+        <br>
+        <div class="input-prepend input-append" style="margin-top:5px">
+          <span class="add-on">Condensing offset (K)</span>
+          <input type="text" style="width:50px" id="condensing_offset" value="4">
+          <span class="add-on">Evaporator offset (K)</span>
+          <input type="text" style="width:50px" id="evaporator_offset" value="-6">
+        </div>
+        <div class="input-prepend input-append" style="margin-top:5px">
+          <span class="add-on">Heatpump factor</span>
+          <input type="text" style="width:50px" id="heatpump_factor" value="0.49">
+          <span class="add-on">Starting power (W)</span>
+          <input type="text" style="width:50px" id="starting_power" value="100">
+        </div>
+        <div class="input-prepend input-append" style="margin-top:5px">
+          <span class="add-on">Fixed outside temperature (C)</span>
+          <input type="text" style="width:50px" id="fixed_outside_temperature" value="6.0">
+        </div>        
       </div>
     </div>
 
