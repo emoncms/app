@@ -6,7 +6,7 @@
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
@@ -269,7 +269,7 @@ function livefn()
         solar_now = parseInt(feeds[config.app.solar.value].value);
         
     var use_now = parseInt(feeds[config.app.use.value].value);
-    var gridwind = feed.getvalueremote(67088);
+    var gridwind = getvalueremote(67088);
     var average_power = ((config.app.windkwh.value/365.0)/0.024);
     var wind_now = Math.round((average_power / average_wind_power) * gridwind);
 
@@ -366,12 +366,12 @@ function draw_powergraph() {
 
         var feedid = config.app.solar.value;
         if (feedid!=false)
-            timeseries.load("solar",feed.getdata(feedid,view.start,view.end,view.interval,0,0));
+            timeseries.load("solar",feed.getdata(feedid,view.start,view.end,view.interval,0,0,0));
         
         var feedid = config.app.use.value;
-        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0));
+        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,0,0,0));
         
-        timeseries.load("remotewind",feed.getdataremote(67088,view.start,view.end,view.interval));    
+        timeseries.load("remotewind",getdataremote(67088,view.start,view.end,view.interval));   
     }
     // -------------------------------------------------------------------------------------------------------
     
@@ -496,5 +496,44 @@ $(function() {
 function app_log (level, message) {
     if (level=="ERROR") alert(level+": "+message);
     console.log(level+": "+message);
+}
+
+// ----------------------------------------------------------------------
+// Remote data requests
+// ----------------------------------------------------------------------
+function getdataremote(id,start,end,interval)
+{   
+    var data = [];
+    $.ajax({                                      
+        url: path+"app/dataremote",
+        data: {id:id,start:start,end:end,interval:interval,skipmissing:0,limitinterval:0},
+        dataType: 'json',
+        async: false,                      
+        success: function(result) {
+            if (!result || result===null || result==="" || result.constructor!=Array) {
+                console.log("ERROR","feed.getdataremote invalid response: "+result);
+                result = [];
+            }
+            data = result;
+        }
+    });
+    return data;
+}
+
+function getvalueremote(id)
+{   
+    var value = 0;
+    $.ajax({                                      
+        url: path+"app/valueremote",                       
+        data: {id:id}, dataType: 'json', async: false,                      
+        success: function(result) {
+            if (isNaN(result)) {
+                console.log("ERROR","feed.getvalueremote value is not a number, found: "+result);
+                result = 0;
+            }
+            value = parseFloat(result);
+        }
+    });
+    return value;
 }
 </script>

@@ -8,7 +8,7 @@ global $path, $session, $v;
 
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/config.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/feed.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script>
@@ -650,6 +650,7 @@ $('#datetimepicker2').on("changeDate", function (e) {
 function graph_load() 
 {
     $(".power-graph-footer").show();
+    
     var interval = 1800;
     var intervalms = interval * 1000;
     view.start = Math.ceil(view.start/intervalms)*intervalms;
@@ -670,14 +671,14 @@ function graph_load()
         $("#use_meter_kwh_hh_bound").show();
     }
 
-    var import_kwh = feed.getdata(feeds["import_kwh"].id,view.start,view.end,interval,0,0);
+    var import_kwh = feed.getdata(feeds["import_kwh"].id,view.start,view.end,interval,0,0,0);
 
     var use_kwh = [];
-    if (solarpv_mode) use_kwh = feed.getdata(feeds["use_kwh"].id,view.start,view.end,interval,0,0);
+    if (solarpv_mode) use_kwh = feed.getdata(feeds["use_kwh"].id,view.start,view.end,interval,0,0,0);
     var solar_kwh = [];
-    if (solarpv_mode) solar_kwh = feed.getdata(feeds["solar_kwh"].id,view.start,view.end,interval,0,0);    
+    if (solarpv_mode) solar_kwh = feed.getdata(feeds["solar_kwh"].id,view.start,view.end,interval,0,0,0);    
     var meter_kwh_hh = []
-    if (smart_meter_data) meter_kwh_hh = feed.getdata(feeds["meter_kwh_hh"].id,view.start,view.end,interval,0,0); 
+    if (smart_meter_data) meter_kwh_hh = feed.getdata(feeds["meter_kwh_hh"].id,view.start,view.end,interval,0,0,0); 
     
     data = {};
     
@@ -687,13 +688,13 @@ function graph_load()
     
     if (config.app.region!=undefined && regions_import[config.app.region.value]!=undefined) {
         //Add 30 minutes to each reading to get a stepped graph
-        agile = feed.getdataremote(regions_import[config.app.region.value],view.start,view.end,interval);
+        agile = getdataremote(regions_import[config.app.region.value],view.start,view.end,interval);
         for (var z in agile) {
             data["agile"].push(agile[z]);
             data["agile"].push([agile[z][0]+(intervalms-1), agile[z][1]]);
         }
 
-        outgoing =  feed.getdataremote(regions_outgoing[config.app.region.value],view.start,view.end,interval);
+        outgoing =  getdataremote(regions_outgoing[config.app.region.value],view.start,view.end,interval);
         for (var z in outgoing) {
             data["outgoing"].push(outgoing[z]);
             data["outgoing"].push([outgoing[z][0]+(intervalms-1), outgoing[z][1]]);
@@ -701,7 +702,7 @@ function graph_load()
         
         if (show_carbonintensity) {
             //Add 30 minutes to each reading to get a stepped graph
-            carbonintensity = feed.getdataremote(428391,view.start,view.end,interval);
+            carbonintensity = getdataremote(428391,view.start,view.end,interval);
             for (var z in carbonintensity) {
                 data["carbonintensity"].push(carbonintensity[z]);
                 data["carbonintensity"].push([carbonintensity[z][0]+(intervalms-1), carbonintensity[z][1]]);
@@ -1177,5 +1178,27 @@ function parseTimepickerTime(timestr){
     if (time.length!=3) return false;
 
     return new Date(date[2],date[1]-1,date[0],time[0],time[1],time[2],0).getTime() / 1000;
+}
+
+// ----------------------------------------------------------------------
+// Remote data request
+// ----------------------------------------------------------------------
+function getdataremote(id,start,end,interval)
+{   
+    var data = [];
+    $.ajax({                                      
+        url: path+"app/dataremote",
+        data: "id="+id+"&start="+start+"&end="+end+"&interval="+interval+"&skipmissing=0&limitinterval=0",
+        dataType: 'json',
+        async: false,                      
+        success: function(result) {
+            if (!result || result===null || result==="" || result.constructor!=Array) {
+                console.log("ERROR","getdataremote invalid response: "+result);
+                result = [];
+            }
+            data = result;
+        }
+    });
+    return data;
 }
 </script>
