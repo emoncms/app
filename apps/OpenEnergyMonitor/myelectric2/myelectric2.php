@@ -486,7 +486,7 @@ function powergraph_load()
     $("#power-graph-footer").show();
     
     view.calc_interval(800); // npoints = 800
-    data["use"] = feed.getdata(feeds["use"].id,view.start,view.end,view.interval,0,1,1);
+    data["use"] = feed.getdata(feeds["use"].id,view.start,view.end,view.interval,0,0,1,1);
     
     powergraph_series = [];
     powergraph_series.push({data:data["use"], yaxis:1, color:"#44b3e2", lines:{show:true, fill:0.8, lineWidth:0}});

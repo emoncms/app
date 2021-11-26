@@ -577,7 +577,7 @@ function powergraph_load()
     var data_tier = [];
     view.calc_interval(1200); // npoints = 1200
 
-    data["use"] = feed.getdata(feeds["use"].id,view.start,view.end,view.interval,0,1,1);
+    data["use"] = feed.getdata(feeds["use"].id,view.start,view.end,view.interval,0,0,1,1);
     for (var b = 0; b < tier_names.length; b++) {
         data_tier[b] = [];
     }

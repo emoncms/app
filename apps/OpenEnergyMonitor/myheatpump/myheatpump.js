@@ -392,7 +392,7 @@ function powergraph_load()
     powergraph_series = [];
 
     if (feeds["heatpump_flowT"]!=undefined) { 
-        data["heatpump_flowT"] = feed.getdata(feeds["heatpump_flowT"].id,view.start,view.end,view.interval,0,skipmissing,limitinterval);
+        data["heatpump_flowT"] = feed.getdata(feeds["heatpump_flowT"].id,view.start,view.end,view.interval,0,0,skipmissing,limitinterval);
         
         if (simulate_heat_output) {
             powergraph_series.push({label:"Flow T", data:remove_null_values(data["heatpump_flowT"]), yaxis:2, color:2});
@@ -401,7 +401,7 @@ function powergraph_load()
         }
     }
     if (feeds["heatpump_returnT"]!=undefined) {
-        data["heatpump_returnT"] = feed.getdata(feeds["heatpump_returnT"].id,view.start,view.end,view.interval,0,skipmissing,limitinterval);
+        data["heatpump_returnT"] = feed.getdata(feeds["heatpump_returnT"].id,view.start,view.end,view.interval,0,0,skipmissing,limitinterval);
         
         if (simulate_heat_output) { 
             powergraph_series.push({label:"Return T", data:remove_null_values(data["heatpump_returnT"]), yaxis:2, color:3});
@@ -410,7 +410,7 @@ function powergraph_load()
         }
     }
     if (feeds["heatpump_outsideT"]!=undefined) {
-        data["heatpump_outsideT"] = feed.getdata(feeds["heatpump_outsideT"].id,view.start,view.end,view.interval,0,skipmissing,limitinterval);
+        data["heatpump_outsideT"] = feed.getdata(feeds["heatpump_outsideT"].id,view.start,view.end,view.interval,0,0,skipmissing,limitinterval);
         
         if (simulate_heat_output) { 
             powergraph_series.push({label:"Outside T", data:remove_null_values(data["heatpump_outsideT"]), yaxis:2, color:4});
@@ -419,7 +419,7 @@ function powergraph_load()
         }
     }
     if (feeds["DHW_cylinderT"]!=undefined) {
-        data["DHW_cylinderT"] = feed.getdata(feeds["DHW_cylinderT"].id,view.start,view.end,view.interval,0,skipmissing,limitinterval);
+        data["DHW_cylinderT"] = feed.getdata(feeds["DHW_cylinderT"].id,view.start,view.end,view.interval,0,0,skipmissing,limitinterval);
         powergraph_series.push({label:"DHW Cylinder T", data:data["DHW_cylinderT"], yaxis:2, color:5});
     }
 
@@ -427,9 +427,9 @@ function powergraph_load()
         // Where power feed is available
         if (heat_enabled) {
             if (view.interval==meta["heatpump_heat"].interval) {
-                data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,view.start,view.end,view.interval,0,skipmissing,limitinterval);
+                data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,view.start,view.end,view.interval,0,0,skipmissing,limitinterval);
             } else {
-                data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,view.start,view.end,view.interval,1,skipmissing,limitinterval);
+                data["heatpump_heat"] = feed.getdata(feeds["heatpump_heat"].id,view.start,view.end,view.interval,1,0,skipmissing,limitinterval);
             }
             
             if (simulate_heat_output) { 
@@ -440,9 +440,9 @@ function powergraph_load()
         }
         if (elec_enabled && meta["heatpump_elec"]!=undefined) {
             if (view.interval==meta["heatpump_elec"].interval) {
-                data["heatpump_elec"] = feed.getdata(feeds["heatpump_elec"].id,view.start,view.end,view.interval,0,skipmissing,limitinterval);
+                data["heatpump_elec"] = feed.getdata(feeds["heatpump_elec"].id,view.start,view.end,view.interval,0,0,skipmissing,limitinterval);
             } else {
-                data["heatpump_elec"] = feed.getdata(feeds["heatpump_elec"].id,view.start,view.end,view.interval,1,skipmissing,limitinterval);
+                data["heatpump_elec"] = feed.getdata(feeds["heatpump_elec"].id,view.start,view.end,view.interval,1,0,skipmissing,limitinterval);
             }
             powergraph_series.push({label:"Electric Input", data:data["heatpump_elec"], yaxis:1, color:1, lines:{show:true, fill:0.3, lineWidth:0.5}});
         }
@@ -452,7 +452,7 @@ function powergraph_load()
         view.calc_interval(50,120);
         
         if (heat_enabled) {
-            var tmp = feed.getdata(feeds["heatpump_heat_kwh"].id,view.start,view.end,view.interval,0,0,0);
+            var tmp = feed.getdata(feeds["heatpump_heat_kwh"].id,view.start,view.end,view.interval);
             data["heatpump_heat"] = [];
             for (var z=1; z<tmp.length; z++) {
                 var time = tmp[z-1][0];
@@ -465,7 +465,7 @@ function powergraph_load()
         }
         
         if (elec_enabled) {
-            var tmp = feed.getdata(feeds["heatpump_elec_kwh"].id,view.start,view.end,view.interval,0,0,0);
+            var tmp = feed.getdata(feeds["heatpump_elec_kwh"].id,view.start,view.end,view.interval);
             data["heatpump_elec"] = [];
             for (var z=1; z<tmp.length; z++) {
                 var time = tmp[z-1][0];

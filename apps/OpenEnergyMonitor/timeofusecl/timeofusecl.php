@@ -584,8 +584,8 @@ function powergraph_load()
     var cl_tier_index = tier_names.length;
     
     view.calc_interval(1200); // npoints = 1200
-    data["use"] = feed.getdata(feeds["use"].id,view.start,view.end,view.interval,0,1,1);
-    data["cl_use"] = feed.getdata(feeds["cl_use"].id,view.start,view.end,view.interval,0,1,1);
+    data["use"] = feed.getdata(feeds["use"].id,view.start,view.end,view.interval,0,0,1,1);
+    data["cl_use"] = feed.getdata(feeds["cl_use"].id,view.start,view.end,view.interval,0,0,1,1);
     
     // Want to add one extra "tier" of data for the controlled load so use <= instead of <
     for (var b = 0; b <= tier_names.length; b++) {
