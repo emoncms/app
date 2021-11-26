@@ -615,79 +615,27 @@ function bargraph_load(start,end)
     var heat_kwh_in_window = 0;
     
     if (heat_enabled) {
-        var heat_data = [];
-        data["heatpump_heat_kwhd"] = [];
-        
-        var heat_result = feed.getdata(feeds["heatpump_heat_kwh"].id,start,end,"daily")
-        // remove nan values from the end.
-        for (var z in heat_result) {
-          if (heat_result[z][1]!=null) heat_data.push(heat_result[z]);
-        }
-        
-        if (heat_data.length>0) {
-            var lastday = heat_data[heat_data.length-1][0];
-            
-            var d = new Date();
-            d.setHours(0,0,0,0);
-            if (lastday==d.getTime()) {
-                // last day in kwh data matches start of today from the browser's perspective
-                // which means its safe to append today kwh value
-                var next = heat_data[heat_data.length-1][0] + (interval*1000);
-                heat_data.push([next,feeds["heatpump_heat_kwh"].value]);
-            }
-     
-            // Calculate the daily totals by subtracting each day from the day before
-            for (var z=1; z<heat_data.length; z++) {
-                var time = heat_data[z-1][0];
-                var heat_kwh = (heat_data[z][1]-heat_data[z-1][1]);
-                if (heat_kwh<0) heat_kwh = 0;
-                data["heatpump_heat_kwhd"].push([time,heat_kwh]);
-                heat_kwh_in_window += heat_kwh;
-            }
-        }
-        
+        data["heatpump_heat_kwhd"] = feed.getdata(feeds["heatpump_heat_kwh"].id,start,end,"daily",0,1)
         bargraph_series.push({
             data: data["heatpump_heat_kwhd"], color: 0,
             bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 1.0, lineWidth:0}
         });
+        
+        for (var z in data["heatpump_heat_kwhd"]) {
+            heat_kwh_in_window += data["heatpump_heat_kwhd"][z][1];
+        }
     }
     
     if (elec_enabled) {
-        var elec_data = [];
-        data["heatpump_elec_kwhd"] = [];
-        
-        var elec_result = feed.getdata(feeds["heatpump_elec_kwh"].id,start,end,"daily");
-        // remove nan values from the end.
-        for (var z in elec_result) {
-          if (elec_result[z][1]!=null) elec_data.push(elec_result[z]);
-        }
-        
-        if (elec_data.length>0) {
-            var lastday = elec_data[elec_data.length-1][0];
-            
-            var d = new Date();
-            d.setHours(0,0,0,0);
-            if (lastday==d.getTime()) {
-                // last day in kwh data matches start of today from the browser's perspective
-                // which means its safe to append today kwh value
-                var next = elec_data[elec_data.length-1][0] + (interval*1000);
-                elec_data.push([next,feeds["heatpump_elec_kwh"].value]);
-            }
-     
-            // Calculate the daily totals by subtracting each day from the day before
-            for (var z=1; z<elec_data.length; z++) {
-                var time = elec_data[z-1][0];
-                var elec_kwh = (elec_data[z][1]-elec_data[z-1][1]);
-                if (elec_kwh<0) elec_kwh = 0;
-                data["heatpump_elec_kwhd"].push([time,elec_kwh]);
-                elec_kwh_in_window += elec_kwh;
-            }
-        }
-        
+        data["heatpump_elec_kwhd"] = feed.getdata(feeds["heatpump_elec_kwh"].id,start,end,"daily",0,1);
         bargraph_series.push({
             data: data["heatpump_elec_kwhd"], color: 1,
             bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 1.0, lineWidth:0}
         });
+
+        for (var z in data["heatpump_elec_kwhd"]) {
+            elec_kwh_in_window += data["heatpump_elec_kwhd"][z][1];
+        }
     }
     
     var cop_in_window =  heat_kwh_in_window/elec_kwh_in_window;
