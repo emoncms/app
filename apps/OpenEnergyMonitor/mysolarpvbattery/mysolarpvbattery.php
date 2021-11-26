@@ -943,12 +943,12 @@ function load_bargraph() {
     start = Math.floor(start/intervalms)*intervalms;
     
     // Load kWh data
-    var solar_kwh_data = feed.getdata(config.app.solar_kwh.value,start,end,"daily");
-    var use_kwh_data = feed.getdata(config.app.use_kwh.value,start,end,"daily");
-    var import_kwh_data = feed.getdata(config.app.import_kwh.value,start,end,"daily");
-    var battery_charge_kwh_data = feed.getdata(config.app.battery_charge_kwh.value,start,end,"daily");
-    var battery_discharge_kwh_data = feed.getdata(config.app.battery_discharge_kwh.value,start,end,"daily");
-    var solar_direct_kwh_data = feed.getdata(config.app.solar_direct_kwh.value,start,end,"daily");
+    var solar_kwh_data = feed.getdata(config.app.solar_kwh.value,start,end,"daily",0,1);
+    var use_kwh_data = feed.getdata(config.app.use_kwh.value,start,end,"daily",0,1);
+    var import_kwh_data = feed.getdata(config.app.import_kwh.value,start,end,"daily",0,1);
+    var battery_charge_kwh_data = feed.getdata(config.app.battery_charge_kwh.value,start,end,"daily",0,1);
+    var battery_discharge_kwh_data = feed.getdata(config.app.battery_discharge_kwh.value,start,end,"daily",0,1);
+    var solar_direct_kwh_data = feed.getdata(config.app.solar_direct_kwh.value,start,end,"daily",0,1);
     
     solar_kwhd_data = [];
     use_kwhd_data = [];
@@ -958,29 +958,17 @@ function load_bargraph() {
     battery_discharge_kwhd_data = [];
     import_kwhd_data = [];
     
-    if (solar_kwh_data.length>1) {
-        
-        for (var day=1; day<solar_kwh_data.length; day++)
+    if (solar_kwh_data.length) {
+        for (var day=0; day<solar_kwh_data.length; day++)
         {
-            var time = solar_kwh_data[day-1][0];
+            var time = solar_kwh_data[day][0];
             
-            var solar_kwh = solar_kwh_data[day][1] - solar_kwh_data[day-1][1];
-            if (solar_kwh_data[day][1]==null || solar_kwh_data[day-1][1]==null) solar_kwh = null;
-            
-            var use_kwh = use_kwh_data[day][1] - use_kwh_data[day-1][1];
-            if (use_kwh_data[day][1]==null || use_kwh_data[day-1][1]==null) use_kwh = null;
-            
-            var import_kwh = import_kwh_data[day][1] - import_kwh_data[day-1][1];
-            if (import_kwh_data[day][1]==null || import_kwh_data[day-1][1]==null) import_kwh = null;
-
-            var battery_charge_kwh = battery_charge_kwh_data[day][1] - battery_charge_kwh_data[day-1][1];
-            if (battery_charge_kwh_data[day][1]==null || battery_charge_kwh_data[day-1][1]==null) battery_charge_kwh = null;
-
-            var battery_discharge_kwh = battery_discharge_kwh_data[day][1] - battery_discharge_kwh_data[day-1][1];
-            if (battery_discharge_kwh_data[day][1]==null || battery_discharge_kwh_data[day-1][1]==null) battery_discharge_kwh = null;
-            
-            var solar_direct_kwh = solar_direct_kwh_data[day][1] - solar_direct_kwh_data[day-1][1];
-            if (solar_direct_kwh_data[day][1]==null || solar_direct_kwh_data[day-1][1]==null) solar_direct_kwh = null;            
+            var solar_kwh = solar_kwh_data[day][1];
+            var use_kwh = use_kwh_data[day][1];
+            var import_kwh = import_kwh_data[day][1];
+            var battery_charge_kwh = battery_charge_kwh_data[day][1]
+            var battery_discharge_kwh = battery_discharge_kwh_data[day][1];
+            var solar_direct_kwh = solar_direct_kwh_data[day][1];           
             
             if (solar_kwh!=null && use_kwh!=null && import_kwh!=null && battery_charge_kwh!=null && battery_discharge_kwh!=null && solar_direct_kwh!=null)
             {

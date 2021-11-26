@@ -869,13 +869,14 @@ function load_bargraph(start,end) {
     start = Math.floor(start/intervalms)*intervalms;
     
     // Load kWh data
-    var solar_kwh_data = feed.getdata(config.app.solar_kwh.value,start,end,"daily");
-    var use_kwh_data = feed.getdata(config.app.use_kwh.value,start,end,"daily");
-    var divert_kwh_data = feed.getdata(config.app.divert_kwh.value,start,end,"daily");
-    var import_kwh_data = feed.getdata(config.app.import_kwh.value,start,end,"daily");
+    var solar_kwh_data = feed.getdata(config.app.solar_kwh.value,start,end,"daily",0,1);
+    var use_kwh_data = feed.getdata(config.app.use_kwh.value,start,end,"daily",0,1);
+    var import_kwh_data = feed.getdata(config.app.import_kwh.value,start,end,"daily",0,1);
+    var divert_kwh_data = feed.getdata(config.app.divert_kwh.value,start,end,"daily",0,1);
+    
     var wind_kwh_data = [];
     if (has_wind && config.wind_kwh) {
-        wind_kwh_data = feed.getdata(config.wind_kwh.value,start,end,"daily");
+        wind_kwh_data = feed.getdata(config.wind_kwh.value,start,end,"daily",0,1);
     }
     
     house_generated_kwhd_data = [];
@@ -886,49 +887,36 @@ function load_bargraph(start,end) {
     divert_kwhd_data = [];
     export_kwhd_data = [];
     
-    if (solar_kwh_data.length>1) {
-    
-    for (var day=1; day<solar_kwh_data.length; day++)
-    {
-        var solar_kwh = solar_kwh_data[day][1] - solar_kwh_data[day-1][1];
-        if (solar_kwh_data[day][1]==null || solar_kwh_data[day-1][1]==null) solar_kwh = null;
-        
-        var wind_kwh = null;
-        if (has_wind && wind_kwh_data[day]) {
-            var wind_kwh = wind_kwh_data[day][1] - wind_kwh_data[day-1][1];
-            if (wind_kwh_data[day][1]==null || wind_kwh_data[day-1][1]==null) wind_kwh = null;
-        }
-        
-        var use_kwh = use_kwh_data[day][1] - use_kwh_data[day-1][1];
-        if (use_kwh_data[day][1]==null || use_kwh_data[day-1][1]==null) use_kwh = null;
-        
-        if(divert_kwh_data[day]) {
-            var divert_kwh = divert_kwh_data[day][1] - divert_kwh_data[day-1][1];
-            if (divert_kwh_data[day][1]==null || divert_kwh_data[day-1][1]==null) divert_kwh = null;
-        }
-        
-        var import_kwh = import_kwh_data[day][1] - import_kwh_data[day-1][1];
-        if (import_kwh_data[day][1]==null || import_kwh_data[day-1][1]==null) import_kwh = null;
-        
-        var generated_kwh = solar_kwh + wind_kwh;
-        var export_kwh = generated_kwh - (use_kwh - import_kwh);
-        var house_kwh = use_kwh - divert_kwh;
-        var house_generated_kwh = house_kwh - import_kwh;
-        
-        if (solar_kwh!=null && use_kwh!=null && export_kwh!=null && divert_kwh!=null && house_kwh!=null &&
-            (!has_wind || wind_kwh!=null)
-           )
+    if (solar_kwh_data.length) {    
+        for (var day=0; day<solar_kwh_data.length; day++)
         {
-            house_generated_kwhd_data.push([solar_kwh_data[day-1][0],house_generated_kwh]);
-            solar_kwhd_data.push([solar_kwh_data[day-1][0],solar_kwh]);
-            if (wind_kwh!=null) wind_kwhd_data.push([wind_kwh_data[day-1][0],wind_kwh]);
-            use_kwhd_data.push([use_kwh_data[day-1][0],use_kwh]);
-            house_kwhd_data.push([use_kwh_data[day-1][0],house_kwh*-1]);
-            divert_kwhd_data.push([divert_kwh_data[day-1][0],divert_kwh]);
-            export_kwhd_data.push([import_kwh_data[day-1][0],export_kwh]);
+            var solar_kwh = solar_kwh_data[day][1];
+            var use_kwh = use_kwh_data[day][1];
+            var import_kwh = import_kwh_data[day][1];
+            var divert_kwh = divert_kwh_data[day][1];
+            
+            var wind_kwh = null;
+            if (has_wind && wind_kwh_data[day]) {
+                wind_kwh = wind_kwh_data[day][1];
+            }
+            
+            var generated_kwh = solar_kwh + wind_kwh;
+            var export_kwh = generated_kwh - (use_kwh - import_kwh);
+            var house_kwh = use_kwh - divert_kwh;
+            var house_generated_kwh = house_kwh - import_kwh;
+            
+            if (solar_kwh!=null && use_kwh!=null && export_kwh!=null && divert_kwh!=null && house_kwh!=null && (!has_wind || wind_kwh!=null))
+            {
+                var time = solar_kwh_data[day][0];
+                house_generated_kwhd_data.push([time,house_generated_kwh]);
+                solar_kwhd_data.push([time,solar_kwh]);
+                if (wind_kwh!=null) wind_kwhd_data.push([time,wind_kwh]);
+                use_kwhd_data.push([time,use_kwh]);
+                house_kwhd_data.push([time,house_kwh*-1]);
+                divert_kwhd_data.push([time,divert_kwh]);
+                export_kwhd_data.push([time,export_kwh]);
+            }
         }
-    }
-    
     }
     
     var series = [];

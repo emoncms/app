@@ -698,48 +698,34 @@ function load_bargraph(start,end) {
     start = Math.floor(start/intervalms)*intervalms;
     
     // Load kWh data
-    var solar_kwh_data = feed.getdata(config.app.solar_kwh.value,start,end,"daily");
-    var use_kwh_data = feed.getdata(config.app.use_kwh.value,start,end,"daily");
-    var import_kwh_data = feed.getdata(config.app.import_kwh.value,start,end,"daily");
+    var solar_kwh_data = feed.getdata(config.app.solar_kwh.value,start,end,"daily",0,1);
+    var use_kwh_data = feed.getdata(config.app.use_kwh.value,start,end,"daily",0,1);
+    var import_kwh_data = feed.getdata(config.app.import_kwh.value,start,end,"daily",0,1);
     
-    // console.log(solar_kwh_data);
-    // console.log(use_kwh_data);
     
     solarused_kwhd_data = [];
     solar_kwhd_data = [];
     use_kwhd_data = [];
     export_kwhd_data = [];
     
-    if (solar_kwh_data.length>1) {
+    if (solar_kwh_data.length>0) {
     
-    for (var day=1; day<solar_kwh_data.length; day++)
-    {
-        var solar_kwh = solar_kwh_data[day][1] - solar_kwh_data[day-1][1];
-        if (solar_kwh_data[day][1]==null || solar_kwh_data[day-1][1]==null) solar_kwh = null;
-        
-        var use_kwh = null;
-        if (use_kwh_data[day]!=undefined) {
-            use_kwh = use_kwh_data[day][1] - use_kwh_data[day-1][1];
-            if (use_kwh_data[day][1]==null || use_kwh_data[day-1][1]==null) use_kwh = null;
+        for (var day=0; day<solar_kwh_data.length; day++)
+        {
+            var solar_kwh = solar_kwh_data[day][1];
+            var use_kwh = use_kwh_data[day][1];
+            var import_kwh = import_kwh_data[day][1];
+            
+            var export_kwh = solar_kwh - (use_kwh - import_kwh);
+            
+            if (solar_kwh!=null && use_kwh!=null & export_kwh!=null) {
+                let time = solar_kwh_data[day][0];
+                solarused_kwhd_data.push([time,solar_kwh - export_kwh]);
+                solar_kwhd_data.push([time,solar_kwh]);
+                use_kwhd_data.push([time,use_kwh]);
+                export_kwhd_data.push([time,export_kwh*-1]);
+            }
         }
-        
-        var import_kwh = null;
-        if (import_kwh_data[day]!=undefined) {
-            import_kwh = import_kwh_data[day][1] - import_kwh_data[day-1][1];
-            if (import_kwh_data[day][1]==null || import_kwh_data[day-1][1]==null) import_kwh = null;
-        }
-        
-        var export_kwh = solar_kwh - (use_kwh - import_kwh);
-        
-        if (solar_kwh!=null && use_kwh!=null & export_kwh!=null) {
-            let time = solar_kwh_data[day-1][0];
-            solarused_kwhd_data.push([time,solar_kwh - export_kwh]);
-            solar_kwhd_data.push([time,solar_kwh]);
-            use_kwhd_data.push([time,use_kwh]);
-            export_kwhd_data.push([time,export_kwh*-1]);
-        }
-    }
-    
     }
     
     var series = [];
