@@ -570,58 +570,28 @@ function bargraph_load(start,end)
     end = Math.ceil(end/intervalms)*intervalms;
     start = Math.floor(start/intervalms)*intervalms;
     
-    var elec_result = feed.getdata(feeds["use_kwh"].id,start,end,"daily")
+    data["use_kwhd"] = feed.getdata(feeds["use_kwh"].id,start,end,"daily",0,1)
     
-    var elec_data = [];
-    
-    // remove nan values from the end.
-    for (var z in elec_result) {
-      if (elec_result[z][1]!=null) elec_data.push(elec_result[z]);
-    }
-    
-    data["use_kwhd"] = [];
-    
-    if (elec_data.length==0) {
-        // If empty, then it's a new feed and we can safely append today's value.
-        // Also append a fake value for the day before so that the calculations work.
-        var d = new Date();
-        d.setHours(0,0,0,0);
-        elec_data.push([d.getTime(),0]);
-        elec_data.push([d.getTime()+(interval*1000),feeds["use_kwh"].value]);
-    } else {
-        var lastday = elec_data[elec_data.length-1][0];
-        
-        var d = new Date();
-        d.setHours(0,0,0,0);
-        if (lastday==d.getTime()) {
-            // last day in kwh data matches start of today from the browser's perspective
-            // which means its safe to append today kwh value
-            var next = elec_data[elec_data.length-1][0] + (interval*1000);
-            elec_data.push([next,feeds["use_kwh"].value]);
-        }
-    }
-
-    if (elec_data.length>1) {
+    if (data["use_kwhd"].length) {
         var total_kwh = 0; 
         var n = 0;
-        // Calculate the daily totals by subtracting each day from the day before
-        for (var z=1; z<elec_data.length; z++)
-        {
-            var time = elec_data[z-1][0];
-            var elec_kwh = (elec_data[z][1]-elec_data[z-1][1]);
-            data["use_kwhd"].push([time,elec_kwh]);
-            total_kwh += elec_kwh;
+        for (var z=0; z<data["use_kwhd"].length; z++) {
+            total_kwh += data["use_kwhd"][z][1];
             n++;
         }
         period_average = total_kwh / n;
         
         var kwh_today = data["use_kwhd"][data["use_kwhd"].length-1][1];
         
-        if (viewcostenergy=="energy") {
-            $("#kwh_today").html(kwh_today.toFixed(1)+"<span class='units'>kWh</span>");
-        } else {
-            $("#kwh_today").html(config.app.currency.value+(kwh_today*config.app.unitcost.value).toFixed(2));
-	}
+        if (kwh_today!==null) {
+            if (viewcostenergy=="energy") {
+                $("#kwh_today").html(kwh_today.toFixed(1)+"<span class='units'>kWh</span>");
+            } else {
+                $("#kwh_today").html(config.app.currency.value+(kwh_today*config.app.unitcost.value).toFixed(2));
+	          }
+	      } else {
+	          $("#kwh_today").html("---");
+	      }
     }
     
     bargraph_series = [];
