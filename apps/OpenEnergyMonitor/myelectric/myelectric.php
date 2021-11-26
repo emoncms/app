@@ -469,12 +469,12 @@ function fastupdate(event)
         startofweek = feed.getvalue(use_kwh,time*0.001);
         last_startofweektime = time;
     }
-    if (startofweek===false) startofweek = [startalltime*1000,0];
+    if (startofweek===false) startofweek = 0;
     
     // Week total
-    var week_kwh = alltime_kwh - (startofweek[1]);
+    var week_kwh = alltime_kwh - startofweek;
     $("#week_kwh").html((scale*week_kwh).toFixed(1));
-    var days = ((feeds[use_kwh].time - (startofweek[0]*0.001))/86400);
+    var days = ((feeds[use_kwh].time - (time*0.001))/86400);
     $("#week_kwhd").html((scale*week_kwh/days).toFixed(1));
     // --------------------------------------------------------------------------------------------------------       
     // MONTH: repeat same process as above (scale is unitcost)
@@ -483,12 +483,12 @@ function fastupdate(event)
         startofmonth = feed.getvalue(use_kwh,time*0.001);
         last_startofmonthtime = time;
     }
-    if (startofmonth===false) startofmonth = [startalltime*1000,0];
+    if (startofmonth===false) startofmonth = 0;
     
     // Monthly total
-    var month_kwh = alltime_kwh - (startofmonth[1]);
+    var month_kwh = alltime_kwh - startofmonth;
     $("#month_kwh").html(Math.round(scale*month_kwh));
-    var days = ((feeds[use_kwh].time - (startofmonth[0]*0.001))/86400);
+    var days = ((feeds[use_kwh].time - (time*0.001))/86400);
     $("#month_kwhd").html((scale*month_kwh/days).toFixed(1));
     // -------------------------------------------------------------------------------------------------------- 
     // YEAR: repeat same process as above (scale is unitcost)
@@ -497,12 +497,12 @@ function fastupdate(event)
         startofyear = feed.getvalue(use_kwh,time*0.001);
         last_startofyeartime = time;
     }
-    if (startofyear===false) startofyear = [startalltime*1000,0];     
+    if (startofyear===false) startofyear = 0;     
     
     // Year total
-    var year_kwh = alltime_kwh - (startofyear[1]);
+    var year_kwh = alltime_kwh - startofyear;
     $("#year_kwh").html(Math.round(scale*year_kwh));
-    var days = ((feeds[use_kwh].time - (startofyear[0]*0.001))/86400);
+    var days = ((feeds[use_kwh].time - (time*0.001))/86400);
     $("#year_kwhd").html((scale*year_kwh/days).toFixed(1));
     // -------------------------------------------------------------------------------------------------------- 
     // ALL TIME (scale is unitcost)
@@ -514,81 +514,29 @@ function fastupdate(event)
     
 function slowupdate()
 {
-   var use = config.app.use.value;
-   var use_kwh = config.app.use_kwh.value;
-   
-    // When we make a request for daily data it returns the data up to the start of this day. 
-    // This works appart from a request made just after the start of day and before the buffered 
-    // data is written to disk. This produces an error as the day rolls over.
-
-    // Most of the time the request will return data where the last datapoint is the start of the
-    // current day. If the start of the current day is less than 60s (the buffer time)  from the 
-    // current day then the last datapoint will be the previous day start.
-
-    // The easy solution is to request the data every 60s and then always append the last kwh value 
-    // from feeds to the end as a new day, with the interval one day ahead of the last day in the kwh feed.
-
-    // This presents a minor error for 60s after midnight but should not be noticable in most cases 
-    // and will correct itself after the 60s is over.
+    var use = config.app.use.value;
+    var use_kwh = config.app.use_kwh.value;
     
     var interval = 86400;
     var now = new Date();
     var end = Math.floor(now.getTime() * 0.001);
     var start = end - interval * Math.round(graph_bars.width/30);
     
-    var result = feed.getdata(use_kwh,start*1000,end*1000,"daily");
-
-    var data = [];
-    // remove nan values from the end.
-    for (z in result) {
-      if (result[z][1]!=null) {
-        data.push(result[z]);
-      }
-    }
+    var daily = feed.getdata(use_kwh,start*1000,end*1000,"daily",0,1);
     
-    daily = [];
-
-    if (data.length==0) {
-        // If empty, then it's a new feed and we can safely append today's value.
-        // Also append a fake value for the day before so that the calculations work.
-        if (feeds[use_kwh]!=undefined) {
-            var d = new Date();
-            d.setHours(0,0,0,0);
-            data.push([d.getTime(),0]);
-            data.push([d.getTime()+(interval*1000),feeds[use_kwh].value*1.0]);
-        }
-    } else {
-        var lastday = data[data.length-1][0];
-        
-        var d = new Date();
-        d.setHours(0,0,0,0);
-        if (lastday==d.getTime()) {
-            // last day in kwh data matches start of today from the browser's perspective
-            // which means its safe to append today kwh value
-            var next = data[data.length-1][0] + (interval*1000);
-            if (feeds[use_kwh]!=undefined) {
-                data.push([next,feeds[use_kwh].value*1.0]);
-            }
-        }
-    }
-    
-    // Calculate the daily totals by subtracting each day from the day before
-    for (var z=1; z<data.length; z++)
-    {
-      var time = data[z-1][0];
-      var diff = (data[z][1]-data[z-1][1]);
-      daily.push([time,diff*scale]);
-    }
-    
-    var usetoday_kwh = 0;
+    var usetoday_kwh = null;
     if (daily.length>0) {
         usetoday_kwh = daily[daily.length-1][1];
     }
     
-    if (usetoday_kwh<100) {
-        $("#usetoday").html((usetoday_kwh).toFixed(1));
+    if (usetoday_kwh!==null) {
+        if (usetoday_kwh<100) {
+            $("#usetoday").html((usetoday_kwh).toFixed(1));
+        } else {
+            $("#usetoday").html((usetoday_kwh).toFixed(0));
+        }
     } else {
-        $("#usetoday").html((usetoday_kwh).toFixed(0));
+        $("#usetoday").html("---");
     }
 
     graph_bars.draw('placeholder_kwhd',[daily]);
