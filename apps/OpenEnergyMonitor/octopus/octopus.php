@@ -511,7 +511,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
 
             var text = "";
             if (profile_mode) {
-                if (item.series.label=='Agile' || item.series.label=='Outgoing') {
+                if (item.series.label=='Agile' || item.series.label=='Outgoing' || item.series.label=='Go') {
                     text += "Average ";
                 } else {
                     text += "Cumulative ";
@@ -520,7 +520,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             
             text += item.series.label
             text += "<br>"+date+"<br>";
-            if (item.series.label=='Agile' || item.series.label=='Outgoing') {
+            if (item.series.label=='Agile' || item.series.label=='Outgoing' || item.series.label=='Go') {
                 text += (itemValue*1.05).toFixed(2)+" p/kWh (inc VAT)";
             } else if (item.series.label=='Carbon Intensity') {
                 text += itemValue+" gCO2/kWh";
@@ -711,11 +711,26 @@ function graph_load()
     }
     // Invert export tariff
     for (var z in data["outgoing"]) data["outgoing"][z][1] *= -1;
+    
+    // Two tier tariff comparison option: e.g GO or economy7
+    data["go"] = [];
+    var d = new Date();
+    for (var time=view.start; time<view.end; time+=interval*1000) {
 
+        d.setTime(time);
+        let h = d.getHours() + (d.getMinutes()/60)
+
+        let cost = 15.88;
+        if (h>=0.5 && h<4.5) cost = 4.76;
+
+        data["go"].push([time,cost]);
+        data["go"].push([time+(intervalms-1),cost]);
+    }
 
     data["use"] = [];
     data["import"] = [];
     data["import_cost"] = [];
+    data["import_cost_go"] = [];
     data["export"] = [];
     data["export_cost"] = [];
     data["solar_used"] = []
@@ -726,6 +741,7 @@ function graph_load()
     // Used to generate averaged profile
     profile_kwh = [];
     profile_cost = [];
+    profile_cost_go = [];
     
     var d = new Date();
     d.setHours(0,0,0,0);
@@ -735,9 +751,11 @@ function graph_load()
         let profile_time = profile_start + hh*1800*1000;
         profile_kwh[hh] = [profile_time,0.0]
         profile_cost[hh] = [profile_time,0.0]
+        profile_cost_go[hh] = [profile_time,0.0]
     }
     
     var total_cost_import = 0
+    var total_cost_import_go = 0
     var total_kwh_import = 0
     var total_cost_export = 0
     var total_kwh_export = 0
@@ -812,7 +830,7 @@ function graph_load()
                 // costs
                 let cost_import = data.agile[2*(z-1)][1]*0.01;
                 let cost_export = data.outgoing[2*(z-1)][1]*0.01*-1;
-
+                
                 // half hourly datasets for graph
                 data["import_cost"].push([time,kwh_import*cost_import]);
                 data["export_cost"].push([time,kwh_export*cost_export*-1]);
@@ -844,8 +862,10 @@ function graph_load()
                 if (kwh_import<0.0) kwh_import = 0.0;
                 data["import"].push([time,kwh_import]);
                 let cost_import = data.agile[2*(z-1)][1]*0.01;
+                let cost_import_go = data.go[2*(z-1)][1]*0.01;   
                 data["import_cost"].push([time,kwh_import*cost_import]);
-                
+                data["import_cost_go"].push([time,kwh_import*cost_import_go]);
+                      
                 // If we have octopus smart meter data available use instead
                 let smart_meter_hh_available = false;
                 if (smart_meter_data) {
@@ -873,15 +893,18 @@ function graph_load()
                 
                 if (smart_meter_hh_available && use_meter_kwh_hh) {
                     total_kwh_import +=  meter_kwh_hh[z-1][1]
-                    total_cost_import +=  meter_kwh_hh[z-1][1]*cost_import         
+                    total_cost_import +=  meter_kwh_hh[z-1][1]*cost_import     
+                    total_cost_import_go +=  meter_kwh_hh[z-1][1]*cost_import_go 
                 } else {
                     total_kwh_import += kwh_import
-                    total_cost_import += kwh_import*cost_import  
+                    total_cost_import += kwh_import*cost_import 
+                    total_cost_import_go += kwh_import*cost_import_go
                 }
                 
                 // Generate profile
                 profile_kwh[hh][1] += kwh_import
                 profile_cost[hh][1] += kwh_import*cost_import
+                profile_cost_go[hh][1] += kwh_import*cost_import_go  
                 
                 if (show_carbonintensity) {
                     let co2intensity = data.carbonintensity[2*(z-1)][1];
@@ -910,13 +933,21 @@ function graph_load()
     }
 
     var unit_cost_import = (total_cost_import/total_kwh_import);
-
+    var unit_cost_import_go = (total_cost_import_go/total_kwh_import);
+    
     var out = "";
     out += "<tr>";
-    out += "<td>Import</td>";
+    out += "<td>Import Agile</td>";
     out += "<td>"+total_kwh_import.toFixed(1)+" kWh</td>";
-    out += "<td>£"+total_cost_import.toFixed(2)+"</td>";
+    out += "<td>£"+(total_cost_import*1.05).toFixed(2)+"</td>";
     out += "<td>"+(unit_cost_import*100*1.05).toFixed(1)+"p/kWh (inc VAT)</td>";
+    out += "</tr>";
+
+    out += "<tr>";
+    out += "<td>Import Go</td>";
+    out += "<td>"+total_kwh_import.toFixed(1)+" kWh</td>";
+    out += "<td>£"+(total_cost_import_go*1.05).toFixed(2)+"</td>";
+    out += "<td>"+(unit_cost_import_go*100*1.05).toFixed(1)+"p/kWh (inc VAT)</td>";
     out += "</tr>";
     
     if (show_carbonintensity) {
@@ -1000,6 +1031,8 @@ function graph_draw()
     graph_series.push({label: "Agile", data:data["agile"], yaxis:2, color:"#fb1a80", lines: { show: true, align: "left", lineWidth:1}});
     if (solarpv_mode) graph_series.push({label: "Outgoing", data:data["outgoing"], yaxis:2, color:"#941afb", lines: { show: true, align: "center", lineWidth:1}}); 
     if (show_carbonintensity) graph_series.push({label: "Carbon Intensity", data:data["carbonintensity"], yaxis:2, color:"#888", lines: { show: true, align: "left", lineWidth:1}});
+
+    graph_series.push({label: "Go", data:data["go"], yaxis:2, color:"#7c1a80", lines: { show: true, align: "left", lineWidth:1}});
 
     var options = {
         xaxis: {
