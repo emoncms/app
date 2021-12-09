@@ -44,6 +44,7 @@ class AppConfig
                 $dir = dirname($file);
                 
                 $content = (array) json_decode(file_get_contents($file));
+                if (!isset($content['order'])) $content['order'] = 100;
                 if (json_last_error() == 0 && array_key_exists("title", $content) && array_key_exists("description", $content)) {
                     $content['dir'] = stripslashes($dir.'/');
                     
