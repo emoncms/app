@@ -57,9 +57,11 @@ class AppConfig
             }
         }
         uasort($list, function($a1, $a2) {
-            if($a1['status'] == $a2['status'])
-                return strcmp($a1['title'], $a2['title']);
-            return strcmp($a1['status'], $a2['status']);
+            if($a1['order'] > $a2['order']) {
+                return 1;
+            } else {
+               return -1;
+            }
         });
         return $list;
     }

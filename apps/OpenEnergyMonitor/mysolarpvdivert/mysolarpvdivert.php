@@ -336,9 +336,7 @@ function getTranslations(){
 // ----------------------------------------------------------------------
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-
-apikeystr = ""; 
-if (apikey!="") apikeystr = "&apikey="+apikey;
+feed.apikey = apikey;
 
 // ----------------------------------------------------------------------
 // Display

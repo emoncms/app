@@ -215,9 +215,7 @@ global $path, $session, $v;
 // ----------------------------------------------------------------------
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-
-apikeystr = "";
-if (apikey!="") apikeystr = "&apikey="+apikey;
+feed.apikey = apikey;
 
 var view_mode = "energy";
 var profile_mode = false;

@@ -41,9 +41,7 @@ for (var z in available_apps) {
     if (available_apps[z].description=="") 
         available_apps[z].description = "no description...";
     out += '<div class="app-item" app="'+z+'">';
-    var status = "";
-    if (available_apps[z].status!="") status = available_apps[z].status+": ";
-    out += '<div class="app-item-title">'+status+available_apps[z].title+'</div>';
+    out += '<div class="app-item-title">'+available_apps[z].title+'</div>';
     out += '<div class="app-item-description">'+available_apps[z].description+'</div>';
     out += '</div>';
 }
