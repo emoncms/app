@@ -178,6 +178,7 @@ var average_wind_power = 2630; // MW - this is the average UK wind power output 
 var annual_wind_gen = 3300;
 var capacity_factor = 0.4;
 var my_wind_cap = 0;
+var live_timerange = 0;
 
 config.init();
 
@@ -191,6 +192,8 @@ function init()
     var timeWindow = (3600000*6.0*1);
     view.end = +new Date;
     view.start = view.end - timeWindow;
+    live_timerange = timeWindow;
+    
     
     // The first view is the powergraph, we load the events for the power graph here.
     powergraph_events();
@@ -206,6 +209,7 @@ function init()
         view.timewindow($(this).attr("time")/24.0); 
         reload = true; 
         autoupdate = true;
+        live_timerange = view.end - view.start;
         draw();
     });
     
@@ -284,9 +288,8 @@ function livefn()
         timeseries.append("remotewind",updatetime,gridwind);
         timeseries.trim_start("remotewind",view.start*0.001);
         // Advance view
-        var timerange = view.end - view.start;
         view.end = now;
-        view.start = view.end - timerange;
+        view.start = now - live_timerange
     }
     // Lower limit for solar
     if (solar_now<10) solar_now = 0;
@@ -478,6 +481,7 @@ function powergraph_events() {
         var now = +new Date();
         if (Math.abs(view.end-now)<30000) {
             autoupdate = true;
+            live_timerange = view.end - view.start;
         }
 
         draw();

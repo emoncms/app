@@ -425,6 +425,8 @@ timeWindow = (3600000*6.0*1);
 var power_end = +new Date;
 var power_start = power_end - timeWindow;
 
+var live_timerange = timeWindow;
+
 config.init();
 
 // App start function
@@ -453,6 +455,7 @@ function init()
         view.timewindow($(this).attr("time")/24.0); 
         reload = true; 
         autoupdate = true;
+        live_timerange = view.end - view.start;
         draw(true);
     });
     
@@ -569,9 +572,8 @@ function livefn()
         }
        
         // Advance view
-        var timerange = view.end - view.start;
         view.end = now;
-        view.start = view.end - timerange;
+        view.start = now - live_timerange;
     }
     // Lower limit for solar & battery charge/discharge
     if (solar_now<10) solar_now = 0;
@@ -897,6 +899,7 @@ function powergraph_events() {
         var now = +new Date();
         if (Math.abs(view.end-now)<30000) {
             autoupdate = true;
+            live_timerange = view.end - view.start;
         }
 
         draw(true);

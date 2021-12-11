@@ -390,6 +390,7 @@ var powerseries = [];
 var latest_start_time = 0;
 var panning = false;
 var bargraph_initialized = false;
+var live_timerange = 0;
 
 config.init();
 
@@ -401,6 +402,7 @@ function init()
     var timeWindow = (3600000*6.0*1);
     view.end = +new Date;
     view.start = view.end - timeWindow;
+    live_timerange = timeWindow;
     
     if (config.app.wind.value) {
         has_wind = true;
@@ -436,6 +438,7 @@ function init()
         view.timewindow($(this).attr("time")/24.0); 
         reload = true; 
         autoupdate = true;
+        live_timerange = view.end - view.start;
         draw();
     });
     
@@ -541,9 +544,8 @@ function livefn()
         }
 
         // Advance view
-        var timerange = view.end - view.start;
         view.end = now;
-        view.start = view.end - timerange;
+        view.start = now - live_timerange;
     }
     // Lower limit for solar & divert
     if (solar_now<10) solar_now = 0;
@@ -818,6 +820,7 @@ function powergraph_events() {
         var now = +new Date();
         if (Math.abs(view.end-now)<30000) {
             autoupdate = true;
+            live_timerange = view.end - view.start;
         }
 
         draw();
