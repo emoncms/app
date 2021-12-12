@@ -126,8 +126,7 @@ padding:10px;
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 
-apikeystr = "";
-if (apikey != "") {apikeystr = "&apikey=" + apikey;}
+feed.apikey = apikey;
 
 if (!sessionwrite) $(".config-open").hide();
 

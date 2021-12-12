@@ -168,7 +168,7 @@
 </div>    
   
 <div id="app-setup" class="block py-2 px-5 hide">
-    <h2 class="app-config-title">My Heatpump</h2>
+    <h2 class="app-config-title text-success">My Heatpump</h2>
 
     <div class="app-config-description">
       <div class="app-config-description-inner">
@@ -178,7 +178,6 @@
         <br><br>
         <b>Cumulative kWh</b> feeds can be generated from power feeds with the power_to_kwh input processor.
         <br><br>
-        <img src="../Modules/app/images/myelectric_app.png" style="width:600px" class="img-rounded">
       </div>
     </div>
     <div class="app-config"></div>

@@ -44,6 +44,7 @@ class AppConfig
                 $dir = dirname($file);
                 
                 $content = (array) json_decode(file_get_contents($file));
+                if (!isset($content['order'])) $content['order'] = 100;
                 if (json_last_error() == 0 && array_key_exists("title", $content) && array_key_exists("description", $content)) {
                     $content['dir'] = stripslashes($dir.'/');
                     
@@ -57,9 +58,11 @@ class AppConfig
             }
         }
         uasort($list, function($a1, $a2) {
-            if($a1['status'] == $a2['status'])
-                return strcmp($a1['title'], $a2['title']);
-            return strcmp($a1['status'], $a2['status']);
+            if($a1['order'] > $a2['order']) {
+                return 1;
+            } else {
+               return -1;
+            }
         });
         return $list;
     }

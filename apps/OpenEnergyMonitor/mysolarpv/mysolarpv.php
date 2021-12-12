@@ -189,9 +189,7 @@ function getTranslations(){
 // ----------------------------------------------------------------------
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
-
-apikeystr = ""; 
-if (apikey!="") apikeystr = "&apikey="+apikey;
+feed.apikey = apikey;
 
 // ----------------------------------------------------------------------
 // Display
@@ -238,6 +236,7 @@ var historyseries = [];
 var latest_start_time = 0;
 var panning = false;
 var bargraph_initialized = false;
+var live_timerange = 0;
 
 config.init();
 
@@ -252,6 +251,7 @@ function init()
     var timeWindow = (3600000*6.0*1);
     view.end = +new Date;
     view.start = view.end - timeWindow;
+    live_timerange = timeWindow;
     
     if (solar_kwh && use_kwh && import_kwh) {
         init_bargraph();
@@ -267,7 +267,8 @@ function init()
     $('#left').click(function () {view.panleft(); reload = true; autoupdate = false; draw();});
     
     $('.time').click(function () {
-        view.timewindow($(this).attr("time")/24.0); 
+        view.timewindow($(this).attr("time")/24.0);
+        live_timerange = view.end - view.start;
         reload = true; 
         autoupdate = true;
         draw();
@@ -429,9 +430,8 @@ function livefn()
         timeseries.trim_start("use",view.start*0.001);
 
         // Advance view
-        var timerange = view.end - view.start;
         view.end = now;
-        view.start = view.end - timerange;
+        view.start = now - live_timerange;
     }
     // Lower limit for solar
     if (solar_now<10) solar_now = 0;
@@ -496,9 +496,7 @@ function draw_powergraph() {
         grid: {hoverable: true, clickable: true},
         selection: { mode: "x" }
     }
-    
     view.calc_interval(1500); // npoints = 1500
-    
     // -------------------------------------------------------------------------------------------------------
     // LOAD DATA ON INIT OR RELOAD
     // -------------------------------------------------------------------------------------------------------
@@ -620,6 +618,8 @@ function powergraph_events() {
         var now = +new Date();
         if (Math.abs(view.end-now)<30000) {
             autoupdate = true;
+            live_timerange = view.end - view.start;
+            
         }
 
         draw();

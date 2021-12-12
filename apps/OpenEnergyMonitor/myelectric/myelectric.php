@@ -151,9 +151,7 @@ function getTranslations(){
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 
-apikeystr = ""; 
-if (apikey!="") apikeystr = "&apikey="+apikey;
-
+feed.apikey = apikey;
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
@@ -261,14 +259,7 @@ function show()
 {      
     app_log("INFO","myelectric show");
     // start of all time
-    var meta = {};
-    $.ajax({                                      
-        url: path+"feed/getmeta.json",                         
-        data: "id="+config.app.use_kwh.value+apikeystr,
-        dataType: 'json',
-        async: false,                      
-        success: function(data_in) { meta = data_in; }
-    });
+    var meta = feed.getmeta(config.app.use_kwh.value);
     startalltime = meta.start_time;
     view.first_data = meta.start_time * 1000;
     

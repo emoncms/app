@@ -1,5 +1,5 @@
 {
-    "title"          : "Cost Comparison",
+    "title"          : "Time of use cost comparison",
     "description"    : "Energy provider cost comparison with time of use tariffs.",
-    "status"         : "Development"
+    "order"         : 13
 }

@@ -1,5 +1,5 @@
 {
     "title"          : "Octopus Agile",
     "description"    : "Explore Octopus Agile tariff energy costs",
-    "status"         : "Development"
+    "order"         : 8
 }
