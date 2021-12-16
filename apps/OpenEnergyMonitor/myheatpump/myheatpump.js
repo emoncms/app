@@ -234,16 +234,23 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             if (viewmode=="bargraph")
             {
                 var itemTime = item.datapoint[0];
-                var elec_kwh = 0; var heat_kwh = 0;
-                if (elec_enabled && data["heatpump_elec_kwhd"].length) elec_kwh = data["heatpump_elec_kwhd"][z][1];
-                if (heat_enabled && data["heatpump_heat_kwhd"].length) heat_kwh = data["heatpump_heat_kwhd"][z][1];
-                var COP = heat_kwh / elec_kwh;
+                var elec_kwh = null; 
+                var heat_kwh = null;
+                if (elec_enabled && data["heatpump_elec_kwhd"].length && data["heatpump_elec_kwhd"][z]!=undefined) elec_kwh = data["heatpump_elec_kwhd"][z][1];
+                if (heat_enabled && data["heatpump_heat_kwhd"].length && data["heatpump_heat_kwhd"][z]!=undefined) heat_kwh = data["heatpump_heat_kwhd"][z][1];
+                var COP = null; 
+                if (heat_kwh!==null && elec_kwh!==null) COP = heat_kwh / elec_kwh;
 
                 var d = new Date(itemTime);
                 var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
                 var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
                 var date = days[d.getDay()]+", "+months[d.getMonth()]+" "+d.getDate();
-                tooltip(item.pageX, item.pageY, date+"<br>Electric: "+(elec_kwh).toFixed(1)+" kWh<br>Heat: "+(heat_kwh).toFixed(1)+" kWh<br>COP: "+(COP).toFixed(2), "#fff", "#000");
+                
+                if (elec_kwh!==null) elec_kwh = (elec_kwh).toFixed(1); else elec_kwh = "---";
+                if (heat_kwh!==null) heat_kwh = (heat_kwh).toFixed(1); else heat_kwh = "---";
+                if (COP!==null) COP = (COP).toFixed(1); else COP = "---";
+                                
+                tooltip(item.pageX, item.pageY, date+"<br>Electric: "+elec_kwh+" kWh<br>Heat: "+heat_kwh+" kWh<br>COP: "+COP, "#fff", "#000");
             }
             
             if (viewmode=="powergraph")
