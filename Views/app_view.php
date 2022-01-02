@@ -63,7 +63,10 @@ $(function() {
         app_new_enable = false;
         setTimeout(function(){ app_new_enable = true; }, 500);
         $('#app-new-modal').modal('hide');
-        var nicename = escape($("#app-new-name").val()).replace(/%20/g, "+");
+        
+        var app_name = $("#app-new-name").val();
+        app_name =  app_name.replace(/\W/g, '');
+        var nicename = escape(app_name).replace(/%20/g, "+");
         $.ajax({                                      
             url: path+"app/add?name="+nicename+"&app="+selected_app,
             dataType: 'json',
