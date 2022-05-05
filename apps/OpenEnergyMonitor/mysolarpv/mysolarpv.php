@@ -176,6 +176,7 @@ function getTranslations(){
         'Cumulative solar generation in kWh': "<?php echo _('Cumulative solar generation in kWh') ?>",
         'Cumulative grid import in kWh': "<?php echo _('Cumulative grid import in kWh') ?>",
         'Display power as kW': "<?php echo _('Display power as kW') ?>",
+        'Display solar power as 0 below this threshold in w': "<?php echo _('Display solar power as 0 below this threshold in w') ?>",
         'PERFECT BALANCE': "<?php echo _('PERFECT BALANCE') ?>",
         'EXPORTING': "<?php echo _('EXPORTING') ?>",
         'IMPORTING': "<?php echo _('IMPORTING') ?>",
@@ -211,7 +212,8 @@ config.app = {
     "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "description":_("Cumulative use in kWh")},
     "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "description":_("Cumulative solar generation in kWh")},
     "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "description":_("Cumulative grid import in kWh")},
-    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")},
+    "solar_disp_min":{"type":"value", "default":10, "name": "Solar Threshold", "description":_("Display solar power as 0 below this threshold in w")}
     //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
 };
 config.name = "<?php echo $name; ?>";
@@ -434,7 +436,7 @@ function livefn()
         view.start = now - live_timerange;
     }
     // Lower limit for solar
-    if (solar_now<10) solar_now = 0;
+    if (solar_now<config.app.solar_disp_min.value) solar_now = 0;
     
     var balance = solar_now - use_now;
     if (balance==0) {
@@ -537,7 +539,7 @@ function draw_powergraph() {
         // -------------------------------------------------------------------------------------------------------
         // Supply / demand balance calculation
         // -------------------------------------------------------------------------------------------------------
-        if (solar_now<10) solar_now = 0;
+        if (solar_now<config.app.solar_disp_min.value) solar_now = 0;
         var balance = solar_now - use_now;
         
         if (balance>=0) total_use_direct_kwh += (use_now*interval)/(1000*3600);
