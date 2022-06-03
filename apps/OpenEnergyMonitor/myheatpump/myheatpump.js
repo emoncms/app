@@ -19,7 +19,8 @@ config.app = {
     "heatpump_heat_kwh":{"type":"feed", "autoname":"heatpump_heat_kwh", "engine":5, "optional":true, "description":"Cumulative heat output in kWh"},
     "heatpump_flowT":{"type":"feed", "autoname":"heatpump_flowT", "engine":5, "optional":true, "description":"Flow temperature"},
     "heatpump_returnT":{"type":"feed", "autoname":"heatpump_returnT", "engine":5, "optional":true, "description":"Return temperature"},
-    "heatpump_outsideT":{"type":"feed", "autoname":"heatpump_outsideT", "engine":5, "optional":true, "description":"Outside temperature"}
+    "heatpump_outsideT":{"type":"feed", "autoname":"heatpump_outsideT", "engine":5, "optional":true, "description":"Outside temperature"},
+    "heatpump_roomT":{"type":"feed", "autoname":"heatpump_roomT", "engine":5, "optional":true, "description":"Room temperature"}
 };
 config.feeds = feed.list();
 
@@ -93,8 +94,9 @@ function show()
 
     // If this is a new dashboard there will be less than a days data 
     // show power graph directly in this case
-    if (((end*0.001)-start_time)<86400*3) {
+    if (((end*0.001)-start_time)<86400*3 || viewmode=="powergraph") {
         var timeWindow = (end - start_time*1000);
+        if (timeWindow>(86400*3*1000)) timeWindow = 86400*1*1000;
         var start = end - timeWindow;
         view.start = start;
         view.end = end;
@@ -272,6 +274,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 if (item.series.label=="Flow T") { name = "FlowT"; unit = "C"; dp = 1; }
                 else if (item.series.label=="Return T") { name = "ReturnT"; unit = "C"; dp = 1; }
                 else if (item.series.label=="Outside T") { name = "Outside"; unit = "C"; dp = 1; }
+                else if (item.series.label=="Room T") { name = "Room"; unit = "C"; dp = 1; }
                 else if (item.series.label=="Electric Input") { name = "Elec"; unit = "W"; }
                 else if (item.series.label=="Heat Output") { name = "Heat"; unit = "W"; }
                 else if (item.series.label=="Carnot Heat Output") { name = "Carnot Heat"; unit = "W"; }
@@ -423,6 +426,15 @@ function powergraph_load()
             powergraph_series.push({label:"Outside T", data:data["heatpump_outsideT"], yaxis:2, color:4});
         }
     }
+    if (feeds["heatpump_roomT"]!=undefined) {
+        data["heatpump_roomT"] = feed.getdata(feeds["heatpump_roomT"].id,view.start,view.end,view.interval,0,0,skipmissing,limitinterval);
+        
+        if (simulate_heat_output) { 
+            powergraph_series.push({label:"Room T", data:remove_null_values(data["heatpump_roomT"]), yaxis:2, color:7});
+        } else {
+            powergraph_series.push({label:"Room T", data:data["heatpump_roomT"], yaxis:2, color:7});
+        }
+    }
     if (feeds["DHW_cylinderT"]!=undefined) {
         data["DHW_cylinderT"] = feed.getdata(feeds["DHW_cylinderT"].id,view.start,view.end,view.interval,0,0,skipmissing,limitinterval);
         powergraph_series.push({label:"DHW Cylinder T", data:data["DHW_cylinderT"], yaxis:2, color:5});
@@ -540,6 +552,7 @@ function powergraph_load()
     feedstats["heatpump_flowT"] = stats(data["heatpump_flowT"]);
     feedstats["heatpump_returnT"] = stats(data["heatpump_returnT"]);
     if (data["heatpump_outsideT"]!=undefined) feedstats["heatpump_outsideT"] = stats(data["heatpump_outsideT"]);
+    if (data["heatpump_roomT"]!=undefined) feedstats["heatpump_roomT"] = stats(data["heatpump_roomT"]);
     
     if (feedstats["heatpump_elec"].mean>0) {
         var elec_mean = 0; var heat_mean = 0;
