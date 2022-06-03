@@ -236,7 +236,7 @@ var comparison_transport = false;
 var flot_font_size = 12;
 var start_time = 0;
 var updaterinst = false;
-var use_start = 0;
+var use_start_day = 0;
 
 config.init();
 
@@ -262,7 +262,10 @@ function show() {
     
     meta["use_kwh"] = feed.getmeta(feeds["use_kwh"].id);
     if (meta["use_kwh"].start_time>start_time) start_time = meta["use_kwh"].start_time;
-    use_start = feed.getvalue(feeds["use_kwh"].id, start_time);
+ 
+    var now = new Date();   
+    var time = new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();   
+    use_start_day = feed.getvalue(feeds["use_kwh"].id, time*0.001);
 
     resize();
 
@@ -292,6 +295,7 @@ function updater()
             if (config.app[key].value) feeds[key] = result[config.app[key].value];
         }
         
+        // Show live power value
         if (viewcostenergy=="energy") {
             if (feeds["use"].value<10000) {
                 $("#power_now").html(Math.round(feeds["use"].value)+"<span class='units'>W</span>");
@@ -301,6 +305,19 @@ function updater()
         } else {
             $("#power_now").html(config.app.currency.value+(feeds["use"].value*1*config.app.unitcost.value*0.001).toFixed(3)+"<span class='units'>/hr</span>");
         }
+      
+        // Show live energy value      
+        var kwh_today = feeds["use_kwh"].value - use_start_day;
+        
+        if (kwh_today!==null) {
+            if (viewcostenergy=="energy") {
+                $("#kwh_today").html(kwh_today.toFixed(1)+"<span class='units'>kWh</span>");
+            } else {
+                $("#kwh_today").html(config.app.currency.value+(kwh_today*config.app.unitcost.value).toFixed(2));
+	          }
+	      } else {
+	          $("#kwh_today").html("---");
+	      }
     });
 }
 
@@ -568,28 +585,18 @@ function bargraph_load(start,end)
     end = Math.ceil(end/intervalms)*intervalms;
     start = Math.floor(start/intervalms)*intervalms;
     
-    data["use_kwhd"] = feed.getdata(feeds["use_kwh"].id,start,end,"daily",0,1)
+    data["use_kwhd"] = feed.getdata(feeds["use_kwh"].id,start,end,"daily",0,1,0,0)
     
-    if (data["use_kwhd"].length) {
+    var days = data["use_kwhd"].length;
+    
+    if (days) {
         var total_kwh = 0; 
         var n = 0;
-        for (var z=0; z<data["use_kwhd"].length; z++) {
+        for (var z=0; z<days; z++) {
             total_kwh += data["use_kwhd"][z][1];
             n++;
         }
         period_average = total_kwh / n;
-        
-        var kwh_today = data["use_kwhd"][data["use_kwhd"].length-1][1];
-        
-        if (kwh_today!==null) {
-            if (viewcostenergy=="energy") {
-                $("#kwh_today").html(kwh_today.toFixed(1)+"<span class='units'>kWh</span>");
-            } else {
-                $("#kwh_today").html(config.app.currency.value+(kwh_today*config.app.unitcost.value).toFixed(2));
-	          }
-	      } else {
-	          $("#kwh_today").html("---");
-	      }
     }
     
     bargraph_series = [];
