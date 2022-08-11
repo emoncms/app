@@ -1,4 +1,6 @@
 feed.apikey = apikey;
+feed.public_userid = public_userid;
+feed.public_username = public_username;
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
@@ -7,12 +9,14 @@ $(window).ready(function(){
 
 });
 
-if (!sessionwrite) $(".config-open").hide();
+if (!session_write) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
+    "app_name":{"type":"value", "name": "App name", "default": "MY HEATPUMP", "optional":true, "description":"Enter custom name for app"},
+    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"},
     "heatpump_elec":{"type":"feed", "autoname":"heatpump_elec", "engine":5, "optional":true, "description":"Electric use in watts"},
     "heatpump_elec_kwh":{"type":"feed", "autoname":"heatpump_elec_kwh", "engine":5, "description":"Cumulative electric use kWh"},
     "heatpump_heat":{"type":"feed", "autoname":"heatpump_heat", "engine":"5", "optional":true, "description":"Heat output in watts"},
@@ -47,6 +51,7 @@ var progtime = 0;
 var heatpump_elec_start = 0;
 var heatpump_heat_start = 0;
 var start_time = 0;
+var end_time = 0;
  
 config.init();
 
@@ -62,6 +67,8 @@ function init()
 
 function show() 
 {
+    $("#app_name").html(config.app['app_name'].value);
+
     $("body").css('background-color','WhiteSmoke');
     // -------------------------------------------------------------------------------
     // Configurations
@@ -74,12 +81,14 @@ function show()
         meta["heatpump_elec_kwh"] = feed.getmeta(feeds["heatpump_elec_kwh"].id);
         if (feeds["heatpump_elec"]!=undefined) meta["heatpump_elec"] = feed.getmeta(feeds["heatpump_elec"].id);
         if (meta["heatpump_elec_kwh"].start_time>start_time) start_time = meta["heatpump_elec_kwh"].start_time;
+        if (meta["heatpump_elec_kwh"].end_time>end_time) end_time = meta["heatpump_elec_kwh"].end_time;
     }
 
     if (heat_enabled) {
         meta["heatpump_heat_kwh"] = feed.getmeta(feeds["heatpump_heat_kwh"].id);
         meta["heatpump_heat"] = feed.getmeta(feeds["heatpump_heat"].id);
         if (meta["heatpump_heat_kwh"].start_time>start_time) start_time = meta["heatpump_heat_kwh"].start_time;
+        if (meta["heatpump_heat_kwh"].end_time>end_time) end_time = meta["heatpump_heat_kwh"].end_time;
         heatpump_heat_start = feed.getvalue(feeds["heatpump_heat_kwh"].id, start_time);
     }
     
@@ -89,8 +98,27 @@ function show()
     }
     
     resize();
+    
+    var date = new Date();
 
-    var end = (new Date()).getTime();
+    var now = date.getTime();
+    
+    end = end_time*1000;
+    
+    date.setTime(end);
+    
+    if ((now-end)>3600*1000) {
+        $("#last_updated").show();
+        $("#live_table").hide();
+        let h = date.getHours();
+        if (h<10) h = "0"+h;
+        let m = date.getMinutes();
+        if (m<10) m = "0"+m;
+        $("#last_updated").html("Last updated: "+date.toDateString()+" "+h+":"+m)
+    } else {
+        $("#last_updated").hide();
+        $("#live_table").show();  
+    }
 
     // If this is a new dashboard there will be less than a days data 
     // show power graph directly in this case
@@ -202,7 +230,8 @@ $('.time').click(function () {
 $(".viewhistory").click(function () {
     $(".powergraph-navigation").hide();
     var timeWindow = (3600000*24.0*30);
-    var end = (new Date()).getTime();
+    // var end = (new Date()).getTime();
+    var end = end_time*1000;
     var start = end - timeWindow;
     if (start<(start_time*1000)) start = start_time * 1000;
     viewmode = "bargraph";

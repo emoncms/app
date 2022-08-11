@@ -152,6 +152,8 @@ var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 
 feed.apikey = apikey;
+feed.public_userid = public_userid;
+feed.public_username = public_username;
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
@@ -170,7 +172,8 @@ config.app = {
     "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5, "description":"Cumulative use in kWh"},
     "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity e.g £/kWh"},
     "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$,€...)"},
-    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")},
+    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
 };
 
 config.name = "<?php echo $name; ?>";

@@ -337,7 +337,8 @@ function getTranslations(){
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 feed.apikey = apikey;
-
+feed.public_userid = public_userid;
+feed.public_username = public_username;
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
@@ -362,8 +363,9 @@ config.app = {
     "wind_kwh":{"optional":true, "type":"feed", "autoname":"wind_kwh", "engine":5, "description":"Cumulative wind generation in kWh"},
     "divert_kwh":{"optional":true, "type":"feed", "autoname":"divert_kwh", "engine":5, "description":"Cumulative divert energy in kWh"},
     "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "engine":5, "description":"Cumulative grid import in kWh"},
-    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")},
     //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
+    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
 }
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;

@@ -232,7 +232,8 @@
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 feed.apikey = apikey;
-
+feed.public_userid = public_userid;
+feed.public_username = public_username;
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
@@ -262,7 +263,9 @@ config.app = {
         "description":"List of weekend tier start times. See description on the left for details"},
     "ph_days":{"type":"value", "default":"2017:2,104,107,115,163,275,359,360;2018:1",
         "name":"Public Holiday days",
-        "description":"List of public holidays. See description on the left for details"}
+        "description":"List of public holidays. See description on the left for details"},
+        
+    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;

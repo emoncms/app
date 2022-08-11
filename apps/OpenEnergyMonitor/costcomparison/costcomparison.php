@@ -127,6 +127,8 @@ var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 
 feed.apikey = apikey;
+feed.public_userid = public_userid;
+feed.public_username = public_username;
 
 if (!sessionwrite) $(".config-open").hide();
 
@@ -151,7 +153,8 @@ config.app = {
     "default": "10.00",
     "name": "Max currency value",
     "description": "Maximum daily amount to show on currency axis (default of 10.00)"
-    }
+    },
+    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
