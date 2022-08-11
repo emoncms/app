@@ -27,12 +27,14 @@
           </div>
       </div>
       
-      <div class="block-title">MY HEATPUMP</div>
+      <div class="block-title" id="app_name">MY HEATPUMP</div>
     </div>
 
     <div style="background-color:#fff; color:#333">
       <br>
-      <table style="width:100%; color:#333">
+      <div id="last_updated" class="title1" style="text-align:center; height:40px; display:none">Last updated 3rd of June 2022</div>
+      
+      <table id="live_table" style="width:100%; color:#333">
         <tr>
           <td style="width:25%; text-align:center" valign="top">
             <div class="title1">COP 30 mins</div>
@@ -187,9 +189,9 @@
 
 <script>
 var apikey = "<?php print $apikey; ?>";
-var sessionwrite = <?php echo $session['write']; ?>;
+var session_write = <?php echo $session['write']; ?>;
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=19"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=23"></script>
 

@@ -212,7 +212,8 @@ global $path, $session, $v;
 var apikey = "<?php echo $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 feed.apikey = apikey;
-
+feed.public_userid = public_userid;
+feed.public_username = public_username;
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
@@ -248,7 +249,9 @@ config.app = {
     "cl_use":{"type":"feed", "autoname":"cl_use", "engine":5, "description":"Controlled Load power feed (W)"},
     "cl_kwh":{"type":"feed", "autoname":"cl_kwh", "engine":5, "description":"Controlled Load accumulated kWh"},
     "cl_cost":{"type":"value", "default":"0.17", "name":"Controlled Load Cost",
-        "description":"Cost of the controlled Load accumulated kWh, currency/kWh."}
+        "description":"Cost of the controlled Load accumulated kWh, currency/kWh."},
+        
+    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;

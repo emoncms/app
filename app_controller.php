@@ -16,7 +16,7 @@ function app_controller()
 {
     global $mysqli,$path,$session,$route,$user,$settings,$v;
     // Force cache reload of css and javascript
-    $v = 17;
+    $v = 20;
 
     $result = false;
     
@@ -41,15 +41,16 @@ function app_controller()
     if ($route->action == "view") {
         // enable apikey read access
         $userid = false;
-        if (isset($session['write']) && $session['write']) {
+        if (isset($session['read']) && $session['read']) {
             $userid = $session['userid'];
-            $apikey = $user->get_apikey_write($session['userid']);
+            $apikey = $user->get_apikey_read($session['userid']);
         } else if (isset($_GET['readkey'])) {
-            $apikey = $_GET['readkey'];
-            $userid = $user->get_id_from_apikey($apikey);
-        } else if (isset($_GET['apikey'])) {
-            $apikey = $_GET['apikey'];
-            $userid = $user->get_id_from_apikey($apikey);
+            if ($userid = $user->get_id_from_apikey($_GET['readkey'])) {
+                $apikey = $user->get_apikey_read($userid);      
+            }
+        } else if ($session['public_userid']) {
+            $apikey = "";
+            $userid = (int) $session['public_userid'];
         }
         
         if ($userid)
@@ -63,6 +64,12 @@ function app_controller()
             }
             if (!isset($applist->$app)) {
                 foreach (array_keys((array) $applist) as $key) { $app = $key; break; }
+            }
+            
+            if ($session['public_userid']) {
+                if (!isset($applist->$app->config->public) || !$applist->$app->config->public) {
+                    return array('content'=>false);
+                }
             }
             
             $route->format = "html";
