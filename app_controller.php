@@ -41,15 +41,18 @@ function app_controller()
     if ($route->action == "view") {
         // enable apikey read access
         $userid = false;
+        $apikey = "";
+        
         if (isset($session['read']) && $session['read']) {
             $userid = $session['userid'];
-            $apikey = $user->get_apikey_read($session['userid']);
+            if (isset($_GET['apikey'])) {
+                $apikey = $user->get_apikey_read($session['userid']);
+            }
         } else if (isset($_GET['readkey'])) {
             if ($userid = $user->get_id_from_apikey($_GET['readkey'])) {
                 $apikey = $user->get_apikey_read($userid);      
             }
         } else if ($session['public_userid']) {
-            $apikey = "";
             $userid = (int) $session['public_userid'];
         }
         
