@@ -62,8 +62,18 @@ function app_controller()
             } else {
                 $app = urldecode(get("name"));
             }
+            
+            // If no app specified fine one to load
             if (!isset($applist->$app)) {
-                foreach (array_keys((array) $applist) as $key) { $app = $key; break; }
+                foreach (array_keys((array) $applist) as $key) { 
+                    if ($session['public_userid']) {
+                        if (isset($applist->$key->config->public) && $applist->$key->config->public) {
+                            $app = $key; break;
+                        }
+                    } else {
+                        $app = $key; break;
+                    }
+                }
             }
             
             if ($session['public_userid']) {
