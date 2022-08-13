@@ -586,10 +586,11 @@ function livefn()
     if (battery_discharge_now<10) battery_discharge_now = 0;
     
     var battery = 0;
-    if(config.app.is_dc_battery.value)
+    if(config.app.is_dc_battery.value) {
         balance = solar_now - use_now;
-    else
+    } else {
         balance = solar_now - use_now - battery_charge_now + battery_discharge_now;
+    }
     
     // convert W to kW
     if(powerUnit === 'kW') {
@@ -758,10 +759,11 @@ function load_powergraph() {
             if (solar_direct>use_now) solar_direct = use_now;
             
             var battery = 0;
-            if(config.app.is_dc_battery.value)
+            if(config.app.is_dc_battery.value) {
                 balance = solar_now - use_now;
-            else
+            } else {
                 balance = solar_now - use_now - battery_charge_now + battery_discharge_now;
+            }
             
             var excess = 0;
             var unmet = 0;
