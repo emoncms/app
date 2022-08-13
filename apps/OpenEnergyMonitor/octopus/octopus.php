@@ -262,8 +262,8 @@ var regions_import = {
   "A_Eastern_England":396124,
   "B_East_Midlands":396125,
   "C_London":396126,
-  "E_West_Midlands":396127,
   "D_Merseyside_and_Northern_Wales":396105,
+  "E_West_Midlands":396127,
   "F_North_Eastern_England":396128,
   "G_North_Western_England":396129,
   "H_Southern_England":396138,
@@ -279,8 +279,8 @@ var regions_outgoing = {
   "A_Eastern_England":399374,
   "B_East_Midlands":399361,
   "C_London":399362,
-  "E_West_Midlands":399363,
-  "D_Merseyside_and_Northern_Wales":399364,
+  "D_Merseyside_and_Northern_Wales":399363,
+  "E_West_Midlands":399364,
   "F_North_Eastern_England":399365,
   "G_North_Western_England":399366,
   "H_Southern_England":399367,
@@ -523,8 +523,10 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             
             text += item.series.label
             text += "<br>"+date+"<br>";
-            if (item.series.label=='Agile' || item.series.label=='Outgoing' || item.series.label=='Go') {
+            if (item.series.label=='Agile' || item.series.label=='Go') {
                 text += (itemValue*1.05).toFixed(2)+" p/kWh (inc VAT)";
+            } else if (item.series.label=='Outgoing') {
+                text += (itemValue).toFixed(2)+" p/kWh (inc VAT)";
             } else if (item.series.label=='Carbon Intensity') {
                 text += itemValue+" gCO2/kWh";
             } else {
