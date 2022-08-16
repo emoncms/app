@@ -300,13 +300,13 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 var unit = "";
                 var dp = 0;
                 
-                if (item.series.label=="Flow T") { name = "FlowT"; unit = "C"; dp = 1; }
-                else if (item.series.label=="Return T") { name = "ReturnT"; unit = "C"; dp = 1; }
-                else if (item.series.label=="Outside T") { name = "Outside"; unit = "C"; dp = 1; }
-                else if (item.series.label=="Room T") { name = "Room"; unit = "C"; dp = 1; }
-                else if (item.series.label=="Electric Input") { name = "Elec"; unit = "W"; }
-                else if (item.series.label=="Heat Output") { name = "Heat"; unit = "W"; }
-                else if (item.series.label=="Carnot Heat Output") { name = "Carnot Heat"; unit = "W"; }
+                if (item.series.label=="FlowT") { name = "FlowT"; unit = "C"; dp = 1; }
+                else if (item.series.label=="ReturnT") { name = "ReturnT"; unit = "C"; dp = 1; }
+                else if (item.series.label=="OutsideT") { name = "Outside"; unit = "C"; dp = 1; }
+                else if (item.series.label=="RoomT") { name = "Room"; unit = "C"; dp = 1; }
+                else if (item.series.label=="Electric") { name = "Elec"; unit = "W"; }
+                else if (item.series.label=="Heat") { name = "Heat"; unit = "W"; }
+                else if (item.series.label=="Carnot Heat") { name = "Carnot Heat"; unit = "W"; }
                 
                 tooltip(item.pageX, item.pageY, time+": "+name+" "+itemValue.toFixed(dp)+unit, "#fff", "#000");
             }
@@ -432,41 +432,41 @@ function powergraph_load()
         data["heatpump_flowT"] = feed.getdata(feeds["heatpump_flowT"].id,view.start,view.end,view.interval,0,0,skipmissing,limitinterval);
         
         if (simulate_heat_output) {
-            powergraph_series.push({label:"Flow T", data:remove_null_values(data["heatpump_flowT"]), yaxis:2, color:2});
+            powergraph_series.push({label:"FlowT", data:remove_null_values(data["heatpump_flowT"]), yaxis:2, color:2});
         } else {
-            powergraph_series.push({label:"Flow T", data:data["heatpump_flowT"], yaxis:2, color:2});
+            powergraph_series.push({label:"FlowT", data:data["heatpump_flowT"], yaxis:2, color:2});
         }
     }
     if (feeds["heatpump_returnT"]!=undefined) {
         data["heatpump_returnT"] = feed.getdata(feeds["heatpump_returnT"].id,view.start,view.end,view.interval,0,0,skipmissing,limitinterval);
         
         if (simulate_heat_output) { 
-            powergraph_series.push({label:"Return T", data:remove_null_values(data["heatpump_returnT"]), yaxis:2, color:3});
+            powergraph_series.push({label:"ReturnT", data:remove_null_values(data["heatpump_returnT"]), yaxis:2, color:3});
         } else {
-            powergraph_series.push({label:"Return T", data:data["heatpump_returnT"], yaxis:2, color:3});
+            powergraph_series.push({label:"ReturnT", data:data["heatpump_returnT"], yaxis:2, color:3});
         }
     }
     if (feeds["heatpump_outsideT"]!=undefined) {
         data["heatpump_outsideT"] = feed.getdata(feeds["heatpump_outsideT"].id,view.start,view.end,view.interval,0,0,skipmissing,limitinterval);
         
         if (simulate_heat_output) { 
-            powergraph_series.push({label:"Outside T", data:remove_null_values(data["heatpump_outsideT"]), yaxis:2, color:4});
+            powergraph_series.push({label:"OutsideT", data:remove_null_values(data["heatpump_outsideT"]), yaxis:2, color:4});
         } else {
-            powergraph_series.push({label:"Outside T", data:data["heatpump_outsideT"], yaxis:2, color:4});
+            powergraph_series.push({label:"OutsideT", data:data["heatpump_outsideT"], yaxis:2, color:4});
         }
     }
     if (feeds["heatpump_roomT"]!=undefined) {
         data["heatpump_roomT"] = feed.getdata(feeds["heatpump_roomT"].id,view.start,view.end,view.interval,0,0,skipmissing,limitinterval);
         
         if (simulate_heat_output) { 
-            powergraph_series.push({label:"Room T", data:remove_null_values(data["heatpump_roomT"]), yaxis:2, color:7});
+            powergraph_series.push({label:"RoomT", data:remove_null_values(data["heatpump_roomT"]), yaxis:2, color:"#000"});
         } else {
-            powergraph_series.push({label:"Room T", data:data["heatpump_roomT"], yaxis:2, color:7});
+            powergraph_series.push({label:"RoomT", data:data["heatpump_roomT"], yaxis:2, color:"#000"});
         }
     }
     if (feeds["DHW_cylinderT"]!=undefined) {
         data["DHW_cylinderT"] = feed.getdata(feeds["DHW_cylinderT"].id,view.start,view.end,view.interval,0,0,skipmissing,limitinterval);
-        powergraph_series.push({label:"DHW Cylinder T", data:data["DHW_cylinderT"], yaxis:2, color:5});
+        powergraph_series.push({label:"DHW", data:data["DHW_cylinderT"], yaxis:2, color:5});
     }
 
     if (feeds["heatpump_elec"]!=undefined) {
@@ -479,9 +479,9 @@ function powergraph_load()
             }
             
             if (simulate_heat_output) { 
-                powergraph_series.push({label:"Heat Output", data:remove_null_values(data["heatpump_heat"]), yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
+                powergraph_series.push({label:"Heat", data:remove_null_values(data["heatpump_heat"]), yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
             } else {
-                powergraph_series.push({label:"Heat Output", data:data["heatpump_heat"], yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
+                powergraph_series.push({label:"Heat", data:data["heatpump_heat"], yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
             }
         }
         if (elec_enabled && meta["heatpump_elec"]!=undefined) {
@@ -490,7 +490,7 @@ function powergraph_load()
             } else {
                 data["heatpump_elec"] = feed.getdata(feeds["heatpump_elec"].id,view.start,view.end,view.interval,1,0,skipmissing,limitinterval);
             }
-            powergraph_series.push({label:"Electric Input", data:data["heatpump_elec"], yaxis:1, color:1, lines:{show:true, fill:0.3, lineWidth:0.5}});
+            powergraph_series.push({label:"Electric", data:data["heatpump_elec"], yaxis:1, color:1, lines:{show:true, fill:0.3, lineWidth:0.5}});
         }
     } else {
         // Where no power feed available
@@ -507,7 +507,7 @@ function powergraph_load()
                 if (power<0) power = 0;
                 data["heatpump_heat"].push([time,power]);
             }
-            powergraph_series.push({label:"Heat Output", data:data["heatpump_heat"], yaxis:1, color:0, bars:{show:true, barWidth: view.interval * 1000 * 0.8, fill:0.2}});
+            powergraph_series.push({label:"Heat", data:data["heatpump_heat"], yaxis:1, color:0, bars:{show:true, barWidth: view.interval * 1000 * 0.8, fill:0.2}});
         }
         
         if (elec_enabled) {
@@ -520,7 +520,7 @@ function powergraph_load()
                 if (power<0) power = 0;
                 data["heatpump_elec"].push([time,power]);
             }
-            powergraph_series.push({label:"Electric Input", data:data["heatpump_elec"], yaxis:1, color:1, bars:{show:true, barWidth: view.interval * 1000 * 0.8, fill:0.3}});
+            powergraph_series.push({label:"Electric", data:data["heatpump_elec"], yaxis:1, color:1, bars:{show:true, barWidth: view.interval * 1000 * 0.8, fill:0.3}});
         }
     }
     
@@ -569,7 +569,7 @@ function powergraph_load()
                 data["heatpump_heat_carnot"][z] = [time,carnot_heat]
             }
             var carnot_heat_mean = carnot_heat_sum / carnot_heat_n;
-            powergraph_series.push({label:"Carnot Heat Output", data:data["heatpump_heat_carnot"], yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
+            powergraph_series.push({label:"Carnot Heat", data:data["heatpump_heat_carnot"], yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
         } else {
             simulate_heat_output = false;
         }
@@ -641,7 +641,7 @@ function powergraph_draw()
             margin:{top:30}
         },
         selection: { mode: "x" },
-        legend:{position:"NW", noColumns:5}
+        legend:{position:"NW", noColumns:6}
     }
     $.plot($('#placeholder'),powergraph_series,options);
 }
