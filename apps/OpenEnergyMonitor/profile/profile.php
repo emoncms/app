@@ -11,11 +11,18 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
+<script src="<?php echo $path;?>Lib/misc/clipboard.js?v=<?php echo $v; ?>"></script>
 
 <style>
 .color-box {
   height:15px;
   width:15px;
+}
+textarea {
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: scroll;
 }
 </style>
 
@@ -23,6 +30,12 @@
   <div class="col1">
     <div class="col1-inner">
       <div style="float:right;">
+        <select id="resolution" class="btn" style="width:100px; margin-top:10px; text-align:left">
+          <option value="600">10 mins</option>
+          <option value="900">15 mins</option>
+          <option value="1800">30 mins</option>
+          <option value="3600">60 mins</option>
+        </select>
         <button class="btn config-open" style="margin-top:10px">
           <i class=" icon-wrench"></i>
         </button>
@@ -45,6 +58,9 @@
     </tr>
     <tbody id="table"></table>
   </table>
+  
+  <button class="btn" id="copy_to_clipboard" title="Copy CSV data to clipboard">Copy <i class="icon-share-alt"></i></button><br><br>
+ 
 </div>    
 
 <div id="app-setup" style="display:none; padding-top:50px" class="block">
@@ -71,9 +87,15 @@ feed.public_userid = public_userid;
 feed.public_username = public_username;
 
 var interval = 900;
+$("#resolution").val(interval);
+
+var previousPoint = false;
+
+var month = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 // Graph variables
 var data = [];
+var csv = "";
 var options = {}
 var visible = [];
 // ----------------------------------------------------------------------
@@ -166,13 +188,19 @@ function show()
     d.setDate(1);
     d.setMonth(d.getMonth()-12);
     
-    var month = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    
+    csv = "";
+        
     data = [];
     for (var i=0; i<12; i++) {
         var monthstr = month[d.getMonth()];
         var result = process_profile(d);
         data.push({label:monthstr, data: result.profile, kwh: result.kwh, days: result.days});
+        
+        csv += monthstr+", ";
+        for (var m in result.profile) {
+            csv += result.profile[m][1].toFixed(3)+", ";
+        }
+        csv += "\n";
     }
     
     // Calculate mean, min and max so that we can apply automatic colour scale           
@@ -263,6 +291,40 @@ $("#table").on("click",".showhidemonth",function() {
       }
   });
   $.plot($('#graph'),visible, options);
+});
+
+$("#resolution").change(function(){
+    interval = 1*$(this).val();
+    show();
+});
+
+$('#graph').bind("plothover", function (event, pos, item) {
+    if (item) {
+        var z = item.dataIndex;
+        
+        if (previousPoint != item.datapoint) {
+            previousPoint = item.datapoint;
+
+            $("#tooltip").remove();
+            
+            let d = new Date();
+            d.setTime(item.datapoint[0]);
+            
+            let h = d.getHours();
+            if (h<10) h = '0'+h;
+
+            let m = d.getMinutes();
+            if (m<10) m = '0'+m;
+            
+            let text = item.series.label+" "+h+":"+m+": "+item.datapoint[1].toFixed(3)+" kW";
+            
+            tooltip(item.pageX, item.pageY, text, "#fff", "#000");
+        }
+    } else $("#tooltip").remove();
+});
+
+$("#copy_to_clipboard").click(function(){ 
+    copy_text_to_clipboard(csv,"CSV copied to clipboard");
 });
 
 // ----------------------------------------------------------------------
