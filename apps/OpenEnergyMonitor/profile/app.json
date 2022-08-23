@@ -1,5 +1,5 @@
 {
     "title"          : "Profile",
-    "description"    : "A basic app example useful for developing new apps.",
+    "description"    : "Explore average daily profiles for different months of the year.",
     "order"         : 15
 }
