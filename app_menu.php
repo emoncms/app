@@ -26,7 +26,7 @@ if ($session["read"] || $session["public_userid"]) {
     if ($userid)
     {
         $apikey_str = "";
-        if ($apikey) $apikey_str = '?readkey='.$apikey;
+        if ($apikey) $apikey_str = '&readkey='.$apikey;
     
         $applist = $appconfig->get_list($userid);
         
@@ -34,7 +34,7 @@ if ($session["read"] || $session["public_userid"]) {
         foreach ($applist as $name=>$appitem) {
             $item = array(
                 "name"=>$name,
-                "href"=>"app/view/".urlencode($name).$apikey_str,
+                "href"=>"app/view?name=".urlencode($name).$apikey_str,
                 "icon"=>"star_border", 
                 "order"=>$_i
             );
