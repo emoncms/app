@@ -161,10 +161,12 @@ function process_profile(d) {
                 kwh_at_interval[time_day_ms] = 0;
                 time_at_interval[time_day_ms] = 0;
             }
-            kwh_at_interval[time_day_ms] += feed_data[z][1]*scale;
-            time_at_interval[time_day_ms] += interval;
-            kwh += feed_data[z][1]*scale;
-            total_time += interval;
+            if (feed_data[z][1]!=null) {
+                kwh_at_interval[time_day_ms] += feed_data[z][1]*scale;
+                time_at_interval[time_day_ms] += interval;
+                kwh += feed_data[z][1]*scale;
+                total_time += interval;
+            }
         }
     }
     
