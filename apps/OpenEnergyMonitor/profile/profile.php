@@ -48,14 +48,6 @@ textarea {
 
   <br>
   <table class="table table-striped">
-    <tr>
-      <th style="width:50px">Enable</th>
-      <th style="width:50px">Key</th>
-      <th>Month</th>
-      <th>Average Power</th>
-      <th>kWh/day</th>
-      <th>kWh/month</th>
-    </tr>
     <tbody id="table"></table>
   </table>
   
@@ -111,7 +103,8 @@ if (!sessionwrite) $(".config-open").hide();
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "use":{"type":"feed", "autoname":"heatpump_elec_kwh", "engine":"5", "description":"House or building use in watts"},
+    "use":{"type":"feed", "autoname":"heatpump_elec_kwh"},
+    "feed_type":{"type":"select", "options": ['Cumulative kWh','Power (W)','Other'], "name": "Feed type", "default": 'Cumulative kWh'},
     "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
 };
 config.name = "<?php echo $name; ?>";
@@ -134,7 +127,21 @@ function process_profile(d) {
     d.setMonth(d.getMonth()+1);
     var end = d.getTime();
      
-    var feed_data = feed.getdata(config.app.use.value,start,end-(interval*1000),interval,0,1,0,0);
+    var average = 0;
+    var delta = 1;
+    var scale = 1;
+    
+    if (config.app.feed_type.value=='Power (W)') {
+        average = 1;
+        delta = 0;
+        scale = interval / 3600000;
+    } else if (config.app.feed_type.value=='Other') {
+        average = 1;
+        delta = 0;
+        scale = interval / 3600;
+    }
+     
+    var feed_data = feed.getdata(config.app.use.value,start,end-(interval*1000),interval,average,delta,0,0);
     
     var d = new Date();
     var kwh_at_interval = {};
@@ -154,9 +161,9 @@ function process_profile(d) {
                 kwh_at_interval[time_day_ms] = 0;
                 time_at_interval[time_day_ms] = 0;
             }
-            kwh_at_interval[time_day_ms] += feed_data[z][1];
+            kwh_at_interval[time_day_ms] += feed_data[z][1]*scale;
             time_at_interval[time_day_ms] += interval;
-            kwh += feed_data[z][1];
+            kwh += feed_data[z][1]*scale;
             total_time += interval;
         }
     }
@@ -194,13 +201,15 @@ function show()
     for (var i=0; i<12; i++) {
         var monthstr = month[d.getMonth()];
         var result = process_profile(d);
-        data.push({label:monthstr, data: result.profile, kwh: result.kwh, days: result.days});
+        if (result.kwh>0) {
+            data.push({label:monthstr, data: result.profile, kwh: result.kwh, days: result.days});
         
-        csv += monthstr+", ";
-        for (var m in result.profile) {
-            csv += result.profile[m][1].toFixed(3)+", ";
+            csv += monthstr+", ";
+            for (var m in result.profile) {
+                csv += result.profile[m][1].toFixed(3)+", ";
+            }
+            csv += "\n";
         }
-        csv += "\n";
     }
     
     // Calculate mean, min and max so that we can apply automatic colour scale           
@@ -224,7 +233,8 @@ function show()
     // Apply auto colour scale
     for (let z in data) {
         let n = parseInt(240 * (1-((data[z].mean-min) / (max-min))));
-        data[z].color = 'hsl(' + n + ',100%,50%)';    
+        if (isNaN(n)) n = 240;
+        data[z].color = 'hsl(' + n + ',100%,50%)';
     }   
             
     // Graph options
@@ -248,14 +258,32 @@ function show()
     
     // Table
     var out = "";
+    
+    out += '<tr>';
+    out += '<th style="width:50px">Enable</th>';
+    out += '<th style="width:50px">Key</th>';
+    out += '<th>Month</th>';
+    if (config.app.feed_type.value=='Other') {
+        out += '<th>Average</th>';
+    } else {
+        out += '<th>Average Power</th>';
+        out += '<th>kWh/day</th>';
+        out += '<th>kWh/month</th>';
+    }
+    out += '</tr>';
+    
     for (var z in data) {
         out += "<tr>";
         out += "<td style='text-align:center'><input type='checkbox' style='margin-top:-3px' class='showhidemonth' z='"+z+"' checked /></td>";
         out += "<td><div class='color-box' style='background-color:"+data[z].color+"'></div></td>";
         out += "<td>"+data[z].label+"</td>"
-        out += "<td>"+(data[z].mean*1000).toFixed(0)+"W</td>";
-        out += "<td>"+(data[z].kwh/data[z].days).toFixed(2)+" kWh/d</td>";
-        out += "<td>"+(data[z].kwh).toFixed(1)+" kWh</td>";
+        if (config.app.feed_type.value=='Other') {
+            out += "<td>"+(data[z].mean).toFixed(2)+"</td>";    
+        } else {
+            out += "<td>"+(data[z].mean*1000).toFixed(0)+"W</td>";
+            out += "<td>"+(data[z].kwh/data[z].days).toFixed(2)+" kWh/d</td>";
+            out += "<td>"+(data[z].kwh).toFixed(1)+" kWh</td>";
+        }
         out +="</tr>";
     }
     $("#table").html(out);
