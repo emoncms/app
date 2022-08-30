@@ -430,7 +430,12 @@ function process_month(d) {
         if (solar_direct>use) solar_direct = use;
         
         offpeak = false;
-        if (hour>=input.offpeak_start && hour<input.offpeak_end) offpeak = true;
+        if (input.offpeak_start<input.offpeak_end) {
+            if (hour>=input.offpeak_start && hour<input.offpeak_end) offpeak = true;
+        } else if (input.offpeak_start>input.offpeak_end) {
+            if (hour>=input.offpeak_start || hour<input.offpeak_end) offpeak = true;     
+        }
+        
 
         // Starts the offpeak charge session
         if (offpeak && input.offpeak_enable) {
@@ -441,9 +446,14 @@ function process_month(d) {
                 }
             }
         }
-        
-        if (charged_during_offpeak_period && hour>=input.offpeak_end) {
-            charged_during_offpeak_period = false;
+        if (input.offpeak_start<input.offpeak_end) {  
+            if (charged_during_offpeak_period && hour>=input.offpeak_end) {
+                charged_during_offpeak_period = false;
+            }
+        } else if (input.offpeak_start>input.offpeak_end) {
+            if (charged_during_offpeak_period && hour>=input.offpeak_end && hour<input.offpeak_start) {
+                charged_during_offpeak_period = false;
+            } 
         }
         
         charge = 0;
@@ -580,7 +590,7 @@ function show()
         
     data = [];
     data.push({label:"Consumption", data: use_data, color: "#0699fa",lines:{lineWidth:0, fill:0.8}});
-    data.push({label:"Solar", data: solar_data, color: "#dccc1f", lines:{lineWidth:0, fill:1.0}});
+    data.push({label:"Solar", data: solar_data, color: "#dccc1f", lines:{lineWidth:0, fill:0.8}});
     data.push({label:"SOC", data: soc_prc_data, yaxis:2, color: "#000", lines:{lineWidth:1, fill:0.0}});
 
     options = {
