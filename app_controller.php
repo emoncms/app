@@ -14,9 +14,9 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 
 function app_controller()
 {
-    global $mysqli,$path,$session,$route,$user,$settings,$v;
+    global $mysqli,$redis,$path,$session,$route,$user,$settings,$v;
     // Force cache reload of css and javascript
-    $v = 22;
+    $v = 25;
 
     $result = false;
     
@@ -152,7 +152,25 @@ function app_controller()
         $start = (float) get("start");
         $end = (float) get("end");
         $interval = (int) get("interval");
-        $result = json_decode(file_get_contents("https://emoncms.org/feed/data.json?id=$id&start=$start&end=$end&interval=$interval&skipmissing=0&limitinterval=0"));
+        $average = (int) get("average",false,0);
+        $delta = (int) get("delta",false,0);
+        $skipmissing = (int) get("skipmissing",false,0);
+        $limitinterval = (int) get("limitinterval",false,0);
+        $timeformat = get('timeformat',false,'unixms');
+        $dp = (int) get('dp',false,-1);
+        
+        if (!in_array($timeformat,array("unix","unixms","excel","iso8601","notime"))) {
+            return array('success'=>false, 'message'=>'Invalid time format');
+        }
+        
+        //if ($result = $redis->get("app:cache:$id-$start-$end-$interval-$average-$delta")) {
+        //    return json_decode($result);
+        //} else {
+            $result = file_get_contents("http://emoncms.org/feed/data.json?id=$id&start=$start&end=$end&interval=$interval&average=$average&delta=$delta&skipmissing=$skipmissing&limitinterval=$limitinterval&timeformat=$timeformat&dp=$dp");
+            //$redis->set("app:cache:$id-$start-$end-$interval-$average-$delta",$result);
+            return json_decode($result);
+        //}
+
     }
     else if ($route->action == "valueremote") {
         $route->format = "json";

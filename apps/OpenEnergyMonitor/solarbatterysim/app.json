@@ -1,0 +1,5 @@
+{
+    "title"          : "Solar Battery Simulator",
+    "description"    : "Simulate solar pv and a battery",
+    "order"         : 15
+}

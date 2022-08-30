@@ -141,7 +141,7 @@ function process_profile(d) {
         scale = interval / 3600;
     }
      
-    var feed_data = feed.getdata(config.app.use.value,start,end-(interval*1000),interval,average,delta,0,0);
+    var feed_data = feed.getdata(config.app.use.value,start,end-(interval*1000),interval,average,delta,0,0,false,false,'notime');
     
     var d = new Date();
     var kwh_at_interval = {};
