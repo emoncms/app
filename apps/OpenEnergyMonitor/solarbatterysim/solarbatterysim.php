@@ -43,8 +43,6 @@ textarea {
         </div>   
       
         <select id="resolution" class="btn" style="width:100px; margin-top:10px; text-align:left">
-          <option value="60">1 mins</option>
-          <option value="300">5 mins</option>
           <option value="600">10 mins</option>
           <option value="900">15 mins</option>
           <option value="1800">30 mins</option>
@@ -60,11 +58,15 @@ textarea {
   <div id="graph" style="height:500px; width:100%;"></div>
   
   <div id="app">
-    <button class="btn" id="simulate" @click="run">Simulate</button>
-    <br><br>
     
     <div style="float:left; width:350px">
         <h4>Solar & Battery</h4>
+
+        <div class="input-prepend">
+          <span class="add-on" style="width:140px">Existing solar</span>
+          <span class="add-on"><input type="checkbox" v-model="input.solar_existing" style="width:120px" /></span>
+        </div><br>
+        
 
         <div class="input-prepend">
           <span class="add-on" style="width:140px">Solar capacity</span>
@@ -104,14 +106,26 @@ textarea {
         </div><br>
 
         <div class="input-prepend input-append">
-          <span class="add-on" style="width:140px">Charge start SOC</span>
-          <input type="text" v-model.number="input.battery_offpeak_soc_start" style="width:50px" />
+          <span class="add-on" style="width:140px">Winter SOC start</span>
+          <input type="text" v-model.number="input.battery_offpeak_soc_start_winter" style="width:50px" />
           <span class="add-on">%</span>
         </div><br>
 
         <div class="input-prepend input-append">
-          <span class="add-on" style="width:140px">Charge end SOC</span>
-          <input type="text" v-model.number="input.battery_offpeak_soc_target" style="width:50px" />
+          <span class="add-on" style="width:140px">Winter SOC end</span>
+          <input type="text" v-model.number="input.battery_offpeak_soc_target_winter" style="width:50px" />
+          <span class="add-on">%</span>
+        </div><br>
+        
+        <div class="input-prepend input-append">
+          <span class="add-on" style="width:140px">Summer SOC start</span>
+          <input type="text" v-model.number="input.battery_offpeak_soc_start_summer" style="width:50px" />
+          <span class="add-on">%</span>
+        </div><br>
+
+        <div class="input-prepend input-append">
+          <span class="add-on" style="width:140px">Summer SOC end</span>
+          <input type="text" v-model.number="input.battery_offpeak_soc_target_summer" style="width:50px" />
           <span class="add-on">%</span>
         </div><br>
 
@@ -159,6 +173,7 @@ textarea {
     </div>
     
     <div style="clear:both"></div>
+    <button class="btn btn-success" id="simulate" @click="run" style="float:right">Simulate</button>
     
     <h4>Results</h4>
     <table class="table table-striped">
@@ -269,15 +284,18 @@ config.db = <?php echo json_encode($config); ?>;
 config.feeds = feed.list();
 
 var input = {
+    solar_existing: false,
     solar_capacity: 3000,
     
     battery_capacity: 8.5,
     battery_max_charge_rate: 3000,
     battery_max_discharge_rate: 3000,
     battery_round_trip_efficiency: 95,
-    battery_offpeak_soc_target: 80,
-    battery_offpeak_soc_start: 60,
-    battery_minimum_soc: 3,
+    battery_offpeak_soc_target_summer: 75,
+    battery_offpeak_soc_start_summer: 60,
+    battery_offpeak_soc_target_winter: 100,
+    battery_offpeak_soc_start_winter: 70,
+    battery_minimum_soc: 2,
 
     offpeak_enable: 1,
     offpeak_start: 0.5,
@@ -324,7 +342,19 @@ app = new Vue({
 
 
 config.initapp = function(){init()};
-config.showapp = function(){show()};
+config.showapp = function(){
+    $(".ajax-loader").show();
+    cache_use = {};
+    cache_solar = {};
+    
+    if (config.app.solar.value!='disable' && config.app.solar.value>0) {
+        input.solar_capacity = config.app.solar_capacity.value
+    } else {
+        input.solar_capacity = 3000;
+    }
+    
+    show()
+};
 config.hideapp = function(){clear()};
 
 // ----------------------------------------------------------------------
@@ -335,7 +365,7 @@ var feeds = {};
 config.init();
 
 function init()
-{   
+{
 
 }
 
@@ -358,6 +388,16 @@ function process_month(d) {
     }
 
     var max_datapoints = 8928;
+    
+    var this_month = d.getMonth();
+    
+    if (this_month>=9 || this_month<4) {
+        battery_offpeak_soc_start = input.battery_offpeak_soc_start_winter
+        battery_offpeak_soc_target = input.battery_offpeak_soc_target_winter
+    } else {
+        battery_offpeak_soc_start = input.battery_offpeak_soc_start_summer
+        battery_offpeak_soc_target = input.battery_offpeak_soc_target_summer
+    }
     
     start = d.getTime();
     
@@ -440,7 +480,7 @@ function process_month(d) {
         // Starts the offpeak charge session
         if (offpeak && input.offpeak_enable) {
             if (!charging_offpeak && !charged_during_offpeak_period) {
-                if (soc<(input.battery_offpeak_soc_start*0.01*input.battery_capacity)) {
+                if (soc<(battery_offpeak_soc_start*0.01*input.battery_capacity)) {
                     charging_offpeak = true;
                     charged_during_offpeak_period = true;
                 }
@@ -496,7 +536,19 @@ function process_month(d) {
             
             }
         }
-                
+        
+        // Balance solar & consumption only
+        // Used for savings calculation when solar has already been installed.
+        balance_pre_battery = solar - use
+        grid_import_pre_battery = 0;
+        grid_export_pre_battery = 0;
+        if (balance_pre_battery>0) {
+            grid_export_pre_battery = balance_pre_battery;
+        } else {
+            grid_import_pre_battery = -1*balance_pre_battery;
+        }
+               
+        // Full balance with battery
         balance = solar - use - charge + discharge;
         grid_import = 0;
         grid_export = 0;
@@ -509,16 +561,24 @@ function process_month(d) {
         soc_prc = 100.0*soc/input.battery_capacity;
 
         // turn off offpeak charge if we reach 
-        if (soc_prc>=input.battery_offpeak_soc_target) {
+        if (soc_prc>=battery_offpeak_soc_target) {
             charging_offpeak = false;
         }
         
         if (offpeak) {
             month.total_import_cost += grid_import * power_to_kwh * input.offpeak_unit_rate * 0.01;
-            month.total_reference_cost += use * power_to_kwh * input.offpeak_unit_rate * 0.01;
+            if (!input.solar_existing) {
+                month.total_reference_cost += use * power_to_kwh * input.offpeak_unit_rate * 0.01;
+            } else {
+                month.total_reference_cost += grid_import_pre_battery * power_to_kwh * input.offpeak_unit_rate * 0.01;
+            }
         } else {
             month.total_import_cost += grid_import * power_to_kwh * input.peak_unit_rate * 0.01;
-            month.total_reference_cost += use * power_to_kwh * input.peak_unit_rate * 0.01;
+            if (!input.solar_existing) {    
+                month.total_reference_cost += use * power_to_kwh * input.peak_unit_rate * 0.01;
+            } else {
+                month.total_reference_cost += grid_import_pre_battery * power_to_kwh * input.peak_unit_rate * 0.01;    
+            }
         }
 
         month.total_charge += charge * power_to_kwh;
@@ -542,8 +602,7 @@ function process_month(d) {
 }
     
 function show()
-{   
-    $(".ajax-loader").hide();
+{
     $("body").css('background-color','#fff');
     
     var d = new Date();
@@ -551,7 +610,7 @@ function show()
     d.setDate(1);
     d.setMonth(d.getMonth()-12);
     
-    view.start = d.getTime();
+    if (!view.start) view.start = d.getTime();
     
     use_data = [];
     solar_data = [];
@@ -569,7 +628,7 @@ function show()
         app.monthly.push(process_month(d));
     }
     
-    view.end = d.getTime();
+    if (!view.end) view.end = d.getTime();
     
     // Sum annual totals
     app.annual = {};    
@@ -609,6 +668,7 @@ function show()
     
     // Draw graph
     $.plot($('#graph'),data, options);
+    $(".ajax-loader").hide();
 }
    
 function updater()
