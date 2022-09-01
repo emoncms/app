@@ -161,6 +161,11 @@ textarea {
         </div><br>
 
         <div class="input-prepend">
+          <span class="add-on" style="width:140px">Export unit rate</span>
+          <input type="text" v-model.number="input.export_unit_rate" style="width:120px" />
+        </div><br>
+
+        <div class="input-prepend">
           <span class="add-on" style="width:140px">System cost (£)</span>
           <input type="text" v-model.number="input.system_cost" style="width:120px" />
         </div><br>
@@ -187,6 +192,7 @@ textarea {
         <th>Charge</th>
         <th>Discharge</th>
         <th>Import Cost</th>
+        <th>Export Value</th>
         <th>Ref Cost</th>
       </tr>
       <tr v-for="(month, index) in monthly">
@@ -199,6 +205,7 @@ textarea {
         <td>{{ month.total_charge | toFixed(0) }} kWh</td>
         <td>{{ month.total_discharge | toFixed(0) }} kWh</td>
         <td>£{{ month.total_import_cost | toFixed(2) }}</td>
+        <td>£{{ month.total_export_value | toFixed(2) }}</td>
         <td>£{{ month.total_reference_cost | toFixed(2) }}</td>
       </tr>
       
@@ -212,6 +219,7 @@ textarea {
         <th>{{ annual.total_charge | toFixed(0) }} kWh</th>
         <th>{{ annual.total_discharge | toFixed(0) }} kWh</th>
         <th>£{{ annual.total_import_cost | toFixed(2) }}</th>
+        <th>£{{ annual.total_export_value | toFixed(2) }}</th>
         <th>£{{ annual.total_reference_cost | toFixed(2) }}</th>
       </tr>
     </table>
@@ -302,6 +310,7 @@ var input = {
     offpeak_end: 4.5,
     peak_unit_rate: 42.0,
     offpeak_unit_rate: 7.5,
+    export_unit_rate: 5.0,
     
     system_cost: 8000,
     system_lifespan: 20
@@ -383,6 +392,7 @@ function process_month(d) {
         total_discharge: 0,
         total_solar_direct: 0,
         total_import_cost: 0,
+        total_export_value: 0,
         total_reference_cost: 0,
         unit_price: 0
     }
@@ -580,6 +590,8 @@ function process_month(d) {
                 month.total_reference_cost += grid_import_pre_battery * power_to_kwh * input.peak_unit_rate * 0.01;    
             }
         }
+        
+        month.total_export_value += grid_export * power_to_kwh * input.export_unit_rate * 0.01;
 
         month.total_charge += charge * power_to_kwh;
         month.total_discharge += discharge * power_to_kwh;
@@ -640,10 +652,10 @@ function show()
     }
     
     app.annual.unit_price = app.annual.total_import_cost / app.annual.total_consumption
-    app.annual.import_saving = app.annual.total_reference_cost - app.annual.total_import_cost
+    app.annual.import_saving = (app.annual.total_reference_cost - app.annual.total_import_cost) + app.annual.total_export_value
     app.annual.system_cost = input.system_cost / input.system_lifespan
     app.output.simple_payback = input.system_cost / app.annual.import_saving
-    app.annual.total_cost = app.annual.system_cost + app.annual.total_import_cost
+    app.annual.total_cost = app.annual.system_cost + (app.annual.total_import_cost - app.annual.total_export_value)
     app.annual.unit_price = app.annual.total_cost / app.annual.total_consumption
     csv = "";
         
