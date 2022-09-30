@@ -541,6 +541,7 @@ function powergraph_load()
             // Carnot COP simulator
             var carnot_heat_sum = 0;
             var carnot_heat_n = 0;
+            var carnot_heat_kwh = 0;
             
             var flowT = 0;
             var ambientT = 0;
@@ -561,9 +562,13 @@ function powergraph_load()
                 
                 if (power!=null) {
                     carnot_heat = power * COP;
-                    if (power<starting_power) carnot_heat = 0;
+                    if (power<starting_power) {
+                        carnot_heat = 0;
+                    }
                     carnot_heat_sum += carnot_heat;
                     carnot_heat_n++;
+                    
+                    carnot_heat_kwh += carnot_heat * view.interval / 3600000;
                 }
             
                 data["heatpump_heat_carnot"][z] = [time,carnot_heat]
@@ -574,7 +579,19 @@ function powergraph_load()
             simulate_heat_output = false;
         }
     }
-    
+
+    var starting_power = parseFloat($("#starting_power").val());
+    var standby_kwh = 0;
+    if (data["heatpump_elec"]!=undefined) {
+        for (var z in data["heatpump_elec"]) {
+            if (data["heatpump_elec"][z][1]!=null) power = data["heatpump_elec"][z][1];
+            if (power<starting_power) {
+                standby_kwh += power * view.interval / 3600000;
+            }
+        }
+    }
+    $("#standby_kwh").html(standby_kwh.toFixed(3));
+        
     var feedstats = {};
     if (elec_enabled) feedstats["heatpump_elec"] = stats(data["heatpump_elec"]);
     if (heat_enabled) feedstats["heatpump_heat"] = stats(data["heatpump_heat"]);
@@ -589,9 +606,11 @@ function powergraph_load()
         if (heat_enabled) heat_mean = feedstats["heatpump_heat"].mean;
         if (elec_mean>0) {
             $("#window-cop").html((heat_mean / elec_mean).toFixed(2));
+            $("#standby_cop").html((feedstats["heatpump_heat"].kwh / (feedstats["heatpump_elec"].kwh-standby_kwh)).toFixed(2));
             if (simulate_heat_output) {
                 $("#window-carnot-cop").html("(Simulated: <b>"+(carnot_heat_mean / elec_mean).toFixed(2)+"</b>)");
-            } else {
+                $("#standby_cop_simulated").html(" (Simulated: "+(carnot_heat_kwh / (feedstats["heatpump_elec"].kwh-standby_kwh)).toFixed(2)+")");
+           } else {
                 $("#window-carnot-cop").html("");
             }
         }
