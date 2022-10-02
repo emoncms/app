@@ -109,23 +109,26 @@ function app_controller()
             } else {
                 $result .= view("Modules/app/Views/app_view.php",array("apps"=>$appavail));
             }
+            return $result;
+        } else {
+            return "";
         }
     }
     else if ($route->action == "list" && $session['read']) {
         $route->format = "json";
-        $result = $appconfig->get_list($session['userid']);
+        return $appconfig->get_list($session['userid']);
     }
     else if ($route->action == "available" && $session['read']) {
         $route->format = "json";
-        $result = $appavail;
+        return $appavail;
     }
     else if ($route->action == "add" && $session['write']) {
         $route->format = "json";
         $appname = get("app");
         if (isset($appavail[$appname])) {
-            $result = $appconfig->add($session['userid'],$appname,get("name"));
+            return $appconfig->add($session['userid'],$appname,get("name"));
         } else {
-            $result = "Invalid app";
+            return "Invalid app";
         }
     }
     else if ($route->action == "new" && $session['write']) {
@@ -136,15 +139,15 @@ function app_controller()
     }
     else if ($route->action == "remove" && $session['write']) {
         $route->format = "json";
-        $result = $appconfig->remove($session['userid'],get("name"));
+        return $appconfig->remove($session['userid'],get("name"));
     }
     else if ($route->action == "setconfig" && $session['write']) {
         $route->format = "json";
-        $result = $appconfig->set_config($session['userid'],get('name'),get('config'));    
+        return $appconfig->set_config($session['userid'],get('name'),get('config'));    
     }
     else if ($route->action == "getconfig" && $session['read']) {
         $route->format = "json";
-        $result = $appconfig->get_config($session['userid'],get('name'));
+        return $appconfig->get_config($session['userid'],get('name'));
     }
     else if ($route->action == "dataremote") {
         $route->format = "json";
@@ -166,24 +169,24 @@ function app_controller()
         //if ($result = $redis->get("app:cache:$id-$start-$end-$interval-$average-$delta")) {
         //    return json_decode($result);
         //} else {
-            $result = file_get_contents("http://emoncms.org/feed/data.json?id=$id&start=$start&end=$end&interval=$interval&average=$average&delta=$delta&skipmissing=$skipmissing&limitinterval=$limitinterval&timeformat=$timeformat&dp=$dp");
-            //$redis->set("app:cache:$id-$start-$end-$interval-$average-$delta",$result);
-            return json_decode($result);
+        $result = file_get_contents("http://emoncms.org/feed/data.json?id=$id&start=$start&end=$end&interval=$interval&average=$average&delta=$delta&skipmissing=$skipmissing&limitinterval=$limitinterval&timeformat=$timeformat&dp=$dp");
+        //$redis->set("app:cache:$id-$start-$end-$interval-$average-$delta",$result);
+        return json_decode($result);
         //}
 
     }
     else if ($route->action == "valueremote") {
         $route->format = "json";
         $id = (int) get("id");
-        $result = (float) json_decode(file_get_contents("https://emoncms.org/feed/value.json?id=$id"));
+        return (float) json_decode(file_get_contents("https://emoncms.org/feed/value.json?id=$id"));
     }
     else if ($route->action == "ukgridremote") {
         $route->format = "json";
         $start = (float) get("start");
         $end = (float) get("end");
         $interval = (int) get("interval");
-        $result = json_decode(file_get_contents("https://openenergymonitor.org/ukgrid/api.php?q=data&id=1&start=$start&end=$end&interval=$interval"));
+        return json_decode(file_get_contents("https://openenergymonitor.org/ukgrid/api.php?q=data&id=1&start=$start&end=$end&interval=$interval"));
     }
 
-    return array('content'=>$result);
+    return array('content'=>EMPTY_ROUTE);
 }
