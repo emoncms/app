@@ -544,6 +544,7 @@ function powergraph_load()
             var carnot_heat_kwh = 0;
             
             var flowT = 0;
+            var returnT = 0;
             var ambientT = 0;
             var power = 0;
             
@@ -551,6 +552,7 @@ function powergraph_load()
                 let time = data["heatpump_elec"][z][0];
                 if (data["heatpump_elec"][z][1]!=null) power = data["heatpump_elec"][z][1];
                 if (data["heatpump_flowT"][z][1]!=null) flowT = data["heatpump_flowT"][z][1];
+                if (data["heatpump_returnT"][z][1]!=null) returnT = data["heatpump_returnT"][z][1];
                 ambientT = fixed_outside_temperature;
                 
                 if (heatpump_outsideT_available && data["heatpump_outsideT"][z][1]!=null) {
@@ -562,9 +564,11 @@ function powergraph_load()
                 
                 if (power!=null) {
                     carnot_heat = power * COP;
-                    if (power<starting_power) {
-                        carnot_heat = 0;
-                    }
+
+                    if (power<starting_power) carnot_heat = 0;
+                    
+                    if (returnT>flowT) carnot_heat *= -1;
+                    
                     carnot_heat_sum += carnot_heat;
                     carnot_heat_n++;
                     
