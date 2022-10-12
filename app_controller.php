@@ -136,6 +136,7 @@ function app_controller()
         $route->format = "html";
         $result .= "<link href='".$path."Modules/app/Views/css/app.css?v=".$v."' rel='stylesheet'>";
         $result .= view("Modules/app/Views/app_view.php", array("apps"=>$appavail));
+        return $result;
     }
     else if ($route->action == "remove" && $session['write']) {
         $route->format = "json";
