@@ -132,7 +132,9 @@
         <div class="input-prepend input-append" style="margin-top:5px">
           <span class="add-on">Fixed outside temperature (C)</span>
           <input type="text" style="width:50px" id="fixed_outside_temperature" value="6.0">
-        </div>        
+        </div>
+        <p>Electricity consumption below starting power (standby): <span id="standby_kwh"></span> kWh</p>        
+        <p>COP in window not including standby: <span id="standby_cop"></span><span id="standby_cop_simulated"></span></p>        
       </div>
     </div>
 
