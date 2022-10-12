@@ -606,7 +606,11 @@ function powergraph_load()
         if (heat_enabled) heat_mean = feedstats["heatpump_heat"].mean;
         if (elec_mean>0) {
             $("#window-cop").html((heat_mean / elec_mean).toFixed(2));
-            $("#standby_cop").html((feedstats["heatpump_heat"].kwh / (feedstats["heatpump_elec"].kwh-standby_kwh)).toFixed(2));
+            if (feedstats["heatpump_heat"]!=undefined) {
+                $("#standby_cop").html((feedstats["heatpump_heat"].kwh / (feedstats["heatpump_elec"].kwh-standby_kwh)).toFixed(2));
+            } else {
+                $("#standby_cop").html("");
+            }
             if (simulate_heat_output) {
                 $("#window-carnot-cop").html("(Simulated: <b>"+(carnot_heat_mean / elec_mean).toFixed(2)+"</b>)");
                 $("#standby_cop_simulated").html(" (Simulated: "+(carnot_heat_kwh / (feedstats["heatpump_elec"].kwh-standby_kwh)).toFixed(2)+")");
