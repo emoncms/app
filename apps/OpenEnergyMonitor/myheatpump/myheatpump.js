@@ -119,6 +119,11 @@ function show()
         $("#last_updated").hide();
         $("#live_table").show();  
     }
+    
+    if (urlParams.mode!=undefined) {
+        if (urlParams.mode=="realtime") viewmode = "powergraph"
+    }
+    
 
     // If this is a new dashboard there will be less than a days data 
     // show power graph directly in this case
@@ -126,6 +131,10 @@ function show()
         var timeWindow = (end - start_time*1000);
         if (timeWindow>(86400*3*1000)) timeWindow = 86400*1*1000;
         var start = end - timeWindow;
+        
+        if (urlParams.start!=undefined) start = urlParams.start*1000;
+        if (urlParams.end!=undefined) end = urlParams.end*1000;
+        
         view.start = start;
         view.end = end;
         viewmode = "powergraph";
@@ -138,6 +147,10 @@ function show()
         var timeWindow = (3600000*24.0*30);
         var start = end - timeWindow;
         if (start<(start_time*1000)) start = start_time * 1000;
+        
+        if (urlParams.start!=undefined) start = urlParams.start*1000;
+        if (urlParams.end!=undefined) end = urlParams.end*1000; 
+        
         bargraph_load(start,end);
         bargraph_draw();
         $("#advanced-toggle").hide();
@@ -645,6 +658,8 @@ function powergraph_load()
 // -------------------------------------------------------------------------------
 function powergraph_draw() 
 {
+    set_url_view_params("realtime",view.start,view.end);
+    
     var options = {
         lines: { fill: false },
         xaxis: { 
@@ -716,6 +731,8 @@ function bargraph_load(start,end)
     if (cop_in_window<0) cop_in_window = 0;
     $("#window-cop").html((cop_in_window).toFixed(2));
     $("#window-carnot-cop").html("");
+    
+    set_url_view_params('daily',start,end);
 }
 
 function bargraph_draw() 
@@ -799,4 +816,12 @@ function remove_null_values(data_in) {
         }
     }
     return tmp;
+}
+
+function set_url_view_params(mode,start,end) {
+    const url = new URL(window.location);
+    url.searchParams.set('mode', mode); 
+    url.searchParams.set('start', Math.round(start*0.001));
+    url.searchParams.set('end', Math.round(end*0.001));
+    window.history.pushState(null, '', url.toString());
 }
