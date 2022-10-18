@@ -525,9 +525,19 @@ function slowupdate()
     
     if (usetoday_kwh!==null) {
         if (usetoday_kwh<100) {
-            $("#usetoday").html((usetoday_kwh).toFixed(1));
+            if (viewmode=="energy") {
+                $("#usetoday").html((usetoday_kwh).toFixed(1));
+            } else {
+                scale = config.app.unitcost.value;
+                $("#usetoday").html((usetoday_kwh*scale).toFixed(1));
+            }
         } else {
-            $("#usetoday").html((usetoday_kwh).toFixed(0));
+            if (viewmode=="energy") {
+                $("#usetoday").html((usetoday_kwh).toFixed(0));
+            } else {
+                scale = config.app.unitcost.value;
+                $("#usetoday").html((usetoday_kwh*scale).toFixed(0)); 
+            }
         }
     } else {
         $("#usetoday").html("---");
