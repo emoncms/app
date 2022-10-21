@@ -17,8 +17,12 @@ var config = {
         
         // Check that the config is complete first otherwise show config interface
         if (!config.check()) {
-            config.showConfig();          // Show setup block
-            config.UI();                  // Populate setup UI options
+            if (!public_userid) {
+                config.showConfig();          // Show setup block
+                config.UI();                  // Populate setup UI options
+            } else {
+                $("#app-block").show();       // Show app block
+            }
             $(".ajax-loader").hide();     // Hide AJAX loader
         } else {
             $("#app-block").show();       // Show app block

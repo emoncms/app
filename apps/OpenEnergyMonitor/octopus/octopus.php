@@ -216,6 +216,8 @@ global $path, $session, $v;
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 feed.apikey = apikey;
+feed.public_userid = public_userid;
+feed.public_username = public_username;
 
 var view_mode = "energy";
 var profile_mode = false;
@@ -243,8 +245,17 @@ config.app = {
     "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5},
     "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5},
     "meter_kwh_hh":{"optional":true, "type":"feed", "autoname":"meter_kwh_hh", "engine":5},
-    "region":{"type":"select", "name":"Select region:", "default":"D_Merseyside_and_Northern_Wales", "options":["A_Eastern_England","B_East_Midlands","C_London","E_West_Midlands","D_Merseyside_and_Northern_Wales","F_North_Eastern_England","G_North_Western_England","H_Southern_England","J_South_Eastern_England","K_Southern_Wales","L_South_Western_England","M_Yorkshire","N_Southern_Scotland","P_Northern_Scotland"]}
+    "region":{"type":"select", "name":"Select region:", "default":"D_Merseyside_and_Northern_Wales", "options":["A_Eastern_England","B_East_Midlands","C_London","E_West_Midlands","D_Merseyside_and_Northern_Wales","F_North_Eastern_England","G_North_Western_England","H_Southern_England","J_South_Eastern_England","K_Southern_Wales","L_South_Western_England","M_Yorkshire","N_Southern_Scotland","P_Northern_Scotland"]},
+
+    "go_day_rate":{"type":"value", "default":40.28, "name": "GO day rate"},
+    "go_offpeak_rate":{"type":"value", "default":7.86, "name": "GO day rate"}, 
+    "go_start_time":{"type":"value", "default":1.5, "name": "GO start time"}, 
+    "go_end_time":{"type":"value", "default":6.5, "name": "GO end time"}, 
+    
+    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
+
 };
+
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 config.feeds = feed.list();
@@ -257,8 +268,8 @@ var regions_import = {
   "A_Eastern_England":396124,
   "B_East_Midlands":396125,
   "C_London":396126,
-  "E_West_Midlands":396127,
   "D_Merseyside_and_Northern_Wales":396105,
+  "E_West_Midlands":396127,
   "F_North_Eastern_England":396128,
   "G_North_Western_England":396129,
   "H_Southern_England":396138,
@@ -274,8 +285,8 @@ var regions_outgoing = {
   "A_Eastern_England":399374,
   "B_East_Midlands":399361,
   "C_London":399362,
-  "E_West_Midlands":399363,
-  "D_Merseyside_and_Northern_Wales":399364,
+  "D_Merseyside_and_Northern_Wales":399363,
+  "E_West_Midlands":399364,
   "F_North_Eastern_England":399365,
   "G_North_Western_England":399366,
   "H_Southern_England":399367,
@@ -518,8 +529,10 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             
             text += item.series.label
             text += "<br>"+date+"<br>";
-            if (item.series.label=='Agile' || item.series.label=='Outgoing' || item.series.label=='Go') {
+            if (item.series.label=='Agile' || item.series.label=='Go') {
                 text += (itemValue*1.05).toFixed(2)+" p/kWh (inc VAT)";
+            } else if (item.series.label=='Outgoing') {
+                text += (itemValue).toFixed(2)+" p/kWh (inc VAT)";
             } else if (item.series.label=='Carbon Intensity') {
                 text += itemValue+" gCO2/kWh";
             } else {
@@ -711,15 +724,21 @@ function graph_load()
     for (var z in data["outgoing"]) data["outgoing"][z][1] *= -1;
     
     // Two tier tariff comparison option: e.g GO or economy7
+    
+    let go_day_rate = 1*config.app.go_day_rate.value;
+    let go_offpeak_rate = 1*config.app.go_offpeak_rate.value;
+    let go_start_time = 1*config.app.go_start_time.value;
+    let go_end_time = 1*config.app.go_end_time.value;
+    
     data["go"] = [];
     var d = new Date();
     for (var time=view.start; time<view.end; time+=interval*1000) {
 
         d.setTime(time);
         let h = d.getHours() + (d.getMinutes()/60)
-
-        let cost = 15.88;
-        if (h>=0.5 && h<4.5) cost = 4.76;
+        
+        let cost = go_day_rate;
+        if (h>=go_start_time && h<go_end_time) cost = go_offpeak_rate;
 
         data["go"].push([time,cost]);
         data["go"].push([time+(intervalms-1),cost]);

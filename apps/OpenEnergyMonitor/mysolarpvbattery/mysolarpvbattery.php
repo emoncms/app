@@ -356,7 +356,8 @@ function getTranslations(){
 var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 feed.apikey = apikey;
-
+feed.public_userid = public_userid;
+feed.public_username = public_username;
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
@@ -389,8 +390,12 @@ config.app = {
 
     // Other options
     "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description": "Display power as kW"},
-    "battery_capacity_kwh":{"type":"value", "default":0, "name":"Battery Capacity", "description":"Battery capacity in kWh"}
-}
+    "battery_capacity_kwh":{"type":"value", "default":0, "name":"Battery Capacity", "description":"Battery capacity in kWh"},
+    
+    "is_dc_battery":{"type":"checkbox", "name": "DC Battery", "default": 0, "optional":true, "description":"Is the Battery on the DC side?"},
+
+    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
+    }
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 config.feeds = feed.list();
@@ -580,7 +585,12 @@ function livefn()
     if (battery_charge_now<10) battery_charge_now = 0;
     if (battery_discharge_now<10) battery_discharge_now = 0;
     
-    var balance = solar_now - use_now - battery_charge_now + battery_discharge_now;
+    var battery = 0;
+    if(config.app.is_dc_battery.value) {
+        balance = solar_now - use_now;
+    } else {
+        balance = solar_now - use_now - battery_charge_now + battery_discharge_now;
+    }
     
     // convert W to kW
     if(powerUnit === 'kW') {
@@ -748,7 +758,12 @@ function load_powergraph() {
             var solar_direct = solar_now;
             if (solar_direct>use_now) solar_direct = use_now;
             
-            var balance = solar_now - use_now - battery_charge_now + battery_discharge_now;
+            var battery = 0;
+            if(config.app.is_dc_battery.value) {
+                balance = solar_now - use_now;
+            } else {
+                balance = solar_now - use_now - battery_charge_now + battery_discharge_now;
+            }
             
             var excess = 0;
             var unmet = 0;
@@ -824,9 +839,19 @@ function load_powergraph() {
     powerseries = [];
     
     powerseries.push({data:solar_data, label: "Solar", color: "#dccc1f", stack:1, lines:{lineWidth:0, fill:1.0}});
-    powerseries.push({data:use_data, label: "House", color: "#82cbfc", stack:2, lines:{lineWidth:0, fill:0.8}});
-    powerseries.push({data:battery_charge_data, label: "Charge", color: "#fb7b50", stack:2, lines:{lineWidth:0, fill:0.8}});
-    powerseries.push({data:battery_discharge_data, label: "Discharge", color: "#fbb450", stack:1, lines:{lineWidth:0, fill:0.8}});
+    if(config.app.is_dc_battery.value)
+    {
+        powerseries.push({data:battery_charge_data, label: "Charge", color: "#fb7b50", stack:2, lines:{lineWidth:0, fill:0.8}});
+        powerseries.push({data:battery_discharge_data, label: "Discharge", color: "#fbb450", stack:2, lines:{lineWidth:0, fill:0.8}});
+        powerseries.push({data:use_data, label: "House", color: "#82cbfc", stack:3, lines:{lineWidth:0, fill:0.8}});
+    }
+    else
+    {
+	    powerseries.push({data:use_data, label: "House", color: "#82cbfc", stack:2, lines:{lineWidth:0, fill:0.8}});
+        powerseries.push({data:battery_charge_data, label: "Charge", color: "#fb7b50", stack:2, lines:{lineWidth:0, fill:0.8}});
+        powerseries.push({data:battery_discharge_data, label: "Discharge", color: "#fbb450", stack:1, lines:{lineWidth:0, fill:0.8}});
+    }
+
     
     if (show_battery_soc && config.app.battery_soc.value) powerseries.push({data:battery_soc_data, label: "SOC", yaxis:2, color: "#888"});
 }

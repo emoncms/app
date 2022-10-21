@@ -8,9 +8,14 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
+<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
+
 <style>
 .title {
-   margin-top:100px;
+   margin-top:40px;
    color:#aaa;
    font-weight:bold;
    font-size:32px;
@@ -38,6 +43,10 @@
     </div>
   
   </div></div>
+  
+  <div id="graph" style="height:500px; width:100%;"></div>
+ 
+  
 </div>    
 
 <div id="app-setup" style="display:none; padding-top:50px" class="block">
@@ -104,6 +113,24 @@ function show()
     $(".ajax-loader").hide();
     resize();
     updaterinst = setInterval(updater,5000);
+    
+    // Basic graph code
+    
+    // Time window
+    view.end = +new Date;
+    view.start = view.end - (3600000*24.0*7);
+    // Calc interval
+    view.calc_interval(800);
+    // Fetch data
+    data = feed.getdata(config.app.use.value,view.start,view.end,view.interval,1,0,0,0);
+    // Graph options
+    var options = {
+        canvas: true,
+        lines: { fill: true },
+        xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end }
+    }
+    // Draw graph
+    $.plot($('#graph'), [{data:data}], options);
 }
    
 function updater()

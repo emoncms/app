@@ -131,7 +131,8 @@ function getTranslations(){
 var apikey = "<?php echo $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 feed.apikey = apikey;
-
+feed.public_userid = public_userid;
+feed.public_username = public_username;
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
@@ -149,7 +150,8 @@ config.app = {
     "use":{"type":"feed", "autoname":"use", "engine":"5", "description":_("House or building use in watts")},
     "solar":{"optional":true, "type":"feed", "autoname":"solar", "engine":"5", "description":_("Solar pv generation in watts")},
     "windkwh":{"type":"value", "default":2000, "name": "kWh Wind", "description":_("kWh of wind energy bought annually")},
-    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")},
+    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
 };
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
