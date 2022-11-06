@@ -115,7 +115,8 @@
           <tbody id="stats"></tbody>
         </table>
         
-        <b>Simulate heat output using carnot COP equation</b><input id="carnot_enable" type="checkbox" style="margin-top:-4px; margin-left:7px">
+        <b>Simulate heat output using carnot COP equation</b><input id="carnot_enable" type="checkbox" style="margin-top:-4px; margin-left:7px"> 
+        <b>Show as % of carnot COP</b><input id="carnot_enable_prc" type="checkbox" style="margin-top:-4px; margin-left:7px">
         <br>
         <div class="input-prepend input-append" style="margin-top:5px">
           <span class="add-on">Condensing offset (K)</span>
@@ -195,5 +196,5 @@ var session_write = <?php echo $session['write']; ?>;
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=27"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=32"></script>
 
