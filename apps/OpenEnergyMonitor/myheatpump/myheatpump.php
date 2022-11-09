@@ -115,7 +115,24 @@
           <tbody id="stats"></tbody>
         </table>
         
-        <b>Simulate heat output using carnot COP equation</b><input id="carnot_enable" type="checkbox" style="margin-top:-4px; margin-left:7px"> 
+        <hr style="margin:10px 0px 10px 0px">
+        <p><b>Standby</b></p>
+        <p>Electricity consumption below starting power (standby): <span id="standby_kwh"></span> kWh</p>        
+        <p>COP in window not including standby: <span id="standby_cop"></span><span id="standby_cop_simulated"></span></p>   
+        <div class="input-prepend input-append" style="margin-top:5px">
+          <span class="add-on">Starting power (W)</span>
+          <input type="text" style="width:50px" id="starting_power" value="100">
+        </div>     
+
+        <hr style="margin:10px 0px 10px 0px">
+        
+        <p><b>Show stats for periods when heat pump is running only:</b> <input id="stats_when_running" type="checkbox" style="margin-top:-4px; margin-left:7px"><br><span style="font-size:12px">(Based on starting power value below)</span></p>        
+
+        <div id="mean_when_running"></div>
+        
+        <hr style="margin:10px 0px 10px 0px">
+        
+        <b>Simulate heat output using carnot COP equation</b><input id="carnot_enable" type="checkbox" style="margin-top:-4px; margin-left:7px"> &nbsp;&nbsp;
         <b>Show as % of carnot COP</b><input id="carnot_enable_prc" type="checkbox" style="margin-top:-4px; margin-left:7px">
         <br>
         <div class="input-prepend input-append" style="margin-top:5px">
@@ -124,18 +141,14 @@
           <span class="add-on">Evaporator offset (K)</span>
           <input type="text" style="width:50px" id="evaporator_offset" value="-6">
         </div>
-        <div class="input-prepend input-append" style="margin-top:5px">
+        <div id="heatpump_factor_bound" class="input-prepend input-append" style="margin-top:5px">
           <span class="add-on">Heatpump factor</span>
           <input type="text" style="width:50px" id="heatpump_factor" value="0.49">
-          <span class="add-on">Starting power (W)</span>
-          <input type="text" style="width:50px" id="starting_power" value="100">
         </div>
-        <div class="input-prepend input-append" style="margin-top:5px">
+        <div id="fixed_outside_temperature_bound" class="input-prepend input-append" style="margin-top:5px">
           <span class="add-on">Fixed outside temperature (C)</span>
           <input type="text" style="width:50px" id="fixed_outside_temperature" value="6.0">
         </div>
-        <p>Electricity consumption below starting power (standby): <span id="standby_kwh"></span> kWh</p>        
-        <p>COP in window not including standby: <span id="standby_cop"></span><span id="standby_cop_simulated"></span></p>        
       </div>
     </div>
 
@@ -196,5 +209,5 @@ var session_write = <?php echo $session['write']; ?>;
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=32"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=33"></script>
 
