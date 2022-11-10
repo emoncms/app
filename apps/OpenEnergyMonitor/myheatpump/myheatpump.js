@@ -589,16 +589,21 @@ function powergraph_load()
             var returnT = 0;
             var ambientT = 0;
             var power = 0;
+            var heat = 0;
             
             var flowT_sum = 0;
             var returnT_sum = 0;
             var elec_sum = 0;
             var heat_sum = 0;
+            var outside_sum = 0;
+            var flow_minus_outside_sum = 0;
+            var dT_sum = 0;
             var running_count = 0;
             
             for (var z in data["heatpump_elec"]) {
                 let time = data["heatpump_elec"][z][0];
                 if (data["heatpump_elec"][z][1]!=null) power = data["heatpump_elec"][z][1];
+                if (data["heatpump_heat"][z][1]!=null) heat = data["heatpump_heat"][z][1];        
                 if (data["heatpump_flowT"][z][1]!=null) flowT = data["heatpump_flowT"][z][1];
                 if (data["heatpump_returnT"][z][1]!=null) returnT = data["heatpump_returnT"][z][1];
                 ambientT = fixed_outside_temperature;
@@ -622,6 +627,10 @@ function powergraph_load()
                         flowT_sum += flowT;
                         returnT_sum += returnT;
                         elec_sum += power;
+                        heat_sum += heat;
+                        dT_sum += (flowT-returnT);
+                        outside_sum += ambientT;
+                        flow_minus_outside_sum += (flowT-ambientT);
                         running_count++;
                     }
                     
@@ -649,8 +658,12 @@ function powergraph_load()
             if (stats_when_running) {
                 var out = "";
                 out += "<tr><td>Electricity consumption</td><td>"+(elec_sum/running_count).toFixed(0)+"W<td></tr>";
+                out += "<tr><td>Heat output</td><td>"+(heat_sum/running_count).toFixed(0)+"W<td></tr>";
                 out += "<tr><td>Flow temperature</td><td>"+(flowT_sum/running_count).toFixed(1)+"°C<td></tr>"; 
                 out += "<tr><td>Return temperature</td><td>"+(returnT_sum/running_count).toFixed(1)+"°C<td></tr>"; 
+                out += "<tr><td>Flow - Return</td><td>"+(dT_sum/running_count).toFixed(1)+"°K<td></tr>"; 
+                out += "<tr><td>Outside temperature</td><td>"+(outside_sum/running_count).toFixed(1)+"°C<td></tr>"; 
+                out += "<tr><td>Flow - Outside</td><td>"+(flow_minus_outside_sum/running_count).toFixed(1)+"°K<td></tr>"; 
                 $("#mean_when_running").html("<table class='table'>"+out+"</table>");
             }
         } else {
