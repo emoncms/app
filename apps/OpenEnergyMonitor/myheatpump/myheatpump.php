@@ -126,7 +126,7 @@
 
         <hr style="margin:10px 0px 10px 0px">
         
-        <p><b>Show stats for periods when heat pump is running only:</b> <input id="stats_when_running" type="checkbox" style="margin-top:-4px; margin-left:7px"><br><span style="font-size:12px">(Based on starting power value below)</span></p>        
+        <p><b>Show mean values for periods when heat pump is running only:</b> <input id="stats_when_running" type="checkbox" style="margin-top:-4px; margin-left:7px"><br><span style="font-size:12px">(Based on starting power value above)</span></p>        
 
         <div id="mean_when_running"></div>
         
