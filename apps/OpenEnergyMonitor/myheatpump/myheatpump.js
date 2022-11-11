@@ -958,7 +958,7 @@ function draw_histogram(histogram){
           bars: { show: true, align: "center", barWidth: (1/200)*0.8, fill: 1.0, lineWidth:0},
           xaxis: { 
               // mode: "time", timezone: "browser", 
-              // min: view.start, max: view.end, 
+              min: 0.2, max: 0.8, 
               font: {size:flot_font_size, color:"#666"},
               reserveSpace:false
           },
