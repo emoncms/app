@@ -149,6 +149,12 @@
           <span class="add-on">Fixed outside temperature (C)</span>
           <input type="text" style="width:50px" id="fixed_outside_temperature" value="6.0">
         </div>
+        
+        <p>Measured COP vs Carnot COP distribution:</p>
+        <div id="histogram_bound" style="width:100%; height:400px;overflow:hidden">
+          <div id="histogram" style="height:400px"></div>
+        </div>
+        
       </div>
     </div>
 
@@ -209,5 +215,5 @@ var session_write = <?php echo $session['write']; ?>;
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=34"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=36"></script>
 
