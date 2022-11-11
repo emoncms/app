@@ -243,7 +243,16 @@ $(".viewhistory").click(function () {
 });
 
 $("#advanced-toggle").click(function () { 
-    show_advanced_block($(this).html());
+    var state = $(this).html();
+    
+    if (state=="SHOW DETAIL") {
+        $("#advanced-block").show();
+        $("#advanced-toggle").html("HIDE DETAIL");
+        
+    } else {
+        $("#advanced-block").hide();
+        $("#advanced-toggle").html("SHOW DETAIL");
+    }    
 });
 
 $('#placeholder').bind("plothover", function (event, pos, item) {
@@ -319,7 +328,13 @@ $('#placeholder').bind("plotclick", function (event, pos, item)
         powergraph_draw();
         $(".powergraph-navigation").show();
         $("#advanced-toggle").show();
-        show_advanced_block($("#advanced-toggle").html());
+        
+        if ($("#advanced-toggle").html()=="SHOW DETAIL") {
+            $("#advanced-block").hide();
+        } else {
+            $("#advanced-block").show();
+        }  
+        
     }
 });
 
@@ -985,15 +1000,3 @@ $('#histogram').bind("plothover", function (event, pos, item) {
         }
     } else $("#tooltip").remove();
 });
-
-function show_advanced_block(state){
-
-    if (state=="SHOW DETAIL") {
-        $("#advanced-block").show();
-        $("#advanced-toggle").html("HIDE DETAIL");
-        
-    } else {
-        $("#advanced-block").hide();
-        $("#advanced-toggle").html("SHOW DETAIL");
-    }
-}
