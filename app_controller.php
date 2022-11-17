@@ -38,9 +38,10 @@ function app_controller()
     $appconfig = new AppConfig($mysqli, $settings['app']);
     $appavail = $appconfig->get_available();
 
-    if ($route->action == "view") {
+    if ($route->action == "view" || $route->action == "") {
         // enable apikey read access
         $userid = false;
+        $public = false;
         $apikey = "";
         
         if (isset($session['read']) && $session['read']) {
@@ -54,64 +55,60 @@ function app_controller()
             }
         } else if ($session['public_userid']) {
             $userid = (int) $session['public_userid'];
+            $public = true;
         }
         
         if ($userid)
-        {
-            $applist = $appconfig->get_list($userid);
-            
+        {            
             if ($route->subaction) {
-                $app = $route->subaction;
+                $app_name = $route->subaction;
             } else {
-                $app = urldecode(get("name"));
+                $app_name = urldecode(get("name",false,false));
             }
-            
-            // If no app specified fine one to load
-            if (!isset($applist->$app)) {
-                foreach (array_keys((array) $applist) as $key) { 
-                    if ($session['public_userid']) {
-                        if (isset($applist->$key->config->public) && $applist->$key->config->public) {
-                            $app = $key; break;
-                        }
-                    } else {
-                        $app = $key; break;
-                    }
-                }
-            }
-            
-            if ($session['public_userid']) {
-                if (!isset($applist->$app->config->public) || !$applist->$app->config->public) {
-                    return array('content'=>false);
-                }
-            }
+            $app = $appconfig->get_app_or_default($userid,$app_name,$public);
             
             $route->format = "html";
-            if ($app!=false) {
-                $id = $applist->$app->app;
-                if (isset($appavail[$id])) {
-                    $dir = $appavail[$id]['dir'];
-                    $config = $applist->$app->config;
-                }
-                else {
-                    $id = 'blank';
-                    $dir = "Modules/app/apps/blank/";
-                    $config = new stdClass();
-                }
-            }
-            
             $result = "\n<!-- global app css and js -->";
             $result .= "\n" . '<link href="' . $path . 'Modules/app/Views/css/app.css?v=' . $v . '" rel="stylesheet">';
             $result .= "\n" . '<script src="' . $path . 'Modules/app/Views/js/app.js?v=' . $v . '"></script>';
             $result .= "\n\n <!-- app specific view -->\n";
 
             if ($app!=false) {
-                $result .= view($dir.$id.".php",array("name"=>$app, "appdir"=>$dir, "config"=>$config, "apikey"=>$apikey));
-            } else {
+                $dir = $appconfig->get_app_dir($app->app);
+                $result .= view($dir.$app->app.".php",array("name"=>$app_name, "appdir"=>$dir, "config"=>$app->config, "apikey"=>$apikey));
+            } else if (!$public) {
                 $result .= view("Modules/app/Views/app_view.php",array("apps"=>$appavail));
+            } else {
+                return ""; // redirects to login
             }
             return $result;
         } else {
-            return "";
+            return ""; // redirects to login
+        }
+    }
+    else if ($route->action == "getconfig") {
+
+        // enable apikey read access
+        $userid = false;
+        $public = false;
+        $apikey = "";
+        
+        if (isset($session['read']) && $session['read']) {
+            $userid = $session['userid'];
+        } else if (isset($_GET['readkey'])) {
+            $userid = $user->get_id_from_apikey($_GET['readkey']);
+        } else if ($session['public_userid']) {
+            $userid = (int) $session['public_userid'];
+            $public = true;
+        }
+    
+        $route->format = "json";
+        $app_name = urldecode(get("name",false,false));
+        $app = $appconfig->get_app_or_default($userid,$app_name,$public);
+        if ($app!=false) {
+            return $app;
+        } else {
+            return array("success"=>false, "message"=>"invalid app or permissions");
         }
     }
     else if ($route->action == "list" && $session['read']) {
@@ -145,10 +142,6 @@ function app_controller()
     else if ($route->action == "setconfig" && $session['write']) {
         $route->format = "json";
         return $appconfig->set_config($session['userid'],get('name'),get('config'));    
-    }
-    else if ($route->action == "getconfig" && $session['read']) {
-        $route->format = "json";
-        return $appconfig->get_config($session['userid'],get('name'));
     }
     else if ($route->action == "dataremote") {
         $route->format = "json";
