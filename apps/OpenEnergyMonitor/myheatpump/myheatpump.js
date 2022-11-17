@@ -615,9 +615,9 @@ function powergraph_load()
                 if (time<meta["heatpump_elec"].end_time*1000) {
                     
                     if (data["heatpump_elec"][z][1]!=null) power = data["heatpump_elec"][z][1];
-                    if (data["heatpump_heat"][z][1]!=null) heat = data["heatpump_heat"][z][1];        
+                    if (data["heatpump_heat"]!=undefined && data["heatpump_heat"][z][1]!=null) heat = data["heatpump_heat"][z][1];        
                     if (data["heatpump_flowT"][z][1]!=null) flowT = data["heatpump_flowT"][z][1];
-                    if (data["heatpump_returnT"][z][1]!=null) returnT = data["heatpump_returnT"][z][1];
+                    if (data["heatpump_returnT"]!=undefined && data["heatpump_returnT"][z][1]!=null) returnT = data["heatpump_returnT"][z][1];
                     ambientT = fixed_outside_temperature;
                     
                     if (heatpump_outsideT_available && data["heatpump_outsideT"][z][1]!=null) {
