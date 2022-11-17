@@ -24,7 +24,8 @@ config.app = {
     "heatpump_flowT":{"type":"feed", "autoname":"heatpump_flowT", "engine":5, "optional":true, "description":"Flow temperature"},
     "heatpump_returnT":{"type":"feed", "autoname":"heatpump_returnT", "engine":5, "optional":true, "description":"Return temperature"},
     "heatpump_outsideT":{"type":"feed", "autoname":"heatpump_outsideT", "engine":5, "optional":true, "description":"Outside temperature"},
-    "heatpump_roomT":{"type":"feed", "autoname":"heatpump_roomT", "engine":5, "optional":true, "description":"Room temperature"}
+    "heatpump_roomT":{"type":"feed", "autoname":"heatpump_roomT", "engine":5, "optional":true, "description":"Room temperature"},
+    "start_date":{"type":"value", "default":0, "name": "Start date", "description":_("Start date for all time values (unix timestamp)")},
 };
 config.feeds = feed.list();
 
@@ -52,6 +53,8 @@ var heatpump_elec_start = 0;
 var heatpump_heat_start = 0;
 var start_time = 0;
 var end_time = 0;
+
+var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
  
 config.init();
 
@@ -76,7 +79,7 @@ function show()
     if (feeds["heatpump_elec_kwh"]!=undefined) elec_enabled = true;
     if (feeds["heatpump_heat"]!=undefined && feeds["heatpump_heat_kwh"]!=undefined) heat_enabled = true;
     // -------------------------------------------------------------------------------
-
+    
     if (elec_enabled) {
         meta["heatpump_elec_kwh"] = feed.getmeta(feeds["heatpump_elec_kwh"].id);
         if (feeds["heatpump_elec"]!=undefined) meta["heatpump_elec"] = feed.getmeta(feeds["heatpump_elec"].id);
@@ -89,12 +92,26 @@ function show()
         meta["heatpump_heat"] = feed.getmeta(feeds["heatpump_heat"].id);
         if (meta["heatpump_heat_kwh"].start_time>start_time) start_time = meta["heatpump_heat_kwh"].start_time;
         if (meta["heatpump_heat_kwh"].end_time>end_time) end_time = meta["heatpump_heat_kwh"].end_time;
-        heatpump_heat_start = feed.getvalue(feeds["heatpump_heat_kwh"].id, start_time);
+    }
+
+    var alltime_start_time = start_time;
+    var config_start_date = config.app.start_date.value*1;
+    if (config_start_date>alltime_start_time) {
+        alltime_start_time = config_start_date;
+        var d = new Date(alltime_start_time*1000);
+        $("#all_time_history_title").html("TOTAL SINCE: "+d.getDate()  + " " + months[d.getMonth()] + " " + d.getFullYear());        
+    } else {
+        var d = new Date(start_time*1000);
+        $("#all_time_history_title").html("TOTAL SINCE: "+d.getDate()  + " " + months[d.getMonth()] + " " + d.getFullYear()); 
     }
     
     // Load elec start here after start_time may have been modified by heat start time
     if (elec_enabled) {
-        heatpump_elec_start = feed.getvalue(feeds["heatpump_elec_kwh"].id, start_time);
+        heatpump_elec_start = feed.getvalue(feeds["heatpump_elec_kwh"].id, alltime_start_time);
+    }
+
+    if (heat_enabled) {
+        heatpump_heat_start = feed.getvalue(feeds["heatpump_heat_kwh"].id, alltime_start_time);
     }
     
     resize();
@@ -275,7 +292,6 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
 
                 var d = new Date(itemTime);
                 var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-                var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
                 var date = days[d.getDay()]+", "+months[d.getMonth()]+" "+d.getDate();
                 
                 if (elec_kwh!==null) elec_kwh = (elec_kwh).toFixed(1); else elec_kwh = "---";

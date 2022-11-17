@@ -162,7 +162,7 @@
   <div class="col1"><div class="col1-inner">
          
     <div class="block-bound">
-        <div class="block-title">ALL TIME HISTORY</div>
+        <div class="block-title" id="all_time_history_title">ALL TIME HISTORY</div>
     </div>
           
     <div style="background-color:#fff; padding:10px;">
@@ -179,7 +179,7 @@
         </td>
         
         <td style="width:33.3%; text-align:center" valign="top">
-          <div class="title1">All-time COP</div>
+          <div class="title1">SCOP</div>
           <div class="value1"><span id="total_cop"></span></div>
         </td>
       </tr>
@@ -215,5 +215,5 @@ var session_write = <?php echo $session['write']; ?>;
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=37"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=39"></script>
 
