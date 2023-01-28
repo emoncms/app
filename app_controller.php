@@ -143,6 +143,10 @@ function app_controller()
         $route->format = "json";
         return $appconfig->set_config($session['userid'],get('name'),get('config'));    
     }
+    else if ($route->action == "octopus-feed-list") {
+        $route->format = "json";
+        return json_decode(file_get_contents("http://emoncms.org/octopus/feed/list.json"));
+    }
     else if ($route->action == "dataremote") {
         $route->format = "json";
         $id = (int) get("id");

@@ -245,6 +245,9 @@ config.app = {
     "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5},
     "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5},
     "meter_kwh_hh":{"optional":true, "type":"feed", "autoname":"meter_kwh_hh", "engine":5},
+
+    "tariff":{"type":"select", "name":"Select tariff:", "default":"AGILE-FLEX-22-11-25", "options":["AGILE-18-02-21","AGILE-22-07-22","AGILE-22-08-31","AGILE-VAR-22-10-19","AGILE-FLEX-22-11-25"]},
+    
     "region":{"type":"select", "name":"Select region:", "default":"D_Merseyside_and_Northern_Wales", "options":["A_Eastern_England","B_East_Midlands","C_London","E_West_Midlands","D_Merseyside_and_Northern_Wales","F_North_Eastern_England","G_North_Western_England","H_Southern_England","J_South_Eastern_England","K_Southern_Wales","L_South_Western_England","M_Yorkshire","N_Southern_Scotland","P_Northern_Scotland"]},
 
     "go_day_rate":{"type":"value", "default":40.28, "name": "GO day rate"},
@@ -264,22 +267,7 @@ config.initapp = function(){init()};
 config.showapp = function(){show()};
 config.hideapp = function(){hide()};
 
-var regions_import = {
-  "A_Eastern_England":396124,
-  "B_East_Midlands":396125,
-  "C_London":396126,
-  "D_Merseyside_and_Northern_Wales":396105,
-  "E_West_Midlands":396127,
-  "F_North_Eastern_England":396128,
-  "G_North_Western_England":396129,
-  "H_Southern_England":396138,
-  "J_South_Eastern_England":396139,
-  "K_Southern_Wales":396140,
-  "L_South_Western_England":396141,
-  "M_Yorkshire":396142,
-  "N_Southern_Scotland":396143,
-  "P_Northern_Scotland":396144
-}
+var octopus_feed_list = {};
 
 var regions_outgoing = {
   "A_Eastern_England":399374,
@@ -355,6 +343,19 @@ function show() {
     solarpv_mode = false;
 
     resize();
+
+    $.ajax({                                      
+        url: path+"app/octopus-feed-list",
+        dataType: 'json',
+        async: false,                      
+        success: function(result) {
+            for (var z in result) {
+               var tag = result[z].tag;
+               if (octopus_feed_list[tag]==undefined) octopus_feed_list[tag] = {};
+               octopus_feed_list[tag][result[z].name] = parseInt(result[z].id);
+            }
+        }
+    });
 
     setPeriod('T');
     graph_load();
@@ -697,9 +698,10 @@ function graph_load()
     data["outgoing"] = []
     data["carbonintensity"] = []
     
-    if (config.app.region!=undefined && regions_import[config.app.region.value]!=undefined) {
+    if (config.app.region!=undefined && octopus_feed_list[config.app.tariff.value][config.app.region.value]!=undefined) {
+    
         //Add 30 minutes to each reading to get a stepped graph
-        agile = getdataremote(regions_import[config.app.region.value],view.start,view.end,interval);
+        agile = getdataremote(octopus_feed_list[config.app.tariff.value][config.app.region.value],view.start,view.end,interval);
         for (var z in agile) {
             data["agile"].push(agile[z]);
             data["agile"].push([agile[z][0]+(intervalms-1), agile[z][1]]);
