@@ -111,6 +111,45 @@ function app_controller()
             return array("success"=>false, "message"=>"invalid app or permissions");
         }
     }
+    else if ($route->action == "getstats") {
+
+        // enable apikey read access
+        $userid = false;
+        $public = false;
+        $apikey = "";
+        
+        if (isset($session['read']) && $session['read']) {
+            $userid = $session['userid'];
+        } else if (isset($_GET['readkey'])) {
+            $userid = $user->get_id_from_apikey($_GET['readkey']);
+        } else if ($session['public_userid']) {
+            $userid = (int) $session['public_userid'];
+            $public = true;
+        }
+    
+        $route->format = "json";
+        $app_name = urldecode(get("name",false,false));
+        $app = $appconfig->get_app_or_default($userid,$app_name,$public);
+        
+        if ($app!=false) {
+        
+            if ($app->app=="myheatpump") {
+                $start = get('start',true);
+                $end = get('end',true);
+                $startingpower = get('startingpower',false,100);
+                
+                require_once "Modules/feed/feed_model.php";
+                $settings['feed']['max_datapoints'] = 100000;
+                $feed = new Feed($mysqli,$redis,$settings['feed']);
+                require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_api.php";
+                return get_heatpump_stats($feed,$app,$start,$end,$startingpower*1);
+            }
+        
+            return $app;
+        } else {
+            return array("success"=>false, "message"=>"invalid app or permissions");
+        }
+    }
     else if ($route->action == "list" && $session['read']) {
         $route->format = "json";
         return $appconfig->get_list($session['userid']);

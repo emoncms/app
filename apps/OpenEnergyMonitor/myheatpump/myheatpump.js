@@ -507,7 +507,7 @@ function powergraph_load()
         }
     }
     if (feeds["heatpump_outsideT"]!=undefined) {
-        data["heatpump_outsideT"] = feed.getdata(feeds["heatpump_outsideT"].id,view.start,view.end,view.interval,1,0,skipmissing,limitinterval);
+        data["heatpump_outsideT"] = feed.getdata(feeds["heatpump_outsideT"].id,view.start,view.end,view.interval,1,0,skipmissing,0);
         
         if (all_same_interval) { 
             powergraph_series.push({label:"OutsideT", data:remove_null_values(data["heatpump_outsideT"]), yaxis:2, color:4});
@@ -692,7 +692,7 @@ function powergraph_load()
             var practical_carnot_heat_mean = practical_carnot_heat_sum / carnot_heat_n;
             var ideal_carnot_heat_mean = ideal_carnot_heat_sum / carnot_heat_n;
             if (simulate_heat_output && !show_as_prc_of_carnot) {
-                powergraph_series.push({label:"Carnot Heat", data:data["heatpump_heat_carnot"], yaxis:1, color:0, lines:{show:true, fill:0.2, lineWidth:0.5}});
+                powergraph_series.push({label:"Carnot Heat", data:data["heatpump_heat_carnot"], yaxis:1, color:7, lines:{show:true, fill:0.05, lineWidth:0.8}});
             }
             
             if (show_as_prc_of_carnot) {
@@ -781,13 +781,13 @@ function powergraph_load()
         let name = z;
         if (names[z]!=undefined) name = names[z];
         out += "<td style='text-align:left'>"+name+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].minval.toFixed(2)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].maxval.toFixed(2)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].diff.toFixed(2)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].mean.toFixed(2)+"</td>";
-        var kwhstr = ""; if (z=="heatpump_elec" || z=="heatpump_heat") kwhstr = feedstats[z].kwh.toFixed(3)
+        out += "<td style='text-align:center'>"+(feedstats[z].minval*1).toFixed(2)+"</td>";
+        out += "<td style='text-align:center'>"+(feedstats[z].maxval*1).toFixed(2)+"</td>";
+        out += "<td style='text-align:center'>"+(feedstats[z].diff*1).toFixed(2)+"</td>";
+        out += "<td style='text-align:center'>"+(feedstats[z].mean*1).toFixed(2)+"</td>";
+        var kwhstr = ""; if (z=="heatpump_elec" || z=="heatpump_heat") kwhstr = (feedstats[z].kwh*1).toFixed(3)
         out += "<td style='text-align:center'>"+kwhstr+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].stdev.toFixed(2)+"</td>";
+        out += "<td style='text-align:center'>"+(feedstats[z].stdev*1).toFixed(2)+"</td>";
         out += "</tr>";
     }
     $("#stats").html(out);
