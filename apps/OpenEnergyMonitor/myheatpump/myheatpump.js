@@ -307,6 +307,9 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 var itemValue = item.datapoint[1];
                 
                 var d = new Date(itemTime);
+                var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+                var date = days[d.getDay()]+", "+months[d.getMonth()]+" "+d.getDate();
+                  
                 var h = d.getHours();
                 if (h<10) h = "0"+h;
                 var m = d.getMinutes();
@@ -325,7 +328,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 else if (item.series.label=="Heat") { name = "Heat"; unit = "W"; }
                 else if (item.series.label=="Carnot Heat") { name = "Carnot Heat"; unit = "W"; }
                 
-                tooltip(item.pageX, item.pageY, time+": "+name+" "+itemValue.toFixed(dp)+unit, "#fff", "#000");
+                tooltip(item.pageX, item.pageY, name+" "+itemValue.toFixed(dp)+unit+"<br>"+date+", "+time, "#fff", "#000");
             }
         }
     } else $("#tooltip").remove();
