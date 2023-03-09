@@ -102,6 +102,8 @@
           
     <div id="advanced-block" style="background-color:#fff; padding:10px; display:none">
       <div style="color:#000">
+        <p id="show_flow_rate_bound" style="display:none"><b>Show flow rate:</b> <input id="show_flow_rate" type="checkbox" style="margin-top:-4px; margin-left:7px"></p>
+      
         <table class="table">
           <tr>
           <th></th>
@@ -154,6 +156,7 @@
         <div id="histogram_bound" style="width:100%; height:400px;overflow:hidden">
           <div id="histogram" style="height:400px"></div>
         </div>
+        
         
       </div>
     </div>
@@ -215,5 +218,5 @@ var session_write = <?php echo $session['write']; ?>;
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=45"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=47"></script>
 
