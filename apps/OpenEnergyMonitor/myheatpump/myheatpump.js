@@ -292,6 +292,14 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 var heat_kwh = null;
                 if (elec_enabled && data["heatpump_elec_kwhd"].length && data["heatpump_elec_kwhd"][z]!=undefined) elec_kwh = data["heatpump_elec_kwhd"][z][1];
                 if (heat_enabled && data["heatpump_heat_kwhd"].length && data["heatpump_heat_kwhd"][z]!=undefined) heat_kwh = data["heatpump_heat_kwhd"][z][1];
+                
+                var outside_temp_str = "";
+                if (feeds["heatpump_outsideT"]!=undefined) {
+                    if (data["heatpump_outsideT_daily"].length && data["heatpump_outsideT_daily"][z]!=undefined) {
+                        outside_temp_str = "Outside: "+data["heatpump_outsideT_daily"][z][1].toFixed(1)+"°C<br>";
+                    }
+                }
+                
                 var COP = null; 
                 if (heat_kwh!==null && elec_kwh!==null) COP = heat_kwh / elec_kwh;
 
@@ -303,7 +311,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 if (heat_kwh!==null) heat_kwh = (heat_kwh).toFixed(1); else heat_kwh = "---";
                 if (COP!==null) COP = (COP).toFixed(1); else COP = "---";
                                 
-                tooltip(item.pageX, item.pageY, date+"<br>Electric: "+elec_kwh+" kWh<br>Heat: "+heat_kwh+" kWh<br>COP: "+COP, "#fff", "#000");
+                tooltip(item.pageX, item.pageY, date+"<br>Electric: "+elec_kwh+" kWh<br>Heat: "+heat_kwh+" kWh<br>"+outside_temp_str+"COP: "+COP, "#fff", "#000");
             }
             
             if (viewmode=="powergraph")
@@ -891,6 +899,17 @@ function bargraph_load(start,end)
         }
     }
     
+    if (feeds["heatpump_outsideT"]!=undefined) {
+        
+        if ((end - start)<(3600*24*120*1000)) {
+            data["heatpump_outsideT_daily"] = feed.getdata(feeds["heatpump_outsideT"].id,start,end,"daily",1,0);
+            bargraph_series.push({
+                data: data["heatpump_outsideT_daily"], color: 4, yaxis:2,
+                lines: { show: true, align: "center", fill: false}, points: { show: true }
+            });
+        }
+    }
+    
     var cop_in_window =  heat_kwh_in_window/elec_kwh_in_window;
     if (cop_in_window<0) cop_in_window = 0;
     $("#window-cop").html((cop_in_window).toFixed(2));
@@ -907,12 +926,17 @@ function bargraph_draw()
             // labelHeight:-5
             reserveSpace:false
         },
-        yaxis: { 
+        yaxes: [ { 
             font: {size:flot_font_size, color:"#666"}, 
             // labelWidth:-5
             reserveSpace:false,
             min:0
-        },
+        },{ 
+            font: {size:flot_font_size, color:"#666"}, 
+            // labelWidth:-5
+            reserveSpace:false,
+            // max:40
+        }],
         selection: { mode: "x" },
         grid: {
             show:true, 
