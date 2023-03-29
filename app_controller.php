@@ -188,7 +188,17 @@ function app_controller()
     }
     else if ($route->action == "dataremote") {
         $route->format = "json";
-        $id = (int) get("id");
+
+        if (isset($_GET['id'])) {
+            $id_str = "id=".intval($_GET['id']);
+        } else if (isset($_GET['ids'])) {
+            // validate csv of ids - must be integers
+            $ids = explode(",",$_GET['ids']);
+            $ids = array_map('intval', $ids);
+            $id_str = "ids=".implode(",",$ids);
+        } else {
+            return array('success'=>false, 'message'=>'Missing id or ids');
+        }
         $start = (float) get("start");
         $end = (float) get("end");
         $interval = (int) get("interval");
@@ -206,7 +216,7 @@ function app_controller()
         //if ($result = $redis->get("app:cache:$id-$start-$end-$interval-$average-$delta")) {
         //    return json_decode($result);
         //} else {
-        $result = file_get_contents("http://emoncms.org/feed/data.json?id=$id&start=$start&end=$end&interval=$interval&average=$average&delta=$delta&skipmissing=$skipmissing&limitinterval=$limitinterval&timeformat=$timeformat&dp=$dp");
+        $result = file_get_contents("http://emoncms.org/feed/data.json?$id_str&start=$start&end=$end&interval=$interval&average=$average&delta=$delta&skipmissing=$skipmissing&limitinterval=$limitinterval&timeformat=$timeformat&dp=$dp");
         //$redis->set("app:cache:$id-$start-$end-$interval-$average-$delta",$result);
         return json_decode($result);
         //}
