@@ -860,7 +860,9 @@ function powergraph_draw()
         selection: { mode: "x" },
         legend:{position:"NW", noColumns:7}
     }
-    $.plot($('#placeholder'),powergraph_series,options);
+    if ($('#placeholder').width()) {
+        $.plot($('#placeholder'),powergraph_series,options);
+    }
 }
 
 // -------------------------------------------------------------------------------
@@ -949,9 +951,10 @@ function bargraph_draw()
             clickable: true
         }
     }
-
-    var plot = $.plot($('#placeholder'),bargraph_series,options);
-    $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'></div>");
+    if ($('#placeholder').width()) {
+        var plot = $.plot($('#placeholder'),bargraph_series,options);
+        $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'></div>");
+    }
 }
 
 // -------------------------------------------------------------------------------
