@@ -96,7 +96,7 @@
 <section id="app-setup" class="hide pb-3 px-3">
     <!-- instructions and settings -->
     <div class="row-fluid">
-        <div class="span9">
+        <div class="span7">
             <div class="text-light">
                 <h2 class="app-config-title text-warning"><?php echo _('My Solar'); ?> & <?php echo _('Wind'); ?></h2>
                 <p class="lead">This app extends the My Solar app by adding in a 'share of UK wind' estimate.</p>
@@ -106,7 +106,7 @@
                 <img src="../Modules/app/images/mysolar_app.png" class="d-none d-sm-inline-block">
             </div>
         </div>
-        <div class="span3 app-config pt-3"></div>
+        <div class="span5 app-config pt-3"></div>
     </div>
 </section>
 
@@ -175,11 +175,10 @@ var historyseries = [];
 var latest_start_time = 0;
 var panning = false;
 
-var average_wind_power = 2630; // MW - this is the average UK wind power output in MW between March 2015 and March 2016, it is used to scale the share of UK Wind power
+// MW - this is the average UK wind power output in MW between March 2022 and March 2023
+// used to scale the share of UK Wind power
+var average_wind_power = 7188; 
 
-var annual_wind_gen = 3300;
-var capacity_factor = 0.4;
-var my_wind_cap = 0;
 var live_timerange = 0;
 
 config.init();
@@ -187,12 +186,21 @@ config.init();
 // App start function
 function init()
 {        
+    if (config.app.solar.value=="disable") {
+        config.app.solar.value = false;
+    }
+
     app_log("INFO","mysolarpv init");
     
-    my_wind_cap = ((annual_wind_gen / 365) / 0.024) / capacity_factor;
-
     var timeWindow = (3600000*6.0*1);
     view.end = +new Date;
+
+    var meta = feed.getmeta(config.app.use.value);
+    // If the feed is more than 1 hour behind then start the view at the end of the feed
+    if ((view.end*0.001-meta.end_time)>3600) {
+        view.end = meta.end_time*1000;
+        autoupdate = false;
+    }
     view.start = view.end - timeWindow;
     live_timerange = timeWindow;
     
@@ -350,12 +358,17 @@ function draw_powergraph() {
     var units = "C";
     var fill = false;
     var plotColour = 0;
-    
+
     var options = {
         lines: { fill: fill },
         xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end},
         yaxes: [{ min: 0 }],
-        grid: {hoverable: true, clickable: true},
+        grid: {
+            hoverable: true, 
+            clickable: true,
+            color: "#aaa",
+            borderWidth: 0
+        },
         selection: { mode: "x" }
     }
     
@@ -369,12 +382,12 @@ function draw_powergraph() {
 
         var feedid = config.app.solar.value;
         if (feedid!=false)
-            timeseries.load("solar",feed.getdata(feedid,view.start,view.end,view.interval));
+            timeseries.load("solar",feed.getdata(feedid,view.start,view.end,view.interval,1));
         
         var feedid = config.app.use.value;
-        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval));
+        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,1));
         
-        timeseries.load("remotewind",getdataremote(67088,view.start,view.end,view.interval));   
+        timeseries.load("remotewind",getdataremote(97699,view.start,view.end,view.interval));   
     }
     // -------------------------------------------------------------------------------------------------------
     
