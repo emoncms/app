@@ -164,7 +164,7 @@ global $path, $session, $v;
 <section id="app-setup" class="hide pb-3 px-3">
     <!-- instructions and settings -->
     <div class="row-fluid">
-        <div class="span9 app-config-description">
+        <div class="span7 app-config-description">
             <div class="app-config-description-inner text-light">
                 <h2 class="app-config-title text-primary"><?php echo _('Time of Use - flexible + CL'); ?></h2>
                 <p class="lead">The "Time of Use - flexible + CL" app is a simple home energy monitoring app for exploring home or building electricity consumption and cost over time.</p>
@@ -198,7 +198,7 @@ global $path, $session, $v;
                 https://www.epochconverter.com/days</a> provides an easy reference.</p>
             </div>
         </div>
-        <div class="span3 app-config pt-3"></div>
+        <div class="span5 app-config pt-3"></div>
     </div>
 </section>
 

@@ -322,7 +322,7 @@
     <!-- instructions and settings -->
     <div class="px-3">
         <div class="row-fluid">
-            <div class="span9 xappconfig-description">
+            <div class="span7 xappconfig-description">
                 <div class="xappconfig-description-inner text-light">
                     <h2 class="appconfig-title text-warning"><?php echo _('My Solar & Battery'); ?></h2>
                     <p class="lead">
@@ -332,7 +332,7 @@
                     <img src="../Modules/app/images/mysolar_app.png" class="d-none d-sm-inline-block">
                 </div>
             </div>
-            <div class="span3 app-config pt-3"></div>
+            <div class="span5 app-config pt-3"></div>
         </div>
     </div>
 </section>

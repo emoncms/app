@@ -105,7 +105,7 @@ padding:10px;
 <section id="app-setup" class="hide pb-3 px-3">
     <!-- instructions and settings -->
     <div class="row-fluid">
-        <div class="span9 app-config-description">
+        <div class="span7 app-config-description">
             <div class="app-config-description-inner text-light">
                 <h2 class="app-config-title text-primary"><?php echo _('Cost Comparison'); ?></h2>
                 <p class="lead">The Cost Comparison app allows you to compare your energy usage against energy suppliers tariffs including new time of use tariffs.</p>
@@ -115,7 +115,7 @@ padding:10px;
                 <img src="<?php echo $path; echo $appdir; ?>preview.png" class="d-none d-sm-inline-block">
             </div>
         </div>
-        <div class="span3 app-config pt-3"></div>
+        <div class="span5 app-config pt-3"></div>
     </div>
 </section>
 

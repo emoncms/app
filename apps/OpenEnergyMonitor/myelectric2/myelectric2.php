@@ -136,7 +136,7 @@
       </div>
       
       <div style="background-color:rgba(68,179,226,0.1); padding:20px; color:#333; text-align:center">
-        <div id="comparison_summary" style=""></div><br>
+        <div id="comparison_summary"></div><br>
         <canvas id="energystack" width="270px" height="360px"></canvas>
         <div style="text-align:left">
         The ZeroCarbonBritain target is based on a household using all low energy appliances and LED lighting.
@@ -154,9 +154,6 @@
     
 </div>    
 </div>
-
-
-
 
 <section id="app-setup" class="hide pb-3">
     <!-- instructions and settings -->
@@ -262,6 +259,7 @@ function show() {
         $("#energystack-comparison").parent().hide();
     }
     
+    meta["use"] = feed.getmeta(feeds["use"].id);
     meta["use_kwh"] = feed.getmeta(feeds["use_kwh"].id);
     if (meta["use_kwh"].start_time>start_time) start_time = meta["use_kwh"].start_time;
  
@@ -273,6 +271,12 @@ function show() {
 
     var timeWindow = (3600000*24.0*30);
     var end = (new Date()).getTime();
+    // Limit end time to feed end time
+    if (end>meta['use'].end_time) end = meta['use'].end_time*1000;
+    if (end*0.001>meta['use_kwh'].end_time) {
+        end = meta['use_kwh'].end_time*1000;
+    }
+
     var start = end - timeWindow;
     bargraph_load(start,end);
     bargraph_draw();

@@ -189,7 +189,7 @@ global $path, $session, $v;
     <!-- instructions and settings -->
     <div class="px-3">
         <div class="row-fluid">
-            <div class="span9 appconfig-description">
+            <div class="span7 appconfig-description">
                 <div class="appconfig-description-inner text-light">
                     <h2 class="appconfig-title text-primary"><?php echo _('Octopus Agile'); ?></h2>
                     <p class="lead">Explore Octopus Agile tariff costs over time.</p>
@@ -201,7 +201,7 @@ global $path, $session, $v;
                     <img src="../Modules/app/images/agile_app.png" class="d-none d-sm-inline-block">
                 </div>
             </div>
-            <div class="span3 app-config pt-3"></div>
+            <div class="span5 app-config pt-3"></div>
         </div>
     </div>
 </section>

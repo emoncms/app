@@ -9,21 +9,9 @@
 }
 
 .app-config-description {
-  width:70%;
-  float:left;
-}
-
-.xapp-config-description-inner,
-.xappconfig-description-inner,
-.appconfig-description-inner,
-.app-config-description-inner {
-  padding-right:20px;
   font-size:18px;
-  line-height:22px;
-}
-.app-config {
-  width:30%;
-  float:left
+  margin-bottom:20px;
+  color:#ccc
 }
 
 .app-config select {
