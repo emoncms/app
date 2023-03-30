@@ -41,7 +41,6 @@
     }
 }
 
-
 /* set chart height to full screen height (100vh) minus an offset to cover the large value indicators and menus */
 .chart-placeholder > * {
     height: calc(100vh - var(--height-offset))!important;
@@ -151,7 +150,7 @@
     <!-- instructions and settings -->
     <div class="px-3">
         <div class="row-fluid">
-            <div class="span9 xapp-config-description">
+            <div class="span7 xapp-config-description">
                 <div class="xapp-config-description-inner text-light">
                     <h2 class="app-config-title text-warning"><?php echo _('My Solar'); ?></h2>
                     <p class="lead">The My Solar app can be used to explore onsite solar generation, self consumption, export and building consumption both in realtime with a moving power graph view and historically with a daily and monthly bargraph.</p>
@@ -160,7 +159,7 @@
                     <img src="../Modules/app/images/mysolar_app.png" class="d-none d-sm-inline-block">
                 </div>
             </div>
-            <div class="span3 app-config pt-3"></div>
+            <div class="span5 app-config pt-3"></div>
         </div>
     </div>
 </section>
@@ -255,6 +254,13 @@ function init()
 
     var timeWindow = (3600000*6.0*1);
     view.end = +new Date;
+
+    var meta = feed.getmeta(config.app.use.value);
+    // If the feed is more than 1 hour behind then start the view at the end of the feed
+    if ((view.end*0.001-meta.end_time)>3600) {
+        view.end = meta.end_time*1000;
+        autoupdate = false;
+    }
     view.start = view.end - timeWindow;
     live_timerange = timeWindow;
     
@@ -391,16 +397,6 @@ function show()
 function resize() 
 {
     app_log("INFO","mysolarpv resize");
-    
-    var top_offset = 0;
-    var placeholder_bound = $('#placeholder_bound');
-    var placeholder = $('#placeholder');
-
-    var width = placeholder_bound.width();
-    var height = $(window).height()*0.55;
-
-    if (height>width) height = width;
-    if (height<180) height = 180;
 
     if($('#app-block').is(":visible")) {
         draw();
@@ -436,7 +432,7 @@ function livefn()
 
         // Advance view
         view.end = now;
-        view.start = now - live_timerange;
+        view.start = view.end - live_timerange;
     }
     // Lower limit for solar
     if (solar_now<config.app.solar_disp_min.value) solar_now = 0;
@@ -498,7 +494,12 @@ function draw_powergraph() {
         lines: { fill: fill },
         xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end},
         yaxes: [{ min: 0 }],
-        grid: {hoverable: true, clickable: true},
+        grid: {
+            hoverable: true, 
+            clickable: true,
+            color: "#aaa",
+            borderWidth: 0
+        },
         selection: { mode: "x" }
     }
     view.calc_interval(1500); // npoints = 1500
