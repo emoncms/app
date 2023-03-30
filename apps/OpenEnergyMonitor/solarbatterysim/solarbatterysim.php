@@ -467,7 +467,7 @@ function process_month(d) {
         month.total_consumption += use * power_to_kwh
 
         // Load generation data from public feed
-        if (solar_data_month[z][1]!=null) {
+        if (solar_data_month[z]!=undefined && solar_data_month[z][1]!=null) {
             solar = solar_data_month[z][1] * convert * (input.solar_capacity/feed_solar_capacity);
         }
         month.total_generation += solar * power_to_kwh
