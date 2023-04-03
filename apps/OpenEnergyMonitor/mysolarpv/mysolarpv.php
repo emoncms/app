@@ -241,6 +241,8 @@ var latest_start_time = 0;
 var panning = false;
 var bargraph_initialized = false;
 var live_timerange = 0;
+var meta = {};
+var power_graph_end_time = 0;
 
 config.init();
 
@@ -255,10 +257,19 @@ function init()
     var timeWindow = (3600000*6.0*1);
     view.end = +new Date;
 
-    var meta = feed.getmeta(config.app.use.value);
+    if (config.app.use.value) {
+        meta['use'] = feed.getmeta(config.app.use.value);
+        if (meta['use'].end_time>power_graph_end_time) power_graph_end_time = meta['use'].end_time;
+    }
+
+    if (config.app.solar.value) {
+        meta['solar'] = feed.getmeta(config.app.solar.value);
+        if (meta['solar'].end_time>power_graph_end_time) power_graph_end_time = meta['solar'].end_time;
+    }
+
     // If the feed is more than 1 hour behind then start the view at the end of the feed
-    if ((view.end*0.001-meta.end_time)>3600) {
-        view.end = meta.end_time*1000;
+    if ((view.end*0.001-power_graph_end_time)>3600) {
+        view.end = power_graph_end_time*1000;
         autoupdate = false;
     }
     view.start = view.end - timeWindow;
@@ -533,6 +544,7 @@ function draw_powergraph() {
     var sample_size = Math.min(timeseries.length("solar"), timeseries.length("use"));
 
     for (var z=0; z<sample_size; z++) {
+        var time = datastart + (1000 * interval * z);
 
         // -------------------------------------------------------------------------------------------------------
         // Get solar or use values
@@ -540,27 +552,29 @@ function draw_powergraph() {
         if (timeseries.value("solar",z)!=null) solar_now = timeseries.value("solar",z);
         if (timeseries.value("use",z)!=null) use_now = timeseries.value("use",z);
         
-        // -------------------------------------------------------------------------------------------------------
-        // Supply / demand balance calculation
-        // -------------------------------------------------------------------------------------------------------
-        if (solar_now<config.app.solar_disp_min.value) solar_now = 0;
-        var balance = solar_now - use_now;
-        
-        if (balance>=0) total_use_direct_kwh += (use_now*interval)/(1000*3600);
-        if (balance<0) total_use_direct_kwh += (solar_now*interval)/(1000*3600);
-        
-        var store_change = (balance * interval) / (1000*3600);
-        store += store_change;
-        
-        total_solar_kwh += (solar_now*interval)/(1000*3600);
-        total_use_kwh += (use_now*interval)/(1000*3600);
-        
-        var time = datastart + (1000 * interval * z);
-        use_data.push([time,use_now]);
-        gen_data.push([time,solar_now]);
-        bal_data.push([time,balance]);
-        store_data.push([time,store]);
-        
+        if (time*0.001<=power_graph_end_time) {
+            // -------------------------------------------------------------------------------------------------------
+            // Supply / demand balance calculation
+            // -------------------------------------------------------------------------------------------------------
+            if (solar_now<config.app.solar_disp_min.value) solar_now = 0;
+            var balance = solar_now - use_now;
+            
+            if (balance>=0) total_use_direct_kwh += (use_now*interval)/(1000*3600);
+            if (balance<0) total_use_direct_kwh += (solar_now*interval)/(1000*3600);
+            
+            var store_change = (balance * interval) / (1000*3600);
+            store += store_change;
+            
+            total_solar_kwh += (solar_now*interval)/(1000*3600);
+            total_use_kwh += (use_now*interval)/(1000*3600);
+            
+            
+            use_data.push([time,use_now]);
+            gen_data.push([time,solar_now]);
+            bal_data.push([time,balance]);
+            store_data.push([time,store]);
+        }
+
         t += interval;
     }
     if (total_solar_kwh < 1) {
