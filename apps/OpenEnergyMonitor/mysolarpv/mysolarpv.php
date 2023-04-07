@@ -244,6 +244,8 @@ var live_timerange = 0;
 var meta = {};
 var power_graph_end_time = 0;
 
+var powerseries = null;
+
 config.init();
 
 // App start function
@@ -493,7 +495,6 @@ function draw()
     if (viewmode=="powergraph") draw_powergraph();
     if (viewmode=="bargraph") draw_bargraph();
 }
-var powerseries = null;
 
 function draw_powergraph() {
     var dp = 1;
@@ -659,13 +660,15 @@ function powergraph_events() {
             if (powerseries) {
                 for (i = 0; i < powerseries.length; i++) {
                     var series = powerseries[i];
-                    if (series.name.toUpperCase()=="BALANCE") {
-                        tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "kWh"]);
-                    } else {
-                        if ( series.data[item.dataIndex][1] >= 1000) {
-                            tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(0)/1000 , "kW"]);
+                    if (series.data[item.dataIndex]!=undefined && series.data[item.dataIndex][1]!=null) {
+                        if (series.name.toUpperCase()=="BALANCE") {
+                            tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "kWh"]);
                         } else {
-                            tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W"]);
+                            if ( series.data[item.dataIndex][1] >= 1000) {
+                                tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(0)/1000 , "kW"]);
+                            } else {
+                                tooltip_items.push([series.name.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W"]);
+                            }
                         }
                     }
                 }

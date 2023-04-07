@@ -795,13 +795,15 @@ function powergraph_events() {
 
             for (i = 0; i < powerseries.length; i++) {
                 var series = powerseries[i];
-                if (series.label.toUpperCase()=="BALANCE") {
-                    tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "kWh"]);
-                } else {
-                    if ( series.data[item.dataIndex][1] >= 1000) {
-                        tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(0)/1000 , "kW"]);
+                if (series.data[item.dataIndex]!=undefined && series.data[item.dataIndex][1]!=null) {
+                    if (series.label.toUpperCase()=="BALANCE") {
+                        tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "kWh"]);
                     } else {
-                        tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W"]);
+                        if ( series.data[item.dataIndex][1] >= 1000) {
+                            tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(0)/1000 , "kW"]);
+                        } else {
+                            tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W"]);
+                        }
                     }
                 }
             }
