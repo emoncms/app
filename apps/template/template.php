@@ -11,7 +11,7 @@ global $path, $session, $v;
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=1"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=2"></script>
 
 <style>
     /* Dynamic height chart placeholder */
@@ -97,4 +97,4 @@ global $path, $session, $v;
     var app_name = "<?php echo $name; ?>";
     var app_config = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/template/template.js?v=4"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/template/template.js?v=5"></script>
