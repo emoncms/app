@@ -578,6 +578,24 @@ function draw_powergraph() {
 
         t += interval;
     }
+    
+    // Consider loading totals from kWh feeds if available
+    // Need to avoid too many requests here, currently updating every 10s
+    /*
+    console.log("-----");
+    
+    skwh = get_kwh_between_two_timestamps('solar_kwh',view.start*0.001,view.end*0.001);
+    console.log(skwh);
+    
+    ukwh = get_kwh_between_two_timestamps('use_kwh',view.start*0.001,view.end*0.001);
+    console.log(ukwh);
+    
+    ikwh = get_kwh_between_two_timestamps('import_kwh',view.start*0.001,view.end*0.001);
+    console.log(ikwh);
+    
+    console.log((ukwh-ikwh)/skwh)
+    */
+    
     if (total_solar_kwh < 1) {
     	$(".total_solar_kwh").html(total_solar_kwh.toFixed(2));
     } else {
@@ -618,6 +636,18 @@ function draw_powergraph() {
     powerseries = series;
     $.plot($('#placeholder'),series,options);
     $(".ajax-loader").hide();
+}
+
+function get_kwh_between_two_timestamps(key,start,end) {
+    if (meta[key]!=undefined) {
+        if (start<meta[key].start_time) start = meta[key].start_time;
+        if (end>meta[key].end_time) end = meta[key].end_time;
+        
+        var kwh_start = feed.getvalue(config.app[key].value,start);
+        var kwh_end = feed.getvalue(config.app[key].value,end);
+        return kwh_end - kwh_start;
+    }
+    return false;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -694,17 +724,17 @@ function init_bargraph() {
     bargraph_initialized = true;
     // Fetch the start_time covering all kwh feeds - this is used for the 'all time' button
     latest_start_time = 0;
-    var solar_meta = feed.getmeta(config.app.solar_kwh.value);
-    var use_meta = feed.getmeta(config.app.use_kwh.value);
-    var import_meta = feed.getmeta(config.app.import_kwh.value);
-    if (solar_meta.start_time > latest_start_time) latest_start_time = solar_meta.start_time;
-    if (use_meta.start_time > latest_start_time) latest_start_time = use_meta.start_time;
-    if (import_meta.start_time > latest_start_time) latest_start_time = import_meta.start_time;
+    meta['solar_kwh'] = feed.getmeta(config.app.solar_kwh.value);
+    meta['use_kwh'] = feed.getmeta(config.app.use_kwh.value);
+    meta['import_kwh'] = feed.getmeta(config.app.import_kwh.value);
+    if (meta['solar_kwh'].start_time > latest_start_time) latest_start_time = meta['solar_kwh'].start_time;
+    if (meta['use_kwh'].start_time > latest_start_time) latest_start_time = meta['use_kwh'].start_time;
+    if (meta['import_kwh'].start_time > latest_start_time) latest_start_time = meta['import_kwh'].start_time;
     latest_start_time = latest_start_time;
 
-    var earliest_start_time = solar_meta.start_time;
-    earliest_start_time = Math.min(use_meta.start_time, earliest_start_time);
-    earliest_start_time = Math.min(import_meta.start_time, earliest_start_time);
+    var earliest_start_time = meta['solar_kwh'].start_time;
+    earliest_start_time = Math.min(meta['use_kwh'].start_time, earliest_start_time);
+    earliest_start_time = Math.min(meta['import_kwh'].start_time, earliest_start_time);
     view.first_data = earliest_start_time * 1000;
 
     var timeWindow = (3600000*24.0*40);
