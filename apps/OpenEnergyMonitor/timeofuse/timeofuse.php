@@ -102,7 +102,7 @@
       <div id='advanced-toggle' class='bluenav' >SHOW DETAIL</div>
  
        <div style="padding:10px;">
-        kWh in window: <b id="window-kwh"></b> <b>kWh</b>
+        kWh in window: <b id="window-kwh"></b> <b>kWh</b>, Off-peak: <b id="window-offpeak"></b> <b>kWh</b>, Peak: <b id="window-peak"></b> <b>kWh</b>
       </div>
       
       <div style="clear:both"></div>
@@ -480,28 +480,61 @@ function powergraph_load()
 {
     $("#power-graph-footer").show();
     view.calc_interval(1200); // npoints = 1200
-    data["use"] = feed.getdata(feeds["use"].id,view.start,view.end,view.interval,0,0,1,1);
+    // feedid,start,end,interval,average=0,delta=0,skipmissing=0,limitinterval=0
+    data["use"] = feed.getdata(feeds["use"].id,view.start,view.end,view.interval,1,0,0,0);
+
+    data["use_standard"] = [];
+    data["use_economy7"] = [];
+
+    var offpeak_start = config.app.economy7_start.value*1;
+    var offpeak_end = config.app.economy7_end.value*1;
+
+    var kwh_offpeak = 0;
+    var kwh_onpeak = 0;
+    var power_to_kwh = view.interval / 3600000.0;
+
+    // Split into standard and economy 7
+    for (var z=0; z<data["use"].length-1; z++) {
+        let time = data["use"][z][0];
+        let date = new Date(time);
+        let hour = date.getHours() + (date.getMinutes()/60.0);
+
+        let offpeak = false;
+        if (offpeak_start<offpeak_end) {
+            if (hour>=offpeak_start && hour<offpeak_end) offpeak = true;
+        } else {
+            if (hour>offpeak_start && hour<24) offpeak = true;
+            if (hour>=0 && hour<offpeak_end) offpeak = true;
+        }
+
+        let use = data["use"][z][1];
+
+        if (offpeak) {
+            data["use_economy7"].push([time, data["use"][z][1]]);
+            data["use_standard"].push([time, null]);
+
+            kwh_offpeak += use * power_to_kwh;
+
+        } else {
+            data["use_economy7"].push([time, null]);
+            data["use_standard"].push([time, data["use"][z][1]]);
+
+            kwh_onpeak += use * power_to_kwh;
+        }
+    }
     
     powergraph_series = [];
-    powergraph_series.push({data:data["use"], yaxis:1, color:"#44b3e2", lines:{show:true, fill:0.8, lineWidth:0}});
+    powergraph_series.push({data:data["use_standard"], yaxis:1, color:"#44b3e2", lines:{show:true, fill:0.8, lineWidth:0}});
+    powergraph_series.push({data:data["use_economy7"], yaxis:1, color:"#1d8dbc", lines:{show:true, fill:0.8, lineWidth:0}});
     
     var feedstats = {};
     feedstats["use"] = stats(data["use"]);
     
     var time_elapsed = (data["use"][data["use"].length-1][0] - data["use"][0][0])*0.001;
-    var kwh_in_window = 0.0; // (feedstats["use"].mean * time_elapsed) / 3600000;
-    
-    for (var z=0; z<data["use"].length-1; z++) {
-        var power = 0;
-        if (data["use"][z][1]!=null) power = data["use"][z][1];
-        var time = (data["use"][z+1][0] - data["use"][z][0]) *0.001;
         
-        if (time<3600) {
-            kwh_in_window += (power * time) / 3600000;
-        }
-    }
-    
-    $("#window-kwh").html(kwh_in_window.toFixed(1));
+    $("#window-kwh").html((kwh_offpeak+kwh_onpeak).toFixed(1));
+    $("#window-offpeak").html(kwh_offpeak.toFixed(1));
+    $("#window-peak").html(kwh_onpeak.toFixed(1));
     
     var out = "";
     for (var z in feedstats) {
@@ -558,7 +591,11 @@ function bargraph_load(start,end)
     end = Math.ceil(end/intervalms)*intervalms;
     start = Math.floor(start/intervalms)*intervalms;
     
-    var elec_result = feed.getdataDMY_time_of_use(feeds["use_kwh"].id,start,end,"daily",JSON.stringify([0,config.app.economy7_start.value,config.app.economy7_end.value]));
+
+    var offpeak_start = config.app.economy7_start.value*1;
+    var offpeak_end = config.app.economy7_end.value*1;
+    var split = [0,config.app.economy7_start.value,config.app.economy7_end.value];
+    var elec_result = feed.getdataDMY_time_of_use(feeds["use_kwh"].id,start,end,"daily",JSON.stringify(split));
     
     var elec_data = [];
     
@@ -588,18 +625,28 @@ function bargraph_load(start,end)
         var total_kwh = 0; 
         var n = 0;
         // Calculate the daily totals by subtracting each day from the day before
-        for (var z=0; z<elec_data.length; z++)
+        for (var z=0; z<elec_data.length-1; z++)
         {
             var time = elec_data[z][0];
-            var economy7 = (elec_data[z][1][2]-elec_data[z][1][1]);
-            data["economy7"].push([time,economy7]);
+
+            if (offpeak_start<offpeak_end) {
+                // start until end
+                economy7 = elec_data[z][1][2]-elec_data[z][1][1]
+            } else {
+                // first part is midnight until end
+                economy7 = elec_data[z][1][2]-elec_data[z][1][0]
+                // second part is start until midnight
+                economy7 += elec_data[z+1][1][0]-elec_data[z][1][1]
+            }
             
-            var standard = elec_data[z][1][1] - elec_data[z][1][0];
-            if ((z+1)<elec_data.length) standard += elec_data[z+1][1][0] - elec_data[z][1][2];
+            data["economy7"].push([time,economy7]);
+
+            var total_day = elec_data[z+1][1][0] - elec_data[z][1][0];            
+            var standard = total_day - economy7;
             data["standard"].push([time,standard]);
             
             console.log(economy7+" "+standard);
-            total_kwh += economy7 + standard;
+            total_kwh += total_day;
             
             daytime_total_kwh += standard;
             nighttime_total_kwh += economy7;
