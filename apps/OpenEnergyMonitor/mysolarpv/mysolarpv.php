@@ -438,6 +438,8 @@ function livefn()
         var updatetimesolar = feeds[config.app.solar.value].time;
         var updatetimeuse = feeds[config.app.use.value].time;
         var updatetime = Math.max(updatetimesolar, updatetimeuse);
+        
+        power_graph_end_time = updatetime;
         timeseries.append("solar",updatetime,solar_now);
         timeseries.trim_start("solar",view.start*0.001);
         timeseries.append("use",updatetime,use_now);
