@@ -152,4 +152,4 @@ global $path, $session, $v;
     config.init();
 </script>
 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/ukgrid/ukgrid.js?v=5"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/ukgrid/ukgrid.js?v=8"></script>

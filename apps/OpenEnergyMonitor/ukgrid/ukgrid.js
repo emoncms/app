@@ -287,7 +287,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             var out ="";
             for (var z in series) {
                 if (series[z].label==item.series.label) {
-                    let value = series[z].data[z][1];
+                    let value = series[z].data[i][1];
                     if (value!=null) {
                         out += series[z].label+": "+value.toFixed(0)+unit+"<br>";
                     }
