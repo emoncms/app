@@ -75,6 +75,9 @@ var timeseries = {
                 var v = datastore[name].data[p][1];
                 tmpdata.push([t,v]);
             }
+            if (datastore[name].data.length<2) {
+                return false;
+            }
             datastore[name].data = tmpdata;
             datastore[name].start = datastore[name].data[0][0] * 0.001;
             datastore[name].interval = (datastore[name].data[1][0] - datastore[name].data[0][0])*0.001;
