@@ -59,13 +59,9 @@ global $path, $session, $v;
 <!-- Top navigation bar -->
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="viewpower btn btn-large btn-link btn-inverse myelectric-view-cost" disable title="<?php echo _('Fuel mix history') ?>">
-                <span class="d-xs-none"><?php echo _("Pwr") ?></span>
-                <span class="d-none d-xs-inline-block"><?php echo _("UKGRID") ?></span>
-            </button></li>
         <li><button class="fuelmix btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo _('Fuel mix history') ?>">
                 <span class="d-xs-none"><?php echo _("Pwr") ?></span>
-                <span class="d-none d-xs-inline-block"><?php echo _("FUEL MIX") ?></span>
+                <span class="d-none d-xs-inline-block"><?php echo _("UK FUEL MIX") ?></span>
             </button></li>
         <li><button class="forecast active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo _('Wind & Solar forecast') ?>">
                 <span class="d-xs-none"><?php echo _("Pwr") ?></span>
