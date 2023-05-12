@@ -59,13 +59,9 @@ global $path, $session, $v;
 <!-- Top navigation bar -->
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="viewpower btn btn-large btn-link btn-inverse myelectric-view-cost" disable title="<?php echo _('Fuel mix history') ?>">
-                <span class="d-xs-none"><?php echo _("Pwr") ?></span>
-                <span class="d-none d-xs-inline-block"><?php echo _("UKGRID") ?></span>
-            </button></li>
         <li><button class="fuelmix btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo _('Fuel mix history') ?>">
                 <span class="d-xs-none"><?php echo _("Pwr") ?></span>
-                <span class="d-none d-xs-inline-block"><?php echo _("FUEL MIX") ?></span>
+                <span class="d-none d-xs-inline-block"><?php echo _("UK FUEL MIX") ?></span>
             </button></li>
         <li><button class="forecast active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo _('Wind & Solar forecast') ?>">
                 <span class="d-xs-none"><?php echo _("Pwr") ?></span>
@@ -94,12 +90,14 @@ global $path, $session, $v;
             </div>
         </div>
         <div class="span2">
-            <div id="visible-checkboxes"></div>
+            <div id="visible-checkboxes" style="margin-top:10px"></div>
         </div>
     </div>
     <br><br>
-    <p style="font-size:14px">This app shows realtime uk electricity demand and how it is supplied from different sources of electricity generation. The data is updated every 5 minutes from elexonportal.co.uk.<br>
-        Click on the key items on the right to show or hide different sources of generation and use the navigation buttons to explore historic data.</p>
+    <p style="font-size:14px" id="fuel-mix-info" class="hide">UK historic electricity demand and fuel mix obtained from <a href="https://www.elexonportal.co.uk">elexonportal.co.uk.</a>. <br>Embedded wind and solar obtained from <a href="https://data.nationalgrideso.com/data-groups/demand">data.nationalgrideso.com</a><br>Note that the demand series has been modified to include embedded wind and solar generation.</p>
+    <p style="font-size:14px" id="forecast-info">14 day ahead UK wind, embedded wind, solar and demand forecast obtained from <a href="https://data.nationalgrideso.com/data-groups/demand">data.nationalgrideso.com</a>.<br>Note that the demand forecast has been modified to include embedded wind and solar generation.</p>
+    
+    </p>
 </div>
 
 <!-- App configuration -->
@@ -154,4 +152,4 @@ global $path, $session, $v;
     config.init();
 </script>
 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/ukgrid/ukgrid.js?v=3"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/ukgrid/ukgrid.js?v=8"></script>

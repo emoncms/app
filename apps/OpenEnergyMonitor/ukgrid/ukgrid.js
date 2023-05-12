@@ -41,7 +41,7 @@ function init_series() {
         $('.time').hide();
         series = [
             {label:"WIND", feedid:477240, color:"rgba(0,255,0,0.6)"},
-            {label:"WIND EM", feedid:477234, color:"rgba(0,200,0,0.6)"},
+            {label:"WIND EMBEDDED", feedid:477234, color:"rgba(0,200,0,0.6)"},
             {label:"SOLAR", feedid:477236, color:"rgba(255,255,0,0.6)"},
             {label:"DEMAND", feedid:477241, color:"rgba(255,0,0,0.6)",stack: false,fill:false,show:true}
         ];
@@ -50,6 +50,9 @@ function init_series() {
     
     } else {
         $('.time').show();
+        $('.time[time=1]').hide();
+        $('.time[time=3]').hide();
+        $('.time[time=6]').hide();
         series = [
             {label:"NUCLEAR", feedid:97697, color:"rgba(227,225,36,0.6)"},
             {label:"BIOMASS", feedid:382965, color:"#735d34"},
@@ -65,8 +68,11 @@ function init_series() {
             
             {label:"NPSHYD", feedid:97703, color:"rgba(0,50,255,0.6)"},
             {label:"WIND", feedid:97699, color:"rgba(0,255,0,0.6)"},
+            {label:"WIND EMBEDDED", feedid:477234, color:"rgba(0,200,0,0.6)"},
+            {label:"SOLAR", feedid:477236, color:"rgba(255,255,0,0.6)"},
             {label:"PS", feedid:97701, color:"rgba(0,150,255,0.6)"},
-        
+
+             
             {label:"OTHER", feedid:97705, color:"rgba(227,162,36,0.6)"},
             
             {label:"OIL", feedid:97693, color:"rgba(50,50,50,0.6)"},
@@ -80,6 +86,7 @@ function init_series() {
         ];
         view.end = Math.round(timenow / intervalms) * intervalms;
         view.start = view.end - (86400*1000*7);
+        
     }
 
     ids = [];
@@ -100,7 +107,7 @@ function init_series() {
         var star = "";
         var show = 0;
         if (series[z].show) {star = "&nbsp;*&nbsp;"; show = 1;}
-        out += '<div><div class="legendcheckbox" index="'+z+'" show='+show+' style="float:left; background-color:'+series[z].color+'; cursor:pointer">';
+        out += '<div style="display:inline-block; width:180px"><div class="legendcheckbox" index="'+z+'" show='+show+' style="float:left; background-color:'+series[z].color+'; cursor:pointer">';
         out += '<div class="legendItem">'+star+'</div></div>'+series[z].label+'</div>';
     }
     $("#visible-checkboxes").html(out);
@@ -142,6 +149,43 @@ function load() {
                 } 
                 series[z].data = data_with_time
             }
+            
+            // Do not show embeded wind and solar forecast in historic fuel mix mode
+            if (mode!="forecast") {
+                var last_index = -1;
+                for (var z=0; z<series[20].data.length; z++) {
+                    if (series[20].data[z][1]!=null) {
+                        last_index = z;
+                    }
+                }
+            
+                if (last_index!=-1) {
+                    for (var z=last_index+1; z<series[12].data.length; z++) {
+                        series[12].data[z][1] = null;
+                        series[13].data[z][1] = null;
+                    }
+                }
+            }
+            
+            // Modify demand data to include embedded wind and solar
+            if (mode=="forecast") {
+                for (var z=0; z<series[3].data.length; z++) {
+                    if (series[1].data[z][1]!=null) {
+                        series[3].data[z][1] += series[1].data[z][1];
+                        series[3].data[z][1] += series[2].data[z][1];
+                    }
+                }
+            } else {
+                for (var z=0; z<series[20].data.length; z++) {
+                    if (series[12].data[z][1]!=null) {
+                        series[20].data[z][1] += series[12].data[z][1];
+                        series[20].data[z][1] += series[13].data[z][1];
+                    }
+                }  
+            }
+            
+            
+            
             draw();
         }
     });
@@ -168,7 +212,8 @@ $(".fuelmix").click(function() {
     $(".forecast").toggleClass('active', false); 
     $(".fuelmix").toggleClass('active', true); 
     init_series();
-
+    $("#forecast-info").hide();
+    $("#fuel-mix-info").show();
 });
 
 $(".forecast").click(function() {
@@ -176,11 +221,14 @@ $(".forecast").click(function() {
     $(".fuelmix").toggleClass('active', false);
     $(".forecast").toggleClass('active', true); 
     init_series();
+    $("#forecast-info").show();
+    $("#fuel-mix-info").hide();
 });
 
-$(".legendcheckbox").click(function() {
+$("#visible-checkboxes").on("click",".legendcheckbox",function() {
     var index = $(this).attr("index");
     var show = $(this).attr("show");
+    
     if (show==0) {
         show = 1; 
         $(this).find(".legendItem").html("&nbsp;*&nbsp;");
@@ -204,7 +252,7 @@ $("#zoomout").click(function () {view.zoomout(); load();});
 $("#zoomin").click(function () {view.zoomin(); load();});
 $('#right').click(function () {view.panright(); load();});
 $('#left').click(function () {view.panleft(); load();});
-$('.time').click(function () {view.timewindow($(this).attr("time")); load();});
+$('.time').click(function () {view.timewindow($(this).attr("time")/24.0); load();});
 
 
 $('#placeholder').bind("plothover", function (event, pos, item) {
@@ -239,7 +287,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             var out ="";
             for (var z in series) {
                 if (series[z].label==item.series.label) {
-                    let value = series[z].data[z][1];
+                    let value = series[z].data[i][1];
                     if (value!=null) {
                         out += series[z].label+": "+value.toFixed(0)+unit+"<br>";
                     }
