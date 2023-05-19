@@ -1,0 +1,5 @@
+{
+    "title"          : "Storage Simulator",
+    "description"    : "Explore supply and demand matching with short and long term storage",
+    "order"         : 15
+}
