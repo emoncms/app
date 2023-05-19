@@ -36,7 +36,7 @@ global $path, $session, $v;
                     <option value="600">10 mins</option>
                     <option value="900">15 mins</option>
                     <option value="1800">30 mins</option>
-                    <option value="3600">1 hour</option>
+                    <option value="3600" selected>1 hour</option>
                 </select>
 
                 <button class="btn config-open" style="margin-top:10px">

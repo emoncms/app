@@ -180,7 +180,7 @@ function load(){
         }
     }
 
-    if (config.app.consumption.value!="disable") {
+    if (config.app.consumption.value!="disable" && parseInt(config.app.consumption.value)>0) {
         start_date = new Date("2022-05-01");
         // Load local data in 1 month chunks
         for (var i=0; i<1; i++) {
@@ -192,10 +192,10 @@ function load(){
             }
         }
     } else {
-        feed_data["home_solar"] = undefined;
+        feed_data["consumption"] = undefined;
     }
 
-    if (config.app.solar.value!="disable") {
+    if (config.app.solar.value!="disable" && parseInt(config.app.solar.value)>0) {
         start_date = new Date("2022-05-01");
         // Load local data in 1 month chunks
         for (var i=0; i<1; i++) {
