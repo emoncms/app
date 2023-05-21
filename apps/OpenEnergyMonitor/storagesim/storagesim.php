@@ -65,13 +65,22 @@ global $path, $session, $v;
                         <td>{{ gen.kwh | toFixed(0) }} kWh ({{ 100*gen.capacity_factor | toFixed(1)}}%)</td>
                     </tr>
                     <tr>
+                        <td>Nuclear / geothermal<br>(non load following)</td>
+                        <td>
+                            <div class="input-append">
+                                <input type="text" v-model="nuclear.output" style="width:50px" @change="update">
+                                <span class="add-on">kW</span>
+                            </td>
+                        <td>{{ nuclear.kwh | toFixed(0) }} kWh ({{ 100*nuclear.capacity_factor | toFixed(1)}}%)</td>
+                    </tr>
+                    <tr>
                         <td>Home solar feed</td>
                         <td>
                             <div class="input-append">
                                 <input type="text" v-model="home_solar.scale" style="width:50px" @change="update">
                                 <span class="add-on">%</span>
                             </td>
-                        <td>{{ home_solar.kwh | toFixed(0) }} kWh ({{ 100*app.home_solar.capacity_factor | toFixed(1)}}%)</td>
+                        <td>{{ home_solar.kwh | toFixed(0) }} kWh ({{ 100*home_solar.capacity_factor | toFixed(1)}}%)</td>
                     </tr>
                     <tr>
                         <td>Total supply</td>
@@ -104,7 +113,18 @@ global $path, $session, $v;
                         <td></td>
                         <td>{{ balance.unmet | toFixed(1) }} kWh</td>
                     </tr>
-
+                    <tr>
+                        <td>Peak shaving storage requirement</td>
+                        <td>
+                            <div class="input-append">
+                                <span class="add-on">Show</span>
+                                <span class="add-on">
+                                <input type="checkbox" v-model="show_peak_shaving_balance" @change="update"/>
+                                </span>
+                            </div>
+                        </td>
+                        <td>{{ max_peak_shaving_deficit | toFixed(1) }} kWh</td>
+                    </tr>                  
                 </table>
             </div>
             <div class="span3" style="background-color:darkseagreen">
@@ -167,11 +187,11 @@ global $path, $session, $v;
                     </tr>
                     <tr>
                         <td>Total charge</td>
-                        <td>{{ store1.charge_kwh | toFixed(1) }} kWh</td>
+                        <td>{{ store1.charge_kwh | toFixed(1) }} kWh ({{ 100*store1.charge_CF | toFixed(1)}}%)</td>
                     </tr>
                     <tr>
                         <td>Total discharge</td>
-                        <td>{{ store1.discharge_kwh | toFixed(1) }} kWh</td>
+                        <td>{{ store1.discharge_kwh | toFixed(1) }} kWh ({{ 100*store1.discharge_CF | toFixed(1)}}%)</td>
                     </tr>
                     <tr>
                         <td>Cycles</td>
@@ -245,11 +265,11 @@ global $path, $session, $v;
                     </tr>
                     <tr>
                         <td>Total charge</td>
-                        <td>{{ store2.charge_kwh | toFixed(1) }} kWh</td>
+                        <td>{{ store2.charge_kwh | toFixed(1) }} kWh ({{ 100*store2.charge_CF | toFixed(1)}}%)</td>
                     </tr>
                     <tr>
                         <td>Total discharge</td>
-                        <td>{{ store2.discharge_kwh | toFixed(1) }} kWh</td>
+                        <td>{{ store2.discharge_kwh | toFixed(1) }} kWh ({{ 100*store2.discharge_CF | toFixed(1)}}%)</td>
                     </tr>
                     <tr>
                         <td>Cycles</td>
@@ -260,6 +280,8 @@ global $path, $session, $v;
                         <td>{{ 100*balance.after_store2 | toFixed(0) }}%</td>
                     </tr>
                 </table>
+
+                <button class="btn" @click="auto">Auto</button>
 
             </div>
         </div>
@@ -285,4 +307,4 @@ global $path, $session, $v;
     var app_config = <?php echo json_encode($config); ?>;
 </script>
 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/storagesim/storagesim.js?v=20"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/storagesim/storagesim.js?v=26"></script>
