@@ -101,7 +101,8 @@ var app = new Vue({
             kwh: 0
         },
         consumption: {
-            kwh: 0
+            kwh: 0,
+            efuel_demand: 0
         },
         balance: {
             before_store1: 0,
@@ -314,6 +315,9 @@ function model(){
         return false;
     }
 
+    var interval_direct_efuel_demand = app.consumption.efuel_demand / feed_data['consumption'].length;
+    var unmet_direct_efuel_demand = 0;
+
     var start = feed_data['consumption'][0][0];
     for (var z=0; z<feed_data['consumption'].length; z++) {
         let time = start*0.001 + (z * interval);
@@ -453,6 +457,14 @@ function model(){
             store2_discharge = discharge;
         }
 
+        // Substract direct efuel demand
+        if (app.store2.soc - interval_direct_efuel_demand < 0) {
+            unmet_direct_efuel_demand += interval_direct_efuel_demand - app.store2.soc;
+            app.store2.soc = 0;
+        } else {
+            app.store2.soc -= interval_direct_efuel_demand;
+        }
+
         // Record max and min store level
         if (app.store2.soc>app.store2.max_level) {
             app.store2.max_level = app.store2.soc;
@@ -516,13 +528,13 @@ function model(){
     app.balance.before_store1 = (consumption_kwh - deficit_before_store1_kwh) / consumption_kwh;
     app.balance.after_store1 = (consumption_kwh - deficit_after_store1_kwh) / consumption_kwh;
     app.balance.after_store2 = (consumption_kwh - deficit_after_store2_kwh) / consumption_kwh;
-    app.balance.unmet = deficit_after_store2_kwh
+    app.balance.unmet = deficit_after_store2_kwh + unmet_direct_efuel_demand;
 
     app.generation.wind.kwh = wind_kwh;
     app.generation.solar.kwh = solar_kwh;
     app.home_solar.kwh = home_solar_kwh;
     app.nuclear.kwh = nuclear_kwh;
-    app.consumption.kwh = consumption_kwh;
+    app.consumption.kwh = consumption_kwh + app.consumption.efuel_demand;
     app.supply.kwh = supply_kwh;
 
     app.store1.cycles = 0.5*(app.store1.charge_kwh + app.store1.discharge_kwh) / app.store1.capacity;

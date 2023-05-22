@@ -93,6 +93,16 @@ global $path, $session, $v;
                         <td>{{ consumption.kwh | toFixed(0) }} kWh</td>
                     </tr>
                     <tr>
+                        <td>Direct e-fuel demand (e.g industry, shipping or aviation)</td>
+                        <td>
+                            <div class="input-append">
+                                <input type="text" v-model.number="consumption.efuel_demand" style="width:50px" @change="update">
+                                <span class="add-on">kWh</span>
+                            </div>
+                        </td>
+                        <td></td>
+                    </tr>                    
+                    <tr>
                         <td>Primary energy factor</td>
                         <td></td>
                         <td>{{ 100*supply.kwh/consumption.kwh | toFixed(0) }}%</td>
@@ -307,4 +317,4 @@ global $path, $session, $v;
     var app_config = <?php echo json_encode($config); ?>;
 </script>
 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/storagesim/storagesim.js?v=26"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/storagesim/storagesim.js?v=27"></script>
