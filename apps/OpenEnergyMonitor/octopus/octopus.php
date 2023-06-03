@@ -740,7 +740,11 @@ function graph_load()
         let h = d.getHours() + (d.getMinutes()/60)
         
         let cost = go_day_rate;
-        if (h>=go_start_time && h<go_end_time) cost = go_offpeak_rate;
+        if (go_start_time<go_end_time) {
+            if (h>=go_start_time && h<go_end_time) cost = go_offpeak_rate;
+        } else {
+            if (h>=go_start_time || h<go_end_time) cost = go_offpeak_rate;
+        }
 
         data["go"].push([time,cost]);
         data["go"].push([time+(intervalms-1),cost]);
