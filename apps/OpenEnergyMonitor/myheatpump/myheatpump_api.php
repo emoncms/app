@@ -118,6 +118,42 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     $ideal_carnot_heat_mean = $ideal_carnot_heat_sum / $running_count;
     $prc_of_carnot = (100 * $heat_mean / $ideal_carnot_heat_mean);
     
+    // Last year and month figures
+
+    $end_time = 0;
+    $start_time = 0;
+    if (isset($app->config->heatpump_elec_kwh)) {
+        $elec_kwh_meta = $feed->get_meta($app->config->heatpump_elec_kwh);
+        $end_time = $elec_kwh_meta->end_time;
+        $start_time = $elec_kwh_meta->start_time;
+    }
+    if (isset($app->config->heatpump_heat_kwh)) {
+        $heat_kwh_meta = $feed->get_meta($app->config->heatpump_heat_kwh);
+        if ($heat_kwh_meta->end_time<$end_time) $end_time = $heat_kwh_meta->end_time;
+        if ($heat_kwh_meta->start_time>$start_time) $start_time = $heat_kwh_meta->start_time;
+    }
+
+    $year_start_time = $start_time;
+    $last30_start_time = $start_time;
+    $year_ago = $end_time - 365*24*3600;
+    $last30_ago = $end_time - 30*24*3600;
+    if ($year_start_time<$year_ago) $year_start_time = $year_ago;
+    if ($last30_start_time<$last30_ago) $last30_start_time = $last30_ago;
+
+    $last365_elec_kwh = 0;
+    $last30_elec_kwh = 0;
+    if (isset($app->config->heatpump_elec_kwh)) {
+        $end_value = $feed->get_value($app->config->heatpump_elec_kwh,$end_time);
+        $last365_elec_kwh = $end_value-$feed->get_value($app->config->heatpump_elec_kwh,$year_start_time);
+        $last30_elec_kwh = $end_value-$feed->get_value($app->config->heatpump_elec_kwh,$last30_start_time);
+    }
+    $last365_heat_kwh = 0;
+    $last30_heat_kwh = 0;
+    if (isset($app->config->heatpump_heat_kwh)) {
+        $end_value = $feed->get_value($app->config->heatpump_heat_kwh,$end_time);
+        $last365_heat_kwh = $end_value-$feed->get_value($app->config->heatpump_heat_kwh,$year_start_time);
+        $last30_heat_kwh = $end_value-$feed->get_value($app->config->heatpump_heat_kwh,$last30_start_time);
+    }
 
     $result = [
       "start"=>(int)$start,
@@ -143,6 +179,18 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
         "outsideT"=>number_format($outside_sum/$running_count,2,'.','')*1,
         "flow_minus_outside"=>number_format($flow_minus_outside_sum/$running_count,2,'.','')*1,
         "carnot_prc"=>number_format($prc_of_carnot,2,'.','')*1
+      ],
+      "last365"=>[
+        "elec_kwh"=>number_format($last365_elec_kwh,3,'.','')*1,
+        "heat_kwh"=>number_format($last365_heat_kwh,3,'.','')*1,
+        "cop"=>number_format($last365_heat_kwh/$last365_elec_kwh,2,'.','')*1,
+        "since"=>$year_start_time
+      ],
+      "last30"=>[
+        "elec_kwh"=>number_format($last30_elec_kwh,3,'.','')*1,
+        "heat_kwh"=>number_format($last30_heat_kwh,3,'.','')*1,
+        "cop"=>number_format($last30_heat_kwh/$last30_elec_kwh,2,'.','')*1,
+        "since"=>$last30_start_time
       ]
     ];
 
