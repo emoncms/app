@@ -134,8 +134,8 @@ function app_controller()
         if ($app!=false) {
         
             if ($app->app=="myheatpump") {
-                $start = get('start',true);
-                $end = get('end',true);
+                $start = get('start',false);
+                $end = get('end',false);
                 $startingpower = get('startingpower',false,100);
                 
                 require_once "Modules/feed/feed_model.php";

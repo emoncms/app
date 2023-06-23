@@ -2,11 +2,57 @@
 
 function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
 
-    $timezone = 'Europe/London';
-    $start = convert_time($start,$timezone);
-    $end = convert_time($end,$timezone);
-            
-    if ($end<=$start) return array('success'=>false, 'message'=>"Request end time before start time");
+    // This first part fetches values for the last 365 days and the last 30 days
+    // independently of the start and end times passed in the URL. The second part
+    // specifically returns stats for the start and end times passed in the URL.
+
+    $end_time = 0;
+    $start_time = 0;
+    if (isset($app->config->heatpump_elec_kwh)) {
+        $elec_kwh_meta = $feed->get_meta($app->config->heatpump_elec_kwh);
+        $end_time = $elec_kwh_meta->end_time;
+        $start_time = $elec_kwh_meta->start_time;
+    }
+    if (isset($app->config->heatpump_heat_kwh)) {
+        $heat_kwh_meta = $feed->get_meta($app->config->heatpump_heat_kwh);
+        if ($heat_kwh_meta->end_time<$end_time) $end_time = $heat_kwh_meta->end_time;
+        if ($heat_kwh_meta->start_time>$start_time) $start_time = $heat_kwh_meta->start_time;
+    }
+
+    $year_start_time = $start_time;
+    $last30_start_time = $start_time;
+    $year_ago = $end_time - 365*24*3600;
+    $last30_ago = $end_time - 30*24*3600;
+    if ($year_start_time<$year_ago) $year_start_time = $year_ago;
+    if ($last30_start_time<$last30_ago) $last30_start_time = $last30_ago;
+
+    $last365_elec_kwh = 0;
+    $last30_elec_kwh = 0;
+    if (isset($app->config->heatpump_elec_kwh)) {
+        $end_value = $feed->get_value($app->config->heatpump_elec_kwh,$end_time);
+        $last365_elec_kwh = $end_value-$feed->get_value($app->config->heatpump_elec_kwh,$year_start_time);
+        $last30_elec_kwh = $end_value-$feed->get_value($app->config->heatpump_elec_kwh,$last30_start_time);
+    }
+    $last365_heat_kwh = 0;
+    $last30_heat_kwh = 0;
+    if (isset($app->config->heatpump_heat_kwh)) {
+        $end_value = $feed->get_value($app->config->heatpump_heat_kwh,$end_time);
+        $last365_heat_kwh = $end_value-$feed->get_value($app->config->heatpump_heat_kwh,$year_start_time);
+        $last30_heat_kwh = $end_value-$feed->get_value($app->config->heatpump_heat_kwh,$last30_start_time);
+    }
+
+    // If no start and end times specificed in URL, return stats for the last 30 days available in the feeds
+
+    if ($end==null || $start==null) {
+        $end = $end_time;
+        $start = $last30_start_time;
+    } else {
+        $timezone = 'Europe/London';
+        $start = convert_time($start,$timezone);
+        $end = convert_time($end,$timezone);
+                
+        if ($end<=$start) return array('success'=>false, 'message'=>"Request end time before start time");
+    }
 
     $period = $end-$start;
     if ($period<=3600*24*7) {
@@ -22,8 +68,6 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     } else {
         return array('success'=>false, 'message'=>"period to large");
     } 
-
-
 
     if (!isset($app->config->heatpump_flowT) || $app->config->heatpump_flowT<1) return array('success'=>false, 'message'=>"Missing flow temperature feed");
     if (!isset($app->config->heatpump_elec) || $app->config->heatpump_elec<1) return array('success'=>false, 'message'=>"Missing electricity consumption feed");
@@ -118,43 +162,6 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     $ideal_carnot_heat_mean = $ideal_carnot_heat_sum / $running_count;
     $prc_of_carnot = (100 * $heat_mean / $ideal_carnot_heat_mean);
     
-    // Last year and month figures
-
-    $end_time = 0;
-    $start_time = 0;
-    if (isset($app->config->heatpump_elec_kwh)) {
-        $elec_kwh_meta = $feed->get_meta($app->config->heatpump_elec_kwh);
-        $end_time = $elec_kwh_meta->end_time;
-        $start_time = $elec_kwh_meta->start_time;
-    }
-    if (isset($app->config->heatpump_heat_kwh)) {
-        $heat_kwh_meta = $feed->get_meta($app->config->heatpump_heat_kwh);
-        if ($heat_kwh_meta->end_time<$end_time) $end_time = $heat_kwh_meta->end_time;
-        if ($heat_kwh_meta->start_time>$start_time) $start_time = $heat_kwh_meta->start_time;
-    }
-
-    $year_start_time = $start_time;
-    $last30_start_time = $start_time;
-    $year_ago = $end_time - 365*24*3600;
-    $last30_ago = $end_time - 30*24*3600;
-    if ($year_start_time<$year_ago) $year_start_time = $year_ago;
-    if ($last30_start_time<$last30_ago) $last30_start_time = $last30_ago;
-
-    $last365_elec_kwh = 0;
-    $last30_elec_kwh = 0;
-    if (isset($app->config->heatpump_elec_kwh)) {
-        $end_value = $feed->get_value($app->config->heatpump_elec_kwh,$end_time);
-        $last365_elec_kwh = $end_value-$feed->get_value($app->config->heatpump_elec_kwh,$year_start_time);
-        $last30_elec_kwh = $end_value-$feed->get_value($app->config->heatpump_elec_kwh,$last30_start_time);
-    }
-    $last365_heat_kwh = 0;
-    $last30_heat_kwh = 0;
-    if (isset($app->config->heatpump_heat_kwh)) {
-        $end_value = $feed->get_value($app->config->heatpump_heat_kwh,$end_time);
-        $last365_heat_kwh = $end_value-$feed->get_value($app->config->heatpump_heat_kwh,$year_start_time);
-        $last30_heat_kwh = $end_value-$feed->get_value($app->config->heatpump_heat_kwh,$last30_start_time);
-    }
-
     $result = [
       "start"=>(int)$start,
       "end"=>(int)$end,
