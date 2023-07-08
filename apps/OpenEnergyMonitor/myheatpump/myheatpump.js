@@ -21,12 +21,13 @@ config.app = {
     "heatpump_elec_kwh":{"type":"feed", "autoname":"heatpump_elec_kwh", "engine":5, "description":"Cumulative electric use kWh"},
     "heatpump_heat":{"type":"feed", "autoname":"heatpump_heat", "engine":"5", "optional":true, "description":"Heat output in watts"},
     "heatpump_heat_kwh":{"type":"feed", "autoname":"heatpump_heat_kwh", "engine":5, "optional":true, "description":"Cumulative heat output in kWh"},
+    "heatpump_cool_kwh":{"type":"feed", "autoname":"heatpump_cool_kwh", "engine":5, "optional":true, "description":"Cumulative cool output in kWh (negative)"},
     "heatpump_flowT":{"type":"feed", "autoname":"heatpump_flowT", "engine":5, "optional":true, "description":"Flow temperature"},
     "heatpump_returnT":{"type":"feed", "autoname":"heatpump_returnT", "engine":5, "optional":true, "description":"Return temperature"},
     "heatpump_outsideT":{"type":"feed", "autoname":"heatpump_outsideT", "engine":5, "optional":true, "description":"Outside temperature"},
     "heatpump_roomT":{"type":"feed", "autoname":"heatpump_roomT", "engine":5, "optional":true, "description":"Room temperature"},
     "heatpump_flowrate":{"type":"feed", "autoname":"heatpump_flowrate", "engine":5, "optional":true, "description":"Flow rate"},
-    "start_date":{"type":"value", "default":0, "name": "Start date", "description":_("Start date for all time values (unix timestamp)")},
+    "start_date":{"type":"value", "default":0, "name": "Start date", "description":_("Start date for all time values (unix timestamp)")}
 };
 config.feeds = feed.list();
 
@@ -48,6 +49,7 @@ var flot_font_size = 12;
 var updaterinst = false;
 var elec_enabled = false;
 var heat_enabled = false;
+var cool_enabled = false;
 var feeds = {};
 var progtime = 0;
 var heatpump_elec_start = 0;
@@ -80,6 +82,7 @@ function show()
     // -------------------------------------------------------------------------------
     if (feeds["heatpump_elec_kwh"]!=undefined) elec_enabled = true;
     if (feeds["heatpump_heat"]!=undefined && feeds["heatpump_heat_kwh"]!=undefined) heat_enabled = true;
+    if (feeds["heatpump_cool_kwh"]!=undefined) cool_enabled = true;
     if (feeds["heatpump_flowrate"]!=undefined) {
         $("#show_flow_rate_bound").show();
     }
@@ -97,6 +100,10 @@ function show()
         meta["heatpump_heat"] = feed.getmeta(feeds["heatpump_heat"].id);
         if (meta["heatpump_heat_kwh"].start_time>start_time) start_time = meta["heatpump_heat_kwh"].start_time;
         if (meta["heatpump_heat_kwh"].end_time>end_time) end_time = meta["heatpump_heat_kwh"].end_time;
+    }
+
+    if (cool_enabled) {
+        meta["heatpump_cool_kwh"] = feed.getmeta(feeds["heatpump_cool_kwh"].id);
     }
 
     var alltime_start_time = start_time;
@@ -453,6 +460,11 @@ $("#stats_when_running").click(function(){
     powergraph_draw();
 });
 
+$("#show_cooling").click(function(){
+    powergraph_load();
+    powergraph_draw();
+});
+
 $("#condensing_offset").change(function(){
     powergraph_load();
     powergraph_draw();
@@ -766,7 +778,26 @@ function powergraph_load()
         }
     }
     $("#standby_kwh").html(standby_kwh.toFixed(3));
-        
+    
+    if ($("#show_cooling")[0].checked) {
+        data["heat_only"] = [];
+        data["cooling"] = [];
+        for (var z in data["heatpump_heat"]) {
+            let time = data["heatpump_heat"][z][0];
+            let heat = data["heatpump_heat"][z][1];
+            heat_only = 0;
+            cool = 0;
+            if (heat>0) {
+                heat_only = heat;
+            } else {
+                cool = heat;
+            }
+            data["heat_only"].push([time,heat_only]);
+            data["cooling"].push([time,cool]);
+        }
+    }
+
+
     var feedstats = {};
     if (elec_enabled) feedstats["heatpump_elec"] = stats(data["heatpump_elec"]);
     if (heat_enabled) feedstats["heatpump_heat"] = stats(data["heatpump_heat"]);
@@ -775,6 +806,9 @@ function powergraph_load()
     if (data["heatpump_outsideT"]!=undefined) feedstats["heatpump_outsideT"] = stats(data["heatpump_outsideT"]);
     if (data["heatpump_roomT"]!=undefined) feedstats["heatpump_roomT"] = stats(data["heatpump_roomT"]);
     if (data["heatpump_flowrate"]!=undefined) feedstats["heatpump_flowrate"] = stats(data["heatpump_flowrate"]);
+
+    if (data["heat_only"]!=undefined) feedstats["heat_only"] = stats(data["heat_only"]);
+    if (data["cooling"]!=undefined) feedstats["cooling"] = stats(data["cooling"]);
     
     if (feedstats["heatpump_elec"].mean>0) {
         var elec_mean = 0; var heat_mean = 0;
@@ -804,12 +838,14 @@ function powergraph_load()
     
     var names = {
       "heatpump_elec":"Electric consumption",
-      "heatpump_heat":"Heat output",  
+      "heatpump_heat":"Heat output (net)",  
       "heatpump_flowT":"Flow temperature",
       "heatpump_returnT":"Return temperature",
       "heatpump_outsideT":"Outside temperature",
       "heatpump_roomT":"Room temperature",
-      "heatpump_flowrate":"Flow rate"
+      "heatpump_flowrate":"Flow rate",
+      "heat_only":"Heat output (gross)",
+      "cooling":"Cooling/Defrost"
     }
     
     var out = "";
@@ -822,7 +858,7 @@ function powergraph_load()
         out += "<td style='text-align:center'>"+(feedstats[z].maxval*1).toFixed(2)+"</td>";
         out += "<td style='text-align:center'>"+(feedstats[z].diff*1).toFixed(2)+"</td>";
         out += "<td style='text-align:center'>"+(feedstats[z].mean*1).toFixed(2)+"</td>";
-        var kwhstr = ""; if (z=="heatpump_elec" || z=="heatpump_heat") kwhstr = (feedstats[z].kwh*1).toFixed(3)
+        var kwhstr = ""; if (z=="heatpump_elec" || z=="heatpump_heat" || z=="heat_only" || z=="cooling") kwhstr = (feedstats[z].kwh*1).toFixed(3)
         out += "<td style='text-align:center'>"+kwhstr+"</td>";
         out += "<td style='text-align:center'>"+(feedstats[z].stdev*1).toFixed(2)+"</td>";
         out += "</tr>";
@@ -844,7 +880,7 @@ function powergraph_draw()
             reserveSpace:false
         },
         yaxes: [
-            { min: 0,font: {size:flot_font_size, color:"#666"},reserveSpace:false},
+            {font: {size:flot_font_size, color:"#666"},reserveSpace:false},
             {font: {size:flot_font_size, color:"#666"},reserveSpace:false}
         ],
         grid: {
@@ -860,6 +896,11 @@ function powergraph_draw()
         selection: { mode: "x" },
         legend:{position:"NW", noColumns:7}
     }
+
+    if (!$("#show_cooling")[0].checked) {
+        options.yaxes[0].min = 0;
+    }
+
     if ($('#placeholder').width()) {
         $.plot($('#placeholder'),powergraph_series,options);
     }
@@ -903,6 +944,14 @@ function bargraph_load(start,end)
             elec_kwh_in_window += data["heatpump_elec_kwhd"][z][1];
         }
     }
+
+    if (cool_enabled) {
+        data["heatpump_cool_kwhd"] = feed.getdata(feeds["heatpump_cool_kwh"].id,start,end,"daily",0,1);
+        bargraph_series.push({
+            data: data["heatpump_cool_kwhd"], color: "#6495ED",
+            bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 1.0, lineWidth:0 }
+        });
+    }
     
     if (feeds["heatpump_outsideT"]!=undefined) {
         
@@ -934,8 +983,7 @@ function bargraph_draw()
         yaxes: [ { 
             font: {size:flot_font_size, color:"#666"}, 
             // labelWidth:-5
-            reserveSpace:false,
-            min:0
+            reserveSpace:false
         },{ 
             font: {size:flot_font_size, color:"#666"}, 
             // labelWidth:-5
@@ -951,6 +999,13 @@ function bargraph_draw()
             clickable: true
         }
     }
+
+    console.log("cool_enabled: "+cool_enabled)
+
+    if (!cool_enabled) {
+        options.yaxes[0].min = 0;
+    }
+
     if ($('#placeholder').width()) {
         var plot = $.plot($('#placeholder'),bargraph_series,options);
         $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'></div>");

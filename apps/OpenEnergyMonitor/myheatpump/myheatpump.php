@@ -133,6 +133,10 @@
         <div id="mean_when_running"></div>
         
         <hr style="margin:10px 0px 10px 0px">
+
+        <p><b>Show cooling:</b> <input id="show_cooling" type="checkbox" style="margin-top:-4px; margin-left:7px"></p>        
+
+        <hr style="margin:10px 0px 10px 0px">
         
         <b>Simulate heat output using carnot COP equation</b><input id="carnot_enable" type="checkbox" style="margin-top:-4px; margin-left:7px"> &nbsp;&nbsp;
         <b>Show as % of carnot COP</b><input id="carnot_enable_prc" type="checkbox" style="margin-top:-4px; margin-left:7px">
@@ -223,5 +227,5 @@ var session_write = <?php echo $session['write']; ?>;
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=50"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=52"></script>
 
