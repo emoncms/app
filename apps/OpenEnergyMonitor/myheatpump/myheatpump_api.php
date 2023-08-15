@@ -18,6 +18,13 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
         if ($heat_kwh_meta->end_time<$end_time) $end_time = $heat_kwh_meta->end_time;
         if ($heat_kwh_meta->start_time>$start_time) $start_time = $heat_kwh_meta->start_time;
     }
+    
+    if (isset($app->config->start_date) && $app->config->start_date>$start_time) {
+        $start_time = $app->config->start_date*1;
+    }
+    
+    $data_start = $start_time;
+    
 
     $year_start_time = $start_time;
     $last30_start_time = $start_time;
@@ -119,21 +126,58 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     $elec_kwh_running = 0;
     $heat_kwh_running = 0;
     
+    $elec_null_count = 0;
+    $heat_null_count = 0;
+    $flow_null_count = 0;
+    $return_null_count = 0;
+    $outside_null_count = 0;
+    
     for ($z=0; $z<count($elec_data); $z++) {
         $time = $start + $z*$interval;
-        if ($time<$elec_meta->end_time) {
+         
+        if (!is_null($elec_data[$z])) {
+            $elec = $elec_data[$z];
+        } else {
+            $elec_null_count++;
+        }
+        
+        if ($heat_data && !is_null($heat_data[$z])) {
+            $heat = $heat_data[$z];        
+        } else {
+            $heat_null_count++;
+        }
+        
+        if (!is_null($flowT_data[$z])) {
+            $flowT = $flowT_data[$z];
+        } else {
+            $flow_null_count++;
+        }
+        
+        if ($returnT_data && !is_null($returnT_data[$z])) {
+            $returnT = $returnT_data[$z];
+        } else {
+            $return_null_count++;
+        }
+        
+        if ($outsideT_data && !is_null($outsideT_data[$z])) {
+            $ambientT = $outsideT_data[$z];
+        } else {
+            $outside_null_count++;
+        }
             
-            if (!is_null($elec_data[$z])) $elec = $elec_data[$z];
-            if ($heat_data && !is_null($heat_data[$z])) $heat = $heat_data[$z];        
-            if (!is_null($flowT_data[$z])) $flowT = $flowT_data[$z];
-            if ($returnT_data && !is_null($returnT_data[$z])) $returnT = $returnT_data[$z];
-            if ($outsideT_data && !is_null($outsideT_data[$z])) $ambientT = $outsideT_data[$z];
+        if ($time<$elec_meta->end_time) {
             
             $elec_kwh += $elec * $interval / 3600000.0;
             $heat_kwh += $heat * $interval / 3600000.0;           
             
-            $carnot_COP = (($flowT+$condensing_offset+273) / (($flowT+$condensing_offset+273) - ($ambientT+$evaporator_offset+273)));
-            
+            $carnot_A = $flowT+$condensing_offset+273;
+            $carnot_B = ($flowT+$condensing_offset+273) - ($ambientT+$evaporator_offset+273);
+            if ($carnot_B!=0) {
+                $carnot_COP = $carnot_A / $carnot_B;
+            } else {
+                $carnot_COP = 0;
+            }
+
             $ideal_carnot_heat = $elec * $carnot_COP;
             if ($returnT>$flowT) {
                 $ideal_carnot_heat *= -1;
@@ -157,10 +201,49 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
             }
         }
     }
-    $elec_mean = $elec_sum/$running_count;
-    $heat_mean = $heat_sum/$running_count;
-    $ideal_carnot_heat_mean = $ideal_carnot_heat_sum / $running_count;
-    $prc_of_carnot = (100 * $heat_mean / $ideal_carnot_heat_mean);
+    if ($running_count>0) {
+        $elec_mean = $elec_sum/$running_count;
+        $heat_mean = $heat_sum/$running_count;
+        $ideal_carnot_heat_mean = $ideal_carnot_heat_sum / $running_count;
+        $prc_of_carnot = (100 * $heat_mean / $ideal_carnot_heat_mean);
+        
+        $when_running_flowT = $flowT_sum / $running_count;
+        $when_running_returnT = $returnT_sum / $running_count;
+        $when_running_dT = $dT_sum / $running_count;
+        $when_running_outsideT = $outside_sum / $running_count;
+        $when_running_flow_minus_outside = $flow_minus_outside_sum / $running_count;
+    } else {
+        $elec_mean = 0;
+        $heat_mean = 0;
+        $ideal_carnot_heat_mean = 0;
+        $prc_of_carnot = 0;
+        $when_running_flowT = 0;
+        $when_running_returnT = 0;
+        $when_running_dT = 0;
+        $when_running_outsideT = 0;
+        $when_running_flow_minus_outside = 0;
+    }
+    $count = count($elec_data);
+    
+    $running_COP = 0;
+    if ($elec_kwh_running>0) {
+        $running_COP = $heat_kwh_running/$elec_kwh_running;
+    }
+    
+    $full_period_cop = 0;
+    if ($elec_kwh!=0) {
+        $full_period_cop = $heat_kwh / $elec_kwh;
+    }
+    
+    $last365_cop = 0;
+    if ($last365_elec_kwh!=0) {
+        $last365_cop = $last365_heat_kwh / $last365_elec_kwh;
+    }
+
+    $last30_cop = 0;
+    if ($last30_elec_kwh!=0) {
+        $last30_cop = $last30_heat_kwh / $last30_elec_kwh;
+    }
     
     $result = [
       "start"=>(int)$start,
@@ -170,35 +253,42 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
       "full_period"=>[
         "elec_kwh"=>number_format($elec_kwh,3,'.','')*1,
         "heat_kwh"=>number_format($heat_kwh,3,'.','')*1,
-        "cop"=>number_format($heat_kwh/$elec_kwh,2,'.','')*1
+        "cop"=>number_format($full_period_cop,2,'.','')*1
       ],
       "standby_threshold"=>$starting_power,
       "standby_kwh"=>number_format($standby_kwh,3,'.','')*1,
       "when_running"=>[
         "elec_kwh"=>number_format($elec_kwh_running,3,'.','')*1,
         "heat_kwh"=>number_format($heat_kwh_running,3,'.','')*1,
-        "cop"=>number_format($heat_kwh_running/$elec_kwh_running,2,'.','')*1,
+        "cop"=>number_format($running_COP,2,'.','')*1,
         "elec_W"=>number_format($elec_mean,0,'.','')*1,
         "heat_W"=>number_format($heat_mean,0,'.','')*1,
-        "flowT"=>number_format($flowT_sum/$running_count,2,'.','')*1,
-        "returnT"=>number_format($returnT_sum/$running_count,2,'.','')*1,
-        "flow_minus_return"=>number_format($dT_sum/$running_count,2,'.','')*1,
-        "outsideT"=>number_format($outside_sum/$running_count,2,'.','')*1,
-        "flow_minus_outside"=>number_format($flow_minus_outside_sum/$running_count,2,'.','')*1,
+        "flowT"=>number_format($when_running_flowT,2,'.','')*1,
+        "returnT"=>number_format($when_running_returnT,2,'.','')*1,
+        "flow_minus_return"=>number_format($when_running_dT,2,'.','')*1,
+        "outsideT"=>number_format($when_running_outsideT,2,'.','')*1,
+        "flow_minus_outside"=>number_format($when_running_flow_minus_outside,2,'.','')*1,
         "carnot_prc"=>number_format($prc_of_carnot,2,'.','')*1
       ],
       "last365"=>[
         "elec_kwh"=>number_format($last365_elec_kwh,3,'.','')*1,
         "heat_kwh"=>number_format($last365_heat_kwh,3,'.','')*1,
-        "cop"=>number_format($last365_heat_kwh/$last365_elec_kwh,2,'.','')*1,
+        "cop"=>number_format($last365_cop,2,'.','')*1,
         "since"=>$year_start_time
       ],
       "last30"=>[
         "elec_kwh"=>number_format($last30_elec_kwh,3,'.','')*1,
         "heat_kwh"=>number_format($last30_heat_kwh,3,'.','')*1,
-        "cop"=>number_format($last30_heat_kwh/$last30_elec_kwh,2,'.','')*1,
+        "cop"=>number_format($last30_cop,2,'.','')*1,
         "since"=>$last30_start_time
-      ]
+      ],
+      "quality_elec"=>round(100*(1-($elec_null_count / $count))),
+      "quality_heat"=>round(100*(1-($heat_null_count / $count))),
+      "quality_flow"=>round(100*(1-($flow_null_count / $count))),
+      "quality_return"=>round(100*(1-($return_null_count / $count))),
+      "quality_outside"=>round(100*(1-($outside_null_count / $count))),
+      "data_start"=>$data_start
+      
     ];
 
     if (!$heat_data) {
