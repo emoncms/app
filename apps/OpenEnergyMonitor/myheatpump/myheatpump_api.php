@@ -28,8 +28,8 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
 
     $year_start_time = $start_time;
     $last30_start_time = $start_time;
-    $year_ago = $end_time - 365*24*3600;
-    $last30_ago = $end_time - 30*24*3600;
+    $year_ago = time() - 365*24*3600;
+    $last30_ago = time() - 30*24*3600;
     if ($year_start_time<$year_ago) $year_start_time = $year_ago;
     if ($last30_start_time<$last30_ago) $last30_start_time = $last30_ago;
 
@@ -37,15 +37,23 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     $last30_elec_kwh = 0;
     if (isset($app->config->heatpump_elec_kwh)) {
         $end_value = $feed->get_value($app->config->heatpump_elec_kwh,$end_time);
-        $last365_elec_kwh = $end_value-$feed->get_value($app->config->heatpump_elec_kwh,$year_start_time);
-        $last30_elec_kwh = $end_value-$feed->get_value($app->config->heatpump_elec_kwh,$last30_start_time);
+        if ($year_start_time<$end_time) {
+            $last365_elec_kwh = $end_value-$feed->get_value($app->config->heatpump_elec_kwh,$year_start_time);
+        }
+        if ($last30_start_time<$end_time) {
+            $last30_elec_kwh = $end_value-$feed->get_value($app->config->heatpump_elec_kwh,$last30_start_time);
+        }
     }
     $last365_heat_kwh = 0;
     $last30_heat_kwh = 0;
     if (isset($app->config->heatpump_heat_kwh)) {
         $end_value = $feed->get_value($app->config->heatpump_heat_kwh,$end_time);
-        $last365_heat_kwh = $end_value-$feed->get_value($app->config->heatpump_heat_kwh,$year_start_time);
-        $last30_heat_kwh = $end_value-$feed->get_value($app->config->heatpump_heat_kwh,$last30_start_time);
+        if ($year_start_time<$end_time) {
+            $last365_heat_kwh = $end_value-$feed->get_value($app->config->heatpump_heat_kwh,$year_start_time);
+        }
+        if ($last30_start_time<$end_time) {
+            $last30_heat_kwh = $end_value-$feed->get_value($app->config->heatpump_heat_kwh,$last30_start_time);
+        }
     }
 
     // If no start and end times specificed in URL, return stats for the last 30 days available in the feeds
@@ -80,22 +88,30 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     if (!isset($app->config->heatpump_elec) || $app->config->heatpump_elec<1) return array('success'=>false, 'message'=>"Missing electricity consumption feed");
         
     $elec_meta = $feed->get_meta($app->config->heatpump_elec);
-    $elec_data = $feed->get_data($app->config->heatpump_elec,$start,$end,$interval,1,"UTC","notime",false,0,0,false);
-    $flowT_data = $feed->get_data($app->config->heatpump_flowT,$start,$end,$interval,1,"UTC","notime",false,0,0,false);
-
-    $returnT_data = false;
-    if (isset($app->config->heatpump_returnT) && $app->config->heatpump_returnT>0) {
-        $returnT_data = $feed->get_data($app->config->heatpump_returnT,$start,$end,$interval,1,"UTC","notime",false,0,0,false);
-    }
-  
-    $outsideT_data = false;
-    if (isset($app->config->heatpump_outsideT) && $app->config->heatpump_outsideT>0) {
-        $outsideT_data = $feed->get_data($app->config->heatpump_outsideT,$start,$end,$interval,1,"UTC","notime",false,0,0,false);
-    }
     
-    $heat_data = false;
-    if (isset($app->config->heatpump_heat) && $app->config->heatpump_heat>0) {
-        $heat_data = $feed->get_data($app->config->heatpump_heat,$start,$end,$interval,1,"UTC","notime",false,0,0,false);
+    if ($start<$end) {
+        $elec_data = $feed->get_data($app->config->heatpump_elec,$start,$end,$interval,1,"UTC","notime",false,0,0,false);
+        $flowT_data = $feed->get_data($app->config->heatpump_flowT,$start,$end,$interval,1,"UTC","notime",false,0,0,false);
+
+        $returnT_data = false;
+        if (isset($app->config->heatpump_returnT) && $app->config->heatpump_returnT>0) {
+            $returnT_data = $feed->get_data($app->config->heatpump_returnT,$start,$end,$interval,1,"UTC","notime",false,0,0,false);
+        }
+      
+        $outsideT_data = false;
+        if (isset($app->config->heatpump_outsideT) && $app->config->heatpump_outsideT>0) {
+            $outsideT_data = $feed->get_data($app->config->heatpump_outsideT,$start,$end,$interval,1,"UTC","notime",false,0,0,false);
+        }
+        
+        $heat_data = false;
+        if (isset($app->config->heatpump_heat) && $app->config->heatpump_heat>0) {
+            $heat_data = $feed->get_data($app->config->heatpump_heat,$start,$end,$interval,1,"UTC","notime",false,0,0,false);
+        }
+    } else {
+        $elec_data = array();
+        $heat_data = array();
+        $outsideT_data = array();
+        $returnT_data = array();
     }
     
     $condensing_offset = 4;
@@ -245,6 +261,20 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
         $last30_cop = $last30_heat_kwh / $last30_elec_kwh;
     }
     
+    $quality_elec = 0;
+    $quality_heat = 0;
+    $quality_flow = 0;
+    $quality_return = 0;
+    $quality_outside = 0;
+    
+    if ($count) {
+        $quality_elec = round(100*(1-($elec_null_count / $count)));
+        $quality_heat = round(100*(1-($heat_null_count / $count)));
+        $quality_flow = round(100*(1-($flow_null_count / $count)));
+        $quality_return = round(100*(1-($return_null_count / $count)));
+        $quality_outside = round(100*(1-($outside_null_count / $count)));
+    }
+    
     $result = [
       "start"=>(int)$start,
       "end"=>(int)$end,
@@ -282,11 +312,11 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
         "cop"=>number_format($last30_cop,2,'.','')*1,
         "since"=>$last30_start_time
       ],
-      "quality_elec"=>round(100*(1-($elec_null_count / $count))),
-      "quality_heat"=>round(100*(1-($heat_null_count / $count))),
-      "quality_flow"=>round(100*(1-($flow_null_count / $count))),
-      "quality_return"=>round(100*(1-($return_null_count / $count))),
-      "quality_outside"=>round(100*(1-($outside_null_count / $count))),
+      "quality_elec"=>$quality_elec,
+      "quality_heat"=>$quality_heat,
+      "quality_flow"=>$quality_flow,
+      "quality_return"=>$quality_return,
+      "quality_outside"=>$quality_outside,
       "data_start"=>$data_start
       
     ];
