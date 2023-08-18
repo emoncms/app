@@ -275,6 +275,15 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
         $quality_outside = round(100*(1-($outside_null_count / $count)));
     }
     
+    $data_length_start = $start;
+    if ($data_start>$start) $data_length_start = $data_start;
+    $full_period_data_length = $end - $data_length_start;
+    if ($full_period_data_length<0) $full_period_data_length = 0;
+    
+    
+    $last365_data_length = $end_time - $year_start_time;
+    $last30_data_length = $end_time - $last30_start_time;
+    
     $result = [
       "start"=>(int)$start,
       "end"=>(int)$end,
@@ -283,7 +292,8 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
       "full_period"=>[
         "elec_kwh"=>number_format($elec_kwh,3,'.','')*1,
         "heat_kwh"=>number_format($heat_kwh,3,'.','')*1,
-        "cop"=>number_format($full_period_cop,2,'.','')*1
+        "cop"=>number_format($full_period_cop,2,'.','')*1,
+        "data_length"=>$full_period_data_length
       ],
       "standby_threshold"=>$starting_power,
       "standby_kwh"=>number_format($standby_kwh,3,'.','')*1,
@@ -304,13 +314,15 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
         "elec_kwh"=>number_format($last365_elec_kwh,3,'.','')*1,
         "heat_kwh"=>number_format($last365_heat_kwh,3,'.','')*1,
         "cop"=>number_format($last365_cop,2,'.','')*1,
-        "since"=>$year_start_time
+        "since"=>$year_start_time,
+        "data_length"=>$last365_data_length
       ],
       "last30"=>[
         "elec_kwh"=>number_format($last30_elec_kwh,3,'.','')*1,
         "heat_kwh"=>number_format($last30_heat_kwh,3,'.','')*1,
         "cop"=>number_format($last30_cop,2,'.','')*1,
-        "since"=>$last30_start_time
+        "since"=>$last30_start_time,
+        "data_length"=>$last30_data_length
       ],
       "quality_elec"=>$quality_elec,
       "quality_heat"=>$quality_heat,
@@ -318,7 +330,6 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
       "quality_return"=>$quality_return,
       "quality_outside"=>$quality_outside,
       "data_start"=>$data_start
-      
     ];
 
     if (!$heat_data) {
