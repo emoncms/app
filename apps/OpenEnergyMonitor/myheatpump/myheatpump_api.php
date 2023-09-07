@@ -148,73 +148,84 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     $return_null_count = 0;
     $outside_null_count = 0;
     
+    $count = 0;
+    
     for ($z=0; $z<count($elec_data); $z++) {
         $time = $start + $z*$interval;
-         
-        if (!is_null($elec_data[$z])) {
-            $elec = $elec_data[$z];
+        
+        if ($time>$start_time) {
+             
+            if (!is_null($elec_data[$z])) {
+                $elec = $elec_data[$z];
+            } else {
+                $elec_null_count++;
+            }
+            
+            if ($heat_data && !is_null($heat_data[$z])) {
+                $heat = $heat_data[$z];        
+            } else {
+                $heat_null_count++;
+            }
+            
+            if (!is_null($flowT_data[$z])) {
+                $flowT = $flowT_data[$z];
+            } else {
+                $flow_null_count++;
+            }
+            
+            if ($returnT_data && !is_null($returnT_data[$z])) {
+                $returnT = $returnT_data[$z];
+            } else {
+                $return_null_count++;
+            }
+            
+            if ($outsideT_data && !is_null($outsideT_data[$z])) {
+                $ambientT = $outsideT_data[$z];
+            } else {
+                $outside_null_count++;
+            }
+                
+            if ($time<$elec_meta->end_time) {
+                
+                $elec_kwh += $elec * $interval / 3600000.0;
+                $heat_kwh += $heat * $interval / 3600000.0;           
+                
+                $carnot_A = $flowT+$condensing_offset+273;
+                $carnot_B = ($flowT+$condensing_offset+273) - ($ambientT+$evaporator_offset+273);
+                if ($carnot_B!=0) {
+                    $carnot_COP = $carnot_A / $carnot_B;
+                } else {
+                    $carnot_COP = 0;
+                }
+
+                $ideal_carnot_heat = $elec * $carnot_COP;
+                if ($returnT>$flowT) {
+                    $ideal_carnot_heat *= -1;
+                }
+                
+                if ($elec>=$starting_power) {
+                    $flowT_sum += $flowT;
+                    $returnT_sum += $returnT;
+                    $elec_sum += $elec;
+                    $heat_sum += $heat;
+                    $dT_sum += ($flowT-$returnT);
+                    $outside_sum += $ambientT;
+                    $flow_minus_outside_sum += ($flowT-$ambientT);
+                    $ideal_carnot_heat_sum += $ideal_carnot_heat;
+                    $running_count++;
+                    
+                    $elec_kwh_running += $elec * $interval / 3600000.0; 
+                    $heat_kwh_running += $heat * $interval / 3600000.0; 
+                } else {
+                    $standby_kwh += $elec * $interval / 3600000.0; 
+                }
+            }
         } else {
             $elec_null_count++;
-        }
-        
-        if ($heat_data && !is_null($heat_data[$z])) {
-            $heat = $heat_data[$z];        
-        } else {
             $heat_null_count++;
-        }
-        
-        if (!is_null($flowT_data[$z])) {
-            $flowT = $flowT_data[$z];
-        } else {
             $flow_null_count++;
-        }
-        
-        if ($returnT_data && !is_null($returnT_data[$z])) {
-            $returnT = $returnT_data[$z];
-        } else {
             $return_null_count++;
-        }
-        
-        if ($outsideT_data && !is_null($outsideT_data[$z])) {
-            $ambientT = $outsideT_data[$z];
-        } else {
             $outside_null_count++;
-        }
-            
-        if ($time<$elec_meta->end_time) {
-            
-            $elec_kwh += $elec * $interval / 3600000.0;
-            $heat_kwh += $heat * $interval / 3600000.0;           
-            
-            $carnot_A = $flowT+$condensing_offset+273;
-            $carnot_B = ($flowT+$condensing_offset+273) - ($ambientT+$evaporator_offset+273);
-            if ($carnot_B!=0) {
-                $carnot_COP = $carnot_A / $carnot_B;
-            } else {
-                $carnot_COP = 0;
-            }
-
-            $ideal_carnot_heat = $elec * $carnot_COP;
-            if ($returnT>$flowT) {
-                $ideal_carnot_heat *= -1;
-            }
-            
-            if ($elec>=$starting_power) {
-                $flowT_sum += $flowT;
-                $returnT_sum += $returnT;
-                $elec_sum += $elec;
-                $heat_sum += $heat;
-                $dT_sum += ($flowT-$returnT);
-                $outside_sum += $ambientT;
-                $flow_minus_outside_sum += ($flowT-$ambientT);
-                $ideal_carnot_heat_sum += $ideal_carnot_heat;
-                $running_count++;
-                
-                $elec_kwh_running += $elec * $interval / 3600000.0; 
-                $heat_kwh_running += $heat * $interval / 3600000.0; 
-            } else {
-                $standby_kwh += $elec * $interval / 3600000.0; 
-            }
         }
     }
     if ($running_count>0) {
