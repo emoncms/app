@@ -201,8 +201,8 @@ if (!sessionwrite) $(".config-open").hide();
 // ----------------------------------------------------------------------
 config.app = {
     "title":{"type":"value", "default":"MY ELECTRIC", "name": "Title", "description":"Optional title for app"},
-    "use":{"type":"feed", "autoname":"use", "engine":"5"},
-    "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5},
+    "use":{"type":"feed", "autoname":"use"},
+    "use_kwh":{"type":"feed", "autoname":"use_kwh"},
     "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity £/kWh"},
     "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$..)"},
     "showcomparison":{"type":"checkbox", "default":true, "name": "Show comparison", "description":"Energy stack comparison"},

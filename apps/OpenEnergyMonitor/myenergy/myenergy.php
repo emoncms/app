@@ -147,8 +147,8 @@ if (!sessionwrite) $(".config-open").hide();
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "use":{"type":"feed", "autoname":"use", "engine":"5", "description":_("House or building use in watts")},
-    "solar":{"optional":true, "type":"feed", "autoname":"solar", "engine":"5", "description":_("Solar pv generation in watts")},
+    "use":{"type":"feed", "autoname":"use", "description":_("House or building use in watts")},
+    "solar":{"optional":true, "type":"feed", "autoname":"solar", "description":_("Solar pv generation in watts")},
     "windkwh":{"type":"value", "default":2000, "name": "kWh Wind", "description":_("kWh of wind energy bought annually")},
     "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")},
     "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}

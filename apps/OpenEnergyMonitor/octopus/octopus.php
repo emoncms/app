@@ -240,11 +240,11 @@ if (!sessionwrite) $(".config-open").hide();
 // ----------------------------------------------------------------------
 config.app = {
     "title":{"type":"value", "default":"OCTOPUS AGILE", "name": "Title", "description":"Optional title for app"},
-    "import":{"optional":true, "type":"feed", "autoname":"import", "engine":"5"},
-    "import_kwh":{"type":"feed", "autoname":"import_kwh", "engine":5},
-    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "engine":5},
-    "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "engine":5},
-    "meter_kwh_hh":{"optional":true, "type":"feed", "autoname":"meter_kwh_hh", "engine":5},
+    "import":{"optional":true, "type":"feed", "autoname":"import"},
+    "import_kwh":{"type":"feed", "autoname":"import_kwh"},
+    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh"},
+    "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh"},
+    "meter_kwh_hh":{"optional":true, "type":"feed", "autoname":"meter_kwh_hh"},
 
     "tariff":{"type":"select", "name":"Select tariff:", "default":"AGILE-FLEX-22-11-25", "options":["AGILE-18-02-21","AGILE-22-07-22","AGILE-22-08-31","AGILE-VAR-22-10-19","AGILE-FLEX-22-11-25"]},
     

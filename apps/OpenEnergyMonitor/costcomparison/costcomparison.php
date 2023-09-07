@@ -139,7 +139,6 @@ config.app = {
     "use_kwh": {
         "type": "feed",
         "autoname": "use_kwh",
-        "engine": 5, 
         "description": "Use import_kwh if you have solar or renewable energy, otherwise use_kwh."        
     },
     "currency": {

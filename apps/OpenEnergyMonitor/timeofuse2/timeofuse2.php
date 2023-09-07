@@ -249,8 +249,8 @@ if (!sessionwrite) $(".config-open").hide();
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "use":{"type":"feed", "autoname":"use", "engine":5, "description":"Time Of Use total feed (W)"},
-    "use_kwh":{"type":"feed", "autoname":"use_kwh", "engine":5, "description":"Time Of Use accumulated kWh"},
+    "use":{"type":"feed", "autoname":"use", "description":"Time Of Use total feed (W)"},
+    "use_kwh":{"type":"feed", "autoname":"use_kwh", "description":"Time Of Use accumulated kWh"},
     "currency":{"type":"value", "default":"$", "name": "Currency", "description":"Currency symbol (£,$..)"},
     "tier_cost":{"type":"value", "default":"OffPeak:0.165,Shoulder:0.253,Peak:0.594",
         "name":"Tier Names and Costs, currency/kWh",
