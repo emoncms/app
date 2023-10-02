@@ -288,7 +288,12 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     
     $data_length_start = $start;
     if ($data_start>$start) $data_length_start = $data_start;
-    $full_period_data_length = $end - $data_length_start;
+    
+    
+    $data_length_end = $end;
+    $now = time();
+    if ($data_length_end>$now) $data_length_end = $now;
+    $full_period_data_length = $data_length_end - $data_length_start;
     if ($full_period_data_length<0) $full_period_data_length = 0;
     
     

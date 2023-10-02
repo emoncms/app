@@ -200,8 +200,20 @@ function updater()
         if (total_elec>0) total_cop = total_heat / total_elec;
         if (total_cop<0) total_cop = 0;
         
-        $("#total_elec").html(Math.round(total_elec));
-        $("#total_heat").html(Math.round(total_heat));
+        if (total_elec<20) {
+            total_elec = total_elec.toFixed(1);
+        } else {
+            total_elec = total_elec.toFixed(0);
+        }
+
+        if (total_heat<20) {
+            total_heat = total_heat.toFixed(1);
+        } else {
+            total_heat = total_heat.toFixed(0);
+        }
+        
+        $("#total_elec").html(total_elec);
+        $("#total_heat").html(total_heat);
         $("#total_cop").html(total_cop.toFixed(2));
         
         // Updates every 60 seconds
