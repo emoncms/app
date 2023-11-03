@@ -228,8 +228,12 @@ function updater()
             }
             
             var elec = 0; var heat = 0;
-            if (elec_enabled) elec = feeds["heatpump_elec_kwh"].value - feed.getvalue(feeds["heatpump_elec_kwh"].id, min30);
-            if (heat_enabled) heat = feeds["heatpump_heat_kwh"].value - feed.getvalue(feeds["heatpump_heat_kwh"].id, min30);
+            // if (elec_enabled) elec = feeds["heatpump_elec_kwh"].value - feed.getvalue(feeds["heatpump_elec_kwh"].id, min30);
+            // if (heat_enabled) heat = feeds["heatpump_heat_kwh"].value - feed.getvalue(feeds["heatpump_heat_kwh"].id, min30);
+
+            if (elec_enabled) elec = get_average("heatpump_elec",1800);
+            if (heat_enabled) heat = get_average("heatpump_heat",1800);
+            
             
             var COP = 0;
             if (elec>0) COP = heat / elec;
@@ -244,6 +248,18 @@ function updater()
         //$(".value1").css("color","#00cc00");
         //setTimeout(function(){ $(".value1").css("color","#333"); },400);
     });
+}
+
+function get_average(name,duration) {
+
+    var dps = feed.getdata(feeds[name].id,feeds[name].time-duration,feeds[name].time,60,1,0,0,0);
+    var sum = 0;
+    var n = 0;
+    for (var z in dps) {
+        sum += dps[z][1];
+        n++;
+    }
+    return sum/n;
 }
 
 // -------------------------------------------------------------------------------
