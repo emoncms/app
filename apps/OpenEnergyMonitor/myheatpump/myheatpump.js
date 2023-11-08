@@ -55,6 +55,9 @@ var heatpump_heat_start = 0;
 var start_time = 0;
 var end_time = 0;
 var show_flow_rate = false;
+var show_instant_cop = false;
+var inst_cop_min = 2;
+var inst_cop_max = 6;
 
 var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
  
@@ -371,6 +374,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 else if (item.series.label=="Electric") { name = "Elec"; unit = "W"; }
                 else if (item.series.label=="Heat") { name = "Heat"; unit = "W"; }
                 else if (item.series.label=="Carnot Heat") { name = "Carnot Heat"; unit = "W"; }
+                else if (item.series.label=="Inst COP") { name = "Inst COP"; unit = ""; dp=1; }
                 else if (item.series.label=="Flow rate") { 
                     name = "Flow rate"; 
                     unit = " "+feeds["heatpump_flowrate"].unit;
@@ -457,6 +461,18 @@ $("#carnot_enable").click(function(){
     powergraph_draw();
 });
 
+$("#show_instant_cop").click(function(){
+
+    if ($("#show_instant_cop")[0].checked) {
+        show_instant_cop = true;
+    } else {
+        show_instant_cop = false;
+    }
+
+    powergraph_load();
+    powergraph_draw();
+});
+
 $("#carnot_enable_prc").click(function(){
 
     if ($("#carnot_enable_prc")[0].checked) {
@@ -520,11 +536,13 @@ function powergraph_load()
     var simulate_heat_output = $("#carnot_enable")[0].checked;
     var show_as_prc_of_carnot = $("#carnot_enable_prc")[0].checked;
     var stats_when_running = $("#stats_when_running")[0].checked;
+    var inst_cop_min = parseFloat($("#inst_cop_min").val());
+    var inst_cop_max = parseFloat($("#inst_cop_max").val());
     
     var skipmissing = 1;
     var limitinterval = 1;
     
-    var all_same_interval = false;
+    var all_same_interval = true;
     if (simulate_heat_output || stats_when_running || show_as_prc_of_carnot) {
         all_same_interval = true;
     }
@@ -655,6 +673,7 @@ function powergraph_load()
     if (all_same_interval) {
         if (data["heatpump_elec"]!=undefined && data["heatpump_flowT"]!=undefined) {
             data["heatpump_heat_carnot"] = [];
+            data["inst_COP"] = [];
             
             var condensing_offset = parseFloat($("#condensing_offset").val());
             var evaporator_offset = parseFloat($("#evaporator_offset").val());
@@ -691,6 +710,10 @@ function powergraph_load()
             
             for (var z in data["heatpump_elec"]) {
                 let time = data["heatpump_elec"][z][0];
+
+                let practical_carnot_heat = null;
+                let inst_COP = null;
+
                 if (time<meta["heatpump_elec"].end_time*1000) {
                     
                     if (data["heatpump_elec"][z][1]!=null) power = data["heatpump_elec"][z][1];
@@ -704,8 +727,10 @@ function powergraph_load()
                     }
                     
                     let carnot_COP = ((flowT+condensing_offset+273) / ((flowT+condensing_offset+273) - (ambientT+evaporator_offset+273)));
-                    let practical_carnot_heat = null;
+                    
                     let ideal_carnot_heat = null;
+
+                    inst_COP = heat / power;
                     
                     if (power!=null) {
                         practical_carnot_heat = power * carnot_COP * heatpump_factor;
@@ -750,12 +775,26 @@ function powergraph_load()
                     }
                 
                     data["heatpump_heat_carnot"][z] = [time,practical_carnot_heat]
+                    data["inst_COP"][z] = [time,inst_COP]
                 }
             }
             var practical_carnot_heat_mean = practical_carnot_heat_sum / carnot_heat_n;
             var ideal_carnot_heat_mean = ideal_carnot_heat_sum / carnot_heat_n;
             if (simulate_heat_output && !show_as_prc_of_carnot) {
                 powergraph_series.push({label:"Carnot Heat", data:data["heatpump_heat_carnot"], yaxis:1, color:7, lines:{show:true, fill:0.05, lineWidth:0.8}});
+            }
+
+            if (show_instant_cop) {
+                
+                // filter out inst_COP values outside of range
+                for (var z in data["inst_COP"]) {
+                    let inst_COP = data["inst_COP"][z][1];
+                    if (inst_COP>inst_cop_max) inst_COP = null;
+                    else if (inst_COP<inst_cop_min) inst_COP = null;
+                    data["inst_COP"][z][1] = inst_COP;
+                }
+
+                powergraph_series.push({label:"Inst COP", data: data["inst_COP"], yaxis:3, color:"#000", lines:{show:true, lineWidth:2}});
             }
             
             if (show_as_prc_of_carnot) {

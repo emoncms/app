@@ -127,6 +127,18 @@
         </div>     
 
         <hr style="margin:10px 0px 10px 0px">
+
+        <p><b>Show Instantaneous COP:</b> <input id="show_instant_cop" type="checkbox" style="margin-top:-4px; margin-left:7px"></p>
+
+        <div class="input-prepend input-append" style="margin-top:5px">
+          <span class="add-on">Valid COP</span>
+          <span class="add-on">Min</span>
+          <input type="text" style="width:50px" id="inst_cop_min" value="2.0">
+          <span class="add-on">Max</span>
+          <input type="text" style="width:50px" id="inst_cop_max" value="8.0">
+        </div>
+
+        <hr style="margin:10px 0px 10px 0px">
         
         <p><b>Show mean values for periods when heat pump is running only:</b> <input id="stats_when_running" type="checkbox" style="margin-top:-4px; margin-left:7px"><br><span style="font-size:12px">(Based on starting power value above)</span></p>        
 
@@ -223,5 +235,5 @@ var session_write = <?php echo $session['write']; ?>;
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=54"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=55"></script>
 
