@@ -60,6 +60,8 @@ var inst_cop_min = 2;
 var inst_cop_max = 6;
 var inst_cop_mv_av_dp = 0;
 
+var realtime_cop_div_mode = "30min";
+
 var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
  
 config.init();
@@ -183,6 +185,9 @@ function clear()
 
 function updater()
 {
+
+
+
     feed.listbyidasync(function(result){
         if (result === null) { return; }
         
@@ -193,6 +198,14 @@ function updater()
         if (feeds["heatpump_elec"]!=undefined) $("#heatpump_elec").html(Math.round(feeds["heatpump_elec"].value));
         if (feeds["heatpump_heat"]!=undefined) $("#heatpump_heat").html(Math.round(feeds["heatpump_heat"].value));
         if (feeds["heatpump_flowT"]!=undefined) $("#heatpump_flowT").html((1*feeds["heatpump_flowT"].value).toFixed(1));
+        
+        if (realtime_cop_div_mode=="inst" && feeds["heatpump_elec"]!=undefined && feeds["heatpump_heat"]!=undefined) {
+            var COP_inst = 0;
+            if (feeds["heatpump_elec"].value>0) {
+                COP_inst = feeds["heatpump_heat"].value / feeds["heatpump_elec"].value;
+            }
+            $("#realtime_cop_value").html(COP_inst.toFixed(2));
+        }
         
         // Update all-time values
         var total_elec = 0;
@@ -242,7 +255,9 @@ function updater()
             var COP = 0;
             if (elec>0) COP = heat / elec;
             if (COP<0) COP =0;
-            $("#COP_30m").html(COP.toFixed(2));
+            if (realtime_cop_div_mode=="30min") {
+                $("#realtime_cop_value").html(COP.toFixed(2));
+            }
             
             if (feeds["heatpump_elec"]==undefined) $("#heatpump_elec").html(Math.round(elec*3600000/(60*30)));
             if (feeds["heatpump_elec"]==undefined) $("#heatpump_heat").html(Math.round(heat*3600000/(60*30)));
@@ -813,7 +828,7 @@ function powergraph_load()
                     data["inst_COP"][z][1] = inst_COP;
                 }
 
-                powergraph_series.push({label:"Inst COP", data: data["inst_COP"], yaxis:3, color:"#000", lines:{show:true, lineWidth:2}});
+                powergraph_series.push({label:"Inst COP", data: data["inst_COP"], yaxis:3, color:"#44b3e2", lines:{show:true, lineWidth:2}});
             }
             
             if (show_as_prc_of_carnot) {
@@ -1197,4 +1212,18 @@ $("#inst_cop_mv_av_dp").change(function() {
     inst_cop_mv_av_dp = parseInt($("#inst_cop_mv_av_dp").val());
     powergraph_load();
     powergraph_draw();
+});
+
+$("#realtime_cop_div").click(function() {
+    if (realtime_cop_div_mode=="30min") {
+        realtime_cop_div_mode = "inst";
+        $("#realtime_cop_title").html("COP Now");
+        $("#realtime_cop_value").html("---");
+    } else {
+        realtime_cop_div_mode = "30min";
+        $("#realtime_cop_title").html("COP 30mins");
+        $("#realtime_cop_value").html("---");
+        progtime = 0;
+    }
+    updater();
 });

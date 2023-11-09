@@ -36,9 +36,10 @@
       
       <table id="live_table" style="width:100%; color:#333">
         <tr>
-          <td style="width:25%; text-align:center" valign="top">
-            <div class="title1">COP 30 mins</div>
-            <div class="value1" id="COP_30m">---</div>
+
+          <td style="width:25%; text-align:center; cursor:pointer" valign="top" id="realtime_cop_div">
+            <div class="title1" id="realtime_cop_title">COP 30 mins</div>
+            <div class="value1" id="realtime_cop_value">---</div>
           </td>
           
           <td style="width:25%; text-align:center" valign="top">
