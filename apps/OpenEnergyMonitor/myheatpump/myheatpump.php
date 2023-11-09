@@ -138,6 +138,15 @@
           <input type="text" style="width:50px" id="inst_cop_max" value="8.0">
         </div>
 
+        <div class="input-prepend input-append" style="margin-top:5px">
+          <span class="add-on">Moving average</span>
+          <select id="inst_cop_mv_av_dp" style="width:100px">
+            <option value="0" selected>Disabled</option>
+            <option value="3">3 points</option>
+            <option value="5">5 points</option>
+          </select>
+        </div>
+
         <hr style="margin:10px 0px 10px 0px">
         
         <p><b>Show mean values for periods when heat pump is running only:</b> <input id="stats_when_running" type="checkbox" style="margin-top:-4px; margin-left:7px"><br><span style="font-size:12px">(Based on starting power value above)</span></p>        
@@ -235,5 +244,5 @@ var session_write = <?php echo $session['write']; ?>;
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=55"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=59"></script>
 

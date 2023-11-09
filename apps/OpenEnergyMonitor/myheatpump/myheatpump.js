@@ -58,6 +58,7 @@ var show_flow_rate = false;
 var show_instant_cop = false;
 var inst_cop_min = 2;
 var inst_cop_max = 6;
+var inst_cop_mv_av_dp = 0;
 
 var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
  
@@ -461,18 +462,6 @@ $("#carnot_enable").click(function(){
     powergraph_draw();
 });
 
-$("#show_instant_cop").click(function(){
-
-    if ($("#show_instant_cop")[0].checked) {
-        show_instant_cop = true;
-    } else {
-        show_instant_cop = false;
-    }
-
-    powergraph_load();
-    powergraph_draw();
-});
-
 $("#carnot_enable_prc").click(function(){
 
     if ($("#carnot_enable_prc")[0].checked) {
@@ -673,7 +662,6 @@ function powergraph_load()
     if (all_same_interval) {
         if (data["heatpump_elec"]!=undefined && data["heatpump_flowT"]!=undefined) {
             data["heatpump_heat_carnot"] = [];
-            data["inst_COP"] = [];
             
             var condensing_offset = parseFloat($("#condensing_offset").val());
             var evaporator_offset = parseFloat($("#evaporator_offset").val());
@@ -707,14 +695,21 @@ function powergraph_load()
             var running_count = 0;
             
             var histogram = {}
+
+            var now = (new Date()).getTime();
+            if (meta["heatpump_elec"].end_time*1000>now) {
+                now = meta["heatpump_elec"].end_time*1000;
+            }
+
+            var elec_without_null = [];
+            var heat_without_null = [];
             
             for (var z in data["heatpump_elec"]) {
                 let time = data["heatpump_elec"][z][0];
 
                 let practical_carnot_heat = null;
-                let inst_COP = null;
 
-                if (time<meta["heatpump_elec"].end_time*1000) {
+                if (time<now) {
                     
                     if (data["heatpump_elec"][z][1]!=null) power = data["heatpump_elec"][z][1];
                     if (data["heatpump_heat"]!=undefined && data["heatpump_heat"][z][1]!=null) heat = data["heatpump_heat"][z][1];        
@@ -729,8 +724,6 @@ function powergraph_load()
                     let carnot_COP = ((flowT+condensing_offset+273) / ((flowT+condensing_offset+273) - (ambientT+evaporator_offset+273)));
                     
                     let ideal_carnot_heat = null;
-
-                    inst_COP = heat / power;
                     
                     if (power!=null) {
                         practical_carnot_heat = power * carnot_COP * heatpump_factor;
@@ -775,7 +768,9 @@ function powergraph_load()
                     }
                 
                     data["heatpump_heat_carnot"][z] = [time,practical_carnot_heat]
-                    data["inst_COP"][z] = [time,inst_COP]
+
+                    elec_without_null[z] = [time,power];
+                    heat_without_null[z] = [time,heat];
                 }
             }
             var practical_carnot_heat_mean = practical_carnot_heat_sum / carnot_heat_n;
@@ -785,6 +780,30 @@ function powergraph_load()
             }
 
             if (show_instant_cop) {
+
+                // foreach elec_without_null & heat_without_null find the COP 3 point average
+                data["inst_COP"] = [];
+
+                var np = inst_cop_mv_av_dp;
+
+                for (var z = np; z < elec_without_null.length - np; z++) {
+                    var time = elec_without_null[z][0];
+                
+                    // Extract values only once
+                    var elec_values = elec_without_null.slice(z - np, z + np + 1).map(entry => entry[1]);
+                    var heat_values = heat_without_null.slice(z - np, z + np + 1).map(entry => entry[1]);
+                
+                    // Check for null values
+                    if (!elec_values.includes(null) && !heat_values.includes(null)) {
+                        // Calculate sum directly
+                        var elec_sum = elec_values.reduce((sum, value) => sum + value, 0);
+                        var heat_sum = heat_values.reduce((sum, value) => sum + value, 0);
+                
+                        // Avoid division by zero
+                        var cop = elec_sum !== 0 ? heat_sum / elec_sum : null;
+                        data["inst_COP"][z] = [time, cop];
+                    }
+                }
                 
                 // filter out inst_COP values outside of range
                 for (var z in data["inst_COP"]) {
@@ -1146,6 +1165,36 @@ $("#show_flow_rate").click(function() {
     } else {
         show_flow_rate = false;
     }
+    powergraph_load();
+    powergraph_draw();
+});
+
+$("#show_instant_cop").click(function(){
+
+    if ($("#show_instant_cop")[0].checked) {
+        show_instant_cop = true;
+    } else {
+        show_instant_cop = false;
+    }
+
+    powergraph_load();
+    powergraph_draw();
+});
+
+$("#inst_cop_min").change(function() {
+    inst_cop_min = parseInt($("#inst_cop_min").val());
+    powergraph_load();
+    powergraph_draw();
+});
+
+$("#inst_cop_max").change(function() {
+    inst_cop_max = parseInt($("#inst_cop_max").val());
+    powergraph_load();
+    powergraph_draw();
+});
+
+$("#inst_cop_mv_av_dp").change(function() {
+    inst_cop_mv_av_dp = parseInt($("#inst_cop_mv_av_dp").val());
     powergraph_load();
     powergraph_draw();
 });
