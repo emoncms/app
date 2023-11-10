@@ -1,0 +1,5 @@
+{
+    "title"          : "CO2 Monitor",
+    "description"    : "Calculate room air change rates form CO2 decay curves",
+    "order"         : 15
+}
