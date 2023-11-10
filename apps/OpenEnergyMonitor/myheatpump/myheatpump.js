@@ -27,6 +27,7 @@ config.app = {
     "heatpump_roomT":{"type":"feed", "autoname":"heatpump_roomT", "engine":5, "optional":true, "description":"Room temperature"},
     "heatpump_flowrate":{"type":"feed", "autoname":"heatpump_flowrate", "engine":5, "optional":true, "description":"Flow rate"},
     "heatpump_dhw":{"type":"feed", "autoname":"heatpump_dhw", "engine":5, "optional":true, "description":"Heating Hot Water"},
+    "heatpump_ch":{"type":"feed", "autoname":"heatpump_ch", "engine":5, "optional":true, "description":"Central Heating"},
     "start_date":{"type":"value", "default":0, "name": "Start date", "description":_("Start date for all time values (unix timestamp)")},
 };
 config.feeds = feed.list();
@@ -392,6 +393,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 else if (item.series.label=="OutsideT") { name = "Outside"; unit = "°C"; dp = 1; }
                 else if (item.series.label=="RoomT") { name = "Room"; unit = "°C"; dp = 1; }
                 else if (item.series.label=="DHW") { name = "Hot Water"; unit = ""; dp = 0; }
+                else if (item.series.label=="CH") { name = "Central Heating"; unit = ""; dp = 0; }
                 else if (item.series.label=="Electric") { name = "Elec"; unit = "W"; }
                 else if (item.series.label=="Heat") { name = "Heat"; unit = "W"; }
                 else if (item.series.label=="Carnot Heat") { name = "Carnot Heat"; unit = "W"; }
@@ -583,6 +585,16 @@ function powergraph_load()
             powergraph_series.push({label:"DHW", data:remove_null_values(data["heatpump_dhw"]), yaxis:4, color:"#88F", lines:style});
         } else {
             powergraph_series.push({label:"DHW", data:data["heatpump_dhw"], yaxis:4, color:"#88F", lines:style});
+        }
+    }
+    if (feeds["heatpump_ch"]!=undefined) {
+        data["heatpump_ch"] = feed.getdata(feeds["heatpump_ch"].id,view.start,view.end,view.interval,0,0,skipmissing,limitinterval);
+
+        let style = {lineWidth: 0, show:true, fill:0.15};
+        if (all_same_interval) {
+            powergraph_series.push({label:"CH", data:remove_null_values(data["heatpump_ch"]), yaxis:4, color:"#FD8", lines:style});
+        } else {
+            powergraph_series.push({label:"CH", data:data["heatpump_ch"], yaxis:4, color:"#FD8", lines:style});
         }
     }
     if (feeds["heatpump_flowT"]!=undefined) { 
