@@ -271,6 +271,8 @@ function updater()
 
 function get_average(name,duration) {
 
+    if (feeds[name]==undefined) return null;
+
     var dps = feed.getdata(feeds[name].id,feeds[name].time-duration,feeds[name].time,60,1,0,0,0);
     var sum = 0;
     var n = 0;
@@ -712,7 +714,7 @@ function powergraph_load()
             var histogram = {}
 
             var now = (new Date()).getTime();
-            if (meta["heatpump_elec"].end_time*1000>now) {
+            if (meta["heatpump_elec"]!=undefined && meta["heatpump_elec"].end_time*1000>now) {
                 now = meta["heatpump_elec"].end_time*1000;
             }
 
