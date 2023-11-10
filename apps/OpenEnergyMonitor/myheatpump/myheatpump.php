@@ -120,12 +120,16 @@
         
         <div id="dhw_stats" style="display: none">
           <hr style="margin:10px 0px 10px 0px">
-          <p><b>Hot Water</b></p>
-          <p>Electricity consumed: <span id="dhw_elec_kwh"></span> kWh
-          &gt; heat produced: <span id="dhw_heat_kwh"></span> kWh
-          = COP <b><span id="dhw_cop"></span></b>
-          | COP excluding DHW: <b><span id="exclude_dhw_cop"></span></b>
-        </p>
+          <p><b>Heating</b>:
+            Electricity consumed: <span id="ch_elec_kwh"></span> kWh
+            &raquo; heat produced: <span id="ch_heat_kwh"></span> kWh
+            = COP <b><span id="ch_cop"></span></b>
+          </p>
+          <p><b>Hot Water</b>:
+            Electricity consumed: <span id="dhw_elec_kwh"></span> kWh
+            &raquo; heat produced: <span id="dhw_heat_kwh"></span> kWh
+            = COP <b><span id="dhw_cop"></span></b>
+          </p>
         </div>
         
         <hr style="margin:10px 0px 10px 0px">
@@ -258,4 +262,4 @@ var session_write = <?php echo $session['write']; ?>;
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=62"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=63"></script>
