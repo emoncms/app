@@ -1104,7 +1104,7 @@ function powergraph_draw()
             margin:{top:30}
         },
         selection: { mode: "x" },
-        legend:{position:"NW", noColumns:7}
+        legend:{position:"NW", noColumns:10}
     }
     if ($('#placeholder').width()) {
         $.plot($('#placeholder'),powergraph_series,options);
