@@ -848,11 +848,11 @@ function powergraph_load()
                     // Check for null values
                     if (!elec_values.includes(null) && !heat_values.includes(null)) {
                         // Calculate sum directly
-                        var elec_sum = elec_values.reduce((sum, value) => sum + value, 0);
-                        var heat_sum = heat_values.reduce((sum, value) => sum + value, 0);
+                        var elec_sum_inst = elec_values.reduce((sum, value) => sum + value, 0);
+                        var heat_sum_inst = heat_values.reduce((sum, value) => sum + value, 0);
                 
                         // Avoid division by zero
-                        var cop = elec_sum !== 0 ? heat_sum / elec_sum : null;
+                        var cop = elec_sum_inst !== 0 ? heat_sum_inst / elec_sum_inst : null;
                         data["inst_COP"][z] = [time, cop];
                     }
                 }
