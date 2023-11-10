@@ -118,14 +118,24 @@
           <tbody id="stats"></tbody>
         </table>
         
+        <div id="dhw_stats" style="display: none">
+          <hr style="margin:10px 0px 10px 0px">
+          <p><b>Hot Water</b></p>
+          <p>Electricity consumed: <span id="dhw_elec_kwh"></span> kWh
+          &gt; heat produced: <span id="dhw_heat_kwh"></span> kWh
+          = COP <b><span id="dhw_cop"></span></b>
+          | COP excluding DHW: <b><span id="exclude_dhw_cop"></span></b>
+        </p>
+        </div>
+        
         <hr style="margin:10px 0px 10px 0px">
         <p><b>Standby</b></p>
-        <p>Electricity consumption below starting power (standby): <span id="standby_kwh"></span> kWh</p>        
-        <p>COP in window not including standby: <span id="standby_cop"></span><span id="standby_cop_simulated"></span></p>   
+        <p>Electricity consumption below starting power (standby): <span id="standby_kwh"></span> kWh</p>
+        <p>COP in window not including standby: <b><span id="standby_cop"></span></b><span id="standby_cop_simulated"></span></p>
         <div class="input-prepend input-append" style="margin-top:5px">
           <span class="add-on">Starting power (W)</span>
           <input type="text" style="width:50px" id="starting_power" value="100">
-        </div>     
+        </div>
 
         <hr style="margin:10px 0px 10px 0px">
 
@@ -150,7 +160,10 @@
 
         <hr style="margin:10px 0px 10px 0px">
         
-        <p><b>Show mean values for periods when heat pump is running only:</b> <input id="stats_when_running" type="checkbox" style="margin-top:-4px; margin-left:7px"><br><span style="font-size:12px">(Based on starting power value above)</span></p>        
+        <p><b>Show mean values for periods when heat pump is running only:</b>
+          <input id="stats_when_running" type="checkbox" style="margin-top:-4px; margin-left:7px">
+          <span id="stats_without_dhw" style="display: none;"> - <i>Exclude DHW:</i> <input id="exclude_dhw" type="checkbox" style="margin-top:-4px; margin-left:7px"></span>
+          <br><span style="font-size:12px">(Based on starting power value above)</span></p>
 
         <div id="mean_when_running"></div>
         
@@ -246,4 +259,3 @@ config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 </script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=62"></script>
-
