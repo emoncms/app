@@ -975,8 +975,16 @@ function powergraph_load()
             } else {
                 $("#dhw_cop").html("~");
             }
-            let cop = (feedstats["heatpump_heat"].kwh - dhw_heat_kwh) / (feedstats["heatpump_elec"].kwh - dhw_elec_kwh);
-            $("#exclude_dhw_cop").html(cop.toFixed(2));
+
+            let ch_elec_kwh = feedstats["heatpump_elec"].kwh - dhw_elec_kwh - standby_kwh
+            let ch_heat_kwh = feedstats["heatpump_heat"].kwh - dhw_heat_kwh
+            if (ch_elec_kwh > 0) {
+                $("#ch_cop").html((ch_heat_kwh / ch_elec_kwh).toFixed(2));
+            } else {
+                $("#ch_cop").html("~");
+            }
+            $("#ch_elec_kwh").html(ch_elec_kwh.toFixed(3));
+            $("#ch_heat_kwh").html(ch_heat_kwh.toFixed(3));
         }
     }
     
@@ -987,7 +995,6 @@ function powergraph_load()
       "heatpump_returnT":"Return temperature",
       "heatpump_outsideT":"Outside temperature",
       "heatpump_roomT":"Room temperature",
-      "heatpump_dwh":"Heating hot water tank",
       "heatpump_flowrate":"Flow rate"
     }
     
