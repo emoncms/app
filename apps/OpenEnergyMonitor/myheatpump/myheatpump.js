@@ -26,8 +26,8 @@ config.app = {
     "heatpump_outsideT":{"type":"feed", "autoname":"heatpump_outsideT", "engine":5, "optional":true, "description":"Outside temperature"},
     "heatpump_roomT":{"type":"feed", "autoname":"heatpump_roomT", "engine":5, "optional":true, "description":"Room temperature"},
     "heatpump_flowrate":{"type":"feed", "autoname":"heatpump_flowrate", "engine":5, "optional":true, "description":"Flow rate"},
-    "heatpump_dhw":{"type":"feed", "autoname":"heatpump_dhw", "engine":5, "optional":true, "description":"Heating Hot Water"},
-    "heatpump_ch":{"type":"feed", "autoname":"heatpump_ch", "engine":5, "optional":true, "description":"Central Heating"},
+    "heatpump_dhw":{"type":"feed", "autoname":"heatpump_dhw", "optional":true, "description":"Heating Hot Water"},
+    "heatpump_ch":{"type":"feed", "autoname":"heatpump_ch", "optional":true, "description":"Central Heating"},
     "start_date":{"type":"value", "default":0, "name": "Start date", "description":_("Start date for all time values (unix timestamp)")},
 };
 config.feeds = feed.list();
