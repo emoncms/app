@@ -100,10 +100,22 @@
         COP in window: <b id="window-cop"></b> <span id="window-carnot-cop"></span>
       </div>
     </div>
-          
+    
     <div id="advanced-block" style="background-color:#fff; padding:10px; display:none">
       <div style="color:#000">
-        <p id="show_flow_rate_bound" style="display:none"><b>Show flow rate:</b> <input id="show_flow_rate" type="checkbox" style="margin-top:-4px; margin-left:7px"></p>
+        <div id="dhw_stats" style="display: none">
+          <p><b>Heating</b>:
+          Electricity consumed: <span id="ch_elec_kwh"></span> kWh
+            &raquo; heat produced: <span id="ch_heat_kwh"></span> kWh
+            = COP <b><span id="ch_cop"></span></b>
+          </p>
+          <p><b>Hot Water</b>:
+          Electricity consumed: <span id="dhw_elec_kwh"></span> kWh
+            &raquo; heat produced: <span id="dhw_heat_kwh"></span> kWh
+            = COP <b><span id="dhw_cop"></span></b>
+          </p>
+        </div>
+        <hr style="margin:10px 0px 10px 0px">
       
         <table class="table">
           <tr>
@@ -118,19 +130,7 @@
           <tbody id="stats"></tbody>
         </table>
         
-        <div id="dhw_stats" style="display: none">
-          <hr style="margin:10px 0px 10px 0px">
-          <p><b>Heating</b>:
-            Electricity consumed: <span id="ch_elec_kwh"></span> kWh
-            &raquo; heat produced: <span id="ch_heat_kwh"></span> kWh
-            = COP <b><span id="ch_cop"></span></b>
-          </p>
-          <p><b>Hot Water</b>:
-            Electricity consumed: <span id="dhw_elec_kwh"></span> kWh
-            &raquo; heat produced: <span id="dhw_heat_kwh"></span> kWh
-            = COP <b><span id="dhw_cop"></span></b>
-          </p>
-        </div>
+        <p id="show_flow_rate_bound" style="display:none"><b>Show flow rate:</b> <input id="show_flow_rate" type="checkbox" style="margin-top:-4px; margin-left:7px"></p>
         
         <hr style="margin:10px 0px 10px 0px">
         <p><b>Standby</b></p>
