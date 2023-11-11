@@ -81,6 +81,7 @@
         <span class="bluenav time dmy" time='720'>M</span>
         <span class="bluenav time dmy" time='168'>W</span>
         <span class="bluenav time" time='24'>D</span>
+        <span class="bluenav time" time='6'>6H</span>
         <span class="bluenav time" time='1'>H</span>
       </div>
         
