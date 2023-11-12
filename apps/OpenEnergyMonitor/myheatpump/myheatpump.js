@@ -1023,27 +1023,70 @@ function powergraph_load()
     
     if (feedstats["heatpump_flowT"]!=undefined && feedstats["heatpump_returnT"]!=undefined && feedstats["heatpump_roomT"]!=undefined && feedstats["heatpump_heat"]!=undefined) {
 
-        if (feedstats["heatpump_flowT"].stdev>0.1 || feedstats["heatpump_returnT"].stdev>0.1) {
+        if (feedstats["heatpump_flowT"].stdev>0.2 || feedstats["heatpump_returnT"].stdev>0.2) {
             $("#kW_at_50").html("?");
             
             if (kw_at_50_for_volume) {
-                console.log("System volume calculation:");
-                let MWT = (feedstats["heatpump_flowT"].mean + feedstats["heatpump_returnT"].mean)*0.5;
+
+                if (all_same_interval) {
+
+                    heat = 0;
+                    flowT = 0;
+                    returnT = 0;
+                    roomT = 0;
+
+                    var kwh_to_system_volume = 0;
+                    var MWT = 0;
+                    var MWT_start = null;
+
+                    for (var z in data["heatpump_heat"]) {
+                        let time = data["heatpump_heat"][z][0];
+                            
+                        if (data["heatpump_heat"][z][1]!=null) heat = data["heatpump_heat"][z][1];
+                        if (data["heatpump_flowT"][z][1]!=null) flowT = data["heatpump_flowT"][z][1];
+                        if (data["heatpump_returnT"][z][1]!=null) returnT = data["heatpump_returnT"][z][1];
+                        if (data["heatpump_roomT"][z][1]!=null) roomT = data["heatpump_roomT"][z][1];
+
+                        MWT = (flowT + returnT)*0.5;
+                        let MWT_minus_room = MWT - roomT;
+
+                        let heat_based_on_emitter_spec = kw_at_50_for_volume* 1000 * Math.pow(MWT_minus_room/50,1.3);
+                        let heat_to_system_volume = heat - heat_based_on_emitter_spec;
+
+                        kwh_to_system_volume += heat_to_system_volume * view.interval / 3600000;
+
+                        if (MWT_start==null) {
+                            MWT_start = MWT;
+                        }
+                    }
+                    DT = MWT - MWT_start;
+                    if (DT>0) {
+                        console.log("- kwh_to_system_volume: "+kwh_to_system_volume.toFixed(3)+"kWh");
+                        let system_volume = 3600000 * kwh_to_system_volume / (4200*DT);
+                        console.log("- system volume 1: "+system_volume.toFixed(0)+" litres");
+
+                    }
+
+                }
+                
+
+                MWT = (feedstats["heatpump_flowT"].mean + feedstats["heatpump_returnT"].mean)*0.5;
                 let MWT_minus_room = MWT - feedstats["heatpump_roomT"].mean;
                 
                 let heat_based_on_emitter_spec = kw_at_50_for_volume* 1000 * Math.pow(MWT_minus_room/50,1.3)
                 let heat_to_system_volume = feedstats["heatpump_heat"].mean - heat_based_on_emitter_spec;
                 
-                let MWT_start = (feedstats["heatpump_flowT"].minval + feedstats["heatpump_returnT"].minval)*0.5;
+                MWT_start = (feedstats["heatpump_flowT"].minval + feedstats["heatpump_returnT"].minval)*0.5;
                 let MWT_end = (feedstats["heatpump_flowT"].maxval + feedstats["heatpump_returnT"].maxval)*0.5;
-                let DT = MWT_end - MWT_start;
+                DT = MWT_end - MWT_start;
                 if (DT>0) {
                 
                     let time_elapsed = (view.end - view.start)*0.001
                     if (time_elapsed>0) {
                         let DS_second = DT / time_elapsed;
                         let system_volume = heat_to_system_volume / (4200*DS_second)
-                    
+                        
+                        console.log("System volume calculation:");
                         console.log("- heat output based on recorded emitter spec: "+heat_based_on_emitter_spec.toFixed(0)+"W");
                         console.log("- heat to system volume: "+heat_to_system_volume.toFixed(0)+"W");
                         console.log("- increase in temperature: "+DT.toFixed(1)+"K");
@@ -1066,11 +1109,7 @@ function powergraph_load()
             console.log("- kw_at_50: "+kw_at_50.toFixed(1)+" kW");
             $("#kW_at_50").html(kw_at_50.toFixed(1));
         }
-    } else {
-        $("#kW_at_50").html("?");
     }
-    
-    
 }
 
 // -------------------------------------------------------------------------------
