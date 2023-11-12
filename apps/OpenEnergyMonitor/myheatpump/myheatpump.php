@@ -196,6 +196,9 @@
           <div id="histogram" style="height:400px"></div>
         </div>
         
+        <hr style="margin:10px 0px 10px 0px">
+        
+        <p>Inferred emitter spec (select period of steady state operation): <span id="kW_at_50"></span> kW @ DT50</p>
         
       </div>
     </div>
@@ -262,4 +265,4 @@ var session_write = <?php echo $session['write']; ?>;
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=63"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=65"></script>

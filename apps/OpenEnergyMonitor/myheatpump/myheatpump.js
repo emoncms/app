@@ -1014,6 +1014,30 @@ function powergraph_load()
         out += "</tr>";
     }
     $("#stats").html(out);
+    
+    
+    if (feedstats["heatpump_flowT"]!=undefined && feedstats["heatpump_returnT"]!=undefined && feedstats["heatpump_roomT"]!=undefined && feedstats["heatpump_heat"]!=undefined) {
+
+        if (feedstats["heatpump_flowT"].stdev>0.1 || feedstats["heatpump_returnT"].stdev>0.1) {
+            $("#kW_at_50").html("?");
+        } else {
+            let MWT = (feedstats["heatpump_flowT"].mean + feedstats["heatpump_returnT"].mean)*0.5;
+            let MWT_minus_room = MWT - feedstats["heatpump_roomT"].mean;
+            
+            kw_at_50 = 0.001 * feedstats["heatpump_heat"].mean / Math.pow(MWT_minus_room/50,1.3);
+            
+            console.log("Radiator spec calculation:");
+            console.log("- mean water temperature: "+MWT.toFixed(1)+"C");
+            console.log("- MWT - room: "+MWT_minus_room.toFixed(1)+"K");
+            console.log("- heat output: "+feedstats["heatpump_heat"].mean.toFixed(0)+"W");
+            console.log("- kw_at_50: "+kw_at_50.toFixed(1)+" kW");
+            $("#kW_at_50").html(kw_at_50.toFixed(1));
+        }
+    } else {
+        $("#kW_at_50").html("?");
+    }
+    
+    
 }
 
 // -------------------------------------------------------------------------------
