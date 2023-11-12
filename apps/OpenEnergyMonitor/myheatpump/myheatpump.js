@@ -62,6 +62,8 @@ var exclude_dhw = false;
 var inst_cop_min = 2;
 var inst_cop_max = 6;
 var inst_cop_mv_av_dp = 0;
+var kw_at_50 = 0;
+var kw_at_50_for_volume = 0;
 
 var realtime_cop_div_mode = "30min";
 
@@ -1016,14 +1018,45 @@ function powergraph_load()
     $("#stats").html(out);
     
     
+    $("#system_volume").html("?");
+    $("#kW_at_50").html("?");
+    
     if (feedstats["heatpump_flowT"]!=undefined && feedstats["heatpump_returnT"]!=undefined && feedstats["heatpump_roomT"]!=undefined && feedstats["heatpump_heat"]!=undefined) {
 
         if (feedstats["heatpump_flowT"].stdev>0.1 || feedstats["heatpump_returnT"].stdev>0.1) {
             $("#kW_at_50").html("?");
+            
+            if (kw_at_50_for_volume) {
+                console.log("System volume calculation:");
+                let MWT = (feedstats["heatpump_flowT"].mean + feedstats["heatpump_returnT"].mean)*0.5;
+                let MWT_minus_room = MWT - feedstats["heatpump_roomT"].mean;
+                
+                let heat_based_on_emitter_spec = kw_at_50_for_volume* 1000 * Math.pow(MWT_minus_room/50,1.3)
+                let heat_to_system_volume = feedstats["heatpump_heat"].mean - heat_based_on_emitter_spec;
+                
+                let MWT_start = (feedstats["heatpump_flowT"].minval + feedstats["heatpump_returnT"].minval)*0.5;
+                let MWT_end = (feedstats["heatpump_flowT"].maxval + feedstats["heatpump_returnT"].maxval)*0.5;
+                let DT = MWT_end - MWT_start;
+                if (DT>0) {
+                
+                    let time_elapsed = (view.end - view.start)*0.001
+                    if (time_elapsed>0) {
+                        let DS_second = DT / time_elapsed;
+                        let system_volume = heat_to_system_volume / (4200*DS_second)
+                    
+                        console.log("- heat output based on recorded emitter spec: "+heat_based_on_emitter_spec.toFixed(0)+"W");
+                        console.log("- heat to system volume: "+heat_to_system_volume.toFixed(0)+"W");
+                        console.log("- increase in temperature: "+DT.toFixed(1)+"K");
+                        console.log("- increase in temperature per second: "+DS_second.toFixed(6)+"K/s");
+                        console.log("- system volume: "+system_volume.toFixed(0)+" litres");
+                        $("#system_volume").html(system_volume.toFixed(0));
+                    }
+                }
+            }
+            
         } else {
             let MWT = (feedstats["heatpump_flowT"].mean + feedstats["heatpump_returnT"].mean)*0.5;
             let MWT_minus_room = MWT - feedstats["heatpump_roomT"].mean;
-            
             kw_at_50 = 0.001 * feedstats["heatpump_heat"].mean / Math.pow(MWT_minus_room/50,1.3);
             
             console.log("Radiator spec calculation:");
@@ -1338,4 +1371,8 @@ $("#realtime_cop_div").click(function() {
         progtime = 0;
     }
     updater();
+});
+
+$("#use_for_volume_calc").click(function() {
+    kw_at_50_for_volume = kw_at_50;
 });

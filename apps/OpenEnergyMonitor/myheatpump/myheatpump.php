@@ -197,8 +197,10 @@
         </div>
         
         <hr style="margin:10px 0px 10px 0px">
+        <p><b>Experimental</b></p>
         
-        <p>Inferred emitter spec (select period of steady state operation): <span id="kW_at_50"></span> kW @ DT50</p>
+        <p>Inferred emitter spec (select period of steady state operation): <span id="kW_at_50"></span> kW @ DT50 <button class="btn btn-mini" id="use_for_volume_calc">Use for volume calc</button></p>
+        <p>Inferred system volume (select space heating period with increasing flow and return temperatures): <span id="system_volume">?</span> Litres</p>
         
       </div>
     </div>
