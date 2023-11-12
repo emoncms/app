@@ -1023,7 +1023,7 @@ function powergraph_load()
     
     if (feedstats["heatpump_flowT"]!=undefined && feedstats["heatpump_returnT"]!=undefined && feedstats["heatpump_roomT"]!=undefined && feedstats["heatpump_heat"]!=undefined) {
 
-        if (feedstats["heatpump_flowT"].stdev>0.1 || feedstats["heatpump_returnT"].stdev>0.1) {
+        if (feedstats["heatpump_flowT"].diff>0.15 || feedstats["heatpump_returnT"].diff>0.15) {
             $("#kW_at_50").html("?");
             
             if (kw_at_50_for_volume) {
