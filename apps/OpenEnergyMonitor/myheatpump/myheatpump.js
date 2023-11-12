@@ -476,6 +476,15 @@ $('.bargraph-month').click(function () {
     bargraph_draw();
 });
 
+$('.bargraph-year').click(function () {
+    var timeWindow = (3600000*24.0*365);
+    var end = (new Date()).getTime();
+    var start = end - timeWindow;
+    if (start<(start_time*1000)) start = start_time * 1000;
+    bargraph_load(start,end);
+    bargraph_draw();
+});
+
 $("#carnot_enable").click(function(){
 
     if ($("#carnot_enable_prc")[0].checked && !$("#carnot_enable")[0].checked) {
