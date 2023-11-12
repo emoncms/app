@@ -603,9 +603,10 @@ function powergraph_load()
 
         let style = {lineWidth: 0, show:true, fill:0.15};
         if (all_same_interval) {
-            powergraph_series.push({label:"CH", data:remove_null_values(data["heatpump_ch"]), yaxis:4, color:"#FD8", lines:style});
+            powergraph_series.push({label:"CH", data:remove_null_values(data["heatpump_ch"]), yaxis:4, color:"#FB6", lines:style});
         } else {
-            powergraph_series.push({label:"CH", data:data["heatpump_ch"], yaxis:4, color:"#FD8", lines:style});
+            powergraph_series.push({label:"CH", data:data["heatpump_ch"], yaxis:4, color:"#FB6", lines:style});
+        }
         }
     }
     if (feeds["heatpump_flowT"]!=undefined) { 
@@ -1099,7 +1100,7 @@ function powergraph_draw()
         yaxes: [
             {min: 0, font: style,reserveSpace:false},
             {font: style,reserveSpace:false},
-            {font: style,reserveSpace:false},
+            {min: 0, font: {size:flot_font_size, color: "#44b3e2"},reserveSpace:false},
             {min: 0, max: 1, show: false, reserveSpace:false}
         ],
         grid: {
