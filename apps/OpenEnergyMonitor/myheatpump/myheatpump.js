@@ -467,6 +467,15 @@ $('.bargraph-week').click(function () {
     bargraph_draw();
 });
 
+$('.bargraph-quarter').click(function () {
+    var timeWindow = (3600000*24.0*91);
+    var end = (new Date()).getTime();
+    var start = end - timeWindow;
+    if (start<(start_time*1000)) start = start_time * 1000;
+    bargraph_load(start,end);
+    bargraph_draw();
+});
+
 $('.bargraph-month').click(function () {
     var timeWindow = (3600000*24.0*30);
     var end = (new Date()).getTime();

@@ -69,6 +69,7 @@
         <!--<div class="bluenav bargraph-other">OTHER</div>-->
         <div class="bluenav bargraph-alltime">ALL TIME</div>
         <div class="bluenav bargraph-year">YEAR</div>
+        <div class="bluenav bargraph-quarter">3 MONTHS</div>
         <div class="bluenav bargraph-month">MONTH</div>
         <div class="bluenav bargraph-week">WEEK</div>
       </div>
