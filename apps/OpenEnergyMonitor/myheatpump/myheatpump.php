@@ -74,16 +74,16 @@
       </div>
       
       <div class="powergraph-navigation" style="display:none">
-        <div class="bluenav viewhistory">BACK</div>
-        <span class="bluenav" id="right" >></span>
-        <span class="bluenav" id="left" ><</span>
-        <span class="bluenav" id="zoomout" >-</span>
-        <span class="bluenav" id="zoomin" >+</span>
-        <span class="bluenav time dmy" time='720'>M</span>
-        <span class="bluenav time dmy" time='168'>W</span>
-        <span class="bluenav time" time='24'>D</span>
-        <span class="bluenav time" time='6'>6H</span>
-        <span class="bluenav time" time='1'>H</span>
+        <div class="bluenav viewhistory" title="Back to daily summary">BACK</div>
+        <span class="bluenav" id="right" title="Scroll right">&gt;</span>
+        <span class="bluenav" id="left" title="Scroll left">&lt;</span>
+        <span class="bluenav" id="zoomout" title="Zoom out">-</span>
+        <span class="bluenav" id="zoomin" title="Zoom in">+</span>
+        <span class="bluenav time dmy" time='720' title="Last 30 days">M</span>
+        <span class="bluenav time dmy" time='168' title="Last 7 days">W</span>
+        <span class="bluenav time" time='24' title="Last 24 hours">D</span>
+        <span class="bluenav time" time='6' title="Last 6 hours">6</span>
+        <span class="bluenav time" time='1' title="Last hour">H</span>
       </div>
         
       <div class="block-title">HISTORY</div>       
