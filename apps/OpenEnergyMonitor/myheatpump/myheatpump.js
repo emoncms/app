@@ -303,6 +303,18 @@ $('.time').click(function () {
     powergraph_load(); powergraph_draw(); 
 });
 
+if (window.location.hash == "#power") {
+    view.timewindow(1.0);
+    $(".bargraph-navigation").hide();
+    viewmode = "powergraph";
+    powergraph_load();
+    powergraph_draw();
+    $(".powergraph-navigation").show();
+    $("#advanced-toggle").show();
+    $("#advanced-toggle").html("HIDE DETAIL");
+    $("#advanced-block").show();
+}
+
 $(".viewhistory").click(function () {
     $(".powergraph-navigation").hide();
     var timeWindow = (3600000*24.0*30);
@@ -615,7 +627,6 @@ function powergraph_load()
             powergraph_series.push({label:"CH", data:remove_null_values(data["heatpump_ch"]), yaxis:4, color:"#FB6", lines:style});
         } else {
             powergraph_series.push({label:"CH", data:data["heatpump_ch"], yaxis:4, color:"#FB6", lines:style});
-        }
         }
     }
     if (feeds["heatpump_flowT"]!=undefined) { 
