@@ -72,6 +72,7 @@
         <div class="bluenav bargraph-quarter">3 MONTHS</div>
         <div class="bluenav bargraph-month">MONTH</div>
         <div class="bluenav bargraph-week">WEEK</div>
+        <div class="bluenav bargraph-day">DAY</div>
       </div>
       
       <div class="powergraph-navigation" style="display:none">

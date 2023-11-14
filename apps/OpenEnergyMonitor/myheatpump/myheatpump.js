@@ -304,6 +304,10 @@ $('.time').click(function () {
 });
 
 if (window.location.hash == "#power") {
+    show_powergraph();
+}
+
+function show_powergraph() {
     view.timewindow(1.0);
     $(".bargraph-navigation").hide();
     viewmode = "powergraph";
@@ -470,6 +474,10 @@ $('.bargraph-alltime').click(function () {
     bargraph_draw();
 });
 
+$('.bargraph-day').click(function () {
+    show_powergraph();
+});
+
 $('.bargraph-week').click(function () {
     var timeWindow = (3600000*24.0*7);
     var end = (new Date()).getTime();
@@ -479,8 +487,8 @@ $('.bargraph-week').click(function () {
     bargraph_draw();
 });
 
-$('.bargraph-quarter').click(function () {
-    var timeWindow = (3600000*24.0*91);
+$('.bargraph-month').click(function () {
+    var timeWindow = (3600000*24.0*30);
     var end = (new Date()).getTime();
     var start = end - timeWindow;
     if (start<(start_time*1000)) start = start_time * 1000;
@@ -488,8 +496,8 @@ $('.bargraph-quarter').click(function () {
     bargraph_draw();
 });
 
-$('.bargraph-month').click(function () {
-    var timeWindow = (3600000*24.0*30);
+$('.bargraph-quarter').click(function () {
+    var timeWindow = (3600000*24.0*91);
     var end = (new Date()).getTime();
     var start = end - timeWindow;
     if (start<(start_time*1000)) start = start_time * 1000;
