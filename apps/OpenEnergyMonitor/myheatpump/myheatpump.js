@@ -155,7 +155,7 @@ function show()
 
     // If this is a new dashboard there will be less than a days data 
     // show power graph directly in this case
-    if (((end*0.001)-start_time)<86400*3 || viewmode=="powergraph" || location.hash == "#power") {
+    if (((end*0.001)-start_time)<86400*3 || viewmode=="powergraph") {
         var timeWindow = (end - start_time*1000);
         if (timeWindow>(86400*3*1000)) timeWindow = 86400*1*1000;
         var start = end - timeWindow;
@@ -167,12 +167,6 @@ function show()
         $(".powergraph-navigation").show();
         powergraph_draw();
         $("#advanced-toggle").show();
-
-        if (location.hash == "#power") {
-          // auto-expand detail
-          $("#advanced-block").show();
-          $("#advanced-toggle").html("HIDE DETAIL");
-        }
     } else {
         var timeWindow = (3600000*24.0*30);
         var start = end - timeWindow;
