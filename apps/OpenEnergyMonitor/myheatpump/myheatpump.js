@@ -154,9 +154,12 @@ function show()
     }
 
     if (urlParams.mode!=undefined) {
-        if (urlParams.mode=="power") viewmode = "powergraph"
-    }
-    
+        if (urlParams.mode=="power") {
+            viewmode = "powergraph"
+            $("#advanced-block").show();
+            $("#advanced-toggle").html("HIDE DETAIL");
+        }
+    }    
 
     // If this is a new dashboard there will be less than a days data 
     // show power graph directly in this case
