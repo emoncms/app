@@ -66,8 +66,7 @@
     <div class="block-bound">
     
       <div class="bargraph-navigation">
-        <!--<div class="bluenav bargraph-other">OTHER</div>-->
-        <div class="bluenav bargraph-alltime">ALL TIME</div>
+        <div class="bluenav bargraph-alltime">ALL</div>
         <div class="bluenav bargraph-year">YEAR</div>
         <div class="bluenav bargraph-quarter">3 MONTHS</div>
         <div class="bluenav bargraph-month">MONTH</div>
@@ -87,8 +86,6 @@
         <span class="bluenav time" time='6' title="Last 6 hours">6</span>
         <span class="bluenav time" time='1' title="Last hour">H</span>
       </div>
-        
-      <div class="block-title">HISTORY</div>       
     </div>
     
     <div style="background-color:#fff; padding:10px;">
