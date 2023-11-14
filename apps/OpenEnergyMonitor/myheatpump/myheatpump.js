@@ -152,9 +152,9 @@ function show()
         $("#last_updated").hide();
         $("#live_table").show();  
     }
-    
+
     if (urlParams.mode!=undefined) {
-        if (urlParams.mode=="realtime") viewmode = "powergraph"
+        if (urlParams.mode=="power") viewmode = "powergraph"
     }
     
 
@@ -1091,8 +1091,8 @@ function powergraph_load()
 // -------------------------------------------------------------------------------
 function powergraph_draw() 
 {
-    set_url_view_params("realtime",view.start,view.end);
-    
+    set_url_view_params("power",view.start,view.end);
+
     var style = {size:flot_font_size, color:"#666"}
     var options = {
         lines: { fill: false },
@@ -1204,7 +1204,7 @@ function bargraph_draw()
             // labelWidth:-5
             reserveSpace:false,
             // max:40
-        }],
+                }],
         selection: { mode: "x" },
         grid: {
             show:true, 
@@ -1278,7 +1278,7 @@ function set_url_view_params(mode,start,end) {
     url.searchParams.set('mode', mode); 
     url.searchParams.set('start', Math.round(start*0.001));
     url.searchParams.set('end', Math.round(end*0.001));
-    window.history.pushState(null, '', url.toString());
+    $('#permalink')[0].href = url.toString();
 }
 
 function draw_histogram(histogram){
