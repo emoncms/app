@@ -155,7 +155,7 @@ function show()
 
     // If this is a new dashboard there will be less than a days data 
     // show power graph directly in this case
-    if (((end*0.001)-start_time)<86400*3 || viewmode=="powergraph") {
+    if (((end*0.001)-start_time)<86400*3 || viewmode=="powergraph" || location.hash == "#power") {
         var timeWindow = (end - start_time*1000);
         if (timeWindow>(86400*3*1000)) timeWindow = 86400*1*1000;
         var start = end - timeWindow;
@@ -167,6 +167,12 @@ function show()
         $(".powergraph-navigation").show();
         powergraph_draw();
         $("#advanced-toggle").show();
+
+        if (location.hash == "#power") {
+          // auto-expand detail
+          $("#advanced-block").show();
+          $("#advanced-toggle").html("HIDE DETAIL");
+        }
     } else {
         var timeWindow = (3600000*24.0*30);
         var start = end - timeWindow;
@@ -302,22 +308,6 @@ $('.time').click(function () {
     view.timewindow($(this).attr("time")/24.0);
     powergraph_load(); powergraph_draw(); 
 });
-
-if (window.location.hash == "#power") {
-    show_powergraph();
-}
-
-function show_powergraph() {
-    view.timewindow(1.0);
-    $(".bargraph-navigation").hide();
-    viewmode = "powergraph";
-    powergraph_load();
-    powergraph_draw();
-    $(".powergraph-navigation").show();
-    $("#advanced-toggle").show();
-    $("#advanced-toggle").html("HIDE DETAIL");
-    $("#advanced-block").show();
-}
 
 $(".viewhistory").click(function () {
     $(".powergraph-navigation").hide();
@@ -475,7 +465,13 @@ $('.bargraph-alltime').click(function () {
 });
 
 $('.bargraph-day').click(function () {
-    show_powergraph();
+    view.timewindow(1.0);
+    $(".bargraph-navigation").hide();
+    viewmode = "powergraph";
+    powergraph_load();
+    powergraph_draw();
+    $(".powergraph-navigation").show();
+    $("#advanced-toggle").show();
 });
 
 $('.bargraph-week').click(function () {
