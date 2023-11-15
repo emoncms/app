@@ -979,11 +979,14 @@ function powergraph_load()
             }
 
             let ch_elec_kwh = feedstats["heatpump_elec"].kwh - dhw_elec_kwh - standby_kwh
-            let ch_heat_kwh = feedstats["heatpump_heat"].kwh - dhw_heat_kwh
-            if (ch_elec_kwh > 0) {
-                $("#ch_cop").html((ch_heat_kwh / ch_elec_kwh).toFixed(2));
-            } else {
-                $("#ch_cop").html("~");
+            let ch_heat_kwh = 0;
+            if (feedstats["heatpump_heat"]!=undefined) {
+                ch_heat_kwh = feedstats["heatpump_heat"].kwh - dhw_heat_kwh
+                if (ch_elec_kwh > 0) {
+                    $("#ch_cop").html((ch_heat_kwh / ch_elec_kwh).toFixed(2));
+                } else {
+                    $("#ch_cop").html("~");
+                }
             }
             $("#ch_elec_kwh").html(ch_elec_kwh.toFixed(3));
             $("#ch_heat_kwh").html(ch_heat_kwh.toFixed(3));
