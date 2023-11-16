@@ -14,7 +14,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=<?php echo $v; ?>" rel="stylesheet">
+<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=30>" rel="stylesheet">
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
 <div id="app-block" style="display:none">
@@ -22,10 +22,9 @@
   <div class="col1"><div class="col1-inner">
     <div class="block-bound">
       <div style="float:right">
-          <div style="padding-top:10px; padding-right:10px">
-              <i class="config-open icon-wrench icon-white" title="Configure app" style="cursor:pointer"></i>
-              <a id="permalink" href="" title="Share this view"><i class="icon-share icon-white"></i></a>
-          </div>
+        <a id="permalink" href="" title="Share this view" class="myheatpump-top-buttons"><i class="icon-share icon-white"></i></a><div class="myheatpump-top-buttons config-open">
+          <i class="icon-wrench icon-white" title="Configure app"></i>
+        </div>
       </div>
       
       <div class="block-title" id="app_name">MY HEATPUMP</div>
