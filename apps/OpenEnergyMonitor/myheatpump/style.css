@@ -37,3 +37,10 @@
     height:10px;
     background-color:#ccc;
 }
+
+.myheatpump-top-buttons {
+    display:inline-block; 
+    padding: 10px 15px 10px 15px; 
+    border-left: 1px solid #fff;
+    cursor:pointer;
+}

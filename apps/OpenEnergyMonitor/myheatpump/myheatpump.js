@@ -26,8 +26,8 @@ config.app = {
     "heatpump_outsideT":{"type":"feed", "autoname":"heatpump_outsideT", "engine":5, "optional":true, "description":"Outside temperature"},
     "heatpump_roomT":{"type":"feed", "autoname":"heatpump_roomT", "engine":5, "optional":true, "description":"Room temperature"},
     "heatpump_flowrate":{"type":"feed", "autoname":"heatpump_flowrate", "engine":5, "optional":true, "description":"Flow rate"},
-    "heatpump_dhw":{"type":"feed", "autoname":"heatpump_dhw", "optional":true, "description":"Heating Hot Water"},
-    "heatpump_ch":{"type":"feed", "autoname":"heatpump_ch", "optional":true, "description":"Central Heating"},
+    "heatpump_dhw":{"type":"feed", "autoname":"heatpump_dhw", "optional":true, "description":"Status of Hot Water circuit (non-zero when running)"},
+    "heatpump_ch":{"type":"feed", "autoname":"heatpump_ch", "optional":true, "description":"Status of Central Heating circuit (non-zero when running)"},
     "start_date":{"type":"value", "default":0, "name": "Start date", "description":_("Start date for all time values (unix timestamp)")},
 };
 config.feeds = feed.list();
@@ -64,6 +64,7 @@ var inst_cop_max = 6;
 var inst_cop_mv_av_dp = 0;
 var kw_at_50 = 0;
 var kw_at_50_for_volume = 0;
+var show_daily_cop_series = true;
 
 var realtime_cop_div_mode = "30min";
 
@@ -153,12 +154,24 @@ function show()
         $("#live_table").show();  
     }
 
+    if (urlParams.mode!=undefined) {
+        if (urlParams.mode=="power") {
+            viewmode = "powergraph"
+            $("#advanced-block").show();
+            $("#advanced-toggle").html("HIDE DETAIL");
+        }
+    }    
+
     // If this is a new dashboard there will be less than a days data 
     // show power graph directly in this case
     if (((end*0.001)-start_time)<86400*3 || viewmode=="powergraph") {
         var timeWindow = (end - start_time*1000);
         if (timeWindow>(86400*3*1000)) timeWindow = 86400*1*1000;
         var start = end - timeWindow;
+        
+        if (urlParams.start!=undefined) start = urlParams.start*1000;
+        if (urlParams.end!=undefined) end = urlParams.end*1000;
+        
         view.start = start;
         view.end = end;
         viewmode = "powergraph";
@@ -171,6 +184,10 @@ function show()
         var timeWindow = (3600000*24.0*30);
         var start = end - timeWindow;
         if (start<(start_time*1000)) start = start_time * 1000;
+        
+        if (urlParams.start!=undefined) start = urlParams.start*1000;
+        if (urlParams.end!=undefined) end = urlParams.end*1000; 
+        
         bargraph_load(start,end);
         bargraph_draw();
         $("#advanced-toggle").hide();
@@ -349,7 +366,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 
                 var outside_temp_str = "";
                 if (feeds["heatpump_outsideT"]!=undefined) {
-                    if (data["heatpump_outsideT_daily"].length && data["heatpump_outsideT_daily"][z]!=undefined) {
+                    if (data["heatpump_outsideT_daily"]!=undefined && data["heatpump_outsideT_daily"].length && data["heatpump_outsideT_daily"][z]!=undefined) {
                         let outsideT = data["heatpump_outsideT_daily"][z][1];
                         if (outsideT!=null) {
                             outside_temp_str = "Outside: "+outsideT.toFixed(1)+"°C<br>";
@@ -458,6 +475,16 @@ $('.bargraph-alltime').click(function () {
     bargraph_draw();
 });
 
+$('.bargraph-day').click(function () {
+    view.timewindow(1.0);
+    $(".bargraph-navigation").hide();
+    viewmode = "powergraph";
+    powergraph_load();
+    powergraph_draw();
+    $(".powergraph-navigation").show();
+    $("#advanced-toggle").show();
+});
+
 $('.bargraph-week').click(function () {
     var timeWindow = (3600000*24.0*7);
     var end = (new Date()).getTime();
@@ -469,6 +496,24 @@ $('.bargraph-week').click(function () {
 
 $('.bargraph-month').click(function () {
     var timeWindow = (3600000*24.0*30);
+    var end = (new Date()).getTime();
+    var start = end - timeWindow;
+    if (start<(start_time*1000)) start = start_time * 1000;
+    bargraph_load(start,end);
+    bargraph_draw();
+});
+
+$('.bargraph-quarter').click(function () {
+    var timeWindow = (3600000*24.0*91);
+    var end = (new Date()).getTime();
+    var start = end - timeWindow;
+    if (start<(start_time*1000)) start = start_time * 1000;
+    bargraph_load(start,end);
+    bargraph_draw();
+});
+
+$('.bargraph-year').click(function () {
+    var timeWindow = (3600000*24.0*365);
     var end = (new Date()).getTime();
     var start = end - timeWindow;
     if (start<(start_time*1000)) start = start_time * 1000;
@@ -594,9 +639,9 @@ function powergraph_load()
 
         let style = {lineWidth: 0, show:true, fill:0.15};
         if (all_same_interval) {
-            powergraph_series.push({label:"CH", data:remove_null_values(data["heatpump_ch"]), yaxis:4, color:"#FD8", lines:style});
+            powergraph_series.push({label:"CH", data:remove_null_values(data["heatpump_ch"]), yaxis:4, color:"#FB6", lines:style});
         } else {
-            powergraph_series.push({label:"CH", data:data["heatpump_ch"], yaxis:4, color:"#FD8", lines:style});
+            powergraph_series.push({label:"CH", data:data["heatpump_ch"], yaxis:4, color:"#FB6", lines:style});
         }
     }
     if (feeds["heatpump_flowT"]!=undefined) { 
@@ -954,6 +999,14 @@ function powergraph_load()
         if (heat_enabled) heat_mean = feedstats["heatpump_heat"].mean;
         if (elec_mean>0) {
             $("#window-cop").html((heat_mean / elec_mean).toFixed(2));
+            
+            var tooltip_text = "";
+            tooltip_text += "Electric: "+feedstats["heatpump_elec"].kwh.toFixed(1)+" kWh\n";
+            if (feedstats["heatpump_heat"]!=undefined) {
+                tooltip_text += "Heat: "+feedstats["heatpump_heat"].kwh.toFixed(1)+" kWh\n";
+            }
+            $("#window-cop").attr("title",tooltip_text);
+                    
             if (feedstats["heatpump_heat"]!=undefined) {
                 $("#standby_cop").html((feedstats["heatpump_heat"].kwh / (feedstats["heatpump_elec"].kwh-standby_kwh)).toFixed(2));
             } else {
@@ -979,11 +1032,14 @@ function powergraph_load()
             }
 
             let ch_elec_kwh = feedstats["heatpump_elec"].kwh - dhw_elec_kwh - standby_kwh
-            let ch_heat_kwh = feedstats["heatpump_heat"].kwh - dhw_heat_kwh
-            if (ch_elec_kwh > 0) {
-                $("#ch_cop").html((ch_heat_kwh / ch_elec_kwh).toFixed(2));
-            } else {
-                $("#ch_cop").html("~");
+            let ch_heat_kwh = 0;
+            if (feedstats["heatpump_heat"]!=undefined) {
+                ch_heat_kwh = feedstats["heatpump_heat"].kwh - dhw_heat_kwh
+                if (ch_elec_kwh > 0) {
+                    $("#ch_cop").html((ch_heat_kwh / ch_elec_kwh).toFixed(2));
+                } else {
+                    $("#ch_cop").html("~");
+                }
             }
             $("#ch_elec_kwh").html(ch_elec_kwh.toFixed(3));
             $("#ch_heat_kwh").html(ch_heat_kwh.toFixed(3));
@@ -1023,7 +1079,7 @@ function powergraph_load()
     
     if (feedstats["heatpump_flowT"]!=undefined && feedstats["heatpump_returnT"]!=undefined && feedstats["heatpump_roomT"]!=undefined && feedstats["heatpump_heat"]!=undefined) {
 
-        if (feedstats["heatpump_flowT"].stdev>0.2 || feedstats["heatpump_returnT"].stdev>0.2) {
+    if (feedstats["heatpump_flowT"].diff>0.15 || feedstats["heatpump_returnT"].diff>0.15) {
             $("#kW_at_50").html("?");
             
             if (kw_at_50_for_volume) {
@@ -1117,6 +1173,8 @@ function powergraph_load()
 // -------------------------------------------------------------------------------
 function powergraph_draw() 
 {
+    set_url_view_params("power",view.start,view.end);
+
     var style = {size:flot_font_size, color:"#666"}
     var options = {
         lines: { fill: false },
@@ -1129,7 +1187,7 @@ function powergraph_draw()
         yaxes: [
             {min: 0, font: style,reserveSpace:false},
             {font: style,reserveSpace:false},
-            {font: style,reserveSpace:false},
+            {min: 0, font: {size:flot_font_size, color: "#44b3e2"},reserveSpace:false},
             {min: 0, max: 1, show: false, reserveSpace:false}
         ],
         grid: {
@@ -1143,7 +1201,7 @@ function powergraph_draw()
             margin:{top:30}
         },
         selection: { mode: "x" },
-        legend:{position:"NW", noColumns:7}
+        legend:{position:"NW", noColumns:10}
     }
     if ($('#placeholder').width()) {
         $.plot($('#placeholder'),powergraph_series,options);
@@ -1164,6 +1222,8 @@ function bargraph_load(start,end)
     
     var elec_kwh_in_window = 0;
     var heat_kwh_in_window = 0;
+    var days_elec = 0;
+    var days_heat = 0;
     
     if (heat_enabled) {
         data["heatpump_heat_kwhd"] = feed.getdata(feeds["heatpump_heat_kwh"].id,start,end,"daily",0,1)
@@ -1174,6 +1234,7 @@ function bargraph_load(start,end)
         
         for (var z in data["heatpump_heat_kwhd"]) {
             heat_kwh_in_window += data["heatpump_heat_kwhd"][z][1];
+            days_heat++;
         }
     }
     
@@ -1186,6 +1247,26 @@ function bargraph_load(start,end)
 
         for (var z in data["heatpump_elec_kwhd"]) {
             elec_kwh_in_window += data["heatpump_elec_kwhd"][z][1];
+            days_elec++;
+        }
+
+        // add series that shows COP points for each day
+        if (heat_enabled) {
+            if ((end - start)<(3600*24*120*1000)) {
+                cop_data = [];
+                for (var z in data["heatpump_elec_kwhd"]) {
+                    time = data["heatpump_elec_kwhd"][z][0];
+                    elec = data["heatpump_elec_kwhd"][z][1];
+                    heat = data["heatpump_heat_kwhd"][z][1];
+                    if (elec && heat) {
+                        cop_data[z] = [ time, heat / elec ];
+                    }
+                }
+                bargraph_series.push({
+                    data: cop_data, color: "#44b3e2", yaxis:3,
+                    points: { show: true }
+                });
+            }
         }
     }
     
@@ -1195,7 +1276,7 @@ function bargraph_load(start,end)
             data["heatpump_outsideT_daily"] = feed.getdata(feeds["heatpump_outsideT"].id,start,end,"daily",1,0);
             bargraph_series.push({
                 data: data["heatpump_outsideT_daily"], color: 4, yaxis:2,
-                lines: { show: true, align: "center", fill: false}, points: { show: true }
+                lines: { show: true, align: "center", fill: false}, points: { show: false }
             });
         }
     }
@@ -1203,7 +1284,16 @@ function bargraph_load(start,end)
     var cop_in_window =  heat_kwh_in_window/elec_kwh_in_window;
     if (cop_in_window<0) cop_in_window = 0;
     $("#window-cop").html((cop_in_window).toFixed(2));
+    
+    var tooltip_text = "";
+    tooltip_text += "Electric: "+elec_kwh_in_window.toFixed(0)+" kWh ("+(elec_kwh_in_window/days_elec).toFixed(1)+" kWh/d)\n";
+    tooltip_text += "Heat: "+heat_kwh_in_window.toFixed(0)+" kWh ("+(heat_kwh_in_window/days_heat).toFixed(1)+" kWh/d)\n";
+    tooltip_text += "Days: "+days_elec;
+    $("#window-cop").attr("title",tooltip_text);
+    
     $("#window-carnot-cop").html("");
+    
+    set_url_view_params('daily',start,end);
 }
 
 function bargraph_draw() 
@@ -1226,6 +1316,10 @@ function bargraph_draw()
             // labelWidth:-5
             reserveSpace:false,
             // max:40
+        },{ 
+            font: {size:flot_font_size, color:"#44b3e2"}, 
+            reserveSpace:false,
+            min: 0
         }],
         selection: { mode: "x" },
         grid: {
@@ -1293,6 +1387,14 @@ function remove_null_values(data_in) {
         }
     }
     return tmp;
+}
+
+function set_url_view_params(mode,start,end) {
+    const url = new URL(window.location);
+    url.searchParams.set('mode', mode); 
+    url.searchParams.set('start', Math.round(start*0.001));
+    url.searchParams.set('end', Math.round(end*0.001));
+    $('#permalink')[0].href = url.toString();
 }
 
 function draw_histogram(histogram){

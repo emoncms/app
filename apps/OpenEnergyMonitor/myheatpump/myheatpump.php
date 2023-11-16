@@ -14,7 +14,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=<?php echo $v; ?>" rel="stylesheet">
+<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=30>" rel="stylesheet">
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
 <div id="app-block" style="display:none">
@@ -22,9 +22,9 @@
   <div class="col1"><div class="col1-inner">
     <div class="block-bound">
       <div style="float:right">
-          <div class="config-open" style="padding-top:10px; padding-right:10px; cursor:pointer">
-              <i class="icon-wrench icon-white"></i>
-          </div>
+        <a id="permalink" href="" title="Share this view" class="myheatpump-top-buttons"><i class="icon-share icon-white"></i></a><div class="myheatpump-top-buttons config-open">
+          <i class="icon-wrench icon-white" title="Configure app"></i>
+        </div>
       </div>
       
       <div class="block-title" id="app_name">MY HEATPUMP</div>
@@ -66,25 +66,26 @@
     <div class="block-bound">
     
       <div class="bargraph-navigation">
-        <!--<div class="bluenav bargraph-other">OTHER</div>-->
-        <div class="bluenav bargraph-alltime">ALL TIME</div>
+        <div class="bluenav bargraph-alltime">ALL</div>
+        <div class="bluenav bargraph-year">YEAR</div>
+        <div class="bluenav bargraph-quarter">3 MONTHS</div>
         <div class="bluenav bargraph-month">MONTH</div>
         <div class="bluenav bargraph-week">WEEK</div>
+        <div class="bluenav bargraph-day">DAY</div>
       </div>
       
       <div class="powergraph-navigation" style="display:none">
-        <div class="bluenav viewhistory">BACK</div>
-        <span class="bluenav" id="right" >></span>
-        <span class="bluenav" id="left" ><</span>
-        <span class="bluenav" id="zoomout" >-</span>
-        <span class="bluenav" id="zoomin" >+</span>
-        <span class="bluenav time dmy" time='720'>M</span>
-        <span class="bluenav time dmy" time='168'>W</span>
-        <span class="bluenav time" time='24'>D</span>
-        <span class="bluenav time" time='1'>H</span>
+        <div class="bluenav viewhistory" title="Back to daily summary">BACK</div>
+        <span class="bluenav" id="right" title="Scroll right">&gt;</span>
+        <span class="bluenav" id="left" title="Scroll left">&lt;</span>
+        <span class="bluenav" id="zoomout" title="Zoom out">-</span>
+        <span class="bluenav" id="zoomin" title="Zoom in">+</span>
+        <span class="bluenav time dmy" time='720' title="Last 30 days">M</span>
+        <span class="bluenav time dmy" time='168' title="Last 7 days">W</span>
+        <span class="bluenav time" time='24' title="Last 24 hours">D</span>
+        <span class="bluenav time" time='6' title="Last 6 hours">6</span>
+        <span class="bluenav time" time='1' title="Last hour">H</span>
       </div>
-        
-      <div class="block-title">HISTORY</div>       
     </div>
     
     <div style="background-color:#fff; padding:10px;">
@@ -96,14 +97,26 @@
     <div style="background-color:#eee; color:#333">
       <div id='advanced-toggle' class='bluenav' style="display:none" >SHOW DETAIL</div>
       
-      <div style="padding:10px;">
-        COP in window: <b id="window-cop"></b> <span id="window-carnot-cop"></span>
+      <div style="padding:10px">
+        COP in window: <b id="window-cop" style="cursor:pointer"></b> <span id="window-carnot-cop"></span>
       </div>
     </div>
-          
+    
     <div id="advanced-block" style="background-color:#fff; padding:10px; display:none">
       <div style="color:#000">
-        <p id="show_flow_rate_bound" style="display:none"><b>Show flow rate:</b> <input id="show_flow_rate" type="checkbox" style="margin-top:-4px; margin-left:7px"></p>
+        <div id="dhw_stats" style="display: none">
+          <p><b>Heating</b>:
+          Electricity consumed: <span id="ch_elec_kwh"></span> kWh
+            &raquo; heat produced: <span id="ch_heat_kwh"></span> kWh
+            = COP <b><span id="ch_cop"></span></b>
+          </p>
+          <p><b>Hot Water</b>:
+          Electricity consumed: <span id="dhw_elec_kwh"></span> kWh
+            &raquo; heat produced: <span id="dhw_heat_kwh"></span> kWh
+            = COP <b><span id="dhw_cop"></span></b>
+          </p>
+        </div>
+        <hr style="margin:10px 0px 10px 0px">
       
         <table class="table">
           <tr>
@@ -118,19 +131,7 @@
           <tbody id="stats"></tbody>
         </table>
         
-        <div id="dhw_stats" style="display: none">
-          <hr style="margin:10px 0px 10px 0px">
-          <p><b>Heating</b>:
-            Electricity consumed: <span id="ch_elec_kwh"></span> kWh
-            &raquo; heat produced: <span id="ch_heat_kwh"></span> kWh
-            = COP <b><span id="ch_cop"></span></b>
-          </p>
-          <p><b>Hot Water</b>:
-            Electricity consumed: <span id="dhw_elec_kwh"></span> kWh
-            &raquo; heat produced: <span id="dhw_heat_kwh"></span> kWh
-            = COP <b><span id="dhw_cop"></span></b>
-          </p>
-        </div>
+        <p id="show_flow_rate_bound" style="display:none"><b>Show flow rate:</b> <input id="show_flow_rate" type="checkbox" style="margin-top:-4px; margin-left:7px"></p>
         
         <hr style="margin:10px 0px 10px 0px">
         <p><b>Standby</b></p>
@@ -267,4 +268,4 @@ var session_write = <?php echo $session['write']; ?>;
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=65"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=72"></script>
