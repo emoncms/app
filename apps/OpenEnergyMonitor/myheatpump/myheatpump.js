@@ -153,12 +153,24 @@ function show()
         $("#live_table").show();  
     }
 
+    if (urlParams.mode!=undefined) {
+        if (urlParams.mode=="power") {
+            viewmode = "powergraph"
+            $("#advanced-block").show();
+            $("#advanced-toggle").html("HIDE DETAIL");
+        }
+    }    
+
     // If this is a new dashboard there will be less than a days data 
     // show power graph directly in this case
     if (((end*0.001)-start_time)<86400*3 || viewmode=="powergraph") {
         var timeWindow = (end - start_time*1000);
         if (timeWindow>(86400*3*1000)) timeWindow = 86400*1*1000;
         var start = end - timeWindow;
+        
+        if (urlParams.start!=undefined) start = urlParams.start*1000;
+        if (urlParams.end!=undefined) end = urlParams.end*1000;
+        
         view.start = start;
         view.end = end;
         viewmode = "powergraph";
@@ -171,6 +183,10 @@ function show()
         var timeWindow = (3600000*24.0*30);
         var start = end - timeWindow;
         if (start<(start_time*1000)) start = start_time * 1000;
+        
+        if (urlParams.start!=undefined) start = urlParams.start*1000;
+        if (urlParams.end!=undefined) end = urlParams.end*1000; 
+        
         bargraph_load(start,end);
         bargraph_draw();
         $("#advanced-toggle").hide();
@@ -1109,6 +1125,8 @@ function powergraph_load()
 // -------------------------------------------------------------------------------
 function powergraph_draw() 
 {
+    set_url_view_params("power",view.start,view.end);
+
     var style = {size:flot_font_size, color:"#666"}
     var options = {
         lines: { fill: false },
@@ -1156,6 +1174,8 @@ function bargraph_load(start,end)
     
     var elec_kwh_in_window = 0;
     var heat_kwh_in_window = 0;
+    var days_elec = 0;
+    var days_heat = 0;
     
     if (heat_enabled) {
         data["heatpump_heat_kwhd"] = feed.getdata(feeds["heatpump_heat_kwh"].id,start,end,"daily",0,1)
@@ -1166,6 +1186,7 @@ function bargraph_load(start,end)
         
         for (var z in data["heatpump_heat_kwhd"]) {
             heat_kwh_in_window += data["heatpump_heat_kwhd"][z][1];
+            days_heat++;
         }
     }
     
@@ -1178,6 +1199,7 @@ function bargraph_load(start,end)
 
         for (var z in data["heatpump_elec_kwhd"]) {
             elec_kwh_in_window += data["heatpump_elec_kwhd"][z][1];
+            days_elec++;
         }
 
         // add series that shows COP points for each day
@@ -1212,7 +1234,15 @@ function bargraph_load(start,end)
     var cop_in_window =  heat_kwh_in_window/elec_kwh_in_window;
     if (cop_in_window<0) cop_in_window = 0;
     $("#window-cop").html((cop_in_window).toFixed(2));
+    
+    var tooltip_text = "";
+    tooltip_text += "Electric: "+elec_kwh_in_window.toFixed(0)+" kWh ("+(elec_kwh_in_window/days_elec).toFixed(1)+" kWh/d)\n";
+    tooltip_text += "Heat: "+heat_kwh_in_window.toFixed(0)+" kWh ("+(heat_kwh_in_window/days_heat).toFixed(1)+" kWh/d)\n";
+    tooltip_text += "Days: "+days_elec;
+    $("#window-cop").attr("title",tooltip_text);
     $("#window-carnot-cop").html("");
+    
+    set_url_view_params('daily',start,end);
 }
 
 function bargraph_draw() 
@@ -1306,6 +1336,14 @@ function remove_null_values(data_in) {
         }
     }
     return tmp;
+}
+
+function set_url_view_params(mode,start,end) {
+    const url = new URL(window.location);
+    url.searchParams.set('mode', mode); 
+    url.searchParams.set('start', Math.round(start*0.001));
+    url.searchParams.set('end', Math.round(end*0.001));
+    $('#permalink')[0].href = url.toString();
 }
 
 function draw_histogram(histogram){
