@@ -365,7 +365,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 
                 var outside_temp_str = "";
                 if (feeds["heatpump_outsideT"]!=undefined) {
-                    if (data["heatpump_outsideT_daily"].length && data["heatpump_outsideT_daily"][z]!=undefined) {
+                    if (data["heatpump_outsideT_daily"]!=undefined && data["heatpump_outsideT_daily"].length && data["heatpump_outsideT_daily"][z]!=undefined) {
                         let outsideT = data["heatpump_outsideT_daily"][z][1];
                         if (outsideT!=null) {
                             outside_temp_str = "Outside: "+outsideT.toFixed(1)+"°C<br>";
