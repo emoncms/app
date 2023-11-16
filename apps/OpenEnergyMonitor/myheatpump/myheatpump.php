@@ -22,8 +22,9 @@
   <div class="col1"><div class="col1-inner">
     <div class="block-bound">
       <div style="float:right">
-          <div class="config-open" style="padding-top:10px; padding-right:10px; cursor:pointer">
-              <i class="icon-wrench icon-white"></i>
+          <div style="padding-top:10px; padding-right:10px">
+              <i class="config-open icon-wrench icon-white" title="Configure app" style="cursor:pointer"></i>
+              <a id="permalink" href="" title="Share this view"><i class="icon-share icon-white"></i></a>
           </div>
       </div>
       
@@ -97,8 +98,8 @@
     <div style="background-color:#eee; color:#333">
       <div id='advanced-toggle' class='bluenav' style="display:none" >SHOW DETAIL</div>
       
-      <div style="padding:10px;">
-        COP in window: <b id="window-cop"></b> <span id="window-carnot-cop"></span>
+      <div style="padding:10px">
+        COP in window: <b id="window-cop" style="cursor:pointer"></b> <span id="window-carnot-cop"></span>
       </div>
     </div>
     
@@ -268,4 +269,4 @@ var session_write = <?php echo $session['write']; ?>;
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=68"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=69"></script>
