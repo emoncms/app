@@ -999,6 +999,14 @@ function powergraph_load()
         if (heat_enabled) heat_mean = feedstats["heatpump_heat"].mean;
         if (elec_mean>0) {
             $("#window-cop").html((heat_mean / elec_mean).toFixed(2));
+            
+            var tooltip_text = "";
+            tooltip_text += "Electric: "+feedstats["heatpump_elec"].kwh.toFixed(1)+" kWh\n";
+            if (feedstats["heatpump_heat"]!=undefined) {
+                tooltip_text += "Heat: "+feedstats["heatpump_heat"].kwh.toFixed(1)+" kWh\n";
+            }
+            $("#window-cop").attr("title",tooltip_text);
+                    
             if (feedstats["heatpump_heat"]!=undefined) {
                 $("#standby_cop").html((feedstats["heatpump_heat"].kwh / (feedstats["heatpump_elec"].kwh-standby_kwh)).toFixed(2));
             } else {
@@ -1243,6 +1251,7 @@ function bargraph_load(start,end)
     tooltip_text += "Heat: "+heat_kwh_in_window.toFixed(0)+" kWh ("+(heat_kwh_in_window/days_heat).toFixed(1)+" kWh/d)\n";
     tooltip_text += "Days: "+days_elec;
     $("#window-cop").attr("title",tooltip_text);
+    
     $("#window-carnot-cop").html("");
     
     set_url_view_params('daily',start,end);
