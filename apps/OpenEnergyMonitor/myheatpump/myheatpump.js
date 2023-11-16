@@ -64,6 +64,7 @@ var inst_cop_max = 6;
 var inst_cop_mv_av_dp = 0;
 var kw_at_50 = 0;
 var kw_at_50_for_volume = 0;
+var show_daily_cop_series = true;
 
 var realtime_cop_div_mode = "30min";
 
@@ -1204,19 +1205,21 @@ function bargraph_load(start,end)
 
         // add series that shows COP points for each day
         if (heat_enabled) {
-            cop_data = [];
-            for (var z in data["heatpump_elec_kwhd"]) {
-                time = data["heatpump_elec_kwhd"][z][0];
-                elec = data["heatpump_elec_kwhd"][z][1];
-                heat = data["heatpump_heat_kwhd"][z][1];
-                if (elec && heat) {
-                    cop_data[z] = [ time, heat / elec ];
+            if ((end - start)<(3600*24*120*1000)) {
+                cop_data = [];
+                for (var z in data["heatpump_elec_kwhd"]) {
+                    time = data["heatpump_elec_kwhd"][z][0];
+                    elec = data["heatpump_elec_kwhd"][z][1];
+                    heat = data["heatpump_heat_kwhd"][z][1];
+                    if (elec && heat) {
+                        cop_data[z] = [ time, heat / elec ];
+                    }
                 }
+                bargraph_series.push({
+                    data: cop_data, color: "#44b3e2", yaxis:3,
+                    points: { show: true }
+                });
             }
-            bargraph_series.push({
-                data: cop_data, color: "#44b3e2", yaxis:3,
-                points: { show: true }
-            });
         }
     }
     
