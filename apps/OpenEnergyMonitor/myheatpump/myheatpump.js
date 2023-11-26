@@ -1288,7 +1288,7 @@ function bargraph_draw()
             reserveSpace:false,
             min:0
         },{ 
-            font: {size:flot_font_size, color:"#666"}, 
+            font: {size:flot_font_size, color:"#9440ed"}, 
             // labelWidth:-5
             reserveSpace:false,
             // max:40
