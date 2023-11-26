@@ -637,7 +637,7 @@ function powergraph_load()
     powergraph_series = [];
 
     if (feeds["heatpump_dhw"]!=undefined) {
-        data["heatpump_dhw"] = feed.getdata(feeds["heatpump_dhw"].id,view.start,view.end,view.interval,0,0,skipmissing,limitinterval);
+        data["heatpump_dhw"] = feed.getdata(feeds["heatpump_dhw"].id,view.start,view.end,view.interval,1,0,skipmissing,limitinterval);
 
         let style = {lineWidth: 0, show:true, fill:0.15};
         if (all_same_interval) {
@@ -647,7 +647,7 @@ function powergraph_load()
         }
     }
     if (feeds["heatpump_ch"]!=undefined) {
-        data["heatpump_ch"] = feed.getdata(feeds["heatpump_ch"].id,view.start,view.end,view.interval,0,0,skipmissing,limitinterval);
+        data["heatpump_ch"] = feed.getdata(feeds["heatpump_ch"].id,view.start,view.end,view.interval,1,0,skipmissing,limitinterval);
 
         let style = {lineWidth: 0, show:true, fill:0.15};
         if (all_same_interval) {
