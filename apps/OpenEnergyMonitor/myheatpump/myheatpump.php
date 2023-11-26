@@ -142,6 +142,13 @@
           <input type="text" style="width:50px" id="starting_power" value="100">
         </div>
 
+        <p><b>Show mean values for periods when heat pump is running only:</b>
+          <input id="stats_when_running" type="checkbox" style="margin-top:-4px; margin-left:7px">
+          <span id="stats_without_dhw" style="display: none;"> - <i>Exclude DHW:</i> <input id="exclude_dhw" type="checkbox" style="margin-top:-4px; margin-left:7px"></span>
+          <br><span style="font-size:12px">(Based on starting power value above)</span></p>
+
+        <div id="mean_when_running"></div>
+        
         <hr style="margin:10px 0px 10px 0px">
 
         <p><b>Show Instantaneous COP:</b> <input id="show_instant_cop" type="checkbox" style="margin-top:-4px; margin-left:7px"></p>
@@ -162,15 +169,6 @@
             <option value="5">5 points</option>
           </select>
         </div>
-
-        <hr style="margin:10px 0px 10px 0px">
-        
-        <p><b>Show mean values for periods when heat pump is running only:</b>
-          <input id="stats_when_running" type="checkbox" style="margin-top:-4px; margin-left:7px">
-          <span id="stats_without_dhw" style="display: none;"> - <i>Exclude DHW:</i> <input id="exclude_dhw" type="checkbox" style="margin-top:-4px; margin-left:7px"></span>
-          <br><span style="font-size:12px">(Based on starting power value above)</span></p>
-
-        <div id="mean_when_running"></div>
         
         <hr style="margin:10px 0px 10px 0px">
         
@@ -268,4 +266,4 @@ var session_write = <?php echo $session['write']; ?>;
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=72"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=73"></script>
