@@ -963,7 +963,7 @@ function powergraph_load()
             for (var z in data["heatpump_elec"]) {
                 if (data["heatpump_elec"][z][0]>=now) break;
                 if (data["heatpump_elec"][z][1]!=null) power = data["heatpump_elec"][z][1];
-                if (data["heatpump_dhw"][z][1]!=null) dhw = data["heatpump_dhw"][z][1];
+                if (data["heatpump_dhw"][z] && data["heatpump_dhw"][z][1]!=null) dhw = data["heatpump_dhw"][z][1];
                 if (dhw) {
                     dhw_elec_kwh += power * view.interval / 3600000;
                 }
@@ -978,7 +978,7 @@ function powergraph_load()
             for (var z in data["heatpump_heat"]) {
                 if (data["heatpump_heat"][z][0]>=now) break;
                 if (data["heatpump_heat"][z][1]!=null) heat = data["heatpump_heat"][z][1];
-                if (data["heatpump_dhw"][z][1]!=null) dhw = data["heatpump_dhw"][z][1];
+                if (data["heatpump_dhw"][z] && data["heatpump_dhw"][z][1]!=null) dhw = data["heatpump_dhw"][z][1];
                 if (dhw) {
                     dhw_heat_kwh += heat * view.interval / 3600000;
                 }
