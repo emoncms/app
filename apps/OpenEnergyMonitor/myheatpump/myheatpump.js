@@ -160,7 +160,19 @@ function show()
             $("#advanced-block").show();
             $("#advanced-toggle").html("HIDE DETAIL");
         }
-    }    
+        if (urlParams.cop) {
+            $("#show_instant_cop").click();
+            show_instant_cop = true;
+        }
+        if (urlParams.flow) {
+            $("#show_flow_rate").click();
+            show_flow_rate = true;
+        }
+        if (urlParams.carnot) {
+            $("#carnot_enable")[0].click();
+            $("#heatpump_factor").val(urlParams.carnot);
+        }
+    }
 
     // If this is a new dashboard there will be less than a days data 
     // show power graph directly in this case
@@ -1358,6 +1370,16 @@ function set_url_view_params(mode,start,end) {
     url.searchParams.set('mode', mode); 
     url.searchParams.set('start', Math.round(start*0.001));
     url.searchParams.set('end', Math.round(end*0.001));
+
+    if (show_instant_cop) url.searchParams.set('cop', 1); 
+    else url.searchParams.delete('cop');
+
+    if (show_flow_rate) url.searchParams.set('flow', 1); 
+    else url.searchParams.delete('flow');
+    
+    if ($("#carnot_enable")[0].checked) url.searchParams.set('carnot', parseFloat($("#heatpump_factor").val())); 
+    else url.searchParams.delete('carnot');
+
     $('#permalink')[0].href = url.toString();
 }
 
