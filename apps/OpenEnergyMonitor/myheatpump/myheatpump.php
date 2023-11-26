@@ -156,7 +156,7 @@
         <div class="input-prepend input-append" style="margin-top:5px">
           <span class="add-on">Valid COP</span>
           <span class="add-on">Min</span>
-          <input type="text" style="width:50px" id="inst_cop_min" value="2.0">
+          <input type="text" style="width:50px" id="inst_cop_min" value="1.0">
           <span class="add-on">Max</span>
           <input type="text" style="width:50px" id="inst_cop_max" value="8.0">
         </div>
