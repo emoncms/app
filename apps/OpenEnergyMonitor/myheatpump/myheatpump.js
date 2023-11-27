@@ -135,19 +135,17 @@ function show()
     resize();
     
     var date = new Date();
-
     var now = date.getTime();
     
     end = end_time*1000;
     
-    date.setTime(end);
-    
     if ((now-end)>3600*1000) {
         $("#last_updated").show();
         $("#live_table").hide();
+        date.setTime(end);
         let h = date.getHours();
-        if (h<10) h = "0"+h;
         let m = date.getMinutes();
+        if (h<10) h = "0"+h;
         if (m<10) m = "0"+m;
         $("#last_updated").html("Last updated: "+date.toDateString()+" "+h+":"+m)
     } else {
@@ -220,9 +218,6 @@ function clear()
 
 function updater()
 {
-
-
-
     feed.listbyidasync(function(result){
         if (result === null) { return; }
         
@@ -270,34 +265,20 @@ function updater()
         
         // Updates every 60 seconds
         if (progtime%60==0) {
-        
-            if (feeds["heatpump_elec"]!=undefined) {
-                var min30 = feeds["heatpump_elec"].time - (60*30);
-                var min60 = feeds["heatpump_elec"].time - (60*60);
-            } else {
-                var min30 = feeds["heatpump_elec_kwh"].time - (60*30);
-                var min60 = feeds["heatpump_elec_kwh"].time - (60*60);
-            }
-            
             var elec = 0; var heat = 0;
-            // if (elec_enabled) elec = feeds["heatpump_elec_kwh"].value - feed.getvalue(feeds["heatpump_elec_kwh"].id, min30);
-            // if (heat_enabled) heat = feeds["heatpump_heat_kwh"].value - feed.getvalue(feeds["heatpump_heat_kwh"].id, min30);
-
             if (elec_enabled) elec = get_average("heatpump_elec",1800);
             if (heat_enabled) heat = get_average("heatpump_heat",1800);
             
-            
             var COP = 0;
-            if (elec>0) COP = heat / elec;
-            if (COP<0) COP =0;
+            if (elec>0 && heat>0) COP = heat / elec;
             if (realtime_cop_div_mode=="30min") {
                 $("#realtime_cop_value").html(COP.toFixed(2));
             }
             
             if (feeds["heatpump_elec"]==undefined) $("#heatpump_elec").html(Math.round(elec*3600000/(60*30)));
-            if (feeds["heatpump_elec"]==undefined) $("#heatpump_heat").html(Math.round(heat*3600000/(60*30)));
+            if (feeds["heatpump_heat"]==undefined) $("#heatpump_heat").html(Math.round(heat*3600000/(60*30)));
         }
-        progtime += 5;
+        progtime += 10;
         
         //$(".value1").css("color","#00cc00");
         //setTimeout(function(){ $(".value1").css("color","#333"); },400);
