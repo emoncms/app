@@ -498,7 +498,13 @@ $('.bargraph-day').click(function () {
     powergraph_load();
     powergraph_draw();
     $(".powergraph-navigation").show();
+    
     $("#advanced-toggle").show();
+    if ($("#advanced-toggle").html()=="SHOW DETAIL") {
+        $("#advanced-block").hide();
+    } else {
+        $("#advanced-block").show();
+    }  
 });
 
 $('.bargraph-week').click(function () {
