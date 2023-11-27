@@ -70,7 +70,12 @@ var show_daily_cop_series = true;
 var realtime_cop_div_mode = "30min";
 
 var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
- 
+
+// duration contants (milliseonds)
+const MINUTE = 60 * 1000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+
 config.init();
 
 function init()
@@ -139,7 +144,7 @@ function show()
     
     end = end_time*1000;
     
-    if ((now-end)>3600*1000) {
+    if (now-end>HOUR) {
         $("#last_updated").show();
         $("#live_table").hide();
         date.setTime(end);
@@ -175,9 +180,9 @@ function show()
 
     // If this is a new dashboard there will be less than a days data 
     // show power graph directly in this case
-    if (((end*0.001)-start_time)<86400*3 || viewmode=="powergraph") {
-        var timeWindow = (end - start_time*1000);
-        if (timeWindow>(86400*3*1000)) timeWindow = 86400*1*1000;
+    var timeWindow = (end - start_time*1000);
+    if (timeWindow<3*DAY || viewmode=="powergraph") {
+        if (timeWindow>3*DAY) timeWindow = DAY;
         var start = end - timeWindow;
         
         if (urlParams.start!=undefined) start = urlParams.start*1000;
@@ -192,7 +197,7 @@ function show()
         powergraph_draw();
         $("#advanced-toggle").show();
     } else {
-        var timeWindow = (3600000*24.0*30);
+        var timeWindow = 30 * DAY;
         var start = end - timeWindow;
         if (start<(start_time*1000)) start = start_time * 1000;
         
@@ -264,7 +269,8 @@ function updater()
         $("#total_cop").html(total_cop.toFixed(2));
         
         // Updates every 60 seconds
-        if (progtime%60==0) {
+        var now = new Date().getTime();
+        if (progtime < now - MINUTE) {
             var elec = 0; var heat = 0;
             if (elec_enabled) elec = get_average("heatpump_elec",1800);
             if (heat_enabled) heat = get_average("heatpump_heat",1800);
@@ -275,10 +281,11 @@ function updater()
                 $("#realtime_cop_value").html(COP.toFixed(2));
             }
             
-            if (feeds["heatpump_elec"]==undefined) $("#heatpump_elec").html(Math.round(elec*3600000/(60*30)));
-            if (feeds["heatpump_heat"]==undefined) $("#heatpump_heat").html(Math.round(heat*3600000/(60*30)));
+            if (feeds["heatpump_elec"]==undefined) $("#heatpump_elec").html(Math.round(elec*HOUR/(60*30)));
+            if (feeds["heatpump_heat"]==undefined) $("#heatpump_heat").html(Math.round(heat*HOUR/(60*30)));
+            
+            progtime = now;
         }
-        progtime += 10;
         
         //$(".value1").css("color","#00cc00");
         //setTimeout(function(){ $(".value1").css("color","#333"); },400);
@@ -316,7 +323,7 @@ $('.time').click(function () {
 
 $(".viewhistory").click(function () {
     $(".powergraph-navigation").hide();
-    var timeWindow = (3600000*24.0*30);
+    var timeWindow = 30*DAY;
     // var end = (new Date()).getTime();
     var end = end_time*1000;
     var start = end - timeWindow;
@@ -430,7 +437,7 @@ $('#placeholder').bind("plotclick", function (event, pos, item)
     if (item && !panning && viewmode=="bargraph") {
         var z = item.dataIndex;
         view.start = data["heatpump_elec_kwhd"][z][0];
-        view.end = view.start + 86400*1000;
+        view.end = view.start + DAY;
         $(".bargraph-navigation").hide();
         viewmode = "powergraph";
         powergraph_load();
@@ -481,7 +488,7 @@ $('.bargraph-day').click(function () {
 });
 
 $('.bargraph-week').click(function () {
-    var timeWindow = (3600000*24.0*7);
+    var timeWindow = 7*DAY;
     var end = (new Date()).getTime();
     var start = end - timeWindow;
     if (start<(start_time*1000)) start = start_time * 1000;
@@ -490,7 +497,7 @@ $('.bargraph-week').click(function () {
 });
 
 $('.bargraph-month').click(function () {
-    var timeWindow = (3600000*24.0*30);
+    var timeWindow = 30*DAY;
     var end = (new Date()).getTime();
     var start = end - timeWindow;
     if (start<(start_time*1000)) start = start_time * 1000;
@@ -499,7 +506,7 @@ $('.bargraph-month').click(function () {
 });
 
 $('.bargraph-quarter').click(function () {
-    var timeWindow = (3600000*24.0*91);
+    var timeWindow = 91*DAY;
     var end = (new Date()).getTime();
     var start = end - timeWindow;
     if (start<(start_time*1000)) start = start_time * 1000;
@@ -508,7 +515,7 @@ $('.bargraph-quarter').click(function () {
 });
 
 $('.bargraph-year').click(function () {
-    var timeWindow = (3600000*24.0*365);
+    var timeWindow = 365*DAY;
     var end = (new Date()).getTime();
     var start = end - timeWindow;
     if (start<(start_time*1000)) start = start_time * 1000;
@@ -736,7 +743,7 @@ function powergraph_load()
             for (var z=1; z<tmp.length; z++) {
                 var time = tmp[z-1][0];
                 var diff = tmp[z][1] - tmp[z-1][1];
-                var power = (diff * 3600000) / view.interval;
+                var power = (diff * HOUR) / view.interval;
                 if (power<0) power = 0;
                 data["heatpump_heat"].push([time,power]);
             }
@@ -749,7 +756,7 @@ function powergraph_load()
             for (var z=1; z<tmp.length; z++) {
                 var time = tmp[z-1][0];
                 var diff = tmp[z][1] - tmp[z-1][1];  // diff in kWh
-                var power = (diff * 3600000) / view.interval;
+                var power = (diff * HOUR) / view.interval;
                 if (power<0) power = 0;
                 data["heatpump_elec"].push([time,power]);
             }
@@ -855,8 +862,8 @@ function powergraph_load()
                         ideal_carnot_heat_sum += ideal_carnot_heat;
                         carnot_heat_n++;
                         
-                        practical_carnot_heat_kwh += practical_carnot_heat * view.interval / 3600000;
-                        ideal_carnot_heat_kwh += ideal_carnot_heat * view.interval / 3600000;
+                        practical_carnot_heat_kwh += practical_carnot_heat * view.interval / HOUR;
+                        ideal_carnot_heat_kwh += ideal_carnot_heat * view.interval / HOUR;
                         
                         if (heat!=0 && power!=0 && carnot_COP!=0) {
                             let COP = heat / power;
@@ -865,7 +872,7 @@ function powergraph_load()
                                 let bucket = Math.round(1*practical_efficiency*200)/200
 
                                 if (histogram[bucket]==undefined) histogram[bucket] = 0
-                                histogram[bucket] += heat * view.interval / 3600000  
+                                histogram[bucket] += heat * view.interval / HOUR;
                             }
                         }
                     }
@@ -951,7 +958,7 @@ function powergraph_load()
             if (data["heatpump_elec"][z][0]>=now) break;
             if (data["heatpump_elec"][z][1]!=null) power = data["heatpump_elec"][z][1];
             if (power<starting_power) {
-                standby_kwh += power * view.interval / 3600000;
+                standby_kwh += power * view.interval / HOUR;
             }
         }
     }
@@ -969,7 +976,7 @@ function powergraph_load()
                 if (data["heatpump_elec"][z][1]!=null) power = data["heatpump_elec"][z][1];
                 if (data["heatpump_dhw"][z] && data["heatpump_dhw"][z][1]!=null) dhw = data["heatpump_dhw"][z][1];
                 if (dhw) {
-                    dhw_elec_kwh += power * view.interval / 3600000;
+                    dhw_elec_kwh += power * view.interval / HOUR;
                 }
             }
         }
@@ -984,7 +991,7 @@ function powergraph_load()
                 if (data["heatpump_heat"][z][1]!=null) heat = data["heatpump_heat"][z][1];
                 if (data["heatpump_dhw"][z] && data["heatpump_dhw"][z][1]!=null) dhw = data["heatpump_dhw"][z][1];
                 if (dhw) {
-                    dhw_heat_kwh += heat * view.interval / 3600000;
+                    dhw_heat_kwh += heat * view.interval / HOUR;
                 }
             }
         }
@@ -1183,8 +1190,7 @@ function powergraph_draw()
 // -------------------------------------------------------------------------------
 function bargraph_load(start,end) 
 {   
-    var interval = 3600*24;
-    var intervalms = interval * 1000;
+    var intervalms = DAY;
     end = Math.ceil(end/intervalms)*intervalms;
     start = Math.floor(start/intervalms)*intervalms;
     
@@ -1199,7 +1205,7 @@ function bargraph_load(start,end)
         data["heatpump_heat_kwhd"] = feed.getdata(feeds["heatpump_heat_kwh"].id,start,end,"daily",0,1)
         bargraph_series.push({
             data: data["heatpump_heat_kwhd"], color: 0,
-            bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 1.0, lineWidth:0}
+            bars: { show: true, align: "center", barWidth: 0.75*DAY, fill: 1.0, lineWidth:0}
         });
         
         for (var z in data["heatpump_heat_kwhd"]) {
@@ -1212,7 +1218,7 @@ function bargraph_load(start,end)
         data["heatpump_elec_kwhd"] = feed.getdata(feeds["heatpump_elec_kwh"].id,start,end,"daily",0,1);
         bargraph_series.push({
             data: data["heatpump_elec_kwhd"], color: 1,
-            bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 1.0, lineWidth:0}
+            bars: { show: true, align: "center", barWidth: 0.75*DAY, fill: 1.0, lineWidth:0}
         });
 
         for (var z in data["heatpump_elec_kwhd"]) {
@@ -1222,7 +1228,7 @@ function bargraph_load(start,end)
 
         // add series that shows COP points for each day
         if (heat_enabled) {
-            if ((end - start)<(3600*24*120*1000)) {
+            if ((end - start)<120*DAY) {
                 cop_data = [];
                 for (var z in data["heatpump_elec_kwhd"]) {
                     time = data["heatpump_elec_kwhd"][z][0];
@@ -1242,7 +1248,7 @@ function bargraph_load(start,end)
     
     if (feeds["heatpump_outsideT"]!=undefined) {
         
-        if ((end - start)<(3600*24*120*1000)) {
+        if ((end - start)<120*DAY) {
             data["heatpump_outsideT_daily"] = feed.getdata(feeds["heatpump_outsideT"].id,start,end,"daily",1,0);
             bargraph_series.push({
                 data: data["heatpump_outsideT_daily"], color: 4, yaxis:2,
