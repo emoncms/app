@@ -76,6 +76,7 @@
       
       <div class="powergraph-navigation" style="display:none">
         <div class="bluenav viewhistory" title="Back to daily summary">BACK</div>
+        <span class="bluenav" id="live" title="Live scroll" style="display:none; color: yellow; cursor: default">&gt;&gt;</span>
         <span class="bluenav" id="right" title="Scroll right">&gt;</span>
         <span class="bluenav" id="left" title="Scroll left">&lt;</span>
         <span class="bluenav" id="zoomout" title="Zoom out">-</span>

@@ -284,6 +284,20 @@ function updater()
             if (feeds["heatpump_elec"]==undefined) $("#heatpump_elec").html(Math.round(elec*HOUR/(60*30)));
             if (feeds["heatpump_heat"]==undefined) $("#heatpump_heat").html(Math.round(heat*HOUR/(60*30)));
             
+            // update power chart if showing up to last 5 minutes, and less than 48 hours
+            if (viewmode=="powergraph") {
+                var timeWindow = (view.end - view.start);
+                if (view.end > progtime - 5*MINUTE && timeWindow <= 2*DAY) {
+                    if (view.end < now) {
+                        // automatically scroll power chart if at the end
+                        view.end = now;
+                        view.start = view.end - timeWindow;
+                    }
+
+                    powergraph_load();
+                    powergraph_draw();
+                }
+            }
             progtime = now;
         }
         
@@ -1182,6 +1196,17 @@ function powergraph_draw()
     }
     if ($('#placeholder').width()) {
         $.plot($('#placeholder'),powergraph_series,options);
+    }
+
+    // show symbol when live scrolling is active
+    var now = new Date().getTime();
+    if (view.end > now - 5*MINUTE && view.end <= now + 5*MINUTE && view.end - view.start <= 2*DAY) {
+        $('#right').hide();
+        $('#live').show();
+    }
+    else {
+        $('#live').hide();
+        $('#right').show();
     }
 }
 
