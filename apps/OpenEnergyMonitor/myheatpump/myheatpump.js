@@ -187,6 +187,7 @@ function show()
         
         if (urlParams.start!=undefined) start = urlParams.start*1000;
         if (urlParams.end!=undefined) end = urlParams.end*1000;
+        if (urlParams.hours!=undefined) start = end - urlParams.hours * HOUR;
         
         view.start = start;
         view.end = end;
@@ -210,7 +211,7 @@ function show()
     }
     
     // LOOP
-    progtime = 0;
+    progtime = now;
     updater();
     updaterinst = setInterval(updater,10000);
     $(".ajax-loader").hide();
@@ -1401,6 +1402,7 @@ function set_url_view_params(mode,start,end) {
     url.searchParams.set('mode', mode); 
     url.searchParams.set('start', Math.round(start*0.001));
     url.searchParams.set('end', Math.round(end*0.001));
+    url.searchParams.delete('hours');
 
     if (show_instant_cop) url.searchParams.set('cop', 1); 
     else url.searchParams.delete('cop');
