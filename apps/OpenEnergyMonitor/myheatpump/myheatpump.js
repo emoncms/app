@@ -211,7 +211,7 @@ function show()
     }
     
     // LOOP
-    progtime = 0;
+    progtime = now;
     updater();
     updaterinst = setInterval(updater,10000);
     $(".ajax-loader").hide();
