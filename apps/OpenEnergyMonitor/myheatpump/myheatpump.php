@@ -196,6 +196,12 @@
           <div id="histogram" style="height:400px"></div>
         </div>
         
+        <div id="show_negative_heat_bound">
+          <hr style="margin:10px 0px 10px 0px">
+          <p><b>Show defrosts / cooling:</b> <input id="show_negative_heat" type="checkbox" style="margin-top:-4px; margin-left:7px"></p>
+          <p>Heat: <b><span id="total_positive_heat_kwh"></span> kWh</b>, Cool: <b><span id="total_negative_heat_kwh"></span> kWh (<span id="prc_negative_heat"></span>%)</b>, Net: <b><span id="total_net_heat_kwh"></span> kWh</b></p>
+        </div>
+                
         <hr style="margin:10px 0px 10px 0px">
         <p><b>Experimental</b></p>
         
@@ -267,4 +273,4 @@ var session_write = <?php echo $session['write']; ?>;
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=73"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=74"></script>
