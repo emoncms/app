@@ -14,7 +14,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=30>" rel="stylesheet">
+<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=37>" rel="stylesheet">
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
 <div id="app-block" style="display:none">
@@ -105,108 +105,156 @@
     
     <div id="advanced-block" style="background-color:#fff; padding:10px; display:none">
       <div style="color:#000">
-        <div id="dhw_stats" style="display: none">
-          <p><b>Heating</b>:
-          Electricity consumed: <span id="ch_elec_kwh"></span> kWh
-            &raquo; heat produced: <span id="ch_heat_kwh"></span> kWh
-            = COP <b><span id="ch_cop"></span></b>
-          </p>
-          <p><b>Hot Water</b>:
-          Electricity consumed: <span id="dhw_elec_kwh"></span> kWh
-            &raquo; heat produced: <span id="dhw_heat_kwh"></span> kWh
-            = COP <b><span id="dhw_cop"></span></b>
-          </p>
-        </div>
-        <hr style="margin:10px 0px 10px 0px">
       
-        <table class="table">
-          <tr>
-          <th></th>
-          <th style="text-align:center">Min</th>
-          <th style="text-align:center">Max</th>
-          <th style="text-align:center">Diff</th>
-          <th style="text-align:center">Mean</th>
-          <th style="text-align:center">kWh</th>
-          <th style="text-align:center">StDev</th>
-          </tr>
-          <tbody id="stats"></tbody>
+
+      
+        <table style="width:100%; color:#333;">
+        <tr>
+          <td valign="top" class="show_stats_category" key="combined">
+            <div class="cop-title">Full window</div>
+            <div class="cop-value"><span class="cop_combined">---</span></div>
+          </td>
+          
+          <td valign="top" class="show_stats_category" key="when_running" style="color:#698d5d">
+            <div class="cop-title">When running</div>
+            <div class="cop-value"><span class="cop_when_running">---</span></div>
+          </td>
+          
+          <td valign="top" class="show_stats_category" key="space_heating" style="color:#f6a801">
+            <div class="cop-title">Space heating</div>
+            <div class="cop-value"><span class="cop_space_heating">---</span></div>
+          </td>
+
+          <td valign="top" class="show_stats_category" key="water_heating" style="color:#014656">
+            <div class="cop-title">Water heating</div>
+            <div class="cop-value"><span class="cop_water_heating">---</span></div>
+          </td>
+        </tr>
         </table>
         
-        <p id="show_flow_rate_bound" style="display:none"><b>Show flow rate:</b> <input id="show_flow_rate" type="checkbox" style="margin-top:-4px; margin-left:7px"></p>
         
-        <hr style="margin:10px 0px 10px 0px">
-        <p><b>Standby</b></p>
-        <p>Electricity consumption below starting power (standby): <span id="standby_kwh"></span> kWh</p>
-        <p>COP in window not including standby: <b><span id="standby_cop"></span></b><span id="standby_cop_simulated"></span></p>
-        <div class="input-prepend input-append" style="margin-top:5px">
-          <span class="add-on">Starting power (W)</span>
-          <input type="text" style="width:50px" id="starting_power" value="100">
+        <table class="table">
+          <tr>
+            <th></th>
+            <th style="text-align:center; width:150px; color:#777">Min</th>
+            <th style="text-align:center; width:150px; color:#777">Max</th>
+            <th style="text-align:center; width:150px; color:#777">Diff</th>
+            <th style="text-align:center; width:150px">Mean</th>
+            <th style="text-align:center; width:150px">kWh</th>
+          </tr>
+          <tbody class="stats_category" key="combined"></tbody>
+          <tbody class="stats_category" key="when_running" style="display:none"></tbody>
+          <tbody class="stats_category" key="water_heating" style="display:none"></tbody>
+          <tbody class="stats_category" key="space_heating" style="display:none"></tbody>
+        </table>
+        
+        <div id="show_flow_rate_bound" style="display:none" class="advanced-options">
+          <input id="show_flow_rate" type="checkbox" class="advanced-options-checkbox">
+          <b>Show flow rate</b> 
+        </div>
+        
+        <div id="show_cooling_bound" class="advanced-options">
+          <div style="float:right"><span id="total_negative_heat_kwh"></span> kWh (<span id="prc_negative_heat"></span>%)</div>
+          <input id="show_negative_heat" type="checkbox" class="advanced-options-checkbox">
+          <b>Show cooling / defrosts</b> 
+        </div>
+        
+        <div id="show_inst_cop_bound" class="advanced-options">
+
+          <input id="show_instant_cop" type="checkbox" class="advanced-options-checkbox">
+          <b>Show instantaneous COP</b>
+          
+          <div id="inst_cop_options" style="display:none">
+            <div class="input-prepend input-append" style="margin-top:10px; margin-bottom:0px; margin-left:35px">
+              <span class="add-on">Valid COP</span>
+              <span class="add-on">Min</span>
+              <input type="text" style="width:50px" id="inst_cop_min" value="1.0">
+              <span class="add-on">Max</span>
+              <input type="text" style="width:50px" id="inst_cop_max" value="8.0">
+            </div>
+            
+            <div class="input-prepend input-append" style="margin-top:10px; margin-bottom:0px">
+              <span class="add-on">Moving average</span>
+              <select id="inst_cop_mv_av_dp" style="width:100px">
+                <option value="0" selected>Disabled</option>
+                <option value="3">3 points</option>
+                <option value="5">5 points</option>
+              </select>
+            </div>
+          </div>
+          
         </div>
 
-        <p><b>Show mean values for periods when heat pump is running only:</b>
-          <input id="stats_when_running" type="checkbox" style="margin-top:-4px; margin-left:7px">
-          <span id="stats_without_dhw" style="display: none;"> - <i>Exclude DHW:</i> <input id="exclude_dhw" type="checkbox" style="margin-top:-4px; margin-left:7px"></span>
-          <br><span style="font-size:12px">(Based on starting power value above)</span></p>
+        <div id="show_inst_cop_bound" class="advanced-options">
+          <input id="carnot_enable" type="checkbox" class="advanced-options-checkbox">
+          <b>Show simulated carnot heat output</b> 
 
-        <div id="mean_when_running"></div>
-        
-        <hr style="margin:10px 0px 10px 0px">
-
-        <p><b>Show Instantaneous COP:</b> <input id="show_instant_cop" type="checkbox" style="margin-top:-4px; margin-left:7px"></p>
-
-        <div class="input-prepend input-append" style="margin-top:5px">
-          <span class="add-on">Valid COP</span>
-          <span class="add-on">Min</span>
-          <input type="text" style="width:50px" id="inst_cop_min" value="1.0">
-          <span class="add-on">Max</span>
-          <input type="text" style="width:50px" id="inst_cop_max" value="8.0">
+          <div id="carnot_sim_options" style="display:none">  
+            <div class="input-prepend input-append" style="margin-top:5px">
+              <span class="add-on">Condensing offset (K)</span>
+              <input type="text" style="width:50px" id="condensing_offset" value="2">
+              <span class="add-on">Evaporator offset (K)</span>
+              <input type="text" style="width:50px" id="evaporator_offset" value="-6">
+            </div>
+            <div id="heatpump_factor_bound" class="input-prepend input-append" style="margin-top:5px">
+              <span class="add-on">Heatpump factor</span>
+              <input type="text" style="width:50px" id="heatpump_factor" value="0.49">
+            </div>
+            <div id="fixed_outside_temperature_bound" class="input-prepend input-append" style="margin-top:5px">
+              <span class="add-on">Fixed outside temperature (C)</span>
+              <input type="text" style="width:50px" id="fixed_outside_temperature" value="6.0">
+            </div>
+          </div>
+          
+        </div>
+      
+        <div id="show_inst_cop_bound" class="advanced-options">
+          <input id="carnot_enable_prc" type="checkbox" class="advanced-options-checkbox">
+          <b>Show as % of carnot COP</b> 
+          
+          <div id="carnot_prc_options" style="display:none">
+            <p>Measured COP vs Carnot COP distribution:</p>
+            <div id="histogram_bound" style="width:100%; height:400px;overflow:hidden">
+              <div id="histogram" style="height:400px"></div>
+            </div>
+          </div>
+          
         </div>
 
-        <div class="input-prepend input-append" style="margin-top:5px">
-          <span class="add-on">Moving average</span>
-          <select id="inst_cop_mv_av_dp" style="width:100px">
-            <option value="0" selected>Disabled</option>
-            <option value="3">3 points</option>
-            <option value="5">5 points</option>
-          </select>
+        <div id="show_inst_cop_bound" class="advanced-options">
+          <input id="emitter_spec_enable" type="checkbox" class="advanced-options-checkbox">
+          <b>Calculate emitter spec and system volume</b>
+          <div id="emitter_spec_options" style="margin-top:10px; margin-left:35px; display:none">
+            <p>1. Select period of steady state operation where flow and return temperatures are flat</p>
+            
+            <div class="input-append" style="margin-top:5px">
+              <input type="text" style="width:50px" id="kW_at_50" disabled>
+              <span class="add-on">kW @ DT50</span>
+              <button class="btn" id="use_for_volume_calc">Use for volume calc</button>
+            </div>
+            
+            <p>2. Select space heating period with increasing flow and return temperatures</p>
+
+            <div class="input-append" style="margin-top:5px">
+              <input type="text" style="width:50px" id="system_volume" disabled>
+              <span class="add-on">Litres</span>
+            </div>
+          </div>
         </div>
         
-        <hr style="margin:10px 0px 10px 0px">
-        
-        <b>Simulate heat output using carnot COP equation</b><input id="carnot_enable" type="checkbox" style="margin-top:-4px; margin-left:7px"> &nbsp;&nbsp;
-        <b>Show as % of carnot COP</b><input id="carnot_enable_prc" type="checkbox" style="margin-top:-4px; margin-left:7px">
-        <br>
-        <div class="input-prepend input-append" style="margin-top:5px">
-          <span class="add-on">Condensing offset (K)</span>
-          <input type="text" style="width:50px" id="condensing_offset" value="4">
-          <span class="add-on">Evaporator offset (K)</span>
-          <input type="text" style="width:50px" id="evaporator_offset" value="-6">
+        <div class="advanced-options" style="border-bottom:1px solid #ccc">
+          <div style="float:right"><span id="standby_kwh"></span> kWh</span></div>
+          <input id="configure_standby" type="checkbox" class="advanced-options-checkbox">
+          <b>Configure standby</b> 
+          <div id="configure_standby_options" style="display:none">
+            <div class="input-prepend input-append" style="margin-top:10px; margin-left:35px; margin-bottom:0px;">
+              <span class="add-on">Starting power</span>
+              <input type="text" style="width:50px" id="starting_power" value="100">
+              <span class="add-on">W</span>
+            </div>
+          </div>
+          
         </div>
-        <div id="heatpump_factor_bound" class="input-prepend input-append" style="margin-top:5px">
-          <span class="add-on">Heatpump factor</span>
-          <input type="text" style="width:50px" id="heatpump_factor" value="0.49">
-        </div>
-        <div id="fixed_outside_temperature_bound" class="input-prepend input-append" style="margin-top:5px">
-          <span class="add-on">Fixed outside temperature (C)</span>
-          <input type="text" style="width:50px" id="fixed_outside_temperature" value="6.0">
-        </div>
-        
-        <p>Measured COP vs Carnot COP distribution:</p>
-        <div id="histogram_bound" style="width:100%; height:400px;overflow:hidden">
-          <div id="histogram" style="height:400px"></div>
-        </div>
-        
-        <div id="show_negative_heat_bound">
-          <hr style="margin:10px 0px 10px 0px">
-          <p><b>Show defrosts / cooling:</b> <input id="show_negative_heat" type="checkbox" style="margin-top:-4px; margin-left:7px"></p>
-          <p>Heat: <b><span id="total_positive_heat_kwh"></span> kWh</b>, Cool: <b><span id="total_negative_heat_kwh"></span> kWh (<span id="prc_negative_heat"></span>%)</b>, Net: <b><span id="total_net_heat_kwh"></span> kWh</b></p>
-        </div>
-                
-        <hr style="margin:10px 0px 10px 0px">
-        <p><b>Experimental</b></p>
-        
-        <p>Inferred emitter spec (select period of steady state operation): <span id="kW_at_50"></span> kW @ DT50 <button class="btn btn-mini" id="use_for_volume_calc">Use for volume calc</button></p>
-        <p>Inferred system volume (select space heating period with increasing flow and return temperatures): <span id="system_volume">?</span> Litres</p>
         
       </div>
     </div>
@@ -273,4 +321,4 @@ var session_write = <?php echo $session['write']; ?>;
 config.name = "<?php echo $name; ?>";
 config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=76"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=83"></script>

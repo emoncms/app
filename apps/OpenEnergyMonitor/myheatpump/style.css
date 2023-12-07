@@ -44,3 +44,44 @@
     border-left: 1px solid #fff;
     cursor:pointer;
 }
+
+.sc-white {
+    background-color:#fff;
+}
+
+.sc-grey {
+    background-color:#f3f3f3;
+}
+
+.advanced-options {
+    padding:10px;
+    background-color:#fff;
+    border: 1px solid #ccc;
+    border-bottom: none;
+}
+
+.advanced-options-checkbox {
+  margin-top:-4px !important; 
+  margin-left:7px !important; 
+  margin-right:10px !important;
+}
+
+.cop-title {
+  font-size:16px;
+}
+
+.cop-value {
+  font-size:22px;
+  padding:10px;
+}
+
+.show_stats_category {
+  width:25%; 
+  text-align:center;
+  cursor:pointer;
+}
+
+.show_stats_category:hover {
+  /*border-bottom: 1px solid #000;*/
+  background-color:#fafafa;
+}
