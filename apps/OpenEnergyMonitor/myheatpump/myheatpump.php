@@ -110,7 +110,7 @@
       
         <table style="width:100%; color:#333;">
         <tr>
-          <td valign="top" class="show_stats_category" key="combined">
+          <td valign="top" class="show_stats_category" key="combined" style="border-bottom:1px solid #000">
             <div class="cop-title">Full window</div>
             <div class="cop-value"><span class="cop_combined">---</span></div>
           </td>
