@@ -283,7 +283,7 @@ function updater()
         $("#total_cop").html(total_cop.toFixed(2));
         
         // Updates every 60 seconds
-        var now = new Date().getTime();
+        var now = new Date().getTime();  
         if (progtime < now - MINUTE) {
             var elec = 0; var heat = 0;
             if (elec_enabled) elec = get_average("heatpump_elec",1800);
@@ -307,6 +307,9 @@ function updater()
                         view.end = now;
                         view.start = view.end - timeWindow;
                     }
+                    
+                    
+  
 
                     powergraph_load();
                 }
@@ -662,8 +665,11 @@ function powergraph_load()
         if (feeds[key]!=undefined) feedids.push(feeds[key].id);
     }
     
+    var average = 1;
+    if (view.interval<20) average = 0;
+    
     // Fetch the data
-    feed.getdata(feedids,view.start,view.end,view.interval,1,0,skipmissing,limitinterval,function(all_data) {
+    feed.getdata(feedids,view.start,view.end,view.interval,average,0,skipmissing,limitinterval,function(all_data) {
         // Transfer from data to all_data by key
         var feed_index = 0;
         for (var key in feeds_to_load) {
