@@ -312,9 +312,6 @@ function updater() {
             }
             progtime = now;
         }
-
-        //$(".value1").css("color","#00cc00");
-        //setTimeout(function(){ $(".value1").css("color","#333"); },400);
     });
 }
 
@@ -686,7 +683,8 @@ function powergraph_load() {
         powergraph_process();
     }, false, "notime");
 
-
+    // Consider supporting conversion of kWh data to power again here
+    // old code:
 
     /* else {
         // Where no power feed available
@@ -722,13 +720,21 @@ function powergraph_load() {
 
 }
 
+// Called from powergraph_load and when changing settings
+// This function processes the data and loads it into powergraph_series
 function powergraph_process() {
+    // process_stats: calculates min, max, mean, total, etc
     process_stats();
+    // carnor_simulator: calculates carnot heat output
     carnot_simulator();
+    // process_inst_cop: calculates instantaneous COP
     process_inst_cop();
+    // process_cooling: calculates cooling
     process_cooling();
+    // calculates emitter and volume
     emitter_and_volume_calculator();
 
+    // Load powergraph_series into flot
     powergraph_draw();
 }
 
@@ -832,7 +838,8 @@ function carnot_simulator() {
         var ideal_carnot_heat_mean = ideal_carnot_heat_sum / carnot_heat_n;
         if (simulate_heat_output && !show_as_prc_of_carnot) {
             powergraph_series['carnot'] = { label: "Carnot Heat", data: data["heatpump_heat_carnot"], yaxis: 1, color: 7, lines: { show: true, fill: 0.05, lineWidth: 0.8 } };
-            powergraph_series['sim_flow_rate'] = { label: "Simulated flow rate", data: data["sim_flow_rate"], yaxis: 3, color: "#000", lines: { show: true, fill: false, lineWidth: 1.0 } };
+            // Uncomment to show simulated flow rate (experimental)
+            // powergraph_series['sim_flow_rate'] = { label: "Simulated flow rate", data: data["sim_flow_rate"], yaxis: 3, color: "#000", lines: { show: true, fill: false, lineWidth: 1.0 } };
         }
 
         if (show_as_prc_of_carnot) {

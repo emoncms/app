@@ -210,7 +210,7 @@ global $path, $session, $v;
                 </div>
                 <div id="heatpump_factor_bound" class="input-prepend" style="margin-top:5px; margin-bottom:0px">
                   <span class="add-on">Heatpump factor</span>
-                  <input type="text" style="width:50px" id="heatpump_factor" value="0.49">
+                  <input type="text" style="width:50px" id="heatpump_factor" value="0.47">
                 </div>
                 <div id="fixed_outside_temperature_bound" class="input-prepend input-append" style="margin-top:5px; margin-bottom:0px">
                   <span class="add-on">Fixed outside temperature (C)</span>
