@@ -53,6 +53,7 @@ var elec_enabled = false;
 var heat_enabled = false;
 var feeds = {};
 var progtime = 0;
+var firstrun = true;
 var heatpump_elec_start = 0;
 var heatpump_heat_start = 0;
 var start_time = 0;
@@ -280,7 +281,9 @@ function updater() {
 
         // Updates every 60 seconds
         var now = new Date().getTime();
-        if (progtime < now - MINUTE) {
+        if ((progtime < (now - MINUTE)) || firstrun) {
+            firstrun = false;
+            
             var elec = 0; var heat = 0;
             if (elec_enabled) elec = get_average("heatpump_elec", 1800);
             if (heat_enabled) heat = get_average("heatpump_heat", 1800);
