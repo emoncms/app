@@ -165,7 +165,7 @@
           <b>Show instantaneous COP</b>
           
           <div id="inst_cop_options" style="display:none">
-            <div class="input-prepend input-append" style="margin-top:10px; margin-bottom:0px; margin-left:35px">
+            <div class="input-prepend input-append" style="margin-top:10px; margin-bottom:0px">
               <span class="add-on">Valid COP</span>
               <span class="add-on">Min</span>
               <input type="text" style="width:50px" id="inst_cop_min" value="1.0">
@@ -190,17 +190,19 @@
           <b>Show simulated carnot heat output</b> 
 
           <div id="carnot_sim_options" style="display:none">  
-            <div class="input-prepend input-append" style="margin-top:5px">
+            <div class="input-prepend" style="margin-top:5px; margin-bottom:0px">
               <span class="add-on">Condensing offset (K)</span>
               <input type="text" style="width:50px" id="condensing_offset" value="2">
+            </div>
+            <div class="input-prepend" style="margin-top:5px; margin-bottom:0px">
               <span class="add-on">Evaporator offset (K)</span>
               <input type="text" style="width:50px" id="evaporator_offset" value="-6">
             </div>
-            <div id="heatpump_factor_bound" class="input-prepend input-append" style="margin-top:5px">
+            <div id="heatpump_factor_bound" class="input-prepend" style="margin-top:5px; margin-bottom:0px">
               <span class="add-on">Heatpump factor</span>
               <input type="text" style="width:50px" id="heatpump_factor" value="0.49">
             </div>
-            <div id="fixed_outside_temperature_bound" class="input-prepend input-append" style="margin-top:5px">
+            <div id="fixed_outside_temperature_bound" class="input-prepend input-append" style="margin-top:5px; margin-bottom:0px">
               <span class="add-on">Fixed outside temperature (C)</span>
               <input type="text" style="width:50px" id="fixed_outside_temperature" value="6.0">
             </div>
@@ -224,7 +226,7 @@
         <div id="show_inst_cop_bound" class="advanced-options">
           <input id="emitter_spec_enable" type="checkbox" class="advanced-options-checkbox">
           <b>Calculate emitter spec and system volume</b>
-          <div id="emitter_spec_options" style="margin-top:10px; margin-left:35px; display:none">
+          <div id="emitter_spec_options" style="margin-top:10px; display:none">
             <p>1. Select period of steady state operation where flow and return temperatures are flat</p>
             
             <div class="input-append" style="margin-top:5px">
@@ -247,7 +249,7 @@
           <input id="configure_standby" type="checkbox" class="advanced-options-checkbox">
           <b>Configure standby</b> 
           <div id="configure_standby_options" style="display:none">
-            <div class="input-prepend input-append" style="margin-top:10px; margin-left:35px; margin-bottom:0px;">
+            <div class="input-prepend input-append" style="margin-top:10px; margin-bottom:0px;">
               <span class="add-on">Starting power</span>
               <input type="text" style="width:50px" id="starting_power" value="100">
               <span class="add-on">W</span>
