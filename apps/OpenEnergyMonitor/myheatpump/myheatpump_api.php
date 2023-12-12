@@ -38,10 +38,16 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     if (isset($app->config->heatpump_elec_kwh)) {
         $end_value = $feed->get_value($app->config->heatpump_elec_kwh,$end_time);
         if ($year_start_time<$end_time) {
-            $last365_elec_kwh = $end_value-$feed->get_value($app->config->heatpump_elec_kwh,$year_start_time);
+            $start_value = $feed->get_value($app->config->heatpump_elec_kwh,$year_start_time);
+            if ($start_value!=null) {
+                $last365_elec_kwh = $end_value-$start_value;
+            }
         }
         if ($last30_start_time<$end_time) {
-            $last30_elec_kwh = $end_value-$feed->get_value($app->config->heatpump_elec_kwh,$last30_start_time);
+            $start_value = $feed->get_value($app->config->heatpump_elec_kwh,$last30_start_time);
+            if ($start_value!=null) { 
+                $last30_elec_kwh = $end_value-$start_value;
+            }
         }
     }
     $last365_heat_kwh = 0;
@@ -49,10 +55,16 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     if (isset($app->config->heatpump_heat_kwh)) {
         $end_value = $feed->get_value($app->config->heatpump_heat_kwh,$end_time);
         if ($year_start_time<$end_time) {
-            $last365_heat_kwh = $end_value-$feed->get_value($app->config->heatpump_heat_kwh,$year_start_time);
+            $start_value = $feed->get_value($app->config->heatpump_heat_kwh,$year_start_time);
+            if ($start_value!=null) {
+                $last365_heat_kwh = $end_value-$start_value;
+            }
         }
         if ($last30_start_time<$end_time) {
-            $last30_heat_kwh = $end_value-$feed->get_value($app->config->heatpump_heat_kwh,$last30_start_time);
+            $start_value = $feed->get_value($app->config->heatpump_heat_kwh,$last30_start_time);
+            if ($start_value!=null) {
+                $last30_heat_kwh = $end_value-$start_value;
+            }
         }
     }
 
@@ -83,16 +95,19 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     } else {
         return array('success'=>false, 'message'=>"period to large");
     } 
-
-    if (!isset($app->config->heatpump_flowT) || $app->config->heatpump_flowT<1) return array('success'=>false, 'message'=>"Missing flow temperature feed");
+    
     if (!isset($app->config->heatpump_elec) || $app->config->heatpump_elec<1) return array('success'=>false, 'message'=>"Missing electricity consumption feed");
         
     $elec_meta = $feed->get_meta($app->config->heatpump_elec);
     
     if ($start<$end) {
         $elec_data = $feed->get_data($app->config->heatpump_elec,$start,$end,$interval,1,"UTC","notime",false,0,0,false);
-        $flowT_data = $feed->get_data($app->config->heatpump_flowT,$start,$end,$interval,1,"UTC","notime",false,0,0,false);
-
+        
+        $flowT_data = false;
+        if (isset($app->config->heatpump_flowT) && $app->config->heatpump_flowT>0) {      
+            $flowT_data = $feed->get_data($app->config->heatpump_flowT,$start,$end,$interval,1,"UTC","notime",false,0,0,false);
+        }
+        
         $returnT_data = false;
         if (isset($app->config->heatpump_returnT) && $app->config->heatpump_returnT>0) {
             $returnT_data = $feed->get_data($app->config->heatpump_returnT,$start,$end,$interval,1,"UTC","notime",false,0,0,false);
@@ -167,7 +182,7 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
                 $heat_null_count++;
             }
             
-            if (!is_null($flowT_data[$z])) {
+            if ($flowT_data && !is_null($flowT_data[$z])) {
                 $flowT = $flowT_data[$z];
             } else {
                 $flow_null_count++;
