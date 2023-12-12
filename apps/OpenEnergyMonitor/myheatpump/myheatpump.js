@@ -728,6 +728,8 @@ function powergraph_load() {
 function powergraph_process() {
     // process_stats: calculates min, max, mean, total, etc
     process_stats();
+    // Different approach for cop calculations
+    calculate_window_cops();
     // carnor_simulator: calculates carnot heat output
     carnot_simulator();
     // process_inst_cop: calculates instantaneous COP
@@ -1024,56 +1026,89 @@ function process_stats() {
 
         $(".stats_category[key='" + x + "']").html(out);
     }
-
-    // Further processing
-
-    // In window COP and tooltip
-    if (data["heatpump_heat"] != undefined) {
-        if (stats['combined']['heatpump_elec'].mean > 0) {
-            let cop_in_window = stats['combined']['heatpump_heat'].mean / stats['combined']['heatpump_elec'].mean;
-            $("#window-cop").html(cop_in_window.toFixed(2));
-            $(".cop_combined").html(cop_in_window.toFixed(2));
-
-            var tooltip_text = "";
-            if (stats['combined']['heatpump_elec'].kwh != null) {
-                tooltip_text += "Electric: " + stats['combined']['heatpump_elec'].kwh.toFixed(1) + " kWh\n";
-            }
-            if (stats['combined']['heatpump_heat'].kwh != null) {
-                tooltip_text += "Heat: " + stats['combined']['heatpump_heat'].kwh.toFixed(1) + " kWh\n";
-            }
-            $("#window-cop").attr("title", tooltip_text);
-        }
-
-        if (stats['when_running']['heatpump_elec'].mean > 0) {
-            let cop_when_running = stats['when_running']['heatpump_heat'].mean / stats['when_running']['heatpump_elec'].mean
-            $("#standby_cop").html(cop_when_running.toFixed(2));
-            $(".cop_when_running").html(cop_when_running.toFixed(2));
-        } else {
-            $("#standby_cop").html("");
-            $(".cop_when_running").html("---");
-        }
-
-        if (stats['water_heating']['heatpump_elec'].mean > 0) {
-            let cop_water_heating = stats['water_heating']['heatpump_heat'].mean / stats['water_heating']['heatpump_elec'].mean
-            $(".cop_water_heating").html(cop_water_heating.toFixed(2));
-        } else {
-            $(".cop_water_heating").html("---");
-        }
-
-        if (stats['space_heating']['heatpump_elec'].mean > 0) {
-            let cop_space_heating = stats['space_heating']['heatpump_heat'].mean / stats['space_heating']['heatpump_elec'].mean
-            $(".cop_space_heating").html(cop_space_heating.toFixed(2));
-        } else {
-            $(".cop_space_heating").html("---");
-        }
-
-    }
-
+    
     // Standby energy
     var standby_kwh = stats['combined']['heatpump_elec'].kwh - stats['when_running']['heatpump_elec'].kwh;
     $("#standby_kwh").html(standby_kwh.toFixed(3));
 
     return stats;
+}
+
+// This takes a slightly different approach to the stats calculation above
+// for cop calculation we need to make sure that it's only based on periods
+// where electric and heat data are simultaneously available.
+// We check here to make sure both elec and heat are not null and then 
+// sum the kwh values before finally populating the COP fields.
+function calculate_window_cops() {
+    cop_stats = {};
+    cop_stats.combined = {};
+    cop_stats.when_running = {};
+    cop_stats.space_heating = {};
+    cop_stats.water_heating = {};
+    
+    for (var category in cop_stats) {
+        cop_stats[category].elec_kwh = 0;
+        cop_stats[category].heat_kwh = 0;
+    }
+    
+    if (data["heatpump_elec"] != undefined && data["heatpump_heat"] != undefined) {
+    
+        var starting_power = parseFloat($("#starting_power").val());
+    
+        var dhw_enable = false;
+        if (data["heatpump_dhw"] != undefined) dhw_enable = true;
+        
+        var power_to_kwh = view.interval / 3600000;
+    
+        for (var z in data["heatpump_elec"]) {
+            let elec = data["heatpump_elec"][z][1];
+            let heat = data["heatpump_heat"][z][1];
+
+            let dhw = false;
+            if (dhw_enable) dhw = data["heatpump_dhw"][z][1];
+            
+            if (elec != null && heat !=null) {
+            
+                cop_stats.combined.elec_kwh += elec * power_to_kwh;
+                cop_stats.combined.heat_kwh += heat * power_to_kwh;
+            
+                if (elec >= starting_power) {
+                    cop_stats.when_running.elec_kwh += elec * power_to_kwh;
+                    cop_stats.when_running.heat_kwh += heat * power_to_kwh;
+
+                    if (dhw_enable) {
+                        if (dhw) {
+                            cop_stats.water_heating.elec_kwh += elec * power_to_kwh;
+                            cop_stats.water_heating.heat_kwh += heat * power_to_kwh;
+                        } else {
+                            cop_stats.space_heating.elec_kwh += elec * power_to_kwh;
+                            cop_stats.space_heating.heat_kwh += heat * power_to_kwh;
+                        }
+                    }
+                }
+            }
+        }
+        
+        for (var category in cop_stats) {
+            if (cop_stats[category].elec_kwh>0) {
+                let cop = cop_stats[category].heat_kwh / cop_stats[category].elec_kwh
+                $(".cop_"+category).html(cop.toFixed(2));
+                var tooltip_text = "Electric: " + cop_stats[category].elec_kwh.toFixed(1) + " kWh\nHeat: " + cop_stats[category].heat_kwh.toFixed(1) + " kWh\n";
+                $(".cop_"+category).attr("title", tooltip_text);    
+            } else {
+                $(".cop_"+category).html("---");
+            }
+        }
+        
+        $("#window-cop").html($(".cop_combined").html());
+        $("#window-cop").attr("title", $(".cop_combined").attr("title"));
+        
+    } else {
+        $(".cop_combined").html("---");
+        $(".cop_when_running").html("---");
+        $(".cop_water_heating").html("---");
+        $(".cop_space_heating").html("---");
+    }
 }
 
 function stats_min_max(category, key, value) {
