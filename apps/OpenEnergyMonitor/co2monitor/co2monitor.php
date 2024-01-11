@@ -88,6 +88,11 @@ global $path, $session, $v;
                 <p>Air change rate</p>
                 <input type="text" id="airchange" class="input_ppm" disabled> ACH
             </div>
+            <div class="span3">
+                <p>R2</p>
+                <input type="text" id="square_sum" class="input_ppm" style="width:120px" disabled>
+                <button class="btn" id="refine">Refine</button>
+            </div>
         </div>
     </div>
 

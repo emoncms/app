@@ -74,6 +74,9 @@ var last_start = null;
 var last_end = null;
 var view_changed = false;
 
+var data = [];
+var exp_decay_data = [];
+
 config.init();
 
 function init() {
@@ -115,21 +118,42 @@ function load() {
 
     // Calculate kwh
     
-    var start_co2 = null;
-    var end_co2 = null;
-    var start_time = null;
-    var end_time = null;
+    start_co2 = null;
+    end_co2 = null;
+    start_time = null;
+    end_time = null;
+    
+    minimum_co2 = null;
+    sum_co2 = null;
+    npoints = 0;
     
     for (var z in data) {
         if (start_co2==null && data[z][1]!=null) {
             start_co2 = data[z][1];
             start_time = data[z][0]*0.001;
+            
+            minimum_co2 = data[z][1];
         }
         if (data[z][1]!=null) {
             end_co2 = data[z][1];
             end_time = data[z][0]*0.001;
+            
+            if (data[z][1]<minimum_co2) minimum_co2 = data[z][1];
+            sum_co2 += data[z][1];
+            npoints ++;
         }
     }
+    
+    mean_co2 = sum_co2 / npoints
+    
+    ambient_co2 = minimum_co2-10;
+    $("#ambient_co2").val(ambient_co2);
+    exp_fit();
+    
+
+}
+
+function exp_fit() {
     
     var time_change = end_time - start_time;
     var co2_start_minus_ambient = start_co2 - ambient_co2;
@@ -146,14 +170,40 @@ function load() {
     }
 
     // Method 2 plot exp decay curve
+    SSE_sum = 0
+    SST_sum = 0;
+    diff_sum = 0;
 
-    var exp_decay_data = [];
+    exp_decay_data = [];
     if (start_time!=null && end_time!=null && valid) {
-        for (var time = start_time; time < end_time; time+=view.interval) {
+                
+        for (var z in data) {
+            time = data[z][0]*0.001
+        
             var co2 = (start_co2 - ambient_co2)*Math.exp(-1*(air_change_rate/3600)*(time-start_time))+ambient_co2;
             exp_decay_data.push([time*1000,co2]);
+            
+            SSE_sum += Math.pow(data[z][1] - co2,2)
+            SST_sum += Math.pow(data[z][1] - mean_co2,2)
+            diff_sum += data[z][1] - co2
         }
     }
+    
+    $("#square_sum").val((1-(SSE_sum/SST_sum)).toFixed(5))
+    //$("#square_sum").val((diff_sum).toFixed(0))
+    draw();
+}
+
+function refine() {
+    for (var i=0; i<10; i++) {
+         exp_fit();
+         ambient_co2 -= diff_sum * 0.0002
+    }
+    $("#ambient_co2").val(ambient_co2.toFixed(0));
+}
+
+function draw() {
+
     // Graph options
     options.xaxis.min = view.start;
     options.xaxis.max = view.end;
@@ -170,10 +220,6 @@ function load() {
         color: "#888"
     });
 
-    draw();
-}
-
-function draw() {
     $.plot($('#graph'), series, options);
 }
 
@@ -230,7 +276,11 @@ $('#graph').bind("plotselected", function (event, ranges) {
 
 $("#ambient_co2").change(function () {
     ambient_co2 = $("#ambient_co2").val()*1;
-    load();
+    exp_fit();
+});
+
+$("#refine").click(function() {
+    refine();
 });
 
 $(window).resize(function () {
