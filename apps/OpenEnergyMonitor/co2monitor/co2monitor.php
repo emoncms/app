@@ -17,12 +17,12 @@ global $path, $session, $v;
     /* Dynamic height chart placeholder */
     /* Adjust the height offset as necessary */
     .chart-placeholder {
-        --height-offset: 28rem;
+        --height-offset: 32rem;
     }
 
     @media (min-width: 768px) {
         .chart-placeholder {
-            --height-offset: 28rem;
+            --height-offset: 32rem;
         }
     }
 
@@ -69,6 +69,13 @@ global $path, $session, $v;
         padding: 10px;
         border-bottom: 1px solid #333;
     }
+    
+    .co2input {
+        width:70px !important;
+        background-color:#333 !important;
+        border: 1px solid #555 !important;
+        color:#fff !important;
+    }
 
 </style>
 
@@ -77,7 +84,7 @@ global $path, $session, $v;
     <ul id="tabs" class="nav nav-pills mb-0">
         <li><button class="viewpower active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo _('Power View') ?>">
                 <span class="d-xs-none"><?php echo _("Pwr") ?></span>
-                <span class="d-none d-xs-inline-block"><?php echo _("Air change rate calculator from CO2 Decay") ?></span>
+                <span class="d-none d-xs-inline-block"><?php echo _("Air change rate calculator from CO2 data") ?></span>
             </button></li>
     </ul>
     <ul class="text-right nav nav-pills mb-0">
@@ -98,6 +105,11 @@ global $path, $session, $v;
     </div>
 -->
 
+    <div class="btn-group" style="float:right">
+      <button class="btn btn-primary" id="decay_mode">Decay</button>
+      <button class="btn" id="average_mode">Average</button>
+    </div>
+
     <?php include(dirname(__DIR__) . '/graph-nav.php'); ?>
 
     <div id="graph_bound" class="chart-placeholder">
@@ -106,23 +118,33 @@ global $path, $session, $v;
 
     <br>
     <div id="sensors">
+    
+        <div class="average hide">
+            <table class="co2table" style="color:#fff; font-size:16px">
+                <tr>
+                <td>Total volume: <b><span id="total_volume"></span> m<sup>3</sup></b></td>
+                <td>Mean CO2: <b><span id="total_mean_co2"></span> ppm</b></td>
+                <td>Daily CO2 addition: <input type="text" id="daily_co2_addition" value="1000" class="co2input"> L/day</td>
+                <td>Air change rate: <b><span id="total_mean_air_change_rate"></span> ACH</b></td>
+                </tr>
+            </table>
+            
+        </div>
+    
         <table class="co2table" style="color:#fff">
             <tr>
                 <th>Name</th>
-                <th scope="col"><?php echo _('Volume') ?></th>
-                <th scope="col"><?php echo _('Mean CO2') ?></th>
-                <th scope="col"><?php echo _('Baseline CO2') ?></th>
-                <th scope="col"><?php echo _('Air change rate') ?></th>
-                <th scope="col"><?php echo _('R2') ?></th>
-                <th></th>
+                <th scope="col" class="average"><?php echo _('Volume') ?></th>
+                <th scope="col" class="average"><?php echo _('Mean CO2') ?></th>
+                <th scope="col" class="decay"><?php echo _('Baseline CO2') ?></th>
+                <th scope="col" class="decay"><?php echo _('Air change rate') ?></th>
+                <th scope="col" class="decay"><?php echo _('R2') ?></th>
+                <th class="decay"></th>
             </tr>
             <tbody id="sensors_list"></tbody>
         </table>
+        
 
-        <p style="color:#fff; margin-top:20px">Building volume: <b><span id="total_volume"></span> m<sup>3</sup></b></p>
-        <p style="color:#fff">Mean CO2 level: <b><span id="total_mean_co2"></span> ppm</b></p>
-        <p style="color:#fff">Daily CO2 addition: <input type="text" id="daily_co2_addition" value="1000" style="width:100px"> L/day</p>
-        <p style="color:#fff">Air change rate: <b><span id="total_mean_air_change_rate"></span> ACH</b></p>
     </div>
 
 </div>

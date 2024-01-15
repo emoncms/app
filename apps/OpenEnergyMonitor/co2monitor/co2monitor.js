@@ -1,5 +1,7 @@
 // These are used by the feed api to handle user auth requirements
 feed.apikey = apikey;
+feed.public_userid = public_userid;
+feed.public_username = public_username;
 
 // Hide the config button if in public view
 if (!sessionwrite) $(".config-open").hide();
@@ -74,6 +76,7 @@ var previousPoint = null;
 
 var feeds_to_load = [];
 var selected_feed = false;
+var mode = "decay";
 
 config.init();
 
@@ -282,14 +285,17 @@ function draw() {
 
         sensors_list += "<tr>";
         sensors_list += "<td>"+config.feedsbyid[feeds_to_load[z].value].tag + ": "+config.feedsbyid[feeds_to_load[z].value].name+"</td>";
-        sensors_list += "<td>"+feeds_to_load[z].volume+" m3</td>";
-        sensors_list += "<td>"+feeds_to_load[z].params.mean.toFixed(0)+" ppm</td>";
-        sensors_list += "<td>"+feeds_to_load[z].params.baseline.toFixed(0)+" ppm</td>";
-        sensors_list += "<td>"+air_change_rate+"</td>";
-        sensors_list += "<td>"+R2+"</td>";
-        // refine button
-        sensors_list += "<td><button class='btn btn-primary' onclick='refine("+z+")'>Refine</button></td>";
-      
+        if (mode=="average") {
+            sensors_list += "<td>"+feeds_to_load[z].volume+" m3</td>";
+            sensors_list += "<td>"+feeds_to_load[z].params.mean.toFixed(0)+" ppm</td>";
+        } else {
+            sensors_list += "<td>"+feeds_to_load[z].params.baseline.toFixed(0)+" ppm</td>";
+            sensors_list += "<td>"+air_change_rate+"</td>";
+            sensors_list += "<td>"+R2+"</td>";
+            // refine button
+            sensors_list += "<td><button class='btn btn-primary' onclick='refine("+z+")'>Refine</button></td>";
+        }
+
         sensors_list += "</tr>";
     }
     if (sensors_list=="") sensors_list = "<tr><td>No sensors selected</td></tr>";
@@ -379,6 +385,26 @@ $(window).resize(function () {
 
 $("#daily_co2_addition").change(function () {
     calculate_volume_based_air_change_rate();
+});
+
+$("#decay_mode").click(function() {
+    mode = "decay";
+    $(".decay").show();
+    $(".average").hide();
+    $("#decay_mode").removeClass("btn-primary");
+    $("#average_mode").removeClass("btn-primary");
+    $("#decay_mode").addClass("btn-primary");
+    draw();
+});
+
+$("#average_mode").click(function() {
+    mode = "average";
+    $(".decay").hide();
+    $(".average").show();
+    $("#decay_mode").removeClass("btn-primary");
+    $("#average_mode").removeClass("btn-primary");
+    $("#average_mode").addClass("btn-primary");
+    draw();
 });
 
 // ----------------------------------------------------------------------
