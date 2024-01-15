@@ -76,7 +76,9 @@ var previousPoint = null;
 
 var feeds_to_load = [];
 var selected_feed = false;
-var mode = "decay";
+var mode = "average";
+$(".decay").hide();
+$(".average").show();
 
 config.init();
 
@@ -98,7 +100,7 @@ function show() {
         view.end = meta.end_time * 1000;
     }
     // Set start time to 7 days ago
-    view.start = view.end - (3600000 * 24.0 * 1);
+    view.start = view.end - (3600000 * 24.0 * 7);
 
     load();
 }
@@ -270,6 +272,9 @@ function calculate_volume_based_air_change_rate() {
 function draw() {
     calculate_volume_based_air_change_rate();
 
+    var colours = ["#0699fa", "#60BDFC", "#99D5FD", "#BDE4FD", "#D5EDFD", "#FFFFFF"];
+    colours = ["#ff2117","#ff8c00","#ffd93d","#fff195","#c69563","#8b4819"]
+
     var sensors_list = "";
     for (var z in feeds_to_load) {
 
@@ -284,6 +289,7 @@ function draw() {
         }
 
         sensors_list += "<tr>";
+        sensors_list += "<td><div class='box' style='background-color:"+colours[z]+"'></div></td>";
         sensors_list += "<td>"+config.feedsbyid[feeds_to_load[z].value].tag + ": "+config.feedsbyid[feeds_to_load[z].value].name+"</td>";
         if (mode=="average") {
             sensors_list += "<td>"+feeds_to_load[z].volume+" m3</td>";
@@ -306,11 +312,11 @@ function draw() {
     options.xaxis.max = view.end;
 
     var series = [];
-    var colours = ["#0699fa", "#60BDFC", "#99D5FD", "#BDE4FD", "#D5EDFD", "#FFFFFF"];
-    colours = ["#ff2117","#ff8c00","#ffd93d","#fff195","#c69563","#8b4819"]
+
 
     for (var z in feeds_to_load) {
         series.push({
+            label: config.feedsbyid[feeds_to_load[z].value].tag + ": "+config.feedsbyid[feeds_to_load[z].value].name,
             data: feeds_to_load[z].data,
             color: colours[z]
         });
@@ -368,7 +374,7 @@ $('#graph').bind("plothover", function (event, pos, item) {
             var itemValue = item.datapoint[1];
 
             if (itemValue != null) itemValue = itemValue.toFixed(0);
-            tooltip(item.pageX, item.pageY, itemValue + " ppm<br>" + tooltip_date(itemTime), "#fff", "#000");
+            tooltip(item.pageX, item.pageY, item.series.label + "<br>"+itemValue + " ppm<br>" + tooltip_date(itemTime), "#fff", "#000");
         }
     } else $("#tooltip").remove();
 });
