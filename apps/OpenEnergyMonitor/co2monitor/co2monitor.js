@@ -6,12 +6,20 @@ if (!sessionwrite) $(".config-open").hide();
 
 // Used by the apps module configuration library to build the app configuration form
 config.app = {
-    "use": {
-        "type": "feed",
-        "autoname": "use",
-        "engine": "5",
-        "description": "House or building use in watts"
-    }
+    "public": { "type": "checkbox", "name": "Public", "default": 0, "optional": true, "description": "Make app public" },
+    "feedA": { "type": "feed", "description": "CO2 concentration feed", "autotag": "CO2", "autoname": "CO2 1", "optional": false },
+    "feedB": { "type": "feed", "description": "CO2 concentration feed", "autotag": "CO2", "autoname": "CO2 2", "optional": true },
+    "feedC": { "type": "feed", "description": "CO2 concentration feed", "autotag": "CO2", "autoname": "CO2 3", "optional": true },
+    "feedD": { "type": "feed", "description": "CO2 concentration feed", "autotag": "CO2", "autoname": "CO2 4", "optional": true },
+    "feedE": { "type": "feed", "description": "CO2 concentration feed", "autotag": "CO2", "autoname": "CO2 5", "optional": true },
+    "feedF": { "type": "feed", "description": "CO2 concentration feed", "autotag": "CO2", "autoname": "CO2 6", "optional": true },
+    "volumeA": { "type": "value", "name": "Volume A", "optional": true, default: 0 },
+    "volumeB": { "type": "value", "name": "Volume B", "optional": true, default: 0 },
+    "volumeC": { "type": "value", "name": "Volume C", "optional": true, default: 0 },
+    "volumeD": { "type": "value", "name": "Volume D", "optional": true, default: 0 },
+    "volumeE": { "type": "value", "name": "Volume E", "optional": true, default: 0 },
+    "volumeF": { "type": "value", "name": "Volume F", "optional": true, default: 0 },
+
 };
 // Name of the app
 config.name = app_name;
@@ -35,7 +43,6 @@ config.hideapp = function () {
 // ----------------------------------------------------------------------
 
 // Graph variables
-var series = [];
 
 var options = {
     canvas: true,
@@ -65,17 +72,8 @@ var options = {
 // used for tooltip
 var previousPoint = null;
 
-var ambient_co2 = 420;
-$("#ambient_co2").val(ambient_co2);
-
-var air_change_rate_m2 = null;
-
-var last_start = null;
-var last_end = null;
-var view_changed = false;
-
-var data = [];
-var exp_decay_data = [];
+var feeds_to_load = [];
+var selected_feed = false;
 
 config.init();
 
@@ -91,7 +89,7 @@ function show() {
 
     // Starting view
     view.end = +new Date;
-    meta = feed.getmeta(config.app.use.value);
+    meta = feed.getmeta(config.app.feedA.value);
     // Limit end time to feed end time
     if (view.end * 0.001 > meta.end_time) {
         view.end = meta.end_time * 1000;
@@ -104,28 +102,62 @@ function show() {
 
 function load() {
     // Calc interval
-    view.calc_interval(800);
+    view.calc_interval(1200);
 
-    // has the view changed
-    if (last_start != view.start || last_end != view.end) {
-        view_changed = true;
+    feeds_to_load = [];
+
+    var codes = ["A", "B", "C", "D", "E", "F"];
+    for (var z in codes) {
+        let name = "feed" + codes[z];
+        if (!isNaN(config.app[name].value) && config.app[name].value>0) {
+
+            // check if volume field is set
+            let volume_name = "volume" + codes[z];
+            config.app[name].volume = 0;
+            if (!isNaN(config.app[volume_name].value) && config.app[volume_name].value>0) {
+                config.app[name].volume = config.app[volume_name].value*1;
+            }
+
+            feeds_to_load.push(config.app[name]);
+        }
     }
-    last_start = view.start;
-    last_end = view.end;
 
-    // Fetch data (feedid,start,end,interval,average,delta,skipmissing,limitinterval)
-    data = feed.getdata(config.app.use.value, view.start, view.end, view.interval, 1, 0, 0, 0);
+    var feedids = [];
+    for (var z in feeds_to_load) {
+        feedids.push(feeds_to_load[z].value);
+    }
 
+    feed.getdata(feedids, view.start, view.end, view.interval, 1, 0, 0, 0, function (all_data) {
+
+        var data_index = 0;
+        for (var z in feeds_to_load) {
+
+            feeds_to_load[z].data = all_data[data_index].data;
+            feeds_to_load[z].params = prepare(all_data[data_index].data);
+            feeds_to_load[z].fit = exp_fit(all_data[data_index].data,feeds_to_load[z].params);
+
+            data_index++;
+        }
+        draw();
+    });
+
+    /*
     // Calculate kwh
+  
+    */
+
+}
+
+function prepare(data) {
+  
+    let start_co2 = null;
+    let end_co2 = null;
+    let start_time = null;
+    let end_time = null;
     
-    start_co2 = null;
-    end_co2 = null;
-    start_time = null;
-    end_time = null;
-    
-    minimum_co2 = null;
-    sum_co2 = null;
-    npoints = 0;
+    let minimum_co2 = null;
+    let sum_co2 = null;
+    let npoints = 0;
     
     for (var z in data) {
         if (start_co2==null && data[z][1]!=null) {
@@ -144,87 +176,154 @@ function load() {
         }
     }
     
-    mean_co2 = sum_co2 / npoints
-    
-    ambient_co2 = minimum_co2-10;
-    $("#ambient_co2").val(ambient_co2);
-    exp_fit();
-    
+    let mean_co2 = sum_co2 / npoints
+    let ambient_co2 = minimum_co2-10;
 
+    return {
+        start_co2: start_co2,
+        end_co2: end_co2,
+        start_time: start_time,
+        end_time: end_time,
+        mean: mean_co2,
+        ambient_co2: ambient_co2,
+        baseline: ambient_co2,
+    }
 }
 
-function exp_fit() {
+function exp_fit(data,params,plot = false) {
     
-    var time_change = end_time - start_time;
-    var co2_start_minus_ambient = start_co2 - ambient_co2;
-    var co2_end_minus_ambient = end_co2 - ambient_co2;
+    var time_change = params.end_time - params.start_time;
+    var co2_start_minus_ambient = params.start_co2 - params.ambient_co2;
+    var co2_end_minus_ambient = params.end_co2 - params.ambient_co2;
 
     var air_change_rate = ((-1*Math.log(co2_end_minus_ambient / co2_start_minus_ambient))/time_change)*3600;
 
-    var valid = true;
+    var valid = false;
     if (air_change_rate>0 && air_change_rate<100) {
-        $("#airchange").val(air_change_rate.toFixed(2));
-    } else {
-        $("#airchange").val("?");
-        valid = false;
+        valid = true;
     }
 
     // Method 2 plot exp decay curve
-    SSE_sum = 0
-    SST_sum = 0;
-    diff_sum = 0;
+    var SSE_sum = 0
+    var SST_sum = 0;
+    var diff_sum = 0;
 
-    exp_decay_data = [];
-    if (start_time!=null && end_time!=null && valid) {
+    var exp_decay_data = [];
+    if (params.start_time!=null && params.end_time!=null && valid) {
                 
         for (var z in data) {
             time = data[z][0]*0.001
         
-            var co2 = (start_co2 - ambient_co2)*Math.exp(-1*(air_change_rate/3600)*(time-start_time))+ambient_co2;
-            exp_decay_data.push([time*1000,co2]);
+            var co2 = (params.start_co2 - params.ambient_co2)*Math.exp(-1*(air_change_rate/3600)*(time-params.start_time))+params.ambient_co2;
+
+            if (plot) exp_decay_data.push([time*1000,co2]);
             
             SSE_sum += Math.pow(data[z][1] - co2,2)
-            SST_sum += Math.pow(data[z][1] - mean_co2,2)
+            SST_sum += Math.pow(data[z][1] - params.mean,2)
             diff_sum += data[z][1] - co2
         }
     }
-    
-    $("#square_sum").val((1-(SSE_sum/SST_sum)).toFixed(5))
-    //$("#square_sum").val((diff_sum).toFixed(0))
+
+    return {
+        valid: valid,
+        air_change_rate: air_change_rate,
+        SSE_sum: SSE_sum,
+        SST_sum: SST_sum,
+        diff_sum: diff_sum,
+        exp_decay_data: exp_decay_data,
+        R2: 1-(SSE_sum/SST_sum)
+    }
+}
+
+function refine(z) {
+    selected_feed = z;
+
+    for (var i=0; i<50; i++) {
+        feeds_to_load[z].params.ambient_co2 -= feeds_to_load[z].fit.diff_sum * 0.0002
+        let plot = false;
+        if (i==49) plot = true;
+        feeds_to_load[z].fit = exp_fit(feeds_to_load[z].data,feeds_to_load[z].params, plot);
+    }
+
     draw();
 }
 
-function refine() {
-    for (var i=0; i<10; i++) {
-         exp_fit();
-         ambient_co2 -= diff_sum * 0.0002
+function calculate_volume_based_air_change_rate() {
+    var total_volume = 0;
+    var total_mean = 0;
+    for (var z in feeds_to_load) {
+        total_volume += feeds_to_load[z].volume;
+        total_mean += feeds_to_load[z].params.mean * feeds_to_load[z].volume;
     }
-    $("#ambient_co2").val(ambient_co2.toFixed(0));
+    total_mean = total_mean / total_volume;
+    $("#total_volume").html(total_volume);
+    $("#total_mean_co2").html(total_mean.toFixed(0));
+
+    var co2_litres_per_day = $("#daily_co2_addition").val();
+    var mean_air_change_rate = (co2_litres_per_day / 24) / (1000 * total_volume * (0.000001 * (total_mean - 420)));
+    $("#total_mean_air_change_rate").html(mean_air_change_rate.toFixed(2));
 }
 
 function draw() {
+    calculate_volume_based_air_change_rate();
+
+    var sensors_list = "";
+    for (var z in feeds_to_load) {
+
+        let air_change_rate = "?";
+        if (isNaN(feeds_to_load[z].fit.air_change_rate)==false) {
+            air_change_rate = feeds_to_load[z].fit.air_change_rate.toFixed(2) + " ACH"
+        }
+
+        let R2 = "?";
+        if (isNaN(feeds_to_load[z].fit.R2)==false) {
+            R2 = feeds_to_load[z].fit.R2.toFixed(5);
+        }
+
+        sensors_list += "<tr>";
+        sensors_list += "<td>"+config.feedsbyid[feeds_to_load[z].value].tag + ": "+config.feedsbyid[feeds_to_load[z].value].name+"</td>";
+        sensors_list += "<td>"+feeds_to_load[z].volume+" m3</td>";
+        sensors_list += "<td>"+feeds_to_load[z].params.mean.toFixed(0)+" ppm</td>";
+        sensors_list += "<td>"+feeds_to_load[z].params.baseline.toFixed(0)+" ppm</td>";
+        sensors_list += "<td>"+air_change_rate+"</td>";
+        sensors_list += "<td>"+R2+"</td>";
+        // refine button
+        sensors_list += "<td><button class='btn btn-primary' onclick='refine("+z+")'>Refine</button></td>";
+      
+        sensors_list += "</tr>";
+    }
+    if (sensors_list=="") sensors_list = "<tr><td>No sensors selected</td></tr>";
+    $("#sensors_list").html(sensors_list);
 
     // Graph options
     options.xaxis.min = view.start;
     options.xaxis.max = view.end;
+
+    var series = [];
+    var colours = ["#0699fa", "#60BDFC", "#99D5FD", "#BDE4FD", "#D5EDFD", "#FFFFFF"];
+    colours = ["#ff2117","#ff8c00","#ffd93d","#fff195","#c69563","#8b4819"]
+
+    for (var z in feeds_to_load) {
+        series.push({
+            data: feeds_to_load[z].data,
+            color: colours[z]
+        });
+    }
+
     // Draw graph
-    series = [];
-    series.push({
-        label: config.app.use.autoname,
-        data: data,
-        color: "#0699fa"
-    });
-    series.push({
-        label: "Exponential Decay Curve",
-        data: exp_decay_data,
-        color: "#888"
-    });
+    if (feeds_to_load[selected_feed]!=undefined && feeds_to_load[selected_feed].fit.exp_decay_data!=undefined) {
+        series.push({
+            label: "Exponential Decay Curve",
+            data: feeds_to_load[selected_feed].fit.exp_decay_data,
+            color: "#888"
+        });
+    }
 
     $.plot($('#graph'), series, options);
 }
 
 function updater() {
-    var use = config.app.use.value;
+    var use = config.app.feedA.value;
     var feeds = feed.listbyid();
     $("#powernow").html((feeds[use].value * 1).toFixed(0));
 }
@@ -274,17 +373,12 @@ $('#graph').bind("plotselected", function (event, ranges) {
     load();
 });
 
-$("#ambient_co2").change(function () {
-    ambient_co2 = $("#ambient_co2").val()*1;
-    exp_fit();
-});
-
-$("#refine").click(function() {
-    refine();
-});
-
 $(window).resize(function () {
     resize();
+});
+
+$("#daily_co2_addition").change(function () {
+    calculate_volume_based_air_change_rate();
 });
 
 // ----------------------------------------------------------------------

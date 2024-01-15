@@ -17,20 +17,29 @@ global $path, $session, $v;
     /* Dynamic height chart placeholder */
     /* Adjust the height offset as necessary */
     .chart-placeholder {
-        --height-offset: 19rem;
+        --height-offset: 28rem;
     }
+
     @media (min-width: 768px) {
-        .chart-placeholder { --height-offset: 22rem; }
+        .chart-placeholder {
+            --height-offset: 28rem;
+        }
     }
+
     .chart-placeholder>* {
         height: calc(100vh - var(--height-offset)) !important;
         min-height: 180px;
     }
 
     /* Remove padding from container-fluid, gives a little more screen space */
-    .container-fluid { padding: 0px; }
+    .container-fluid {
+        padding: 0px;
+    }
+
     @media (min-width: 768px) {
-        .container-fluid { padding: 0px 20px 0px 20px; }
+        .container-fluid {
+            padding: 0px 20px 0px 20px;
+        }
     }
 
     .input_ppm {
@@ -41,6 +50,26 @@ global $path, $session, $v;
         padding: 10px !important;
         color: #aaa !important;
     }
+
+    .co2table {
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+
+    }
+
+    .co2table th {
+        text-align: left;
+        padding: 10px;
+        border-bottom: 1px solid #333;
+        border-top: 1px solid #333;
+    }
+
+    .co2table td {
+        padding: 10px;
+        border-bottom: 1px solid #333;
+    }
+
 </style>
 
 <!-- Top navigation bar -->
@@ -69,31 +98,31 @@ global $path, $session, $v;
     </div>
 -->
 
-    <?php include(dirname(__DIR__).'/graph-nav.php'); ?>
+    <?php include(dirname(__DIR__) . '/graph-nav.php'); ?>
 
     <div id="graph_bound" class="chart-placeholder">
         <div id="graph"></div>
     </div>
 
     <br>
-    <!-- 3 columns, bootstrap 2 -->
-    <div class="px-3" style="color:#ccc">
-        <div class="row">
+    <div id="sensors">
+        <table class="co2table" style="color:#fff">
+            <tr>
+                <th>Name</th>
+                <th scope="col"><?php echo _('Volume') ?></th>
+                <th scope="col"><?php echo _('Mean CO2') ?></th>
+                <th scope="col"><?php echo _('Baseline CO2') ?></th>
+                <th scope="col"><?php echo _('Air change rate') ?></th>
+                <th scope="col"><?php echo _('R2') ?></th>
+                <th></th>
+            </tr>
+            <tbody id="sensors_list"></tbody>
+        </table>
 
-        <div class="span3">
-                <p>Enter baseline CO2 level<p>
-                <input type="text" id="ambient_co2" class="input_ppm"> ppm
-            </div>
-            <div class="span3">
-                <p>Air change rate</p>
-                <input type="text" id="airchange" class="input_ppm" disabled> ACH
-            </div>
-            <div class="span3">
-                <p>R2</p>
-                <input type="text" id="square_sum" class="input_ppm" style="width:120px" disabled>
-                <button class="btn" id="refine">Refine</button>
-            </div>
-        </div>
+        <p style="color:#fff; margin-top:20px">Building volume: <b><span id="total_volume"></span> m<sup>3</sup></b></p>
+        <p style="color:#fff">Mean CO2 level: <b><span id="total_mean_co2"></span> ppm</b></p>
+        <p style="color:#fff">Daily CO2 addition: <input type="text" id="daily_co2_addition" value="1000" style="width:100px"> L/day</p>
+        <p style="color:#fff">Air change rate: <b><span id="total_mean_air_change_rate"></span> ACH</b></p>
     </div>
 
 </div>
