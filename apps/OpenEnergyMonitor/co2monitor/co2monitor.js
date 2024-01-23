@@ -21,6 +21,7 @@ config.app = {
     "volumeD": { "type": "value", "name": "Volume D", "optional": true, default: 0 },
     "volumeE": { "type": "value", "name": "Volume E", "optional": true, default: 0 },
     "volumeF": { "type": "value", "name": "Volume F", "optional": true, default: 0 },
+    "windspeed": { "type": "feed", "description": "Wind speed", "autotag": "metoffice", "autoname": "windspeed", "optional": true }
 
 };
 // Name of the app
@@ -75,6 +76,9 @@ var options = {
 var previousPoint = null;
 
 var feeds_to_load = [];
+var windspeed_enabled = false;
+var show_windspeed = false;
+var windspeed_data = [];
 var selected_feed = false;
 var mode = "average";
 $(".decay").hide();
@@ -102,13 +106,8 @@ function show() {
     // Set start time to 7 days ago
     view.start = view.end - (3600000 * 24.0 * 7);
 
-    load();
-}
 
-function load() {
-    // Calc interval
-    view.calc_interval(1200);
-
+    // Prepare
     feeds_to_load = [];
 
     var codes = ["A", "B", "C", "D", "E", "F"];
@@ -122,14 +121,30 @@ function load() {
             if (!isNaN(config.app[volume_name].value) && config.app[volume_name].value>0) {
                 config.app[name].volume = config.app[volume_name].value*1;
             }
+            config.app[name].show = true;
 
             feeds_to_load.push(config.app[name]);
         }
     }
 
+
+    load();
+}
+
+function load() {
+    // Calc interval
+    view.calc_interval(1200);
+    
     var feedids = [];
     for (var z in feeds_to_load) {
         feedids.push(feeds_to_load[z].value);
+    }
+    
+    // Load wind speed data if selected
+    if (!isNaN(config.app["windspeed"].value) && config.app["windspeed"].value>0) {
+        windspeed_enabled = true;
+        $("#windspeed_option").show();
+        feedids.push(config.app["windspeed"].value);
     }
 
     feed.getdata(feedids, view.start, view.end, view.interval, 1, 0, 0, 0, function (all_data) {
@@ -143,6 +158,11 @@ function load() {
 
             data_index++;
         }
+        
+        if (windspeed_enabled) {
+            windspeed_data = all_data[data_index].data;
+        }
+        
         draw();
     });
 
@@ -287,9 +307,11 @@ function draw() {
         if (isNaN(feeds_to_load[z].fit.R2)==false) {
             R2 = feeds_to_load[z].fit.R2.toFixed(5);
         }
+        let highlight = "#fff";
+        if (!feeds_to_load[z].show) highlight = "#666";
 
-        sensors_list += "<tr>";
-        sensors_list += "<td><div class='box' style='background-color:"+colours[z]+"'></div></td>";
+        sensors_list += "<tr style='color:"+highlight+"'>";
+        sensors_list += "<td><div class='box' style='background-color:"+colours[z]+"; cursor:pointer' z='"+z+"'></div></td>";
         sensors_list += "<td>"+config.feedsbyid[feeds_to_load[z].value].tag + ": "+config.feedsbyid[feeds_to_load[z].value].name+"</td>";
         if (mode=="average") {
             sensors_list += "<td>"+feeds_to_load[z].volume+" m3</td>";
@@ -315,11 +337,14 @@ function draw() {
 
 
     for (var z in feeds_to_load) {
-        series.push({
-            label: config.feedsbyid[feeds_to_load[z].value].tag + ": "+config.feedsbyid[feeds_to_load[z].value].name,
-            data: feeds_to_load[z].data,
-            color: colours[z]
-        });
+        console.log(feeds_to_load[z].show)
+        if (feeds_to_load[z].show) {
+            series.push({
+                label: config.feedsbyid[feeds_to_load[z].value].tag + ": "+config.feedsbyid[feeds_to_load[z].value].name,
+                data: feeds_to_load[z].data,
+                color: colours[z]
+            });
+        }
     }
 
     // Draw graph
@@ -329,6 +354,15 @@ function draw() {
             data: feeds_to_load[selected_feed].fit.exp_decay_data,
             color: "#888"
         });
+    }
+    
+    if (windspeed_enabled && show_windspeed) {
+        series.push({
+            label: "Wind speed",
+            data: windspeed_data,
+            color: "#00aa00",
+            yaxis:2
+        });    
     }
 
     $.plot($('#graph'), series, options);
@@ -374,7 +408,11 @@ $('#graph').bind("plothover", function (event, pos, item) {
             var itemValue = item.datapoint[1];
 
             if (itemValue != null) itemValue = itemValue.toFixed(0);
-            tooltip(item.pageX, item.pageY, item.series.label + "<br>"+itemValue + " ppm<br>" + tooltip_date(itemTime), "#fff", "#000");
+            
+            let unit = "ppm";
+            if (item.series.label=="Wind speed") unit = "m/s";
+            
+            tooltip(item.pageX, item.pageY, item.series.label + "<br>"+itemValue + " "+ unit +"<br>" + tooltip_date(itemTime), "#fff", "#000");
         }
     } else $("#tooltip").remove();
 });
@@ -411,6 +449,17 @@ $("#average_mode").click(function() {
     $("#average_mode").removeClass("btn-primary");
     $("#average_mode").addClass("btn-primary");
     draw();
+});
+
+$("#sensors_list").on("click",".box",function() {
+    let z = 1 * $(this).attr("z");
+    feeds_to_load[z].show = !feeds_to_load[z].show;
+    draw();
+});
+
+$("#show_windspeed").click(function() {
+   show_windspeed = $("#show_windspeed")[0].checked;
+   draw();
 });
 
 // ----------------------------------------------------------------------

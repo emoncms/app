@@ -115,7 +115,15 @@ global $path, $session, $v;
       <button class="btn btn-primary" id="average_mode">Average</button>
     </div>
 
-    <?php include(dirname(__DIR__) . '/graph-nav.php'); ?>
+    <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start d-flex justify-content-stretch btn-group">
+        <button class='visnav time btn btn-inverse btn-link btn-large py-1 px-2' time='24'><?php echo _('D') ?></button>
+        <button class='visnav time btn btn-inverse btn-link btn-large py-1 px-2' time='168'><?php echo _('W') ?></button>
+        <button class='visnav time btn btn-inverse btn-link btn-large py-1 px-2' time='720'><?php echo _('M') ?></button>
+        <button id='zoomin' class='visnav btn btn-inverse btn-link btn-large py-1 px-2' >+</button>
+        <button id='zoomout' class='visnav btn btn-inverse btn-link btn-large py-1 px-2' >-</button>
+        <button id='left' class='visnav btn btn-inverse btn-link btn-large py-1 px-2' >&lt;</button>
+        <button id='right' class='visnav btn btn-inverse btn-link btn-large py-1 px-2' >&gt;</button>
+    </div>
 
     <div id="graph_bound" class="chart-placeholder">
         <div id="graph"></div>
@@ -149,6 +157,8 @@ global $path, $session, $v;
             </tr>
             <tbody id="sensors_list"></tbody>
         </table>
+        
+        <p id="windspeed_option" class="hide" style="margin-top:15px; color:#aaa"><input type="checkbox" id="show_windspeed" style="margin: -5px 10px 0px 10px" > Show wind speed</p>
         
 
     </div>
