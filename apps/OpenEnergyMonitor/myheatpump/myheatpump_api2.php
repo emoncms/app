@@ -119,7 +119,7 @@ function process_stats($data, $interval, $starting_power) {
     }
 
     $dhw_enable = false;
-    if (isset($data["heatpump_dhw"])) {
+    if (isset($data["heatpump_dhw"]) && $data["heatpump_dhw"] != false) {
         $dhw_enable = true;
     }
 
@@ -274,7 +274,7 @@ function calculate_window_cops($data, $interval, $starting_power) {
     if (isset($data["heatpump_elec"]) && isset($data["heatpump_heat"])) {
 
         $dhw_enable = false;
-        if (isset($data["heatpump_dhw"])) {
+        if (isset($data["heatpump_dhw"]) && $data["heatpump_dhw"] != false) {
             $dhw_enable = true;
         }
 
