@@ -145,6 +145,9 @@ function app_controller()
                     $start = $date->getTimestamp();
                     $date->modify("+1 day");
                     $end = $date->getTimestamp();
+                } else {
+                    $start = null;
+                    $end = null;
                 }
                                   
                 $startingpower = get('startingpower',false,100);
