@@ -5,10 +5,18 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     // --------------------------------------------------------------------------------------------------------------    
     // Validate params
     // --------------------------------------------------------------------------------------------------------------
-
-    $timezone = 'Europe/London';
-    $start = convert_time($start,$timezone);
-    $end = convert_time($end,$timezone);
+    if ($end===null || $start===null) {
+        $date = new DateTime();
+        $date->setTimezone(new DateTimeZone("Europe/London"));
+        $date->modify("midnight");
+        $end = $date->getTimestamp();
+        $date->modify("-30 day");
+        $start = $date->getTimestamp();
+    } else {
+        $timezone = 'Europe/London';
+        $start = convert_time($start,$timezone);
+        $end = convert_time($end,$timezone);
+    }
     
     if ($end<=$start) return array('success'=>false, 'message'=>"Request end time before start time");
 
