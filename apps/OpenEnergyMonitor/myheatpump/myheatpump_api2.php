@@ -268,6 +268,7 @@ function calculate_window_cops($data, $interval, $starting_power) {
     foreach ($cop_stats as $category => $value) {
         $cop_stats[$category]["elec_kwh"] = 0;
         $cop_stats[$category]["heat_kwh"] = 0;
+        $cop_stats[$category]["data_length"] = 0;
     }
 
     if (isset($data["heatpump_elec"]) && isset($data["heatpump_heat"])) {
@@ -291,18 +292,22 @@ function calculate_window_cops($data, $interval, $starting_power) {
             if ($elec !== null && $heat !== null) {
                 $cop_stats["combined"]["elec_kwh"] += $elec * $power_to_kwh;
                 $cop_stats["combined"]["heat_kwh"] += $heat * $power_to_kwh;
-
+                $cop_stats["combined"]["data_length"] += $interval;
+                
                 if ($elec >= $starting_power) {
                     $cop_stats["when_running"]["elec_kwh"] += $elec * $power_to_kwh;
                     $cop_stats["when_running"]["heat_kwh"] += $heat * $power_to_kwh;
+                    $cop_stats["when_running"]["data_length"] += $interval;
 
                     if ($dhw_enable) {
                         if ($dhw) {
                             $cop_stats["water_heating"]["elec_kwh"] += $elec * $power_to_kwh;
                             $cop_stats["water_heating"]["heat_kwh"] += $heat * $power_to_kwh;
+                            $cop_stats["water_heating"]["data_length"] += $interval;
                         } else {
                             $cop_stats["space_heating"]["elec_kwh"] += $elec * $power_to_kwh;
                             $cop_stats["space_heating"]["heat_kwh"] += $heat * $power_to_kwh;
+                            $cop_stats["space_heating"]["data_length"] += $interval;
                         }
                     }
                 }
