@@ -111,7 +111,7 @@ function app_controller()
             return array("success"=>false, "message"=>"invalid app or permissions");
         }
     }
-    else if ($route->action == "getstats" || $route->action == "getstats2" || $route->action == "getdaily") {
+    else if ($route->action == "getstats" || $route->action == "getstats2" || $route->action == "getdaily" || $route->action == "datastart") {
 
         // enable apikey read access
         $userid = false;
@@ -156,14 +156,33 @@ function app_controller()
                 $settings['feed']['max_datapoints'] = 100000;
                 $feed = new Feed($mysqli,$redis,$settings['feed']);
                 
-                if ($route->action == "getstats2" || $route->action == "getdaily") {
+                if ($route->action == "getstats2" || $route->action == "getdaily" || $route->action == "datastart") {
                     require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_api2.php";
                 } else {
                     require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_api.php";   
                 }
                 
-                if ($route->action == "getdaily") {
+                if ($route->action == "datastart") {
+                    $route->format = "json";
+                    $datastart = 0;
+                    if (isset($app->config->heatpump_elec)) {
+                        $meta = $feed->get_meta($app->config->heatpump_elec);
+                        $datastart = $meta->start_time;
+                    }
+                    if (isset($app->config->heatpump_heat)) {
+                        $meta = $feed->get_meta($app->config->heatpump_heat);
+                        if ($meta->start_time>$datastart) {
+                            $datastart = $meta->start_time;
+                        }
+                    }
+                    if (isset($app->config->start_date) && $app->config->start_date>$datastart) {
+                        $datastart = $app->config->start_date*1;
+                    }
+                    if ($datastart==0) $datastart = false;
+                    return array("datastart"=>$datastart);
+                }
                 
+                if ($route->action == "getdaily") {
                     $route->format = "text";
                     return get_daily_stats($feed,$app,$start,$end,$startingpower*1);
                 }
