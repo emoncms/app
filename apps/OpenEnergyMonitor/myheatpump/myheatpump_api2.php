@@ -1,5 +1,80 @@
 <?php
 
+function get_daily_stats($feed,$app,$start,$end,$starting_power) {
+
+    $timezone = 'Europe/London';
+    $date = new DateTime();
+    $date->setTimezone(new DateTimeZone($timezone));
+
+    if ($end===null || $start===null) {
+        $date->modify("midnight");
+        $end = $date->getTimestamp();
+        $date->modify("-30 day");
+        $start = $date->getTimestamp();
+    } else {
+        $start = convert_time($start,$timezone);
+        $end = convert_time($end,$timezone);
+        
+        $date->setTimestamp($start);
+        $date->modify("midnight");
+        $start = $date->getTimestamp();
+    }
+    
+    $out = "";
+    $fields = array();
+    $fields[] = "timestamp";
+    $fields[] = "combined_elec_kwh";
+    $fields[] = "combined_heat_kwh";
+    $fields[] = "combined_cop";
+    
+    $fields[] = "running_elec_kwh";
+    $fields[] = "running_heat_kwh";
+    $fields[] = "running_cop";
+
+    $fields[] = "space_elec_kwh";
+    $fields[] = "space_heat_kwh";
+    $fields[] = "space_cop";
+
+    $fields[] = "water_elec_kwh";
+    $fields[] = "water_heat_kwh";
+    $fields[] = "water_cop";
+
+    $out .= implode(",",$fields)."\n";
+        
+    $time = $start;
+    while ($time<$end) {
+        // print $date->format("c")."\n";
+        
+        $stats = get_heatpump_stats($feed,$app,$time,$time+(3600*24),$starting_power);
+        
+        $values = array();
+        
+        $values[] = $stats['start'];
+        $values[] = $stats['stats']['combined']['elec_kwh'];
+        $values[] = $stats['stats']['combined']['heat_kwh'];
+        $values[] = $stats['stats']['combined']['cop'];
+
+        $values[] = $stats['stats']['when_running']['elec_kwh'];
+        $values[] = $stats['stats']['when_running']['heat_kwh'];
+        $values[] = $stats['stats']['when_running']['cop'];
+
+        $values[] = $stats['stats']['space_heating']['elec_kwh'];
+        $values[] = $stats['stats']['space_heating']['heat_kwh'];
+        $values[] = $stats['stats']['space_heating']['cop'];
+        
+        $values[] = $stats['stats']['water_heating']['elec_kwh'];
+        $values[] = $stats['stats']['water_heating']['heat_kwh'];
+        $values[] = $stats['stats']['water_heating']['cop'];
+        
+        $out .= implode(",",$values)."\n";
+        
+        $date->modify("+1 day");
+        $time = $date->getTimestamp();
+    }
+
+    return $out;
+}
+
 function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
 
     // --------------------------------------------------------------------------------------------------------------    
@@ -324,6 +399,12 @@ function calculate_window_cops($data, $interval, $starting_power) {
             $cop_stats[$category]["elec_kwh"] = number_format($cop_stats[$category]["elec_kwh"],3,".","")*1;            
             $cop_stats[$category]["heat_kwh"] = number_format($cop_stats[$category]["heat_kwh"],3,".","")*1;            
             $cop_stats[$category]["cop"] = number_format($cop_stats[$category]["cop"],2,".","")*1;
+            
+            if ($cop_stats[$category]["data_length"] == 0) {
+                $cop_stats[$category]["elec_kwh"] = null;
+                $cop_stats[$category]["heat_kwh"] = null;
+                $cop_stats[$category]["cop"] = null;
+            }
         }
     }
     return $cop_stats;

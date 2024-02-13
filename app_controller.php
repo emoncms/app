@@ -111,7 +111,7 @@ function app_controller()
             return array("success"=>false, "message"=>"invalid app or permissions");
         }
     }
-    else if ($route->action == "getstats" || $route->action == "getstats2") {
+    else if ($route->action == "getstats" || $route->action == "getstats2" || $route->action == "getdaily") {
 
         // enable apikey read access
         $userid = false;
@@ -156,11 +156,18 @@ function app_controller()
                 $settings['feed']['max_datapoints'] = 100000;
                 $feed = new Feed($mysqli,$redis,$settings['feed']);
                 
-                if ($route->action == "getstats2") {
+                if ($route->action == "getstats2" || $route->action == "getdaily") {
                     require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_api2.php";
                 } else {
                     require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_api.php";   
                 }
+                
+                if ($route->action == "getdaily") {
+                
+                    $route->format = "text";
+                    return get_daily_stats($feed,$app,$start,$end,$startingpower*1);
+                }
+                
                 return get_heatpump_stats($feed,$app,$start,$end,$startingpower*1);
             }
         
