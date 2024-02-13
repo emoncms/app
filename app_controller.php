@@ -164,22 +164,23 @@ function app_controller()
                 
                 if ($route->action == "datastart") {
                     $route->format = "json";
-                    $datastart = 0;
+                    $result = array("start"=>0, "end"=>0);
                     if (isset($app->config->heatpump_elec)) {
                         $meta = $feed->get_meta($app->config->heatpump_elec);
-                        $datastart = $meta->start_time;
+                        $result['start'] = $meta->start_time;
+                        $result['end'] = $meta->end_time;
                     }
                     if (isset($app->config->heatpump_heat)) {
                         $meta = $feed->get_meta($app->config->heatpump_heat);
-                        if ($meta->start_time>$datastart) {
-                            $datastart = $meta->start_time;
-                        }
+                        if ($meta->start_time>$result['start']) $result['start'] = $meta->start_time;
+                        if ($meta->end_time<$result['end']) $result['end'] = $meta->end_time;
                     }
-                    if (isset($app->config->start_date) && $app->config->start_date>$datastart) {
-                        $datastart = $app->config->start_date*1;
+                    if (isset($app->config->start_date) && $app->config->start_date>$result['start']) {
+                        $result['start'] = $app->config->start_date*1;
                     }
-                    if ($datastart==0) $datastart = false;
-                    return array("datastart"=>$datastart);
+                    if ($result['start']==0) $result['start'] = false;
+                    if ($result['end']==0) $result['end'] = false;
+                    return $result;
                 }
                 
                 if ($route->action == "getdaily") {
