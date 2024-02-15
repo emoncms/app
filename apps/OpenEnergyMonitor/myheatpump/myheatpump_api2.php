@@ -23,21 +23,44 @@ function get_daily_stats($feed,$app,$start,$end,$starting_power) {
     $out = "";
     $fields = array();
     $fields[] = "timestamp";
+    
     $fields[] = "combined_elec_kwh";
     $fields[] = "combined_heat_kwh";
     $fields[] = "combined_cop";
-    
+    $fields[] = "combined_data_length";
+    $fields[] = "combined_flowT_mean";
+    $fields[] = "combined_returnT_mean";
+    $fields[] = "combined_outsideT_mean";
+        
     $fields[] = "running_elec_kwh";
     $fields[] = "running_heat_kwh";
     $fields[] = "running_cop";
+    $fields[] = "running_data_length";
+    $fields[] = "running_flowT_mean";
+    $fields[] = "running_returnT_mean";
+    $fields[] = "running_outsideT_mean";
 
     $fields[] = "space_elec_kwh";
     $fields[] = "space_heat_kwh";
     $fields[] = "space_cop";
-
+    $fields[] = "space_data_length";
+    $fields[] = "space_flowT_mean";
+    $fields[] = "space_returnT_mean";
+    $fields[] = "space_outsideT_mean";
+    
     $fields[] = "water_elec_kwh";
     $fields[] = "water_heat_kwh";
     $fields[] = "water_cop";
+    $fields[] = "water_data_length";
+    $fields[] = "water_flowT_mean";
+    $fields[] = "water_returnT_mean";
+    $fields[] = "water_outsideT_mean";
+    
+    $fields[] = "quality_elec";
+    $fields[] = "quality_heat";
+    $fields[] = "quality_flowT";
+    $fields[] = "quality_returnT";
+    $fields[] = "quality_outsideT";
 
     $out .= implode(",",$fields)."\n";
         
@@ -53,19 +76,41 @@ function get_daily_stats($feed,$app,$start,$end,$starting_power) {
         $values[] = $stats['stats']['combined']['elec_kwh'];
         $values[] = $stats['stats']['combined']['heat_kwh'];
         $values[] = $stats['stats']['combined']['cop'];
+        $values[] = $stats['stats']['combined']['data_length'];
+        $values[] = $stats['stats']['combined']['flowT_mean'];
+        $values[] = $stats['stats']['combined']['returnT_mean'];
+        $values[] = $stats['stats']['combined']['outsideT_mean'];
 
         $values[] = $stats['stats']['when_running']['elec_kwh'];
         $values[] = $stats['stats']['when_running']['heat_kwh'];
         $values[] = $stats['stats']['when_running']['cop'];
-
+        $values[] = $stats['stats']['when_running']['data_length'];
+        $values[] = $stats['stats']['when_running']['flowT_mean'];
+        $values[] = $stats['stats']['when_running']['returnT_mean'];
+        $values[] = $stats['stats']['when_running']['outsideT_mean'];
+        
         $values[] = $stats['stats']['space_heating']['elec_kwh'];
         $values[] = $stats['stats']['space_heating']['heat_kwh'];
         $values[] = $stats['stats']['space_heating']['cop'];
-        
+        $values[] = $stats['stats']['space_heating']['data_length'];
+        $values[] = $stats['stats']['space_heating']['flowT_mean'];
+        $values[] = $stats['stats']['space_heating']['returnT_mean'];
+        $values[] = $stats['stats']['space_heating']['outsideT_mean'];
+                
         $values[] = $stats['stats']['water_heating']['elec_kwh'];
         $values[] = $stats['stats']['water_heating']['heat_kwh'];
         $values[] = $stats['stats']['water_heating']['cop'];
+        $values[] = $stats['stats']['water_heating']['data_length'];
+        $values[] = $stats['stats']['water_heating']['flowT_mean'];
+        $values[] = $stats['stats']['water_heating']['returnT_mean'];
+        $values[] = $stats['stats']['water_heating']['outsideT_mean'];
         
+        $values[] = $stats['quality']['elec'];
+        $values[] = $stats['quality']['heat'];
+        $values[] = $stats['quality']['flowT'];
+        $values[] = $stats['quality']['returnT'];
+        $values[] = $stats['quality']['outsideT'];
+                
         $out .= implode(",",$values)."\n";
         
         $date->modify("+1 day");
@@ -127,7 +172,7 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     foreach ($feeds as $key) {
         $data[$key] = false;
         if (isset($app->config->$key) && $app->config->$key>0) {   
-            $data[$key] = $feed->get_data($app->config->$key,$start,$end,$interval,1,"UTC","notime");
+            $data[$key] = $feed->get_data($app->config->$key,$start,$end-$interval,$interval,1,"UTC","notime");
             $data[$key] = remove_null_values($data[$key],$interval);
         }
     }
