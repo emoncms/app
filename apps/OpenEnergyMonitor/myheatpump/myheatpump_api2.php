@@ -172,7 +172,7 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     foreach ($feeds as $key) {
         $data[$key] = false;
         if (isset($app->config->$key) && $app->config->$key>0) {   
-            $data[$key] = $feed->get_data($app->config->$key,$start,$end-$interval,$interval,1,"UTC","notime");
+            $data[$key] = $feed->get_data($app->config->$key,$start,$end-$interval,$interval,1,"Europe/London","notime");
             $data[$key] = remove_null_values($data[$key],$interval);
         }
     }
@@ -350,7 +350,7 @@ function stats_min_max(&$stats, $category, $key, $value) {
 function remove_null_values($data, $interval) {
     $last_valid_pos = 0;
     for ($pos = 0; $pos < count($data); $pos++) {
-        if ($data[$pos] != null) {
+        if ($data[$pos] !== null) {
             $null_time = ($pos - $last_valid_pos) * $interval;
             if ($null_time < 900) {
                 for ($x = $last_valid_pos + 1; $x < $pos; $x++) {
@@ -398,11 +398,11 @@ function calculate_window_cops($data, $interval, $starting_power) {
             $dhw_enable = true;
         }
 
-        $power_to_kwh = $interval / 3600000;
+        $power_to_kwh = 1.0 * $interval / 3600000.0;
 
         foreach ($data["heatpump_elec"] as $z => $elec_data) {
-            $elec = $data["heatpump_elec"][$z];
-            $heat = $data["heatpump_heat"][$z];
+            $elec = $data["heatpump_elec"][$z]*1;
+            $heat = $data["heatpump_heat"][$z]*1;
 
             $dhw = false;
             if ($dhw_enable) {

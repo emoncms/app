@@ -138,12 +138,19 @@ function app_controller()
                 if (isset($_GET['start']) && isset($_GET['end'])) {
                     $start = (int) $_GET['start'];
                     $end = (int) $_GET['end'];
-                } else if (isset($_GET['date'])) {
-                    $date = new DateTime($_GET['date']);
+                } else if (isset($_GET['day'])) {
+                    $date = new DateTime($_GET['day']);
                     $date->setTimezone(new DateTimeZone("Europe/London"));
                     $date->modify("midnight");
                     $start = $date->getTimestamp();
                     $date->modify("+1 day");
+                    $end = $date->getTimestamp();
+                } else if (isset($_GET['month'])) {
+                    $date = new DateTime($_GET['month']);
+                    $date->setTimezone(new DateTimeZone("Europe/London"));
+                    $date->modify("midnight");
+                    $start = $date->getTimestamp();
+                    $date->modify("+1 month");
                     $end = $date->getTimestamp();
                 } else {
                     $start = null;
