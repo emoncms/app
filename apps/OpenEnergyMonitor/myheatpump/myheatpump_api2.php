@@ -291,7 +291,7 @@ function process_stats($data, $interval, $starting_power) {
             }
             /*
             $stats[$x][$key]["diff"] = null;
-            if ($stats[$x][$key]["minval"] != null && $stats[$x][$key]["maxval"] != null) {
+            if ($stats[$x][$key]["minval"] !== null && $stats[$x][$key]["maxval"] !== null) {
                 $stats[$x][$key]["diff"] = $stats[$x][$key]["maxval"] - $stats[$x][$key]["minval"];
             }
             */
@@ -301,30 +301,30 @@ function process_stats($data, $interval, $starting_power) {
     foreach ($stats as $x => $val) {
         foreach ($feed_options as $key => $props) {
         
-            if ($props["unit"] == "W" && $stats[$x][$key]["mean"] != null) {
+            if ($props["unit"] == "W" && $stats[$x][$key]["mean"] !== null) {
                 $stats[$x][$key]["kwh"] = ($stats[$x][$key]["mean"] * $stats[$x][$key]["count"] * $interval) / 3600000;
                 $stats[$x][$key]["kwh"] = number_format($stats[$x][$key]["kwh"],3,".","")*1;            
             } else {
                 unset($stats[$x][$key]["kwh"]);
             }
         
-            //if ($stats[$x][$key]["sum"]!=null) {
+            //if ($stats[$x][$key]["sum"]!==null) {
             //    $stats[$x][$key]["sum"] = number_format($stats[$x][$key]["sum"],$props["dp"],".","")*1;
             //}
             unset($stats[$x][$key]["sum"]);
             unset($stats[$x][$key]["count"]);
             
-            if ($stats[$x][$key]["mean"]!=null) {
+            if ($stats[$x][$key]["mean"]!==null) {
                 $stats[$x][$key]["mean"] = number_format($stats[$x][$key]["mean"],$props["dp"],".","")*1;
             }
             /*
-            if ($stats[$x][$key]["minval"]!=null) {
+            if ($stats[$x][$key]["minval"]!==null) {
                 $stats[$x][$key]["minval"] = number_format($stats[$x][$key]["minval"],$props["dp"],".","")*1;  
             }
-            if ($stats[$x][$key]["maxval"]!=null) {
+            if ($stats[$x][$key]["maxval"]!==null) {
                 $stats[$x][$key]["maxval"] = number_format($stats[$x][$key]["maxval"],$props["dp"],".","")*1;  
             }    
-            if ($stats[$x][$key]["diff"]!=null) {
+            if ($stats[$x][$key]["diff"]!==null) {
                 $stats[$x][$key]["diff"] = number_format($stats[$x][$key]["diff"],$props["dp"],".","")*1;  
             }*/
              
