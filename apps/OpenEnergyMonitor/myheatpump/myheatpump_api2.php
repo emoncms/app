@@ -23,44 +23,29 @@ function get_daily_stats($feed,$app,$start,$end,$starting_power) {
     $out = "";
     $fields = array();
     $fields[] = "timestamp";
-    
-    $fields[] = "combined_elec_kwh";
-    $fields[] = "combined_heat_kwh";
-    $fields[] = "combined_cop";
-    $fields[] = "combined_data_length";
-    $fields[] = "combined_flowT_mean";
-    $fields[] = "combined_returnT_mean";
-    $fields[] = "combined_outsideT_mean";
-        
-    $fields[] = "running_elec_kwh";
-    $fields[] = "running_heat_kwh";
-    $fields[] = "running_cop";
-    $fields[] = "running_data_length";
-    $fields[] = "running_flowT_mean";
-    $fields[] = "running_returnT_mean";
-    $fields[] = "running_outsideT_mean";
 
-    $fields[] = "space_elec_kwh";
-    $fields[] = "space_heat_kwh";
-    $fields[] = "space_cop";
-    $fields[] = "space_data_length";
-    $fields[] = "space_flowT_mean";
-    $fields[] = "space_returnT_mean";
-    $fields[] = "space_outsideT_mean";
-    
-    $fields[] = "water_elec_kwh";
-    $fields[] = "water_heat_kwh";
-    $fields[] = "water_cop";
-    $fields[] = "water_data_length";
-    $fields[] = "water_flowT_mean";
-    $fields[] = "water_returnT_mean";
-    $fields[] = "water_outsideT_mean";
+    $categories = ["combined","running","space","water"];
+
+    foreach ($categories as $category) {
+        $fields[] = $category."_elec_kwh";
+        $fields[] = $category."_heat_kwh";
+        $fields[] = $category."_cop";
+        $fields[] = $category."_data_length";
+        $fields[] = $category."_elec_mean";
+        $fields[] = $category."_heat_mean";
+        $fields[] = $category."_flowT_mean";
+        $fields[] = $category."_returnT_mean";
+        $fields[] = $category."_outsideT_mean";
+        $fields[] = $category."_roomT_mean";
+        $fields[] = $category."_prc_carnot";
+    }
     
     $fields[] = "quality_elec";
     $fields[] = "quality_heat";
     $fields[] = "quality_flowT";
     $fields[] = "quality_returnT";
     $fields[] = "quality_outsideT";
+    $fields[] = "quality_roomT";
 
     $out .= implode(",",$fields)."\n";
         
@@ -71,45 +56,29 @@ function get_daily_stats($feed,$app,$start,$end,$starting_power) {
         $stats = get_heatpump_stats($feed,$app,$time,$time+(3600*24),$starting_power);
         
         $values = array();
-        
-        $values[] = $stats['start'];
-        $values[] = $stats['stats']['combined']['elec_kwh'];
-        $values[] = $stats['stats']['combined']['heat_kwh'];
-        $values[] = $stats['stats']['combined']['cop'];
-        $values[] = $stats['stats']['combined']['data_length'];
-        $values[] = $stats['stats']['combined']['flowT_mean'];
-        $values[] = $stats['stats']['combined']['returnT_mean'];
-        $values[] = $stats['stats']['combined']['outsideT_mean'];
 
-        $values[] = $stats['stats']['when_running']['elec_kwh'];
-        $values[] = $stats['stats']['when_running']['heat_kwh'];
-        $values[] = $stats['stats']['when_running']['cop'];
-        $values[] = $stats['stats']['when_running']['data_length'];
-        $values[] = $stats['stats']['when_running']['flowT_mean'];
-        $values[] = $stats['stats']['when_running']['returnT_mean'];
-        $values[] = $stats['stats']['when_running']['outsideT_mean'];
-        
-        $values[] = $stats['stats']['space_heating']['elec_kwh'];
-        $values[] = $stats['stats']['space_heating']['heat_kwh'];
-        $values[] = $stats['stats']['space_heating']['cop'];
-        $values[] = $stats['stats']['space_heating']['data_length'];
-        $values[] = $stats['stats']['space_heating']['flowT_mean'];
-        $values[] = $stats['stats']['space_heating']['returnT_mean'];
-        $values[] = $stats['stats']['space_heating']['outsideT_mean'];
-                
-        $values[] = $stats['stats']['water_heating']['elec_kwh'];
-        $values[] = $stats['stats']['water_heating']['heat_kwh'];
-        $values[] = $stats['stats']['water_heating']['cop'];
-        $values[] = $stats['stats']['water_heating']['data_length'];
-        $values[] = $stats['stats']['water_heating']['flowT_mean'];
-        $values[] = $stats['stats']['water_heating']['returnT_mean'];
-        $values[] = $stats['stats']['water_heating']['outsideT_mean'];
+        $values[] = $stats['start'];
+
+        foreach ($categories as $category) {
+            $values[] = $stats['stats'][$category]['elec_kwh'];
+            $values[] = $stats['stats'][$category]['heat_kwh'];
+            $values[] = $stats['stats'][$category]['cop'];
+            $values[] = $stats['stats'][$category]['data_length'];
+            $values[] = $stats['stats'][$category]['elec_mean'];
+            $values[] = $stats['stats'][$category]['heat_mean'];
+            $values[] = $stats['stats'][$category]['flowT_mean'];
+            $values[] = $stats['stats'][$category]['returnT_mean'];
+            $values[] = $stats['stats'][$category]['outsideT_mean'];
+            $values[] = $stats['stats'][$category]['roomT_mean'];
+            $values[] = $stats['stats'][$category]['prc_carnot'];
+        }
         
         $values[] = $stats['quality']['elec'];
         $values[] = $stats['quality']['heat'];
         $values[] = $stats['quality']['flowT'];
         $values[] = $stats['quality']['returnT'];
         $values[] = $stats['quality']['outsideT'];
+        $values[] = $stats['quality']['roomT'];
                 
         $out .= implode(",",$values)."\n";
         
@@ -209,7 +178,8 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
         "heat"=>get_quality($data["heatpump_heat"]),
         "flowT"=>get_quality($data["heatpump_flowT"]),
         "returnT"=>get_quality($data["heatpump_returnT"]),
-        "outsideT"=>get_quality($data["heatpump_outsideT"])
+        "outsideT"=>get_quality($data["heatpump_outsideT"]),
+        "roomT"=>get_quality($data["heatpump_roomT"])
       ]
     ];
     
@@ -219,9 +189,9 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
 function process_stats($data, $interval, $starting_power) {
     $stats = [
         'combined' => [],
-        'when_running' => [],
-        'space_heating' => [],
-        'water_heating' => []
+        'running' => [],
+        'space' => [],
+        'water' => []
     ];
     
     $feed_options = [
@@ -272,19 +242,19 @@ function process_stats($data, $interval, $starting_power) {
                     //stats_min_max($stats, 'combined', $key, $value);
 
                     if ($power !== null && $power >= $starting_power) {
-                        $stats['when_running'][$key]['sum'] += $value;
-                        $stats['when_running'][$key]['count']++;
-                        //stats_min_max($stats, 'when_running', $key, $value);
+                        $stats['running'][$key]['sum'] += $value;
+                        $stats['running'][$key]['count']++;
+                        //stats_min_max($stats, 'running', $key, $value);
 
                         if ($dhw_enable) {
                             if ($dhw) {
-                                $stats['water_heating'][$key]['sum'] += $value;
-                                $stats['water_heating'][$key]['count']++;
-                                //stats_min_max($stats, 'water_heating', $key, $value);
+                                $stats['water'][$key]['sum'] += $value;
+                                $stats['water'][$key]['count']++;
+                                //stats_min_max($stats, 'water', $key, $value);
                             } else {
-                                $stats['space_heating'][$key]['sum'] += $value;
-                                $stats['space_heating'][$key]['count']++;
-                                //stats_min_max($stats, 'space_heating', $key, $value);
+                                $stats['space'][$key]['sum'] += $value;
+                                $stats['space'][$key]['count']++;
+                                //stats_min_max($stats, 'space', $key, $value);
                             }
                         }
                     }
@@ -391,9 +361,9 @@ function get_quality($data) {
 function calculate_window_cops($data, $interval, $starting_power) {
     $cop_stats = array(
         "combined" => array(),
-        "when_running" => array(),
-        "space_heating" => array(),
-        "water_heating" => array(),
+        "running" => array(),
+        "space" => array(),
+        "water" => array(),
     );
 
     foreach ($cop_stats as $category => $value) {
@@ -426,19 +396,19 @@ function calculate_window_cops($data, $interval, $starting_power) {
                 $cop_stats["combined"]["data_length"] += $interval;
                 
                 if ($elec >= $starting_power) {
-                    $cop_stats["when_running"]["elec_kwh"] += $elec * $power_to_kwh;
-                    $cop_stats["when_running"]["heat_kwh"] += $heat * $power_to_kwh;
-                    $cop_stats["when_running"]["data_length"] += $interval;
+                    $cop_stats["running"]["elec_kwh"] += $elec * $power_to_kwh;
+                    $cop_stats["running"]["heat_kwh"] += $heat * $power_to_kwh;
+                    $cop_stats["running"]["data_length"] += $interval;
 
                     if ($dhw_enable) {
                         if ($dhw) {
-                            $cop_stats["water_heating"]["elec_kwh"] += $elec * $power_to_kwh;
-                            $cop_stats["water_heating"]["heat_kwh"] += $heat * $power_to_kwh;
-                            $cop_stats["water_heating"]["data_length"] += $interval;
+                            $cop_stats["water"]["elec_kwh"] += $elec * $power_to_kwh;
+                            $cop_stats["water"]["heat_kwh"] += $heat * $power_to_kwh;
+                            $cop_stats["water"]["data_length"] += $interval;
                         } else {
-                            $cop_stats["space_heating"]["elec_kwh"] += $elec * $power_to_kwh;
-                            $cop_stats["space_heating"]["heat_kwh"] += $heat * $power_to_kwh;
-                            $cop_stats["space_heating"]["data_length"] += $interval;
+                            $cop_stats["space"]["elec_kwh"] += $elec * $power_to_kwh;
+                            $cop_stats["space"]["heat_kwh"] += $heat * $power_to_kwh;
+                            $cop_stats["space"]["data_length"] += $interval;
                         }
                     }
                 }
@@ -554,9 +524,9 @@ function carnot_simulator($data, $starting_power) {
 
     return array(
         "combined" => $combined_ideal_carnot_heat_mean,
-        "when_running" => $running_ideal_carnot_heat_mean,
-        "space_heating" => $space_ideal_carnot_heat_mean,
-        "water_heating" => $water_ideal_carnot_heat_mean
+        "running" => $running_ideal_carnot_heat_mean,
+        "space" => $space_ideal_carnot_heat_mean,
+        "water" => $water_ideal_carnot_heat_mean
     );
 }
 
