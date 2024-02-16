@@ -473,8 +473,14 @@ function carnot_simulator($data, $starting_power) {
             $dhw = $data["heatpump_dhw"][$z];
         }
 
-        $carnot_COP = ($flowT + $condensing_offset + 273) / (($flowT + $condensing_offset + 273) - ($ambientT + $evaporator_offset + 273));
-
+        $a = $flowT + $condensing_offset + 273;
+        $b = $a - ($ambientT + $evaporator_offset + 273);
+        
+        $carnot_COP = 0;
+        if ($b!=0) {
+            $carnot_COP = $a / $b;
+        }
+        
         if ($elec !== null && $carnot_COP !== null) {
         
             $ideal_carnot_heat = $elec * $carnot_COP;
