@@ -167,7 +167,7 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     
     $elec_meta = $feed->get_meta($app->config->heatpump_elec);
     
-    $feeds = array("heatpump_elec","heatpump_flowT","heatpump_returnT","heatpump_outsideT","heatpump_heat","heatpump_dhw");
+    $feeds = array("heatpump_elec","heatpump_flowT","heatpump_returnT","heatpump_outsideT","heatpump_roomT","heatpump_heat","heatpump_dhw");
     
     foreach ($feeds as $key) {
         $data[$key] = false;
@@ -182,9 +182,20 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     $stats = process_stats($data, $interval, $starting_power);
     
     foreach ($stats as $category => $val) {
+        $cop_stats[$category]["elec_mean"] = $stats[$category]["elec"]["mean"];    
+        $cop_stats[$category]["heat_mean"] = $stats[$category]["heat"]["mean"];    
         $cop_stats[$category]["flowT_mean"] = $stats[$category]["flowT"]["mean"];
         $cop_stats[$category]["returnT_mean"] = $stats[$category]["returnT"]["mean"];
         $cop_stats[$category]["outsideT_mean"] = $stats[$category]["outsideT"]["mean"];
+        $cop_stats[$category]["roomT_mean"] = $stats[$category]["roomT"]["mean"]; 
+    }
+    
+    $ideal_carnot_heat_mean = carnot_simulator($data, $starting_power);
+    foreach ($stats as $category => $val) {
+        $cop_stats[$category]["prc_carnot"] = null;
+        if ($ideal_carnot_heat_mean[$category]!==null && $ideal_carnot_heat_mean[$category]>0) {
+            $cop_stats[$category]["prc_carnot"] = number_format(100 * $stats[$category]["heat"]["mean"] / $ideal_carnot_heat_mean[$category],3,'.','')*1;
+        }
     }
     
     $result = [
@@ -214,13 +225,13 @@ function process_stats($data, $interval, $starting_power) {
     ];
     
     $feed_options = [
-        "elec" => ["name" => "Electric consumption", "unit" => "W", "dp" => 0],
-        "heat" => ["name" => "Heat output", "unit" => "W", "dp" => 0],
+        "elec" => ["name" => "Electric consumption", "unit" => "W", "dp" => 1],
+        "heat" => ["name" => "Heat output", "unit" => "W", "dp" => 1],
         //"heat_carnot" => ["name" => "Simulated heat output", "unit" => "W", "dp" => 0],
-        "flowT" => ["name" => "Flow temperature", "unit" => "°C", "dp" => 1],
-        "returnT" => ["name" => "Return temperature", "unit" => "°C", "dp" => 1],
-        "outsideT" => ["name" => "Outside temperature", "unit" => "°C", "dp" => 1],
-        //"roomT" => ["name" => "Room temperature", "unit" => "°C", "dp" => 1],
+        "flowT" => ["name" => "Flow temperature", "unit" => "°C", "dp" => 2],
+        "returnT" => ["name" => "Return temperature", "unit" => "°C", "dp" => 2],
+        "outsideT" => ["name" => "Outside temperature", "unit" => "°C", "dp" => 2],
+        "roomT" => ["name" => "Room temperature", "unit" => "°C", "dp" => 2],
         //"targetT" => ["name" => "Target temperature", "unit" => "°C", "dp" => 1],
         //"flowrate" => ["name" => "Flow rate", "unit" => "", "dp" => 3]
     ];
@@ -303,7 +314,7 @@ function process_stats($data, $interval, $starting_power) {
         
             if ($props["unit"] == "W" && $stats[$x][$key]["mean"] !== null) {
                 $stats[$x][$key]["kwh"] = ($stats[$x][$key]["mean"] * $stats[$x][$key]["count"] * $interval) / 3600000;
-                $stats[$x][$key]["kwh"] = number_format($stats[$x][$key]["kwh"],3,".","")*1;            
+                $stats[$x][$key]["kwh"] = number_format($stats[$x][$key]["kwh"],4,".","")*1;            
             } else {
                 unset($stats[$x][$key]["kwh"]);
             }
@@ -374,7 +385,7 @@ function get_quality($data) {
         }
     }
     $quality = 100*(1-($null_count / $count));
-    return number_format($quality,2,'.','')*1;
+    return number_format($quality,3,'.','')*1;
 }
 
 function calculate_window_cops($data, $interval, $starting_power) {
@@ -401,8 +412,8 @@ function calculate_window_cops($data, $interval, $starting_power) {
         $power_to_kwh = 1.0 * $interval / 3600000.0;
 
         foreach ($data["heatpump_elec"] as $z => $elec_data) {
-            $elec = $data["heatpump_elec"][$z]*1;
-            $heat = $data["heatpump_heat"][$z]*1;
+            $elec = $data["heatpump_elec"][$z];
+            $heat = $data["heatpump_heat"][$z];
 
             $dhw = false;
             if ($dhw_enable) {
@@ -441,9 +452,9 @@ function calculate_window_cops($data, $interval, $starting_power) {
                 $cop_stats[$category]["cop"] = $cop_stats[$category]["heat_kwh"] / $cop_stats[$category]["elec_kwh"];
             }
 
-            $cop_stats[$category]["elec_kwh"] = number_format($cop_stats[$category]["elec_kwh"],3,".","")*1;            
-            $cop_stats[$category]["heat_kwh"] = number_format($cop_stats[$category]["heat_kwh"],3,".","")*1;            
-            $cop_stats[$category]["cop"] = number_format($cop_stats[$category]["cop"],2,".","")*1;
+            $cop_stats[$category]["elec_kwh"] = number_format($cop_stats[$category]["elec_kwh"],4,".","")*1;            
+            $cop_stats[$category]["heat_kwh"] = number_format($cop_stats[$category]["heat_kwh"],4,".","")*1;            
+            $cop_stats[$category]["cop"] = number_format($cop_stats[$category]["cop"],3,".","")*1;
             
             if ($cop_stats[$category]["data_length"] == 0) {
                 $cop_stats[$category]["elec_kwh"] = null;
@@ -454,6 +465,101 @@ function calculate_window_cops($data, $interval, $starting_power) {
     }
     return $cop_stats;
 }
+
+function carnot_simulator($data, $starting_power) {
+    if (!isset($data["heatpump_elec"])) return false;
+    if (!isset($data["heatpump_flowT"])) return false;
+    if (!isset($data["heatpump_returnT"])) return false;
+    if (!isset($data["heatpump_outsideT"])) return false;
+    
+    $dhw_enable = false;
+    if (isset($data["heatpump_dhw"]) && $data["heatpump_dhw"] != false) {
+        $dhw_enable = true;
+    }
+
+    $condensing_offset = 2;
+    $evaporator_offset = -6;
+    
+    $combined_ideal_carnot_heat_sum = 0;
+    $combined_carnot_heat_n = 0;
+    
+    $running_ideal_carnot_heat_sum = 0;
+    $running_carnot_heat_n = 0;
+    
+    $space_ideal_carnot_heat_sum = 0;
+    $space_carnot_heat_n = 0;
+    
+    $water_ideal_carnot_heat_sum = 0;
+    $water_carnot_heat_n = 0;  
+
+    foreach ($data["heatpump_elec"] as $z => $value) {
+        $elec = $data["heatpump_elec"][$z];
+        $flowT = $data["heatpump_flowT"][$z];
+        $returnT = $data["heatpump_returnT"][$z];
+        $ambientT = $data["heatpump_outsideT"][$z];
+        
+        $dhw = false;
+        if ($dhw_enable) {
+            $dhw = $data["heatpump_dhw"][$z];
+        }
+
+        $carnot_COP = ($flowT + $condensing_offset + 273) / (($flowT + $condensing_offset + 273) - ($ambientT + $evaporator_offset + 273));
+
+        if ($elec !== null && $carnot_COP !== null) {
+        
+            $ideal_carnot_heat = $elec * $carnot_COP;
+            if ($returnT > $flowT) {
+                $ideal_carnot_heat *= -1;
+            }
+        
+            $combined_ideal_carnot_heat_sum += $ideal_carnot_heat;
+            $combined_carnot_heat_n++;
+        
+            if ($elec >= $starting_power) {
+                $running_ideal_carnot_heat_sum += $ideal_carnot_heat;
+                $running_carnot_heat_n++;
+                
+                if ($dhw_enable) {
+                    if ($dhw) {
+                        $water_ideal_carnot_heat_sum += $ideal_carnot_heat;
+                        $water_carnot_heat_n++;
+                    } else {
+                        $space_ideal_carnot_heat_sum += $ideal_carnot_heat;
+                        $space_carnot_heat_n++;    
+                    }
+                }
+            }
+        }
+    }
+    
+    $combined_ideal_carnot_heat_mean = null;
+    if ($combined_carnot_heat_n>0) {
+        $combined_ideal_carnot_heat_mean = round($combined_ideal_carnot_heat_sum / $combined_carnot_heat_n);
+    }
+    
+    $running_ideal_carnot_heat_mean = null;
+    if ($running_carnot_heat_n>0) {
+        $running_ideal_carnot_heat_mean = round($running_ideal_carnot_heat_sum / $running_carnot_heat_n);
+    }
+    
+    $space_ideal_carnot_heat_mean = null;
+    if ($space_carnot_heat_n>0) {
+        $space_ideal_carnot_heat_mean = round($space_ideal_carnot_heat_sum / $space_carnot_heat_n);
+    }
+    
+    $water_ideal_carnot_heat_mean = null;
+    if ($water_carnot_heat_n>0) {
+        $water_ideal_carnot_heat_mean = round($water_ideal_carnot_heat_sum / $water_carnot_heat_n);
+    }
+
+    return array(
+        "combined" => $combined_ideal_carnot_heat_mean,
+        "when_running" => $running_ideal_carnot_heat_mean,
+        "space_heating" => $space_ideal_carnot_heat_mean,
+        "water_heating" => $water_ideal_carnot_heat_mean
+    );
+}
+
 
 
 function convert_time($time,$timezone) {
