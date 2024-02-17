@@ -40,6 +40,11 @@ function get_daily_stats($feed,$app,$start,$end,$starting_power) {
         $fields[] = $category."_prc_carnot";
     }
     
+    $fields[] = "combined_cooling_kwh";
+    $fields[] = "from_energy_feeds_elec_kwh";
+    $fields[] = "from_energy_Feeds_heat_kwh";
+    $fields[] = "from_energy_Feeds_cop";
+    
     $fields[] = "quality_elec";
     $fields[] = "quality_heat";
     $fields[] = "quality_flowT";
@@ -73,6 +78,11 @@ function get_daily_stats($feed,$app,$start,$end,$starting_power) {
             $values[] = $stats['stats'][$category]['prc_carnot'];
         }
         
+        $values[] = $stats['stats']["combined"]['cooling_kwh'];
+        $values[] = $stats['stats']['from_energy_feeds']['elec_kwh'];
+        $values[] = $stats['stats']['from_energy_feeds']['heat_kwh'];
+        $values[] = $stats['stats']['from_energy_feeds']['cop'];
+           
         $values[] = $stats['quality']['elec'];
         $values[] = $stats['quality']['heat'];
         $values[] = $stats['quality']['flowT'];
@@ -176,11 +186,14 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     if ($elec_kwh>0) {
         $cop = $heat_kwh / $elec_kwh;
     }
+    if ($elec_kwh!==null) $elec_kwh = number_format($elec_kwh,4,'.','')*1;
+    if ($heat_kwh!==null) $heat_kwh = number_format($heat_kwh,4,'.','')*1;
+    if ($cop!==null) $cop = number_format($cop,3,'.','')*1;
     
     $cop_stats["from_energy_feeds"] = array(
-        "elec_kwh" => number_format($elec_kwh,4,'.','')*1,
-        "heat_kwh" => number_format($heat_kwh,4,'.','')*1,
-        "cop" => number_format($cop,3,'.','')*1
+        "elec_kwh" => $elec_kwh,
+        "heat_kwh" => $heat_kwh,
+        "cop" => $cop
     );
     
     $result = [
