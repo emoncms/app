@@ -42,8 +42,8 @@ function get_daily_stats($feed,$app,$start,$end,$starting_power) {
     
     $fields[] = "combined_cooling_kwh";
     $fields[] = "from_energy_feeds_elec_kwh";
-    $fields[] = "from_energy_Feeds_heat_kwh";
-    $fields[] = "from_energy_Feeds_cop";
+    $fields[] = "from_energy_feeds_heat_kwh";
+    $fields[] = "from_energy_feeds_cop";
     
     $fields[] = "quality_elec";
     $fields[] = "quality_heat";
