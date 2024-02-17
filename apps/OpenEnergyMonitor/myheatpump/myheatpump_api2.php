@@ -167,6 +167,22 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
         }
     }
     
+    $cop_stats["combined"]["cooling_kwh"] = process_cooling($data,$interval);
+    
+    $elec_kwh = get_cumulative_kwh($feed,$app->config->heatpump_elec_kwh,$start,$end);
+    $heat_kwh = get_cumulative_kwh($feed,$app->config->heatpump_heat_kwh,$start,$end);
+    
+    $cop = null;
+    if ($elec_kwh>0) {
+        $cop = $heat_kwh / $elec_kwh;
+    }
+    
+    $cop_stats["from_energy_feeds"] = array(
+        "elec_kwh" => number_format($elec_kwh,4,'.','')*1,
+        "heat_kwh" => number_format($heat_kwh,4,'.','')*1,
+        "cop" => number_format($cop,3,'.','')*1
+    );
+    
     $result = [
       "start"=>(int)$start,
       "end"=>(int)$end,
@@ -536,7 +552,41 @@ function carnot_simulator($data, $starting_power) {
     );
 }
 
+function process_cooling($data, $interval) {
 
+    $power_to_kwh = 1.0 * $interval / 3600000.0;
+    
+    $total_negative_heat_kwh = 0;
+    if (isset($data["heatpump_heat"])) {
+        foreach ($data["heatpump_heat"] as $z => $value) {
+            $heat = $data["heatpump_heat"][$z];
+            if ($heat !== null && $heat < 0) {
+                $total_negative_heat_kwh += -1 * $heat * $power_to_kwh;
+            }
+        }
+
+    }
+    return number_format($total_negative_heat_kwh,3,'.','')*1;
+}
+
+function get_cumulative_kwh($feed,$feedid,$start,$end) {
+    
+    $meta = $feed->get_meta($feedid);
+    if ($meta->start_time>$start) {
+        $start = $meta->start_time;
+    }
+    if ($meta->end_time<$end) {
+        $end = $meta->end_time;
+    }
+    
+    if ($end<$start) return false;
+    
+    
+    $kwh_start = $feed->get_value($feedid,$start);
+    $kwh_end = $feed->get_value($feedid,$end);
+    //print $feedid." ".$start." ".$end." ".$kwh_start." ".$kwh_end." ";
+    return $kwh_end - $kwh_start;
+}
 
 function convert_time($time,$timezone) {
     // Option to specify times as date strings
