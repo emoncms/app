@@ -1,0 +1,5 @@
+{
+    "title"          : "My Boiler",
+    "description"    : "Explore boiler performance: daily fuel input, heat output and efficiency. Zoom in for detailed temperature & heat graphs.",
+    "order"         : 8
+}
