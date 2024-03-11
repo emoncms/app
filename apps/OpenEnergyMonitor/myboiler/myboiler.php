@@ -109,6 +109,11 @@ global $path, $session, $v;
 
         <div style="background-color:#eee; color:#333">
           <div id='advanced-toggle' class='bluenav' style="display:none">SHOW DETAIL</div>
+          
+          <div style="padding:10px; display:none" id="window-efficiency-bound">
+            Efficiency in window: <b id="window-efficiency" style="cursor:pointer"></b> <i class="icon-info-sign" title="Make sure to select period that includes all boiler fuel steps" style="margin-top:3px"></i>
+          </div>
+          
         </div>
 
         <div id="advanced-block" style="background-color:#fff; padding:10px; display:none">
@@ -155,6 +160,11 @@ global $path, $session, $v;
               <tbody class="stats_category" key="water_heating" style="display:none"></tbody>
               <tbody class="stats_category" key="space_heating" style="display:none"></tbody>
             </table>
+
+            <div id="show_boiler_fuel_kwh_bound" class="advanced-options">
+              <input id="show_boiler_fuel_kwh" type="checkbox" class="advanced-options-checkbox" checked>
+              <b>Show boiler fuel kWh</b>
+            </div>
 
             <div id="show_flow_rate_bound" style="display:none" class="advanced-options">
               <input id="show_flow_rate" type="checkbox" class="advanced-options-checkbox">
@@ -277,4 +287,4 @@ global $path, $session, $v;
   config.name = "<?php echo $name; ?>";
   config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myboiler/myboiler.js?v=3"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myboiler/myboiler.js?v=5"></script>

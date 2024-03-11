@@ -61,6 +61,7 @@ var boiler_heat_start = 0;
 var start_time = 0;
 var end_time = 0;
 var show_flow_rate = false;
+var show_boiler_fuel_kwh = true;
 var exclude_dhw = false;
 var kw_at_50 = 0;
 var kw_at_50_for_volume = 0;
@@ -437,6 +438,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 else if (item.series.label == "CH") { name = "Central Heating"; unit = ""; dp = 0; }
                 else if (item.series.label == "Electric") { name = "Elec"; unit = "W"; }
                 else if (item.series.label == "Heat") { name = "Heat"; unit = "W"; }
+                else if (item.series.label == "Fuel consumption") { name = "Fuel consumption"; unit = "kWh"; }
                 else if (item.series.label == "Flow rate") {
                     name = "Flow rate";
                     unit = " " + feeds["boiler_flowrate"].unit;
@@ -585,7 +587,7 @@ function powergraph_load() {
 
     // Index order is important here!
     var feeds_to_load = {
-        "boiler_fuel_kwh": { label: "Fuel", yaxis: 4, color: 0 },
+        "boiler_fuel_kwh": { label: "Fuel", yaxis: 3, color: 6 },
         "boiler_dhw": { label: "DHW", yaxis: 4, color: "#88F", lines: { lineWidth: 0, show: true, fill: 0.15 } },
         "boiler_ch": { label: "CH", yaxis: 4, color: "#FB6", lines: { lineWidth: 0, show: true, fill: 0.15 } },
         "boiler_targetT": { label: "TargetT", yaxis: 2, color: "#ccc" },
@@ -646,6 +648,8 @@ function powergraph_process() {
 
     // Load powergraph_series into flot
     powergraph_draw();
+    
+    $("#window-efficiency-bound").show();
 }
 
 
@@ -811,6 +815,15 @@ function process_stats() {
     } else {
         $(".cop_space_heating").html("---");
     }
+    
+    let window_efficiency = "---";
+    if (stats["combined"]["boiler_fuel_kwh"].diff>0) {
+        window_efficiency = 100 * stats["combined"]["boiler_heat"].kwh / stats["combined"]["boiler_fuel_kwh"].diff;
+        window_efficiency = window_efficiency.toFixed(1)+"%";
+    }
+    
+    $("#window-efficiency").html(window_efficiency);
+    
 
     return stats;
 }
@@ -914,7 +927,7 @@ function powergraph_draw() {
         yaxes: [
             { min: 0, font: style, reserveSpace: false },
             { font: style, reserveSpace: false },
-            { min: 0, font: { size: flot_font_size, color: "#44b3e2" }, reserveSpace: false },
+            { font: { size: flot_font_size, color: "#44b3e2" }, reserveSpace: false },
             { min: 0, max: 1, show: false, reserveSpace: false }
         ],
         grid: {
@@ -941,7 +954,8 @@ function powergraph_draw() {
         for (var key in powergraph_series) {
             let show = true;
             if (key == 'boiler_flowrate' && !show_flow_rate) show = false;
-
+            if (key == 'boiler_fuel_kwh' && !show_boiler_fuel_kwh) show = false;
+            
             if (show) powergraph_series_without_key.push(powergraph_series[key]);
         }
         $.plot($('#placeholder'), powergraph_series_without_key, options);
@@ -1060,6 +1074,8 @@ function bargraph_load(start, end) {
 
 
     set_url_view_params('daily', start, end);
+    
+    $("#window-efficiency-bound").hide();
 }
 
 function bargraph_draw() {
@@ -1239,8 +1255,25 @@ $('#histogram').bind("plothover", function (event, pos, item) {
 $("#show_flow_rate").click(function () {
     if ($("#show_flow_rate")[0].checked) {
         show_flow_rate = true;
+        if (show_boiler_fuel_kwh) {
+            show_boiler_fuel_kwh = false;
+            $("#show_boiler_fuel_kwh")[0].checked = false;
+        }
     } else {
         show_flow_rate = false;
+    }
+    powergraph_draw();
+});
+
+$("#show_boiler_fuel_kwh").click(function () {
+    if ($("#show_boiler_fuel_kwh")[0].checked) {
+        show_boiler_fuel_kwh = true;
+        if (show_flow_rate) {
+            show_flow_rate = false;
+            $("#show_flow_rate")[0].checked = false;
+        }
+    } else {
+        show_boiler_fuel_kwh = false;
     }
     powergraph_draw();
 });
