@@ -246,7 +246,7 @@ config.app = {
     "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh"},
     "meter_kwh_hh":{"optional":true, "type":"feed", "autoname":"meter_kwh_hh"},
 
-    "tariff":{"type":"select", "name":"Select tariff:", "default":"AGILE-FLEX-22-11-25", "options":["AGILE-18-02-21","AGILE-22-07-22","AGILE-22-08-31","AGILE-VAR-22-10-19","AGILE-FLEX-22-11-25"]},
+    "tariff":{"type":"select", "name":"Select tariff:", "default":"AGILE-FLEX-22-11-25", "options":["AGILE-18-02-21","AGILE-22-07-22","AGILE-22-08-31","AGILE-23-12-06","AGILE-VAR-22-10-19","AGILE-FLEX-22-11-25"]},
     
     "region":{"type":"select", "name":"Select region:", "default":"D_Merseyside_and_Northern_Wales", "options":["A_Eastern_England","B_East_Midlands","C_London","E_West_Midlands","D_Merseyside_and_Northern_Wales","F_North_Eastern_England","G_North_Western_England","H_Southern_England","J_South_Eastern_England","K_Southern_Wales","L_South_Western_England","M_Yorkshire","N_Southern_Scotland","P_Northern_Scotland"]},
 
