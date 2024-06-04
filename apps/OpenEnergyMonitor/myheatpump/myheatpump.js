@@ -738,6 +738,8 @@ function powergraph_process() {
     process_cooling();
     // calculates emitter and volume
     emitter_and_volume_calculator();
+    // calculate starts
+    compressor_starts();
 
     // Load powergraph_series into flot
     powergraph_draw();
@@ -1237,6 +1239,43 @@ function emitter_and_volume_calculator() {
     } else {
         $("#kW_at_50").html("?");
     }
+}
+
+function compressor_starts() {
+
+    var starting_power = parseFloat($("#starting_power").val());
+    
+    var state = null;
+    var last_state = null;
+    var starts = 0;
+    var time_elapsed = 0;
+
+    for (var z in data["heatpump_elec"]) {
+        let elec = data["heatpump_elec"][z][1];
+        
+        if (elec !== null) {
+        
+            last_state = state;
+            
+            if (elec >= starting_power) {
+                state = 1;
+            } else {
+                state = 0;
+            }
+            
+            if (last_state===0 && state===1) {
+                starts++;
+            }
+            
+            time_elapsed += view.interval
+        }
+    }
+        
+    var hours = time_elapsed / 3600;
+    
+    var starts_per_hour = 0;
+    if (hours>0) starts_per_hour = starts / hours;
+    console.log("Starts: "+starts+", Starts per hour: "+starts_per_hour.toFixed(1)+", Hours: "+hours.toFixed(1));
 }
 
 // -------------------------------------------------------------------------------

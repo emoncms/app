@@ -181,6 +181,11 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     }
     
     $cop_stats["combined"]["cooling_kwh"] = process_cooling($data,$interval);
+
+    $starts_result = compressor_starts($data, $interval, $starting_power);
+    
+    $cop_stats["combined"]["starts"] = $starts_result["starts"];
+    $cop_stats["combined"]["starts_per_hour"] = number_format($starts_result["starts_per_hour"],2,'.','')*1;
     
     $elec_kwh = 0;
     if (isset($app->config->heatpump_elec_kwh)) {
@@ -600,6 +605,45 @@ function process_cooling($data, $interval) {
 
     }
     return number_format($total_negative_heat_kwh,3,'.','')*1;
+}
+
+function compressor_starts($data, $interval, $starting_power) {
+    
+    $state = null;
+    $last_state = null;
+    $starts = 0;
+    $time_elapsed = 0;
+    
+    foreach ($data["heatpump_elec"] as $z => $value) {
+        $elec = $data["heatpump_elec"][$z];
+            
+        if ($elec !== null) {
+            $last_state = $state;
+            
+            if ($elec >= $starting_power) {
+                $state = 1;
+            } else {
+                $state = 0;
+            }
+            
+            if ($last_state===0 && $state===1) {
+                $starts++;
+            }
+            
+            $time_elapsed += $interval;
+        }
+    }
+        
+    $hours = $time_elapsed / 3600;
+    $starts_per_hour = 0;
+    if ($hours>0) {
+        $starts_per_hour = $starts / $hours;
+    }
+    
+    return array(
+        "starts" => $starts,
+        "starts_per_hour"=>$starts_per_hour
+    );
 }
 
 function get_cumulative_kwh($feed,$feedid,$start,$end) {
