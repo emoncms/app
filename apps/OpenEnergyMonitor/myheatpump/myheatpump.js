@@ -748,6 +748,8 @@ function powergraph_process() {
 function carnot_simulator() {
     var simulate_heat_output = $("#carnot_enable")[0].checked;
     var show_as_prc_of_carnot = $("#carnot_enable_prc")[0].checked;
+    
+    var starting_power = parseFloat($("#starting_power").val());
 
     data["heatpump_heat_carnot"] = [];
     data["sim_flow_rate"] = [];
@@ -802,6 +804,9 @@ function carnot_simulator() {
             let sim_flow_rate = null;
 
             if (power != null && carnot_COP != null) {
+            
+                if (power<starting_power) power = 0;
+            
                 practical_carnot_heat = power * carnot_COP * heatpump_factor;
                 ideal_carnot_heat = power * carnot_COP;
 

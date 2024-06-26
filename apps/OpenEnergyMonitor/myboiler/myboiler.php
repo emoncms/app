@@ -199,7 +199,7 @@ global $path, $session, $v;
               <div id="configure_standby_options" style="display:none">
                 <div class="input-prepend input-append" style="margin-top:10px; margin-bottom:0px;">
                   <span class="add-on">Starting power</span>
-                  <input type="text" style="width:50px" id="starting_power" value="10">
+                  <input type="text" style="width:50px" id="starting_heat" value="100">
                   <span class="add-on">W</span>
                 </div>
               </div>
@@ -287,4 +287,4 @@ global $path, $session, $v;
   config.name = "<?php echo $name; ?>";
   config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myboiler/myboiler.js?v=5"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myboiler/myboiler.js?v=8"></script>

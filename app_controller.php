@@ -105,11 +105,97 @@ function app_controller()
         $route->format = "json";
         $app_name = urldecode(get("name",false,false));
         $app = $appconfig->get_app_or_default($userid,$app_name,$public);
+        
         if ($app!=false) {
             return $app;
         } else {
             return array("success"=>false, "message"=>"invalid app or permissions");
         }
+    }
+    else if ($route->action == "getconfigmeta") {
+
+        // enable apikey read access
+        $userid = false;
+        $public = false;
+        $apikey = "";
+        
+        if (isset($session['read']) && $session['read']) {
+            $userid = $session['userid'];
+        } else if (isset($_GET['readkey'])) {
+            $userid = $user->get_id_from_apikey($_GET['readkey']);
+        } else if ($session['public_userid']) {
+            $userid = (int) $session['public_userid'];
+            $public = true;
+        }
+    
+        $route->format = "json";
+        $app_name = urldecode(get("name",false,false));
+        
+        if (!$app = $appconfig->get_app_or_default($userid,$app_name,$public)) {
+            return array("success"=>false, "message"=>"invalid app or permissions");
+        }
+        
+        $result = array();
+        $result["feeds"] = array();
+        
+        $result["start_date"] = 0;
+        
+        if (isset($app->config)) {
+        
+            if (isset($app->config->start_date)) {
+                $result["start_date"] = (int) $app->config->start_date;
+            }
+        
+            $feeds = array(
+                "heatpump_elec",
+                "heatpump_elec_kwh",
+                "heatpump_heat", 
+                "heatpump_heat_kwh", 
+                "heatpump_flowT",
+                "heatpump_returnT",
+                "heatpump_flowrate",
+                "heatpump_roomT",
+                "heatpump_outsideT",
+                "heatpump_dhw",
+                "heatpump_ch",
+                "heatpump_targetT"
+            );
+
+            require_once "Modules/feed/feed_model.php";
+            $feed = new Feed($mysqli,$redis,$settings['feed']);
+
+            foreach ($feeds as $feed_name) {
+                if (isset($app->config->$feed_name)) {
+                    $feedid = (int) $app->config->$feed_name;
+                    
+                    if (!$feedid) continue;
+                    
+                    $feed_meta = array();
+                    $meta = $feed->get_meta($feedid);
+                    
+                    $feed_meta['feedid'] = $feedid;
+                    
+                    if (isset($meta->start_time)) {
+                        $feed_meta['start_time'] = $meta->start_time;
+                    }
+                    
+                    if (isset($meta->end_time)) {
+                        $feed_meta['end_time'] = $meta->end_time;
+                    }
+
+                    if (isset($meta->interval)) {
+                        $feed_meta['interval'] = $meta->interval;
+                    }
+
+                    if (isset($meta->npoints)) {
+                        $feed_meta['npoints'] = $meta->npoints;
+                    }
+                    
+                    $result["feeds"][$feed_name] = $feed_meta;
+                }
+            }
+        }
+        return $result;
     }
     else if ($route->action == "getstats" || $route->action == "getstats2" || $route->action == "getdaily" || $route->action == "datastart") {
 

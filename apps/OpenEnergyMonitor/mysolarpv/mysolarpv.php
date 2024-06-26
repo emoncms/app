@@ -244,6 +244,11 @@ var live_timerange = 0;
 var meta = {};
 var power_graph_end_time = 0;
 
+var storage_type = "balance";            // balance or battery
+var storage_capacity = 0;               // kWh
+var round_trip_efficiency = 0.8;
+var single_trip_efficiency = 1 - ((1 - round_trip_efficiency)/2);
+
 var powerseries = null;
 
 config.init();
@@ -565,8 +570,14 @@ function draw_powergraph() {
             if (balance>=0) total_use_direct_kwh += (use_now*interval)/(1000*3600);
             if (balance<0) total_use_direct_kwh += (solar_now*interval)/(1000*3600);
             
+            
             var store_change = (balance * interval) / (1000*3600);
             store += store_change;
+            
+            if (storage_capacity!=0) {
+                if (store>storage_capacity) store = storage_capacity;
+                if (store<0) store = 0;
+            }
             
             total_solar_kwh += (solar_now*interval)/(1000*3600);
             total_use_kwh += (use_now*interval)/(1000*3600);

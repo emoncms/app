@@ -19,7 +19,7 @@ config.app = {
     "public": { "type": "checkbox", "name": "Public", "default": 0, "optional": true, "description": "Make app public" },
     "boiler_fuel_kwh": { "type": "feed", "autoname": "boiler_fuel_kwh", "description": "Cumulative fuel use kWh" },    
     "boiler_elec": { "type": "feed", "autoname": "boiler_elec", "optional": true, "description": "Electric use in watts" },
-    "boiler_elec_kwh": { "type": "feed", "autoname": "boiler_elec_kwh", "description": "Cumulative electric use kWh" },
+    "boiler_elec_kwh": { "type": "feed", "autoname": "boiler_elec_kwh", "optional": true, "description": "Cumulative electric use kWh" },
     "boiler_heat": { "type": "feed", "autoname": "boiler_heat", "optional": true, "description": "Heat output in watts" },
     "boiler_heat_kwh": { "type": "feed", "autoname": "boiler_heat_kwh", "optional": true, "description": "Cumulative heat output in kWh" },
     "boiler_flowT": { "type": "feed", "autoname": "boiler_flowT", "optional": true, "description": "Flow temperature" },
@@ -254,8 +254,11 @@ function updater() {
         if (elec_enabled) total_elec = feeds["boiler_elec_kwh"].value - boiler_elec_start;
         if (heat_enabled) total_heat = feeds["boiler_heat_kwh"].value - boiler_heat_start;
 
+
+
+
         var total_efficiency = 0;
-        if (total_elec > 0) total_efficiency = total_heat / (total_elec + total_fuel);
+        if (total_fuel > 0) total_efficiency = total_heat / (total_elec + total_fuel);
         if (total_efficiency < 0) total_efficiency = 0;
 
         if (total_fuel < 20) {
@@ -455,7 +458,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
 $('#placeholder').bind("plotclick", function (event, pos, item) {
     if (item && !panning && viewmode == "bargraph") {
         var z = item.dataIndex;
-        view.start = data["boiler_elec_kwhd"][z][0];
+        view.start = data["boiler_heat_kwhd"][z][0];
         view.end = view.start + DAY;
         $(".bargraph-navigation").hide();
         viewmode = "powergraph";
@@ -695,13 +698,13 @@ function process_stats() {
         }
     }
 
-    var starting_power = parseFloat($("#starting_power").val());
+    var starting_heat = parseFloat($("#starting_heat").val());
 
     var dhw_enable = false;
     if (data["boiler_dhw"] != undefined) dhw_enable = true;
 
-    for (var z in data["boiler_elec"]) {
-        let power = data["boiler_elec"][z][1];
+    for (var z in data["boiler_heat"]) {
+        let heat = data["boiler_heat"][z][1];
 
         let dhw = false;
         if (dhw_enable) dhw = data["boiler_dhw"][z][1];
@@ -719,7 +722,7 @@ function process_stats() {
                     stats.combined[key].count++;
                     stats_min_max('combined', key, value);
 
-                    if (power != null && power >= starting_power) {
+                    if (heat != null && heat >= starting_heat) {
                         stats.when_running[key].sum += value;
                         stats.when_running[key].count++;
                         stats_min_max('when_running', key, value);
@@ -792,8 +795,12 @@ function process_stats() {
     }
     
     // Standby energy
-    var standby_kwh = stats['combined']['boiler_elec'].kwh - stats['when_running']['boiler_elec'].kwh;
-    $("#standby_kwh").html(standby_kwh.toFixed(3));
+    if (elec_enabled) {
+        var standby_kwh = stats['combined']['boiler_elec'].kwh - stats['when_running']['boiler_elec'].kwh;
+        $("#standby_kwh").html(standby_kwh.toFixed(3));
+    } else {
+        $("#standby_kwh").html("---");
+    }
 
     if (stats["combined"]["boiler_heat"].kwh!=null) {
         $(".cop_combined").html(stats["combined"]["boiler_heat"].kwh.toFixed(1));
@@ -818,7 +825,11 @@ function process_stats() {
     
     let window_efficiency = "---";
     if (stats["combined"]["boiler_fuel_kwh"].diff>0) {
-        window_efficiency = 100 * stats["combined"]["boiler_heat"].kwh / stats["combined"]["boiler_fuel_kwh"].diff;
+        let boiler_elec = 0; 
+        if (elec_enabled) {
+            boiler_elec = stats['when_running']['boiler_elec'].kwh;
+        }
+        window_efficiency = 100 * stats["combined"]["boiler_heat"].kwh / (stats["combined"]["boiler_fuel_kwh"].diff + boiler_elec);
         window_efficiency = window_efficiency.toFixed(1)+"%";
     }
     
@@ -1033,9 +1044,12 @@ function bargraph_load(start, end) {
         if (heat_enabled && fuel_enabled) {
             if ((end - start) < 120 * DAY) {
                 cop_data = [];
-                for (var z in data["boiler_elec_kwhd"]) {
-                    time = data["boiler_elec_kwhd"][z][0];
-                    elec = data["boiler_elec_kwhd"][z][1];
+                for (var z in data["boiler_heat_kwhd"]) {
+                    time = data["boiler_heat_kwhd"][z][0];
+                    elec = 0;
+                    if (elec_enabled) {
+                        elec = data["boiler_elec_kwhd"][z][1];
+                    }
                     heat = data["boiler_heat_kwhd"][z][1];
                     fuel = data["boiler_fuel_kwhd"][z][1];
                     if (elec && heat && fuel) {
