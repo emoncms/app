@@ -32,13 +32,6 @@ global $path, $session, $v;
                     <button class='btn' id='right'>></button>
                 </div>
 
-                <select id="resolution" class="btn" style="width:100px; margin-top:10px; text-align:left">
-                    <option value="600">10 mins</option>
-                    <option value="900">15 mins</option>
-                    <option value="1800">30 mins</option>
-                    <option value="3600" selected>1 hour</option>
-                </select>
-
                 <button class="btn config-open" style="margin-top:10px">
                     <i class=" icon-wrench"></i>
                 </button>
@@ -317,4 +310,4 @@ global $path, $session, $v;
     var app_config = <?php echo json_encode($config); ?>;
 </script>
 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/storagesim/storagesim.js?v=27"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/storagesim/storagesim.js?v=29"></script>

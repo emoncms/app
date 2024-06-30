@@ -10,7 +10,8 @@ if (!sessionwrite) $(".config-open").hide();
 config.app = {
     "consumption": {
         "type": "feed",
-        "autoname": "use"
+        "autoname": "use",
+        "optional": true
     },
     "solar": {
         "type": "feed",
@@ -59,11 +60,30 @@ var options = {
         clickable: true
     }
 };
-// Janurary 2023 - 1 hour interval
-view.end = (new Date("2023-05-01")).getTime();
-view.start = (new Date("2022-05-01")).getTime();
-view.limit_x = false;
+
 interval = 1800;
+
+
+// Get time now
+var time_now = new Date().getTime();
+
+// Fix to 1st of July 2024
+time_now = (new Date("2024-07-01")).getTime();
+// midnight
+time_now = time_now - (time_now % 86400000);
+
+// Floor to nearest hour
+time_now = time_now - (time_now % (interval * 1000));
+
+// Set view
+view.end = time_now;
+
+// Minus 1 year
+view.start = time_now - 365*24*3600000;
+
+// view.end = (new Date("2023-05-01")).getTime();
+// view.start = (new Date("2022-05-01")).getTime();
+view.limit_x = false;
 
 // Vue app
 var app = new Vue({
@@ -74,7 +94,7 @@ var app = new Vue({
                 name: "UK Wind (normalised)",
                 id: 480172,
                 color: "#00B050",
-                capacity: 1.54, 
+                capacity: 1.47, 
                 kwh: 0, 
                 capacity_factor: 0
             },
@@ -116,7 +136,7 @@ var app = new Vue({
             charge_efficiency: 0.9,
             discharge_max: 3,
             discharge_efficiency: 0.9,
-            capacity: 5,
+            capacity: 10,
             starting_soc: 2.5,
             soc: 0,
             charge_kwh: 0,
@@ -126,11 +146,11 @@ var app = new Vue({
             max_discharge: 0
         },
         store2: {
-            charge_max:0.8,
+            charge_max:1.0,
             charge_efficiency: 0.8,
             discharge_max: 1.6,
             discharge_efficiency: 0.5,
-            capacity: 1200,
+            capacity: 700,
             starting_soc: 100,
             soc: 0,
             charge_kwh: 0,
@@ -166,6 +186,18 @@ config.init();
 
 function load(){
     
+    if (config.app.consumption.value!="disable" && parseInt(config.app.consumption.value)>0) {
+        feed_data["consumption"] = feed.getdata(config.app.consumption.value,view.start,view.end,interval,1,0,0,0,false,false,'notime');
+    } else {
+        feed_data["consumption"] = undefined;
+    }
+
+    if (config.app.solar.value!="disable" && parseInt(config.app.solar.value)>0) {
+        feed_data["home_solar"] = feed.getdata(config.app.solar.value,view.start,view.end,interval,1,0,0,0,false,false,'notime');
+    } else {
+        feed_data["home_solar"] = undefined;
+    }
+
     // Specify generation feeds
     var ids = [];
     var keys = [];
@@ -173,63 +205,20 @@ function load(){
         ids.push(app.generation[key].id);
         keys.push(key);
     }
-    // Consumption feed
-    ids.push(476422);
-    keys.push("consumption");
-    
-    var start_date = new Date("2022-05-01");
 
-    // Initialise feed_data object
+    // If no user specified consumption feed
+    // Use normalised aggregated electric consumption example from heatpumpmonitor.org
+    if (feed_data["consumption"]==undefined) {
+        // 476422::normalised_aggregated_electric_consumption 
+        // https://emoncms.org/heatpumpmonitororg/graph/476422
+        ids.push(476422);
+        keys.push("consumption");    
+    }
+
+    var result = remote.getdata(ids,view.start,view.end,interval,1,0,0,0,'notime',false,false);
     for (var z in keys) {
-        feed_data[keys[z]] = [];
+        feed_data[keys[z]] = result[z].data;
     }
-    feed_data["consumption"] = [];
-    feed_data["home_solar"] = [];
-
-    // Load remote data in 1 month chunks
-    for (var i=0; i<4; i++) {
-        start_time = start_date.getTime();
-        end_time = start_date.setMonth(start_date.getMonth()+3);
-        
-        var month = remote.getdata(ids,start_time,end_time,interval,1,0,0,0,'notime',false,false);
-        // Add data to feed_data object
-        for (var z in keys) {
-            // append array to array
-            for (var j in month[z].data) {
-                feed_data[keys[z]].push(month[z].data[j]);
-            }
-        }
-    }
-/*
-    if (config.app.consumption.value!="disable" && parseInt(config.app.consumption.value)>0) {
-        start_date = new Date("2022-05-01");
-        // Load local data in 1 month chunks
-        for (var i=0; i<1; i++) {
-            start_time = start_date.getTime();
-            end_time = start_date.setMonth(start_date.getMonth()+12);
-            var month = feed.getdata(config.app.consumption.value,start_time,end_time,interval,1,0,0,0,false,false,'notime');
-            for (var j in month) {
-                feed_data["consumption"].push(month[j]);
-            }
-        }
-    } else {
-        feed_data["consumption"] = undefined;
-    }*/
-
-    if (config.app.solar.value!="disable" && parseInt(config.app.solar.value)>0) {
-        start_date = new Date("2022-05-01");
-        // Load local data in 1 month chunks
-        for (var i=0; i<4; i++) {
-            start_time = start_date.getTime();
-            end_time = start_date.setMonth(start_date.getMonth()+3);
-            var month = feed.getdata(config.app.solar.value,start_time,end_time,interval,1,0,0,0,false,false,'notime');
-            for (var j in month) {
-                feed_data["home_solar"].push(month[j]);
-            }
-        }
-    } else {
-        feed_data["home_solar"] = undefined;
-    }    
 
     model();
 }
