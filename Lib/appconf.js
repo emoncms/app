@@ -346,19 +346,25 @@ var config = {
 
     load: function()
     {
+        var auto_conf_to_save = false;
+        
         for (var key in config.app) {
             
             if (config.app[key].type=="feed") {
                 config.app[key].value = false;
                 
-                // Check if feeds match naming convention
-                var autoname = config.app[key].autoname;
-                if (config.feedsbyname[autoname]!=undefined) {
-                    config.app[key].value = config.feedsbyname[autoname].id;
-                }
+
                 // Overwrite with any user set feeds if applicable
                 if (config.db[key]!=undefined) {
                     config.app[key].value = config.db[key];
+                } else {
+                    // Check if feeds match naming convention
+                    var autoname = config.app[key].autoname;
+                    if (config.feedsbyname[autoname]!=undefined) {
+                        config.app[key].value = config.feedsbyname[autoname].id;
+                        config.db[key] = config.feedsbyname[autoname].id;
+                        auto_conf_to_save = true;
+                    }
                 }
             }
             
@@ -385,6 +391,10 @@ var config = {
                     config.app[key].value = config.app[key].default;
                 }
             }
+        }
+        
+        if (auto_conf_to_save) {
+            config.set();
         }
         
         return config.app;

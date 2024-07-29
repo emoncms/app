@@ -16,7 +16,7 @@ function app_controller()
 {
     global $mysqli,$redis,$path,$session,$route,$user,$settings,$v;
     // Force cache reload of css and javascript
-    $v = 29;
+    $v = 30;
 
     $result = false;
     
