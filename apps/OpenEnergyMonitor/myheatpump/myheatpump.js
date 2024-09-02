@@ -29,6 +29,7 @@ config.app = {
     "heatpump_flowrate": { "type": "feed", "autoname": "heatpump_flowrate", "optional": true, "description": "Flow rate" },
     "heatpump_dhw": { "type": "feed", "autoname": "heatpump_dhw", "optional": true, "description": "Status of Hot Water circuit (non-zero when running)" },
     "heatpump_ch": { "type": "feed", "autoname": "heatpump_ch", "optional": true, "description": "Status of Central Heating circuit (non-zero when running)" },
+    "heatpump_error": { "type": "feed", "autoname": "heatpump_error", "optional": true, "description": "Axioma heat meter error state" },
     "start_date": { "type": "value", "default": 0, "name": "Start date", "description": _("Start date for all time values (unix timestamp)") },
 };
 config.feeds = feed.list();
@@ -439,6 +440,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 else if (item.series.label == "TargetT") { name = "Target"; unit = "°C"; dp = 1; }
                 else if (item.series.label == "DHW") { name = "Hot Water"; unit = ""; dp = 0; }
                 else if (item.series.label == "CH") { name = "Central Heating"; unit = ""; dp = 0; }
+                else if (item.series.label == "Error") { name = "Heat meter air error"; unit = ""; dp = 0; }
                 else if (item.series.label == "Electric") { name = "Elec"; unit = "W"; }
                 else if (item.series.label == "Heat") { name = "Heat"; unit = "W"; }
                 else if (item.series.label == "Carnot Heat") { name = "Carnot Heat"; unit = "W"; }
@@ -641,6 +643,7 @@ function powergraph_load() {
     var feeds_to_load = {
         "heatpump_dhw": { label: "DHW", yaxis: 4, color: "#88F", lines: { lineWidth: 0, show: true, fill: 0.15 } },
         "heatpump_ch": { label: "CH", yaxis: 4, color: "#FB6", lines: { lineWidth: 0, show: true, fill: 0.15 } },
+        "heatpump_error": { label: "Error", yaxis: 4, color: "#F00", lines: { lineWidth: 0, show: true, fill: 0.15 } },
         "heatpump_targetT": { label: "TargetT", yaxis: 2, color: "#ccc" },
         "heatpump_flowT": { label: "FlowT", yaxis: 2, color: 2 },
         "heatpump_returnT": { label: "ReturnT", yaxis: 2, color: 3 },
@@ -682,6 +685,9 @@ function powergraph_load() {
         } else {
             $("#fixed_outside_temperature_bound").show();
         }
+
+        // Process axioma heat meter error data
+        process_error_data();
 
         powergraph_process();
     }, false, "notime");
@@ -1281,6 +1287,22 @@ function compressor_starts() {
     var starts_per_hour = 0;
     if (hours>0) starts_per_hour = starts / hours;
     console.log("Starts: "+starts+", Starts per hour: "+starts_per_hour.toFixed(1)+", Hours: "+hours.toFixed(1));
+}
+
+function process_error_data() {
+    if (data["heatpump_error"] != undefined) {
+        // Axioma heat meter error codes:
+        // 1024: No flow
+        // 67108864: < 3C delta T (ignore, this is often the case)
+
+        // translate 1024  = 1, everything else = 0
+        for (var z in data["heatpump_error"]) {
+            let time = data["heatpump_error"][z][0];
+            let error = data["heatpump_error"][z][1];
+            if (error == 1024) data["heatpump_error"][z] = [time, 1];
+            else data["heatpump_error"][z] = [time, 0];
+        }
+    }
 }
 
 // -------------------------------------------------------------------------------
