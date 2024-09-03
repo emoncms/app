@@ -17,6 +17,7 @@ class AppConfig
     private $mysqli;
     private $settings;
     private $available;
+    private $app_table_exists = true;
 
     public function __construct($mysqli, $settings)
     {
@@ -25,8 +26,12 @@ class AppConfig
         
         $this->available = $this->load_available();
 
-        if ($this->if_pre_v2_9()) {
-            $this->migrate_v2_9();
+        if (!$this->app_table_exists()) {
+            $this->app_table_exists = false;
+        } else {
+            if ($this->if_pre_v2_9()) {
+                $this->migrate_v2_9();
+            }
         }
     }
 
@@ -90,6 +95,10 @@ class AppConfig
     public function get_list($userid) 
     {
         $userid = (int) $userid;
+
+        if (!$this->app_table_exists) {
+            return array();
+        }
 
         $apps = array();
         $result = $this->mysqli->query("SELECT `id`, `app`, `name`, `public` FROM app WHERE `userid`='$userid'");
@@ -373,6 +382,16 @@ class AppConfig
     // ----------------------------------------------------------------------------------------------
     // Migrate app config to new format
     // ----------------------------------------------------------------------------------------------
+    private function app_table_exists() {
+        // check if app table exists
+        $result = $this->mysqli->query("SHOW TABLES LIKE 'app'");
+        // if it does not return false
+        if ($result->num_rows==0) {
+            return false;
+        }
+        return true;
+    }
+
     private function if_pre_v2_9() {
         // is app_config table empty?
         $result = $this->mysqli->query("SELECT `userid` FROM app_config");
@@ -427,6 +446,7 @@ class AppConfig
             // Delete old app_config entry
             $this->mysqli->query("DELETE FROM app_config WHERE `userid`='$userid'");
         }
+        return true;
     }
 }
 
