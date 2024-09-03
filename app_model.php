@@ -24,7 +24,10 @@ class AppConfig
         $this->settings = $settings;
         
         $this->available = $this->load_available();
-        
+
+        if ($this->if_pre_v2_9()) {
+            $this->migrate_v2_9();
+        }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -83,95 +86,249 @@ class AppConfig
         return false;
     }
 
-    // ----------------------------------------------------------------------------------------------
     // Get user app list
-    // ----------------------------------------------------------------------------------------------
     public function get_list($userid) 
     {
         $userid = (int) $userid;
-        return $this->get($userid);
+
+        $apps = array();
+        $result = $this->mysqli->query("SELECT `id`, `app`, `name`, `public` FROM app WHERE `userid`='$userid'");
+        while ($row = $result->fetch_object()) {
+            $apps[] = $row;
+        }
+        return $apps;
     }
     
-    public function get_app_or_default($userid,$app_name,$public) {
+    /** 
+     * Get app by name or default
+     * 
+     * @param int $userid User ID
+     * @param string $app_name App name
+     * @param bool $context_public Context public
+     * @return object App object or false
+     */ 
+    public function get_app_or_default($userid,$app_name,$context_public) {
+
+        $userid = (int) $userid;
         $applist = $this->get_list($userid);
 
-        // If no app specified find one to load
-        if (!isset($applist->$app_name)) {
-            foreach (array_keys((array) $applist) as $key) { 
-                if ($public) {
-                    if (isset($applist->$key->config->public) && $applist->$key->config->public) {
-                        $app_name = $key; break;
-                    }
-                } else {
-                    $app_name = $key; break;
-                }
+        // TRY TO FIND APP BY NAME
+        foreach ($applist as $appitem) {
+            if ($appitem->name == $app_name) {
+                // If context is public and app is not public, break out of loop
+                if ($context_public && !$appitem->public) break;
+                // else return the app
+                return $this->get_app_by_id($userid, $appitem->id);
             }
         }
-        
-        if (!isset($applist->$app_name)) return false;
-        
-        $app_id = $applist->$app_name->app;
-        if (!isset($this->available[$app_id])) return false;
-        
-        if ($public) {
-            if (!isset($applist->$app_name->config->public) || !$applist->$app_name->config->public) {
-                return false;
-            }
+
+        // DEFAULT APP
+        // If app not found in user app list, return default app
+        foreach ($applist as $appitem) {
+            // If context is public and app is not public, skip to next app
+            if ($context_public && !$appitem->public) continue;
+            // else return the app
+            return $this->get_app_by_id($userid, $appitem->id);
         }
-        
-        return $applist->$app_name;
+
+        return false;
     }
 
-    // ----------------------------------------------------------------------------------------------
-    // Add a new app to the user app list
-    // ----------------------------------------------------------------------------------------------
-    public function add($userid,$app,$name) 
+    /**
+     * Get app by id
+     * 
+     * @param int $userid User ID
+     * @param int $id App id
+     */
+    public function get_app_by_id($userid, $id) {
+        $userid = (int) $userid;
+        $id = (int) $id;
+
+        $result = $this->mysqli->query("SELECT `id`, `app`, `name`, `public`, `config` FROM app WHERE `userid`='$userid' AND `id`='$id'");
+        if ($result && $row = $result->fetch_object()) {
+            $row->config = json_decode($row->config);
+            return $row;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Check if app exists
+     * 
+     * @param int $userid User ID
+     * @param string $name App name
+     * @return bool id or false
+     */
+    public function app_exists_by_name($userid, $name) {
+        $stmt = $this->mysqli->prepare("SELECT `id` FROM app WHERE `userid`=? AND `name`=?");
+        $stmt->bind_param("is", $userid, $name);
+        $stmt->execute();
+
+        // return id or false
+        $stmt->store_result();
+        $stmt->bind_result($id);
+        if ($stmt->fetch()) {
+            $stmt->close();
+            return $id;
+        } else {
+            $stmt->close();
+            return false;
+        }
+    }
+
+    /**
+     * Check if app exists by id
+     * 
+     * @param int $userid User ID
+     * @param int $id App id
+     * @return bool id or false
+     */
+    public function app_exists_by_id($userid, $id) {
+        $userid = (int) $userid;
+        $id = (int) $id;
+
+        $result = $this->mysqli->query("SELECT `id` FROM app WHERE `userid`='$userid' AND `id`='$id'");
+        if ($result && $row = $result->fetch_object()) {
+            return $row->id;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Add new app to app table
+     *
+     * @param int $userid User ID
+     * @param string $app App identifier
+     * @param string $name App name
+     * @return array Success status and message
+     */
+    public function add($userid,$app,$name)
     {
         $userid = (int) $userid;
         if (preg_replace('/[^\p{N}\p{L}]/u','',$app)!=$app) return array('success'=>false, "message"=>"Invalid app"); 
-        if (preg_replace('/[^\p{N}\p{L}_\s\-:]/u','',$name)!=$name) return array('success'=>false, "message"=>"Invalid app name"); 
-        
-        // Load config from database
-        $applist = $this->get($userid);
-        if (isset($applist->$name)) return array('success'=>false, "message"=>"App already exist with name $name");
-        
-        // Add new app to config
-        $applist->$name = new stdClass();
-        $applist->$name->app = $app;
-        $applist->$name->config = new stdClass();
-
-        // Save        
-        if (!$this->set($userid,$applist)) return array('success'=>false, 'message'=>"Error on app_config update");
-        return array('success'=>true);
-    }
-    
-    // ----------------------------------------------------------------------------------------------
-    // Remove app from user app list
-    // ----------------------------------------------------------------------------------------------
-    public function remove($userid,$name) 
-    {
-        $userid = (int) $userid;
-        if (preg_replace('/[^\p{N}\p{L}_\s\-:]/u','',$name)!=$name) return array('success'=>false, "message"=>"Invalid app name"); 
-        
-        // Load config from database
-        $applist = $this->get($userid);
-        if (!isset($applist->$name)) return array('success'=>false, "message"=>"App does not exist with name $name");
-        
-        // Delete the app
-        unset($applist->$name);
-
-        // Save
-        if (!$this->set($userid,$applist)) return array('success'=>false, 'message'=>"Error on app_config update");
-        return array('success'=>true);
-    }
-    
-    // ----------------------------------------------------------------------------------------------
-    // Set config off a particular app in the user app list
-    // ----------------------------------------------------------------------------------------------    
-    public function set_config($userid,$name,$config) 
-    {
-        $userid = (int) $userid;
         if (preg_replace('/[^\p{N}\p{L}_\s\-:]/u','',$name)!=$name) return array('success'=>false, "message"=>"Invalid app name");
+        
+        if ($this->app_exists_by_name($userid, $name)) {
+            return array('success'=>false, "message"=>"App already exist with name $name");
+        }
+
+        // Add new app to app table
+        $stmt = $this->mysqli->prepare("INSERT INTO app (`userid`, `app`, `name`, `public`, `config`) VALUES (?,?,?,0,'{}')");
+        $stmt->bind_param("iss", $userid, $app, $name);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            return array('success'=>false, 'message'=>"Error on app insert");
+        }
+
+        // Get the ID of the newly inserted row
+        $id = $this->mysqli->insert_id;
+        $stmt->close();
+
+        return array('success' => true, 'id' => $id);
+    }
+    
+    /**
+     * Remove app from app table
+     * 
+     * @param int $userid User ID
+     * @param int $name App id
+     * @return array Success status and message
+     */
+    public function remove($userid,$app_id) 
+    {
+        $userid = (int) $userid;
+        $id = (int) $app_id;
+
+        if (!$this->app_exists_by_id($userid, $id)) {
+            return array('success'=>false, "message"=>"App does not exist with id $id");
+        }
+
+        // Remove app by id from app table
+        $this->mysqli->query("DELETE FROM app WHERE `userid`='$userid' AND `id`='$id'");
+        
+        return array('success'=>true);
+    }
+
+    /**
+     * Set app name
+     * 
+     * @param int $userid User ID
+     * @param int $id App id
+     * @param string $name App name
+     * @return array Success status and message
+     */
+    public function set_name($userid,$id,$name)
+    {
+        $userid = (int) $userid;
+        $id = (int) $id;
+        if (preg_replace('/[^\p{N}\p{L}_\s\-:]/u','',$name)!=$name) return array('success'=>false, "message"=>"Invalid app name");
+
+        if (!$this->app_exists_by_id($userid, $id)) {
+            return array('success'=>false, "message"=>"App does not exist with id $id");
+        }
+
+        // Set app name
+        $stmt = $this->mysqli->prepare("UPDATE app SET `name`=? WHERE `userid`=? AND `id`=?");
+        $stmt->bind_param("sii", $name, $userid, $id);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            return array('success'=>false, "message"=>"Error saving name");
+        }
+        $stmt->close();
+        
+        return array('success'=>true);
+    }
+
+    /**
+     * Set app public status
+     * 
+     * @param int $userid User ID
+     * @param int $id App id
+     * @param bool $public Public status
+     * @return array Success status and message
+     */
+    public function set_public($userid,$id,$public)
+    {
+        $userid = (int) $userid;
+        $id = (int) $id;
+        $public = (int) $public;
+
+        if (!$this->app_exists_by_id($userid, $id)) {
+            return array('success'=>false, "message"=>"App does not exist with id $id");
+        }
+
+        // Set app public status
+        $stmt = $this->mysqli->prepare("UPDATE app SET `public`=? WHERE `userid`=? AND `id`=?");
+        $stmt->bind_param("iii", $public, $userid, $id);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            return array('success'=>false, "message"=>"Error saving public status");
+        }
+        $stmt->close();
+        
+        return array('success'=>true);
+    }
+    
+    /**
+     * Set config for a particular app in the user app list
+     *  
+     * @param int $userid User ID
+     * @param int $id App id
+     * @param string $config JSON encoded config
+     * @return array Success status and message
+     */
+    public function set_config($userid,$id,$config) 
+    {
+        $userid = (int) $userid;
+        $id = (int) $id;
+
+        if (!$this->app_exists_by_id($userid, $id)) {
+            return array('success'=>false, "message"=>"App does not exist with id $id");
+        } 
+
+        // if (preg_replace('/[^\p{N}\p{L}_\s\-:]/u','',$name)!=$name) return array('success'=>false, "message"=>"Invalid app name");
         // Config sanitisation 
         $config = json_decode($config);
         if (!$config || $config===null) return array('success'=>false, "message"=>"Could not parse json");
@@ -199,94 +356,76 @@ class AppConfig
 
             if (preg_replace("/[^\pSc\pL\pP\pN\W]/u",'',strip_tags($value))!=$value) return array('success'=>false, "message"=>"Invalid config value");
         }
+
+        // Save config
+        $config = json_encode($config);
+        $stmt = $this->mysqli->prepare("UPDATE app SET `config`=? WHERE `userid`=? AND `id`=?");
+        $stmt->bind_param("sii", $config, $userid, $id);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            return array('success'=>false, "message"=>"Error saving config");
+        }
+        $stmt->close();
         
-        // Load config from database
-        $applist = $this->get($userid);
-        if (!isset($applist->$name)) return array('success'=>false, "message"=>"App does not exist with name $name");
-        
-        // Update the applist object with the configuration
-        $applist->$name->config = $config;
-        
-        // Save
-        if (!$this->set($userid,$applist)) return array('success'=>false, 'message'=>"Error on app_config update");
         return array('success'=>true);
     }
 
     // ----------------------------------------------------------------------------------------------
-    // Get the config off a particular app in the user app list
-    // ----------------------------------------------------------------------------------------------     
-    public function get_config($userid,$name) 
-    {
-        $userid = (int) $userid;
-        if ($name && preg_replace('/[^\p{N}\p{L}_\s\-:]/u','',$name)!=$name) return array('success'=>false, "message"=>"Invalid app name");
-        
-        $applist = $this->get($userid);
-        if (!isset($applist->$name)) return array('success'=>false, "message"=>"App does not exist with name $name");
-        
-        return $applist->$name->config;
-    }
-    
+    // Migrate app config to new format
     // ----------------------------------------------------------------------------------------------
-    // Private app config database entry set method
-    // ---------------------------------------------------------------------------------------------- 
-    private function set($userid,$applist) 
-    {
-        // Re-encode for storage in db text field
-        $json = json_encode($applist);
-        
-        // Alternative to json_encode($outdata,JSON_UNESCAPED_UNICODE), for php 5.3 support
-        $json = preg_replace_callback('/\\\\u(\w{4})/', function ($matches) {
-            return html_entity_decode('&#x' . $matches[1] . ';', ENT_COMPAT, 'UTF-8');
-        }, $json);
-        
-        // Update database entry if it exists otherwise insert a new entry
-        $result = $this->mysqli->query("SELECT `userid` FROM app_config WHERE `userid`='$userid'");
+    private function if_pre_v2_9() {
+        // is app_config table empty?
+        $result = $this->mysqli->query("SELECT `userid` FROM app_config");
         if ($result->num_rows) {
-        
-            $stmt = $this->mysqli->prepare("UPDATE app_config SET `data`=? WHERE `userid`=?");
-            $stmt->bind_param("si", $json, $userid);
-            if (!$stmt->execute()) {
-                return false;
-            }
-            return true;
-            
-        } else {
-            $stmt = $this->mysqli->prepare("INSERT INTO app_config (`userid`,`data`) VALUES (?,?)");
-            $stmt->bind_param("is", $userid,$json);
-            if (!$stmt->execute()) {
-                return false;
-            }
             return true;
         }
+        return false;
     }
-    
-    // ----------------------------------------------------------------------------------------------
-    // Private app config database entry get method
-    // ---------------------------------------------------------------------------------------------- 
-    private function get($userid) 
-    {
-        $result = $this->mysqli->query("SELECT `data` FROM app_config WHERE `userid`='$userid'");
-        if ($result && $row = $result->fetch_object()) {
+
+    private function migrate_v2_9() {
+
+        // For each entry in the app_config table migrate the data to the new app table format
+        // old: userid, data
+        // new: app id, userid, name, config
+
+        $result = $this->mysqli->query("SELECT `userid`, `data` FROM app_config");
+        while ($row = $result->fetch_object()) {
             $applist = json_decode($row->data);
             if (gettype($applist)=="array" || $applist===null) $applist = new stdClass();
-        } else {
-            $applist = new stdClass();
-        }
-        
-        // App list config migration
-        foreach ($applist as $name=>$appitem) {
-            if (!isset($applist->$name->config)) {
-                if (isset($this->available_apps[$name])) {
-                    $applist->$name = new stdClass();
-                    $applist->$name->app = $name;
-                    $applist->$name->config = $appitem;
+
+            foreach ($applist as $name=>$appitem) {
+                $app = $appitem->app;
+                // print "Migrating app $name : $app for userid $row->userid\n";
+
+                // Check if app exists with this name in app table
+                $result = $this->mysqli->query("SELECT `id` FROM app WHERE `userid`='$row->userid' AND `name`='$name'");
+                if ($result->num_rows) {
+                    // App already exists (this should not happen)
+                    // print "App already exists\n";
                 } else {
-                    unset($applist->$name);
+
+                    // Copy app to app table
+                    if (isset($appitem->config)) {
+                        $config = json_encode($appitem->config);
+                    } else {
+                        $config = "{}";
+                    }
+
+                    // Moving config field to field in app table
+                    $public = 0;
+                    if (isset($appitem->config->public) && $appitem->config->public) {
+                        $public = 1;
+                    }
+
+                    $stmt = $this->mysqli->prepare("INSERT INTO app (`userid`, `app`, `name`, `public`, `config`) VALUES (?,?,?,?,?)");
+                    $stmt->bind_param("issis", $userid, $app, $name, $public, $config);
+                    $stmt->execute();
                 }
             }
+
+            // Delete old app_config entry
+            $this->mysqli->query("DELETE FROM app_config WHERE `userid`='$row->userid'");
         }
-        
-        return $applist;
     }
 }
 

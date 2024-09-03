@@ -392,11 +392,12 @@ config.app = {
     "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description": "Display power as kW"},
     "battery_capacity_kwh":{"type":"value", "default":0, "name":"Battery Capacity", "description":"Battery capacity in kWh"},
     
-    "is_dc_battery":{"type":"checkbox", "name": "DC Battery", "default": 0, "optional":true, "description":"Is the Battery on the DC side?"},
-
-    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
+    "is_dc_battery":{"type":"checkbox", "name": "DC Battery", "default": 0, "optional":true, "description":"Is the Battery on the DC side?"}
     }
+
+config.id = <?php echo $id; ?>;
 config.name = "<?php echo $name; ?>";
+config.public = <?php echo $public; ?>;
 config.db = <?php echo json_encode($config); ?>;
 config.feeds = feed.list();
 

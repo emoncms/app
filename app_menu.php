@@ -31,17 +31,17 @@ if ($session["read"] || $session["public_userid"]) {
         $applist = $appconfig->get_list($userid);
         
         $_i = 0;
-        foreach ($applist as $name=>$appitem) {
+        foreach ($applist as $appitem) {
             $item = array(
-                "name"=>$name,
-                "href"=>"app/view?name=".urlencode($name).$apikey_str,
+                "name"=>$appitem->name,
+                "href"=>"app/view?name=".urlencode($appitem->name).$apikey_str,
                 "icon"=>"star_border", 
                 "order"=>$_i
             );
             if ($session['public_userid']) {
                 $item['href'] = $session['public_username']."/".$item["href"];   
                 // Only show app if public       
-                if (isset($appitem->config->public) && $appitem->config->public) {
+                if (isset($appitem->public) && $appitem->public) {
                     $l2["$_i"] = $item;
                     $_i++;
                 }

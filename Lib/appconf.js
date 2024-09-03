@@ -2,6 +2,7 @@ var config = {
 
     initialized: false,
 
+    id: false,
     name: "",
     db: {},
     app: {},
@@ -57,10 +58,10 @@ var config = {
         });
 
         $("body").on("click",".app-delete",function(){
-            console.log("delete: "+config.name);
+            console.log("delete: "+config.id);
             $.ajax({ 
                 url: path+"app/remove", 
-                data: "name="+config.name,
+                data: "id="+config.id,
                 dataType: 'text',
                 async: false, 
                 success: function(result){
@@ -119,6 +120,23 @@ var config = {
 
         // Draw the config interface from the config object:
         var out = "";
+
+        // Option to set app name
+        out += "<div class='app-config-box'>";
+        out += "<i class='status icon-ok-sign icon-app-config'></i> <b>App name (menu)</b>";
+        out += "<br><span class='app-config-info'></span>";
+        out += "<input class='app-config-name' type='text' key='"+z+"' value='"+config.name+"' / >";
+        out += "</div>";
+        // Option to set public or private
+        out += "<div class='app-config-box'>";
+        out += "<i class='status icon-ok-sign icon-app-config'></i> <b>Public</b>";
+        out += "<br><span class='app-config-info'>Make app public</span>";
+        var checked = ""; if (config.public) checked = "checked";
+        out += " <input class='app-config-public' type='checkbox' style='margin-top:-2px' "+checked+" / >";
+        out += "</div>";
+        
+        out += "<br>";
+
         for (var z in config.app) {
             out += "<div class='app-config-box' key='"+z+"'>";
             if (config.app[z].type=="feed") {
@@ -303,6 +321,20 @@ var config = {
             config.db[key] = value;
             config.set();
         });
+
+        $(".app-config-name").unbind("change");
+        $(".app-config-name").change(function(){
+            var value = $(this).val();
+            config.name = value;
+            config.set_name();
+        });
+
+        $(".app-config-public").unbind("change");
+        $(".app-config-public").change(function(){
+            var value = $(this)[0].checked;
+            config.public = 1*value;
+            config.set_public();
+        });
     },
 
     check: function()
@@ -422,7 +454,7 @@ var config = {
     {   
         $.ajax({ 
             url: path+"app/setconfig", 
-            data: "name="+config.name+"&config="+JSON.stringify(config.db),
+            data: "id="+config.id+"&config="+JSON.stringify(config.db),
             dataType: 'text',
             async: false, 
             success: function(result){
@@ -432,6 +464,50 @@ var config = {
                 } catch (e) {
                     try {
                         app.log("ERROR","Could not parse /setconfig reply, error: "+e);
+                    } catch (e2) {
+                        console.log(e,e2);
+                    }
+                }
+            } 
+        });
+    },
+
+    set_name: function()
+    {   
+        $.ajax({ 
+            url: path+"app/setname", 
+            data: "id="+config.id+"&name="+config.name,
+            dataType: 'text',
+            async: false, 
+            success: function(result){
+                try {
+                    result = JSON.parse(result);
+                    if (result.success != undefined && !result.success) appLog("ERROR", result.message);
+                } catch (e) {
+                    try {
+                        app.log("ERROR","Could not parse /setname reply, error: "+e);
+                    } catch (e2) {
+                        console.log(e,e2);
+                    }
+                }
+            } 
+        });
+    },
+
+    set_public: function()
+    {   
+        $.ajax({ 
+            url: path+"app/setpublic", 
+            data: "id="+config.id+"&public="+config.public,
+            dataType: 'text',
+            async: false, 
+            success: function(result){
+                try {
+                    result = JSON.parse(result);
+                    if (result.success != undefined && !result.success) appLog("ERROR", result.message);
+                } catch (e) {
+                    try {
+                        app.log("ERROR","Could not parse /setpublic reply, error: "+e);
                     } catch (e2) {
                         console.log(e,e2);
                     }

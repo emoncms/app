@@ -152,11 +152,14 @@ config.app = {
     "default": "10.00",
     "name": "Max currency value",
     "description": "Maximum daily amount to show on currency axis (default of 10.00)"
-    },
-    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
+    }
 };
+
+config.id = <?php echo $id; ?>;
 config.name = "<?php echo $name; ?>";
+config.public = <?php echo $public; ?>;
 config.db = <?php echo json_encode($config); ?>;
+
 config.feeds = feed.list();
 
 config.initapp = function() {

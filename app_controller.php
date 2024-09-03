@@ -16,7 +16,7 @@ function app_controller()
 {
     global $mysqli,$redis,$path,$session,$route,$user,$settings,$v;
     // Force cache reload of css and javascript
-    $v = 30;
+    $v = 35;
 
     $result = false;
 
@@ -45,10 +45,24 @@ function app_controller()
         $route->format = "json";
         return $appconfig->get_list($session['userid']);
     }
+
+    // List of available apps json
     else if ($route->action == "available" && $session['read']) {
         $route->format = "json";
         return $appconfig->get_available();
     }
+
+    // List of available apps view
+    else if ($route->action == "new" && $session['write']) {
+        $applist = $appconfig->get_list($session['userid']);
+        $route->format = "html";
+        $result .= "<link href='".$path."Modules/app/Views/css/app.css?v=".$v."' rel='stylesheet'>";
+        $appavail = $appconfig->get_available();
+        $result .= view("Modules/app/Views/app_view.php", array("apps"=>$appavail));
+        return $result;
+    }
+
+    // Add and remove apps
     else if ($route->action == "add" && $session['write']) {
         $route->format = "json";
         $appname = get("app");
@@ -59,22 +73,27 @@ function app_controller()
             return "Invalid app";
         }
     }
-    else if ($route->action == "new" && $session['write']) {
-        $applist = $appconfig->get_list($session['userid']);
-        $route->format = "html";
-        $result .= "<link href='".$path."Modules/app/Views/css/app.css?v=".$v."' rel='stylesheet'>";
-        $appavail = $appconfig->get_available();
-        $result .= view("Modules/app/Views/app_view.php", array("apps"=>$appavail));
-        return $result;
-    }
     else if ($route->action == "remove" && $session['write']) {
         $route->format = "json";
-        return $appconfig->remove($session['userid'],get("name"));
+        return $appconfig->remove($session['userid'],get("id"));
+    }
+
+    // Update app name, public flag or config
+    else if ($route->action == "setname" && $session['write']) {
+        $route->format = "json";
+        return $appconfig->set_name($session['userid'],get('id'),get('name'));
+    }
+    else if ($route->action == "setpublic" && $session['write']) {
+        $route->format = "json";
+        return $appconfig->set_public($session['userid'],get('id'),get('public'));
     }
     else if ($route->action == "setconfig" && $session['write']) {
         $route->format = "json";
-        return $appconfig->set_config($session['userid'],get('name'),get('config'));    
+        return $appconfig->set_config($session['userid'],get('id'),get('config'));    
     }
+
+    // --------------------------------------------------------------
+
     else if ($route->action == "octopus-feed-list") {
         $route->format = "json";
         return json_decode(file_get_contents("http://emoncms.org/octopus/feed/list.json"));
@@ -169,7 +188,6 @@ function app_controller()
             $app_name = urldecode(get("name",false,false));
         }
         $app = $appconfig->get_app_or_default($userid,$app_name,$public);
-        $app->name = $app_name;
     }
 
     if (!$app) {
@@ -198,7 +216,14 @@ function app_controller()
         $result .= "\n\n <!-- app specific view -->\n";
 
         $dir = $appconfig->get_app_dir($app->app);
-        $result .= view($dir.$app->app.".php",array("name"=>$app_name, "appdir"=>$dir, "config"=>$app->config, "apikey"=>$apikey));
+        $result .= view($dir.$app->app.".php",array(
+            "id"=>$app->id,
+            "name"=>$app_name,
+            "public"=>$app->public,
+            "appdir"=>$dir, 
+            "config"=>$app->config, 
+            "apikey"=>$apikey
+        ));
         return $result;
     }
     else if ($route->action == "getconfig") {

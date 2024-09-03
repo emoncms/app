@@ -367,7 +367,10 @@ config.app = {
     //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
     "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
 }
+
+config.id = <?php echo $id; ?>;
 config.name = "<?php echo $name; ?>";
+config.public = <?php echo $public; ?>;
 config.db = <?php echo json_encode($config); ?>;
 config.feeds = feed.list();
 

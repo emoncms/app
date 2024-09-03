@@ -13,10 +13,7 @@ config.app = {
         "description": "House or building use in watts"
     }
 };
-// Name of the app
-config.name = app_name;
-// User configuration from database
-config.db = app_config;
+
 // Fetch user feed list
 config.feeds = feed.list();
 

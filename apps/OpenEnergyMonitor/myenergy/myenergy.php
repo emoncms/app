@@ -150,10 +150,12 @@ config.app = {
     "use":{"type":"feed", "autoname":"use", "description":_("House or building use in watts")},
     "solar":{"optional":true, "type":"feed", "autoname":"solar", "description":_("Solar pv generation in watts")},
     "windkwh":{"type":"value", "default":2000, "name": "kWh Wind", "description":_("kWh of wind energy bought annually")},
-    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")},
-    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
 };
+
+config.id = <?php echo $id; ?>;
 config.name = "<?php echo $name; ?>";
+config.public = <?php echo $public; ?>;
 config.db = <?php echo json_encode($config); ?>;
 config.feeds = feed.list();
 

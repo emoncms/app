@@ -214,11 +214,13 @@ config.app = {
     "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "description":_("Cumulative solar generation in kWh")},
     "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "description":_("Cumulative grid import in kWh")},
     "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")},
-    "solar_disp_min":{"type":"value", "default":10, "name": "Solar Threshold", "description":_("Display solar power as 0 below this threshold in w")},
-    //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"},
-    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
+    "solar_disp_min":{"type":"value", "default":10, "name": "Solar Threshold", "description":_("Display solar power as 0 below this threshold in w")}
+    //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
 };
+
+config.id = "<?php echo $id; ?>";
 config.name = "<?php echo $name; ?>";
+config.public = <?php echo $public; ?>;
 config.db = <?php echo json_encode($config); ?>;
 config.feeds = feed.list();
 

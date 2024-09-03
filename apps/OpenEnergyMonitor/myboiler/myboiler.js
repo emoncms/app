@@ -16,7 +16,6 @@ if (!session_write) $(".config-open").hide();
 // ----------------------------------------------------------------------
 config.app = {
     "app_name": { "type": "value", "name": "App name", "default": "MY BOILER", "optional": true, "description": "Enter custom name for app" },
-    "public": { "type": "checkbox", "name": "Public", "default": 0, "optional": true, "description": "Make app public" },
     "boiler_fuel_kwh": { "type": "feed", "autoname": "boiler_fuel_kwh", "description": "Cumulative fuel use kWh" },    
     "boiler_elec": { "type": "feed", "autoname": "boiler_elec", "optional": true, "description": "Electric use in watts" },
     "boiler_elec_kwh": { "type": "feed", "autoname": "boiler_elec_kwh", "optional": true, "description": "Cumulative electric use kWh" },

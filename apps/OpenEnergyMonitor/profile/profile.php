@@ -107,7 +107,9 @@ config.app = {
     "feed_type":{"type":"select", "options": ['Cumulative kWh','Power (W)','Other'], "name": "Feed type", "default": 'Cumulative kWh'},
     "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
 };
+config.id = <?php echo $id; ?>;
 config.name = "<?php echo $name; ?>";
+config.public = <?php echo $public; ?>;
 config.db = <?php echo json_encode($config); ?>;
 config.feeds = feed.list();
 

@@ -8,7 +8,6 @@ if (!sessionwrite) $(".config-open").hide();
 
 // Used by the apps module configuration library to build the app configuration form
 config.app = {
-    "public": { "type": "checkbox", "name": "Public", "default": 0, "optional": true, "description": "Make app public" },
     "feedA": { "type": "feed", "description": "CO2 concentration feed", "autotag": "CO2", "autoname": "CO2 1", "optional": false },
     "feedB": { "type": "feed", "description": "CO2 concentration feed", "autotag": "CO2", "autoname": "CO2 2", "optional": true },
     "feedC": { "type": "feed", "description": "CO2 concentration feed", "autotag": "CO2", "autoname": "CO2 3", "optional": true },
@@ -24,10 +23,7 @@ config.app = {
     "windspeed": { "type": "feed", "description": "Wind speed", "autotag": "metoffice", "autoname": "windspeed", "optional": true }
 
 };
-// Name of the app
-config.name = app_name;
-// User configuration from database
-config.db = app_config;
+
 // Fetch user feed list
 config.feeds = feed.list();
 

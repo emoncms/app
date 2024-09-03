@@ -15,8 +15,7 @@ if (!session_write) $(".config-open").hide();
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "app_name": { "type": "value", "name": "App name", "default": "MY HEATPUMP", "optional": true, "description": "Enter custom name for app" },
-    "public": { "type": "checkbox", "name": "Public", "default": 0, "optional": true, "description": "Make app public" },
+    "app_name": { "type": "value", "name": "App title", "default": "MY HEATPUMP", "optional": true, "description": "Enter custom title for app" },
     "heatpump_elec": { "type": "feed", "autoname": "heatpump_elec", "optional": true, "description": "Electric use in watts" },
     "heatpump_elec_kwh": { "type": "feed", "autoname": "heatpump_elec_kwh", "description": "Cumulative electric use kWh" },
     "heatpump_heat": { "type": "feed", "autoname": "heatpump_heat", "optional": true, "description": "Heat output in watts" },

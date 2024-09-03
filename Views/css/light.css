@@ -5,6 +5,12 @@
   border: 1px solid #fff;
   color: #fff;
 }
+
+.app-config-box-main {
+  border: 1px solid #aaa;
+  color: #fff;
+}
+
 .app-config-description-inner {
   padding-right: 20px;
   color: #ccc;
@@ -23,6 +29,7 @@
 }
 .app-config .icon-app-config {
   background-image: url("../../../../Lib/bootstrap/img/glyphicons-halflings-white.png");
+  margin-top:5px;
 }
 
 .app-config .feed-auto {

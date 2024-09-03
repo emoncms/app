@@ -26,8 +26,7 @@ config.app = {
         "description": "Make app public"
     }
 };
-config.name = app_name;
-config.db = app_config;
+
 config.feeds = feed.list();
 
 config.initapp = function() {

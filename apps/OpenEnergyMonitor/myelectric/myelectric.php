@@ -172,12 +172,14 @@ config.app = {
     "use_kwh":{"type":"feed", "autoname":"use_kwh", "description":"Cumulative use in kWh"},
     "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity e.g £/kWh"},
     "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$,€...)"},
-    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")},
-    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
 };
 
+config.id = <?php echo $id; ?>;
 config.name = "<?php echo $name; ?>";
+config.public = <?php echo $public; ?>;
 config.db = <?php echo json_encode($config); ?>;
+
 config.feeds = feed.list();
 
 config.initapp = function(){init()};

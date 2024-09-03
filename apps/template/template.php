@@ -94,7 +94,9 @@ global $path, $session, $v;
     // Transfer php variables to javascript
     var apikey = "<?php print $apikey; ?>";
     var sessionwrite = <?php echo $session['write']; ?>;
-    var app_name = "<?php echo $name; ?>";
-    var app_config = <?php echo json_encode($config); ?>;
+    config.id = <?php echo $id; ?>;
+    config.name = "<?php echo $name; ?>";
+    config.public = <?php echo $public; ?>;
+    config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/template/template.js?v=5"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/template/template.js?v=6"></script>

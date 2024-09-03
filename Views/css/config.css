@@ -1,6 +1,11 @@
 
 .app-config-box {
   margin-bottom:8px;
+  padding: 8px 10px 10px 10px;
+}
+
+.app-config-box-main {
+  margin-bottom:8px;
   padding:10px;
 }
 

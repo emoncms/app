@@ -337,7 +337,9 @@ global $path, $session, $v;
 <script>
   var apikey = "<?php print $apikey; ?>";
   var session_write = <?php echo $session['write']; ?>;
+  config.id = <?php echo $id; ?>;
   config.name = "<?php echo $name; ?>";
+  config.public = <?php echo $public; ?>;
   config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=94"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=96"></script>

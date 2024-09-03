@@ -205,11 +205,13 @@ config.app = {
     "use_kwh":{"type":"feed", "autoname":"use_kwh"},
     "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity £/kWh"},
     "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$..)"},
-    "showcomparison":{"type":"checkbox", "default":true, "name": "Show comparison", "description":"Energy stack comparison"},
-    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
+    "showcomparison":{"type":"checkbox", "default":true, "name": "Show comparison", "description":"Energy stack comparison"}
 };
+config.id = <?php echo $id; ?>;
 config.name = "<?php echo $name; ?>";
+config.public = <?php echo $public; ?>;
 config.db = <?php echo json_encode($config); ?>;
+
 config.feeds = feed.list();
 
 config.initapp = function(){init()};
