@@ -390,6 +390,7 @@ class AppConfig
 
         $result = $this->mysqli->query("SELECT `userid`, `data` FROM app_config");
         while ($row = $result->fetch_object()) {
+            $userid = $row->userid;
             $applist = json_decode($row->data);
             if (gettype($applist)=="array" || $applist===null) $applist = new stdClass();
 
@@ -398,7 +399,7 @@ class AppConfig
                 // print "Migrating app $name : $app for userid $row->userid\n";
 
                 // Check if app exists with this name in app table
-                $result = $this->mysqli->query("SELECT `id` FROM app WHERE `userid`='$row->userid' AND `name`='$name'");
+                $result = $this->mysqli->query("SELECT `id` FROM app WHERE `userid`='$userid' AND `name`='$name'");
                 if ($result->num_rows) {
                     // App already exists (this should not happen)
                     // print "App already exists\n";
@@ -424,7 +425,7 @@ class AppConfig
             }
 
             // Delete old app_config entry
-            $this->mysqli->query("DELETE FROM app_config WHERE `userid`='$row->userid'");
+            $this->mysqli->query("DELETE FROM app_config WHERE `userid`='$userid'");
         }
     }
 }
