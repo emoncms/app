@@ -42,6 +42,7 @@ config.hideapp = function () { clear() };
 // ----------------------------------------------------------------------
 var meta = {};
 var data = {};
+var daily_data = {};
 var bargraph_series = [];
 var powergraph_series = [];
 var previousPoint = false;
@@ -72,6 +73,8 @@ var emitter_spec_enable = false;
 
 var bargraph_start = 0;
 var bargraph_end = 0;
+var bargraph_mode = "combined";
+
 
 var realtime_cop_div_mode = "30min";
 
@@ -235,6 +238,29 @@ function show() {
     progtime = now;
     updater();
     updaterinst = setInterval(updater, 10000);
+
+    // Load totals from pre-processed daily data
+    $.ajax({
+        url: path + "app/gettotals",
+        data: { name: config.name, apikey: apikey },
+        async: true,
+        dataType: "json",
+        success: function (result) {
+            if (result.combined_elec_kwh != undefined) {
+                $("#total_elec").html(Math.round(result.combined_elec_kwh));
+                $("#total_heat").html(Math.round(result.combined_heat_kwh));
+                $("#total_cop").html(result.combined_cop.toFixed(2));
+            }
+
+        }
+    });
+
+
+
+
+
+
+
     $(".ajax-loader").hide();
 }
 
@@ -263,6 +289,7 @@ function updater() {
         }
 
         // Update all-time values
+        /*
         var total_elec = 0;
         var total_heat = 0;
         if (elec_enabled) total_elec = feeds["heatpump_elec_kwh"].value - heatpump_elec_start;
@@ -287,6 +314,7 @@ function updater() {
         $("#total_elec").html(total_elec);
         $("#total_heat").html(total_heat);
         $("#total_cop").html(total_cop.toFixed(2));
+        */
 
         // Updates every 60 seconds
         var now = new Date().getTime();
@@ -1392,6 +1420,7 @@ function process_daily_data() {
         async: true,
         success: function (result) {
             if (result.days_left != undefined) {
+                console.log("Days left: " + result.days_left);
                 if (result.days_left > 0) {
                     // run again in 10 seconds
                     setTimeout(process_daily_data, 1000);
@@ -1403,8 +1432,6 @@ function process_daily_data() {
             bargraph_draw();
         }
     });
-
-    console.log("process_daily_data end");
 }
 
 function bargraph_load(start, end) {
@@ -1415,14 +1442,7 @@ function bargraph_load(start, end) {
     bargraph_start = start;
     bargraph_end = end;
 
-    bargraph_series = [];
-
-    var elec_kwh_in_window = 0;
-    var heat_kwh_in_window = 0;
-    var days_elec = 0;
-    var days_heat = 0;
-
-    var daily_data = {};
+    daily_data = {};
 
     // Fetch daily data e.g http://localhost/emoncms/app/getdailydata?name=MyHeatpump&apikey=APIKEY
     // Ajax jquery syncronous request
@@ -1457,12 +1477,21 @@ function bargraph_load(start, end) {
         }
     });
 
-    if (heat_enabled) {
-        if (daily_data["combined_heat_kwh"] != undefined) {
-            data["heatpump_heat_kwhd"] = daily_data["combined_heat_kwh"];
-        } else {
-            // data["heatpump_heat_kwhd"] = feed.getdata(feeds["heatpump_heat_kwh"].id, start, end, "daily", 0, 1)
-        }
+    set_url_view_params('daily', start, end);
+}
+
+function bargraph_draw() {
+
+    bargraph_series = [];
+
+    var elec_kwh_in_window = 0;
+    var heat_kwh_in_window = 0;
+    var days_elec = 0;
+    var days_heat = 0;
+
+    if (daily_data[bargraph_mode+"_heat_kwh"] != undefined) {
+        data["heatpump_heat_kwhd"] = daily_data[bargraph_mode+"_heat_kwh"];
+
         bargraph_series.push({
             data: data["heatpump_heat_kwhd"], color: 0,
             bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 }
@@ -1474,12 +1503,9 @@ function bargraph_load(start, end) {
         }
     }
 
-    if (elec_enabled) {
-        if (daily_data["combined_elec_kwh"] != undefined) {
-            data["heatpump_elec_kwhd"] = daily_data["combined_elec_kwh"];
-        } else {
-            // data["heatpump_elec_kwhd"] = feed.getdata(feeds["heatpump_elec_kwh"].id, start, end, "daily", 0, 1);
-        }
+    if (daily_data[bargraph_mode+"_elec_kwh"] != undefined) {
+        data["heatpump_elec_kwhd"] = daily_data[bargraph_mode+"_elec_kwh"];
+
         bargraph_series.push({
             data: data["heatpump_elec_kwhd"], color: 1,
             bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 }
@@ -1489,41 +1515,24 @@ function bargraph_load(start, end) {
             elec_kwh_in_window += data["heatpump_elec_kwhd"][z][1];
             days_elec++;
         }
+    }
 
-        // add series that shows COP points for each day
-        if (heat_enabled) {
-            //if ((end - start) < 120 * DAY) {
-                cop_data = [];
-                for (var z in data["heatpump_elec_kwhd"]) {
-                    time = data["heatpump_elec_kwhd"][z][0];
-                    elec = data["heatpump_elec_kwhd"][z][1];
-                    heat = data["heatpump_heat_kwhd"][z][1];
-                    if (elec && heat) {
-                        cop_data[z] = [time, heat / elec];
-                    }
-                }
-                bargraph_series.push({
-                    data: cop_data, color: "#44b3e2", yaxis: 3,
-                    points: { show: true }
-                });
-            //}
-        }
+    if (daily_data[bargraph_mode+"_cop"] != undefined) {
+        cop_data = daily_data[bargraph_mode+"_cop"];
+
+        bargraph_series.push({
+            data: cop_data, color: "#44b3e2", yaxis: 3,
+            points: { show: true }
+        });
     }
 
     if (feeds["heatpump_outsideT"] != undefined) {
+        data["heatpump_outsideT_daily"] = daily_data["combined_outsideT_mean"];
 
-        //if ((end - start) < 120 * DAY) {
-            if (daily_data["combined_outsideT_mean"] != undefined) {
-                data["heatpump_outsideT_daily"] = daily_data["combined_outsideT_mean"];
-            } else {
-                // data["heatpump_outsideT_daily"] = feed.getdata(feeds["heatpump_outsideT"].id, start, end, "daily", 1, 0);
-            }
-            
-            bargraph_series.push({
-                data: data["heatpump_outsideT_daily"], color: 4, yaxis: 2,
-                lines: { show: true, align: "center", fill: false }, points: { show: false }
-            });
-        //}
+        bargraph_series.push({
+            data: data["heatpump_outsideT_daily"], color: 4, yaxis: 2,
+            lines: { show: true, align: "center", fill: false }, points: { show: false }
+        });
     }
 
     var cop_in_window = heat_kwh_in_window / elec_kwh_in_window;
@@ -1538,10 +1547,7 @@ function bargraph_load(start, end) {
 
     $("#window-carnot-cop").html("");
 
-    set_url_view_params('daily', start, end);
-}
 
-function bargraph_draw() {
     var options = {
         xaxis: {
             mode: "time",
@@ -1807,4 +1813,11 @@ $("#configure_standby").click(function () {
     } else {
         $("#configure_standby_options").hide();
     }
+});
+
+// Bargraph modes
+$(".bargraph_mode").click(function () {
+    var mode = $(this).attr("mode");
+    bargraph_mode = mode;
+    bargraph_draw();
 });

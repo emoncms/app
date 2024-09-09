@@ -45,6 +45,8 @@ class MyHeatPump {
         return $this->format_csv($data);
     }
 
+
+
     /**
      * Format data to csv
      *  
@@ -191,9 +193,9 @@ class MyHeatPump {
         // can be used for a progress bar
         return array(
             "success"=>true,
-            "days"=>number_format($days,2)*1,
+            "days"=>number_format($days,2,'.','')*1,
             "days_processed"=>$days_processed, 
-            "days_left"=>number_format($days_left,2)*1,
+            "days_left"=>number_format($days_left,2,'.','')*1,
             "processing_time"=>number_format(microtime(true)-$timer_start,3)*1
         );
     }
@@ -324,5 +326,194 @@ class MyHeatPump {
             else if (strpos($schema[$key]['type'],'bool')!==false) $schema[$key]['code'] = 'b';
         }
         return $schema;
+    }
+
+    // Processing of daily data
+
+    /**
+     * Process daily data
+     * 
+     * @param int $id - system id
+     * @param int $start - start timestamp
+     * @param int $end - end timestamp
+     * @return array
+     */
+    public function process_from_daily($systemid, $start = false, $end = false) {
+
+        $systemid = (int) $systemid;
+        
+        if ($start==false && $end==false) {
+            $where = "WHERE id = $systemid";
+        } else {
+            $start = (int) $start;
+            $end = (int) $end;
+            $where = "WHERE timestamp >= $start AND timestamp < $end AND id = $systemid";
+        }
+        
+        $rows = array();
+
+        // Get daily data from system_stats_daily table for this system and time period
+        $result = $this->mysqli->query("SELECT * FROM myheatpump_daily_stats $where");
+        while ($row = $result->fetch_object()) {
+            $rows[] = $row;
+        }
+
+        return $this->process($rows,$systemid,$start);
+    }
+
+    public function process($rows,$systemid,$start) {
+
+        $categories = array('combined','running','space','water');
+
+        // Totals only
+        $totals = array();
+        $total_fields = array('elec_kwh','heat_kwh','data_length');
+        foreach ($categories as $category) {
+            foreach ($total_fields as $field) {
+                $totals[$category][$field] = 0;
+            }
+        }
+
+        // sum x data_length
+        $sum = array();
+        $sum_fields = array('elec_mean','heat_mean','flowT_mean','returnT_mean','outsideT_mean','roomT_mean','prc_carnot');
+        foreach ($categories as $category) {
+            foreach ($sum_fields as $field) {
+                $sum[$category][$field] = 0;
+            }
+        }
+
+        // Custom fields
+        $totals['combined']['cooling_kwh'] = 0;
+        $totals['combined']['starts'] = 0;
+        $totals['from_energy_feeds'] = array('elec_kwh'=>0,'heat_kwh'=>0);
+        $totals['agile_cost'] = 0;
+        $totals['cosy_cost'] = 0;
+        $totals['go_cost'] = 0;
+
+        // Quality
+        $quality_fields = array('elec','heat','flowT','returnT','outsideT','roomT');
+        $quality_totals = array();
+        foreach ($quality_fields as $field) {
+            $quality_totals[$field] = 0;
+        }
+        
+        // Count days
+        $days = 0;
+
+        foreach ($rows as $row) {
+
+            foreach ($categories as $category) {
+                foreach ($total_fields as $field) {
+                    $totals[$category][$field] += $row->{$category."_".$field};
+                }
+                foreach ($sum_fields as $field) {
+                    $sum[$category][$field] += $row->{$category."_".$field} * $row->{$category."_data_length"};
+                }
+            }
+
+            foreach ($quality_fields as $field) {
+                $quality_totals[$field] += $row->{"quality_".$field};
+            }
+
+            $totals['combined']['starts'] += $row->combined_starts*1;
+            $totals['combined']['cooling_kwh'] += $row->combined_cooling_kwh;
+            $totals['from_energy_feeds']['elec_kwh'] += $row->from_energy_feeds_elec_kwh;
+            $totals['from_energy_feeds']['heat_kwh'] += $row->from_energy_feeds_heat_kwh;
+
+            $agile_cost = $row->unit_rate_agile * 0.01 * $totals['from_energy_feeds']['elec_kwh'];
+            $totals['agile_cost'] += $agile_cost;
+
+            $cosy_cost = $row->unit_rate_cosy * 0.01 * $totals['from_energy_feeds']['elec_kwh'];
+            $totals['cosy_cost'] += $cosy_cost;
+
+            $go_cost = $row->unit_rate_go * 0.01 * $totals['from_energy_feeds']['elec_kwh'];
+            $totals['go_cost'] += $go_cost;
+            
+            $days++;
+        }
+
+        if ($days == 0) {
+            return false;
+        }
+
+        // Calculate mean from sum
+        $mean = array();
+        foreach ($categories as $category) {
+            foreach ($sum_fields as $field) {
+                $mean[$category][$field] = null;
+                if ($totals[$category]['data_length'] > 0) {
+                    $mean[$category][$field] = $sum[$category][$field] / $totals[$category]['data_length'];
+                }
+            }
+        }
+
+        // Calculate quality
+        $quality = array();
+        foreach ($quality_fields as $field) {
+            $quality[$field] = 0;
+            if ($days > 0) {
+                $quality[$field] = $quality_totals[$field] / $days;
+            }
+        }
+
+        $stats = array(
+            'id' => $systemid,
+            'timestamp' => $start   
+        );
+
+        // As above but without number formatting
+        foreach ($categories as $category) {
+            $stats[$category.'_elec_kwh'] = $totals[$category]['elec_kwh'];
+            $stats[$category.'_heat_kwh'] = $totals[$category]['heat_kwh'];
+            if ($totals[$category]['elec_kwh'] > 0) {
+                $stats[$category.'_cop'] = $totals[$category]['heat_kwh'] / $totals[$category]['elec_kwh'];
+            } else {
+                $stats[$category.'_cop'] = null;
+            }
+            $stats[$category.'_data_length'] = $totals[$category]['data_length'];
+
+            $stats[$category.'_elec_mean'] = $mean[$category]['elec_mean'];
+            $stats[$category.'_heat_mean'] = $mean[$category]['heat_mean'];
+            $stats[$category.'_flowT_mean'] = $mean[$category]['flowT_mean'];
+            $stats[$category.'_returnT_mean'] = $mean[$category]['returnT_mean'];
+            $stats[$category.'_outsideT_mean'] = $mean[$category]['outsideT_mean'];
+            $stats[$category.'_roomT_mean'] = $mean[$category]['roomT_mean'];
+            $stats[$category.'_prc_carnot'] = $mean[$category]['prc_carnot'];
+        }
+
+        $stats['combined_cooling_kwh'] = $totals['combined']['cooling_kwh'];
+        $stats['combined_starts'] = $totals['combined']['starts'];
+        if ($totals['combined']['data_length']>0) {
+            $stats['combined_starts_per_hour'] = $totals['combined']['starts'] / ($totals['combined']['data_length'] / 3600.0);
+        } else {
+            $stats['combined_starts_per_hour'] = 0;
+        }
+        $stats['from_energy_feeds_elec_kwh'] = $totals['from_energy_feeds']['elec_kwh'];
+        $stats['from_energy_feeds_heat_kwh'] = $totals['from_energy_feeds']['heat_kwh'];
+        $stats['from_energy_feeds_cop'] = 0;
+        if ($totals['from_energy_feeds']['elec_kwh'] > 0) {
+            $stats['from_energy_feeds_cop'] = $totals['from_energy_feeds']['heat_kwh'] / $totals['from_energy_feeds']['elec_kwh'];
+        }
+
+        foreach ($quality_fields as $field) {
+            $stats['quality_'.$field] = $quality[$field];
+        }
+
+        $stats['unit_rate_agile'] = null;
+        $stats['unit_rate_cosy'] = null;
+        $stats['unit_rate_go'] = null;
+
+        if ($totals['from_energy_feeds']['elec_kwh'] > 0) {
+            $stats['unit_rate_agile'] = round(100*$totals['agile_cost'] / $totals['from_energy_feeds']['elec_kwh'],1);
+            $stats['unit_rate_cosy'] = round(100*$totals['cosy_cost'] / $totals['from_energy_feeds']['elec_kwh'],1);
+            $stats['unit_rate_go'] = round(100*$totals['go_cost'] / $totals['from_energy_feeds']['elec_kwh'],1);
+        }
+
+        if ($stats['unit_rate_agile'] === 0) $stats['unit_rate_agile'] = null;
+        if ($stats['unit_rate_cosy'] === 0) $stats['unit_rate_cosy'] = null;
+        if ($stats['unit_rate_go'] === 0) $stats['unit_rate_go'] = null;
+
+        return $stats;
     }
 }

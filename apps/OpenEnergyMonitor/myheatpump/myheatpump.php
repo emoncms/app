@@ -76,6 +76,12 @@ global $path, $session, $v;
         <div class="block-bound">
 
           <div class="bargraph-navigation">
+            <div class="bluenav bargraph_mode" mode="combined" style="float:left">ALL</div>
+            <div class="bluenav bargraph_mode" mode="running" style="float:left">RUN</div>
+            <div class="bluenav bargraph_mode" mode="space" style="float:left">SH</div>
+            <div class="bluenav bargraph_mode" mode="water" style="float:left">DHW</div>
+
+
             <div class="bluenav bargraph-alltime">ALL</div>
             <div class="bluenav bargraph-year">YEAR</div>
             <div class="bluenav bargraph-quarter">3 MONTHS</div>
@@ -342,4 +348,4 @@ global $path, $session, $v;
   config.public = <?php echo $public; ?>;
   config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=100"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=102"></script>

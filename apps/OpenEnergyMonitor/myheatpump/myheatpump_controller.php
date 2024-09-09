@@ -183,10 +183,19 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
         return $myheatpump->get_daily($app->id,$start,$end);
     }
 
+    // Get totals
+    else if ($route->action == "gettotals") {
+        $route->format = "json";
+        // Start and end time optional
+        $start = (int) get('start',false,false);
+        $end = (int) get('end',false,false);
+        return $myheatpump->process_from_daily($app->id,$start,$end);
+    }
+
     // Process daily data
     else if ($route->action == "processdaily") {
         $route->format = "json";
-        return $myheatpump->process_daily($app->id,1);
+        return $myheatpump->process_daily($app->id,10);
     }
 
     // Clear daily data
