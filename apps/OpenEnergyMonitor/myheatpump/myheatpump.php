@@ -261,7 +261,7 @@ global $path, $session, $v;
               <div id="configure_standby_options" style="display:none">
                 <div class="input-prepend input-append" style="margin-top:10px; margin-bottom:0px;">
                   <span class="add-on">Starting power</span>
-                  <input type="text" style="width:50px" id="starting_power" value="100">
+                  <input type="text" style="width:50px" id="starting_power" value="150">
                   <span class="add-on">W</span>
                 </div>
               </div>
@@ -342,4 +342,4 @@ global $path, $session, $v;
   config.public = <?php echo $public; ?>;
   config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=99"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=100"></script>

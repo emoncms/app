@@ -789,10 +789,7 @@ function carnot_simulator() {
         var practical_carnot_heat_kwh = 0;
         var ideal_carnot_heat_kwh = 0;
 
-        var flowT = 0;
-        var returnT = 0;
         var ambientT = 0;
-        var heat = 0;
 
         var histogram = {};
 
@@ -801,9 +798,15 @@ function carnot_simulator() {
             let time = data["heatpump_elec"][z][0];
             let power = data["heatpump_elec"][z][1];
 
-            if (data["heatpump_heat"] != undefined) heat = data["heatpump_heat"][z][1];
-            if (data["heatpump_flowT"] != undefined) flowT = data["heatpump_flowT"][z][1];
-            if (data["heatpump_returnT"] != undefined) returnT = data["heatpump_returnT"][z][1];
+            let heat = data["heatpump_heat"][z][1];
+            let flowT = data["heatpump_flowT"][z][1];
+            let returnT = data["heatpump_returnT"][z][1];
+
+            if (power == null || heat == null || flowT == null || returnT == null) {
+                data["heatpump_heat_carnot"][z] = [time, null];
+                data["sim_flow_rate"][z] = [time, null];
+                continue;
+            }
 
             if (heatpump_outsideT_available) {
                 ambientT = data["heatpump_outsideT"][z][1];
@@ -830,7 +833,7 @@ function carnot_simulator() {
                     sim_flow_rate = null
                 }
 
-                if (returnT > flowT) {
+                if (DT<-0.2) {
                     practical_carnot_heat *= -1;
                     ideal_carnot_heat *= -1;
                 }

@@ -133,7 +133,7 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
                 $end = null;
             }
                                 
-            $startingpower = get('startingpower',false,100);
+            $startingpower = get('startingpower',false,150);
             
             require_once "Modules/feed/feed_model.php";
             $settings['feed']['max_datapoints'] = 100000;
