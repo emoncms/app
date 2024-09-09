@@ -252,14 +252,28 @@ function show() {
                 $("#total_cop").html(result.combined_cop.toFixed(2));
             }
 
+            // same for running
+            if (result.running_elec_kwh != undefined) {
+                $("#running_elec").html(Math.round(result.running_elec_kwh));
+                $("#running_heat").html(Math.round(result.running_heat_kwh));
+                $("#running_cop").html(result.running_cop.toFixed(2));
+            }
+
+            // space
+            if (result.space_elec_kwh != undefined) {
+                $("#space_elec").html(Math.round(result.space_elec_kwh));
+                $("#space_heat").html(Math.round(result.space_heat_kwh));
+                $("#space_cop").html(result.space_cop.toFixed(2));
+            }
+
+            //water 
+            if (result.water_elec_kwh != undefined) {
+                $("#water_elec").html(Math.round(result.water_elec_kwh));
+                $("#water_heat").html(Math.round(result.water_heat_kwh));
+                $("#water_cop").html(result.water_cop.toFixed(2));
+            }
         }
     });
-
-
-
-
-
-
 
     $(".ajax-loader").hide();
 }

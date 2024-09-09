@@ -78,7 +78,7 @@ global $path, $session, $v;
           <div class="bargraph-navigation">
             <div class="bluenav bargraph_mode" mode="combined" style="float:left">ALL</div>
             <div class="bluenav bargraph_mode" mode="running" style="float:left">RUN</div>
-            <div class="bluenav bargraph_mode" mode="space" style="float:left">SH</div>
+            <div class="bluenav bargraph_mode" mode="space" style="float:left">SPACE</div>
             <div class="bluenav bargraph_mode" mode="water" style="float:left">DHW</div>
 
 
@@ -308,6 +308,70 @@ global $path, $session, $v;
                 <div class="value1"><span id="total_cop"></span></div>
               </td>
             </tr>
+
+            <!-- 
+            <tr>
+              <td style="width:33.3%; text-align:center" valign="top">
+                <div class="title1">When running electric</div>
+                <div class="value1"><span id="running_elec"></span>
+                  <div class="units1">kWh</div>
+                </div>
+              </td>
+
+              <td style="width:33.3%; text-align:center" valign="top">
+                <div class="title1">When running heat</div>
+                <div class="value1"><span id="running_heat"></span>
+                  <div class="units1">kWh</div>
+                </div>
+              </td>
+
+              <td style="width:33.3%; text-align:center" valign="top">
+                <div class="title1">When running SCOP</div>
+                <div class="value1"><span id="running_cop"></span></div>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="width:33.3%; text-align:center" valign="top">
+                <div class="title1">Space heating electric</div>
+                <div class="value1"><span id="space_elec"></span>
+                  <div class="units1">kWh</div>
+                </div>
+              </td>
+
+              <td style="width:33.3%; text-align:center" valign="top">
+                <div class="title1">Space heating heat</div>
+                <div class="value1"><span id="space_heat"></span>
+                  <div class="units1">kWh</div>
+                </div>
+              </td>
+
+              <td style="width:33.3%; text-align:center" valign="top">
+                <div class="title1">Space heating SCOP</div>
+                <div class="value1"><span id="space_cop"></span></div>
+              </td>
+            </tr>
+            <tr>
+              <td style="width:33.3%; text-align:center" valign="top">
+                <div class="title1">Water heating electric</div>
+                <div class="value1"><span id="water_elec"></span>
+                  <div class="units1">kWh</div>
+                </div>
+              </td>
+
+              <td style="width:33.3%; text-align:center" valign="top">
+                <div class="title1">Water heating heat</div>
+                <div class="value1"><span id="water_heat"></span>
+                  <div class="units1">kWh</div>
+                </div>
+              </td>
+
+              <td style="width:33.3%; text-align:center" valign="top">
+                <div class="title1">Water heating SCOP</div>
+                <div class="value1"><span id="water_cop"></span></div>
+              </td>
+            </tr>
+            -->
           </table>
         </div>
 
