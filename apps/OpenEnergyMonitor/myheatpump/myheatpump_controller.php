@@ -195,7 +195,8 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
     // Process daily data
     else if ($route->action == "processdaily") {
         $route->format = "json";
-        return $myheatpump->process_daily($app->id,10);
+        $timeout = (int) get('timeout',false,1);
+        return $myheatpump->process_daily($app->id,$timeout);
     }
 
     // Clear daily data

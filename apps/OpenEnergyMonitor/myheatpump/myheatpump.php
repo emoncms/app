@@ -106,9 +106,12 @@ global $path, $session, $v;
         </div>
 
         <div style="background-color:#fff; padding:10px;">
-          <div id="placeholder_bound" style="width:100%; height:500px;overflow:hidden">
-            <div id="placeholder" style="height:500px"></div>
-          </div>
+            <div id="placeholder_bound" style="width:100%; height:500px;overflow:hidden; position:relative;">
+                <div id="placeholder" style="height:500px"></div>
+                <div id="overlay" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); color:#333; display:flex; align-items:center; justify-content:center; font-size:20px;">
+                    <div id="overlay_text"></div>
+                </div>
+            </div>
         </div>
 
         <div style="background-color:#eee; color:#333">
@@ -412,4 +415,4 @@ global $path, $session, $v;
   config.public = <?php echo $public; ?>;
   config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=102"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=103"></script>

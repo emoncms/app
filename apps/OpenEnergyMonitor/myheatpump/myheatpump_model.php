@@ -112,7 +112,7 @@ class MyHeatPump {
 
         // Check if processing is locked
         if (!$this->process_lock($id)) {
-            return array("success"=>false, "meassage"=>"Processing locked");
+            return array("success"=>false, "message"=>"Processing locked");
         }
 
         // Get start and end time of available data
@@ -193,9 +193,9 @@ class MyHeatPump {
         // can be used for a progress bar
         return array(
             "success"=>true,
-            "days"=>number_format($days,2,'.','')*1,
+            "days"=>round($days),
             "days_processed"=>$days_processed, 
-            "days_left"=>number_format($days_left,2,'.','')*1,
+            "days_left"=>round($days_left),
             "processing_time"=>number_format(microtime(true)-$timer_start,3)*1
         );
     }

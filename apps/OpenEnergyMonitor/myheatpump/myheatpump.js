@@ -70,6 +70,7 @@ var kw_at_50_for_volume = 0;
 var show_daily_cop_series = true;
 var show_negative_heat = false;
 var emitter_spec_enable = false;
+var process_daily_timeout = 1; // start at 1s
 
 var bargraph_start = 0;
 var bargraph_end = 0;
@@ -1428,22 +1429,40 @@ function powergraph_draw() {
 function process_daily_data() {
     console.log("process_daily_data");
 
+    $("#overlay").show();
     $.ajax({
         url: path + "app/processdaily",
-        data: { name: config.name, apikey: apikey },
+        data: { name: config.name, apikey: apikey, timeout: process_daily_timeout },
         async: true,
         success: function (result) {
             if (result.days_left != undefined) {
                 console.log("Days left: " + result.days_left);
                 if (result.days_left > 0) {
+                    $("#overlay_text").html("Processing daily data... " + result.days_left + " days left");
                     // run again in 10 seconds
+                    process_daily_timeout = 5;
                     setTimeout(process_daily_data, 1000);
+                    
+                } else {
+                    $("#overlay_text").html("");
+                    $("#overlay").hide();
+                    // reload bargraph
+                    bargraph_load(bargraph_start, bargraph_end);
+                    bargraph_draw();    
                 }
             }
 
-            // reload bargraph
-            bargraph_load(bargraph_start, bargraph_end);
-            bargraph_draw();
+            if (result.success != undefined) {
+                // if false
+                if (!result.success) {
+                    $("#overlay").show();
+                    $("#overlay_text").html(result.message);
+                    setTimeout(process_daily_data, 1000);
+
+                }
+            }
+
+
         }
     });
 }
