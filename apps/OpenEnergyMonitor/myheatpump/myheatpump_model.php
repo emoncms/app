@@ -5,15 +5,15 @@ class MyHeatPump {
     private $mysqli;
     private $redis;
     private $feed;
-    private $app;
+    private $appconfig;
     private $schema;
 
     // constructor
-    function __construct($mysqli,$redis,$feed,$app) {
+    function __construct($mysqli,$redis,$feed,$appconfig) {
         $this->mysqli = $mysqli;
         $this->redis = $redis;
         $this->feed = $feed;
-        $this->app = $app;
+        $this->appconfig = $appconfig;
 
         // Load schema
         $schema = array();
@@ -25,7 +25,7 @@ class MyHeatPump {
     /**
      * Get daily data
      *
-     * @param int $id - system id
+     * @param int $id - app id
      * @param int $start - start timestamp
      * @param int $end - end timestamp
      * @return string csv
@@ -102,13 +102,16 @@ class MyHeatPump {
     /**
      * Process daily data
      * 
-     * @param int $id - system id
+     * @param int $id - app id
      * @param int $timeout - optional timeout in seconds
      * @return array days_processed, days_left
      */
     public function process_daily($id, $timeout = 3) {
         $id = (int) $id;
         $timeout = (int) $timeout;
+
+        // Load app config
+        $app = $this->appconfig->get_app_by_id($id);
 
         // Check if processing is locked
         if (!$this->process_lock($id)) {
@@ -162,13 +165,13 @@ class MyHeatPump {
         while ($time<$end) {
             
             // Get stats for the day
-            $stats = get_heatpump_stats($this->feed,$this->app,$time,$time+(3600*24),$starting_power);
+            $stats = get_heatpump_stats($this->feed,$app,$time,$time+(3600*24),$starting_power);
 
             // Translate for database field compatibility
             $row = $this->format_flat_keys($stats);
 
             // Save the day!
-            $this->save_day($this->app->id, $row);
+            $this->save_day($app->id, $row);
             $days_processed++;
             
             // Move to next day
@@ -248,7 +251,7 @@ class MyHeatPump {
      */
     public function get_data_period($id) {
 
-        $app = $this->app;
+        $app = $this->appconfig->get_app_by_id($id);
         
         $result = array("start"=>0, "end"=>0);
 
@@ -275,14 +278,14 @@ class MyHeatPump {
     }
 
     // Save day
-    public function save_day($systemid, $row) 
+    public function save_day($id, $row) 
     {
-        $systemid = (int) $systemid;
+        $id = (int) $id;
         $timestamp = (int) $row['timestamp'];
-        $row['id'] = $systemid;
+        $row['id'] = $id;
 
         // Delete existing stats
-        $this->mysqli->query("DELETE FROM myheatpump_daily_stats WHERE `id`='$systemid' AND `timestamp`='$timestamp'");
+        $this->mysqli->query("DELETE FROM myheatpump_daily_stats WHERE `id`='$id' AND `timestamp`='$timestamp'");
 
         // Insert new
         $this->save_stats_table('myheatpump_daily_stats', $row);
@@ -333,35 +336,35 @@ class MyHeatPump {
     /**
      * Process daily data
      * 
-     * @param int $id - system id
+     * @param int $id - app id
      * @param int $start - start timestamp
      * @param int $end - end timestamp
      * @return array
      */
-    public function process_from_daily($systemid, $start = false, $end = false) {
+    public function process_from_daily($id, $start = false, $end = false) {
 
-        $systemid = (int) $systemid;
+        $id = (int) $id;
         
         if ($start==false && $end==false) {
-            $where = "WHERE id = $systemid";
+            $where = "WHERE id = $id";
         } else {
             $start = (int) $start;
             $end = (int) $end;
-            $where = "WHERE timestamp >= $start AND timestamp < $end AND id = $systemid";
+            $where = "WHERE timestamp >= $start AND timestamp < $end AND id = $id";
         }
         
         $rows = array();
 
-        // Get daily data from system_stats_daily table for this system and time period
+        // Get daily data from myheatpump_daily_stats table for this app and time period
         $result = $this->mysqli->query("SELECT * FROM myheatpump_daily_stats $where");
         while ($row = $result->fetch_object()) {
             $rows[] = $row;
         }
 
-        return $this->process($rows,$systemid,$start);
+        return $this->process($rows,$id,$start);
     }
 
-    public function process($rows,$systemid,$start) {
+    public function process($rows,$id,$start) {
 
         $categories = array('combined','running','space','water');
 
@@ -458,7 +461,7 @@ class MyHeatPump {
         }
 
         $stats = array(
-            'id' => $systemid,
+            'id' => $id,
             'timestamp' => $start   
         );
 

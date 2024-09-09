@@ -22,7 +22,7 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
     $feed = new Feed($mysqli,$redis,$settings['feed']);
     require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_api2.php";
     require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_model.php";
-    $myheatpump = new MyHeatPump($mysqli,$redis,$feed,$app);
+    $myheatpump = new MyHeatPump($mysqli,$redis,$feed,$appconfig);
 
     if ($route->action == "view" || $route->action == "") {
         $route->format = "html";
