@@ -70,6 +70,9 @@ var show_daily_cop_series = true;
 var show_negative_heat = false;
 var emitter_spec_enable = false;
 
+var bargraph_start = 0;
+var bargraph_end = 0;
+
 var realtime_cop_div_mode = "30min";
 
 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -217,8 +220,14 @@ function show() {
         if (urlParams.start != undefined) start = urlParams.start * 1000;
         if (urlParams.end != undefined) end = urlParams.end * 1000;
 
+
         bargraph_load(start, end);
         bargraph_draw();
+
+
+        // check if we need to process any historic data here
+        process_daily_data();
+
         $("#advanced-toggle").hide();
     }
 
@@ -1370,10 +1379,38 @@ function powergraph_draw() {
 // -------------------------------------------------------------------------------
 // BAR GRAPH
 // -------------------------------------------------------------------------------
+
+function process_daily_data() {
+    console.log("process_daily_data");
+
+    $.ajax({
+        url: path + "app/processdaily",
+        data: { name: config.name, apikey: apikey },
+        async: true,
+        success: function (result) {
+            if (result.days_left != undefined) {
+                if (result.days_left > 0) {
+                    // run again in 10 seconds
+                    setTimeout(process_daily_data, 1000);
+                }
+            }
+
+            // reload bargraph
+            bargraph_load(bargraph_start, bargraph_end);
+            bargraph_draw();
+        }
+    });
+
+    console.log("process_daily_data end");
+}
+
 function bargraph_load(start, end) {
     var intervalms = DAY;
     end = Math.ceil(end / intervalms) * intervalms;
     start = Math.floor(start / intervalms) * intervalms;
+
+    bargraph_start = start;
+    bargraph_end = end;
 
     bargraph_series = [];
 
@@ -1382,8 +1419,47 @@ function bargraph_load(start, end) {
     var days_elec = 0;
     var days_heat = 0;
 
+    var daily_data = {};
+
+    // Fetch daily data e.g http://localhost/emoncms/app/getdailydata?name=MyHeatpump&apikey=APIKEY
+    // Ajax jquery syncronous request
+    // format is csv
+    $.ajax({
+        url: path + "app/getdailydata",
+        data: { name: config.name, start: start*0.001, end: end*0.001, apikey: apikey },
+        async: false,
+        success: function (data) {
+            var rows = data.split("\n");
+            var fields = rows[0].split(",");
+
+            
+            for (var z = 1; z < rows.length; z++) {
+                var cols = rows[z].split(",");
+                var timestamp = cols[1] * 1000;
+
+                if (cols.length == fields.length) {
+                    for (var i=2; i<fields.length; i++) {
+                        if (daily_data[fields[i]] == undefined) daily_data[fields[i]] = [];
+
+                        if (cols[i] != "") {
+                            cols[i] = parseFloat(cols[i]);
+                        } else {
+                            cols[i] = null;
+                        }
+
+                        daily_data[fields[i]].push([timestamp, cols[i]]);
+                    }
+                }
+            }
+        }
+    });
+
     if (heat_enabled) {
-        data["heatpump_heat_kwhd"] = feed.getdata(feeds["heatpump_heat_kwh"].id, start, end, "daily", 0, 1)
+        if (daily_data["combined_heat_kwh"] != undefined) {
+            data["heatpump_heat_kwhd"] = daily_data["combined_heat_kwh"];
+        } else {
+            // data["heatpump_heat_kwhd"] = feed.getdata(feeds["heatpump_heat_kwh"].id, start, end, "daily", 0, 1)
+        }
         bargraph_series.push({
             data: data["heatpump_heat_kwhd"], color: 0,
             bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 }
@@ -1396,7 +1472,11 @@ function bargraph_load(start, end) {
     }
 
     if (elec_enabled) {
-        data["heatpump_elec_kwhd"] = feed.getdata(feeds["heatpump_elec_kwh"].id, start, end, "daily", 0, 1);
+        if (daily_data["combined_elec_kwh"] != undefined) {
+            data["heatpump_elec_kwhd"] = daily_data["combined_elec_kwh"];
+        } else {
+            // data["heatpump_elec_kwhd"] = feed.getdata(feeds["heatpump_elec_kwh"].id, start, end, "daily", 0, 1);
+        }
         bargraph_series.push({
             data: data["heatpump_elec_kwhd"], color: 1,
             bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 }
@@ -1409,7 +1489,7 @@ function bargraph_load(start, end) {
 
         // add series that shows COP points for each day
         if (heat_enabled) {
-            if ((end - start) < 120 * DAY) {
+            //if ((end - start) < 120 * DAY) {
                 cop_data = [];
                 for (var z in data["heatpump_elec_kwhd"]) {
                     time = data["heatpump_elec_kwhd"][z][0];
@@ -1423,19 +1503,24 @@ function bargraph_load(start, end) {
                     data: cop_data, color: "#44b3e2", yaxis: 3,
                     points: { show: true }
                 });
-            }
+            //}
         }
     }
 
     if (feeds["heatpump_outsideT"] != undefined) {
 
-        if ((end - start) < 120 * DAY) {
-            data["heatpump_outsideT_daily"] = feed.getdata(feeds["heatpump_outsideT"].id, start, end, "daily", 1, 0);
+        //if ((end - start) < 120 * DAY) {
+            if (daily_data["combined_outsideT_mean"] != undefined) {
+                data["heatpump_outsideT_daily"] = daily_data["combined_outsideT_mean"];
+            } else {
+                // data["heatpump_outsideT_daily"] = feed.getdata(feeds["heatpump_outsideT"].id, start, end, "daily", 1, 0);
+            }
+            
             bargraph_series.push({
                 data: data["heatpump_outsideT_daily"], color: 4, yaxis: 2,
                 lines: { show: true, align: "center", fill: false }, points: { show: false }
             });
-        }
+        //}
     }
 
     var cop_in_window = heat_kwh_in_window / elec_kwh_in_window;
@@ -1460,7 +1545,9 @@ function bargraph_draw() {
             timezone: "browser",
             font: { size: flot_font_size, color: "#666" },
             // labelHeight:-5
-            reserveSpace: false
+            reserveSpace: false,
+            min: bargraph_start, 
+            max: bargraph_end
         },
         yaxes: [{
             font: { size: flot_font_size, color: "#666" },

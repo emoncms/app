@@ -17,6 +17,13 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
     global $path, $session, $settings, $mysqli, $redis;
     $v = 1;
 
+    require_once "Modules/feed/feed_model.php";
+    $settings['feed']['max_datapoints'] = 100000;
+    $feed = new Feed($mysqli,$redis,$settings['feed']);
+    require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_api2.php";
+    require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_model.php";
+    $myheatpump = new MyHeatPump($mysqli,$redis,$feed,$app);
+
     if ($route->action == "view" || $route->action == "") {
         $route->format = "html";
         $result = "\n<!-- global app css and js -->";
@@ -168,6 +175,32 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
         }
     
         return $app;
+    }
+    else if ($route->action == "getdailydata") {
+        $route->format = "text";
+        $start = (int) get('start',true);
+        $end = (int) get('end',true);
+        return $myheatpump->get_daily($app->id,$start,$end);
+    }
+
+    // Process daily data
+    else if ($route->action == "processdaily") {
+        $route->format = "json";
+        return $myheatpump->process_daily($app->id,1);
+    }
+
+    // Clear daily data
+    else if ($route->action == "cleardaily") {
+        $route->format = "json";
+        $mysqli->query("DELETE FROM myheatpump_daily_stats WHERE `id`='".$app->id."'");
+        return array("success"=>true);
+    }
+
+    // Clear last 60 days
+    else if ($route->action == "clearlast60days") {
+        $route->format = "json";
+        $mysqli->query("DELETE FROM myheatpump_daily_stats WHERE `id`='".$app->id."' AND `timestamp`>='".(time()-60*24*3600)."'");
+        return array("success"=>true);
     }
 
 }
