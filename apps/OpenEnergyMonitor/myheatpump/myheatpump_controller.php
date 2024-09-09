@@ -20,7 +20,7 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
     require_once "Modules/feed/feed_model.php";
     $settings['feed']['max_datapoints'] = 100000;
     $feed = new Feed($mysqli,$redis,$settings['feed']);
-    require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_api2.php";
+    require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.php";
     require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_model.php";
     $myheatpump = new MyHeatPump($mysqli,$redis,$feed,$appconfig);
 
@@ -105,77 +105,12 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
         }
         return $result;
     }
-    else if ($route->action == "getstats" || $route->action == "getstats2" || $route->action == "getdaily" || $route->action == "datastart") {
 
+    else if ($route->action == "getdailydatarange") {
         $route->format = "json";
-    
-        if ($app->app=="myheatpump") {
-            
-            if (isset($_GET['start']) && isset($_GET['end'])) {
-                $start = (int) $_GET['start'];
-                $end = (int) $_GET['end'];
-            } else if (isset($_GET['day'])) {
-                $date = new DateTime($_GET['day']);
-                $date->setTimezone(new DateTimeZone("Europe/London"));
-                $date->modify("midnight");
-                $start = $date->getTimestamp();
-                $date->modify("+1 day");
-                $end = $date->getTimestamp();
-            } else if (isset($_GET['month'])) {
-                $date = new DateTime($_GET['month']);
-                $date->setTimezone(new DateTimeZone("Europe/London"));
-                $date->modify("midnight");
-                $start = $date->getTimestamp();
-                $date->modify("+1 month");
-                $end = $date->getTimestamp();
-            } else {
-                $start = null;
-                $end = null;
-            }
-                                
-            $startingpower = get('startingpower',false,150);
-            
-            require_once "Modules/feed/feed_model.php";
-            $settings['feed']['max_datapoints'] = 100000;
-            $feed = new Feed($mysqli,$redis,$settings['feed']);
-            
-            if ($route->action == "getstats2" || $route->action == "getdaily" || $route->action == "datastart") {
-                require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_api2.php";
-            } else {
-                require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_api.php";   
-            }
-            
-            if ($route->action == "datastart") {
-                $route->format = "json";
-                $result = array("start"=>0, "end"=>0);
-                if (isset($app->config->heatpump_elec)) {
-                    $meta = $feed->get_meta($app->config->heatpump_elec);
-                    $result['start'] = $meta->start_time;
-                    $result['end'] = $meta->end_time;
-                }
-                if (isset($app->config->heatpump_heat)) {
-                    $meta = $feed->get_meta($app->config->heatpump_heat);
-                    if ($meta->start_time>$result['start']) $result['start'] = $meta->start_time;
-                    if ($meta->end_time<$result['end']) $result['end'] = $meta->end_time;
-                }
-                if (isset($app->config->start_date) && $app->config->start_date>$result['start']) {
-                    $result['start'] = $app->config->start_date*1;
-                }
-                if ($result['start']==0) $result['start'] = false;
-                if ($result['end']==0) $result['end'] = false;
-                return $result;
-            }
-            
-            if ($route->action == "getdaily") {
-                $route->format = "text";
-                return get_daily_stats($feed,$app,$start,$end,$startingpower*1);
-            }
-            
-            return get_heatpump_stats($feed,$app,$start,$end,$startingpower*1);
-        }
-    
-        return $app;
+        return $myheatpump->get_daily_range($app->id);
     }
+
     else if ($route->action == "getdailydata") {
         $route->format = "text";
         $start = (int) get('start',true);

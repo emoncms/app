@@ -23,6 +23,23 @@ class MyHeatPump {
     }
 
     /**
+     * Get daily data range from myheatpump_daily_stats table
+     * 
+     * @param int $id - app id
+     * @return array start, end
+     */
+    public function get_daily_range($id) {
+        $id = (int) $id;
+
+        $result = $this->mysqli->query("SELECT MIN(`timestamp`) AS `start`, MAX(`timestamp`) AS `end` FROM myheatpump_daily_stats WHERE `id`='$id'");
+        $row = $result->fetch_object();
+
+        $days = ($row->end - $row->start) / 86400;
+
+        return array("start"=>$row->start*1, "end"=>$row->end*1, "days"=>$days);
+    }
+
+    /**
      * Get daily data
      *
      * @param int $id - app id
@@ -44,8 +61,6 @@ class MyHeatPump {
 
         return $this->format_csv($data);
     }
-
-
 
     /**
      * Format data to csv
