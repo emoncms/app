@@ -491,11 +491,13 @@ function calculate_window_cops($data, $interval, $starting_power) {
 
 function carnot_simulator($data, $starting_power) {
     if (!isset($data["heatpump_elec"])) return false;
+    if (!isset($data["heatpump_heat"])) return false;
     if (!isset($data["heatpump_flowT"])) return false;
     if (!isset($data["heatpump_returnT"])) return false;
     if (!isset($data["heatpump_outsideT"])) return false;
 
     if ($data["heatpump_elec"]==false) return false;
+    if ($data["heatpump_heat"]==false) return false;
     if ($data["heatpump_flowT"]==false) return false;
     if ($data["heatpump_returnT"]==false) return false;
     if ($data["heatpump_outsideT"]==false) return false;
@@ -520,11 +522,22 @@ function carnot_simulator($data, $starting_power) {
     $water_ideal_carnot_heat_sum = 0;
     $water_carnot_heat_n = 0;  
 
+    $ambientT = null;
+
     foreach ($data["heatpump_elec"] as $z => $value) {
         $elec = $data["heatpump_elec"][$z];
+        $heat = $data["heatpump_heat"][$z];
         $flowT = $data["heatpump_flowT"][$z];
         $returnT = $data["heatpump_returnT"][$z];
-        $ambientT = $data["heatpump_outsideT"][$z];
+        
+        if ($data["heatpump_outsideT"][$z] !== null) {
+            $ambientT = $data["heatpump_outsideT"][$z];
+        }
+
+        // if any of the values are null, skip this iteration
+        if ($elec === null || $heat === null || $flowT === null || $returnT === null || $ambientT === null) {
+            continue;
+        }
         
         $dhw = false;
         if ($dhw_enable) {
@@ -540,9 +553,14 @@ function carnot_simulator($data, $starting_power) {
         }
         
         if ($elec !== null && $carnot_COP !== null) {
-        
+
+            if ($elec<$starting_power) $elec = 0;
+
             $ideal_carnot_heat = $elec * $carnot_COP;
-            if ($returnT > $flowT) {
+
+            $DT = $flowT - $returnT;
+
+            if ($DT<-0.2) {
                 $ideal_carnot_heat *= -1;
             }
         
