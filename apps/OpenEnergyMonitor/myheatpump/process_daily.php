@@ -1,6 +1,6 @@
 <?php
 
-require "myheatpump_api2.php";
+require "myheatpump_process.php";
 require "/var/www/emoncms/Lib/load_emoncms.php";
 
 require_once "Modules/app/app_model.php";
