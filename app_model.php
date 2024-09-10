@@ -413,8 +413,8 @@ class AppConfig
         // old: userid, data
         // new: app id, userid, name, config
 
-        $result = $this->mysqli->query("SELECT `userid`, `data` FROM app_config");
-        while ($row = $result->fetch_object()) {
+        $main_result = $this->mysqli->query("SELECT `userid`, `data` FROM app_config");
+        while ($row = $main_result->fetch_object()) {
             $userid = $row->userid;
             $applist = json_decode($row->data);
             if (gettype($applist)=="array" || $applist===null) $applist = new stdClass();
