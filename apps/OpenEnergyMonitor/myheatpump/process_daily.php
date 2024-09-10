@@ -1,5 +1,10 @@
 <?php
 
+// Check if script is run from command line
+if (php_sapi_name() != 'cli') {
+    die("This script can only be run from the command line");
+}
+
 require "myheatpump_process.php";
 require "/var/www/emoncms/Lib/load_emoncms.php";
 
