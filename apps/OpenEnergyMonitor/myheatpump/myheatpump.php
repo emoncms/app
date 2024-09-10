@@ -408,6 +408,8 @@ global $path, $session, $v;
 <div class="ajax-loader"></div>
 
 <script>
+  var enable_process_daily = 0;
+  
   var apikey = "<?php print $apikey; ?>";
   var session_write = <?php echo $session['write']; ?>;
   config.id = <?php echo $id; ?>;
