@@ -35,17 +35,12 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
         return array('success'=>false, 'message'=>"period to large");
     }
     
-    //$interval = 60;
-    
-    
     if (!isset($app->config->heatpump_elec) || $app->config->heatpump_elec<1) return array('success'=>false, 'message'=>"Missing electricity consumption feed");
         
     // --------------------------------------------------------------------------------------------------------------    
     // Load data
     // --------------------------------------------------------------------------------------------------------------    
     $data = array();
-    
-    $elec_meta = $feed->get_meta($app->config->heatpump_elec);
     
     $feeds = array("heatpump_elec","heatpump_flowT","heatpump_returnT","heatpump_outsideT","heatpump_roomT","heatpump_heat","heatpump_dhw");
     
@@ -116,7 +111,6 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
       "end"=>(int)$end,
       "interval"=>(int)$interval,
       "stats"=>$cop_stats,
-      //"stats"=>$stats,
       "quality"=>[
         "elec"=>get_quality($data["heatpump_elec"]),
         "heat"=>get_quality($data["heatpump_heat"]),
@@ -580,7 +574,7 @@ function get_cumulative_kwh($feed,$feedid,$start,$end) {
     
     $kwh_start = $feed->get_value($feedid,$start);
     $kwh_end = $feed->get_value($feedid,$end);
-    //print $feedid." ".$start." ".$end." ".$kwh_start." ".$kwh_end." ";
+
     return $kwh_end - $kwh_start;
 }
 
