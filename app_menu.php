@@ -1,11 +1,15 @@
 <?php
     
-global $mysqli,$session,$user,$app_settings;
+global $mysqli,$session,$user,$settings;
 
 if ($session["read"] || $session["public_userid"]) {
 
+    if (!isset($settings['app'])) {
+        $settings['app'] = array();
+    }
+
     require_once "Modules/app/app_model.php";
-    $appconfig = new AppConfig($mysqli, $app_settings);
+    $appconfig = new AppConfig($mysqli, $settings['app']);
 
     // enable apikey read access
     $userid = false;
