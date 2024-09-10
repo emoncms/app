@@ -133,7 +133,7 @@ class AppConfig
                 // If context is public and app is not public, break out of loop
                 if ($context_public && !$appitem->public) break;
                 // else return the app
-                return $this->get_app_by_id($userid, $appitem->id);
+                return $this->get_app_by_id($appitem->id);
             }
         }
 
@@ -143,7 +143,7 @@ class AppConfig
             // If context is public and app is not public, skip to next app
             if ($context_public && !$appitem->public) continue;
             // else return the app
-            return $this->get_app_by_id($userid, $appitem->id);
+            return $this->get_app_by_id($appitem->id);
         }
 
         return false;
@@ -152,14 +152,12 @@ class AppConfig
     /**
      * Get app by id
      * 
-     * @param int $userid User ID
      * @param int $id App id
      */
-    public function get_app_by_id($userid, $id) {
-        $userid = (int) $userid;
+    public function get_app_by_id($id) {
         $id = (int) $id;
 
-        $result = $this->mysqli->query("SELECT `id`, `app`, `name`, `public`, `config` FROM app WHERE `userid`='$userid' AND `id`='$id'");
+        $result = $this->mysqli->query("SELECT `id`, `userid`, `app`, `name`, `public`, `config` FROM app WHERE `id`='$id'");
         if ($result && $row = $result->fetch_object()) {
             $row->config = json_decode($row->config);
             return $row;
@@ -206,6 +204,25 @@ class AppConfig
         $result = $this->mysqli->query("SELECT `id` FROM app WHERE `userid`='$userid' AND `id`='$id'");
         if ($result && $row = $result->fetch_object()) {
             return $row->id;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Check if userid is the owner of the app
+     * 
+     * @param int $userid User ID
+     * @param int $id App id
+     * @return bool Success status
+     */
+    public function is_owner($userid, $id) {
+        $userid = (int) $userid;
+        $id = (int) $id;
+
+        $result = $this->mysqli->query("SELECT `id` FROM app WHERE `userid`='$userid' AND `id`='$id'");
+        if ($result && $row = $result->fetch_object()) {
+            return true;
         } else {
             return false;
         }

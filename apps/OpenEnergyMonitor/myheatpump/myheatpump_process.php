@@ -1,108 +1,5 @@
 <?php
 
-function get_daily_stats($feed,$app,$start,$end,$starting_power) {
-
-    $timezone = 'Europe/London';
-    $date = new DateTime();
-    $date->setTimezone(new DateTimeZone($timezone));
-
-    if ($end===null || $start===null) {
-        $date->modify("midnight");
-        $end = $date->getTimestamp();
-        $date->modify("-30 day");
-        $start = $date->getTimestamp();
-    } else {
-        $start = convert_time($start,$timezone);
-        $end = convert_time($end,$timezone);
-        
-        $date->setTimestamp($start);
-        $date->modify("midnight");
-        $start = $date->getTimestamp();
-    }
-    
-    $out = "";
-    $fields = array();
-    $fields[] = "timestamp";
-
-    $categories = ["combined","running","space","water"];
-
-    foreach ($categories as $category) {
-        $fields[] = $category."_elec_kwh";
-        $fields[] = $category."_heat_kwh";
-        $fields[] = $category."_cop";
-        $fields[] = $category."_data_length";
-        $fields[] = $category."_elec_mean";
-        $fields[] = $category."_heat_mean";
-        $fields[] = $category."_flowT_mean";
-        $fields[] = $category."_returnT_mean";
-        $fields[] = $category."_outsideT_mean";
-        $fields[] = $category."_roomT_mean";
-        $fields[] = $category."_prc_carnot";
-    }
-    
-    $fields[] = "combined_cooling_kwh";
-    $fields[] = "combined_starts";
-    $fields[] = "combined_starts_per_hour";
-    $fields[] = "from_energy_feeds_elec_kwh";
-    $fields[] = "from_energy_feeds_heat_kwh";
-    $fields[] = "from_energy_feeds_cop";
-    
-    $fields[] = "quality_elec";
-    $fields[] = "quality_heat";
-    $fields[] = "quality_flowT";
-    $fields[] = "quality_returnT";
-    $fields[] = "quality_outsideT";
-    $fields[] = "quality_roomT";
-
-    $out .= implode(",",$fields)."\n";
-        
-    $time = $start;
-    while ($time<$end) {
-        // print $date->format("c")."\n";
-        
-        $stats = get_heatpump_stats($feed,$app,$time,$time+(3600*24),$starting_power);
-        
-        $values = array();
-
-        $values[] = $stats['start'];
-
-        foreach ($categories as $category) {
-            $values[] = $stats['stats'][$category]['elec_kwh'];
-            $values[] = $stats['stats'][$category]['heat_kwh'];
-            $values[] = $stats['stats'][$category]['cop'];
-            $values[] = $stats['stats'][$category]['data_length'];
-            $values[] = $stats['stats'][$category]['elec_mean'];
-            $values[] = $stats['stats'][$category]['heat_mean'];
-            $values[] = $stats['stats'][$category]['flowT_mean'];
-            $values[] = $stats['stats'][$category]['returnT_mean'];
-            $values[] = $stats['stats'][$category]['outsideT_mean'];
-            $values[] = $stats['stats'][$category]['roomT_mean'];
-            $values[] = $stats['stats'][$category]['prc_carnot'];
-        }
-        
-        $values[] = $stats['stats']["combined"]['cooling_kwh'];
-        $values[] = $stats['stats']["combined"]['starts'];
-        $values[] = $stats['stats']["combined"]['starts_per_hour'];        
-        $values[] = $stats['stats']['from_energy_feeds']['elec_kwh'];
-        $values[] = $stats['stats']['from_energy_feeds']['heat_kwh'];
-        $values[] = $stats['stats']['from_energy_feeds']['cop'];
-           
-        $values[] = $stats['quality']['elec'];
-        $values[] = $stats['quality']['heat'];
-        $values[] = $stats['quality']['flowT'];
-        $values[] = $stats['quality']['returnT'];
-        $values[] = $stats['quality']['outsideT'];
-        $values[] = $stats['quality']['roomT'];
-                
-        $out .= implode(",",$values)."\n";
-        
-        $date->modify("+1 day");
-        $time = $date->getTimestamp();
-    }
-
-    return $out;
-}
-
 function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
 
     // --------------------------------------------------------------------------------------------------------------    
@@ -138,17 +35,12 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
         return array('success'=>false, 'message'=>"period to large");
     }
     
-    //$interval = 60;
-    
-    
     if (!isset($app->config->heatpump_elec) || $app->config->heatpump_elec<1) return array('success'=>false, 'message'=>"Missing electricity consumption feed");
         
     // --------------------------------------------------------------------------------------------------------------    
     // Load data
     // --------------------------------------------------------------------------------------------------------------    
     $data = array();
-    
-    $elec_meta = $feed->get_meta($app->config->heatpump_elec);
     
     $feeds = array("heatpump_elec","heatpump_flowT","heatpump_returnT","heatpump_outsideT","heatpump_roomT","heatpump_heat","heatpump_dhw");
     
@@ -219,7 +111,6 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
       "end"=>(int)$end,
       "interval"=>(int)$interval,
       "stats"=>$cop_stats,
-      //"stats"=>$stats,
       "quality"=>[
         "elec"=>get_quality($data["heatpump_elec"]),
         "heat"=>get_quality($data["heatpump_heat"]),
@@ -683,7 +574,7 @@ function get_cumulative_kwh($feed,$feedid,$start,$end) {
     
     $kwh_start = $feed->get_value($feedid,$start);
     $kwh_end = $feed->get_value($feedid,$end);
-    //print $feedid." ".$start." ".$end." ".$kwh_start." ".$kwh_end." ";
+
     return $kwh_end - $kwh_start;
 }
 
