@@ -189,13 +189,11 @@ function app_controller()
         } else {
             $app_name = urldecode(get("name",false,false));
         }
-        if ($app_name) {
-            $app = $appconfig->get_app_or_default($userid,$app_name,$public);
-        }
+        $app = $appconfig->get_app_or_default($userid,$app_name,$public);
     }
 
     // If we have an id then we can get the app
-    if (!$app && isset($_GET['id'])) {
+    if (isset($_GET['id'])) {
         $app = $appconfig->get_app_by_id($_GET['id']);
 
         // If public mode is enabled then check if the app is public
