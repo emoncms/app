@@ -17,7 +17,7 @@ class AppConfig
     private $mysqli;
     private $settings;
     private $available;
-    private $app_table_exists = true;
+    public $app_table_exists = true;
 
     public function __construct($mysqli, $settings)
     {

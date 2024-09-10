@@ -53,12 +53,22 @@ if ($session["read"] || $session["public_userid"]) {
     }
     
     if ($session["write"]) {
-        $l2['new'] = array(
-            "name"=>_('New'),
-            "href"=>"app/new", 
-            "icon"=>"plus", 
-            "order"=>$_i
-        );
+
+        if (!$appconfig->app_table_exists) {
+            $l2['notice'] = array(
+                "name"=>_('Please update database'),
+                "href"=>"admin/db", 
+                "icon"=>"", 
+                "order"=>$_i
+            );
+        } else {
+            $l2['new'] = array(
+                "name"=>_('New'),
+                "href"=>"app/new", 
+                "icon"=>"plus", 
+                "order"=>$_i
+            );
+        }
     }
     
     // Level 1 top bar
