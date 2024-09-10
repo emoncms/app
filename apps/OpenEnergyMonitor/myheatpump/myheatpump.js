@@ -950,6 +950,9 @@ function process_error_data() {
 // POWER GRAPH
 // -------------------------------------------------------------------------------
 function powergraph_draw() {
+    $("#overlay_text").html("");
+    $("#overlay").hide();  
+    
     set_url_view_params("power", view.start, view.end);
 
     var style = { size: flot_font_size, color: "#666" }
