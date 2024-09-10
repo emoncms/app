@@ -26,6 +26,12 @@ class AppConfig
         
         $this->available = $this->load_available();
 
+        // Option to skip db check
+        if (isset($settings['db_check']) && $settings['db_check'] == 0) {
+            return;
+        }
+        
+        // Check and migrate database
         if (!$this->app_table_exists()) {
             $this->app_table_exists = false;
         } else {
