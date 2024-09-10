@@ -157,7 +157,7 @@ class AppConfig
     public function get_app_by_id($id) {
         $id = (int) $id;
 
-        $result = $this->mysqli->query("SELECT `id`, `app`, `name`, `public`, `config` FROM app WHERE `id`='$id'");
+        $result = $this->mysqli->query("SELECT `id`, `userid`, `app`, `name`, `public`, `config` FROM app WHERE `id`='$id'");
         if ($result && $row = $result->fetch_object()) {
             $row->config = json_decode($row->config);
             return $row;
@@ -204,6 +204,25 @@ class AppConfig
         $result = $this->mysqli->query("SELECT `id` FROM app WHERE `userid`='$userid' AND `id`='$id'");
         if ($result && $row = $result->fetch_object()) {
             return $row->id;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Check if userid is the owner of the app
+     * 
+     * @param int $userid User ID
+     * @param int $id App id
+     * @return bool Success status
+     */
+    public function is_owner($userid, $id) {
+        $userid = (int) $userid;
+        $id = (int) $id;
+
+        $result = $this->mysqli->query("SELECT `id` FROM app WHERE `userid`='$userid' AND `id`='$id'");
+        if ($result && $row = $result->fetch_object()) {
+            return true;
         } else {
             return false;
         }

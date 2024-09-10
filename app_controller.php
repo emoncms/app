@@ -178,6 +178,8 @@ function app_controller()
         $userid = (int) $session['public_userid'];
         $public = true;
     }
+
+    // Apps can be accessed by name or by id
     
     // If we have a userid then we can get the app
     if ($userid)
@@ -187,7 +189,27 @@ function app_controller()
         } else {
             $app_name = urldecode(get("name",false,false));
         }
-        $app = $appconfig->get_app_or_default($userid,$app_name,$public);
+        if ($app_name) {
+            $app = $appconfig->get_app_or_default($userid,$app_name,$public);
+        }
+    }
+
+    // If we have an id then we can get the app
+    if (!$app && isset($_GET['id'])) {
+        $app = $appconfig->get_app_by_id($_GET['id']);
+
+        // If public mode is enabled then check if the app is public
+        if ($public) {
+            if (!$app->public) {
+                $app = false;
+            }
+        // If public mode is not enabled then check if the app belongs to the user
+        // and is not listed as public
+        } else {
+            if ($app->userid != $userid && !$app->public) {
+                $app = false;
+            }
+        }
     }
 
     if (!$app) {

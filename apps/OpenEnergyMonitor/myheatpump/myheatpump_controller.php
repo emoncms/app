@@ -137,6 +137,8 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
     // Clear daily data
     else if ($route->action == "cleardaily") {
         $route->format = "json";
+        if (!$session["write"]) return array("success"=>false, "message"=>"Permission denied");
+        if ($app->userid != $session["userid"]) return array("success"=>false, "message"=>"Permission denied");
         $mysqli->query("DELETE FROM myheatpump_daily_stats WHERE `id`='".$app->id."'");
         return array("success"=>true);
     }
@@ -144,8 +146,9 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
     // Clear last 60 days
     else if ($route->action == "clearlast60days") {
         $route->format = "json";
+        if (!$session["write"]) return array("success"=>false, "message"=>"Permission denied");
+        if ($app->userid != $session["userid"]) return array("success"=>false, "message"=>"Permission denied");
         $mysqli->query("DELETE FROM myheatpump_daily_stats WHERE `id`='".$app->id."' AND `timestamp`>='".(time()-60*24*3600)."'");
         return array("success"=>true);
     }
-
 }

@@ -256,7 +256,7 @@ function show() {
     if (config.app.enable_process_daily.value) {
         $.ajax({
             url: path + "app/gettotals",
-            data: { name: config.name, apikey: apikey },
+            data: { id: config.id, apikey: apikey },
             async: true,
             dataType: "json",
             success: function (result) {
@@ -1019,7 +1019,7 @@ function process_daily_data() {
     $("#overlay").show();
     $.ajax({
         url: path + "app/processdaily",
-        data: { name: config.name, apikey: apikey, timeout: process_daily_timeout },
+        data: { id: config.id, apikey: apikey, timeout: process_daily_timeout },
         async: true,
         success: function (result) {
             if (result.days_left != undefined) {
@@ -1070,7 +1070,7 @@ function bargraph_load(start, end) {
         // format is csv
         $.ajax({
             url: path + "app/getdailydata",
-            data: { name: config.name, start: start*0.001, end: end*0.001, apikey: apikey },
+            data: { id: config.id, start: start*0.001, end: end*0.001, apikey: apikey },
             async: false,
             success: function (data) {
                 var rows = data.split("\n");
