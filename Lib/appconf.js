@@ -19,8 +19,17 @@ var config = {
         // Check that the config is complete first otherwise show config interface
         if (!config.check()) {
             if (!public_userid) {
-                config.showConfig();          // Show setup block
-                config.UI();                  // Populate setup UI options
+                if (session_write == undefined) {
+                    config.showConfig();          // Show setup block
+                    config.UI();                  // Populate setup UI options
+                } else {
+                    if (session_write) {
+                        config.showConfig();          // Show setup block
+                        config.UI();                  // Populate setup UI options
+                    } else {
+                        alert("Invalid app configuration");
+                    }
+                }
             } else {
                 $("#app-block").show();       // Show app block
             }

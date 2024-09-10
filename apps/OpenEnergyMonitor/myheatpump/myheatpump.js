@@ -265,7 +265,7 @@ function show() {
                     $("#total_heat").html(Math.round(result.combined_heat_kwh));
                     $("#total_cop").html(result.combined_cop.toFixed(2));
                 }
-
+                /*
                 // same for running
                 if (result.running_elec_kwh != undefined) {
                     $("#running_elec").html(Math.round(result.running_elec_kwh));
@@ -285,7 +285,7 @@ function show() {
                     $("#water_elec").html(Math.round(result.water_elec_kwh));
                     $("#water_heat").html(Math.round(result.water_heat_kwh));
                     $("#water_cop").html(result.water_cop.toFixed(2));
-                }
+                }*/
             }
         });
     }

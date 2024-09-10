@@ -134,6 +134,29 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
         return $myheatpump->process_daily($app->id,$timeout);
     }
 
+    // enabledailymode
+    else if ($route->action == "enabledailymode") {
+        $route->format = "json";
+
+        // Load the app config
+        $result = $mysqli->query("SELECT * FROM app WHERE `id`='".$app->id."'");
+        $app = $result->fetch_object();
+        $config = json_decode($app->config);
+
+        if (!isset($config->enable_process_daily)) {
+            $config->enable_process_daily = true;
+        }
+
+        // Update the app config, use prepared statement
+        $config = json_encode($config);
+        $stmt = $mysqli->prepare("UPDATE app SET `config`=? WHERE `id`=?");
+        $stmt->bind_param("si",$config,$app->id);
+        $stmt->execute();
+        $stmt->close();
+
+        return array("success"=>true, "config"=>json_decode($config));
+    }
+
     // Clear daily data
     else if ($route->action == "cleardaily") {
         $route->format = "json";

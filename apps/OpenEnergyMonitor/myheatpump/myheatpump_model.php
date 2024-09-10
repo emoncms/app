@@ -94,6 +94,10 @@ class MyHeatPump {
     public function process_lock($id) {
         $id = (int) $id;
 
+        if (!$this->redis) {
+            return true;
+        }
+
         $lock_key = "myheatpump_process_lock_$id";
         $lock = $this->redis->get($lock_key);
         if ($lock) {
@@ -110,6 +114,11 @@ class MyHeatPump {
 
     public function process_unlock($id) {
         $id = (int) $id;
+
+        if (!$this->redis) {
+            return;
+        }
+        
         $lock_key = "myheatpump_process_lock_$id";
         $this->redis->del($lock_key);
     }
@@ -135,6 +144,11 @@ class MyHeatPump {
 
         // Get start and end time of available data
         $result = $this->get_data_period($id);
+
+        if ($result['start']===false || $result['end']===false) {
+            $this->process_unlock($id);
+            return array("success"=>false, "message"=>"No data available");
+        }
 
         // Get most recent day in table
         $start_time = 0;
