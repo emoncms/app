@@ -19,6 +19,3 @@
         'userid' => array('type' => 'int(11)'),
         'data' => array('type' => 'text')
     );
-    
-    // Include app schema
-    require_once "apps/OpenEnergyMonitor/myheatpump/myheatpump_schema.php";
