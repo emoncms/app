@@ -29,6 +29,7 @@ config.app = {
     "heatpump_dhw": { "type": "feed", "autoname": "heatpump_dhw", "optional": true, "description": "Status of Hot Water circuit (non-zero when running)" },
     "heatpump_ch": { "type": "feed", "autoname": "heatpump_ch", "optional": true, "description": "Status of Central Heating circuit (non-zero when running)" },
     "heatpump_error": { "type": "feed", "autoname": "heatpump_error", "optional": true, "description": "Axioma heat meter error state" },
+    "enable_process_daily":{"type":"checkbox", "default":false, "name": "Enable daily pre-processor", "description":"Enable split between water and space heating in daily view"},
     "start_date": { "type": "value", "default": 0, "name": "Start date", "description": _("Start date for all time values (unix timestamp)") },
 };
 config.feeds = feed.list();
@@ -98,7 +99,15 @@ function init() {
 }
 
 function show() {
+
     $("#app_name").html(config.app['app_name'].value);
+
+    if (!config.app.enable_process_daily.value) {
+        $(".bargraph_mode").hide();
+        bargraph_mode = "combined";
+    } else {
+        $(".bargraph_mode").show();
+    }
 
     $("body").css('background-color', 'WhiteSmoke');
     // -------------------------------------------------------------------------------
@@ -223,14 +232,17 @@ function show() {
 
         if (urlParams.start != undefined) start = urlParams.start * 1000;
         if (urlParams.end != undefined) end = urlParams.end * 1000;
-
-
+        
         bargraph_load(start, end);
         bargraph_draw();
 
-
         // check if we need to process any historic data here
-        process_daily_data();
+        if (config.app.enable_process_daily.value) {
+            process_daily_data();
+        } else {
+            $("#overlay_text").html("");
+            $("#overlay").hide();    
+        }
 
         $("#advanced-toggle").hide();
     }
@@ -241,40 +253,42 @@ function show() {
     updaterinst = setInterval(updater, 10000);
 
     // Load totals from pre-processed daily data
-    $.ajax({
-        url: path + "app/gettotals",
-        data: { name: config.name, apikey: apikey },
-        async: true,
-        dataType: "json",
-        success: function (result) {
-            if (result.combined_elec_kwh != undefined) {
-                $("#total_elec").html(Math.round(result.combined_elec_kwh));
-                $("#total_heat").html(Math.round(result.combined_heat_kwh));
-                $("#total_cop").html(result.combined_cop.toFixed(2));
-            }
+    if (config.app.enable_process_daily.value) {
+        $.ajax({
+            url: path + "app/gettotals",
+            data: { name: config.name, apikey: apikey },
+            async: true,
+            dataType: "json",
+            success: function (result) {
+                if (result.combined_elec_kwh != undefined) {
+                    $("#total_elec").html(Math.round(result.combined_elec_kwh));
+                    $("#total_heat").html(Math.round(result.combined_heat_kwh));
+                    $("#total_cop").html(result.combined_cop.toFixed(2));
+                }
 
-            // same for running
-            if (result.running_elec_kwh != undefined) {
-                $("#running_elec").html(Math.round(result.running_elec_kwh));
-                $("#running_heat").html(Math.round(result.running_heat_kwh));
-                $("#running_cop").html(result.running_cop.toFixed(2));
-            }
+                // same for running
+                if (result.running_elec_kwh != undefined) {
+                    $("#running_elec").html(Math.round(result.running_elec_kwh));
+                    $("#running_heat").html(Math.round(result.running_heat_kwh));
+                    $("#running_cop").html(result.running_cop.toFixed(2));
+                }
 
-            // space
-            if (result.space_elec_kwh != undefined) {
-                $("#space_elec").html(Math.round(result.space_elec_kwh));
-                $("#space_heat").html(Math.round(result.space_heat_kwh));
-                $("#space_cop").html(result.space_cop.toFixed(2));
-            }
+                // space
+                if (result.space_elec_kwh != undefined) {
+                    $("#space_elec").html(Math.round(result.space_elec_kwh));
+                    $("#space_heat").html(Math.round(result.space_heat_kwh));
+                    $("#space_cop").html(result.space_cop.toFixed(2));
+                }
 
-            //water 
-            if (result.water_elec_kwh != undefined) {
-                $("#water_elec").html(Math.round(result.water_elec_kwh));
-                $("#water_heat").html(Math.round(result.water_heat_kwh));
-                $("#water_cop").html(result.water_cop.toFixed(2));
+                //water 
+                if (result.water_elec_kwh != undefined) {
+                    $("#water_elec").html(Math.round(result.water_elec_kwh));
+                    $("#water_heat").html(Math.round(result.water_heat_kwh));
+                    $("#water_cop").html(result.water_cop.toFixed(2));
+                }
             }
-        }
-    });
+        });
+    }
 
     $(".ajax-loader").hide();
 }
@@ -304,32 +318,32 @@ function updater() {
         }
 
         // Update all-time values
-        /*
-        var total_elec = 0;
-        var total_heat = 0;
-        if (elec_enabled) total_elec = feeds["heatpump_elec_kwh"].value - heatpump_elec_start;
-        if (heat_enabled) total_heat = feeds["heatpump_heat_kwh"].value - heatpump_heat_start;
+        if (!config.app.enable_process_daily.value) {
+            var total_elec = 0;
+            var total_heat = 0;
+            if (elec_enabled) total_elec = feeds["heatpump_elec_kwh"].value - heatpump_elec_start;
+            if (heat_enabled) total_heat = feeds["heatpump_heat_kwh"].value - heatpump_heat_start;
 
-        var total_cop = 0;
-        if (total_elec > 0) total_cop = total_heat / total_elec;
-        if (total_cop < 0) total_cop = 0;
+            var total_cop = 0;
+            if (total_elec > 0) total_cop = total_heat / total_elec;
+            if (total_cop < 0) total_cop = 0;
 
-        if (total_elec < 20) {
-            total_elec = total_elec.toFixed(1);
-        } else {
-            total_elec = total_elec.toFixed(0);
+            if (total_elec < 20) {
+                total_elec = total_elec.toFixed(1);
+            } else {
+                total_elec = total_elec.toFixed(0);
+            }
+
+            if (total_heat < 20) {
+                total_heat = total_heat.toFixed(1);
+            } else {
+                total_heat = total_heat.toFixed(0);
+            }
+
+            $("#total_elec").html(total_elec);
+            $("#total_heat").html(total_heat);
+            $("#total_cop").html(total_cop.toFixed(2));
         }
-
-        if (total_heat < 20) {
-            total_heat = total_heat.toFixed(1);
-        } else {
-            total_heat = total_heat.toFixed(0);
-        }
-
-        $("#total_elec").html(total_elec);
-        $("#total_heat").html(total_heat);
-        $("#total_cop").html(total_cop.toFixed(2));
-        */
 
         // Updates every 60 seconds
         var now = new Date().getTime();
@@ -1050,38 +1064,70 @@ function bargraph_load(start, end) {
 
     daily_data = {};
 
-    // Fetch daily data e.g http://localhost/emoncms/app/getdailydata?name=MyHeatpump&apikey=APIKEY
-    // Ajax jquery syncronous request
-    // format is csv
-    $.ajax({
-        url: path + "app/getdailydata",
-        data: { name: config.name, start: start*0.001, end: end*0.001, apikey: apikey },
-        async: false,
-        success: function (data) {
-            var rows = data.split("\n");
-            var fields = rows[0].split(",");
+    if (config.app.enable_process_daily.value) {
+        // Fetch daily data e.g http://localhost/emoncms/app/getdailydata?name=MyHeatpump&apikey=APIKEY
+        // Ajax jquery syncronous request
+        // format is csv
+        $.ajax({
+            url: path + "app/getdailydata",
+            data: { name: config.name, start: start*0.001, end: end*0.001, apikey: apikey },
+            async: false,
+            success: function (data) {
+                var rows = data.split("\n");
+                var fields = rows[0].split(",");
 
-            
-            for (var z = 1; z < rows.length; z++) {
-                var cols = rows[z].split(",");
-                var timestamp = cols[1] * 1000;
+                
+                for (var z = 1; z < rows.length; z++) {
+                    var cols = rows[z].split(",");
+                    var timestamp = cols[1] * 1000;
 
-                if (cols.length == fields.length) {
-                    for (var i=2; i<fields.length; i++) {
-                        if (daily_data[fields[i]] == undefined) daily_data[fields[i]] = [];
+                    if (cols.length == fields.length) {
+                        for (var i=2; i<fields.length; i++) {
+                            if (daily_data[fields[i]] == undefined) daily_data[fields[i]] = [];
 
-                        if (cols[i] != "") {
-                            cols[i] = parseFloat(cols[i]);
-                        } else {
-                            cols[i] = null;
+                            if (cols[i] != "") {
+                                cols[i] = parseFloat(cols[i]);
+                            } else {
+                                cols[i] = null;
+                            }
+
+                            daily_data[fields[i]].push([timestamp, cols[i]]);
                         }
+                    }
+                }
+            }
+        });
+    } else {
 
-                        daily_data[fields[i]].push([timestamp, cols[i]]);
+        // Option: Use standard feed data instead of pre-processed daily data
+
+        if (heat_enabled) {
+            daily_data["combined_heat_kwh"] = feed.getdata(feeds["heatpump_heat_kwh"].id, start, end, "daily", 0, 1);
+        }
+        if (elec_enabled) {
+            daily_data["combined_elec_kwh"] = feed.getdata(feeds["heatpump_elec_kwh"].id, start, end, "daily", 0, 1);
+        }
+        if (feeds["heatpump_outsideT"] != undefined) {
+            if ((end - start) < 120 * DAY) {
+                daily_data["combined_outsideT_mean"] = feed.getdata(feeds["heatpump_outsideT"].id, start, end, "daily", 1, 0);
+            }
+        }
+
+        // add series that shows COP points for each day
+        if (heat_enabled) {
+            if ((end - start) < 120 * DAY) {
+                daily_data["combined_cop"] = [];
+                for (var z in daily_data["combined_elec_kwh"]) {
+                    time = daily_data["combined_elec_kwh"][z][0];
+                    elec = daily_data["combined_elec_kwh"][z][1];
+                    heat = daily_data["combined_heat_kwh"][z][1];
+                    if (elec && heat) {
+                        daily_data["combined_cop"][z] = [time, heat / elec];
                     }
                 }
             }
         }
-    });
+    }
 
     set_url_view_params('daily', start, end);
 }

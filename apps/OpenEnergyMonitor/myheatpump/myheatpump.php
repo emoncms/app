@@ -408,8 +408,6 @@ global $path, $session, $v;
 <div class="ajax-loader"></div>
 
 <script>
-  var enable_process_daily = 0;
-  
   var apikey = "<?php print $apikey; ?>";
   var session_write = <?php echo $session['write']; ?>;
   config.id = <?php echo $id; ?>;
@@ -417,5 +415,5 @@ global $path, $session, $v;
   config.public = <?php echo $public; ?>;
   config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=104"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=105"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=1"></script>
