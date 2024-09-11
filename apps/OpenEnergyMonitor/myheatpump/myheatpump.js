@@ -424,7 +424,7 @@ function powergraph_load() {
         "heatpump_targetT": { label: "TargetT", yaxis: 2, color: "#ccc" },
         "heatpump_flowT": { label: "FlowT", yaxis: 2, color: 2 },
         "heatpump_returnT": { label: "ReturnT", yaxis: 2, color: 3 },
-        "heatpump_outsideT": { label: "OutsideT", yaxis: 2, color: 4 },
+        "heatpump_outsideT": { label: "OutsideT", yaxis: 2, color: "#c880ff" },
         "heatpump_roomT": { label: "RoomT", yaxis: 2, color: "#000" },
         "heatpump_flowrate": { label: "Flow rate", yaxis: 3, color: 6 },
         "heatpump_heat": { label: "Heat", yaxis: 1, color: 0, lines: { show: true, fill: 0.2, lineWidth: 0.5 } },
@@ -834,21 +834,21 @@ function bargraph_draw() {
         }
     }
 
+    if (feeds["heatpump_outsideT"] != undefined) {
+        data["heatpump_outsideT_daily"] = daily_data["combined_outsideT_mean"];
+
+        bargraph_series.push({
+            data: data["heatpump_outsideT_daily"], color: "#c880ff", yaxis: 2,
+            lines: { show: true, align: "center", fill: false }, points: { show: false }
+        });
+    }
+
     if (daily_data[bargraph_mode+"_cop"] != undefined) {
         cop_data = daily_data[bargraph_mode+"_cop"];
 
         bargraph_series.push({
             data: cop_data, color: "#44b3e2", yaxis: 3,
             points: { show: true }
-        });
-    }
-
-    if (feeds["heatpump_outsideT"] != undefined) {
-        data["heatpump_outsideT_daily"] = daily_data["combined_outsideT_mean"];
-
-        bargraph_series.push({
-            data: data["heatpump_outsideT_daily"], color: 4, yaxis: 2,
-            lines: { show: true, align: "center", fill: false }, points: { show: false }
         });
     }
 
@@ -881,14 +881,15 @@ function bargraph_draw() {
             reserveSpace: false,
             min: 0
         }, {
-            font: { size: flot_font_size, color: "#9440ed" },
+            font: { size: flot_font_size, color: "#c880ff" },
             // labelWidth:-5
             reserveSpace: false,
             // max:40
         }, {
             font: { size: flot_font_size, color: "#44b3e2" },
             reserveSpace: false,
-            min: 0
+            min: 1,
+            max: 8
         }],
         selection: { mode: "x" },
         grid: {
