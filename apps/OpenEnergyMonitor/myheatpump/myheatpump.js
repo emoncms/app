@@ -67,7 +67,6 @@ var start_time = 0;
 var end_time = 0;
 var show_flow_rate = false;
 var show_instant_cop = false;
-var exclude_dhw = false;
 var inst_cop_min = 2;
 var inst_cop_max = 6;
 var inst_cop_mv_av_dp = 0;
@@ -1023,8 +1022,7 @@ function draw_histogram(histogram) {
 // EVENTS
 // -------------------------------------------------------------------------------
 
-// Placeholder events
-
+// Power graph navigation
 $("#zoomout").click(function () { view.zoomout(); powergraph_load(); });
 $("#zoomin").click(function () { view.zoomin(); powergraph_load(); });
 $('#right').click(function () { view.panright(); powergraph_load(); });
@@ -1035,6 +1033,7 @@ $('.time').click(function () {
     powergraph_load();
 });
 
+// Switch to bargraph
 $(".viewhistory").click(function () {
     $(".powergraph-navigation").hide();
     var timeWindow = 30 * DAY;
@@ -1050,6 +1049,7 @@ $(".viewhistory").click(function () {
     $("#advanced-block").hide();
 });
 
+// Show advanced section on powergraph
 $("#advanced-toggle").click(function () {
     var state = $(this).html();
 
@@ -1151,18 +1151,17 @@ $('#placeholder').bind("plotclick", function (event, pos, item) {
         var z = item.dataIndex;
         view.start = data["heatpump_elec_kwhd"][z][0];
         view.end = view.start + DAY;
-        $(".bargraph-navigation").hide();
         viewmode = "powergraph";
         powergraph_load();
+
+        $(".bargraph-navigation").hide();
         $(".powergraph-navigation").show();
         $("#advanced-toggle").show();
-
         if ($("#advanced-toggle").html() == "SHOW DETAIL") {
             $("#advanced-block").hide();
         } else {
             $("#advanced-block").show();
         }
-
     }
 });
 
@@ -1175,7 +1174,8 @@ $('#placeholder').bind("plotselected", function (event, ranges) {
         bargraph_load(start, end);
         bargraph_draw();
     } else {
-        view.start = start; view.end = end;
+        view.start = start; 
+        view.end = end;
         powergraph_load();
     }
     setTimeout(function () { panning = false; }, 100);
@@ -1184,14 +1184,9 @@ $('#placeholder').bind("plotselected", function (event, ranges) {
 $('#histogram').bind("plothover", function (event, pos, item) {
     if (item) {
         var z = item.dataIndex;
-
         if (previousPoint != item.datapoint) {
             previousPoint = item.datapoint;
-
             $("#tooltip").remove();
-
-            var itemTime = item.datapoint[0];
-            var itemValue = item.datapoint[1];
             tooltip(item.pageX, item.pageY, item.datapoint[0] + ": " + (item.datapoint[1]).toFixed(3) + " kWh", "#fff", "#000");
 
         }
@@ -1206,20 +1201,13 @@ $(".bargraph_mode").click(function () {
     bargraph_draw();
 });
 
-$('.bargraph-alltime').click(function () {
-    var start = start_time * 1000;
-    var end = (new Date()).getTime();
-    bargraph_load(start, end);
-    bargraph_draw();
-});
-
 $('.bargraph-day').click(function () {
     view.timewindow(1.0);
-    $(".bargraph-navigation").hide();
     viewmode = "powergraph";
     powergraph_load();
-    $(".powergraph-navigation").show();
 
+    $(".bargraph-navigation").hide();
+    $(".powergraph-navigation").show();
     $("#advanced-toggle").show();
     if ($("#advanced-toggle").html() == "SHOW DETAIL") {
         $("#advanced-block").hide();
@@ -1228,8 +1216,9 @@ $('.bargraph-day').click(function () {
     }
 });
 
-$('.bargraph-week').click(function () {
-    var timeWindow = 7 * DAY;
+$('.bargraph-period').click(function () {
+    var days = $(this).attr("days");
+    var timeWindow = days * DAY;
     var end = (new Date()).getTime();
     var start = end - timeWindow;
     if (start < (start_time * 1000)) start = start_time * 1000;
@@ -1237,34 +1226,26 @@ $('.bargraph-week').click(function () {
     bargraph_draw();
 });
 
-$('.bargraph-month').click(function () {
-    var timeWindow = 30 * DAY;
+$('.bargraph-alltime').click(function () {
+    var start = start_time * 1000;
     var end = (new Date()).getTime();
-    var start = end - timeWindow;
-    if (start < (start_time * 1000)) start = start_time * 1000;
-    bargraph_load(start, end);
-    bargraph_draw();
-});
-
-$('.bargraph-quarter').click(function () {
-    var timeWindow = 91 * DAY;
-    var end = (new Date()).getTime();
-    var start = end - timeWindow;
-    if (start < (start_time * 1000)) start = start_time * 1000;
-    bargraph_load(start, end);
-    bargraph_draw();
-});
-
-$('.bargraph-year').click(function () {
-    var timeWindow = 365 * DAY;
-    var end = (new Date()).getTime();
-    var start = end - timeWindow;
-    if (start < (start_time * 1000)) start = start_time * 1000;
     bargraph_load(start, end);
     bargraph_draw();
 });
 
 // Powergraph events (advanced section)
+
+// Detail section events
+
+$(".show_stats_category").click(function () {
+    var key = $(this).attr("key");
+    var color = $(this).css("color");
+    $(".stats_category").hide();
+    $(".stats_category[key='" + key + "'").show();
+    $(".show_stats_category").css("border-bottom", "none");
+    $(this).css("border-bottom", "1px solid " + color);
+});
+
 
 $("#carnot_enable").click(function () {
 
@@ -1294,24 +1275,6 @@ $("#carnot_enable_prc").click(function () {
         $("#carnot_prc_options").hide();
     }
 
-    powergraph_process();
-});
-
-$("#stats_when_running").click(function () {
-    if ($("#stats_when_running")[0].checked) {
-        $("#mean_when_running").show();
-        if (feeds["heatpump_dhw"] != undefined) {
-            $("#stats_without_dhw").show();
-        }
-    } else {
-        $("#mean_when_running").hide();
-        $("#stats_without_dhw").hide();
-    }
-
-    powergraph_process();
-});
-
-$("#exclude_dhw").click(function () {
     powergraph_process();
 });
 
@@ -1416,13 +1379,4 @@ $("#configure_standby").click(function () {
     } else {
         $("#configure_standby_options").hide();
     }
-});
-
-$(".show_stats_category").click(function () {
-    var key = $(this).attr("key");
-    var color = $(this).css("color");
-    $(".stats_category").hide();
-    $(".stats_category[key='" + key + "'").show();
-    $(".show_stats_category").css("border-bottom", "none");
-    $(this).css("border-bottom", "1px solid " + color);
 });
