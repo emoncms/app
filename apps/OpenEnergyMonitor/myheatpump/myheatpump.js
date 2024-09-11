@@ -34,6 +34,11 @@ config.app = {
 };
 config.feeds = feed.list();
 
+// This is to aid with finding the userid of the app owner
+if (config.feeds.length > 0) {
+    console.log("userid: "+config.feeds[0].userid);
+}
+
 config.initapp = function () { init() };
 config.showapp = function () { show() };
 config.hideapp = function () { clear() };
@@ -682,7 +687,6 @@ function powergraph_draw() {
 // -------------------------------------------------------------------------------
 
 function process_daily_data() {
-    console.log("process_daily_data");
 
     $("#overlay").show();
     $.ajax({
@@ -691,7 +695,6 @@ function process_daily_data() {
         async: true,
         success: function (result) {
             if (result.days_left != undefined) {
-                console.log("Days left: " + result.days_left);
                 if (result.days_left > 0) {
                     $("#overlay_text").html("Processing daily data... " + result.days_left + " days left");
                     // run again in 10 seconds
