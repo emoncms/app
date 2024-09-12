@@ -85,3 +85,12 @@
   /*border-bottom: 1px solid #000;*/
   background-color:#fafafa;
 }
+
+#data-error {
+  color:red;
+  float: right;
+  padding:11px;
+  font-size:14px;
+  font-weight:bold;
+  cursor:pointer;
+}

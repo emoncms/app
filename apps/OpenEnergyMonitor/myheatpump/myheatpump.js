@@ -600,18 +600,63 @@ function emitter_and_volume_calculator() {
 }
 
 function process_error_data() {
-    if (data["heatpump_error"] != undefined) {
+
+    var total_error_time = 0;
+
+    if (feeds["heatpump_error"] != undefined) {
         // Axioma heat meter error codes:
         // 1024: No flow
         // 67108864: < 3C delta T (ignore, this is often the case)
-
         // translate 1024  = 1, everything else = 0
         for (var z in data["heatpump_error"]) {
             let time = data["heatpump_error"][z][0];
             let error = data["heatpump_error"][z][1];
-            if (error == 1024) data["heatpump_error"][z] = [time, 1];
+            if (error == 1024) {
+                data["heatpump_error"][z] = [time, 1];
+                total_error_time += view.interval;
+            }
             else data["heatpump_error"][z] = [time, 0];
         }
+
+    } else {
+
+        data["heatpump_error"] = [];
+        // Heat meter error auto detection
+        if (data["heatpump_elec"] != undefined && data["heatpump_heat"] != undefined && data["heatpump_flowT"] != undefined && data["heatpump_returnT"] != undefined) {
+
+            console.log("auto detect heat meter errors");
+
+            for (var z in data["heatpump_elec"]) {
+                var time = data["heatpump_elec"][z][0];
+                var error_state = 0;
+
+                var DT = data["heatpump_flowT"][z][1] - data["heatpump_returnT"][z][1];
+
+                if (data["heatpump_elec"][z][1] > 300 && data["heatpump_heat"][z][1] == 0 && DT > 1) {
+                    error_state = 1;
+                    total_error_time += view.interval;
+                }
+                data["heatpump_error"].push([time, error_state]);
+            }
+
+            if (total_error_time > 60) {
+                powergraph_series['heatpump_error'] = { 
+                    data: data["heatpump_error"],
+                    label: "Error", 
+                    yaxis: 4, 
+                    color: "#F00", 
+                    lines: { lineWidth: 0, show: true, fill: 0.15 } 
+                };
+            }
+        }
+    }
+
+    var error_div = $("#data-error");
+    if (total_error_time > 60) {
+        error_div.show();
+        error_div.attr("title", "Heat meter air issue detected for " + (total_error_time / 60).toFixed(0) + " minutes");
+    } else {
+        error_div.hide();
     }
 }
 
@@ -722,6 +767,9 @@ function process_daily_data() {
 }
 
 function bargraph_load(start, end) {
+
+    $("#data-error").hide();
+
     var intervalms = DAY;
     end = Math.ceil(end / intervalms) * intervalms;
     start = Math.floor(start / intervalms) * intervalms;
@@ -1146,7 +1194,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 else if (item.series.label == "TargetT") { name = "Target"; unit = "°C"; dp = 1; }
                 else if (item.series.label == "DHW") { name = "Hot Water"; unit = ""; dp = 0; }
                 else if (item.series.label == "CH") { name = "Central Heating"; unit = ""; dp = 0; }
-                else if (item.series.label == "Error") { name = "Heat meter air error"; unit = ""; dp = 0; }
+                else if (item.series.label == "Error") { name = "Error"; unit = ""; dp = 0; }
                 else if (item.series.label == "Electric") { name = "Elec"; unit = "W"; }
                 else if (item.series.label == "Heat") { name = "Heat"; unit = "W"; }
                 else if (item.series.label == "Carnot Heat") { name = "Carnot Heat"; unit = "W"; }

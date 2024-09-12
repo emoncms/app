@@ -14,7 +14,7 @@ global $path, $session, $v;
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=37>" rel="stylesheet">
+<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=39>" rel="stylesheet">
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
   <div id="app-block" style="display:none">
@@ -116,6 +116,8 @@ global $path, $session, $v;
 
         <div style="background-color:#eee; color:#333">
           <div id='advanced-toggle' class='bluenav' style="display:none">SHOW DETAIL</div>
+
+          <div id='data-error' style="display:none">DATA ERROR</div>
 
           <div style="padding:10px">
             COP in window: <b id="window-cop" style="cursor:pointer"></b> <span id="window-carnot-cop"></span>
@@ -415,5 +417,5 @@ global $path, $session, $v;
   config.public = <?php echo $public; ?>;
   config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=113"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=118"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=1"></script>
