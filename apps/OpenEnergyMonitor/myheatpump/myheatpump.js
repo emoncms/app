@@ -602,6 +602,7 @@ function emitter_and_volume_calculator() {
 function process_error_data() {
 
     var total_error_time = 0;
+    var min_error_time = 120;
 
     if (feeds["heatpump_error"] != undefined) {
         // Axioma heat meter error codes:
@@ -632,14 +633,14 @@ function process_error_data() {
 
                 var DT = data["heatpump_flowT"][z][1] - data["heatpump_returnT"][z][1];
 
-                if (data["heatpump_elec"][z][1] > 200 && data["heatpump_heat"][z][1] == 0 && DT > 1) {
+                if (data["heatpump_elec"][z][1] > 200 && data["heatpump_heat"][z][1] == 0 && DT > 1.5) {
                     error_state = 1;
                     total_error_time += view.interval;
                 }
                 data["heatpump_error"].push([time, error_state]);
             }
 
-            if (total_error_time > 60) {
+            if (total_error_time > min_error_time) {
                 powergraph_series['heatpump_error'] = { 
                     data: data["heatpump_error"],
                     label: "Error", 
@@ -652,7 +653,7 @@ function process_error_data() {
     }
 
     var error_div = $("#data-error");
-    if (total_error_time > 60) {
+    if (total_error_time > min_error_time) {
         error_div.show();
         error_div.attr("title", "Heat meter air issue detected for " + (total_error_time / 60).toFixed(0) + " minutes");
     } else {
