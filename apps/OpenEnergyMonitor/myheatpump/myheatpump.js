@@ -632,7 +632,7 @@ function process_error_data() {
 
                 var DT = data["heatpump_flowT"][z][1] - data["heatpump_returnT"][z][1];
 
-                if (data["heatpump_elec"][z][1] > 300 && data["heatpump_heat"][z][1] == 0 && DT > 1) {
+                if (data["heatpump_elec"][z][1] > 200 && data["heatpump_heat"][z][1] == 0 && DT > 1) {
                     error_state = 1;
                     total_error_time += view.interval;
                 }
