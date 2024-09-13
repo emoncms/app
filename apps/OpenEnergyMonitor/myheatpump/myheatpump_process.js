@@ -455,7 +455,7 @@ function process_defrosts() {
 
         $("#total_positive_heat_kwh").html(total_positive_heat_kwh.toFixed(3));
         $("#total_defrost_and_loss_kwh").html(total_defrost_and_loss_kwh.toFixed(3));
-        $("#prc_defrost_and_loss").html((100 * total_defrost_and_loss_kwh / total_positive_heat_kwh).toFixed(1));
+        $("#prc_defrost_and_loss").html((100 * total_defrost_and_loss_kwh / (total_positive_heat_kwh+total_cooling_kwh)).toFixed(1));
         $("#total_net_heat_kwh").html((total_positive_heat_kwh - total_defrost_and_loss_kwh).toFixed(3));
     }
 }
