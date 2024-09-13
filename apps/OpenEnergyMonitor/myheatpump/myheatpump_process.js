@@ -4,6 +4,7 @@ function process_stats() {
     stats.when_running = {};
     stats.space_heating = {};
     stats.water_heating = {};
+    stats.cooling = {};
 
     var feed_options = {
         "heatpump_elec": { name: "Electric consumption", unit: "W", dp: 0 },
@@ -43,11 +44,18 @@ function process_stats() {
     var dhw_enable = false;
     if (data["heatpump_dhw"] != undefined) dhw_enable = true;
 
+    var cooling_enable = false;
+    if (data["heatpump_cooling"] != undefined) cooling_enable = true;
+
     for (var z in data["heatpump_elec"]) {
         let power = data["heatpump_elec"][z][1];
 
         let dhw = false;
         if (dhw_enable) dhw = data["heatpump_dhw"][z][1];
+
+        let cool = false;
+        if (cooling_enable) cool = data["heatpump_cooling"][z][1];
+
 
         // let ch = false;
         // if (data["heatpump_ch"]!=undefined) ch = data["heatpump_ch"][z][1];
@@ -77,6 +85,12 @@ function process_stats() {
                                 stats.space_heating[key].count++;
                                 stats_min_max('space_heating', key, value);
                             }
+                        }
+
+                        if (cool) {
+                            stats.cooling[key].sum += value;
+                            stats.cooling[key].count++;
+                            stats_min_max('cooling', key, value);
                         }
                     }
                 }
@@ -182,6 +196,7 @@ function calculate_window_cops() {
     cop_stats.when_running = {};
     cop_stats.space_heating = {};
     cop_stats.water_heating = {};
+    cop_stats.cooling = {};
     
     for (var category in cop_stats) {
         cop_stats[category].elec_kwh = 0;
@@ -194,6 +209,9 @@ function calculate_window_cops() {
     
         var dhw_enable = false;
         if (data["heatpump_dhw"] != undefined) dhw_enable = true;
+
+        var cooling_enable = false;
+        if (data["heatpump_cooling"] != undefined) cooling_enable = true;
         
         var power_to_kwh = view.interval / 3600000;
     
@@ -202,9 +220,18 @@ function calculate_window_cops() {
             let heat = data["heatpump_heat"][z][1];
 
             let dhw = false;
+            let cool = false;
+
             if (dhw_enable) dhw = data["heatpump_dhw"][z][1];
+            if (cooling_enable) cool = data["heatpump_cooling"][z][1];
             
             if (elec != null && heat !=null) {
+
+                if (cool) {
+                    // cooling is negative heat
+                    // invert here so we can sum it with the heat
+                    heat = -1 * heat;
+                }
             
                 cop_stats.combined.elec_kwh += elec * power_to_kwh;
                 cop_stats.combined.heat_kwh += heat * power_to_kwh;
@@ -221,6 +248,11 @@ function calculate_window_cops() {
                             cop_stats.space_heating.elec_kwh += elec * power_to_kwh;
                             cop_stats.space_heating.heat_kwh += heat * power_to_kwh;
                         }
+                    }
+
+                    if (cool) {
+                        cop_stats.cooling.elec_kwh += elec * power_to_kwh;
+                        cop_stats.cooling.heat_kwh += heat * power_to_kwh;
                     }
                 }
             }

@@ -150,6 +150,11 @@ global $path, $session, $v;
                   <div class="cop-title">Water heating</div>
                   <div class="cop-value"><span class="cop_water_heating">---</span></div>
                 </td>
+
+                <td valign="top" class="show_stats_category" key="cooling" style="color:#014656; display:none">
+                  <div class="cop-title">Cooling</div>
+                  <div class="cop-value"><span class="cop_cooling">---</span></div>
+                </td>
               </tr>
             </table>
 
@@ -167,6 +172,7 @@ global $path, $session, $v;
               <tbody class="stats_category" key="when_running" style="display:none"></tbody>
               <tbody class="stats_category" key="water_heating" style="display:none"></tbody>
               <tbody class="stats_category" key="space_heating" style="display:none"></tbody>
+              <tbody class="stats_category" key="cooling" style="display:none"></tbody>
             </table>
 
             <div id="show_flow_rate_bound" style="display:none" class="advanced-options">
@@ -418,4 +424,4 @@ global $path, $session, $v;
   config.db = <?php echo json_encode($config); ?>;
 </script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=120"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=1"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=3"></script>

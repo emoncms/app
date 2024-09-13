@@ -28,6 +28,7 @@ config.app = {
     "heatpump_flowrate": { "type": "feed", "autoname": "heatpump_flowrate", "optional": true, "description": "Flow rate" },
     "heatpump_dhw": { "type": "feed", "autoname": "heatpump_dhw", "optional": true, "description": "Status of Hot Water circuit (non-zero when running)" },
     "heatpump_ch": { "type": "feed", "autoname": "heatpump_ch", "optional": true, "description": "Status of Central Heating circuit (non-zero when running)" },
+    "heatpump_cooling": { "type": "feed", "autoname": "heatpump_cooling", "optional": true, "description": "Cooling status (0: not cooling, 1: cooling)" },
     "heatpump_error": { "type": "feed", "autoname": "heatpump_error", "optional": true, "description": "Axioma heat meter error state" },
     "enable_process_daily":{"type":"checkbox", "default":false, "name": "Enable daily pre-processor", "description":"Enable split between water and space heating in daily view"},
     "start_date": { "type": "value", "default": 0, "name": "Start date", "description": _("Start date for all time values (unix timestamp)") },
@@ -424,6 +425,7 @@ function powergraph_load() {
     var feeds_to_load = {
         "heatpump_dhw": { label: "DHW", yaxis: 4, color: "#88F", lines: { lineWidth: 0, show: true, fill: 0.15 } },
         "heatpump_ch": { label: "CH", yaxis: 4, color: "#FB6", lines: { lineWidth: 0, show: true, fill: 0.15 } },
+        "heatpump_cooling": { label: "Cooling", yaxis: 4, color: "#66b0ff", lines: { lineWidth: 0, show: true, fill: 0.15 } },
         "heatpump_error": { label: "Error", yaxis: 4, color: "#F00", lines: { lineWidth: 0, show: true, fill: 0.15 } },
         "heatpump_targetT": { label: "TargetT", yaxis: 2, color: "#ccc" },
         "heatpump_flowT": { label: "FlowT", yaxis: 2, color: 2 },
@@ -439,6 +441,13 @@ function powergraph_load() {
     var feedids = [];
     for (var key in feeds_to_load) {
         if (feeds[key] != undefined) feedids.push(feeds[key].id);
+    }
+
+    // If heatpump_cooling present 
+    if (feeds["heatpump_cooling"] != undefined) {
+        show_negative_heat = true;
+        $("#show_negative_heat")[0].checked = true;
+        $(".show_stats_category[key='cooling']").show();
     }
 
     var average = 1;
@@ -1217,6 +1226,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 else if (item.series.label == "TargetT") { name = "Target"; unit = "°C"; dp = 1; }
                 else if (item.series.label == "DHW") { name = "Hot Water"; unit = ""; dp = 0; }
                 else if (item.series.label == "CH") { name = "Central Heating"; unit = ""; dp = 0; }
+                else if (item.series.label == "Cooling") { name = "Cooling"; unit = ""; dp = 0; }
                 else if (item.series.label == "Error") { name = "Error"; unit = ""; dp = 0; }
                 else if (item.series.label == "Electric") { name = "Elec"; unit = "W"; }
                 else if (item.series.label == "Heat") { name = "Heat"; unit = "W"; }
