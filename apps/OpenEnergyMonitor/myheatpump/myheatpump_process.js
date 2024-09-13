@@ -66,6 +66,12 @@ function process_stats() {
                 let value = data[key][z][1];
                 if (value != null) {
 
+                    if (cool && key == "heatpump_heat") {
+                        // cooling is negative heat
+                        // invert here so we can sum it with the heat
+                        value = -1 * value;
+                    }
+
                     stats.combined[key].sum += value;
                     stats.combined[key].count++;
                     stats_min_max('combined', key, value);
@@ -88,11 +94,6 @@ function process_stats() {
                         }
 
                         if (cool) {
-                            if (key == "heatpump_heat") {
-                                // cooling is negative heat
-                                // invert here so we can sum it with the heat
-                                value = -1 * value;
-                            }
                             stats.cooling[key].sum += value;
                             stats.cooling[key].count++;
                             stats_min_max('cooling', key, value);
