@@ -88,6 +88,11 @@ function process_stats() {
                         }
 
                         if (cool) {
+                            if (key == "heatpump_heat") {
+                                // cooling is negative heat
+                                // invert here so we can sum it with the heat
+                                value = -1 * value;
+                            }
                             stats.cooling[key].sum += value;
                             stats.cooling[key].count++;
                             stats_min_max('cooling', key, value);
@@ -115,8 +120,12 @@ function process_stats() {
             }
 
             if (stats[x][key].mean != null) {
+
+                let name = feed_options[key].name;
+                if (x == "cooling" && key == "heatpump_heat") name = "Cooling";
+
                 out += "<tr>";
-                out += "<td style='text-align:left;'>" + feed_options[key].name + "</td>";
+                out += "<td style='text-align:left;'>" + name + "</td>";
 
                 var minval_str = "";
                 if (stats[x][key].minval != null) minval_str = (1*stats[x][key].minval).toFixed(feed_options[key].dp) + " " + feed_options[key].unit;
@@ -413,29 +422,40 @@ function carnot_simulator() {
     }
 }
 
-function process_cooling() {
+function process_defrosts() {
 
     if (data["heatpump_heat"] != undefined) {
 
         var total_positive_heat_kwh = 0;
-        var total_negative_heat_kwh = 0;
+        var total_cooling_kwh = 0;
+        var total_defrost_and_loss_kwh = 0;
+        
+        var cooling_enable = false;
+        if (data["heatpump_cooling"] != undefined) cooling_enable = true;
 
         for (var z in data["heatpump_heat"]) {
             let heat = data["heatpump_heat"][z][1];
+
+            let cool = false;
+            if (cooling_enable) cool = data["heatpump_cooling"][z][1];
 
             if (heat != null) {
                 if (heat >= 0) {
                     total_positive_heat_kwh += heat * view.interval / HOUR
                 } else {
-                    total_negative_heat_kwh += -1 * heat * view.interval / HOUR
+                    if (cool) {
+                        total_cooling_kwh += -1 * heat * view.interval / HOUR
+                    } else {
+                        total_defrost_and_loss_kwh += -1 * heat * view.interval / HOUR
+                    }
                 }
             }
         }
 
         $("#total_positive_heat_kwh").html(total_positive_heat_kwh.toFixed(3));
-        $("#total_negative_heat_kwh").html(total_negative_heat_kwh.toFixed(3));
-        $("#prc_negative_heat").html((100 * total_negative_heat_kwh / total_positive_heat_kwh).toFixed(1));
-        $("#total_net_heat_kwh").html((total_positive_heat_kwh - total_negative_heat_kwh).toFixed(3));
+        $("#total_defrost_and_loss_kwh").html(total_defrost_and_loss_kwh.toFixed(3));
+        $("#prc_defrost_and_loss").html((100 * total_defrost_and_loss_kwh / total_positive_heat_kwh).toFixed(1));
+        $("#total_net_heat_kwh").html((total_positive_heat_kwh - total_defrost_and_loss_kwh).toFixed(3));
     }
 }
 

@@ -181,9 +181,9 @@ global $path, $session, $v;
             </div>
 
             <div id="show_cooling_bound" class="advanced-options">
-              <div style="float:right"><span id="total_negative_heat_kwh"></span> kWh (<span id="prc_negative_heat"></span>%)</div>
-              <input id="show_negative_heat" type="checkbox" class="advanced-options-checkbox">
-              <b>Show cooling / defrosts</b>
+              <div style="float:right"><span id="total_defrost_and_loss_kwh"></span> kWh (<span id="prc_defrost_and_loss"></span>%)</div>
+              <input id="show_defrost_and_loss" type="checkbox" class="advanced-options-checkbox">
+              <b>Show defrosts and other heat lost</b>
             </div>
 
             <div id="show_inst_cop_bound" class="advanced-options">
@@ -423,5 +423,5 @@ global $path, $session, $v;
   config.public = <?php echo $public; ?>;
   config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=120"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=3"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=121"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=4"></script>

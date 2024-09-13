@@ -76,7 +76,7 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
         }
     }
     
-    $cop_stats["combined"]["cooling_kwh"] = process_cooling($data,$interval);
+    $cop_stats["combined"]["cooling_kwh"] = process_defrosts($data,$interval);
 
     $starts_result = compressor_starts($data, $interval, $starting_power);
     
@@ -503,7 +503,7 @@ function carnot_simulator($data, $starting_power) {
     );
 }
 
-function process_cooling($data, $interval) {
+function process_defrosts($data, $interval) {
 
     $power_to_kwh = 1.0 * $interval / 3600000.0;
     

@@ -74,7 +74,8 @@ var inst_cop_mv_av_dp = 0;
 var kw_at_50 = 0;
 var kw_at_50_for_volume = 0;
 var show_daily_cop_series = true;
-var show_negative_heat = false;
+var show_defrost_and_loss = false;
+var show_cooling = false;
 var emitter_spec_enable = false;
 var process_daily_timeout = 1; // start at 1s
 
@@ -445,8 +446,7 @@ function powergraph_load() {
 
     // If heatpump_cooling present 
     if (feeds["heatpump_cooling"] != undefined) {
-        show_negative_heat = true;
-        $("#show_negative_heat")[0].checked = true;
+        show_cooling = true;
         $(".show_stats_category[key='cooling']").show();
     }
 
@@ -494,8 +494,8 @@ function powergraph_process() {
     carnot_simulator();
     // process_inst_cop: calculates instantaneous COP
     process_inst_cop();
-    // process_cooling: calculates cooling
-    process_cooling();
+    // process_defrosts: calculates defrost energy
+    process_defrosts();
     // calculates emitter and volume
     emitter_and_volume_calculator();
     // calculate starts
@@ -730,7 +730,7 @@ function powergraph_draw() {
         legend: { position: "NW", noColumns: 13 }
     }
 
-    if (show_negative_heat) {
+    if (show_defrost_and_loss || show_cooling) {
         options.yaxes[0].min = undefined;
     }
 
@@ -1052,7 +1052,7 @@ function set_url_view_params(mode, start, end) {
     if (show_flow_rate) url.searchParams.set('flow', 1);
     else url.searchParams.delete('flow');
 
-    if (show_negative_heat) url.searchParams.set('cool', 1);
+    if (show_defrost_and_loss) url.searchParams.set('cool', 1);
     else url.searchParams.delete('cool');
 
     if ($("#carnot_enable")[0].checked) url.searchParams.set('carnot', parseFloat($("#heatpump_factor").val()));
@@ -1407,11 +1407,11 @@ $("#show_flow_rate").click(function () {
     powergraph_draw();
 });
 
-$("#show_negative_heat").click(function () {
-    if ($("#show_negative_heat")[0].checked) {
-        show_negative_heat = true;
+$("#show_defrost_and_loss").click(function () {
+    if ($("#show_defrost_and_loss")[0].checked) {
+        show_defrost_and_loss = true;
     } else {
-        show_negative_heat = false;
+        show_defrost_and_loss = false;
     }
     powergraph_draw();
 });
