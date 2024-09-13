@@ -127,7 +127,7 @@ global $path, $session, $v;
         <div id="advanced-block" style="background-color:#fff; padding:10px; display:none">
           <div style="color:#000">
 
-
+            <div id="error-message" style="display:none" class="alert alert-error"></div>
 
             <table style="width:100%; color:#333;">
               <tr>

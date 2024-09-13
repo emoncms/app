@@ -627,15 +627,34 @@ function process_error_data() {
 
             console.log("auto detect heat meter errors");
 
+            var error_state = 0;
+            var error_time = 0;
+            var error_start_index = 0;
+
             for (var z in data["heatpump_elec"]) {
                 var time = data["heatpump_elec"][z][0];
-                var error_state = 0;
 
-                var DT = data["heatpump_flowT"][z][1] - data["heatpump_returnT"][z][1];
+                var elec = data["heatpump_elec"][z][1];
+                var heat = data["heatpump_heat"][z][1];
+                var flowT = data["heatpump_flowT"][z][1];
+                var returnT = data["heatpump_returnT"][z][1];
 
-                if (data["heatpump_elec"][z][1] > 200 && data["heatpump_heat"][z][1] == 0 && DT > 1.5) {
+                var DT = flowT - returnT;
+
+                if (elec > 200 && heat == 0 && DT > 1.5 && flowT > 30) {
+                    if (error_time == 0) error_start_index = z;
+
                     error_state = 1;
+                    error_time += view.interval;
                     total_error_time += view.interval;
+                } else {
+                    if (error_state == 1 && error_time <= 60) {
+                        for (var y = error_start_index; y < z; y++) {
+                            data["heatpump_error"][y][1] = 0;
+                        }
+                    }
+                    error_time = 0;
+                    error_state = 0;
                 }
                 data["heatpump_error"].push([time, error_state]);
             }
@@ -656,8 +675,11 @@ function process_error_data() {
     if (total_error_time > min_error_time) {
         error_div.show();
         error_div.attr("title", "Heat meter air issue detected for " + (total_error_time / 60).toFixed(0) + " minutes");
+        $("#error-message").html("Heat meter air issue detected for " + (total_error_time / 60).toFixed(0) + " minutes, see: <a href='https://docs.openenergymonitor.org/heatpumps/removing_air.html'>Removing Air from Heating Systems</a>");
+        $("#error-message").show();
     } else {
         error_div.hide();
+        $("#error-message").hide();
     }
 }
 
