@@ -1,3 +1,164 @@
+
+function process_error_data() {
+
+    var total_error_time = 0;
+    var min_error_time = 120;
+
+    if (feeds["heatpump_error"] != undefined) {
+        // Axioma heat meter error codes:
+        // 1024: No flow
+        // 67108864: < 3C delta T (ignore, this is often the case)
+        // translate 1024  = 1, everything else = 0
+        for (var z in data["heatpump_error"]) {
+            let time = data["heatpump_error"][z][0];
+            let error = data["heatpump_error"][z][1];
+            if (error == 1024) {
+                data["heatpump_error"][z] = [time, 1];
+                total_error_time += view.interval;
+            }
+            else data["heatpump_error"][z] = [time, 0];
+        }
+
+    } else {
+
+        data["heatpump_error"] = [];
+        // Heat meter error auto detection
+        if (data["heatpump_elec"] != undefined && data["heatpump_heat"] != undefined && data["heatpump_flowT"] != undefined && data["heatpump_returnT"] != undefined) {
+
+            console.log("auto detect heat meter errors");
+
+            var error_state = 0;
+            var error_time = 0;
+            var error_start_index = 0;
+
+            for (var z in data["heatpump_elec"]) {
+                var time = data["heatpump_elec"][z][0];
+
+                var elec = data["heatpump_elec"][z][1];
+                var heat = data["heatpump_heat"][z][1];
+                var flowT = data["heatpump_flowT"][z][1];
+                var returnT = data["heatpump_returnT"][z][1];
+
+                var DT = flowT - returnT;
+
+                if (elec > 200 && heat == 0 && DT > 1.5 && flowT > 30) {
+                    if (error_time == 0) error_start_index = z;
+
+                    error_state = 1;
+                    error_time += view.interval;
+                    total_error_time += view.interval;
+                } else {
+                    if (error_state == 1 && error_time <= 60) {
+                        for (var y = error_start_index; y < z; y++) {
+                            data["heatpump_error"][y][1] = 0;
+                        }
+                    }
+                    error_time = 0;
+                    error_state = 0;
+                }
+                data["heatpump_error"].push([time, error_state]);
+            }
+
+            if (total_error_time > min_error_time) {
+                powergraph_series['heatpump_error'] = { 
+                    data: data["heatpump_error"],
+                    label: "Error", 
+                    yaxis: 4, 
+                    color: "#F00", 
+                    lines: { lineWidth: 0, show: true, fill: 0.15 } 
+                };
+            }
+        }
+    }
+
+    var error_div = $("#data-error");
+    if (total_error_time > min_error_time) {
+        error_div.show();
+        error_div.attr("title", "Heat meter air issue detected for " + (total_error_time / 60).toFixed(0) + " minutes");
+        $("#error-message").html("Heat meter air issue detected for " + (total_error_time / 60).toFixed(0) + " minutes, see: <a href='https://docs.openenergymonitor.org/heatpumps/removing_air.html'>Removing Air from Heating Systems</a>");
+        $("#error-message").show();
+    } else {
+        error_div.hide();
+        $("#error-message").hide();
+    }
+}
+
+// if the heatpump_cooling flag doesn't exist, we can try to auto detect it
+function auto_detect_cooling() {
+
+    // Enable cooling only if cooling kWh > heating kWh
+    var heat_kwh = 0;
+    var cool_kwh = 0;
+    for (var z in data["heatpump_heat"]) {
+        let heat = data["heatpump_heat"][z][1];
+        if (heat != null && heat >= 0) {
+            heat_kwh += heat * view.interval / HOUR;
+        } else {
+            cool_kwh += -1 * heat * view.interval / HOUR;
+        }
+    }
+    // exit if heat is greater than cooling
+    if (heat_kwh > cool_kwh) {
+        show_cooling = false;
+        $(".show_stats_category[key='cooling']").hide();
+        return;
+    }
+
+    var miniumum_cooling_time = 300;
+    // var miniumum_cooling_outsideT = 10;
+    data["heatpump_cooling"] = [];
+
+    var cool_state = false;
+    var cool_start_index = 0;
+    var cool_time = 0;
+    var total_cool_time = 0;
+    var outsideT = 0;
+
+    for (var z in data["heatpump_heat"]) {
+        let time = data["heatpump_heat"][z][0];
+        let heat = data["heatpump_heat"][z][1];
+        
+        // if (data["heatpump_outsideT"][z][1] != null) {
+        //     outsideT = data["heatpump_outsideT"][z][1];
+        // }
+
+        if (heat != null && heat < 0) { //  && outsideT > miniumum_cooling_outsideT
+            if (cool_time == 0) cool_start_index = z;
+            cool_state = true;
+            cool_time += view.interval;
+            total_cool_time += view.interval;
+        } else {
+            if (cool_state && cool_time <= miniumum_cooling_time) {
+                // Clear if too short
+                for (var y = cool_start_index; y < z; y++) {
+                    data["heatpump_cooling"][y][1] = 0;
+                }
+            }
+            cool_time = 0;
+            cool_state = false;
+        }
+        
+        data["heatpump_cooling"].push([time, cool_state]);
+    }
+
+    // Add to powergraph series
+    if (total_cool_time > 0) {
+        powergraph_series['heatpump_cooling'] = {
+            data: data["heatpump_cooling"],
+            label: "Cooling",
+            yaxis: 4,
+            color: "#66b0ff",
+            lines: { lineWidth: 0, show: true, fill: 0.15 }
+        };
+
+        show_cooling = true;
+        $(".show_stats_category[key='cooling']").show();
+    } else {
+        show_cooling = false;
+        $(".show_stats_category[key='cooling']").hide();
+    }
+}
+
 function process_stats() {
     stats = {};
     stats.combined = {};
@@ -54,7 +215,7 @@ function process_stats() {
         if (dhw_enable) dhw = data["heatpump_dhw"][z][1];
 
         let cool = false;
-        if (cooling_enable) cool = data["heatpump_cooling"][z][1];
+        if (cooling_enable && data["heatpump_cooling"][z] != undefined) cool = data["heatpump_cooling"][z][1];
 
 
         // let ch = false;

@@ -30,6 +30,7 @@ config.app = {
     "heatpump_ch": { "type": "feed", "autoname": "heatpump_ch", "optional": true, "description": "Status of Central Heating circuit (non-zero when running)" },
     "heatpump_cooling": { "type": "feed", "autoname": "heatpump_cooling", "optional": true, "description": "Cooling status (0: not cooling, 1: cooling)" },
     "heatpump_error": { "type": "feed", "autoname": "heatpump_error", "optional": true, "description": "Axioma heat meter error state" },
+    "auto_detect_cooling":{"type":"checkbox", "default":false, "name": "Auto detect cooling", "description":"Auto detect summer cooling if cooling status feed is not present"},
     "enable_process_daily":{"type":"checkbox", "default":false, "name": "Enable daily pre-processor", "description":"Enable split between water and space heating in daily view"},
     "start_date": { "type": "value", "default": 0, "name": "Start date", "description": _("Start date for all time values (unix timestamp)") },
 };
@@ -479,6 +480,10 @@ function powergraph_load() {
         // Process axioma heat meter error data
         process_error_data();
 
+        if (feeds["heatpump_cooling"] == undefined && config.app.auto_detect_cooling.value) {
+            auto_detect_cooling();
+        }
+
         powergraph_process();
     }, false, "notime");
 }
@@ -605,90 +610,6 @@ function emitter_and_volume_calculator() {
         }
     } else {
         $("#kW_at_50").html("?");
-    }
-}
-
-function process_error_data() {
-
-    var total_error_time = 0;
-    var min_error_time = 120;
-
-    if (feeds["heatpump_error"] != undefined) {
-        // Axioma heat meter error codes:
-        // 1024: No flow
-        // 67108864: < 3C delta T (ignore, this is often the case)
-        // translate 1024  = 1, everything else = 0
-        for (var z in data["heatpump_error"]) {
-            let time = data["heatpump_error"][z][0];
-            let error = data["heatpump_error"][z][1];
-            if (error == 1024) {
-                data["heatpump_error"][z] = [time, 1];
-                total_error_time += view.interval;
-            }
-            else data["heatpump_error"][z] = [time, 0];
-        }
-
-    } else {
-
-        data["heatpump_error"] = [];
-        // Heat meter error auto detection
-        if (data["heatpump_elec"] != undefined && data["heatpump_heat"] != undefined && data["heatpump_flowT"] != undefined && data["heatpump_returnT"] != undefined) {
-
-            console.log("auto detect heat meter errors");
-
-            var error_state = 0;
-            var error_time = 0;
-            var error_start_index = 0;
-
-            for (var z in data["heatpump_elec"]) {
-                var time = data["heatpump_elec"][z][0];
-
-                var elec = data["heatpump_elec"][z][1];
-                var heat = data["heatpump_heat"][z][1];
-                var flowT = data["heatpump_flowT"][z][1];
-                var returnT = data["heatpump_returnT"][z][1];
-
-                var DT = flowT - returnT;
-
-                if (elec > 200 && heat == 0 && DT > 1.5 && flowT > 30) {
-                    if (error_time == 0) error_start_index = z;
-
-                    error_state = 1;
-                    error_time += view.interval;
-                    total_error_time += view.interval;
-                } else {
-                    if (error_state == 1 && error_time <= 60) {
-                        for (var y = error_start_index; y < z; y++) {
-                            data["heatpump_error"][y][1] = 0;
-                        }
-                    }
-                    error_time = 0;
-                    error_state = 0;
-                }
-                data["heatpump_error"].push([time, error_state]);
-            }
-
-            if (total_error_time > min_error_time) {
-                powergraph_series['heatpump_error'] = { 
-                    data: data["heatpump_error"],
-                    label: "Error", 
-                    yaxis: 4, 
-                    color: "#F00", 
-                    lines: { lineWidth: 0, show: true, fill: 0.15 } 
-                };
-            }
-        }
-    }
-
-    var error_div = $("#data-error");
-    if (total_error_time > min_error_time) {
-        error_div.show();
-        error_div.attr("title", "Heat meter air issue detected for " + (total_error_time / 60).toFixed(0) + " minutes");
-        $("#error-message").html("Heat meter air issue detected for " + (total_error_time / 60).toFixed(0) + " minutes, see: <a href='https://docs.openenergymonitor.org/heatpumps/removing_air.html'>Removing Air from Heating Systems</a>");
-        $("#error-message").show();
-    } else {
-        error_div.hide();
-        $("#error-message").hide();
     }
 }
 
