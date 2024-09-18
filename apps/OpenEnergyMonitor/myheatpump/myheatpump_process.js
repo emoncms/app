@@ -52,6 +52,7 @@ function process_error_data() {
                         for (var y = error_start_index; y < z; y++) {
                             data["heatpump_error"][y][1] = 0;
                         }
+                        total_error_time -= error_time;
                     }
                     error_time = 0;
                     error_state = 0;

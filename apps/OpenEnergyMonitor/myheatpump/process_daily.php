@@ -11,7 +11,7 @@ require "/var/www/emoncms/Lib/load_emoncms.php";
 require_once "Modules/app/app_model.php";
 $appconfig = new AppConfig($mysqli, array());
 
-$userid = 1;
+$userid = 40;
 
 require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_model.php";
 $myheatpump = new MyHeatPump($mysqli,$redis,$feed,$appconfig);

@@ -139,7 +139,7 @@ class MyHeatPump {
 
         // Check if processing is locked
         if (!$this->process_lock($id)) {
-            return array("success"=>false, "message"=>"Processing locked");
+            // return array("success"=>false, "message"=>"Processing locked");
         }
 
         // Get start and end time of available data
@@ -240,7 +240,7 @@ class MyHeatPump {
      */
     public function format_flat_keys($stats) {
 
-        $categories = ["combined","running","space","water"];
+        $categories = ["combined","running","space","water","cooling"];
         
         $row = array();
 
@@ -267,6 +267,11 @@ class MyHeatPump {
         // Map quality
         foreach ($stats['quality'] as $key=>$value) {
             $row["quality_".$key] = $value;
+        }
+
+        // Errors
+        foreach ($stats['errors'] as $key=>$value) {
+            $row["error_".$key] = $value;
         }
 
         return $row;
@@ -395,7 +400,7 @@ class MyHeatPump {
 
     public function process($rows,$id,$start) {
 
-        $categories = array('combined','running','space','water');
+        $categories = array('combined','running','space','water','cooling');
 
         // Totals only
         $totals = array();

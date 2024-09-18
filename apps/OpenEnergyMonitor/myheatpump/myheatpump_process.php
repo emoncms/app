@@ -1,5 +1,121 @@
 <?php
 
+function process_error_data($data, $interval) {
+    $total_error_time = 0;
+    $min_error_time = 120;
+
+    if ($data["heatpump_error"]!=false) {
+        // Axioma heat meter error codes:
+        // 1024: No flow
+        // 67108864: < 3C delta T (ignore, this is often the case)
+        // translate 1024  = 1, everything else = 0
+        foreach ($data["heatpump_error"] as $z => $error) {
+            if ($error == 1024) {
+                $data["heatpump_error"][$z] = 1;
+                $total_error_time += $interval;
+            } else {
+                $data["heatpump_error"][$z] = 0;
+            }
+        }
+    } else {
+        $data["heatpump_error"] = [];
+        // Heat meter error auto detection
+        if (isset($data["heatpump_elec"]) && isset($data["heatpump_heat"]) && isset($data["heatpump_flowT"]) && isset($data["heatpump_returnT"])) {
+
+            $error_state = 0;
+            $error_time = 0;
+
+            foreach ($data["heatpump_elec"] as $z => $elec) {
+                $heat = $data["heatpump_heat"][$z];
+                $flowT = $data["heatpump_flowT"][$z];
+                $returnT = $data["heatpump_returnT"][$z];
+
+                $DT = $flowT - $returnT;
+
+                if ($elec > 200 && $heat == 0 && $DT > 1.5 && $flowT > 30) {
+                    $error_state = 1;
+                    $error_time += $interval;
+                    $total_error_time += $interval;
+                } else {
+                    if ($error_state == 1 && $error_time <= 60) {
+                        $total_error_time -= $error_time;
+                    }
+                    $error_time = 0;
+                    $error_state = 0;
+                }
+            }
+        }
+    }
+
+    if ($total_error_time > $min_error_time) {
+        // print "Heat meter air issue detected for " . round($total_error_time / 60) . " minutes";
+    } else {
+        // No heat meter air issue detected
+    }
+
+    return array("air" => $total_error_time);
+}
+
+// if the heatpump_cooling flag doesn't exist, we can try to auto detect it
+function auto_detect_cooling($data, $interval) {
+
+    if (!isset($data["heatpump_heat"])) {
+        return false;
+    }
+
+    // Enable cooling only if cooling kWh > heating kWh
+    $heat_kwh = 0;
+    $cool_kwh = 0;
+    foreach ($data["heatpump_heat"] as $z => $heat) {
+        if ($heat !== null && $heat >= 0) {
+            $heat_kwh += $heat * $interval / 3600;
+        } else {
+            $cool_kwh += -1 * $heat * $interval / 3600;
+        }
+    }
+    // exit if heat is greater than cooling
+    if ($heat_kwh > $cool_kwh) {
+        return false;
+    }
+
+    $miniumum_cooling_time = 300;
+    // $miniumum_cooling_outsideT = 10;
+    $data_heatpump_cooling = [];
+
+    $cool_state = false;
+    $cool_start_index = 0;
+    $cool_time = 0;
+    // $total_cool_time = 0;
+
+    foreach ($data["heatpump_heat"] as $z => $heat) {
+        
+        // if ($data["heatpump_outsideT"][$z][1] !== null) {
+        //     $outsideT = $data["heatpump_outsideT"][$z][1];
+        // }
+
+        if ($heat !== null && $heat < 0) { //  && $outsideT > $miniumum_cooling_outsideT
+            if ($cool_time == 0) $cool_start_index = $z;
+            $cool_state = true;
+            $cool_time += $interval;
+            // $total_cool_time += $interval;
+        } else {
+            if ($cool_state && $cool_time <= $miniumum_cooling_time) {
+                // Clear if too short
+                for ($y = $cool_start_index; $y < $z; $y++) {
+                    $data_heatpump_cooling[$y] = 0;
+                }
+            }
+            $cool_time = 0;
+            $cool_state = false;
+        }
+        
+        $data_heatpump_cooling[] = $cool_state;
+    }
+
+    // returns the data object with the cooling flag added
+    return $data_heatpump_cooling;
+}
+
 function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
 
     // --------------------------------------------------------------------------------------------------------------    
@@ -42,7 +158,7 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     // --------------------------------------------------------------------------------------------------------------    
     $data = array();
     
-    $feeds = array("heatpump_elec","heatpump_flowT","heatpump_returnT","heatpump_outsideT","heatpump_roomT","heatpump_heat","heatpump_dhw");
+    $feeds = array("heatpump_elec","heatpump_flowT","heatpump_returnT","heatpump_outsideT","heatpump_roomT","heatpump_heat","heatpump_dhw","heatpump_error","heatpump_cooling");
     
     foreach ($feeds as $key) {
         $data[$key] = false;
@@ -50,6 +166,12 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
             $data[$key] = $feed->get_data($app->config->$key,$start,$end-$interval,$interval,1,"Europe/London","notime");
             $data[$key] = remove_null_values($data[$key],$interval);
         }
+    }
+
+    $errors = process_error_data($data, $interval);
+
+    if ($data["heatpump_cooling"]==false) {
+        $data["heatpump_cooling"] = auto_detect_cooling($data, $interval);
     }
     
     $cop_stats = calculate_window_cops($data, $interval, $starting_power);
@@ -118,7 +240,8 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
         "returnT"=>get_quality($data["heatpump_returnT"]),
         "outsideT"=>get_quality($data["heatpump_outsideT"]),
         "roomT"=>get_quality($data["heatpump_roomT"])
-      ]
+      ],
+      "errors" => $errors
     ];
     
     return $result;
@@ -129,7 +252,8 @@ function process_stats($data, $interval, $starting_power) {
         'combined' => [],
         'running' => [],
         'space' => [],
-        'water' => []
+        'water' => [],
+        'cooling' => []
     ];
     
     $feed_options = [
@@ -162,6 +286,11 @@ function process_stats($data, $interval, $starting_power) {
         $dhw_enable = true;
     }
 
+    $cooling_enable = false;
+    if (isset($data["heatpump_cooling"]) && $data["heatpump_cooling"] != false) {
+        $cooling_enable = true;
+    }
+
     for ($z = 0; $z < count($data["heatpump_elec"]); $z++) {
         $power = $data["heatpump_elec"][$z];
 
@@ -170,10 +299,21 @@ function process_stats($data, $interval, $starting_power) {
             $dhw = $data["heatpump_dhw"][$z];
         }
 
+        $cool = false;
+        if ($cooling_enable) {
+            $cool = $data["heatpump_cooling"][$z];
+        }
+
         foreach ($feed_options as $key => $props) {
             if (isset($data["heatpump_".$key][$z])) {
                 $value = $data["heatpump_".$key][$z];
                 if ($value !== null) {
+
+                    if ($cool && $key == "heat") {
+                        // cooling is negative heat
+                        // invert here so we can sum it with the heat
+                        $value = -1 * $value;
+                    }
 
                     $stats['combined'][$key]['sum'] += $value;
                     $stats['combined'][$key]['count']++;
@@ -194,6 +334,12 @@ function process_stats($data, $interval, $starting_power) {
                                 $stats['space'][$key]['count']++;
                                 //stats_min_max($stats, 'space', $key, $value);
                             }
+                        }
+
+                        if ($cool) {
+                            $stats['cooling'][$key]['sum'] += $value;
+                            $stats['cooling'][$key]['count']++;
+                            //stats_min_max($stats, 'cooling', $key, $value);
                         }
                     }
                 }
@@ -303,6 +449,7 @@ function calculate_window_cops($data, $interval, $starting_power) {
         "running" => array(),
         "space" => array(),
         "water" => array(),
+        "cooling" => array()
     );
 
     foreach ($cop_stats as $category => $value) {
@@ -324,6 +471,11 @@ function calculate_window_cops($data, $interval, $starting_power) {
         $dhw_enable = true;
     }
 
+    $cooling_enable = false;
+    if (isset($data["heatpump_cooling"]) && $data["heatpump_cooling"] != false) {
+        $cooling_enable = true;
+    }
+
     $power_to_kwh = 1.0 * $interval / 3600000.0;
 
     foreach ($data["heatpump_elec"] as $z => $elec_data) {
@@ -335,7 +487,19 @@ function calculate_window_cops($data, $interval, $starting_power) {
             $dhw = $data["heatpump_dhw"][$z];
         }
 
+        $cool = false;
+        if ($cooling_enable) {
+            $cool = $data["heatpump_cooling"][$z];
+        }
+
         if ($elec !== null && $heat !== null && $elec>=0) {
+
+            if ($cool) {
+                // cooling is negative heat
+                // invert here so we can sum it with the heat
+                $heat = -1 * $heat;
+            }
+
             $cop_stats["combined"]["elec_kwh"] += $elec * $power_to_kwh;
             $cop_stats["combined"]["heat_kwh"] += $heat * $power_to_kwh;
             $cop_stats["combined"]["data_length"] += $interval;
@@ -355,6 +519,12 @@ function calculate_window_cops($data, $interval, $starting_power) {
                         $cop_stats["space"]["heat_kwh"] += $heat * $power_to_kwh;
                         $cop_stats["space"]["data_length"] += $interval;
                     }
+                }
+
+                if ($cool) {
+                    $cop_stats["cooling"]["elec_kwh"] += $elec * $power_to_kwh;
+                    $cop_stats["cooling"]["heat_kwh"] += $heat * $power_to_kwh;
+                    $cop_stats["cooling"]["data_length"] += $interval;
                 }
             }
         }
@@ -499,7 +669,8 @@ function carnot_simulator($data, $starting_power) {
         "combined" => $combined_ideal_carnot_heat_mean,
         "running" => $running_ideal_carnot_heat_mean,
         "space" => $space_ideal_carnot_heat_mean,
-        "water" => $water_ideal_carnot_heat_mean
+        "water" => $water_ideal_carnot_heat_mean,
+        "cooling" => null
     );
 }
 
@@ -515,7 +686,6 @@ function process_defrosts($data, $interval) {
                 $total_negative_heat_kwh += -1 * $heat * $power_to_kwh;
             }
         }
-
     }
     return number_format($total_negative_heat_kwh,3,'.','')*1;
 }
