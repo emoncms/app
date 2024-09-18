@@ -855,6 +855,26 @@ function bargraph_draw() {
         });
     }
 
+    if (daily_data["error_air"] != undefined) {
+        data["error_air"] = daily_data["error_air"];
+
+        let total_error_air = 0;
+        for (var z in data["error_air"]) {
+            total_error_air += data["error_air"][z][1];
+        }
+
+        if (total_error_air > 0) {
+            var error_div = $("#data-error");
+            error_div.show();
+            error_div.attr("title", "Heat meter air issue detected for " + (total_error_air / 60).toFixed(0) + " minutes");
+            
+            bargraph_series.push({
+                data: data["error_air"], color: "#ff0000", yaxis: 4,
+                points: { show: true }
+            });
+        }
+    }
+
     if (daily_data[bargraph_mode+"_cop"] != undefined) {
         cop_data = daily_data[bargraph_mode+"_cop"];
 

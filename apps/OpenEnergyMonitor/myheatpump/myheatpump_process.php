@@ -47,10 +47,12 @@ function process_error_data($data, $interval) {
         }
     }
 
-    if ($total_error_time > $min_error_time) {
-        // print "Heat meter air issue detected for " . round($total_error_time / 60) . " minutes";
-    } else {
-        // No heat meter air issue detected
+    if ($total_error_time < $min_error_time) {
+        $total_error_time = 0;
+    }
+
+    if ($total_error_time == 0) {
+        $total_error_time = null;
     }
 
     return array("air" => $total_error_time);
@@ -170,7 +172,7 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
 
     $errors = process_error_data($data, $interval);
 
-    if ($data["heatpump_cooling"]==false) {
+    if ($data["heatpump_cooling"]==false && isset($app->config->auto_detect_cooling) && $app->config->auto_detect_cooling) {
         $data["heatpump_cooling"] = auto_detect_cooling($data, $interval);
     }
     
