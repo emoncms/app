@@ -83,6 +83,7 @@ var process_daily_timeout = 1; // start at 1s
 var bargraph_start = 0;
 var bargraph_end = 0;
 var bargraph_mode = "combined";
+var show_daily_cooling = false;
 
 
 var realtime_cop_div_mode = "30min";
