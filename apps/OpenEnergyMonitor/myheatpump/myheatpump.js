@@ -763,6 +763,40 @@ function bargraph_load(start, end) {
                         }
                     }
                 }
+
+                // Is there dhw data?
+                show_daily_dhw = false;
+                for (var z in daily_data["water_heat_kwh"]) {
+                    if (daily_data["water_heat_kwh"][z][1] > 0) {
+                        show_daily_dhw = true;
+                        break;
+                    }
+                }
+
+                // Is there cooling data?
+                show_daily_cooling = false;
+                for (var z in daily_data["cooling_heat_kwh"]) {
+                    if (daily_data["cooling_heat_kwh"][z][1] > 0) {
+                        show_daily_cooling = true;
+                        break;
+                    }
+                }
+
+
+                if (show_daily_dhw) {
+                    $(".bargraph_mode[mode='water']").show();
+                    $(".bargraph_mode[mode='space']").show();
+                } else {
+                    $(".bargraph_mode[mode='water']").hide();
+                    $(".bargraph_mode[mode='space']").hide();
+                }
+
+                if (show_daily_cooling) {
+                    $(".bargraph_mode[mode='cooling']").show();
+                } else {
+                    $(".bargraph_mode[mode='cooling']").hide();
+                }
+
             }
         });
     } else {
@@ -810,16 +844,35 @@ function bargraph_draw() {
     var days_heat = 0;
 
     if (daily_data[bargraph_mode+"_heat_kwh"] != undefined) {
+
+
+
         data["heatpump_heat_kwhd"] = daily_data[bargraph_mode+"_heat_kwh"];
 
+        let color = 0;
+        if (bargraph_mode == "cooling") {
+            color = "#66b0ff";
+        }
+        
+
         bargraph_series.push({
-            data: data["heatpump_heat_kwhd"], color: 0,
+            data: data["heatpump_heat_kwhd"], color: color,
             bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 }
         });
 
         for (var z in data["heatpump_heat_kwhd"]) {
             heat_kwh_in_window += data["heatpump_heat_kwhd"][z][1];
             days_heat++;
+        }
+
+        // If we are in combined mode and there is cooling data
+        // overlay cooling data on top of heating data
+        if (bargraph_mode=="combined" && show_daily_cooling) {
+            data["cooling_heat_kwhd"] = daily_data["cooling_heat_kwh"];
+            bargraph_series.push({
+                data: data["cooling_heat_kwhd"], color: "#66b0ff",
+                bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 }
+            });
         }
     }
 
@@ -885,6 +938,7 @@ function bargraph_draw() {
     }
 
     var cop_in_window = heat_kwh_in_window / elec_kwh_in_window;
+
     if (cop_in_window < 0) cop_in_window = 0;
     $("#window-cop").html((cop_in_window).toFixed(2));
 
@@ -1125,8 +1179,6 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
                 var date = days[d.getDay()] + ", " + months[d.getMonth()] + " " + d.getDate();
 
-                if (elec_kwh !== null) elec_kwh = (elec_kwh).toFixed(1); else elec_kwh = "---";
-                if (heat_kwh !== null) heat_kwh = (heat_kwh).toFixed(1); else heat_kwh = "---";
                 if (COP !== null) COP = (COP).toFixed(1); else COP = "---";
 
                 var str_prc_carnot = "";
@@ -1139,7 +1191,18 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                     }
                 }
 
-                tooltip(item.pageX, item.pageY, date + "<br>Electric: " + elec_kwh + " kWh<br>Heat: " + heat_kwh + " kWh<br>" + outside_temp_str + "COP: " + COP + str_prc_carnot, "#fff", "#000");
+                var cool_kwh = null;
+                var cooling_str = "";
+                if (show_daily_cooling) {
+                    if (data["cooling_heat_kwhd"].length && data["cooling_heat_kwhd"][z] != undefined) cool_kwh = data["cooling_heat_kwhd"][z][1];
+                    if (cool_kwh !== null) cooling_str = "<br>Cooling: " + cool_kwh.toFixed(1) + " kWh";
+                    heat_kwh -= cool_kwh;
+                }
+
+                if (elec_kwh !== null) elec_kwh = (elec_kwh).toFixed(1); else elec_kwh = "---";
+                if (heat_kwh !== null) heat_kwh = (heat_kwh).toFixed(1); else heat_kwh = "---";
+
+                tooltip(item.pageX, item.pageY, date + "<br>Electric: " + elec_kwh + " kWh<br>Heat: " + heat_kwh + " kWh"+cooling_str+"<br>" + outside_temp_str + "COP: " + COP + str_prc_carnot, "#fff", "#000");
             }
 
             if (viewmode == "powergraph") {
@@ -1238,6 +1301,19 @@ $('#histogram').bind("plothover", function (event, pos, item) {
 
 $(".bargraph_mode").click(function () {
     var mode = $(this).attr("mode");
+    // change color of selected mode
+    $(".bargraph_mode").css("color", "#fff");
+
+    var mode_colors = {
+        "combined": "#44b3e2",
+        "running": "#2bbd34",
+        "water": "#b7681f",
+        "space": "#b7ab1f",
+        "cooling": "#66b0ff"
+    };
+
+    $(this).css("color", mode_colors[mode]);
+
     bargraph_mode = mode;
     bargraph_draw();
 });
