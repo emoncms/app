@@ -1307,10 +1307,10 @@ $(".bargraph_mode").click(function () {
 
     var mode_colors = {
         "combined": "#44b3e2",
-        "running": "#2bbd34",
-        "water": "#b7681f",
-        "space": "#b7ab1f",
-        "cooling": "#66b0ff"
+        "running": "#44b3e2",
+        "water": "#44b3e2",
+        "space": "#44b3e2",
+        "cooling": "#44b3e2"
     };
 
     $(this).css("color", mode_colors[mode]);
