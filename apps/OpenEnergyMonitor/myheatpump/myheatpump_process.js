@@ -101,7 +101,7 @@ function auto_detect_cooling() {
         }
     }
     // exit if heat is greater than cooling
-    if (heat_kwh > cool_kwh) {
+    if (heat_kwh > cool_kwh*4) {
         show_cooling = false;
         $(".show_stats_category[key='cooling']").hide();
         return;

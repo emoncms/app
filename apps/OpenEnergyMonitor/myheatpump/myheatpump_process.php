@@ -76,7 +76,7 @@ function auto_detect_cooling($data, $interval) {
         }
     }
     // exit if heat is greater than cooling
-    if ($heat_kwh > $cool_kwh) {
+    if ($heat_kwh > $cool_kwh*4) {
         return false;
     }
 
