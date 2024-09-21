@@ -82,6 +82,8 @@ var process_daily_timeout = 1; // start at 1s
 
 var bargraph_start = 0;
 var bargraph_end = 0;
+var last_bargraph_start = 0;
+var last_bargraph_end = 0;
 var bargraph_mode = "combined";
 var show_daily_cooling = false;
 
@@ -977,6 +979,8 @@ function bargraph_draw() {
             reserveSpace: false,
             min: 1,
             max: 8
+        }, {
+            show: false
         }],
         selection: { mode: "x" },
         grid: {
@@ -1126,6 +1130,12 @@ $(".viewhistory").click(function () {
     var end = end_time * 1000;
     var start = end - timeWindow;
     if (start < (start_time * 1000)) start = start_time * 1000;
+
+    if (last_bargraph_start && last_bargraph_end) {
+        start = last_bargraph_start;
+        end = last_bargraph_end;
+    }
+
     viewmode = "bargraph";
     bargraph_load(start, end);
     bargraph_draw();
@@ -1180,7 +1190,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
                 var date = days[d.getDay()] + ", " + months[d.getMonth()] + " " + d.getDate();
 
-                if (COP !== null) COP = (COP).toFixed(1); else COP = "---";
+                if (COP !== null) COP = (COP).toFixed(2); else COP = "---";
 
                 var str_prc_carnot = "";
                 if ($("#carnot_enable")[0].checked) {
@@ -1196,14 +1206,27 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 var cooling_str = "";
                 if (show_daily_cooling) {
                     if (data["cooling_heat_kwhd"].length && data["cooling_heat_kwhd"][z] != undefined) cool_kwh = data["cooling_heat_kwhd"][z][1];
-                    if (cool_kwh !== null) cooling_str = "<br>Cooling: " + cool_kwh.toFixed(1) + " kWh";
+                    if (cool_kwh !== null) {
+                        cooling_str = "<br>Cooling: " + cool_kwh.toFixed(1) + " kWh";
+                        if (heat_kwh !== null) {
+                            cooling_str += "<br>Combined: " + heat_kwh.toFixed(3) + " kWh";
+                        }
+                    }
                     heat_kwh -= cool_kwh;
+                }
+
+                var error_str = "";
+                if (data["error_air"] != undefined && data["error_air"].length && data["error_air"][z] != undefined) {
+                    let error_air = data["error_air"][z][1];
+                    if (error_air > 0) {
+                        error_str = "<br>Error: " + (error_air / 60).toFixed(0) + " min";
+                    }
                 }
 
                 if (elec_kwh !== null) elec_kwh = (elec_kwh).toFixed(1); else elec_kwh = "---";
                 if (heat_kwh !== null) heat_kwh = (heat_kwh).toFixed(1); else heat_kwh = "---";
 
-                tooltip(item.pageX, item.pageY, date + "<br>Electric: " + elec_kwh + " kWh<br>Heat: " + heat_kwh + " kWh"+cooling_str+"<br>" + outside_temp_str + "COP: " + COP + str_prc_carnot, "#fff", "#000");
+                tooltip(item.pageX, item.pageY, date + "<br>Electric: " + elec_kwh + " kWh<br>Heat: " + heat_kwh + " kWh"+cooling_str+"<br>" + outside_temp_str + "COP: " + COP + str_prc_carnot + error_str, "#fff", "#000");
             }
 
             if (viewmode == "powergraph") {
@@ -1253,6 +1276,10 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
 // Auto click through to power graph
 $('#placeholder').bind("plotclick", function (event, pos, item) {
     if (item && !panning && viewmode == "bargraph") {
+
+        last_bargraph_start = bargraph_start;
+        last_bargraph_end = bargraph_end;
+
         var z = item.dataIndex;
         view.start = data["heatpump_elec_kwhd"][z][0];
         view.end = view.start + DAY;

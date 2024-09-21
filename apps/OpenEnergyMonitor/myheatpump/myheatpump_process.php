@@ -302,7 +302,7 @@ function process_stats($data, $interval, $starting_power) {
         }
 
         $cool = false;
-        if ($cooling_enable) {
+        if ($cooling_enable && isset($data["heatpump_cooling"][$z])) {
             $cool = $data["heatpump_cooling"][$z];
         }
 
@@ -326,22 +326,22 @@ function process_stats($data, $interval, $starting_power) {
                         $stats['running'][$key]['count']++;
                         //stats_min_max($stats, 'running', $key, $value);
 
-                        if ($dhw_enable) {
-                            if ($dhw) {
-                                $stats['water'][$key]['sum'] += $value;
-                                $stats['water'][$key]['count']++;
-                                //stats_min_max($stats, 'water', $key, $value);
-                            } else {
-                                $stats['space'][$key]['sum'] += $value;
-                                $stats['space'][$key]['count']++;
-                                //stats_min_max($stats, 'space', $key, $value);
-                            }
-                        }
-
                         if ($cool) {
                             $stats['cooling'][$key]['sum'] += $value;
                             $stats['cooling'][$key]['count']++;
                             //stats_min_max($stats, 'cooling', $key, $value);
+                        } else {
+                            if ($dhw_enable) {
+                                if ($dhw) {
+                                    $stats['water'][$key]['sum'] += $value;
+                                    $stats['water'][$key]['count']++;
+                                    //stats_min_max($stats, 'water', $key, $value);
+                                } else {
+                                    $stats['space'][$key]['sum'] += $value;
+                                    $stats['space'][$key]['count']++;
+                                    //stats_min_max($stats, 'space', $key, $value);
+                                }
+                            }
                         }
                     }
                 }
@@ -490,7 +490,7 @@ function calculate_window_cops($data, $interval, $starting_power) {
         }
 
         $cool = false;
-        if ($cooling_enable) {
+        if ($cooling_enable && isset($data["heatpump_cooling"][$z])) {
             $cool = $data["heatpump_cooling"][$z];
         }
 
@@ -511,22 +511,22 @@ function calculate_window_cops($data, $interval, $starting_power) {
                 $cop_stats["running"]["heat_kwh"] += $heat * $power_to_kwh;
                 $cop_stats["running"]["data_length"] += $interval;
 
-                if ($dhw_enable) {
-                    if ($dhw) {
-                        $cop_stats["water"]["elec_kwh"] += $elec * $power_to_kwh;
-                        $cop_stats["water"]["heat_kwh"] += $heat * $power_to_kwh;
-                        $cop_stats["water"]["data_length"] += $interval;
-                    } else {
-                        $cop_stats["space"]["elec_kwh"] += $elec * $power_to_kwh;
-                        $cop_stats["space"]["heat_kwh"] += $heat * $power_to_kwh;
-                        $cop_stats["space"]["data_length"] += $interval;
-                    }
-                }
-
                 if ($cool) {
                     $cop_stats["cooling"]["elec_kwh"] += $elec * $power_to_kwh;
                     $cop_stats["cooling"]["heat_kwh"] += $heat * $power_to_kwh;
                     $cop_stats["cooling"]["data_length"] += $interval;
+                } else {
+                    if ($dhw_enable) {
+                        if ($dhw) {
+                            $cop_stats["water"]["elec_kwh"] += $elec * $power_to_kwh;
+                            $cop_stats["water"]["heat_kwh"] += $heat * $power_to_kwh;
+                            $cop_stats["water"]["data_length"] += $interval;
+                        } else {
+                            $cop_stats["space"]["elec_kwh"] += $elec * $power_to_kwh;
+                            $cop_stats["space"]["heat_kwh"] += $heat * $power_to_kwh;
+                            $cop_stats["space"]["data_length"] += $interval;
+                        }
+                    }
                 }
             }
         }

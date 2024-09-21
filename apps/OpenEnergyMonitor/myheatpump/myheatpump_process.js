@@ -87,6 +87,8 @@ function process_error_data() {
 // if the heatpump_cooling flag doesn't exist, we can try to auto detect it
 function auto_detect_cooling() {
 
+    data["heatpump_cooling"] = [];
+
     // Enable cooling only if cooling kWh > heating kWh
     var heat_kwh = 0;
     var cool_kwh = 0;
@@ -107,7 +109,6 @@ function auto_detect_cooling() {
 
     var miniumum_cooling_time = 300;
     // var miniumum_cooling_outsideT = 10;
-    data["heatpump_cooling"] = [];
 
     var cool_state = false;
     var cool_start_index = 0;
@@ -243,22 +244,22 @@ function process_stats() {
                         stats.when_running[key].count++;
                         stats_min_max('when_running', key, value);
 
-                        if (dhw_enable) {
-                            if (dhw) {
-                                stats.water_heating[key].sum += value;
-                                stats.water_heating[key].count++;
-                                stats_min_max('water_heating', key, value);
-                            } else {
-                                stats.space_heating[key].sum += value;
-                                stats.space_heating[key].count++;
-                                stats_min_max('space_heating', key, value);
-                            }
-                        }
-
                         if (cool) {
                             stats.cooling[key].sum += value;
                             stats.cooling[key].count++;
                             stats_min_max('cooling', key, value);
+                        } else {
+                            if (dhw_enable) {
+                                if (dhw) {
+                                    stats.water_heating[key].sum += value;
+                                    stats.water_heating[key].count++;
+                                    stats_min_max('water_heating', key, value);
+                                } else {
+                                    stats.space_heating[key].sum += value;
+                                    stats.space_heating[key].count++;
+                                    stats_min_max('space_heating', key, value);
+                                }
+                            }
                         }
                     }
                 }
@@ -395,7 +396,7 @@ function calculate_window_cops() {
             let cool = false;
 
             if (dhw_enable) dhw = data["heatpump_dhw"][z][1];
-            if (cooling_enable) cool = data["heatpump_cooling"][z][1];
+            if (cooling_enable && data["heatpump_cooling"][z] != undefined) cool = data["heatpump_cooling"][z][1];
             
             if (elec != null && heat !=null) {
 
@@ -412,19 +413,19 @@ function calculate_window_cops() {
                     cop_stats.when_running.elec_kwh += elec * power_to_kwh;
                     cop_stats.when_running.heat_kwh += heat * power_to_kwh;
 
-                    if (dhw_enable) {
-                        if (dhw) {
-                            cop_stats.water_heating.elec_kwh += elec * power_to_kwh;
-                            cop_stats.water_heating.heat_kwh += heat * power_to_kwh;
-                        } else {
-                            cop_stats.space_heating.elec_kwh += elec * power_to_kwh;
-                            cop_stats.space_heating.heat_kwh += heat * power_to_kwh;
-                        }
-                    }
-
                     if (cool) {
                         cop_stats.cooling.elec_kwh += elec * power_to_kwh;
                         cop_stats.cooling.heat_kwh += heat * power_to_kwh;
+                    } else {
+                        if (dhw_enable) {
+                            if (dhw) {
+                                cop_stats.water_heating.elec_kwh += elec * power_to_kwh;
+                                cop_stats.water_heating.heat_kwh += heat * power_to_kwh;
+                            } else {
+                                cop_stats.space_heating.elec_kwh += elec * power_to_kwh;
+                                cop_stats.space_heating.heat_kwh += heat * power_to_kwh;
+                            }
+                        }
                     }
                 }
             }
@@ -600,7 +601,7 @@ function process_defrosts() {
             let heat = data["heatpump_heat"][z][1];
 
             let cool = false;
-            if (cooling_enable) cool = data["heatpump_cooling"][z][1];
+            if (cooling_enable && data["heatpump_cooling"][z] != undefined) cool = data["heatpump_cooling"][z][1];
 
             if (heat != null) {
                 if (heat >= 0) {
