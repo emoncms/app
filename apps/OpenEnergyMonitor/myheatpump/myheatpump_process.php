@@ -3,6 +3,7 @@
 function process_error_data($data, $interval) {
     $total_error_time = 0;
     $min_error_time = 120;
+    $total_error_elec_kwh = 0;
 
     if ($data["heatpump_error"]!=false) {
         // Axioma heat meter error codes:
@@ -24,6 +25,9 @@ function process_error_data($data, $interval) {
 
             $error_state = 0;
             $error_time = 0;
+            $error_kwh = 0;
+
+            $power_to_kwh = 1.0 * $interval / 3600000.0;
 
             foreach ($data["heatpump_elec"] as $z => $elec) {
                 $heat = $data["heatpump_heat"][$z];
@@ -34,14 +38,21 @@ function process_error_data($data, $interval) {
 
                 if ($elec > 200 && $heat == 0 && $DT > 1.5 && $flowT > 30) {
                     $error_state = 1;
+                    
                     $error_time += $interval;
                     $total_error_time += $interval;
+
+                    $kwh_inc = $elec * $power_to_kwh;
+                    $error_kwh += $kwh_inc;
+                    $total_error_elec_kwh += $kwh_inc;
                 } else {
                     if ($error_state == 1 && $error_time <= 60) {
                         $total_error_time -= $error_time;
+                        $total_error_elec_kwh -= $error_kwh;
                     }
-                    $error_time = 0;
                     $error_state = 0;
+                    $error_time = 0;
+                    $error_kwh = 0;
                 }
             }
         }
@@ -49,13 +60,15 @@ function process_error_data($data, $interval) {
 
     if ($total_error_time < $min_error_time) {
         $total_error_time = 0;
+        $total_error_elec_kwh = 0;
     }
 
     if ($total_error_time == 0) {
         $total_error_time = null;
+        $total_error_elec_kwh = null;
     }
 
-    return array("air" => $total_error_time);
+    return array("air" => $total_error_time, "air_kwh" => $total_error_elec_kwh);
 }
 
 // if the heatpump_cooling flag doesn't exist, we can try to auto detect it

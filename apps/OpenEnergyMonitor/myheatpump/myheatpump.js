@@ -919,10 +919,21 @@ function bargraph_draw() {
             total_error_air += data["error_air"][z][1];
         }
 
+        if (daily_data["error_air_kwh"] != undefined) {
+            data["error_air_kwh"] = daily_data["error_air_kwh"];
+        }
+
+        let total_error_air_elec_kwh = 0;
+        if (data["error_air_kwh"] != undefined) {
+            for (var z in data["error_air_kwh"]) {
+                total_error_air_elec_kwh += data["error_air_kwh"][z][1];
+            }
+        }
+
         if (total_error_air > 0) {
             var error_div = $("#data-error");
             error_div.show();
-            error_div.attr("title", "Heat meter air issue detected for " + (total_error_air / 60).toFixed(0) + " minutes");
+            error_div.attr("title", "Heat meter air issue detected for " + (total_error_air / 60).toFixed(0) + " minutes (" + (total_error_air_elec_kwh).toFixed(1) + " kWh)");
             
             bargraph_series.push({
                 data: data["error_air"], color: "#ff0000", yaxis: 4,
@@ -1220,6 +1231,13 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                     let error_air = data["error_air"][z][1];
                     if (error_air > 0) {
                         error_str = "<br>Error: " + (error_air / 60).toFixed(0) + " min";
+                    }
+                }
+
+                if (data["error_air_kwh"] != undefined && data["error_air_kwh"].length && data["error_air_kwh"][z] != undefined) {
+                    let error_air_kwh = data["error_air_kwh"][z][1];
+                    if (error_air_kwh > 0) {
+                        error_str += " (" + error_air_kwh.toFixed(1) + " kWh)";
                     }
                 }
 
