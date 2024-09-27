@@ -1,6 +1,6 @@
 {
     "name"         : "App",
-    "version"      : "2.9.11",
+    "version"      : "3.0.0",
     "location"     : "/var/www/emoncms/Modules",
     "branches_available": ["stable","master"]
 }
