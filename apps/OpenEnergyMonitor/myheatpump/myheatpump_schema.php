@@ -93,6 +93,9 @@ $schema['myheatpump_daily_stats'] = array(
     'error_air' => array('type' => 'int(11)', 'name'=>'Air error', 'group'=>'Errors', 'dp'=>0, 'unit'=>'s'),
     'error_air_kwh' => array('type' => 'float', 'name'=>'Air error elec kWh', 'group'=>'Errors', 'dp'=>3, 'unit'=>'kWh'),
 
+    // Auxilary consumption
+    'immersion_kwh' => array('type' => 'float', 'name'=>'Immersion', 'group'=>'Auxilary consumption', 'dp'=>0, 'unit'=>'kWh'),
+
     // Unit rates
     'unit_rate_agile' => array('type' => 'float', 'name'=>'Unit rate agile', 'group'=>'Unit rates', 'dp'=>1, 'unit'=>'p/kWh'),
     'unit_rate_cosy' => array('type' => 'float', 'name'=>'Unit rate cosy', 'group'=>'Unit rates', 'dp'=>1, 'unit'=>'p/kWh'),

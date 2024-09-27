@@ -173,7 +173,7 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     // --------------------------------------------------------------------------------------------------------------    
     $data = array();
     
-    $feeds = array("heatpump_elec","heatpump_flowT","heatpump_returnT","heatpump_outsideT","heatpump_roomT","heatpump_heat","heatpump_dhw","heatpump_error","heatpump_cooling");
+    $feeds = array("heatpump_elec","heatpump_flowT","heatpump_returnT","heatpump_outsideT","heatpump_roomT","heatpump_heat","heatpump_dhw","heatpump_error","heatpump_cooling","immersion_elec");
     
     foreach ($feeds as $key) {
         $data[$key] = false;
@@ -188,6 +188,8 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     if ($data["heatpump_cooling"]==false && isset($app->config->auto_detect_cooling) && $app->config->auto_detect_cooling) {
         $data["heatpump_cooling"] = auto_detect_cooling($data, $interval);
     }
+
+    $immersion_kwh = process_aux($data, $interval);
     
     $cop_stats = calculate_window_cops($data, $interval, $starting_power);
     
@@ -256,7 +258,8 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
         "outsideT"=>get_quality($data["heatpump_outsideT"]),
         "roomT"=>get_quality($data["heatpump_roomT"])
       ],
-      "errors" => $errors
+      "errors" => $errors,
+      "immersion_kwh" => $immersion_kwh
     ];
     
     return $result;
@@ -778,4 +781,19 @@ function convert_time($time,$timezone) {
         $time *= 0.001;
     }
     return $time;
+}
+
+// Calculate kWh immersion 
+function process_aux($data, $interval) {
+    $immersion_kwh = 0;
+    if (isset($data["immersion_elec"]) && is_array($data["immersion_elec"])) {
+        $power_to_kwh = 1.0 * $interval / 3600000.0;
+        foreach ($data["immersion_elec"] as $elec) {
+            // Only include positive values less than 20kW
+            if ($elec !== null && $elec >= 0 && $elec < 20000) {
+                $immersion_kwh += $elec * $power_to_kwh;
+            }
+        }
+    }
+    return number_format($immersion_kwh,3,'.','')*1;
 }

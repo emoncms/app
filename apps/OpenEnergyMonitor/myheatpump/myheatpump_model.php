@@ -274,6 +274,9 @@ class MyHeatPump {
             $row["error_".$key] = $value;
         }
 
+        // Aux consumption
+        $row["immersion_kwh"] = $stats['immersion_kwh'];
+
         return $row;
     }
 
@@ -427,6 +430,7 @@ class MyHeatPump {
         $totals['agile_cost'] = 0;
         $totals['cosy_cost'] = 0;
         $totals['go_cost'] = 0;
+        $totals['immersion_kwh'] = 0;
 
         // Quality
         $quality_fields = array('elec','heat','flowT','returnT','outsideT','roomT');
@@ -466,6 +470,8 @@ class MyHeatPump {
 
             $go_cost = $row->unit_rate_go * 0.01 * $totals['from_energy_feeds']['elec_kwh'];
             $totals['go_cost'] += $go_cost;
+
+            $totals['immersion_kwh'] += $row->immersion_kwh;
             
             $days++;
         }
@@ -536,6 +542,8 @@ class MyHeatPump {
         foreach ($quality_fields as $field) {
             $stats['quality_'.$field] = $quality[$field];
         }
+
+        $stats['immersion_kwh'] = $totals['immersion_kwh'];
 
         $stats['unit_rate_agile'] = null;
         $stats['unit_rate_cosy'] = null;

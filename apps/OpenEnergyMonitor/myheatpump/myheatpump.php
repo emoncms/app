@@ -12,6 +12,7 @@ global $path, $session, $v;
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=40>" rel="stylesheet">
@@ -174,6 +175,12 @@ global $path, $session, $v;
               <tbody class="stats_category" key="space_heating" style="display:none"></tbody>
               <tbody class="stats_category" key="cooling" style="display:none"></tbody>
             </table>
+
+            <div id="show_immersion_bound" style="display:none" class="advanced-options">
+              <div style="float:right"><span id="immersion_kwh"></span> kWh</div>
+              <input id="show_immersion" type="checkbox" class="advanced-options-checkbox">
+              <b>Show immersion</b>
+            </div>
 
             <div id="show_flow_rate_bound" style="display:none" class="advanced-options">
               <input id="show_flow_rate" type="checkbox" class="advanced-options-checkbox">
@@ -423,6 +430,6 @@ global $path, $session, $v;
   config.public = <?php echo $public; ?>;
   config.db = <?php echo json_encode($config); ?>;
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=138"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=15"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=142"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=16"></script>
 

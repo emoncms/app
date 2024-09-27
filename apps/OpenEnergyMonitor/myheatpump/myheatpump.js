@@ -16,20 +16,30 @@ if (!session_write) $(".config-open").hide();
 // ----------------------------------------------------------------------
 config.app = {
     "app_name": { "type": "value", "name": "App title", "default": "MY HEATPUMP", "optional": true, "description": "Enter custom title for app" },
+    // Electric
     "heatpump_elec": { "type": "feed", "autoname": "heatpump_elec", "optional": true, "description": "Electric use in watts" },
     "heatpump_elec_kwh": { "type": "feed", "autoname": "heatpump_elec_kwh", "description": "Cumulative electric use kWh" },
+    // Heat
     "heatpump_heat": { "type": "feed", "autoname": "heatpump_heat", "optional": true, "description": "Heat output in watts" },
     "heatpump_heat_kwh": { "type": "feed", "autoname": "heatpump_heat_kwh", "optional": true, "description": "Cumulative heat output in kWh" },
+    // Sensors
     "heatpump_flowT": { "type": "feed", "autoname": "heatpump_flowT", "optional": true, "description": "Flow temperature" },
     "heatpump_returnT": { "type": "feed", "autoname": "heatpump_returnT", "optional": true, "description": "Return temperature" },
     "heatpump_outsideT": { "type": "feed", "autoname": "heatpump_outsideT", "optional": true, "description": "Outside temperature" },
     "heatpump_roomT": { "type": "feed", "autoname": "heatpump_roomT", "optional": true, "description": "Room temperature" },
     "heatpump_targetT": { "type": "feed", "autoname": "heatpump_targetT", "optional": true, "description": "Target (Room or Flow) Temperature" },
     "heatpump_flowrate": { "type": "feed", "autoname": "heatpump_flowrate", "optional": true, "description": "Flow rate" },
+    // State
     "heatpump_dhw": { "type": "feed", "autoname": "heatpump_dhw", "optional": true, "description": "Status of Hot Water circuit (non-zero when running)" },
     "heatpump_ch": { "type": "feed", "autoname": "heatpump_ch", "optional": true, "description": "Status of Central Heating circuit (non-zero when running)" },
     "heatpump_cooling": { "type": "feed", "autoname": "heatpump_cooling", "optional": true, "description": "Cooling status (0: not cooling, 1: cooling)" },
     "heatpump_error": { "type": "feed", "autoname": "heatpump_error", "optional": true, "description": "Axioma heat meter error state" },
+    // Additional
+    "immersion_elec": { "type": "feed", "autoname": "immersion_elec", "optional": true, "description": "Immersion electric use in watts" },
+    // "immersion_elec_kwh": { "type": "feed", "autoname": "immersion_elec_kwh", "optional": true, "description": "Immersion electric use kWh" },
+
+    // Other
+    "starting_power": { "type": "value", "default": 150, "name": "Starting power", "description": "Starting power of heatpump in watts" },
     "auto_detect_cooling":{"type":"checkbox", "default":false, "name": "Auto detect cooling", "description":"Auto detect summer cooling if cooling status feed is not present"},
     "enable_process_daily":{"type":"checkbox", "default":false, "name": "Enable daily pre-processor", "description":"Enable split between water and space heating in daily view"},
     "start_date": { "type": "value", "default": 0, "name": "Start date", "description": _("Start date for all time values (unix timestamp)") },
@@ -60,6 +70,7 @@ var flot_font_size = 12;
 var updaterinst = false;
 var elec_enabled = false;
 var heat_enabled = false;
+var immersion_enabled = false;
 var feeds = {};
 var progtime = 0;
 var firstrun = true;
@@ -67,6 +78,7 @@ var heatpump_elec_start = 0;
 var heatpump_heat_start = 0;
 var start_time = 0;
 var end_time = 0;
+var show_immersion = false;
 var show_flow_rate = false;
 var show_instant_cop = false;
 var inst_cop_min = 2;
@@ -86,6 +98,7 @@ var last_bargraph_start = 0;
 var last_bargraph_end = 0;
 var bargraph_mode = "combined";
 var show_daily_cooling = false;
+var show_daily_immersion = false;
 
 
 var realtime_cop_div_mode = "30min";
@@ -104,13 +117,14 @@ function init() {
     feeds = {};
     for (var key in config.app) {
         if (config.app[key].value) feeds[key] = config.feedsbyid[config.app[key].value];
-
     }
 }
 
 function show() {
 
     $("#app_name").html(config.app['app_name'].value);
+    // Apply starting_power
+    $("#starting_power").val(config.app.starting_power.value);
 
     if (!config.app.enable_process_daily.value) {
         $(".bargraph_mode").hide();
@@ -125,8 +139,16 @@ function show() {
     // -------------------------------------------------------------------------------
     if (feeds["heatpump_elec_kwh"] != undefined) elec_enabled = true;
     if (feeds["heatpump_heat"] != undefined && feeds["heatpump_heat_kwh"] != undefined) heat_enabled = true;
+    if (feeds["immersion_elec"] != undefined) immersion_enabled = true;
+
     if (feeds["heatpump_flowrate"] != undefined) {
         $("#show_flow_rate_bound").show();
+    }
+
+    if (feeds["immersion_elec"] != undefined) {
+        show_immersion = true;
+        $("#show_immersion")[0].checked = true;
+        $("#show_immersion_bound").show();
     }
 
     if (feeds["heatpump_dhw"] == undefined) {
@@ -439,7 +461,8 @@ function powergraph_load() {
         "heatpump_roomT": { label: "RoomT", yaxis: 2, color: "#000" },
         "heatpump_flowrate": { label: "Flow rate", yaxis: 3, color: 6 },
         "heatpump_heat": { label: "Heat", yaxis: 1, color: 0, lines: { show: true, fill: 0.2, lineWidth: 0.5 } },
-        "heatpump_elec": { label: "Electric", yaxis: 1, color: 1, lines: { show: true, fill: 0.3, lineWidth: 0.5 } }
+        "heatpump_elec": { label: "Electric", yaxis: 1, color: 1, lines: { show: true, fill: 0.3, lineWidth: 0.5 } },
+        "immersion_elec": { label: "Immersion", yaxis: 1, color: 4, lines: { show: true, fill: 0.3, lineWidth: 0.5 } }
     }
 
     // Compile list of feedids
@@ -496,6 +519,8 @@ function powergraph_load() {
 function powergraph_process() {
     // process_stats: calculates min, max, mean, total, etc
     process_stats();
+    // process immersion
+    process_aux();
     // Different approach for cop calculations
     calculate_window_cops();
     // carnor_simulator: calculates carnot heat output
@@ -664,6 +689,7 @@ function powergraph_draw() {
         for (var key in powergraph_series) {
             let show = true;
             if (key == 'heatpump_flowrate' && !show_flow_rate) show = false;
+            if (key == 'immersion_elec' && !show_immersion) show = false;
 
             if (show) powergraph_series_without_key.push(powergraph_series[key]);
         }
@@ -785,6 +811,14 @@ function bargraph_load(start, end) {
                     }
                 }
 
+                // Is there immersion heater data?
+                show_daily_immersion = false;
+                for (var z in daily_data["immersion_kwh"]) {
+                    if (daily_data["immersion_kwh"][z][1] > 0) {
+                        show_daily_immersion = true;
+                        break;
+                    }
+                }
 
                 if (show_daily_dhw) {
                     $(".bargraph_mode[mode='water']").show();
@@ -843,12 +877,14 @@ function bargraph_draw() {
 
     var elec_kwh_in_window = 0;
     var heat_kwh_in_window = 0;
+    var immersion_kwh_in_window = 0;
     var days_elec = 0;
     var days_heat = 0;
 
+    // If we have heating data
+    // - add heating data to bargraph
+    // - add cooling data to bargraph if in combined mode and cooling data is present
     if (daily_data[bargraph_mode+"_heat_kwh"] != undefined) {
-
-
 
         data["heatpump_heat_kwhd"] = daily_data[bargraph_mode+"_heat_kwh"];
 
@@ -857,10 +893,10 @@ function bargraph_draw() {
             color = "#66b0ff";
         }
         
-
         bargraph_series.push({
             data: data["heatpump_heat_kwhd"], color: color,
-            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 }
+            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 },
+            stack: true
         });
 
         for (var z in data["heatpump_heat_kwhd"]) {
@@ -879,12 +915,14 @@ function bargraph_draw() {
         }
     }
 
+    // If we have electric data add to bargraph
     if (daily_data[bargraph_mode+"_elec_kwh"] != undefined) {
         data["heatpump_elec_kwhd"] = daily_data[bargraph_mode+"_elec_kwh"];
 
         bargraph_series.push({
             data: data["heatpump_elec_kwhd"], color: 1,
-            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 }
+            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 },
+            stack: false
         });
 
         for (var z in data["heatpump_elec_kwhd"]) {
@@ -893,6 +931,7 @@ function bargraph_draw() {
         }
     }
 
+    // If we have outside temperature data add to bargraph
     if (feeds["heatpump_outsideT"] != undefined) {
         data["heatpump_outsideT_daily"] = daily_data["combined_outsideT_mean"];
 
@@ -902,6 +941,7 @@ function bargraph_draw() {
         });
     }
 
+    // If we have % carnot data add to bargraph
     if (daily_data["combined_prc_carnot"] != undefined && $("#carnot_enable")[0].checked) {
         data["combined_prc_carnot"] = daily_data["combined_prc_carnot"];
 
@@ -911,6 +951,7 @@ function bargraph_draw() {
         });
     }
 
+    // If we have error data add to bargraph
     if (daily_data["error_air"] != undefined) {
         data["error_air"] = daily_data["error_air"];
 
@@ -942,6 +983,7 @@ function bargraph_draw() {
         }
     }
 
+    // If we have COP data add to bargraph
     if (daily_data[bargraph_mode+"_cop"] != undefined) {
         cop_data = daily_data[bargraph_mode+"_cop"];
 
@@ -951,14 +993,49 @@ function bargraph_draw() {
         });
     }
 
-    var cop_in_window = heat_kwh_in_window / elec_kwh_in_window;
+    // If we are in combined mode and there is immersion data
+    // overlay immersion data on top of heating data
+    if (show_daily_immersion && (bargraph_mode=="combined" || bargraph_mode=="water")) {
+        data["immersion_kwhd"] = daily_data["immersion_kwh"];
+        bargraph_series.push({
+            data: data["immersion_kwhd"], color: 4,
+            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 0.8, lineWidth: 0 },
+            stack: true
+        });
 
+        // Calculate total immersion energy
+        for (var z in data["immersion_kwhd"]) {
+            immersion_kwh_in_window += data["immersion_kwhd"][z][1];
+        }
+    }
+
+    var cop_in_window = 0; 
+    if (elec_kwh_in_window>0) {
+        cop_in_window = heat_kwh_in_window / elec_kwh_in_window;
+    }
     if (cop_in_window < 0) cop_in_window = 0;
     $("#window-cop").html((cop_in_window).toFixed(2));
 
+    var prefix = "";
+    if (show_daily_immersion && (bargraph_mode=="combined" || bargraph_mode=="water")) {
+        var elec_inc_aux_in_window = elec_kwh_in_window + immersion_kwh_in_window;
+        var heat_inc_aux_in_window = heat_kwh_in_window + immersion_kwh_in_window;
+        var cop_inc_aux_in_window = 0;
+        if (elec_inc_aux_in_window > 0) {
+            cop_inc_aux_in_window = heat_inc_aux_in_window / elec_inc_aux_in_window;
+        }
+        if (cop_inc_aux_in_window < 0) cop_inc_aux_in_window = 0;
+        $("#window-cop").html((cop_in_window).toFixed(2) + " (" + (cop_inc_aux_in_window).toFixed(2) + ")");
+        prefix = "HP ";
+    }
+
     var tooltip_text = "";
-    tooltip_text += "Electric: " + elec_kwh_in_window.toFixed(0) + " kWh (" + (elec_kwh_in_window / days_elec).toFixed(1) + " kWh/d)\n";
-    tooltip_text += "Heat: " + heat_kwh_in_window.toFixed(0) + " kWh (" + (heat_kwh_in_window / days_heat).toFixed(1) + " kWh/d)\n";
+    tooltip_text += prefix+"Electric: " + elec_kwh_in_window.toFixed(0) + " kWh (" + (elec_kwh_in_window / days_elec).toFixed(1) + " kWh/d)\n";
+    tooltip_text += prefix+"Heat: " + heat_kwh_in_window.toFixed(0) + " kWh (" + (heat_kwh_in_window / days_heat).toFixed(1) + " kWh/d)\n";
+
+    if (show_daily_immersion && (bargraph_mode=="combined" || bargraph_mode=="water")) {
+        tooltip_text += "Immersion: " + immersion_kwh_in_window.toFixed(0) + " kWh (" + (immersion_kwh_in_window / days_heat).toFixed(1) + " kWh/d)\n";
+    }
     tooltip_text += "Days: " + days_elec;
     $("#window-cop").attr("title", tooltip_text);
 
@@ -1226,6 +1303,28 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                     heat_kwh -= cool_kwh;
                 }
 
+                // immersion heater
+                // only if daily mode = water or combined
+                var immersion_str = "";
+                var hp_prefix = "";
+
+                if (bargraph_mode == "water" || bargraph_mode == "combined") {
+                    var immersion_kwh = null;
+                    if (show_daily_immersion) {
+                        if (data["immersion_kwhd"].length && data["immersion_kwhd"][z] != undefined) immersion_kwh = data["immersion_kwhd"][z][1];
+                        if (immersion_kwh !== null) {
+                            immersion_str = "<br>Immersion: " + immersion_kwh.toFixed(1) + " kWh";
+                            hp_prefix = "HP ";
+                        }
+                    }
+                    // Calculate COP with immersion heater
+                    var COP_H4 = null;
+                    if (elec_kwh !== null && heat_kwh !== null && immersion_kwh !== null) {
+                        COP_H4 = (heat_kwh + immersion_kwh) / (elec_kwh + immersion_kwh);
+                        COP += " (" + (COP_H4).toFixed(2) + ")";
+                    }
+                }
+
                 var error_str = "";
                 if (data["error_air"] != undefined && data["error_air"].length && data["error_air"][z] != undefined) {
                     let error_air = data["error_air"][z][1];
@@ -1244,7 +1343,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                 if (elec_kwh !== null) elec_kwh = (elec_kwh).toFixed(1); else elec_kwh = "---";
                 if (heat_kwh !== null) heat_kwh = (heat_kwh).toFixed(1); else heat_kwh = "---";
 
-                tooltip(item.pageX, item.pageY, date + "<br>Electric: " + elec_kwh + " kWh<br>Heat: " + heat_kwh + " kWh"+cooling_str+"<br>" + outside_temp_str + "COP: " + COP + str_prc_carnot + error_str, "#fff", "#000");
+                tooltip(item.pageX, item.pageY, date + "<br>" + hp_prefix + "Electric: " + elec_kwh + " kWh<br>" + hp_prefix + "Heat: " + heat_kwh + " kWh"+cooling_str+ immersion_str + "<br>" + outside_temp_str + "COP: " + COP + str_prc_carnot + error_str, "#fff", "#000");
             }
 
             if (viewmode == "powergraph") {
@@ -1284,6 +1383,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                     unit = " " + feeds["heatpump_flowrate"].unit;
                     dp = 3;
                 }
+                else if (item.series.label == "Immersion") { name = "Immersion"; unit = "W"; }
 
                 tooltip(item.pageX, item.pageY, name + " " + itemValue.toFixed(dp) + unit + "<br>" + date + ", " + time, "#fff", "#000");
             }
@@ -1466,6 +1566,15 @@ $("#show_flow_rate").click(function () {
         show_flow_rate = true;
     } else {
         show_flow_rate = false;
+    }
+    powergraph_draw();
+});
+
+$("#show_immersion").click(function () {
+    if ($("#show_immersion")[0].checked) {
+        show_immersion = true;
+    } else {
+        show_immersion = false;
     }
     powergraph_draw();
 });

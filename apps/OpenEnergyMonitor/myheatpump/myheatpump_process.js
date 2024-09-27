@@ -1,3 +1,4 @@
+var immersion_kwh = 0;
 
 function process_error_data() {
 
@@ -433,9 +434,28 @@ function calculate_window_cops() {
         
         for (var category in cop_stats) {
             if (cop_stats[category].elec_kwh>0) {
+
+                // COP without immersion
                 let cop = cop_stats[category].heat_kwh / cop_stats[category].elec_kwh
                 $(".cop_"+category).html(cop.toFixed(2));
-                var tooltip_text = "Electric: " + cop_stats[category].elec_kwh.toFixed(1) + " kWh\nHeat: " + cop_stats[category].heat_kwh.toFixed(1) + " kWh\n";
+
+                let tooltip_text = "";
+                let prefix = "";
+                if (immersion_enabled) prefix = "HP ";
+
+                tooltip_text = prefix + "Electric: " + cop_stats[category].elec_kwh.toFixed(1) + " kWh\n";
+                tooltip_text += prefix + "Heat: " + cop_stats[category].heat_kwh.toFixed(1) + " kWh\n";
+                
+
+                if (immersion_enabled) {
+                    // COP with immersion
+                    if (category == "combined" || category == "water_heating") {
+                        let cop_h4 = (cop_stats[category].heat_kwh + immersion_kwh) / (cop_stats[category].elec_kwh + immersion_kwh)
+                        $(".cop_"+category).html(cop.toFixed(2) + " (" + cop_h4.toFixed(2) + ")");
+                        tooltip_text += "Immersion: " + immersion_kwh.toFixed(1) + " kWh\n";         
+                    }
+                }
+                
                 $(".cop_"+category).attr("title", tooltip_text);    
             } else {
                 $(".cop_"+category).html("---");
@@ -658,4 +678,20 @@ function compressor_starts() {
     var starts_per_hour = 0;
     if (hours>0) starts_per_hour = starts / hours;
     console.log("Starts: "+starts+", Starts per hour: "+starts_per_hour.toFixed(1)+", Hours: "+hours.toFixed(1));
+}
+
+// Calculate kWh immersion 
+function process_aux() {
+    if (data["immersion_elec"] != undefined) {
+        var powert_to_kwh = view.interval / HOUR;
+        immersion_kwh = 0;
+        for (var z in data["immersion_elec"]) {
+            let immersion_elec = data["immersion_elec"][z][1];
+            if (immersion_elec != null) {
+                immersion_kwh += immersion_elec * powert_to_kwh;
+            }
+        }
+        $("#immersion_kwh").html(immersion_kwh.toFixed(3));
+        console.log("Immersion: "+immersion_kwh.toFixed(3));
+    }
 }
