@@ -321,7 +321,7 @@ function process_stats() {
     
     // Standby energy
     var standby_kwh = 0;
-    if (stats['combined']['heatpump_elec'].kwh != undefined && stats['when_running']['heatpump_elec'].kwh != undefined) {
+    if (stats['when_running']['heatpump_elec'].kwh != null) {
         standby_kwh = stats['combined']['heatpump_elec'].kwh - stats['when_running']['heatpump_elec'].kwh;
     }
     $("#standby_kwh").html(standby_kwh.toFixed(3));
