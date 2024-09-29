@@ -88,7 +88,7 @@ global $path, $session, $v;
             <div class="bluenav bargraph-period" days=90>3 MONTHS</div>
             <div class="bluenav bargraph-period" days=30>MONTH</div>
             <div class="bluenav bargraph-period" days=7>WEEK</div>
-            <div class="bluenav bargraph-day">DAY</div>
+            <div class="bluenav bargraph-day">TODAY</div>
           </div>
 
           <div class="powergraph-navigation" style="display:none">
