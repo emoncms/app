@@ -1,6 +1,6 @@
 <?php
 
-function process_error_data($data, $interval) {
+function process_error_data($data, $interval, $starting_power) {
     $total_error_time = 0;
     $min_error_time = 120;
     $total_error_elec_kwh = 0;
@@ -36,7 +36,7 @@ function process_error_data($data, $interval) {
 
                 $DT = $flowT - $returnT;
 
-                if ($elec > 200 && $heat == 0 && $DT > 1.5 && $flowT > 30) {
+                if ($elec > $starting_power && $heat == 0 && $DT > 1.5 && $flowT > 30) {
                     $error_state = 1;
                     
                     $error_time += $interval;
@@ -183,7 +183,7 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
         }
     }
 
-    $errors = process_error_data($data, $interval);
+    $errors = process_error_data($data, $interval, $starting_power);
 
     if ($data["heatpump_cooling"]==false && isset($app->config->auto_detect_cooling) && $app->config->auto_detect_cooling) {
         $data["heatpump_cooling"] = auto_detect_cooling($data, $interval);

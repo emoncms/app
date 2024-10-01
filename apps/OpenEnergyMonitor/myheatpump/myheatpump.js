@@ -118,9 +118,12 @@ function show() {
 
     if (!config.app.enable_process_daily.value) {
         $(".bargraph_mode").hide();
+        $("#clear-daily-data").hide();
+
         bargraph_mode = "combined";
     } else {
         $(".bargraph_mode").show();
+        $("#clear-daily-data").show();
     }
 
     $("body").css('background-color', 'WhiteSmoke');
@@ -542,4 +545,22 @@ $('#placeholder').bind("plotselected", function (event, ranges) {
         powergraph_load();
     }
     setTimeout(function () { panning = false; }, 100);
+});
+
+$("#clear-daily-data").click(function () {
+    $.ajax({
+        url: path + "app/cleardaily",
+        data: { id: config.id, apikey: apikey },
+        async: true,
+        dataType: "json",
+        success: function (result) {
+            if (result.success) {
+                alert("Daily data cleared, please refresh the page to reload data");
+                app_log("INFO", "Daily data cleared");
+            } else {
+                alert("Failed to clear daily data");
+                app_log("ERROR", "Failed to clear daily data");
+            }
+        }
+    });
 });

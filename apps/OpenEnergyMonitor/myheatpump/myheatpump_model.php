@@ -182,6 +182,10 @@ class MyHeatPump {
 
         // This should be an option to set.. for now hard coded
         $starting_power = 100;
+        if (isset($app->config->starting_power)) {
+            $starting_power = (int) $app->config->starting_power;
+            if ($starting_power<0) $starting_power = 0;
+        }
         
         // Timeout mechanism
         $timer_start = microtime(true);

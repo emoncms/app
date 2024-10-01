@@ -2,6 +2,9 @@ var immersion_kwh = 0;
 
 function process_error_data() {
 
+    var starting_power = parseFloat($("#starting_power").val());
+
+
     var total_error_time = 0;
     var min_error_time = 120;
 
@@ -42,7 +45,7 @@ function process_error_data() {
 
                 var DT = flowT - returnT;
 
-                if (elec > 200 && heat == 0 && DT > 1.5 && flowT > 30) {
+                if (elec > starting_power && heat == 0 && DT > 1.5 && flowT > 30) {
                     if (error_time == 0) error_start_index = z;
 
                     error_state = 1;
