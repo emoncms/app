@@ -5,6 +5,8 @@ function process_error_data($data, $interval, $starting_power) {
     $min_error_time = 120;
     $total_error_elec_kwh = 0;
 
+    $power_to_kwh = 1.0 * $interval / 3600000.0;
+
     if ($data["heatpump_error"]!=false) {
         // Axioma heat meter error codes:
         // 1024: No flow
@@ -14,6 +16,8 @@ function process_error_data($data, $interval, $starting_power) {
             if ($error == 1024) {
                 $data["heatpump_error"][$z] = 1;
                 $total_error_time += $interval;
+                $total_error_elec_kwh += $data["heatpump_elec"][$z] * $power_to_kwh;
+
             } else {
                 $data["heatpump_error"][$z] = 0;
             }
@@ -27,7 +31,7 @@ function process_error_data($data, $interval, $starting_power) {
             $error_time = 0;
             $error_kwh = 0;
 
-            $power_to_kwh = 1.0 * $interval / 3600000.0;
+            
 
             foreach ($data["heatpump_elec"] as $z => $elec) {
                 $heat = $data["heatpump_heat"][$z];
@@ -433,7 +437,7 @@ function stats_min_max(&$stats, $category, $key, $value) {
 function remove_null_values($data, $interval) {
     $last_valid_pos = 0;
     for ($pos = 0; $pos < count($data); $pos++) {
-        if ($data[$pos] !== null) {
+        if (isset($data[$pos]) && $data[$pos] !== null) {
             $null_time = ($pos - $last_valid_pos) * $interval;
             if ($null_time < 900) {
                 for ($x = $last_valid_pos + 1; $x < $pos; $x++) {

@@ -85,9 +85,9 @@ global $path, $session, $v;
 
             <div class="bluenav bargraph-alltime">ALL</div>
             <div class="bluenav bargraph-period" days=365>YEAR</div>
-            <div class="bluenav bargraph-period" days=90>3 MONTHS</div>
+            <div class="bluenav bargraph-period wide" days=90>3 MONTHS</div>
             <div class="bluenav bargraph-period" days=30>MONTH</div>
-            <div class="bluenav bargraph-period" days=7>WEEK</div>
+            <div class="bluenav bargraph-period wide" days=7>WEEK</div>
             <div class="bluenav bargraph-day">DAY</div>
           </div>
 
@@ -435,7 +435,7 @@ global $path, $session, $v;
   config.db = <?php echo json_encode($config); ?>;
 </script>
 
-<?php $v=150; ?>
+<?php $v=154; ?>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_powergraph.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_bargraph.js?v=<?php echo $v; ?>"></script>

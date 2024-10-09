@@ -410,7 +410,16 @@ function resize() {
     var window_width = $(this).width();
 
     flot_font_size = 12;
-    if (window_width < 450) flot_font_size = 10;
+    if (window_width < 450) {
+        flot_font_size = 10;
+    }
+
+    if (window_width < 700) {
+        $(".wide").hide();
+    } else {
+        $(".wide").show();
+    }
+
 
     var top_offset = 0;
     var placeholder_bound = $('#placeholder_bound');
@@ -425,6 +434,8 @@ function resize() {
     placeholder.width(width);
     placeholder_bound.height(height);
     placeholder.height(height - top_offset);
+
+    
 
     if (viewmode == "bargraph") {
         bargraph_draw();

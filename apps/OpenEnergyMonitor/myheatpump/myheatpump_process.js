@@ -7,6 +7,9 @@ function process_error_data() {
 
     var total_error_time = 0;
     var min_error_time = 120;
+    var total_error_elec_kwh = 0;
+
+    var power_to_kwh = 1.0 * view.interval / 3600000.0;
 
     if (feeds["heatpump_error"] != undefined) {
         // Axioma heat meter error codes:
@@ -19,6 +22,7 @@ function process_error_data() {
             if (error == 1024) {
                 data["heatpump_error"][z] = [time, 1];
                 total_error_time += view.interval;
+                total_error_elec_kwh += data["heatpump_elec"][z][1] * power_to_kwh;
             }
             else data["heatpump_error"][z] = [time, 0];
         }
@@ -33,6 +37,7 @@ function process_error_data() {
 
             var error_state = 0;
             var error_time = 0;
+            var error_kwh = 0;
             var error_start_index = 0;
 
             for (var z in data["heatpump_elec"]) {
@@ -51,14 +56,20 @@ function process_error_data() {
                     error_state = 1;
                     error_time += view.interval;
                     total_error_time += view.interval;
+                    
+                    let kwh_inc = elec * power_to_kwh;
+                    error_kwh += kwh_inc;
+                    total_error_elec_kwh += kwh_inc;
                 } else {
                     if (error_state == 1 && error_time <= 60) {
                         for (var y = error_start_index; y < z; y++) {
                             data["heatpump_error"][y][1] = 0;
                         }
                         total_error_time -= error_time;
+                        total_error_elec_kwh -= error_kwh;
                     }
                     error_time = 0;
+                    error_kwh = 0;
                     error_state = 0;
                 }
                 data["heatpump_error"].push([time, error_state]);
@@ -79,7 +90,7 @@ function process_error_data() {
     var error_div = $("#data-error");
     if (total_error_time > min_error_time) {
         error_div.show();
-        error_div.attr("title", "Heat meter air issue detected for " + (total_error_time / 60).toFixed(0) + " minutes");
+        error_div.attr("title", "Heat meter air issue detected for " + (total_error_time / 60).toFixed(0) + " minutes ("+total_error_elec_kwh.toFixed(3)+" kWh)");
         $("#error-message").html("Heat meter air issue detected for " + (total_error_time / 60).toFixed(0) + " minutes, see: <a href='https://docs.openenergymonitor.org/heatpumps/removing_air.html'>Removing Air from Heating Systems</a>");
         $("#error-message").show();
     } else {
