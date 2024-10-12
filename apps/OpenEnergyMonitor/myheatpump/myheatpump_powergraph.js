@@ -71,6 +71,17 @@ function powergraph_load() {
             $("#fixed_outside_temperature_bound").show();
         }
 
+        // Process heatpump_targetT data
+        // replace null values with the last known value
+        var targetT = null;
+        for (var z in data["heatpump_targetT"]) {
+            if (data["heatpump_targetT"][z][1] != null) {
+                targetT = data["heatpump_targetT"][z][1];
+            } else {
+                data["heatpump_targetT"][z][1] = targetT;
+            }
+        }
+
         // Process axioma heat meter error data
         process_error_data();
 

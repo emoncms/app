@@ -241,11 +241,11 @@ function bargraph_draw() {
     }
 
     // If we have % carnot data add to bargraph
-    if (daily_data["combined_prc_carnot"] != undefined && $("#carnot_enable")[0].checked) {
-        data["combined_prc_carnot"] = daily_data["combined_prc_carnot"];
+    if (daily_data["running_prc_carnot"] != undefined && $("#carnot_enable")[0].checked) {
+        data["running_prc_carnot"] = daily_data["running_prc_carnot"];
 
         bargraph_series.push({
-            data: data["combined_prc_carnot"], color: "#ff9e80", yaxis: 2,
+            data: data["running_prc_carnot"], color: "#ff9e80", yaxis: 2,
             points: { show: true }
         });
     }
@@ -415,8 +415,8 @@ function bargraph_tooltip(item)
 
     var str_prc_carnot = "";
     if ($("#carnot_enable")[0].checked) {
-        if (data["combined_prc_carnot"] != undefined && data["combined_prc_carnot"].length && data["combined_prc_carnot"][z] != undefined) {
-            let prc_carnot = data["combined_prc_carnot"][z][1];
+        if (data["running_prc_carnot"] != undefined && data["running_prc_carnot"].length && data["running_prc_carnot"][z] != undefined) {
+            let prc_carnot = data["running_prc_carnot"][z][1];
             if (prc_carnot != null) {
                 str_prc_carnot = "<br>Carnot: " + prc_carnot.toFixed(1) + "%<br>";
             }
