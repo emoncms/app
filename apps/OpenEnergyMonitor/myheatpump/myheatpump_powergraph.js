@@ -230,28 +230,32 @@ function emitter_and_volume_calculator() {
 
         let dhw = false;
         if (dhw_enable) dhw = data["heatpump_dhw"][z][1];
-        if (dhw) continue;
-
-        let MWT = (data["heatpump_flowT"][z][1] + data["heatpump_returnT"][z][1]) * 0.5;
-        let MWT_minus_room = MWT - data["heatpump_roomT"][z][1];
-        let heat_from_rads = 1000 * Math.pow(MWT_minus_room / 50, 1.3) * radiator_spec;
-
-        let heat_from_heatpump = data["heatpump_heat"][z][1];
-        if (heat_from_rads > heat_from_heatpump) heat_from_rads = heat_from_heatpump;
         
-        let heat_to_volume =  heat_from_heatpump - heat_from_rads
-        if (heat_to_volume > 0) {
-            kwh_to_volume += heat_to_volume * (view.interval / 3600000);
+        let heat_from_rads = null;
+        let heat_from_heatpump = null;
+        
+        if (!dhw) {
+            let MWT = (data["heatpump_flowT"][z][1] + data["heatpump_returnT"][z][1]) * 0.5;
+            let MWT_minus_room = MWT - data["heatpump_roomT"][z][1];
+            heat_from_rads = 1000 * Math.pow(MWT_minus_room / 50, 1.3) * radiator_spec;
 
-            if (last_MWT != null) {
-                let MWT_change = MWT - last_MWT;
-                if (MWT_change>0) {
-                    MWT_increase += MWT_change
+            heat_from_heatpump = data["heatpump_heat"][z][1];
+            if (heat_from_rads > heat_from_heatpump) heat_from_rads = heat_from_heatpump;
+            
+            let heat_to_volume =  heat_from_heatpump - heat_from_rads
+            if (heat_to_volume > 0) {
+                kwh_to_volume += heat_to_volume * (view.interval / 3600000);
+
+                if (last_MWT != null) {
+                    let MWT_change = MWT - last_MWT;
+                    //if (MWT_change>0) {
+                        MWT_increase += MWT_change
+                    //}
                 }
-            }
 
+            }
+            last_MWT = MWT;
         }
-        last_MWT = MWT;
         let time = data["heatpump_flowT"][z][0];
         data["emitter_spec_heat"].push([time, heat_from_rads]);
 
