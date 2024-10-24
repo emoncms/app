@@ -168,6 +168,7 @@ function emitter_and_volume_calculator() {
     $("#system_volume").html("?");
     $("#kW_at_50").html("?");
 
+    if (stats['combined']["heatpump_heat"] == undefined) return false;
     if (stats['combined']["heatpump_heat"].mean == null) return false;
 
     if (!emitter_spec_enable) return false;
