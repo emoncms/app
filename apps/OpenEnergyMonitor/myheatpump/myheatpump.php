@@ -261,16 +261,10 @@ global $path, $session, $v;
               <input id="emitter_spec_enable" type="checkbox" class="advanced-options-checkbox">
               <b>Calculate emitter spec and system volume</b>
               <div id="emitter_spec_options" style="margin-top:10px; display:none">
-                <p>1. Select period of steady state operation where flow and return temperatures are flat</p>
-
                 <div class="input-append" style="margin-top:5px">
                   <input type="text" style="width:50px" id="kW_at_50" disabled>
                   <span class="add-on">kW @ DT50</span>
-                  <button class="btn" id="use_for_volume_calc">Use for volume calc</button>
                 </div>
-
-                <p>2. Select space heating period with increasing flow and return temperatures</p>
-
                 <div class="input-append" style="margin-top:5px">
                   <input type="text" style="width:50px" id="system_volume" disabled>
                   <span class="add-on">Litres</span>
@@ -435,7 +429,7 @@ global $path, $session, $v;
   config.db = <?php echo json_encode($config); ?>;
 </script>
 
-<?php $v=156; ?>
+<?php $v=158; ?>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_powergraph.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_bargraph.js?v=<?php echo $v; ?>"></script>
