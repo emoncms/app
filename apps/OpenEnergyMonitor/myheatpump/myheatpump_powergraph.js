@@ -173,54 +173,124 @@ function emitter_and_volume_calculator() {
 
     if (!emitter_spec_enable) return false;
 
-    if (stats['combined']["heatpump_flowT"] != undefined && stats['combined']["heatpump_returnT"] != undefined && stats['combined']["heatpump_roomT"] != undefined && stats['combined']['heatpump_heat'] != undefined) {
+    var dhw_enable = false;
+    if (data["heatpump_dhw"] != undefined) dhw_enable = true;
 
-        if (stats['combined']["heatpump_flowT"].diff > 0.15 || stats['combined']["heatpump_returnT"].diff > 0.15) {
-            $("#kW_at_50").html("?");
+    // Plot instantaneous emitter spec
+    data["emitter_spec"] = [];
 
-            if (kw_at_50_for_volume) {
-                console.log("System volume calculation:");
-                let MWT = (stats['combined']["heatpump_flowT"].mean + stats['combined']["heatpump_returnT"].mean) * 0.5;
-                let MWT_minus_room = MWT - stats['combined']["heatpump_roomT"].mean;
+    // holds value & frequency
+    let emitter_spec_histogram = {};
 
-                let heat_based_on_emitter_spec = kw_at_50_for_volume * 1000 * Math.pow(MWT_minus_room / 50, 1.3)
-                let heat_to_system_volume = stats['combined']["heatpump_heat"].mean - heat_based_on_emitter_spec;
+    for (var z in data["heatpump_flowT"]) {
 
-                let MWT_start = (stats['combined']["heatpump_flowT"].minval + stats['combined']["heatpump_returnT"].minval) * 0.5;
-                let MWT_end = (stats['combined']["heatpump_flowT"].maxval + stats['combined']["heatpump_returnT"].maxval) * 0.5;
-                let DT = MWT_end - MWT_start;
-                if (DT > 0) {
+        let dhw = false;
+        if (dhw_enable) dhw = data["heatpump_dhw"][z][1];
 
-                    let time_elapsed = (view.end - view.start) * 0.001
-                    if (time_elapsed > 0) {
-                        let DS_second = DT / time_elapsed;
-                        let system_volume = heat_to_system_volume / (4200 * DS_second)
+        let kw_at_50 = null;
+        if (!dhw) {
+            let MWT = (data["heatpump_flowT"][z][1] + data["heatpump_returnT"][z][1]) * 0.5;
+            let MWT_minus_room = MWT - data["heatpump_roomT"][z][1];
+            let heat = data["heatpump_heat"][z][1];
+            kw_at_50 = 0.001 * heat / Math.pow(MWT_minus_room / 50, 1.3);
 
-                        console.log("- heat output based on recorded emitter spec: " + heat_based_on_emitter_spec.toFixed(0) + "W");
-                        console.log("- heat to system volume: " + heat_to_system_volume.toFixed(0) + "W");
-                        console.log("- increase in temperature: " + DT.toFixed(1) + "K");
-                        console.log("- increase in temperature per second: " + DS_second.toFixed(6) + "K/s");
-                        console.log("- system volume: " + system_volume.toFixed(0) + " litres");
-                        $("#system_volume").val(system_volume.toFixed(0));
-                    }
+            // Add to histogram
+            if (kw_at_50 > 0 && kw_at_50 !=null) {
+                let rounded = kw_at_50.toFixed(1);
+                if (emitter_spec_histogram[rounded] == undefined) emitter_spec_histogram[rounded] = 0;
+                emitter_spec_histogram[rounded]++;
+            }
+        }
+
+        if (kw_at_50 <= 0) kw_at_50 = null;
+
+        let time = data["heatpump_flowT"][z][0];
+        data["emitter_spec"].push([time, kw_at_50]);
+    }
+
+    // find the most common value
+    let max = 0;
+    let max_key = 0;
+    for (var key in emitter_spec_histogram) {
+        if (emitter_spec_histogram[key] > max) {
+            max = emitter_spec_histogram[key];
+            max_key = key;
+        }
+    }
+    let radiator_spec = parseFloat(max_key);
+
+    // Create plot of heat output from radiators based on most common emitter spec
+    data["emitter_spec_heat"] = [];
+
+    let kwh_to_volume = 0;
+    let last_MWT = null;
+    let MWT_increase = 0;
+
+    for (var z in data["heatpump_flowT"]) {
+
+        let dhw = false;
+        if (dhw_enable) dhw = data["heatpump_dhw"][z][1];
+        if (dhw) continue;
+
+        let MWT = (data["heatpump_flowT"][z][1] + data["heatpump_returnT"][z][1]) * 0.5;
+        let MWT_minus_room = MWT - data["heatpump_roomT"][z][1];
+        let heat_from_rads = 1000 * Math.pow(MWT_minus_room / 50, 1.3) * radiator_spec;
+
+        let heat_from_heatpump = data["heatpump_heat"][z][1];
+        if (heat_from_rads > heat_from_heatpump) heat_from_rads = heat_from_heatpump;
+        
+        let heat_to_volume =  heat_from_heatpump - heat_from_rads
+        if (heat_to_volume > 0) {
+            kwh_to_volume += heat_to_volume * (view.interval / 3600000);
+
+            if (last_MWT != null) {
+                let MWT_change = MWT - last_MWT;
+                if (MWT_change>0) {
+                    MWT_increase += MWT_change
                 }
             }
 
-        } else {
-            let MWT = (stats['combined']["heatpump_flowT"].mean + stats['combined']["heatpump_returnT"].mean) * 0.5;
-            let MWT_minus_room = MWT - stats['combined']["heatpump_roomT"].mean;
-            kw_at_50 = 0.001 * stats['combined']["heatpump_heat"].mean / Math.pow(MWT_minus_room / 50, 1.3);
-
-            console.log("Radiator spec calculation:");
-            console.log("- mean water temperature: " + MWT.toFixed(1) + "C");
-            console.log("- MWT - room: " + MWT_minus_room.toFixed(1) + "K");
-            console.log("- heat output: " + stats['combined']["heatpump_heat"].mean.toFixed(0) + "W");
-            console.log("- kw_at_50: " + kw_at_50.toFixed(1) + " kW");
-            $("#kW_at_50").val(kw_at_50.toFixed(1));
         }
-    } else {
-        $("#kW_at_50").html("?");
+        last_MWT = MWT;
+        let time = data["heatpump_flowT"][z][0];
+        data["emitter_spec_heat"].push([time, heat_from_rads]);
+
+        // clear emitter_spec values if difference between heat_from_rads and heat_from_heatpump is > 100W
+        if (Math.abs(heat_from_rads - heat_from_heatpump) > 100) {
+            data["emitter_spec"][z][1] = null;
+        }
     }
+
+    // Calculate system volume
+    let system_volume = (kwh_to_volume * 3600000) / (4150 * MWT_increase);
+
+    console.log("Most common emitter spec: " + radiator_spec + " kW");
+    console.log("MWT increase: " + MWT_increase.toFixed(1) + "K");
+    console.log("Heat to system volume: " + kwh_to_volume.toFixed(1) + " kWh");
+    console.log("System volume: " + system_volume.toFixed(0) + " litres");
+
+    $("#kW_at_50").val(radiator_spec);
+    $("#system_volume").val(system_volume.toFixed(0));
+
+    
+    // Enable for development
+    powergraph_series['emitter_spec_heat'] = {
+        label: "Emitter spec heat",
+        data: data["emitter_spec_heat"],
+        yaxis: 1,
+        //color orange
+        color: "#ff7f0e",
+        lines: { show: true, fill: 0.2, lineWidth: 0.5 }
+    };
+
+    powergraph_series['emitter_spec'] = { 
+        label: "Emitter spec", 
+        data: data["emitter_spec"], 
+        yaxis: 6, 
+        color: "#44b3e2", 
+        lines: { show: true, lineWidth: 2 } 
+    };
+    
 }
 
 // -------------------------------------------------------------------------------
@@ -371,6 +441,8 @@ function powergraph_tooltip(item) {
     else if (item.series.label == "Carnot Heat") { name = "Carnot Heat"; unit = "W"; }
     else if (item.series.label == "Simulated flow rate") { name = "Simulated flow rate"; unit = ""; dp = 3; }
     else if (item.series.label == "Inst COP") { name = "Inst COP"; unit = ""; dp = 1; }
+    else if (item.series.label == "Emitter spec") { name = "Emitter spec"; unit = "kW"; dp = 1; }
+    else if (item.series.label == "Emitter spec heat") { name = "Radiator heat output"; unit = "W"; dp = 0; }
     else if (item.series.label == "Flow rate") {
         name = "Flow rate";
         unit = " " + feeds["heatpump_flowrate"].unit;
