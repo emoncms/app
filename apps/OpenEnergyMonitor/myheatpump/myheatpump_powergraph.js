@@ -243,7 +243,7 @@ function emitter_and_volume_calculator() {
             if (heat_from_rads > heat_from_heatpump) heat_from_rads = heat_from_heatpump;
             
             let heat_to_volume =  heat_from_heatpump - heat_from_rads
-            if (heat_to_volume > 0) {
+            if (heat_to_volume > 200) {
                 kwh_to_volume += heat_to_volume * (view.interval / 3600000);
 
                 if (last_MWT != null) {
@@ -274,9 +274,12 @@ function emitter_and_volume_calculator() {
     console.log("System volume: " + system_volume.toFixed(0) + " litres");
 
     $("#kW_at_50").val(radiator_spec);
-    $("#system_volume").val(system_volume.toFixed(0));
-
     
+    if (system_volume>0) {
+        $("#system_volume").val(system_volume.toFixed(0));
+    } else {
+        $("#system_volume").val("?");
+    }
     // Enable for development
     powergraph_series['emitter_spec_heat'] = {
         label: "Emitter spec heat",
