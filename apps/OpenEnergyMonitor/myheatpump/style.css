@@ -94,3 +94,9 @@
   font-weight:bold;
   cursor:pointer;
 }
+
+#emitter-spec-volume {
+  float: right;
+  padding:11px;
+  font-size:14px;
+}

@@ -15,7 +15,7 @@ global $path, $session, $v;
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=40>" rel="stylesheet">
+<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=49>" rel="stylesheet">
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
   <div id="app-block" style="display:none">
@@ -119,6 +119,8 @@ global $path, $session, $v;
           <div id='advanced-toggle' class='bluenav' style="display:none">SHOW DETAIL</div>
 
           <div id='data-error' style="display:none">DATA ERROR</div>
+
+          <div id="emitter-spec-volume" style="display:none"></div>
 
           <div style="padding:10px">
             COP in window: <b id="window-cop" style="cursor:pointer"></b> <span id="window-carnot-cop"></span>
@@ -261,6 +263,7 @@ global $path, $session, $v;
               <input id="emitter_spec_enable" type="checkbox" class="advanced-options-checkbox">
               <b>Calculate emitter spec and system volume</b>
               <div id="emitter_spec_options" style="margin-top:10px; display:none">
+                <p>Make sure there is at least a short period of steady state running in the window.<br>Heat output spikes after hot water cycles can skew results.</p>
                 <div class="input-append" style="margin-top:5px">
                   <input type="text" style="width:50px" id="kW_at_50" disabled>
                   <span class="add-on">kW @ DT50</span>
@@ -429,7 +432,7 @@ global $path, $session, $v;
   config.db = <?php echo json_encode($config); ?>;
 </script>
 
-<?php $v=160; ?>
+<?php $v=165; ?>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_powergraph.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_bargraph.js?v=<?php echo $v; ?>"></script>
