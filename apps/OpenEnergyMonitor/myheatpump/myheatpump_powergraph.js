@@ -176,6 +176,11 @@ function emitter_and_volume_calculator() {
 
     if (!emitter_spec_enable) return false;
 
+    var fixed_emitter_spec = $("#fix_kW_at_50")[0].checked;
+    if (fixed_emitter_spec) {
+        fixed_emitter_spec = parseFloat($("#kW_at_50").val());
+    }
+
     var starting_power = parseFloat($("#starting_power").val());
 
     var dhw_enable = false;
@@ -230,6 +235,8 @@ function emitter_and_volume_calculator() {
     }
     let radiator_spec = parseFloat(max_key);
 
+    if (fixed_emitter_spec) radiator_spec = fixed_emitter_spec;
+
     // Create plot of heat output from radiators based on most common emitter spec
     data["emitter_spec_heat"] = [];
     data["system_volume"] = [];
@@ -244,6 +251,8 @@ function emitter_and_volume_calculator() {
     let MWT_increase = 0;
     let system_volume = null;
 
+    let volumes = [];
+
     for (var z in data["heatpump_flowT"]) {
 
         let power = data["heatpump_elec"][z][1];
@@ -253,11 +262,20 @@ function emitter_and_volume_calculator() {
         if (dhw_enable) dhw = data["heatpump_dhw"][z][1];
         
         let heat_from_rads = null;
-        //system_volume = null;
+        system_volume = null;
 
-        if (heat_from_heatpump <= 0) {  
-            //kwh_to_volume = 0;
-            //MWT_increase = 0;
+        if (heat_from_heatpump <= 0) {
+
+            if (kwh_to_volume != 0) {
+                volumes.push({
+                    kwh: kwh_to_volume,
+                    MWT_inc: MWT_increase,
+                    volume: (kwh_to_volume * 3600000) / (4150 * MWT_increase)
+                });
+            }
+
+            kwh_to_volume = 0;
+            MWT_increase = 0;
             last_MWT = null;
         }
         
@@ -302,12 +320,31 @@ function emitter_and_volume_calculator() {
         }
     }
 
+    if (kwh_to_volume != 0) {
+        volumes.push({
+            kwh: kwh_to_volume,
+            MWT_inc: MWT_increase,
+            volume: (kwh_to_volume * 3600000) / (4150 * MWT_increase)
+        });
+    }
+
+
+    let total_kwh_to_volume = 0;
+    let total_MWT_increase = 0;
+
+    console.log("Volumes:");
+    for (var z in volumes) {
+        total_kwh_to_volume += volumes[z].kwh;
+        total_MWT_increase += volumes[z].MWT_inc;
+        console.log("kwh: " + volumes[z].kwh.toFixed(2) + " MWT: " + volumes[z].MWT_inc.toFixed(2) + " volume: " + volumes[z].volume.toFixed(0));
+    }
+
     // Calculate system volume
-    system_volume = (kwh_to_volume * 3600000) / (4150 * MWT_increase);
+    system_volume = (total_kwh_to_volume * 3600000) / (4150 * total_MWT_increase);
 
     console.log("Most common emitter spec: " + radiator_spec + " kW");
-    console.log("MWT increase: " + MWT_increase.toFixed(1) + "K");
-    console.log("Heat to system volume: " + kwh_to_volume.toFixed(1) + " kWh");
+    console.log("MWT increase: " + total_MWT_increase.toFixed(1) + "K");
+    console.log("Heat to system volume: " + total_kwh_to_volume.toFixed(1) + " kWh");
     console.log("System volume: " + system_volume.toFixed(0) + " litres");
 
     $("#kW_at_50").val(radiator_spec);

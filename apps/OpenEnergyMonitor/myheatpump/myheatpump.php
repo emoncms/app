@@ -267,6 +267,7 @@ global $path, $session, $v;
                 <div class="input-append" style="margin-top:5px">
                   <input type="text" style="width:50px" id="kW_at_50" disabled>
                   <span class="add-on">kW @ DT50</span>
+                  <span class="add-on">Fix <input type="checkbox" id="fix_kW_at_50"></span>
                 </div>
                 <div class="input-append" style="margin-top:5px">
                   <input type="text" style="width:50px" id="system_volume" disabled>
@@ -432,7 +433,7 @@ global $path, $session, $v;
   config.db = <?php echo json_encode($config); ?>;
 </script>
 
-<?php $v=170; ?>
+<?php $v=172; ?>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_powergraph.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_bargraph.js?v=<?php echo $v; ?>"></script>
