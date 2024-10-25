@@ -176,6 +176,8 @@ function emitter_and_volume_calculator() {
 
     if (!emitter_spec_enable) return false;
 
+    var starting_power = parseFloat($("#starting_power").val());
+
     var dhw_enable = false;
     if (data["heatpump_dhw"] != undefined) dhw_enable = true;
 
@@ -232,47 +234,59 @@ function emitter_and_volume_calculator() {
     data["emitter_spec_heat"] = [];
     data["system_volume"] = [];
 
+    data["MWT"] = [];
+
+
+
     let kwh_to_volume = 0;
     let last_MWT = null;
+    let last_DT = null;
     let MWT_increase = 0;
     let system_volume = null;
 
     for (var z in data["heatpump_flowT"]) {
 
+        let power = data["heatpump_elec"][z][1];
+        let heat_from_heatpump = data["heatpump_heat"][z][1];
+
         let dhw = false;
         if (dhw_enable) dhw = data["heatpump_dhw"][z][1];
         
         let heat_from_rads = null;
-        let heat_from_heatpump = null;
+        //system_volume = null;
+
+        if (heat_from_heatpump <= 0) {  
+            //kwh_to_volume = 0;
+            //MWT_increase = 0;
+            last_MWT = null;
+        }
         
-        if (!dhw) {
+        if (power != null && power >= starting_power && !dhw) {
+
             let flowT = data["heatpump_flowT"][z][1];
             let returnT = data["heatpump_returnT"][z][1];
             let DT = flowT - returnT;
             let MWT = (flowT + returnT) * 0.5;
-            
-            if (DT > 1.0) {
-                let MWT_minus_room = MWT - data["heatpump_roomT"][z][1];
-                heat_from_rads = 1000 * Math.pow(MWT_minus_room / 50, 1.3) * radiator_spec;
 
-                heat_from_heatpump = data["heatpump_heat"][z][1];
-                if (heat_from_rads > heat_from_heatpump) heat_from_rads = heat_from_heatpump;
-                
+            let MWT_minus_room = MWT - data["heatpump_roomT"][z][1];
+            heat_from_rads = 1000 * Math.pow(MWT_minus_room / 50, 1.3) * radiator_spec;
+
+            if (heat_from_rads != null) {
+                // Calculate volume
                 let heat_to_volume =  heat_from_heatpump - heat_from_rads
-                if (heat_to_volume > 200) {
 
-                    if (last_MWT != null) {
-                        let MWT_change = MWT - last_MWT;
-                        if (Math.abs(MWT_change) < 3) {
-                            kwh_to_volume += heat_to_volume * (view.interval / 3600000);
-                            MWT_increase += MWT_change
+                if (last_MWT != null) {
+                    let MWT_change = MWT - last_MWT;
+                        kwh_to_volume += heat_to_volume * (view.interval / 3600000);
+                        MWT_increase += MWT_change
+                        if (MWT_increase < 0) {
+                            MWT_increase = 0;
+                            kwh_to_volume = 0;
                         }
-                    }
+                }
 
-                    if (kwh_to_volume>0.5) {
-                        system_volume = (kwh_to_volume * 3600000) / (4150 * MWT_increase);
-                    }
-
+                if (kwh_to_volume>0.1) {
+                    system_volume = (kwh_to_volume * 3600000) / (4150 * MWT_increase);
                 }
             }
             last_MWT = MWT;
@@ -334,7 +348,16 @@ function emitter_and_volume_calculator() {
         color: "#1f77b4",
         lines: { show: true, lineWidth: 2 }
     };
-    
+/*
+    powergraph_series['MWT'] = {
+        label: "MWT",
+        data: data["MWT"],
+        yaxis: 2,
+        // dark blue
+        color: "#1f77b4",
+        lines: { show: true, lineWidth: 2 }
+    };
+  */  
 }
 
 // -------------------------------------------------------------------------------

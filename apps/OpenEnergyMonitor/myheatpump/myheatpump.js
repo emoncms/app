@@ -83,7 +83,7 @@ var show_instant_cop = false;
 var show_daily_cop_series = true;
 var show_defrost_and_loss = false;
 var show_cooling = false;
-var emitter_spec_enable = false;
+var emitter_spec_enable = true;
 
 var bargraph_start = 0;
 var bargraph_end = 0;
