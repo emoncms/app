@@ -188,7 +188,13 @@ function emitter_and_volume_calculator() {
     var manual_roomT = 20;
     if (data["heatpump_roomT"] != undefined) {
         roomT_enable = true;
-        manual_roomT = stats['when_running']["heatpump_roomT"].mean.toFixed(1);
+        if (stats["space_heating"] != undefined && stats["space_heating"]["heatpump_roomT"] != undefined) {
+            manual_roomT = stats["space_heating"]["heatpump_roomT"].mean.toFixed(1);
+        } else {
+            manual_roomT = stats['when_running']["heatpump_roomT"].mean.toFixed(1);
+        }
+    } else {
+        $("#manual_roomT_enable")[0].checked = true;
     }
 
     var manual_roomT_enable = $("#manual_roomT_enable")[0].checked;
@@ -214,8 +220,12 @@ function emitter_and_volume_calculator() {
         let dhw = false;
         if (dhw_enable) dhw = data["heatpump_dhw"][z][1];
         
-        if (data["heatpump_roomT"][z][1]!=null) {
-            roomT = data["heatpump_roomT"][z][1];
+        if (!manual_roomT_enable) {
+            if (data["heatpump_roomT"][z][1]!=null) {
+                roomT = data["heatpump_roomT"][z][1];
+            }
+        } else {
+            roomT = manual_roomT;
         }
 
         let kw_at_50 = null;
@@ -308,8 +318,12 @@ function emitter_and_volume_calculator() {
             let DT = flowT - returnT;
             let MWT = (flowT + returnT) * 0.5;
             
-            if (data["heatpump_roomT"][z][1] != null) {
-                roomT = data["heatpump_roomT"][z][1];
+            if (!manual_roomT_enable) {
+                if (data["heatpump_roomT"][z][1]!=null) {
+                    roomT = data["heatpump_roomT"][z][1];
+                }
+            } else {
+                roomT = manual_roomT;
             }
 
             let MWT_minus_room = MWT - roomT;
@@ -777,4 +791,18 @@ $("#advanced-toggle").click(function () {
         $("#advanced-block").hide();
         $("#advanced-toggle").html("SHOW DETAIL");
     }
+});
+
+$("#manual_roomT_enable").click(function () {
+    if ($("#manual_roomT_enable")[0].checked) {
+        // enable manual roomT
+        $("#room_temperature").prop('disabled', false);
+    } else {
+        // disable manual roomT
+        $("#room_temperature").prop('disabled', true);
+    }
+});
+
+$("#room_temperature").change(function () {
+    powergraph_process();
 });
