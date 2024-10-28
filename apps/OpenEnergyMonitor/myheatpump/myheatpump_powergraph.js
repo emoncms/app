@@ -188,7 +188,7 @@ function emitter_and_volume_calculator() {
     var manual_roomT = 20;
     if (data["heatpump_roomT"] != undefined) {
         roomT_enable = true;
-        if (stats["space_heating"] != undefined && stats["space_heating"]["heatpump_roomT"] != undefined) {
+        if (stats["space_heating"] != undefined && stats["space_heating"]["heatpump_roomT"] != undefined && stats["space_heating"]["heatpump_roomT"].mean != undefined) {
             manual_roomT = stats["space_heating"]["heatpump_roomT"].mean.toFixed(1);
         } else {
             manual_roomT = stats['when_running']["heatpump_roomT"].mean.toFixed(1);
