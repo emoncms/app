@@ -191,11 +191,17 @@ function emitter_and_volume_calculator() {
 
     // holds value & frequency
     let emitter_spec_histogram = {};
+    
+    var roomT = null;
 
     for (var z in data["heatpump_flowT"]) {
 
         let dhw = false;
         if (dhw_enable) dhw = data["heatpump_dhw"][z][1];
+        
+        if (data["heatpump_roomT"][z][1]!=null) {
+            roomT = data["heatpump_roomT"][z][1];
+        }
 
         let kw_at_50 = null;
         if (!dhw) {
@@ -205,7 +211,7 @@ function emitter_and_volume_calculator() {
 
             if (DT > 1.0) {
                 let MWT = (flowT + returnT) * 0.5;
-                let MWT_minus_room = MWT - data["heatpump_roomT"][z][1];
+                let MWT_minus_room = MWT - roomT;
                 let heat = data["heatpump_heat"][z][1];
                 kw_at_50 = 0.001 * heat / Math.pow(MWT_minus_room / 50, 1.3);
 
@@ -250,6 +256,7 @@ function emitter_and_volume_calculator() {
     let last_DT = null;
     let MWT_increase = 0;
     let system_volume = null;
+    roomT = null;
 
     let volumes = [];
 
@@ -285,8 +292,12 @@ function emitter_and_volume_calculator() {
             let returnT = data["heatpump_returnT"][z][1];
             let DT = flowT - returnT;
             let MWT = (flowT + returnT) * 0.5;
+            
+            if (data["heatpump_roomT"][z][1] != null) {
+                roomT = data["heatpump_roomT"][z][1];
+            }
 
-            let MWT_minus_room = MWT - data["heatpump_roomT"][z][1];
+            let MWT_minus_room = MWT - roomT;
             heat_from_rads = 1000 * Math.pow(MWT_minus_room / 50, 1.3) * radiator_spec;
 
             if (heat_from_rads != null) {
