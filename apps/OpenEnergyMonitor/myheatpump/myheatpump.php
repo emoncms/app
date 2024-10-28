@@ -273,6 +273,14 @@ global $path, $session, $v;
                   <input type="text" style="width:50px" id="system_volume" disabled>
                   <span class="add-on">Litres</span>
                 </div>
+                <br>
+                <div class="input-prepend input-append" style="margin-top:5px">
+                  <span class="add-on">Room temperature</span>
+
+                  <input type="text" style="width:50px" id="room_temperature" disabled>
+                  <span class="add-on">&deg;C</span>
+                  <span class="add-on">Manual <input type="checkbox" id="manual_roomT_enable"></span>
+                </div>
               </div>
             </div>
 
@@ -433,7 +441,7 @@ global $path, $session, $v;
   config.db = <?php echo json_encode($config); ?>;
 </script>
 
-<?php $v=172; ?>
+<?php $v=173; ?>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_powergraph.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_bargraph.js?v=<?php echo $v; ?>"></script>

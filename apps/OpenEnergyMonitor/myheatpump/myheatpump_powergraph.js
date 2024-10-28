@@ -183,6 +183,21 @@ function emitter_and_volume_calculator() {
 
     var starting_power = parseFloat($("#starting_power").val());
 
+    // if stats roomT mean
+    var roomT_enable = false;
+    var manual_roomT = 20;
+    if (data["heatpump_roomT"] != undefined) {
+        roomT_enable = true;
+        manual_roomT = stats['when_running']["heatpump_roomT"].mean.toFixed(1);
+    }
+
+    var manual_roomT_enable = $("#manual_roomT_enable")[0].checked;
+    if (!manual_roomT_enable) {
+        $("#room_temperature").val(manual_roomT);
+    } else {
+        manual_roomT = parseFloat($("#room_temperature").val());
+    }
+
     var dhw_enable = false;
     if (data["heatpump_dhw"] != undefined) dhw_enable = true;
 
