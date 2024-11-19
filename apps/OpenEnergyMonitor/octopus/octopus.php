@@ -251,9 +251,9 @@ config.app = {
     "region":{"type":"select", "name":"Select region:", "default":"D_Merseyside_and_Northern_Wales", "options":["A_Eastern_England","B_East_Midlands","C_London","E_West_Midlands","D_Merseyside_and_Northern_Wales","F_North_Eastern_England","G_North_Western_England","H_Southern_England","J_South_Eastern_England","K_Southern_Wales","L_South_Western_England","M_Yorkshire","N_Southern_Scotland","P_Northern_Scotland"]},
 
     "go_day_rate":{"type":"value", "default":40.28, "name": "GO day rate"},
-    "go_offpeak_rate":{"type":"value", "default":7.86, "name": "GO day rate"}, 
-    "go_start_time":{"type":"value", "default":1.5, "name": "GO start time"}, 
-    "go_end_time":{"type":"value", "default":6.5, "name": "GO end time"}, 
+    "go_offpeak_rate":{"type":"value", "default":7.86, "name": "GO off-peak rate"}, 
+    "go_start_time":{"type":"value", "default":0.5, "name": "GO start time"}, 
+    "go_end_time":{"type":"value", "default":5.5, "name": "GO end time"}, 
     
     "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
 
