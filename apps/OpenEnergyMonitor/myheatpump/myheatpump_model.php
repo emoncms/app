@@ -123,6 +123,25 @@ class MyHeatPump {
         $this->redis->del($lock_key);
     }
 
+    public function get_stats($id, $start, $end) {
+        $id = (int) $id;
+
+        // Load app config
+        $app = $this->appconfig->get_app_by_id($id);
+
+        $start = (int) $start;
+        $end = (int) $end;
+
+        // This should be an option to set.. for now hard coded
+        $starting_power = 100;
+        if (isset($app->config->starting_power)) {
+            $starting_power = (int) $app->config->starting_power;
+            if ($starting_power<0) $starting_power = 0;
+        }
+
+        return get_heatpump_stats($this->feed,$app,$start,$end,$starting_power);
+    }
+
     /**
      * Process daily data
      * 

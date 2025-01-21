@@ -24,8 +24,13 @@ function process_error_data($data, $interval, $starting_power) {
         }
     } else {
         $data["heatpump_error"] = [];
+        
         // Heat meter error auto detection
         if (isset($data["heatpump_elec"]) && isset($data["heatpump_heat"]) && isset($data["heatpump_flowT"]) && isset($data["heatpump_returnT"])) {
+        
+            if ($data["heatpump_heat"]==false || $data["heatpump_flowT"]==false || $data["heatpump_returnT"]==false) {
+                return array("air" => 0, "air_kwh" => 0);
+            }
 
             $error_state = 0;
             $error_time = 0;

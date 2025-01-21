@@ -270,7 +270,12 @@ function bargraph_draw() {
             }
         }
 
-        if (total_error_air > 0) {
+        let prc_error_air_kwh = 0;
+        if (elec_kwh_in_window > 0) {
+            prc_error_air_kwh = (total_error_air_elec_kwh / elec_kwh_in_window) * 100;
+        }
+
+        if (prc_error_air_kwh >= 1) {
             var error_div = $("#data-error");
             error_div.show();
             error_div.attr("title", "Heat meter air issue detected for " + (total_error_air / 60).toFixed(0) + " minutes (" + (total_error_air_elec_kwh).toFixed(1) + " kWh)");

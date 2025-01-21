@@ -118,6 +118,13 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
         return $myheatpump->get_daily($app->id,$start,$end);
     }
 
+    else if ($route->action == "getstats") {
+        $route->format = "json";
+        $start = (int) get('start',true);
+        $end = (int) get('end',true);
+        return $myheatpump->get_stats($app->id,$start,$end);
+    }
+
     // Get totals
     else if ($route->action == "gettotals") {
         $route->format = "json";
@@ -160,9 +167,18 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
     // Clear daily data
     else if ($route->action == "cleardaily") {
         $route->format = "json";
+        $app_id = (int) $app->id;
+        
+        if (isset($settings['app']) && isset($settings['app']['clearkey'])) {
+            if (isset($_GET['clearkey']) && $_GET['clearkey'] == $settings['app']['clearkey']) {
+                $mysqli->query("DELETE FROM myheatpump_daily_stats WHERE `id`='".$app_id."'");
+                return array("success"=>true);        
+            }
+        }
+        
         if (!$session["write"]) return array("success"=>false, "message"=>"Permission denied");
         if ($app->userid != $session["userid"]) return array("success"=>false, "message"=>"Permission denied");
-        $mysqli->query("DELETE FROM myheatpump_daily_stats WHERE `id`='".$app->id."'");
+        $mysqli->query("DELETE FROM myheatpump_daily_stats WHERE `id`='".$app_id."'");
         return array("success"=>true);
     }
 

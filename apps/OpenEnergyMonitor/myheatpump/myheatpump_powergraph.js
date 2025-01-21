@@ -189,9 +189,13 @@ function emitter_and_volume_calculator() {
     if (data["heatpump_roomT"] != undefined) {
         roomT_enable = true;
         if (stats["space_heating"] != undefined && stats["space_heating"]["heatpump_roomT"] != undefined && stats["space_heating"]["heatpump_roomT"].mean != undefined) {
-            manual_roomT = stats["space_heating"]["heatpump_roomT"].mean.toFixed(1);
+            if (stats["space_heating"]["heatpump_roomT"].mean != null) {
+                manual_roomT = stats["space_heating"]["heatpump_roomT"].mean.toFixed(1);
+            }
         } else {
-            manual_roomT = stats['when_running']["heatpump_roomT"].mean.toFixed(1);
+            if (stats['when_running']["heatpump_roomT"].mean != null) {
+                manual_roomT = stats['when_running']["heatpump_roomT"].mean.toFixed(1);
+            }
         }
     } else {
         $("#manual_roomT_enable")[0].checked = true;
@@ -214,6 +218,9 @@ function emitter_and_volume_calculator() {
     let emitter_spec_histogram = {};
     
     var roomT = null;
+
+    let kw_at_50_sum = 0;
+    let kw_at_50_count = 0;
 
     for (var z in data["heatpump_flowT"]) {
 
@@ -245,15 +252,20 @@ function emitter_and_volume_calculator() {
                     let rounded = kw_at_50.toFixed(1);
                     if (emitter_spec_histogram[rounded] == undefined) emitter_spec_histogram[rounded] = 0;
                     emitter_spec_histogram[rounded]++;
+
+                    kw_at_50_sum += kw_at_50;
+                    kw_at_50_count++;
                 }
             }
         }
-
         if (kw_at_50 <= 0) kw_at_50 = null;
 
         let time = data["heatpump_flowT"][z][0];
         data["emitter_spec"].push([time, kw_at_50]);
     }
+
+    let kw_at_50_mean = null;
+    if (kw_at_50_count > 0) kw_at_50_mean = kw_at_50_sum / kw_at_50_count;
 
     // find the most common value
     let max = 0;
@@ -383,6 +395,10 @@ function emitter_and_volume_calculator() {
     system_volume = (total_kwh_to_volume * 3600000) / (4150 * total_MWT_increase);
 
     console.log("Most common emitter spec: " + radiator_spec + " kW");
+    // if kw_at_50_mean numeric convert to 1 decimal place
+    if (kw_at_50_mean != null) kw_at_50_mean = kw_at_50_mean.toFixed(1);
+    console.log("Mean emitter spec: " + kw_at_50_mean + " kW");
+
     console.log("MWT increase: " + total_MWT_increase.toFixed(1) + "K");
     console.log("Heat to system volume: " + total_kwh_to_volume.toFixed(1) + " kWh");
     console.log("System volume: " + system_volume.toFixed(0) + " litres");
@@ -805,4 +821,44 @@ $("#manual_roomT_enable").click(function () {
 
 $("#room_temperature").change(function () {
     powergraph_process();
+});
+
+$("#fix_kW_at_50").click(function () {
+    if ($("#fix_kW_at_50")[0].checked) {
+        $("#kW_at_50").prop('disabled', false);
+    } else {
+        $("#kW_at_50").prop('disabled', true);
+    }
+});
+
+$("#kW_at_50").change(function () {
+    powergraph_process();
+});
+
+// if press key 'd', copy defrost info to clipboard
+$(document).keypress(function (e) {
+    if (e.which == 100) {
+        var defrost_info = [];
+
+        defrost_info.push(stats.combined.heatpump_outsideT.mean.toFixed(1));
+        defrost_info.push(stats.combined.heatpump_flowT.maxval.toFixed(1));
+        defrost_info.push(stats.combined.heatpump_flowT.mean.toFixed(1));
+        defrost_info.push(stats.combined.heatpump_flowrate.mean.toFixed(3));
+        defrost_info.push(stats.combined.heatpump_elec.maxval.toFixed(0));
+        defrost_info.push(stats.combined.heatpump_elec.mean.toFixed(0));
+        defrost_info.push(stats.combined.heatpump_heat.maxval.toFixed(0));
+        defrost_info.push(stats.combined.heatpump_heat.mean.toFixed(0));
+
+        // get share link
+        defrost_info.push('?');
+        defrost_info.push('?');
+        defrost_info.push('?');
+        defrost_info.push('?');
+
+        var share_link = window.location.href;
+        defrost_info.push(share_link);
+
+        var defrost_text = defrost_info.join("\t");
+        copy_text_to_clipboard(defrost_text, "Defrost copied to clipboard");
+    }
 });
