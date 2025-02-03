@@ -46,7 +46,7 @@ function powergraph_load() {
     }
 
     var average = 1;
-    if (view.interval < 20) average = 0;
+    if (view.interval < 15) average = 0;
 
     // Fetch the data
     feed.getdata(feedids, view.start, view.end, view.interval, average, 0, skipmissing, limitinterval, function (all_data) {
