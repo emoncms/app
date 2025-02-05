@@ -19,7 +19,7 @@ global $path, $session, $v;
 <script src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
 
 
-<?php $v = time(); ?>
+<?php // $v = time(); ?>
 <link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/octopus/tariff_explorer.css?v=<?php echo $v; ?>" rel="stylesheet">
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
