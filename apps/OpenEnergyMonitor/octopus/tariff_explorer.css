@@ -1,0 +1,58 @@
+.electric-title {
+    font-weight: bold;
+    font-size: 22px;
+    color: #44b3e2;
+}
+
+.power-value {
+    font-weight: bold;
+    font-size: 52px;
+    color: #44b3e2;
+    line-height: 1.1;
+}
+
+.halfhour-value {
+    font-weight: bold;
+    font-size: 42px;
+    color: #44b3e2;
+    line-height: 1.1;
+}
+
+.units {
+    font-size: 75%;
+}
+
+.block-bound {
+    background-color: rgb(68, 179, 226);
+}
+
+.bluenav-active {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.time-select {
+    width: 165px;
+    margin: 4px 5px 0px 0px;
+    float: right;
+    background-color: #44b3e2;
+    color: #fff;
+}
+
+@media(max-width: 610px) {
+    .time-select {
+        margin: 4px 0px 0px 5px;
+        float: none;
+    }
+
+    #history-title {
+        display: none;
+    }
+}
+
+#tariff_A {
+    margin-bottom: 0px;
+}
+
+#tariff_B {
+    margin-bottom: 0px;
+}
