@@ -752,18 +752,25 @@ function graph_load() {
                 total_kwh_solar_used += kwh_solar_used
 
                 // costs
-                let cost_import = data.tariff_A[2 * (z - 1)][1] * 0.01;
+
+                let cost_import_tariff_A = data.tariff_A[2 * (z - 1)][1] * 0.01;
+                let cost_import_tariff_B = data.tariff_B[2 * (z - 1)][1] * 0.01;
+
                 let cost_export = data.outgoing[2 * (z - 1)][1] * 0.01 * -1;
 
                 // half hourly datasets for graph
-                data["import_cost"].push([time, kwh_import * cost_import]);
+                data["import_cost_tariff_A"].push([time, kwh_import * cost_import_tariff_A]);
+                data["import_cost_tariff_B"].push([time, kwh_import * cost_import_tariff_B]);
+
                 data["export_cost"].push([time, kwh_export * cost_export * -1]);
-                data["solar_used_cost"].push([time, kwh_solar_used * cost_import]);
+                data["solar_used_cost"].push([time, kwh_solar_used * cost_import_tariff_A]);
 
                 // cost totals
-                total_cost_import += kwh_import * cost_import
+                total_cost_import_tariff_A += kwh_import * cost_import_tariff_A
+                total_cost_import_tariff_B += kwh_import * cost_import_tariff_B
+
                 total_cost_export += kwh_export * cost_export
-                total_cost_solar_used += kwh_solar_used * cost_import
+                total_cost_solar_used += kwh_solar_used * cost_import_tariff_A
 
                 if (show_carbonintensity) {
                     let co2intensity = data.carbonintensity[2 * (z - 1)][1];
@@ -779,7 +786,8 @@ function graph_load() {
                         "import": 0,
                         "export": 0,
                         "solar_used": 0,
-                        "cost_import": 0,
+                        "cost_import_tariff_A": 0,
+                        "cost_import_tariff_B": 0,
                         "cost_export": 0,
                         "cost_solar_used": 0
                     }
@@ -788,9 +796,10 @@ function graph_load() {
                 monthly_data[startOfMonth]["import"] += kwh_import
                 monthly_data[startOfMonth]["export"] += kwh_export
                 monthly_data[startOfMonth]["solar_used"] += kwh_solar_used
-                monthly_data[startOfMonth]["cost_import"] += kwh_import * cost_import
+                monthly_data[startOfMonth]["cost_import_tariff_A"] += kwh_import * cost_import_tariff_A
+                monthly_data[startOfMonth]["cost_import_tariff_B"] += kwh_import * cost_import_tariff_B
                 monthly_data[startOfMonth]["cost_export"] += kwh_export * cost_export
-                monthly_data[startOfMonth]["cost_solar_used"] += kwh_solar_used * cost_import
+                monthly_data[startOfMonth]["cost_solar_used"] += kwh_solar_used * cost_import_tariff_A
 
             } else {
                 // ----------------------------------------------------
@@ -958,7 +967,7 @@ function graph_load() {
     var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     // Populate monthly data if more than one month of data
-    if (Object.keys(monthly_data).length > 1 && !solarpv_mode) {
+    if (Object.keys(monthly_data).length > 1) {
         var monthly_out = "";
 
         var monthly_sum_kwh = 0;
