@@ -60,6 +60,7 @@ config.app = {
         "autoname": "import"
     },
     "import_kwh": {
+        "optional": true,
         "type": "feed",
         "autoname": "import_kwh"
     },
@@ -162,6 +163,7 @@ var updaterinst = false;
 var this_halfhour_index = -1;
 // disable x axis limit
 view.limit_x = false;
+var cumulative_import_data = false;
 var solarpv_mode = false;
 var smart_meter_data = false;
 var use_meter_kwh_hh = true;
@@ -584,13 +586,18 @@ function graph_load() {
     }
 
     if (feeds["use_kwh"] != undefined && feeds["solar_kwh"] != undefined) solarpv_mode = true;
+
     if (feeds["meter_kwh_hh"] != undefined) {
         smart_meter_data = true;
         $("#use_meter_kwh_hh_bound").show();
     }
 
-    var import_kwh = feed.getdata(feeds["import_kwh"].id, view.start, view.end, interval);
+    if (feeds["import_kwh"] != undefined) {
+        cumulative_import_data = true;
+    }
 
+    var import_kwh = [];
+    if (cumulative_import_data) import_kwh = feed.getdata(feeds["import_kwh"].id, view.start, view.end, interval);
     var use_kwh = [];
     if (solarpv_mode) use_kwh = feed.getdata(feeds["use_kwh"].id, view.start, view.end, interval);
     var solar_kwh = [];
@@ -709,9 +716,17 @@ function graph_load() {
         }
     }
 
-    if (import_kwh.length > 1) {
-        for (var z = 1; z < import_kwh.length; z++) {
-            let time = import_kwh[z - 1][0];
+    var data_length = 0;
+    if (cumulative_import_data) data_length = import_kwh.length;
+    else if (smart_meter_data) data_length = meter_kwh_hh.length;
+
+    if (data_length > 1) {
+        for (var z = 1; z < data_length; z++) {
+            let time = 0;
+
+            if (cumulative_import_data) time = import_kwh[z - 1][0];
+            else if (smart_meter_data) time = meter_kwh_hh[z - 1][0];
+
             d.setTime(time)
             let hh = d.getHours() * 2 + d.getMinutes() / 30
 
@@ -806,12 +821,23 @@ function graph_load() {
                 // Import mode only
                 // ----------------------------------------------------
                 let kwh_import = 0;
-                if (import_kwh[z] != undefined && import_kwh[z - 1] != undefined) {
-                    if (import_kwh[z][1] != null && import_kwh[z - 1][1] != null) {
-                        kwh_import = (import_kwh[z][1] - import_kwh[z - 1][1]);
+
+                // If we have cumulative import data available use instead
+                if (cumulative_import_data) {
+                    if (import_kwh[z] != undefined && import_kwh[z - 1] != undefined) {
+                        if (import_kwh[z][1] != null && import_kwh[z - 1][1] != null) {
+                            kwh_import = (import_kwh[z][1] - import_kwh[z - 1][1]);
+                        }
                     }
+                    if (kwh_import < 0.0) kwh_import = 0.0;
+
+                // If we have octopus smart meter data available use instead
+                } else if (smart_meter_data) {
+                    kwh_import = meter_kwh_hh[z - 1][1];
                 }
-                if (kwh_import < 0.0) kwh_import = 0.0;
+
+                console.log(kwh_import)
+
                 data["import"].push([time, kwh_import]);
                 let cost_import_tariff_A = data.tariff_A[2 * (z - 1)][1] * 0.01;
                 let cost_import_tariff_B = data.tariff_B[2 * (z - 1)][1] * 0.01;
