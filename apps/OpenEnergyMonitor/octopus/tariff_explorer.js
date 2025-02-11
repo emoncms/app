@@ -166,7 +166,7 @@ view.limit_x = false;
 var cumulative_import_data = false;
 var solarpv_mode = false;
 var smart_meter_data = false;
-var use_meter_kwh_hh = true;
+var use_meter_kwh_hh = false;
 
 var profile_kwh = {};
 var profile_cost = {};
@@ -832,11 +832,9 @@ function graph_load() {
             }
 
             // Calculations for line of best fit comparison between meter and smart meter data
-            let smart_meter_hh_available = false;
             if (smart_meter_data) {
                 if (meter_kwh_hh[z - 1] != undefined && import_kwh[z] != undefined && import_kwh[z - 1] != undefined) {
                     if (meter_kwh_hh[z - 1][1] != null) {
-                        smart_meter_hh_available = true;
                         // Calculate line of best fit variables
                         // Suggested calibration
                         var XY = 1.0 * kwh_import * meter_kwh_hh[z - 1][1];
@@ -893,6 +891,8 @@ function graph_load() {
                 total_cost_solar_used += kwh_solar_used * unitcost_tariff_A
             }
         }
+
+        
     }
 
     if (n > 1) {
