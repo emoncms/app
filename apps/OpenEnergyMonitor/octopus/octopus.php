@@ -19,7 +19,7 @@ global $path, $session, $v;
 <script src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
 
 
-<?php $v += 3; ?>
+<?php $v += 4; ?>
 <link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/octopus/tariff_explorer.css?v=<?php echo $v; ?>" rel="stylesheet">
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
@@ -142,6 +142,7 @@ global $path, $session, $v;
                                         <th>Tariff A Cost (&pound;)</th>
                                         <th></th>
                                         <th>Tariff B Cost (&pound;)</th>
+                                        <th></th>
                                         <th></th>
                                         <th></th>
                                     </tr>

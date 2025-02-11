@@ -836,8 +836,6 @@ function graph_load() {
                     kwh_import = meter_kwh_hh[z - 1][1];
                 }
 
-                console.log(kwh_import)
-
                 data["import"].push([time, kwh_import]);
                 let cost_import_tariff_A = data.tariff_A[2 * (z - 1)][1] * 0.01;
                 let cost_import_tariff_B = data.tariff_B[2 * (z - 1)][1] * 0.01;
@@ -1018,6 +1016,16 @@ function graph_load() {
             monthly_out += "<td>" + tariff_A_unit_cost.toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>";
             monthly_out += "<td>£" + tariff_B_cost.toFixed(2) + "</td>";
             monthly_out += "<td>" + tariff_B_unit_cost.toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>";
+
+            // A, B = 
+            if (tariff_A_unit_cost < tariff_B_unit_cost) {
+                monthly_out += "<td style='color:blue'>A</td>";
+            } else if (tariff_A_unit_cost > tariff_B_unit_cost) {
+                monthly_out += "<td style='color:purple'>B</td>";
+            } else {
+                monthly_out += "<td>=</td>";
+            }
+
             // link icon that zooms to month
             monthly_out += "<td><i class='icon-eye-open zoom-to-month' timestamp='"+month+"' style='cursor:pointer'></i></td>";
             monthly_out += "</tr>";
@@ -1027,14 +1035,18 @@ function graph_load() {
             monthly_sum_cost_import_tariff_B += tariff_B_cost;
         }
 
+        var tariff_A_unit_cost = 100*(monthly_sum_cost_import_tariff_A / monthly_sum_kwh);
+        var tariff_B_unit_cost = 100*(monthly_sum_cost_import_tariff_B / monthly_sum_kwh);
+
         // add totals line in bold
         monthly_out += "<tr style='font-weight:bold'>";
         monthly_out += "<td>Total</td>";
         monthly_out += "<td>" + monthly_sum_kwh.toFixed(1) + " kWh</td>";
         monthly_out += "<td>£" + monthly_sum_cost_import_tariff_A.toFixed(2) + "</td>";
-        monthly_out += "<td>" + ((monthly_sum_cost_import_tariff_A / monthly_sum_kwh) * 100).toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>";
+        monthly_out += "<td>" + (tariff_A_unit_cost).toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>";
         monthly_out += "<td>£" + monthly_sum_cost_import_tariff_B.toFixed(2) + "</td>";
-        monthly_out += "<td>" + ((monthly_sum_cost_import_tariff_B / monthly_sum_kwh) * 100).toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>";
+        monthly_out += "<td>" + (tariff_B_unit_cost).toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>";
+        monthly_out += "<td></td>";
         monthly_out += "</tr>";
 
         $("#monthly-data-body").html(monthly_out);
