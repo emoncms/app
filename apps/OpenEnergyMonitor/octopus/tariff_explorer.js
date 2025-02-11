@@ -680,10 +680,13 @@ function graph_load() {
         profile_cost[hh] = [profile_time, 0.0]
     }
 
+    var total_kwh_import_tariff_A = 0
+    var total_kwh_import_tariff_B = 0
     var total_cost_import_tariff_A = 0
     var total_cost_import_tariff_B = 0
-    var total_kwh_import = 0
+
     var total_cost_export = 0
+    var total_kwh_import = 0
     var total_kwh_export = 0
     var total_cost_solar_used = 0
     var total_kwh_solar_used = 0
@@ -732,23 +735,141 @@ function graph_load() {
 
             // get start of month timestamp to calculate monthly data
             let startOfMonth = new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+        
+            // ----------------------------------------------------
+            // Import
+            // ----------------------------------------------------
+            let kwh_import = 0;
 
+            // Use cumulative import data if available by default
+            if (cumulative_import_data) {
+                if (import_kwh[z] != undefined && import_kwh[z - 1] != undefined) {
+                    if (import_kwh[z][1] != null && import_kwh[z - 1][1] != null) {
+                        kwh_import = (import_kwh[z][1] - import_kwh[z - 1][1]);
+                    }
+                }
+                if (kwh_import < 0.0) kwh_import = 0.0;
+
+            // If we dont have cumulative import data, but we have smart meter data, use that instead
+            } else if (smart_meter_data) {
+                kwh_import = meter_kwh_hh[z - 1][1];
+            }
+
+            // Alternatively use meter data in place of cumulative import data if user selected
+            if (smart_meter_data && use_meter_kwh_hh) {
+                kwh_import = meter_kwh_hh[z - 1][1];
+            }
+
+            data["import"].push([time, kwh_import]);
+            total_kwh_import += kwh_import;
+
+            // Unit cost on tariff A
+            let unitcost_tariff_A = null;
+            if (data.tariff_A[2 * (z - 1)][1] != null) {
+                unitcost_tariff_A = data.tariff_A[2 * (z - 1)][1] * 0.01;
+            }
+
+            // Unit cost on tariff B
+            let unitcost_tariff_B = null;
+            if (data.tariff_B[2 * (z - 1)][1] != null) {
+                unitcost_tariff_B = data.tariff_B[2 * (z - 1)][1] * 0.01;
+            }
+
+            // Import cost for this half hour on tariff A
+            let hh_cost_tariff_A = null; 
+            if (unitcost_tariff_A != null) {
+                hh_cost_tariff_A = kwh_import * unitcost_tariff_A;
+            }
+            data["import_cost_tariff_A"].push([time, hh_cost_tariff_A]);
+
+            // Import cost for this half hour on tariff B
+            let hh_cost_tariff_B = null;
+            if (unitcost_tariff_B != null) {
+                hh_cost_tariff_B = kwh_import * unitcost_tariff_B;
+            }
+            data["import_cost_tariff_B"].push([time, hh_cost_tariff_B]);
+
+            // Calculate monthly data
+            if (monthly_data[startOfMonth] == undefined) {
+                monthly_data[startOfMonth] = {
+                    "import": 0,
+                    "import_tariff_A": 0,
+                    "import_tariff_B": 0,
+                    "cost_import_tariff_A": 0,
+                    "cost_import_tariff_B": 0
+                }
+            }
+
+            monthly_data[startOfMonth]["import"] += kwh_import
+
+            if (hh_cost_tariff_A != null) {
+                monthly_data[startOfMonth]["import_tariff_A"] += kwh_import
+                monthly_data[startOfMonth]["cost_import_tariff_A"] += hh_cost_tariff_A
+
+                total_kwh_import_tariff_A += kwh_import
+                total_cost_import_tariff_A += hh_cost_tariff_A
+
+                // Generate profile
+                profile_kwh[hh][1] += kwh_import
+                profile_cost[hh][1] += hh_cost_tariff_A  
+            }
+
+            if (hh_cost_tariff_B != null) {
+                monthly_data[startOfMonth]["import_tariff_B"] += kwh_import
+                monthly_data[startOfMonth]["cost_import_tariff_B"] += hh_cost_tariff_B
+
+                total_kwh_import_tariff_B += kwh_import
+                total_cost_import_tariff_B += hh_cost_tariff_B
+            }
+
+            // Carbon Intensity
+            if (show_carbonintensity) {
+                let co2intensity = data.carbonintensity[2 * (z - 1)][1];
+                let co2_hh = kwh_import * (co2intensity * 0.001)
+                total_co2 += co2_hh
+                sum_co2 += co2intensity
+                sum_co2_n++;
+            }
+
+            // Calculations for line of best fit comparison between meter and smart meter data
+            let smart_meter_hh_available = false;
+            if (smart_meter_data) {
+                if (meter_kwh_hh[z - 1] != undefined && import_kwh[z] != undefined && import_kwh[z - 1] != undefined) {
+                    if (meter_kwh_hh[z - 1][1] != null) {
+                        smart_meter_hh_available = true;
+                        // Calculate line of best fit variables
+                        // Suggested calibration
+                        var XY = 1.0 * kwh_import * meter_kwh_hh[z - 1][1];
+                        var X2 = 1.0 * kwh_import * kwh_import;
+                        sumX += 1.0 * kwh_import;
+                        sumY += 1.0 * meter_kwh_hh[z - 1][1];
+                        sumXY += XY;
+                        sumX2 += X2;
+                        n++;
+                    }
+                }
+            }
+
+            // ----------------------------------------------------
+            // Solar PV agile outgoing
+            // ----------------------------------------------------
             if (solarpv_mode) {
-                // ----------------------------------------------------
-                // Solar PV agile outgoing
-                // ----------------------------------------------------
+
                 // calculate half hour kwh
                 let kwh_use = 0;
-                let kwh_import = 0;
-                let kwh_solar = 0;
-
-                if (use_kwh[z] != undefined && use_kwh[z - 1] != undefined) kwh_use = (use_kwh[z][1] - use_kwh[z - 1][1]);
-                if (import_kwh[z] != undefined && import_kwh[z - 1] != undefined) kwh_import = (import_kwh[z][1] - import_kwh[z - 1][1]);
-                if (solar_kwh[z] != undefined && solar_kwh[z - 1] != undefined) kwh_solar = (solar_kwh[z][1] - solar_kwh[z - 1][1]);
-
-                // limits
+                if (use_kwh[z] != undefined && use_kwh[z - 1] != undefined) {
+                    if (use_kwh[z][1] != null && use_kwh[z - 1][1] != null) {
+                        kwh_use = (use_kwh[z][1] - use_kwh[z - 1][1]);
+                    }
+                }
                 if (kwh_use < 0.0) kwh_use = 0.0;
-                if (kwh_import < 0.0) kwh_import = 0.0;
+
+                let kwh_solar = 0;
+                if (solar_kwh[z] != undefined && solar_kwh[z - 1] != undefined) {
+                    if (solar_kwh[z][1] != null && solar_kwh[z - 1][1] != null) {
+                        kwh_solar = (solar_kwh[z][1] - solar_kwh[z - 1][1]);
+                    }
+                }
                 if (kwh_solar < 0.0) kwh_solar = 0.0;
 
                 // calc export & self consumption
@@ -757,151 +878,21 @@ function graph_load() {
 
                 // half hourly datasets for graph
                 data["use"].push([time, kwh_use]);
-                data["import"].push([time, kwh_import]);
                 data["export"].push([time, kwh_export * -1]);
                 data["solar_used"].push([time, kwh_solar_used]);
 
-                // energy totals
-                total_kwh_import += kwh_import
                 total_kwh_export += kwh_export
                 total_kwh_solar_used += kwh_solar_used
 
-                // costs
-
-                let cost_import_tariff_A = data.tariff_A[2 * (z - 1)][1] * 0.01;
-                let cost_import_tariff_B = data.tariff_B[2 * (z - 1)][1] * 0.01;
-
                 let cost_export = data.outgoing[2 * (z - 1)][1] * 0.01 * -1;
 
-                // half hourly datasets for graph
-                data["import_cost_tariff_A"].push([time, kwh_import * cost_import_tariff_A]);
-                data["import_cost_tariff_B"].push([time, kwh_import * cost_import_tariff_B]);
-
                 data["export_cost"].push([time, kwh_export * cost_export * -1]);
-                data["solar_used_cost"].push([time, kwh_solar_used * cost_import_tariff_A]);
-
-                // cost totals
-                total_cost_import_tariff_A += kwh_import * cost_import_tariff_A
-                total_cost_import_tariff_B += kwh_import * cost_import_tariff_B
+                data["solar_used_cost"].push([time, kwh_solar_used * unitcost_tariff_A]);
 
                 total_cost_export += kwh_export * cost_export
-                total_cost_solar_used += kwh_solar_used * cost_import_tariff_A
-
-                if (show_carbonintensity) {
-                    let co2intensity = data.carbonintensity[2 * (z - 1)][1];
-                    let co2_hh = kwh_import * (co2intensity * 0.001)
-                    total_co2 += co2_hh
-                    sum_co2 += co2intensity
-                    sum_co2_n++;
-                }
-
-                // Calculate monthly data
-                if (monthly_data[startOfMonth] == undefined) {
-                    monthly_data[startOfMonth] = {
-                        "import": 0,
-                        "export": 0,
-                        "solar_used": 0,
-                        "cost_import_tariff_A": 0,
-                        "cost_import_tariff_B": 0,
-                        "cost_export": 0,
-                        "cost_solar_used": 0
-                    }
-                }
-
-                monthly_data[startOfMonth]["import"] += kwh_import
-                monthly_data[startOfMonth]["export"] += kwh_export
-                monthly_data[startOfMonth]["solar_used"] += kwh_solar_used
-                monthly_data[startOfMonth]["cost_import_tariff_A"] += kwh_import * cost_import_tariff_A
-                monthly_data[startOfMonth]["cost_import_tariff_B"] += kwh_import * cost_import_tariff_B
-                monthly_data[startOfMonth]["cost_export"] += kwh_export * cost_export
-                monthly_data[startOfMonth]["cost_solar_used"] += kwh_solar_used * cost_import_tariff_A
-
-            } else {
-                // ----------------------------------------------------
-                // Import mode only
-                // ----------------------------------------------------
-                let kwh_import = 0;
-
-                // If we have cumulative import data available use instead
-                if (cumulative_import_data) {
-                    if (import_kwh[z] != undefined && import_kwh[z - 1] != undefined) {
-                        if (import_kwh[z][1] != null && import_kwh[z - 1][1] != null) {
-                            kwh_import = (import_kwh[z][1] - import_kwh[z - 1][1]);
-                        }
-                    }
-                    if (kwh_import < 0.0) kwh_import = 0.0;
-
-                // If we have octopus smart meter data available use instead
-                } else if (smart_meter_data) {
-                    kwh_import = meter_kwh_hh[z - 1][1];
-                }
-
-                data["import"].push([time, kwh_import]);
-                let cost_import_tariff_A = data.tariff_A[2 * (z - 1)][1] * 0.01;
-                let cost_import_tariff_B = data.tariff_B[2 * (z - 1)][1] * 0.01;
-                data["import_cost_tariff_A"].push([time, kwh_import * cost_import_tariff_A]);
-                data["import_cost_tariff_B"].push([time, kwh_import * cost_import_tariff_B]);
-
-                // If we have octopus smart meter data available use instead
-                let smart_meter_hh_available = false;
-                if (smart_meter_data) {
-                    if (meter_kwh_hh[z - 1] != undefined && import_kwh[z] != undefined && import_kwh[z - 1] != undefined) {
-                        if (meter_kwh_hh[z - 1][1] != null) {
-                            smart_meter_hh_available = true;
-                            // Calculate line of best fit variables
-                            // Suggested calibration
-                            var XY = 1.0 * kwh_import * meter_kwh_hh[z - 1][1];
-                            var X2 = 1.0 * kwh_import * kwh_import;
-                            sumX += 1.0 * kwh_import;
-                            sumY += 1.0 * meter_kwh_hh[z - 1][1];
-                            sumXY += XY;
-                            sumX2 += X2;
-                            n++;
-                        }
-                    }
-                }
-
-                if (smart_meter_hh_available) {
-                    data["meter_kwh_hh_cost"].push([time, meter_kwh_hh[z - 1][1] * cost_import_tariff_A]);
-                } else {
-                    data["meter_kwh_hh_cost"].push([time, null]);
-                }
-
-                if (smart_meter_hh_available && use_meter_kwh_hh) {
-                    total_kwh_import += meter_kwh_hh[z - 1][1]
-                    total_cost_import_tariff_A += meter_kwh_hh[z - 1][1] * cost_import_tariff_A
-                    total_cost_import_tariff_B += meter_kwh_hh[z - 1][1] * cost_import_tariff_B
-                } else {
-                    total_kwh_import += kwh_import
-                    total_cost_import_tariff_A += kwh_import * cost_import_tariff_A
-                    total_cost_import_tariff_B += kwh_import * cost_import_tariff_B
-                }
-
-                // Generate profile
-                profile_kwh[hh][1] += kwh_import
-                profile_cost[hh][1] += kwh_import * cost_import_tariff_A
-
-                if (show_carbonintensity) {
-                    let co2intensity = data.carbonintensity[2 * (z - 1)][1];
-                    let co2_hh = kwh_import * (co2intensity * 0.001)
-                    total_co2 += co2_hh
-                    sum_co2 += co2intensity
-                    sum_co2_n++;
-                }
-
-                // Calculate monthly data
-                if (monthly_data[startOfMonth] == undefined) {
-                    monthly_data[startOfMonth] = {
-                        "import": 0,
-                        "cost_import_tariff_A": 0,
-                        "cost_import_tariff_B": 0
-                    }
-                }
-
-                monthly_data[startOfMonth]["import"] += kwh_import
-                monthly_data[startOfMonth]["cost_import_tariff_A"] += kwh_import * cost_import_tariff_A
-                monthly_data[startOfMonth]["cost_import_tariff_B"] += kwh_import * cost_import_tariff_B
+                total_cost_solar_used += kwh_solar_used * unitcost_tariff_A
             }
+
         }
     }
 
@@ -920,8 +911,8 @@ function graph_load() {
         }
     }
 
-    var unit_cost_import_tariff_A = (total_cost_import_tariff_A / total_kwh_import);
-    var unit_cost_import_tariff_B = (total_cost_import_tariff_B / total_kwh_import);
+    var unit_cost_import_tariff_A = (total_cost_import_tariff_A / total_kwh_import_tariff_A);
+    var unit_cost_import_tariff_B = (total_cost_import_tariff_B / total_kwh_import_tariff_B);
 
     var out = "";
     out += "<tr>";
@@ -930,7 +921,7 @@ function graph_load() {
         out += "<option>" + tariff_options[key] + "</option>";
     }
     out += "</select></td>";
-    out += "<td>" + total_kwh_import.toFixed(1) + " kWh</td>";
+    out += "<td>" + total_kwh_import_tariff_A.toFixed(1) + " kWh</td>";
     out += "<td>£" + (total_cost_import_tariff_A * 1.05).toFixed(2) + "</td>";
     out += "<td>" + (unit_cost_import_tariff_A * 100 * 1.05).toFixed(1) + "p/kWh (inc VAT)</td>";
     out += "</tr>";
@@ -940,7 +931,7 @@ function graph_load() {
     for (var key in tariff_options) {
         out += "<option>" + tariff_options[key] + "</option>";
     }
-    out += "<td>" + total_kwh_import.toFixed(1) + " kWh</td>";
+    out += "<td>" + total_kwh_import_tariff_B.toFixed(1) + " kWh</td>";
     out += "<td>£" + (total_cost_import_tariff_B * 1.05).toFixed(2) + "</td>";
     out += "<td>" + (unit_cost_import_tariff_B * 100 * 1.05).toFixed(1) + "p/kWh (inc VAT)</td>";
     out += "</tr>";
@@ -995,6 +986,8 @@ function graph_load() {
         var monthly_out = "";
 
         var monthly_sum_kwh = 0;
+        var monthly_sum_kwh_tariff_A = 0;
+        var monthly_sum_kwh_tariff_B = 0;
         var monthly_sum_cost_import_tariff_A = 0;
         var monthly_sum_cost_import_tariff_B = 0;
 
@@ -1003,19 +996,30 @@ function graph_load() {
 
             let vat = 1.05;
 
-            let kwh = monthly_data[month]["import"];
+            let tariff_A_kwh = monthly_data[month]["import_tariff_A"];
+            let tariff_B_kwh = monthly_data[month]["import_tariff_B"];
             let tariff_A_cost = monthly_data[month]["cost_import_tariff_A"]*vat;
             let tariff_B_cost = monthly_data[month]["cost_import_tariff_B"]*vat;
-            let tariff_A_unit_cost = 100*(tariff_A_cost / kwh);
-            let tariff_B_unit_cost = 100*(tariff_B_cost / kwh);
+            let tariff_A_unit_cost = 100*(tariff_A_cost / tariff_A_kwh);
+            let tariff_B_unit_cost = 100*(tariff_B_cost / tariff_B_kwh);
 
             monthly_out += "<tr>";
             monthly_out += "<td>" + d.getFullYear() + " " + months[d.getMonth()] + "</td>";
             monthly_out += "<td>" + monthly_data[month]["import"].toFixed(1) + " kWh</td>";
+
             monthly_out += "<td>£" + tariff_A_cost.toFixed(2) + "</td>";
-            monthly_out += "<td>" + tariff_A_unit_cost.toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>";
+            if (!isNaN(tariff_A_unit_cost)) {
+                monthly_out += "<td>" + tariff_A_unit_cost.toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>";
+            } else {
+                monthly_out += "<td></td>";
+            }
+            
             monthly_out += "<td>£" + tariff_B_cost.toFixed(2) + "</td>";
-            monthly_out += "<td>" + tariff_B_unit_cost.toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>";
+            if (!isNaN(tariff_B_unit_cost)) {
+                monthly_out += "<td>" + tariff_B_unit_cost.toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>";
+            } else {
+                monthly_out += "<td></td>";
+            }
 
             // A, B = 
             if (tariff_A_unit_cost < tariff_B_unit_cost) {
@@ -1031,12 +1035,14 @@ function graph_load() {
             monthly_out += "</tr>";
 
             monthly_sum_kwh += monthly_data[month]["import"];
+            monthly_sum_kwh_tariff_A += tariff_A_kwh;
+            monthly_sum_kwh_tariff_B += tariff_B_kwh;
             monthly_sum_cost_import_tariff_A += tariff_A_cost;
             monthly_sum_cost_import_tariff_B += tariff_B_cost;
         }
 
-        var tariff_A_unit_cost = 100*(monthly_sum_cost_import_tariff_A / monthly_sum_kwh);
-        var tariff_B_unit_cost = 100*(monthly_sum_cost_import_tariff_B / monthly_sum_kwh);
+        var tariff_A_unit_cost = 100*(monthly_sum_cost_import_tariff_A / monthly_sum_kwh_tariff_A);
+        var tariff_B_unit_cost = 100*(monthly_sum_cost_import_tariff_B / monthly_sum_kwh_tariff_B);
 
         // add totals line in bold
         monthly_out += "<tr style='font-weight:bold'>";
