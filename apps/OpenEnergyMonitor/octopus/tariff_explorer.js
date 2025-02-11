@@ -892,7 +892,6 @@ function graph_load() {
                 total_cost_export += kwh_export * cost_export
                 total_cost_solar_used += kwh_solar_used * unitcost_tariff_A
             }
-
         }
     }
 
@@ -1067,7 +1066,12 @@ function graph_draw() {
     if (this_halfhour_index != -1) {
 
         let kwh_last_halfhour = data["import"][this_halfhour_index][1];
-        $("#kwh_halfhour").html(kwh_last_halfhour.toFixed(2) + "<span class='units'>kWh</span>");
+
+        if (kwh_last_halfhour != null) {
+            $("#kwh_halfhour").html(kwh_last_halfhour.toFixed(2) + "<span class='units'>kWh</span>");
+        } else {
+            $("#kwh_halfhour").html("N/A");
+        }
 
         let cost_last_halfhour = data["import_cost_tariff_A"][this_halfhour_index][1] * 100;
         $("#cost_halfhour").html("(" + cost_last_halfhour.toFixed(2) + "<span class='units'>p</span>)");
