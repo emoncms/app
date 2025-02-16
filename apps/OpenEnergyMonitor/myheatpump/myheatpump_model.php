@@ -601,4 +601,15 @@ class MyHeatPump {
 
         return $stats;
     }
+
+    public function get_weightedaverages($id, $start, $end) {
+        $id = (int) $id;
+        $start = (int) $start;
+        $end = (int) $end;
+
+        // Load app config
+        $app = $this->appconfig->get_app_by_id($id);
+
+        return process_weighted_averages($this->feed,$app,$start,$end);
+    }
 }

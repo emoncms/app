@@ -948,3 +948,4 @@ function process_weighted_average($data, $interval) {
         "cycle_count" => $cycle_count
     );
 }
+

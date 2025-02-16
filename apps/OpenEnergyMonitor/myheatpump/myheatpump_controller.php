@@ -19,8 +19,11 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
 
     require_once "Modules/feed/feed_model.php";
     $settings['feed']['max_datapoints'] = 100000;
+    $settings['feed']['max_datapoints'] = 1200000;
+
     $feed = new Feed($mysqli,$redis,$settings['feed']);
     require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.php";
+    require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_waft.php";
     require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_model.php";
     $myheatpump = new MyHeatPump($mysqli,$redis,$feed,$appconfig);
 
@@ -200,4 +203,29 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
         $mysqli->query("DELETE FROM myheatpump_daily_stats WHERE `id`='".$app->id."' AND `timestamp`>='".(time()-60*24*3600)."'");
         return array("success"=>true);
     }
+
+    else if ($route->action == "weightedaverages") {
+        $route->format = "json";
+        $start = (int) get('start',false);
+        $end = (int) get('end',false);
+
+        if (!$start || !$end) {
+            $date = new DateTime();
+            // Europe/London is UTC+1
+            $date->setTimezone(new DateTimeZone('Europe/London'));
+            // Set end to midnight start of today
+            $date->setTime(0, 0, 0);
+            $end = $date->getTimestamp();
+            // start to 1 month ago
+            $date->modify('-1 year');
+            $start = $date->getTimestamp();         
+        }
+   
+        if ($end<$start) {
+            return array("success"=>false, "message"=>"End date is before start date");
+        }
+
+        return $myheatpump->get_weightedaverages($app->id,$start,$end);
+    }
+
 }
