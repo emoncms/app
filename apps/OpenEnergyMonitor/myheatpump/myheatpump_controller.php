@@ -120,8 +120,18 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
 
     else if ($route->action == "getstats") {
         $route->format = "json";
-        $start = (int) get('start',true);
-        $end = (int) get('end',true);
+        $start = (int) get('start',false);
+        $end = (int) get('end',false);
+
+        if (!$start || !$end) {
+            $date = new DateTime();
+            $date->setTimezone(new DateTimeZone("Europe/London"));
+            $date->setTime(0,0,0);
+            $end = $date->getTimestamp();
+            $date->modify("-1 day");
+            $start = $date->getTimestamp();
+        }
+
         return $myheatpump->get_stats($app->id,$start,$end);
     }
 

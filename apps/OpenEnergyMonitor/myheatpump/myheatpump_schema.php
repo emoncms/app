@@ -76,6 +76,23 @@ $schema['myheatpump_daily_stats'] = array(
     'cooling_roomT_mean' => array('type' => 'float', 'name'=>'RoomT mean', 'group'=>'Stats: Cooling', 'dp'=>1, 'unit'=>'°C'),
     'cooling_prc_carnot' => array('type' => 'float', 'name'=>'% Carnot', 'group'=>'Stats: Cooling', 'dp'=>1, 'unit'=>'%'),
 
+    // Weighted averages
+    'weighted_flowT' => array('type' => 'float', 'name'=>'Weighted flowT', 'group'=>'Weighted averages', 'dp'=>1, 'unit'=>'°C'),
+    'weighted_outsideT' => array('type' => 'float', 'name'=>'Weighted outsideT', 'group'=>'Weighted averages', 'dp'=>1, 'unit'=>'°C'),
+    'weighted_flowT_minus_outsideT' => array('type' => 'float', 'name'=>'Weighted flowT - outsideT', 'group'=>'Weighted averages', 'dp'=>1, 'unit'=>'°C'),
+    'weighted_flowT_minus_returnT' => array('type' => 'float', 'name'=>'Weighted flowT - returnT', 'group'=>'Weighted averages', 'dp'=>1, 'unit'=>'°C'),
+    'weighted_elec' => array('type' => 'float', 'name'=>'Weighted elec', 'group'=>'Weighted averages', 'dp'=>0, 'unit'=>'W'),
+    'weighted_heat' => array('type' => 'float', 'name'=>'Weighted heat', 'group'=>'Weighted averages', 'dp'=>0, 'unit'=>'W'),
+    'weighted_prc_carnot' => array('type' => 'float', 'name'=>'Weighted % Carnot', 'group'=>'Weighted averages', 'dp'=>1, 'unit'=>'%'),
+    'weighted_kwh_elec' => array('type' => 'float', 'name'=>'Weighted elec kWh', 'group'=>'Weighted averages', 'dp'=>4, 'unit'=>'kWh'),
+    'weighted_kwh_heat' => array('type' => 'float', 'name'=>'Weighted heat kWh', 'group'=>'Weighted averages', 'dp'=>4, 'unit'=>'kWh'),
+    'weighted_kwh_heat_running' => array('type' => 'float', 'name'=>'Weighted heat running kWh', 'group'=>'Weighted averages', 'dp'=>4, 'unit'=>'kWh'),
+    'weighted_kwh_elec_running' => array('type' => 'float', 'name'=>'Weighted elec running kWh', 'group'=>'Weighted averages', 'dp'=>4, 'unit'=>'kWh'),
+    'weighted_kwh_carnot_elec' => array('type' => 'float', 'name'=>'Weighted Carnot elec kWh', 'group'=>'Weighted averages', 'dp'=>4, 'unit'=>'kWh'),
+    'weighted_time_on' => array('type' => 'float', 'name'=>'Weighted time on', 'group'=>'Weighted averages', 'dp'=>0, 'unit'=>'s'),
+    'weighted_time_total' => array('type' => 'float', 'name'=>'Weighted time total', 'group'=>'Weighted averages', 'dp'=>0, 'unit'=>'s'),
+    'weighted_cycle_count' => array('type' => 'float', 'name'=>'Weighted cycle count', 'group'=>'Weighted averages', 'dp'=>0, 'unit'=>''),
+
     // from energy feeds
     'from_energy_feeds_elec_kwh' => array('type' => 'float', 'name'=>'Electricity consumption', 'group'=>'From energy feeds', 'dp'=>0, 'unit'=>'kWh'),
     'from_energy_feeds_heat_kwh' => array('type' => 'float', 'name'=>'Heat output', 'group'=>'From energy feeds', 'dp'=>0, 'unit'=>'kWh'),

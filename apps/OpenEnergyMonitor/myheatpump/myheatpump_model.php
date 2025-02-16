@@ -300,6 +300,23 @@ class MyHeatPump {
         // Aux consumption
         $row["immersion_kwh"] = $stats['immersion_kwh'];
 
+        // Weighted averages
+        $row["weighted_flowT"] = $stats['stats']['weighted']['flowT'];
+        $row["weighted_outsideT"] = $stats['stats']['weighted']['outsideT'];
+        $row["weighted_flowT_minus_outsideT"] = $stats['stats']['weighted']['flowT_minus_outsideT'];
+        $row["weighted_flowT_minus_returnT"] = $stats['stats']['weighted']['flowT_minus_returnT'];
+        $row["weighted_elec"] = $stats['stats']['weighted']['elec'];
+        $row["weighted_heat"] = $stats['stats']['weighted']['heat'];
+        $row["weighted_prc_carnot"] = $stats['stats']['weighted']['prc_carnot'];
+        $row["weighted_kwh_elec"] = $stats['stats']['weighted']['kwh_elec'];
+        $row["weighted_kwh_heat"] = $stats['stats']['weighted']['kwh_heat'];
+        $row["weighted_kwh_heat_running"] = $stats['stats']['weighted']['kwh_heat_running'];
+        $row["weighted_kwh_elec_running"] = $stats['stats']['weighted']['kwh_elec_running'];
+        $row["weighted_kwh_carnot_elec"] = $stats['stats']['weighted']['kwh_carnot_elec'];
+        $row["weighted_time_on"] = $stats['stats']['weighted']['time_on'];
+        $row["weighted_time_total"] = $stats['stats']['weighted']['time_total'];
+        $row["weighted_cycle_count"] = $stats['stats']['weighted']['cycle_count'];
+
         return $row;
     }
 
