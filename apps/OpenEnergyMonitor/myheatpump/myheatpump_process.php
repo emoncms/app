@@ -461,6 +461,8 @@ function get_quality($data) {
     if (!is_array($data)) return 0;
     $count = count($data);
     if ($count<1) return 0;
+
+    if (!isset($data[0])) return 0;
     
     $null_count = 0;
     for ($pos = 0; $pos < $count; $pos++) {
@@ -811,7 +813,18 @@ function process_aux($data, $interval) {
 
 // Weighted average calculation
 function process_weighted_average($data, $interval) {
+    if (!isset($data["heatpump_elec"])) return false;
+    if (!isset($data["heatpump_heat"])) return false;
+    if (!isset($data["heatpump_flowT"])) return false;
+    if (!isset($data["heatpump_returnT"])) return false;
+    if (!isset($data["heatpump_outsideT"])) return false;
 
+    if ($data["heatpump_elec"]==false) return false;
+    if ($data["heatpump_heat"]==false) return false;
+    if ($data["heatpump_flowT"]==false) return false;
+    if ($data["heatpump_returnT"]==false) return false;
+    if ($data["heatpump_outsideT"]==false) return false;
+    
     $flowT_weighted_sum = 0;
     $elec_weighted_sum = 0;
     $heat_weighted_sum = 0;
@@ -833,12 +846,21 @@ function process_weighted_average($data, $interval) {
 
     $power_to_kwh = 1.0 * $interval / 3600000.0;
 
+    $outsideT_available = false;
+    if (isset($data["heatpump_outsideT"]) && is_array($data["heatpump_outsideT"])) {
+        $outsideT_available = true;
+    }
+
     foreach ($data["heatpump_elec"] as $z => $value) {
         $elec = $data["heatpump_elec"][$z];
         $heat = $data["heatpump_heat"][$z];
         $flowT = $data["heatpump_flowT"][$z];
         $returnT = $data["heatpump_returnT"][$z];
-        $outsideT = $data["heatpump_outsideT"][$z];
+        $outsideT = null;
+
+        if ($outsideT_available) {
+            $outsideT = $data["heatpump_outsideT"][$z];
+        }
 
         // if any of the values are null, skip this iteration
         if ($elec === null || $heat === null || $flowT === null || $returnT === null || $outsideT === null) {
@@ -848,12 +870,14 @@ function process_weighted_average($data, $interval) {
         $dt = $flowT - $returnT;
 
         // Calculate ideal carnot efficiency
-        $condensor = $flowT + 2 + 273.15;
-        $evaporator = $outsideT - 6 + 273.15;
-        $carnot_dt = $condensor - $evaporator;
         $ideal_carnot = 0;
-        if ($carnot_dt>0) {
-            $ideal_carnot = $condensor / $carnot_dt;
+        if ($outsideT !== null) {
+            $condensor = $flowT + 2 + 273.15;
+            $evaporator = $outsideT - 6 + 273.15;
+            $carnot_dt = $condensor - $evaporator;
+            if ($carnot_dt>0) {
+                $ideal_carnot = $condensor / $carnot_dt;
+            }
         }
     
         // Calculate COP
