@@ -140,20 +140,19 @@ function auto_detect_cooling($data, $interval) {
     return $data_heatpump_cooling;
 }
 
-function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
+function get_heatpump_stats($feed,$app,$start,$end,$starting_power,$timezone = 'Europe/London') {
 
     // --------------------------------------------------------------------------------------------------------------    
     // Validate params
     // --------------------------------------------------------------------------------------------------------------
     if ($end===null || $start===null) {
         $date = new DateTime();
-        $date->setTimezone(new DateTimeZone("Europe/London"));
+        $date->setTimezone(new DateTimeZone($timezone));
         $date->modify("midnight");
         $end = $date->getTimestamp();
         $date->modify("-30 day");
         $start = $date->getTimestamp();
     } else {
-        $timezone = 'Europe/London';
         $start = convert_time($start,$timezone);
         $end = convert_time($end,$timezone);
     }
@@ -187,7 +186,7 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power) {
     foreach ($feeds as $key) {
         $data[$key] = false;
         if (isset($app->config->$key) && $app->config->$key>0) {   
-            $data[$key] = $feed->get_data($app->config->$key,$start,$end-$interval,$interval,1,"Europe/London","notime");
+            $data[$key] = $feed->get_data($app->config->$key,$start,$end-$interval,$interval,1,$timezone,"notime");
             $data[$key] = remove_null_values($data[$key],$interval);
         }
     }

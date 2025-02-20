@@ -14,8 +14,15 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 
 function myheatpump_app_controller($route,$app,$appconfig,$apikey)
 {
-    global $path, $session, $settings, $mysqli, $redis;
+    global $path, $session, $settings, $mysqli, $redis, $user;
     $v = 1;
+
+    if (!$user_timezone = $user->get_timezone($session['userid'])) {
+        $user_timezone = 'Europe/London';
+    }
+    if (is_numeric($user_timezone)) $user_timezone = "Europe/London";
+    // if timezone UTC set to Europe/London
+    if ($user_timezone == "UTC") $user_timezone = "Europe/London";
 
     require_once "Modules/feed/feed_model.php";
     $settings['feed']['max_datapoints'] = 100000;
@@ -25,7 +32,7 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
     require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.php";
     require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_waft.php";
     require_once "Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_model.php";
-    $myheatpump = new MyHeatPump($mysqli,$redis,$feed,$appconfig);
+    $myheatpump = new MyHeatPump($mysqli,$redis,$feed,$appconfig, $user_timezone);
 
     if ($route->action == "view" || $route->action == "") {
         $route->format = "html";
@@ -128,7 +135,7 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
 
         if (!$start || !$end) {
             $date = new DateTime();
-            $date->setTimezone(new DateTimeZone("Europe/London"));
+            $date->setTimezone(new DateTimeZone($user_timezone));
             $date->setTime(0,0,0);
             $end = $date->getTimestamp();
             $date->modify("-1 day");
@@ -212,7 +219,7 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
         if (!$start || !$end) {
             $date = new DateTime();
             // Europe/London is UTC+1
-            $date->setTimezone(new DateTimeZone('Europe/London'));
+            $date->setTimezone(new DateTimeZone($user_timezone));
             // Set end to midnight start of today
             $date->setTime(0, 0, 0);
             $end = $date->getTimestamp();

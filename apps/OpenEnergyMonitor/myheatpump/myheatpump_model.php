@@ -7,13 +7,15 @@ class MyHeatPump {
     private $feed;
     private $appconfig;
     private $schema;
+    private $user_timezone;
 
     // constructor
-    function __construct($mysqli,$redis,$feed,$appconfig) {
+    function __construct($mysqli,$redis,$feed,$appconfig,$user_timezone = 'Europe/London') {
         $this->mysqli = $mysqli;
         $this->redis = $redis;
         $this->feed = $feed;
         $this->appconfig = $appconfig;
+        $this->user_timezone = $user_timezone;
 
         // Load schema
         $schema = array();
@@ -184,7 +186,7 @@ class MyHeatPump {
 
         // Calculate start and end time aligned to midnight
         $date = new DateTime();
-        $date->setTimezone(new DateTimeZone('Europe/London'));
+        $date->setTimezone(new DateTimeZone($this->user_timezone));
 
         $date->setTimestamp($end_time);
         $date->modify("midnight");
@@ -217,7 +219,7 @@ class MyHeatPump {
         while ($time<$end) {
             
             // Get stats for the day
-            $stats = get_heatpump_stats($this->feed,$app,$time,$time+(3600*24),$starting_power);
+            $stats = get_heatpump_stats($this->feed,$app,$time,$time+(3600*24),$starting_power,$this->user_timezone);
 
             // Translate for database field compatibility
             $row = $this->format_flat_keys($stats);
