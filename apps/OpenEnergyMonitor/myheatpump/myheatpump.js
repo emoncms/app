@@ -38,6 +38,10 @@ config.app = {
     "immersion_elec": { "type": "feed", "autoname": "immersion_elec", "optional": true, "description": "Immersion electric use in watts" },
     // "immersion_elec_kwh": { "type": "feed", "autoname": "immersion_elec_kwh", "optional": true, "description": "Immersion electric use kWh" },
 
+    // DHW
+    "heatpump_dhwT": { "type": "feed", "autoname": "heatpump_dhwT", "optional": true, "description": "Domestic Hot Water temperature" },
+    "heatpump_dhwTargetT": { "type": "feed", "autoname": "heatpump_dhwTargetT", "optional": true, "description": "Target DHW Temperature" },
+    
     // Other
     "starting_power": { "type": "value", "default": 150, "name": "Starting power", "description": "Starting power of heatpump in watts" },
     "auto_detect_cooling":{"type":"checkbox", "default":false, "name": "Auto detect cooling", "description":"Auto detect summer cooling if cooling status feed is not present"},
