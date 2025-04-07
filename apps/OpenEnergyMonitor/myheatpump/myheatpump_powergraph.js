@@ -7,6 +7,7 @@ var inst_cop_mv_av_dp = 0;
 var kw_at_50 = 0;
 var kw_at_50_for_volume = 0;
 
+var standby_dhw_hl_enable = false; // DHW standby loss
 
 function powergraph_load() {
     var skipmissing = 0;
@@ -125,6 +126,8 @@ function powergraph_process() {
     emitter_and_volume_calculator();
     // calculate starts
     compressor_starts();
+    // calculate DHW standby heatloss
+    calculate_standby_heat_loss();
 
     // Load powergraph_series into flot
     powergraph_draw();
@@ -466,6 +469,144 @@ function emitter_and_volume_calculator() {
   */  
 }
 
+/**
+ * Calculates the standby heat loss coefficient (U) for the DHW cylinder.
+ */
+function calculate_standby_heat_loss() {
+    const resultDisplay = $("#standby_dhw_hl_result");
+    resultDisplay.html("---"); // Reset result
+
+    if (!standby_dhw_hl_enable) {
+        return; // Calculation not enabled
+    }
+
+    if (data["heatpump_dhwT"] == undefined || data["heatpump_dhwT"].length < 2) {
+        resultDisplay.html("<span style='color:orange;'>Requires DHW Temp Feed Data</span>");
+        return;
+    }
+
+    const V_cyl_str = $("#cylinder_volume").val();
+    const T_env_str = $("#env_temperature").val();
+
+    const V_cyl = parseFloat(V_cyl_str);
+    const T_env = parseFloat(T_env_str);
+
+    if (isNaN(V_cyl) || V_cyl <= 0 || isNaN(T_env)) {
+        resultDisplay.html("<span style='color:red;'>Invalid Inputs</span>");
+        return;
+    }
+
+    resultDisplay.html("Calculating...");
+
+    const rho_water = 1.0; // kg/L
+    const cp_water = 4186; // J/(kg*K)
+
+    let times_s = []; // Relative time in seconds
+    let ln_deltaT_norm = []; // ln(deltaT / deltaT_0)
+    let deltaT_0 = null;
+    let start_time_ms = null;
+
+    // Prepare data for regression
+    for (let i = 0; i < data["heatpump_dhwT"].length; i++) {
+        const time_ms = data["heatpump_dhwT"][i][0];
+        const T_cyl = data["heatpump_dhwT"][i][1];
+
+        if (T_cyl === null) continue; // Skip null temperature values
+
+        const deltaT = T_cyl - T_env;
+
+        if (deltaT <= 0) continue; // Skip non-positive temperature differences
+
+        // Establish the baseline deltaT and start time for the log normalization
+        if (deltaT_0 === null) {
+            deltaT_0 = deltaT;
+            start_time_ms = time_ms;
+        }
+
+        // Only add points after the start time is established
+        if (start_time_ms !== null) {
+            const relative_time_s = (time_ms - start_time_ms) / 1000.0;
+            const ln_dt_norm_val = Math.log(deltaT / deltaT_0);
+
+            // Avoid issues with log(0) or log(negative) if deltaT somehow becomes <=0 after check
+             if (!isNaN(ln_dt_norm_val) && isFinite(ln_dt_norm_val)) {
+                times_s.push(relative_time_s);
+                ln_deltaT_norm.push(ln_dt_norm_val);
+            }
+        }
+    }
+
+    if (times_s.length < 5) { // Require a minimum number of points for a meaningful fit
+        resultDisplay.html("<span style='color:orange;'>Insufficient Data Points in Window</span>");
+        return;
+    }
+
+    // Perform linear regression: ln(deltaT/deltaT0) = -k * t
+    const regressionResult = linearRegression(times_s, ln_deltaT_norm);
+
+    if (!regressionResult) {
+        resultDisplay.html("<span style='color:red;'>Regression Failed</span>");
+        return;
+    }
+
+    const slope = regressionResult.slope; // This is -k
+    const decay_constant_k = -slope; // k should be positive for decay
+
+    if (isNaN(decay_constant_k) || decay_constant_k <= 0) {
+         resultDisplay.html("<span style='color:orange;'>Non-decaying Fit</span>");
+         return;
+    }
+
+    // Calculate Heat Loss Coefficient U = V_cyl * rho * cp * k
+    const U_WK = V_cyl * rho_water * cp_water * decay_constant_k;
+    // --- Detailed Logging ---
+    console.groupCollapsed("Standby Heat Loss Calculation Details"); // Use groupCollapsed to keep console cleaner initially
+    try { // Use a try...finally to ensure groupEnd is always called
+        console.log(`Timestamp: ${new Date().toISOString()}`);
+        console.log(`Window: ${new Date(view.start).toLocaleString()} - ${new Date(view.end).toLocaleString()}`);
+        console.log(`Inputs: V_cyl=${V_cyl} L, T_env=${T_env} °C`);
+        console.log(`Data Points Used for Fit: ${times_s.length}`);
+        if (times_s.length > 0) {
+                console.log(`Fit Duration: ${times_s[times_s.length - 1].toFixed(1)} s (${ (times_s[times_s.length - 1]/3600).toFixed(2) } hours)`);
+                console.log(`Initial Temp: ${ (deltaT_0 + T_env).toFixed(2) } °C (DeltaT₀ = ${deltaT_0.toFixed(2)} K)`);
+                // Find the last temperature used in the fit
+                const last_ln_deltaT_norm = ln_deltaT_norm[ln_deltaT_norm.length - 1];
+                const last_deltaT = deltaT_0 * Math.exp(last_ln_deltaT_norm);
+                const last_temp = last_deltaT + T_env;
+                console.log(`Final Temp Used: ${last_temp.toFixed(2)} °C (DeltaT = ${last_deltaT.toFixed(2)} K)`);
+        } else {
+                console.log("Fit Duration: N/A (No points)");
+                console.log("Initial Temp: N/A");
+                console.log("Final Temp Used: N/A");
+        }
+
+        console.log("--- Linear Regression Fit ---");
+        console.log("Model: ln(ΔT(t)/ΔT₀) = slope * t + intercept");
+        console.log(`Raw Slope (m): ${regressionResult.slope.toExponential(5)} (1/s)`);
+        console.log(`Raw Intercept (b): ${regressionResult.intercept.toFixed(5)}`);
+        // Include R-squared if you calculated it in linearRegression function
+        // console.log(`R² (Goodness of Fit): ${regressionResult.r2 ? regressionResult.r2.toFixed(4) : 'N/A'}`);
+
+        console.log("--- Derived Values ---");
+        console.log(`Decay Constant (k = -slope): ${decay_constant_k.toExponential(5)} (1/s)`);
+
+        // Calculate and log half-life
+        const half_life_s = Math.log(2) / decay_constant_k;
+        const half_life_h = half_life_s / 3600;
+        const half_life_d = half_life_h / 24;
+        console.log(`Half-life (t_1/2 = ln(2)/k): ${half_life_s.toFixed(1)} s ≈ ${half_life_h.toFixed(2)} hours ≈ ${half_life_d.toFixed(2)} days`);
+
+        console.log("--- Final Result ---");
+        console.log(`Heat Loss Coefficient (U = V_cyl * ρ * cp * k): ${U_WK.toFixed(3)} W/K`);
+
+    } finally {
+        console.groupEnd();
+    }
+    // --- End Detailed Logging ---
+
+    resultDisplay.html(U_WK.toFixed(2)); // Keep the UI display concise
+   }
+
 // -------------------------------------------------------------------------------
 // POWER GRAPH
 // -------------------------------------------------------------------------------
@@ -628,6 +769,58 @@ function powergraph_tooltip(item) {
     tooltip(item.pageX, item.pageY, name + " " + itemValue.toFixed(dp) + unit + "<br>" + date + ", " + time, "#fff", "#000");
 }
 
+/**
+ * Performs linear regression on paired data.
+ * y = mx + b
+ * @param {number[]} x - Array of x values (independent variable, e.g., time in seconds).
+ * @param {number[]} y - Array of y values (dependent variable, e.g., ln(deltaT/deltaT0)).
+ * @returns {object|null} Object with 'slope' (m) and 'intercept' (b), or null if regression is not possible.
+ */
+function linearRegression(x, y) {
+    const n = x.length;
+    if (n < 2 || n !== y.length) {
+        console.error("Linear regression requires at least 2 points and equal length arrays.");
+        return null; // Not enough data or mismatched arrays
+    }
+
+    let sum_x = 0;
+    let sum_y = 0;
+    let sum_xy = 0;
+    let sum_xx = 0;
+    let sum_yy = 0; // Needed for R-squared, not strictly required for slope/intercept
+
+    for (let i = 0; i < n; i++) {
+        sum_x += x[i];
+        sum_y += y[i];
+        sum_xy += x[i] * y[i];
+        sum_xx += x[i] * x[i];
+        sum_yy += y[i] * y[i];
+    }
+
+    const denominator = (n * sum_xx - sum_x * sum_x);
+    if (Math.abs(denominator) < 1e-10) { // Avoid division by zero if all x are the same
+         console.error("Linear regression failed: Denominator is zero (all x values are likely the same).");
+         return null;
+    }
+
+    const slope = (n * sum_xy - sum_x * sum_y) / denominator;
+    const intercept = (sum_y - slope * sum_x) / n;
+
+    // Optional: Calculate R-squared (coefficient of determination)
+    let ssr = 0;
+    for (let i = 0; i < n; i++) {
+        const fit = slope * x[i] + intercept;
+        ssr += (fit - sum_y / n) ** 2;
+    }
+    const sst = sum_yy - (sum_y * sum_y) / n;
+    const r2 = (sst === 0) ? 1 : ssr / sst; // Handle case where all y are the same
+
+    return {
+        slope: slope,
+        intercept: intercept,
+        // r2: r2 // Uncomment if you want R-squared
+    };
+}
 
 // Powergraph events (advanced section)
 
@@ -847,6 +1040,27 @@ $("#fix_kW_at_50").click(function () {
 
 $("#kW_at_50").change(function () {
     powergraph_process();
+});
+
+// Standby Heat Loss Calculation Enable/Disable
+$("#standby_dhw_hl_enable").click(function () {
+    if ($(this).is(":checked")) {
+        standby_dhw_hl_enable = true;
+        $("#standby_dhw_hl_options").show();
+        calculate_standby_heat_loss(); // Trigger calculation immediately
+    } else {
+        standby_dhw_hl_enable = false;
+        $("#standby_dhw_hl_options").hide();
+        $("#standby_dhw_hl_result").html("---"); // Clear result
+    }
+    // Note: We don't call powergraph_process() here as it doesn't change the graph itself
+});
+
+// Recalculate Standby Heat Loss on input change
+$("#cylinder_volume, #env_temperature").on('change input', function() {
+    if (standby_dhw_hl_enable) {
+        calculate_standby_heat_loss();
+    }
 });
 
 // if press key 'd', copy defrost info to clipboard
