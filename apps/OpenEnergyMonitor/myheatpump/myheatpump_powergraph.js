@@ -515,7 +515,8 @@ function powergraph_draw() {
             let show = true;
             if (key == 'heatpump_flowrate' && !show_flow_rate) show = false;
             if (key == 'immersion_elec' && !show_immersion) show = false;
-
+            if (key == 'heatpump_dhwT' && !show_dhw_temp) show = false;
+            if (key == 'heatpump_dhwTargetT' && !show_dhw_temp) show = false;
             if (show) powergraph_series_without_key.push(powergraph_series[key]);
         }
         $.plot($('#placeholder'), powergraph_series_without_key, options);

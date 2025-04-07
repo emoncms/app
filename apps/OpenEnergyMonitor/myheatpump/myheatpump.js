@@ -89,6 +89,8 @@ var show_defrost_and_loss = false;
 var show_cooling = false;
 var emitter_spec_enable = false;
 
+var show_dhw_temp = false
+
 var bargraph_start = 0;
 var bargraph_end = 0;
 var last_bargraph_start = 0;
@@ -140,6 +142,10 @@ function show() {
 
     if (feeds["heatpump_flowrate"] != undefined) {
         $("#show_flow_rate_bound").show();
+    }
+
+    if (feeds["heatpump_dhwT"] != undefined) {
+        $("#show_dhw_temp_bound").show();
     }
 
     if (feeds["immersion_elec"] != undefined) {
@@ -578,4 +584,15 @@ $("#clear-daily-data").click(function () {
             }
         }
     });
+});
+
+$("#show_dhw_temp").click(function () {
+    if ($("#show_dhw_temp")[0].checked) {
+        show_dhw_temp = true;
+    } else {
+        show_dhw_temp = false;
+    }
+    if (viewmode == "powergraph") {
+        powergraph_draw();
+    }
 });
