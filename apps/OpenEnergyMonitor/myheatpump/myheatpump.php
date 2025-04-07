@@ -284,7 +284,28 @@ global $path, $session, $v;
                 </div>
               </div>
             </div>
-
+            <!-- DHW Standby Heat Loss Calculation Option -->
+            <div class="advanced-options" style="border-bottom:1px solid #ccc">
+              <input id="standby_dhw_hl_enable" type="checkbox" class="advanced-options-checkbox">
+              <b>Calculate DHW Standby Heat Loss Coefficient</b>
+              <div id="standby_dhw_hl_options" style="margin-top:10px; display:none;">
+                  <p style="font-size:0.9em; color:#555;"><i>Ensure the selected window only shows DHW temperature decay (no heating cycles, no DHW use such as showering).</i></p>
+                  <div class="input-prepend input-append" style="margin-top:5px; margin-bottom:5px;">
+                    <span class="add-on">Cylinder Volume (V<sub>cyl</sub>)</span>
+                    <input type="text" style="width:60px" id="cylinder_volume" value="200">
+                    <span class="add-on">L</span>
+                  </div>
+                  <div class="input-prepend input-append" style="margin-top:5px; margin-bottom:5px;">
+                    <span class="add-on">Environment Temp (T<sub>env</sub>)</span>
+                    <input type="text" style="width:50px" id="env_temperature" value="15">
+                    <span class="add-on">°C</span>
+                  </div>
+                  <div style="margin-top:10px;">
+                      DHW Heat Loss Coefficient (U): <b id="standby_dhw_hl_result">---</b> W/K
+                  </div>
+              </div>
+            </div>
+            <!-- End DHWStandby Heat Loss -->
             <div class="advanced-options" style="border-bottom:1px solid #ccc">
               <div style="float:right"><span id="standby_kwh"></span> kWh</span></div>
               <input id="configure_standby" type="checkbox" class="advanced-options-checkbox">
