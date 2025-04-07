@@ -476,6 +476,10 @@ function calculate_standby_heat_loss() {
     const resultDisplay = $("#standby_dhw_hl_result");
     resultDisplay.html("---"); // Reset result
 
+    // Ensure any previous fit line is removed if calculation is disabled or fails
+    delete powergraph_series['dhwT_fitted'];
+    data["dhwT_fitted"] = [];
+
     if (!standby_dhw_hl_enable) {
         return; // Calculation not enabled
     }
@@ -556,6 +560,40 @@ function calculate_standby_heat_loss() {
          resultDisplay.html("<span style='color:orange;'>Non-decaying Fit</span>");
          return;
     }
+
+    // Generate fitted data and add series ---
+    // Check if we have valid parameters to generate the fitted curve
+    if (deltaT_0 !== null && start_time_ms !== null && !isNaN(T_env)) {
+        data["dhwT_fitted"] = []; // Initialize array
+
+        // Use the original data timestamps for the fitted curve x-axis
+        for (let i = 0; i < data["heatpump_dhwT"].length; i++) {
+            const time_ms = data["heatpump_dhwT"][i][0];
+            let fitted_temp = null;
+
+            // Only calculate fitted points from the start of the regression data onwards
+            if (time_ms >= start_time_ms) {
+                const relative_time_s = (time_ms - start_time_ms) / 1000.0;
+                // Calculate predicted temperature using the model: T(t) = T_env + (T(0) - T_env) * exp(-k*t)
+                // Using deltaT_0 which is T(0) - T_env
+                const deltaT_predicted = deltaT_0 * Math.exp(-decay_constant_k * relative_time_s);
+                fitted_temp = T_env + deltaT_predicted;
+            }
+            data["dhwT_fitted"].push([time_ms, fitted_temp]);
+        }
+
+        // Add the generated data to powergraph_series for plotting
+        powergraph_series['dhwT_fitted'] = {
+            label: "DHW T (Fitted)", // Label for the legend
+            data: data["dhwT_fitted"],
+            yaxis: 2, // Plot on the temperature axis (usually yaxis 2)
+            color: "#ff9900", // A distinct color (e.g., orange)
+            lines: { show: true, lineWidth: 1 } // Style: thinner line than actual data
+            // Optional: use dashes for clearer distinction:
+            // lines: { show: true, lineWidth: 1, dashes: [5, 5] }
+        };
+    }
+    // --- END MODIFICATION 2 ---
 
     // Calculate Heat Loss Coefficient U = V_cyl * rho * cp * k
     const U_WK = V_cyl * rho_water * cp_water * decay_constant_k;
@@ -766,6 +804,8 @@ function powergraph_tooltip(item) {
     else if (item.series.label == "Immersion") { name = "Immersion"; unit = "W"; }
     else if (item.series.label == "DHW T") { name = "DHW T"; unit = "°C"; dp = 1; }
     else if (item.series.label == "DHW TargetT") { name = "DHW Target T"; unit = "°C"; dp = 1; }
+    else if (item.series.label == "DHW T (Fitted)") { name = "DHW T (Fitted)"; unit = "°C"; dp = 1; }
+
     tooltip(item.pageX, item.pageY, name + " " + itemValue.toFixed(dp) + unit + "<br>" + date + ", " + time, "#fff", "#000");
 }
 
@@ -1047,13 +1087,13 @@ $("#standby_dhw_hl_enable").click(function () {
     if ($(this).is(":checked")) {
         standby_dhw_hl_enable = true;
         $("#standby_dhw_hl_options").show();
-        calculate_standby_heat_loss(); // Trigger calculation immediately
+        calculate_standby_heat_loss();
     } else {
         standby_dhw_hl_enable = false;
         $("#standby_dhw_hl_options").hide();
         $("#standby_dhw_hl_result").html("---"); // Clear result
     }
-    // Note: We don't call powergraph_process() here as it doesn't change the graph itself
+    powergraph_draw();
 });
 
 // Recalculate Standby Heat Loss on input change
