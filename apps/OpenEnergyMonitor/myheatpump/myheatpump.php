@@ -189,7 +189,10 @@ global $path, $session, $v;
               <input id="show_flow_rate" type="checkbox" class="advanced-options-checkbox">
               <b>Show flow rate</b>
             </div>
-
+            <div id="show_dhw_temp_bound" style="display:none" class="advanced-options">
+              <input id="show_dhw_temp" type="checkbox" class="advanced-options-checkbox">
+              <b>Show DHW temperature</b>
+            </div>
             <div id="show_cooling_bound" class="advanced-options">
               <div style="float:right"><span id="total_defrost_and_loss_kwh"></span> kWh (<span id="prc_defrost_and_loss"></span>%)</div>
               <input id="show_defrost_and_loss" type="checkbox" class="advanced-options-checkbox">
