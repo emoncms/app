@@ -427,6 +427,16 @@ function bargraph_draw() {
         var plot = $.plot($('#placeholder'), bargraph_series, options);
         $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'></div>");
     }
+
+    if ($("#heatloss-block").is(":visible")) {
+        // Check if the function exists before calling (good practice)
+        if (typeof plotHeatLossScatter === 'function') {
+            console.log("Bargraph drawn, updating visible Heat Loss plot.");
+            plotHeatLossScatter();
+        } else {
+            console.warn("bargraph_draw: plotHeatLossScatter function not found. Ensure myheatpump_heatloss.js is loaded.");
+        }
+   }
 }
 
 function bargraph_tooltip(item)
@@ -544,6 +554,11 @@ $(".bargraph_mode").click(function () {
 
     bargraph_mode = mode;
     bargraph_draw();
+
+    // If the heat loss panel is visible, update its plot too
+    if ($("#heatloss-block").is(":visible")) {
+        plotHeatLossScatter(); // <<< CALL REMAINS
+    }
 });
 
 $('.bargraph-day').click(function () {

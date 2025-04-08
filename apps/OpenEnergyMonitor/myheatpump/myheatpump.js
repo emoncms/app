@@ -436,6 +436,11 @@ function resize() {
     placeholder.height(height - top_offset);
 
     
+    // Add resize logic for the heat loss plot if it's visible
+    if ($("#heatloss-block").is(":visible")) {
+        plotHeatLossScatter(); // <<< CALL REMAINS
+    }
+
 
     if (viewmode == "bargraph") {
         bargraph_draw();
@@ -599,6 +604,9 @@ $("#heatloss-toggle").click(function () {
         $toggleText.text("HIDE HEAT LOSS ANALYSIS");
          // Update the HTML content (the arrow character) of the arrow span
         $arrow.html("▼"); // Down Arrow ▼
+        resize();
+
+        plotHeatLossScatter();
 
         // Accessing daily_data example:
         if (typeof daily_data !== 'undefined' && daily_data.combined_elec_kwh) {
