@@ -17,7 +17,16 @@ function powergraph_load() {
 
     powergraph_series = {};
 
+
+    // Change labels & target axis depending on DHW type
+    const unit_dhw = config.app.heatpump_dhwT_unit.value || '°C';
+    const dhw_type = (unit_dhw == '°C') ? "temp" : "charge"; 
+    dhw_label = (dhw_type == 'temp') ? "DHW T" : "DHW Charge";
+    dhw_target_label = (dhw_type == 'temp') ? "DHW TargetT" : "DHW Target Charge";
+    dhw_axis = (dhw_type == 'temp') ? 2 : 7;
+
     // Index order is important here!
+    
     var feeds_to_load = {
         "heatpump_dhw": { label: "DHW", yaxis: 4, color: "#88F", lines: { lineWidth: 0, show: true, fill: 0.15 } },
         "heatpump_ch": { label: "CH", yaxis: 4, color: "#FB6", lines: { lineWidth: 0, show: true, fill: 0.15 } },
@@ -32,8 +41,8 @@ function powergraph_load() {
         "heatpump_heat": { label: "Heat", yaxis: 1, color: 0, lines: { show: true, fill: 0.2, lineWidth: 0.5 } },
         "heatpump_elec": { label: "Electric", yaxis: 1, color: 1, lines: { show: true, fill: 0.3, lineWidth: 0.5 } },
         "immersion_elec": { label: "Immersion", yaxis: 1, color: 4, lines: { show: true, fill: 0.3, lineWidth: 0.5 } },
-        "heatpump_dhwT": { label: "DHW T", yaxis: 2, color: "#0080ff" },
-        "heatpump_dhwTargetT": { label: "DHW TargetT", yaxis: 2, color:"#99cbfc" },
+        "heatpump_dhwT": { label: dhw_label, yaxis: dhw_axis, color: "#0080ff" },
+        "heatpump_dhwTargetT": { label: dhw_target_label, yaxis: dhw_axis, color:"#99cbfc" },
     }
 
     // Compile list of feedids
@@ -473,8 +482,14 @@ function emitter_and_volume_calculator() {
  * Calculates the standby heat loss coefficient (U) for the DHW cylinder.
  */
 function calculate_standby_heat_loss() {
-    const resultDisplay = $("#standby_dhw_hl_result");
-    resultDisplay.html("---"); // Reset result
+    const heatlossDisplay = $("#standby_dhw_hl_result");
+    const halflifeDisplay = $("#standby_dhw_t_half_result");
+    heatlossDisplay.html("---"); // Reset result
+    halflifeDisplay.html("---"); // Reset result
+
+    // select whether we have temperature or charge type data
+    const unit_dhw = config.app.heatpump_dhwT_unit.value || '°C';
+    const dhw_type = (unit_dhw == '°C') ? "temp" : "charge"; 
 
     // Ensure any previous fit line is removed if calculation is disabled or fails
     delete powergraph_series['dhwT_fitted'];
@@ -485,7 +500,7 @@ function calculate_standby_heat_loss() {
     }
 
     if (data["heatpump_dhwT"] == undefined || data["heatpump_dhwT"].length < 2) {
-        resultDisplay.html("<span style='color:orange;'>Requires DHW Temp Feed Data</span>");
+        heatlossDisplay.html("<span style='color:orange;'>Requires DHW Temp Feed Data</span>");
         return;
     }
 
@@ -493,14 +508,18 @@ function calculate_standby_heat_loss() {
     const T_env_str = $("#env_temperature").val();
 
     const V_cyl = parseFloat(V_cyl_str);
-    const T_env = parseFloat(T_env_str);
+    // set environmental temperature to 0 for charge type,
+    // otherwise parse the input string
+    // If using cylinder charge, we just estimate the decay to 0%, not the decay to
+    // environmental temperature
+    const T_env = (dhw_type =='temp') ? parseFloat(T_env_str) : 0.0;
 
     if (isNaN(V_cyl) || V_cyl <= 0 || isNaN(T_env)) {
-        resultDisplay.html("<span style='color:red;'>Invalid Inputs</span>");
+        heatlossDisplay.html("<span style='color:red;'>Invalid Inputs</span>");
         return;
     }
 
-    resultDisplay.html("Calculating...");
+    heatlossDisplay.html("Calculating...");
 
     const rho_water = 1.0; // kg/L
     const cp_water = 4186; // J/(kg*K)
@@ -541,7 +560,7 @@ function calculate_standby_heat_loss() {
     }
 
     if (times_s.length < 5) { // Require a minimum number of points for a meaningful fit
-        resultDisplay.html("<span style='color:orange;'>Insufficient Data Points in Window</span>");
+        heatlossDisplay.html("<span style='color:orange;'>Insufficient Data Points in Window</span>");
         return;
     }
 
@@ -549,7 +568,7 @@ function calculate_standby_heat_loss() {
     const regressionResult = linearRegression(times_s, ln_deltaT_norm);
 
     if (!regressionResult) {
-        resultDisplay.html("<span style='color:red;'>Regression Failed</span>");
+        heatlossDisplay.html("<span style='color:red;'>Regression Failed</span>");
         return;
     }
 
@@ -557,7 +576,7 @@ function calculate_standby_heat_loss() {
     const decay_constant_k = -slope; // k should be positive for decay
 
     if (isNaN(decay_constant_k) || decay_constant_k <= 0) {
-         resultDisplay.html("<span style='color:orange;'>Non-decaying Fit</span>");
+         heatlossDisplay.html("<span style='color:orange;'>Non-decaying Fit</span>");
          return;
     }
 
@@ -584,19 +603,24 @@ function calculate_standby_heat_loss() {
 
         // Add the generated data to powergraph_series for plotting
         powergraph_series['dhwT_fitted'] = {
-            label: "DHW T (Fitted)", // Label for the legend
+            label: (dhw_type == "temp") ? "DHW T (Fitted)":"DHW Charge (Fitted)", // Label for the legend
             data: data["dhwT_fitted"],
-            yaxis: 2, // Plot on the temperature axis (usually yaxis 2)
+            yaxis: (dhw_type == "temp") ? 2:7, // Plot on the temperature or charge axis (2 or 7)
             color: "#ff9900", // A distinct color (e.g., orange)
             lines: { show: true, lineWidth: 1 } // Style: thinner line than actual data
             // Optional: use dashes for clearer distinction:
             // lines: { show: true, lineWidth: 1, dashes: [5, 5] }
         };
     }
-    // --- END MODIFICATION 2 ---
 
     // Calculate Heat Loss Coefficient U = V_cyl * rho * cp * k
     const U_WK = V_cyl * rho_water * cp_water * decay_constant_k;
+
+    // calculate half life
+    const half_life_s = Math.log(2) / decay_constant_k;
+    const half_life_h = half_life_s / 3600;
+    const half_life_d = half_life_h / 24;
+
     // --- Detailed Logging ---
     console.groupCollapsed("Standby Heat Loss Calculation Details"); // Use groupCollapsed to keep console cleaner initially
     try { // Use a try...finally to ensure groupEnd is always called
@@ -623,15 +647,12 @@ function calculate_standby_heat_loss() {
         console.log(`Raw Slope (m): ${regressionResult.slope.toExponential(5)} (1/s)`);
         console.log(`Raw Intercept (b): ${regressionResult.intercept.toFixed(5)}`);
         // Include R-squared if you calculated it in linearRegression function
-        // console.log(`R² (Goodness of Fit): ${regressionResult.r2 ? regressionResult.r2.toFixed(4) : 'N/A'}`);
+        console.log(`R² (Goodness of Fit): ${regressionResult.r2 ? regressionResult.r2.toFixed(4) : 'N/A'}`);
 
         console.log("--- Derived Values ---");
         console.log(`Decay Constant (k = -slope): ${decay_constant_k.toExponential(5)} (1/s)`);
 
         // Calculate and log half-life
-        const half_life_s = Math.log(2) / decay_constant_k;
-        const half_life_h = half_life_s / 3600;
-        const half_life_d = half_life_h / 24;
         console.log(`Half-life (t_1/2 = ln(2)/k): ${half_life_s.toFixed(1)} s ≈ ${half_life_h.toFixed(2)} hours ≈ ${half_life_d.toFixed(2)} days`);
 
         console.log("--- Final Result ---");
@@ -642,7 +663,13 @@ function calculate_standby_heat_loss() {
     }
     // --- End Detailed Logging ---
 
-    resultDisplay.html(U_WK.toFixed(2)); // Keep the UI display concise
+
+    if (dhw_type == 'temp') {
+        heatlossDisplay.html(U_WK.toFixed(2) + " W/K");
+    } else {
+        heatlossDisplay.html("---");
+    }
+    halflifeDisplay.html(half_life_d.toFixed(2));
    }
 
 // -------------------------------------------------------------------------------
@@ -780,6 +807,13 @@ function powergraph_tooltip(item) {
     var unit = "";
     var dp = 0;
 
+    // extract unit for DHW (% or °C)
+    var unit_dhw = config.app.heatpump_dhwT_unit.value || '°C';
+    var name_dhw = (unit_dhw == '°C') ? "DHW T" : "DHW Charge"; 
+    var name_dhw_target = (unit_dhw == '°C') ? "DHW Target T" : "DHW Target Charge"; 
+    var name_dhw_fitted = (unit_dhw == '°C') ? "DHW T (Fitted)" : "DHW Charge (Fitted)"; 
+
+
     if (item.series.label == "FlowT") { name = "FlowT"; unit = "°C"; dp = 1; }
     else if (item.series.label == "ReturnT") { name = "ReturnT"; unit = "°C"; dp = 1; }
     else if (item.series.label == "OutsideT") { name = "Outside"; unit = "°C"; dp = 1; }
@@ -806,6 +840,9 @@ function powergraph_tooltip(item) {
     else if (item.series.label == "DHW T") { name = "DHW T"; unit = "°C"; dp = 1; }
     else if (item.series.label == "DHW TargetT") { name = "DHW Target T"; unit = "°C"; dp = 1; }
     else if (item.series.label == "DHW T (Fitted)") { name = "DHW T (Fitted)"; unit = "°C"; dp = 1; }
+    else if (item.series.label == "DHW Charge") { name = "DHW Charge"; unit = "%"; dp = 1; }
+    else if (item.series.label == "DHW Target Charge") { name = "DHW Target Charge"; unit = "%"; dp = 1; }
+    else if (item.series.label == "DHW Charge (Fitted)") { name = "DHW Charge (Fitted)"; unit = "%"; dp = 1; }
 
     tooltip(item.pageX, item.pageY, name + " " + itemValue.toFixed(dp) + unit + "<br>" + date + ", " + time, "#fff", "#000");
 }
@@ -859,7 +896,7 @@ function linearRegression(x, y) {
     return {
         slope: slope,
         intercept: intercept,
-        // r2: r2 // Uncomment if you want R-squared
+        r2: r2 // Uncomment if you want R-squared
     };
 }
 
