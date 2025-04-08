@@ -575,3 +575,37 @@ $("#clear-daily-data").click(function () {
         }
     });
 });
+
+// --- Heat Loss Panel Toggle ---
+$("#heatloss-toggle").click(function () {
+    var $contentBlock = $("#heatloss-block");
+    var $toggleText = $("#heatloss-toggle-text"); // Get the text span
+    var $arrow = $("#heatloss-arrow");           // Get the arrow span
+
+    if ($contentBlock.is(":visible")) {
+        $contentBlock.slideUp(); // Animate hiding
+        $(this).css("background-color", ""); // Reset background if needed
+
+        // Update the text content of the text span
+        $toggleText.text("SHOW HEAT LOSS ANALYSIS");
+        // Update the HTML content (the arrow character) of the arrow span
+        $arrow.html("►"); // Right Arrow ►
+
+    } else {
+        $contentBlock.slideDown(); // Animate showing
+        $(this).css("background-color", "#4a6d8c"); // Darker background when open (optional)
+
+        // Update the text content of the text span
+        $toggleText.text("HIDE HEAT LOSS ANALYSIS");
+         // Update the HTML content (the arrow character) of the arrow span
+        $arrow.html("▼"); // Down Arrow ▼
+
+        // Accessing daily_data example:
+        if (typeof daily_data !== 'undefined' && daily_data.combined_elec_kwh) {
+             console.log("Heat Loss Panel: Accessing daily_data.combined_elec_kwh, number of days:", daily_data.combined_elec_kwh.length);
+        } else {
+             console.log("Heat Loss Panel: daily_data not yet available or empty.");
+        }
+    }
+});
+// --- End Heat Loss Panel Toggle ---

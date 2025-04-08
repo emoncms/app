@@ -100,3 +100,49 @@
   padding:11px;
   font-size:14px;
 }
+
+/* Styles for the new Heat Loss Panel */
+#heatloss-toggle {
+  /* Inherits .bluenav */
+  padding: 8px 15px; /* Keep padding inside the toggle */
+  text-align: left;
+  /* width: calc(100% - 30px); */ /* REMOVE THIS LINE */
+  box-sizing: border-box; /* Add this for robust padding handling */
+  display: block; /* Make it take up available block width */
+  transition: background-color 0.3s;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  /* Optional: Add a min-height if needed, but likely not the issue */
+  /* min-height: 38px; */ /* Match .bluenav height if necessary */
+}
+
+#heatloss-toggle:hover {
+  background-color: #5a7d9c;
+}
+
+#heatloss-arrow {
+    float: right;
+    margin-right: 10px;
+    font-size: 14px;
+    line-height: 1.5; /* Adjust if vertical alignment is off */
+}
+
+#heatloss-block {
+  border: 1px solid #ddd;
+  border-top: none;
+  background-color: #f9f9f9;
+}
+
+#heatloss-plot-bound,
+#heatloss-controls {
+    background-color: #fff;
+}
+
+#heatloss-plot,
+#heatloss-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+    font-style: italic;
+}

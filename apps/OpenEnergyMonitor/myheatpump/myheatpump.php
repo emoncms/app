@@ -402,7 +402,40 @@ global $path, $session, $v;
 
       </div>
     </div>
+      
+<!-- START: New Heat Loss Panel -->
+    <div class="col1">
+      <div class="col1-inner">
 
+        <div class="block-bound">
+          <!-- Updated toggle div -->
+          <div id='heatloss-toggle' class='bluenav' style="text-align:left; cursor:pointer;">
+              <span id="heatloss-toggle-text">SHOW HEAT LOSS ANALYSIS</span>  <!-- Text wrapped in span -->
+              <span id="heatloss-arrow">►</span> <!-- Arrow span remains -->
+          </div>
+        </div>
+
+        <div id="heatloss-block" style="background-color:#fff; padding:10px; display:none;">
+          <!-- Content for the Heat Loss panel goes here -->
+          <p>Heat Loss Analysis Area</p>
+
+          <!-- Placeholder for the plot -->
+          <div id="heatloss-plot-bound" style="width:100%; height:400px; overflow:hidden; position:relative; border:1px dashed #ccc; margin-bottom:10px;">
+              <div id="heatloss-plot" style="height:400px;">Plot Placeholder</div>
+          </div>
+
+          <!-- Placeholder for controls -->
+          <div id="heatloss-controls" style="border:1px dashed #ccc; padding:10px;">
+              Controls Placeholder
+          </div>
+
+        </div> <!-- End of #heatloss-block -->
+
+      </div> <!-- End of col1-inner for Heat Loss -->
+    </div> <!-- End of col1 for Heat Loss -->
+    <!-- END: New Heat Loss Panel -->
+
+    
   </div>
 </div>
 
