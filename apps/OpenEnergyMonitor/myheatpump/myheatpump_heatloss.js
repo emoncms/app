@@ -190,6 +190,7 @@ function plotHeatLossScatter() {
         const xIntercept = -intercept / slope; // x-intercept (where line crosses x-axis)
         // Calculate y-values for the line at min and max observed x values
         const y1 = slope * xIntercept + intercept;
+        maxX=35
         const y2 = slope * maxX + intercept;
 
         regressionLineData = [[xIntercept, y1], [maxX, y2]];
