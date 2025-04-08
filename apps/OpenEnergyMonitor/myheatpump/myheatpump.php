@@ -191,7 +191,7 @@ global $path, $session, $v;
             </div>
             <div id="show_dhw_temp_bound" style="display:none" class="advanced-options">
               <input id="show_dhw_temp" type="checkbox" class="advanced-options-checkbox">
-              <b>Show DHW temperature</b>
+              <b>Show DHW temperature/charge</b>
             </div>
             <div id="show_cooling_bound" class="advanced-options">
               <div style="float:right"><span id="total_defrost_and_loss_kwh"></span> kWh (<span id="prc_defrost_and_loss"></span>%)</div>
@@ -292,7 +292,7 @@ global $path, $session, $v;
               <input id="standby_dhw_hl_enable" type="checkbox" class="advanced-options-checkbox">
               <b>Calculate DHW Standby Heat Loss Coefficient</b>
               <div id="standby_dhw_hl_options" style="margin-top:10px; display:none;">
-                  <p style="font-size:0.9em; color:#555;"><i>Ensure the selected window only shows natural DHW temperature decay (no heating cycles, no DHW use such as showering).</i></p>
+                  <p style="font-size:0.9em; color:#555;"><i>Ensure the selected window only shows natural DHW temperature decay (no heating cycles, no DHW use such as showering). Cylinder volume and environmental temperature are required to compute standby heat loss coefficient, which only works if DHW temperature is measured in °C and not % Charge. </i></p>
                   <div class="input-prepend input-append" style="margin-top:5px; margin-bottom:5px;">
                     <span class="add-on">Cylinder Volume (V<sub>cyl</sub>)</span>
                     <input type="text" style="width:60px" id="cylinder_volume" value="200">

@@ -41,7 +41,7 @@ config.app = {
     // DHW
     "heatpump_dhwT": { "type": "feed", "autoname": "heatpump_dhwT", "optional": true, "description": "Domestic Hot Water temperature" },
     "heatpump_dhwTargetT": { "type": "feed", "autoname": "heatpump_dhwTargetT", "optional": true, "description": "Target DHW Temperature" },
-    
+    "heatpump_dhwT_unit": {"type": "select", "name": "DHW Temperature Unit", "options": {"%": "%", "°C": "°C"}, "default": "°C", "optional": true, "description": "Select the unit for the DHW temperature feed."},
     // Other
     "starting_power": { "type": "value", "default": 150, "name": "Starting power", "description": "Starting power of heatpump in watts" },
     "auto_detect_cooling":{"type":"checkbox", "default":false, "name": "Auto detect cooling", "description":"Auto detect summer cooling if cooling status feed is not present"},
