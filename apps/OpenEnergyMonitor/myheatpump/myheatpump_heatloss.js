@@ -72,7 +72,7 @@ function plotHeatLossScatter() {
     // Iterate through the heat data (which is specific to the mode)
     for (var i = 0; i < heatDataArray.length; i++) {
         var timestamp = heatDataArray[i][0];
-        var heatValue = heatDataArray[i][1];
+        var heatValue = heatDataArray[i][1] / 24.0; // convert from kWh to kW
 
         // Get corresponding temperatures using the timestamp
         var insideTValue = insideTMap.get(timestamp);
@@ -118,7 +118,7 @@ function plotHeatLossScatter() {
 
     var plotOptions = {
         xaxis: {
-            axisLabel: "Temperature Difference (T_inside - T_outside) [°C]",
+            axisLabel: "Temperature Difference (T_inside - T_outside) [K]",
             axisLabelUseCanvas: true,
             axisLabelFontSizePixels: 12,
             axisLabelFontFamily: 'Verdana, Arial, Helvetica, Tahoma, sans-serif',
@@ -127,7 +127,7 @@ function plotHeatLossScatter() {
             // Let flot determine min/max automatically for scatter
         },
         yaxis: {
-            axisLabel: "Daily Heat Output [kWh]",
+            axisLabel: "Heat Output [kW]",
             axisLabelUseCanvas: true,
             axisLabelFontSizePixels: 12,
             axisLabelFontFamily: 'Verdana, Arial, Helvetica, Tahoma, sans-serif',
