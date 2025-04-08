@@ -584,36 +584,73 @@ $("#clear-daily-data").click(function () {
 // --- Heat Loss Panel Toggle ---
 $("#heatloss-toggle").click(function () {
     var $contentBlock = $("#heatloss-block");
-    var $toggleText = $("#heatloss-toggle-text"); // Get the text span
-    var $arrow = $("#heatloss-arrow");           // Get the arrow span
+    var $toggleText = $("#heatloss-toggle-text");
+    var $arrow = $("#heatloss-arrow");
 
     if ($contentBlock.is(":visible")) {
-        $contentBlock.slideUp(); // Animate hiding
-        $(this).css("background-color", ""); // Reset background if needed
-
-        // Update the text content of the text span
+        // Hiding Logic (Stays the same)
+        $contentBlock.slideUp(); // Start hiding animation
+        $(this).css("background-color", "");
         $toggleText.text("SHOW HEAT LOSS ANALYSIS");
-        // Update the HTML content (the arrow character) of the arrow span
-        $arrow.html("►"); // Right Arrow ►
+        $arrow.html("►");
 
     } else {
-        $contentBlock.slideDown(); // Animate showing
-        $(this).css("background-color", "#4a6d8c"); // Darker background when open (optional)
-
-        // Update the text content of the text span
+        // Showing Logic (Modified)
+        // These updates can happen immediately
+        $(this).css("background-color", "#4a6d8c");
         $toggleText.text("HIDE HEAT LOSS ANALYSIS");
-         // Update the HTML content (the arrow character) of the arrow span
-        $arrow.html("▼"); // Down Arrow ▼
-        resize();
+        $arrow.html("▼");
 
-        plotHeatLossScatter();
+        // Start the slideDown animation AND provide a callback function
+        $contentBlock.slideDown(function() {
+            // --- This code runs AFTER slideDown completes ---
+            console.log("Heat Loss Panel: slideDown complete.");
 
-        // Accessing daily_data example:
-        if (typeof daily_data !== 'undefined' && daily_data.combined_elec_kwh) {
-             console.log("Heat Loss Panel: Accessing daily_data.combined_elec_kwh, number of days:", daily_data.combined_elec_kwh.length);
-        } else {
-             console.log("Heat Loss Panel: daily_data not yet available or empty.");
-        }
+            // Now it's safe to resize and plot
+            resize(); // Ensure container dimensions are recalculated based on final state
+            plotHeatLossScatter(); // Plot into the correctly sized, visible container
+
+            // Debugging log at the correct time
+            if (typeof daily_data !== 'undefined' && daily_data.combined_elec_kwh) {
+                console.log("Heat Loss Panel (Post-Slide): Accessing daily_data...");
+            } else {
+                console.log("Heat Loss Panel (Post-Slide): daily_data not yet available...");
+            }
+            // --- End of callback ---
+        });
     }
 });
 // --- End Heat Loss Panel Toggle ---
+
+// 1. Minimum Delta T Input Change
+$("#heatloss_min_deltaT").on('input change', function() {
+    // Only replot if the panel is actually visible
+    if ($("#heatloss-block").is(":visible")) {
+        // Basic validation if needed (e.g., ensure it's a number)
+        // let value = parseFloat($(this).val());
+        // if (!isNaN(value)) { ... }
+        plotHeatLossScatter(); // Call the plotting function (defined in heatloss.js)
+    }
+});
+
+// 2. Fixed Room Temperature Checkbox Change
+$("#heatloss_fixed_roomT_check").on('change', function() {
+    var isChecked = $(this).is(":checked");
+    // Enable/disable the associated value input based on checkbox state
+    $("#heatloss_fixed_roomT_value").prop('disabled', !isChecked);
+
+    // Replot if the panel is visible
+    if ($("#heatloss-block").is(":visible")) {
+        plotHeatLossScatter();
+    }
+});
+
+// 3. Fixed Room Temperature Value Input Change
+$("#heatloss_fixed_roomT_value").on('input change', function() {
+    // Only replot if the panel is visible AND the checkbox is checked
+    if ($("#heatloss-block").is(":visible") && $("#heatloss_fixed_roomT_check").is(":checked")) {
+         plotHeatLossScatter();
+    }
+});
+
+// --- End Heat Loss Control Event Listeners ---

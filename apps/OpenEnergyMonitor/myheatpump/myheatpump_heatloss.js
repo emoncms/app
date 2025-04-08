@@ -1,5 +1,3 @@
-// /var/www/emoncms/Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_heatloss.js
-
 /**
  * Plots a scatter graph of Daily Heat Output vs Daily (Tin - Tout) difference.
  * Uses data prepared for the main bar graph, filtered by the current bargraph_mode.
@@ -11,6 +9,20 @@ function plotHeatLossScatter() {
     var plotBound = $("#heatloss-plot-bound"); // To potentially resize if needed
 
     // --- 1. Data Access and Preparation ---
+    // get min deltaT from input field
+    var minDeltaT = parseFloat($("#heatloss_min_deltaT").val());
+    if (isNaN(minDeltaT)) { // Handle cases where input might be empty or invalid
+        minDeltaT = -Infinity; // Effectively no minimum if invalid
+        console.warn("Heat Loss Plot: Invalid Minimum ΔT input, using no minimum.");
+    }
+
+    // get option to use fixed room temperature
+    var useFixedRoomT = $("#heatloss_fixed_roomT_check").is(":checked");
+    var fixedRoomTValue = parseFloat($("#heatloss_fixed_roomT_value").val());
+     if (isNaN(fixedRoomTValue)) {
+        fixedRoomTValue = 20; // Default if invalid
+        console.warn("Heat Loss Plot: Invalid Fixed Room Temp input, using default 20°C.");
+    }
 
     // Check if essential daily data is available
     if (typeof daily_data === 'undefined' || $.isEmptyObject(daily_data)) {
