@@ -17,7 +17,16 @@ function powergraph_load() {
 
     powergraph_series = {};
 
+
+    // Change labels & target axis depending on DHW type
+    const unit_dhw = config.app.heatpump_dhwT_unit.value || '°C';
+    const dhw_type = (unit_dhw == '°C') ? "temp" : "charge"; 
+    dhw_label = (dhw_type == 'temp') ? "DHW T" : "DHW Charge";
+    dhw_target_label = (dhw_type == 'temp') ? "DHW TargetT" : "DHW Target Charge";
+    dhw_axis = (dhw_type == 'temp') ? 2 : 7;
+
     // Index order is important here!
+    
     var feeds_to_load = {
         "heatpump_dhw": { label: "DHW", yaxis: 4, color: "#88F", lines: { lineWidth: 0, show: true, fill: 0.15 } },
         "heatpump_ch": { label: "CH", yaxis: 4, color: "#FB6", lines: { lineWidth: 0, show: true, fill: 0.15 } },
@@ -32,8 +41,8 @@ function powergraph_load() {
         "heatpump_heat": { label: "Heat", yaxis: 1, color: 0, lines: { show: true, fill: 0.2, lineWidth: 0.5 } },
         "heatpump_elec": { label: "Electric", yaxis: 1, color: 1, lines: { show: true, fill: 0.3, lineWidth: 0.5 } },
         "immersion_elec": { label: "Immersion", yaxis: 1, color: 4, lines: { show: true, fill: 0.3, lineWidth: 0.5 } },
-        "heatpump_dhwT": { label: "DHW T", yaxis: 2, color: "#0080ff" },
-        "heatpump_dhwTargetT": { label: "DHW TargetT", yaxis: 2, color:"#99cbfc" },
+        "heatpump_dhwT": { label: dhw_label, yaxis: dhw_axis, color: "#0080ff" },
+        "heatpump_dhwTargetT": { label: dhw_target_label, yaxis: dhw_axis, color:"#99cbfc" },
     }
 
     // Compile list of feedids
@@ -478,6 +487,10 @@ function calculate_standby_heat_loss() {
     heatlossDisplay.html("---"); // Reset result
     halflifeDisplay.html("---"); // Reset result
 
+    // select whether we have temperature or charge type data
+    const unit_dhw = config.app.heatpump_dhwT_unit.value || '°C';
+    const dhw_type = (unit_dhw == '°C') ? "temp" : "charge"; 
+
     // Ensure any previous fit line is removed if calculation is disabled or fails
     delete powergraph_series['dhwT_fitted'];
     data["dhwT_fitted"] = [];
@@ -495,7 +508,11 @@ function calculate_standby_heat_loss() {
     const T_env_str = $("#env_temperature").val();
 
     const V_cyl = parseFloat(V_cyl_str);
-    const T_env = parseFloat(T_env_str);
+    // set environmental temperature to 0 for charge type,
+    // otherwise parse the input string
+    // If using cylinder charge, we just estimate the decay to 0%, not the decay to
+    // environmental temperature
+    const T_env = (dhw_type =='temp') ? parseFloat(T_env_str) : 0.0;
 
     if (isNaN(V_cyl) || V_cyl <= 0 || isNaN(T_env)) {
         heatlossDisplay.html("<span style='color:red;'>Invalid Inputs</span>");
@@ -586,9 +603,9 @@ function calculate_standby_heat_loss() {
 
         // Add the generated data to powergraph_series for plotting
         powergraph_series['dhwT_fitted'] = {
-            label: "DHW T (Fitted)", // Label for the legend
+            label: (dhw_type == "temp") ? "DHW T (Fitted)":"DHW Charge (Fitted)", // Label for the legend
             data: data["dhwT_fitted"],
-            yaxis: 2, // Plot on the temperature axis (usually yaxis 2)
+            yaxis: (dhw_type == "temp") ? 2:7, // Plot on the temperature or charge axis (2 or 7)
             color: "#ff9900", // A distinct color (e.g., orange)
             lines: { show: true, lineWidth: 1 } // Style: thinner line than actual data
             // Optional: use dashes for clearer distinction:
@@ -646,7 +663,12 @@ function calculate_standby_heat_loss() {
     }
     // --- End Detailed Logging ---
 
-    heatlossDisplay.html(U_WK.toFixed(2));
+
+    if (dhw_type == 'temp') {
+        heatlossDisplay.html(U_WK.toFixed(2) + " W/K");
+    } else {
+        heatlossDisplay.html("---");
+    }
     halflifeDisplay.html(half_life_d.toFixed(2));
    }
 
@@ -785,6 +807,13 @@ function powergraph_tooltip(item) {
     var unit = "";
     var dp = 0;
 
+    // extract unit for DHW (% or °C)
+    var unit_dhw = config.app.heatpump_dhwT_unit.value || '°C';
+    var name_dhw = (unit_dhw == '°C') ? "DHW T" : "DHW Charge"; 
+    var name_dhw_target = (unit_dhw == '°C') ? "DHW Target T" : "DHW Target Charge"; 
+    var name_dhw_fitted = (unit_dhw == '°C') ? "DHW T (Fitted)" : "DHW Charge (Fitted)"; 
+
+
     if (item.series.label == "FlowT") { name = "FlowT"; unit = "°C"; dp = 1; }
     else if (item.series.label == "ReturnT") { name = "ReturnT"; unit = "°C"; dp = 1; }
     else if (item.series.label == "OutsideT") { name = "Outside"; unit = "°C"; dp = 1; }
@@ -811,6 +840,9 @@ function powergraph_tooltip(item) {
     else if (item.series.label == "DHW T") { name = "DHW T"; unit = "°C"; dp = 1; }
     else if (item.series.label == "DHW TargetT") { name = "DHW Target T"; unit = "°C"; dp = 1; }
     else if (item.series.label == "DHW T (Fitted)") { name = "DHW T (Fitted)"; unit = "°C"; dp = 1; }
+    else if (item.series.label == "DHW Charge") { name = "DHW Charge"; unit = "%"; dp = 1; }
+    else if (item.series.label == "DHW Target Charge") { name = "DHW Target Charge"; unit = "%"; dp = 1; }
+    else if (item.series.label == "DHW Charge (Fitted)") { name = "DHW Charge (Fitted)"; unit = "%"; dp = 1; }
 
     tooltip(item.pageX, item.pageY, name + " " + itemValue.toFixed(dp) + unit + "<br>" + date + ", " + time, "#fff", "#000");
 }
