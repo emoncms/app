@@ -184,6 +184,11 @@ function process_stats() {
     stats.water_heating = {};
     stats.cooling = {};
 
+    var unit_dhw = config.app.heatpump_dhwT_unit.value || '°C';
+    var name_dhw = (unit_dhw == '°C') ? "DHW Temperature" : "DHW Charge"; 
+    var name_dhw_target = (unit_dhw == '°C') ? "DHW target Temperature" : "DHW Target Charge"; 
+
+
     var feed_options = {
         "heatpump_elec": { name: "HP electric consumption", unit: "W", dp: 0 },
         "heatpump_heat": { name: "HP heat output", unit: "W", dp: 0 },
@@ -194,7 +199,9 @@ function process_stats() {
         "heatpump_outsideT": { name: "Outside temperature", unit: "°C", dp: 1 },
         "heatpump_roomT": { name: "Room temperature", unit: "°C", dp: 1 },
         "heatpump_targetT": { name: "Target temperature", unit: "°C", dp: 1 },
-        "heatpump_flowrate": { name: "Flow rate", unit: "", dp: 3 }
+        "heatpump_flowrate": { name: "Flow rate", unit: "", dp: 3 },
+        "heatpump_dhwT": { name: name_dhw, unit: unit_dhw, dp: 1 },
+        "heatpump_dhwTargetT": { name: name_dhw_target, unit: unit_dhw, dp: 1 }
     }
 
     var keys = [];
