@@ -473,8 +473,10 @@ function emitter_and_volume_calculator() {
  * Calculates the standby heat loss coefficient (U) for the DHW cylinder.
  */
 function calculate_standby_heat_loss() {
-    const resultDisplay = $("#standby_dhw_hl_result");
-    resultDisplay.html("---"); // Reset result
+    const heatlossDisplay = $("#standby_dhw_hl_result");
+    const halflifeDisplay = $("#standby_dhw_t_half_result");
+    heatlossDisplay.html("---"); // Reset result
+    halflifeDisplay.html("---"); // Reset result
 
     // Ensure any previous fit line is removed if calculation is disabled or fails
     delete powergraph_series['dhwT_fitted'];
@@ -485,7 +487,7 @@ function calculate_standby_heat_loss() {
     }
 
     if (data["heatpump_dhwT"] == undefined || data["heatpump_dhwT"].length < 2) {
-        resultDisplay.html("<span style='color:orange;'>Requires DHW Temp Feed Data</span>");
+        heatlossDisplay.html("<span style='color:orange;'>Requires DHW Temp Feed Data</span>");
         return;
     }
 
@@ -496,11 +498,11 @@ function calculate_standby_heat_loss() {
     const T_env = parseFloat(T_env_str);
 
     if (isNaN(V_cyl) || V_cyl <= 0 || isNaN(T_env)) {
-        resultDisplay.html("<span style='color:red;'>Invalid Inputs</span>");
+        heatlossDisplay.html("<span style='color:red;'>Invalid Inputs</span>");
         return;
     }
 
-    resultDisplay.html("Calculating...");
+    heatlossDisplay.html("Calculating...");
 
     const rho_water = 1.0; // kg/L
     const cp_water = 4186; // J/(kg*K)
@@ -541,7 +543,7 @@ function calculate_standby_heat_loss() {
     }
 
     if (times_s.length < 5) { // Require a minimum number of points for a meaningful fit
-        resultDisplay.html("<span style='color:orange;'>Insufficient Data Points in Window</span>");
+        heatlossDisplay.html("<span style='color:orange;'>Insufficient Data Points in Window</span>");
         return;
     }
 
@@ -549,7 +551,7 @@ function calculate_standby_heat_loss() {
     const regressionResult = linearRegression(times_s, ln_deltaT_norm);
 
     if (!regressionResult) {
-        resultDisplay.html("<span style='color:red;'>Regression Failed</span>");
+        heatlossDisplay.html("<span style='color:red;'>Regression Failed</span>");
         return;
     }
 
@@ -557,7 +559,7 @@ function calculate_standby_heat_loss() {
     const decay_constant_k = -slope; // k should be positive for decay
 
     if (isNaN(decay_constant_k) || decay_constant_k <= 0) {
-         resultDisplay.html("<span style='color:orange;'>Non-decaying Fit</span>");
+         heatlossDisplay.html("<span style='color:orange;'>Non-decaying Fit</span>");
          return;
     }
 
@@ -593,10 +595,15 @@ function calculate_standby_heat_loss() {
             // lines: { show: true, lineWidth: 1, dashes: [5, 5] }
         };
     }
-    // --- END MODIFICATION 2 ---
 
     // Calculate Heat Loss Coefficient U = V_cyl * rho * cp * k
     const U_WK = V_cyl * rho_water * cp_water * decay_constant_k;
+
+    // calculate half life
+    const half_life_s = Math.log(2) / decay_constant_k;
+    const half_life_h = half_life_s / 3600;
+    const half_life_d = half_life_h / 24;
+
     // --- Detailed Logging ---
     console.groupCollapsed("Standby Heat Loss Calculation Details"); // Use groupCollapsed to keep console cleaner initially
     try { // Use a try...finally to ensure groupEnd is always called
@@ -623,15 +630,12 @@ function calculate_standby_heat_loss() {
         console.log(`Raw Slope (m): ${regressionResult.slope.toExponential(5)} (1/s)`);
         console.log(`Raw Intercept (b): ${regressionResult.intercept.toFixed(5)}`);
         // Include R-squared if you calculated it in linearRegression function
-        // console.log(`R² (Goodness of Fit): ${regressionResult.r2 ? regressionResult.r2.toFixed(4) : 'N/A'}`);
+        console.log(`R² (Goodness of Fit): ${regressionResult.r2 ? regressionResult.r2.toFixed(4) : 'N/A'}`);
 
         console.log("--- Derived Values ---");
         console.log(`Decay Constant (k = -slope): ${decay_constant_k.toExponential(5)} (1/s)`);
 
         // Calculate and log half-life
-        const half_life_s = Math.log(2) / decay_constant_k;
-        const half_life_h = half_life_s / 3600;
-        const half_life_d = half_life_h / 24;
         console.log(`Half-life (t_1/2 = ln(2)/k): ${half_life_s.toFixed(1)} s ≈ ${half_life_h.toFixed(2)} hours ≈ ${half_life_d.toFixed(2)} days`);
 
         console.log("--- Final Result ---");
@@ -642,7 +646,8 @@ function calculate_standby_heat_loss() {
     }
     // --- End Detailed Logging ---
 
-    resultDisplay.html(U_WK.toFixed(2)); // Keep the UI display concise
+    heatlossDisplay.html(U_WK.toFixed(2));
+    halflifeDisplay.html(half_life_d.toFixed(2));
    }
 
 // -------------------------------------------------------------------------------
@@ -859,7 +864,7 @@ function linearRegression(x, y) {
     return {
         slope: slope,
         intercept: intercept,
-        // r2: r2 // Uncomment if you want R-squared
+        r2: r2 // Uncomment if you want R-squared
     };
 }
 
