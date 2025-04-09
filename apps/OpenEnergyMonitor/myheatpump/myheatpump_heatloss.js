@@ -178,8 +178,6 @@ function plotHeatLossScatter() {
 
     // --- Calculate Linear Regression ---
     var regressionResult = linearRegression(xValues, yValues);
-    var regressionLineData = null;
-    var regressionLabel = "";
 
     let regressionLineData = []; // Initialize outside the if block to ensure it's always defined
     let regressionLabel = "Fit: N/A"; // Default label
