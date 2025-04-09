@@ -602,14 +602,14 @@ $("#heatloss-toggle").click(function () {
         // Hiding Logic (Stays the same)
         $contentBlock.slideUp(); // Start hiding animation
         $(this).css("background-color", "");
-        $toggleText.text("SHOW HEAT LOSS ANALYSIS");
+        $toggleText.text("SHOW HEAT DEMAND ANALYSIS");
         $arrow.html("►");
 
     } else {
         // Showing Logic (Modified)
         // These updates can happen immediately
         $(this).css("background-color", "#4a6d8c");
-        $toggleText.text("HIDE HEAT LOSS ANALYSIS");
+        $toggleText.text("HIDE HEAT DEMAND ANALYSIS");
         $arrow.html("▼");
 
         // Start the slideDown animation AND provide a callback function

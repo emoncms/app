@@ -216,7 +216,7 @@ function plotHeatLossScatter() {
         },
         lines: { show: false }, // Ensure lines are off for scatter
         color: 'rgb(255, 99, 71)', // Tomato color
-        label: 'Daily Heat Loss (' + bargraph_mode + (shouldUseFixedRoomT ? ', Fixed T_in=' + fixedRoomTValue + '°C' : '') + ')' // Add note to label if fixed T is used
+        label: 'Daily Heat Demand (' + bargraph_mode + (shouldUseFixedRoomT ? ', Fixed T_in=' + fixedRoomTValue + '°C' : '') + ')' // Add note to label if fixed T is used
     }];
 
     if (regressionLineData) {

@@ -438,7 +438,7 @@ global $path, $session, $v;
         <div class="block-bound">
           <!-- Updated toggle div -->
           <div id='heatloss-toggle' class='bluenav' style="text-align:left; cursor:pointer;">
-              <span id="heatloss-toggle-text">SHOW HEAT LOSS ANALYSIS</span>  <!-- Text wrapped in span -->
+              <span id="heatloss-toggle-text">SHOW HEAT DEMAND ANALYSIS</span>  <!-- Text wrapped in span -->
               <span id="heatloss-arrow">►</span> <!-- Arrow span remains -->
           </div>
         </div>
@@ -453,7 +453,7 @@ global $path, $session, $v;
           <!-- Placeholder for controls -->
           <div id="heatloss-controls" style="border:1px solid #eee; padding:15px; background-color: #fdfdfd;">
 
-            <!-- Control Group 1: Min Delta T (modeled after kW_at_50 / system_volume) -->
+            <!-- Control Group 1: Min Delta T -->
             <!-- Using input-append style: input first, then addon(s) -->
             <div class="input-append" style="margin-top:5px;">
                 <input type="number" id="heatloss_min_deltaT" class="heatloss-control-input" value="5" step="1" style="width:50px; text-align:center;">
@@ -461,7 +461,7 @@ global $path, $session, $v;
                 <!-- Note: Combined label and unit into one add-on like 'Litres' or 'kW @ DT50' -->
             </div>
 
-            <!-- Control Group 2: Fixed Room Temp (modeled after room_temperature) -->
+            <!-- Control Group 2: Fixed Room Temp -->
             <!-- Using input-prepend input-append style: label addon, input, unit addon, checkbox addon -->
             <div class="input-prepend input-append" style="margin-top:5px;">
                 <span class="add-on">Fixed room temperature</span>
@@ -519,7 +519,7 @@ global $path, $session, $v;
   config.db = <?php echo json_encode($config); ?>;
 </script>
 
-<?php $v=195; ?>
+<?php $v=196; ?>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_regression.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_powergraph.js?v=<?php echo $v; ?>"></script>
