@@ -181,28 +181,95 @@ function plotHeatLossScatter() {
     var regressionLineData = null;
     var regressionLabel = "";
 
+    let regressionLineData = []; // Initialize outside the if block to ensure it's always defined
+    let regressionLabel = "Fit: N/A"; // Default label
+
     if (regressionResult) {
         console.log("Heat Loss Plot: Regression successful", regressionResult);
         const slope = regressionResult.slope;
         const intercept = regressionResult.intercept;
         const r2 = regressionResult.r2;
 
-        const xIntercept = -intercept / slope; // x-intercept (where line crosses x-axis)
-        // Calculate y-values for the line at min and max observed x values
-        const y1 = slope * xIntercept + intercept;
-        maxX=35
-        const y2 = slope * maxX + intercept;
+        // Define the maximum X value for the line endpoint
+        const maxX = 35; // Or get this dynamically if needed
 
-        regressionLineData = [[xIntercept, y1], [maxX, y2]];
+        // Check for non-zero slope to avoid division by zero
+        if (Math.abs(slope) > 1e-9) { // Use a small tolerance for floating point comparison
+            const xIntercept = -intercept / slope; // x-intercept (where line crosses x-axis)
 
-        // Create a label for the legend
-        regressionLabel = `Fit: HLC=${slope.toFixed(3)*1000} W/K` +
-                            `, Int=${intercept.toFixed(3)*1000} W` +
-                            ` (R²=${r2.toFixed(3)})`; // Heat Loss Coefficient (slope) in W/K
+            // --- Generate points from xIntercept to maxX with integer steps ---
+
+            // 1. Collect all desired unique x-values using a Set
+            const xValuesSet = new Set();
+
+            // Add the start and end points
+            xValuesSet.add(xIntercept);
+            xValuesSet.add(maxX);
+
+            // Determine the integer range to add
+            // Ensure we handle cases where xIntercept might be > maxX or vice-versa
+            const startX = Math.min(xIntercept, maxX);
+            const endX = Math.max(xIntercept, maxX);
+            const firstInteger = Math.ceil(startX);
+            const lastInteger = Math.floor(endX);
+
+            // Add all integers within the calculated range [firstInteger, lastInteger]
+            // These integers must also be between the original xIntercept and maxX bounds
+            for (let xInt = firstInteger; xInt <= lastInteger; xInt++) {
+                 // Ensure the integer point is actually within the desired line segment bounds
+                 if (xInt >= Math.min(xIntercept, maxX) && xInt <= Math.max(xIntercept, maxX)) {
+                    xValuesSet.add(xInt);
+                 }
+            }
+
+            // 2. Convert Set to an array and sort numerically
+            const sortedXValues = Array.from(xValuesSet).sort((a, b) => a - b);
+
+            // 3. Calculate y for each x and create the final data array
+            regressionLineData = sortedXValues.map(x => {
+                const y = slope * x + intercept;
+                return [x, y];
+            });
+
+            // --- End of point generation ---
+
+            // Create a label for the legend
+            regressionLabel = `Fit: HLC=${(slope * 1000).toFixed(3)} W/K` +
+                                `, Int=${(intercept * 1000).toFixed(3)} W` +
+                                ` (R²=${r2.toFixed(3)})`; // Heat Loss Coefficient (slope) in W/K
+
+        } else {
+            // Handle horizontal line (slope is effectively zero)
+            console.warn("Heat Loss Plot: Slope is near zero. Cannot calculate x-intercept. Drawing horizontal line.");
+            // Decide the range for the horizontal line. Maybe 0 to maxX? Or min/max observed X?
+            // Let's draw from 0 to maxX for this example.
+            const minXForLine = 0;
+            const maxXForLine = maxX; // Use the same maxX
+
+             // Generate points similar to above, but y is constant (intercept)
+            const xValuesSet = new Set();
+            xValuesSet.add(minXForLine);
+            xValuesSet.add(maxXForLine);
+            const firstInteger = Math.ceil(minXForLine);
+            const lastInteger = Math.floor(maxXForLine);
+             for (let xInt = firstInteger; xInt <= lastInteger; xInt++) {
+                 xValuesSet.add(xInt);
+            }
+            const sortedXValues = Array.from(xValuesSet).sort((a, b) => a - b);
+            regressionLineData = sortedXValues.map(x => [x, intercept]); // Y is always the intercept
+
+            regressionLabel = `Fit: HLC=0.000 W/K` + // Slope is 0
+                              `, Int=${(intercept * 1000).toFixed(3)} W` +
+                              ` (R²=${r2.toFixed(3)})`;
+        }
 
     } else {
         console.warn("Heat Loss Plot: Linear regression could not be calculated.");
+        // Ensure regressionLineData is empty and label indicates failure
+        regressionLineData = [];
+        regressionLabel = "Fit: N/A";
     }
+
 
     // --- 2. Plotting ---
 
@@ -272,7 +339,7 @@ function plotHeatLossScatter() {
                 } else if (flotItem.series.lines.show) { // Regression line
                     // Tooltip for the line itself is less useful, maybe show equation?
                     // Or just disable tooltip for the line by returning false?
-                    return `<b>${flotItem.series.label}</b><br>ΔT: ${xval.toFixed(1)} °C<br>Predicted Heat: ${yval.toFixed(2)} kW`;
+                    return `ΔT: ${xval.toFixed(1)} °C<br>Predicted Heat: ${yval.toFixed(2)} kW`;
                     // return false; // To disable tooltip for the line
                 }
                 return ''; // Default fallback
