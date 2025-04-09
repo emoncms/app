@@ -445,8 +445,6 @@ global $path, $session, $v;
 
         <div id="heatloss-block" style="background-color:#fff; padding:10px; display:none;">
           <!-- Content for the Heat Loss panel goes here -->
-          <p>Heat Loss Analysis Area</p>
-
           <!-- Placeholder for the plot -->
           <div id="heatloss-plot-bound" style="width:100%; height:400px; overflow:hidden; position:relative; border:1px dashed #ccc; margin-bottom:10px;">
               <div id="heatloss-plot" style="height:400px;">Plot Placeholder</div>
@@ -454,23 +452,26 @@ global $path, $session, $v;
 
           <!-- Placeholder for controls -->
           <div id="heatloss-controls" style="border:1px solid #eee; padding:15px; background-color: #fdfdfd;">
-              <!-- Control Group 1: Min Delta T -->
-              <!-- Keep this simpler group as is for now, or apply similar flex styling if needed -->
-              <div class="heatloss-control-group simple">
-                  <label for="heatloss_min_deltaT">Minimum ΔT:</label>
-                  <input type="number" id="heatloss_min_deltaT" class="heatloss-control-input" value="5" step="1">
-                  <span class="heatloss-unit">°C</span>
-              </div>
 
-              <!-- Control Group 2: Fixed Room Temp (Applying new flex style) -->
-              <div class="heatloss-control-group input-like-group" style="margin-top: 10px;">
-                  <span class="heatloss-addon-label" for="heatloss_fixed_roomT_check">Fixed room temperature:</span>
-                   <!-- Checkbox IS the control here, label above is descriptive -->
-                  <input type="checkbox" id="heatloss_fixed_roomT_check" class="heatloss-control-checkbox">
-                  <input type="number" id="heatloss_fixed_roomT_value" class="heatloss-control-input" value="20" step="0.1" disabled>
-                  <span class="heatloss-addon-unit">°C</span>
-              </div>
-          </div>
+            <!-- Control Group 1: Min Delta T (modeled after kW_at_50 / system_volume) -->
+            <!-- Using input-append style: input first, then addon(s) -->
+            <div class="input-append" style="margin-top:5px;">
+                <input type="number" id="heatloss_min_deltaT" class="heatloss-control-input" value="5" step="1" style="width:50px; text-align:center;">
+                <span class="add-on">Minimum ΔT °C</span>
+                <!-- Note: Combined label and unit into one add-on like 'Litres' or 'kW @ DT50' -->
+            </div>
+
+            <!-- Control Group 2: Fixed Room Temp (modeled after room_temperature) -->
+            <!-- Using input-prepend input-append style: label addon, input, unit addon, checkbox addon -->
+            <div class="input-prepend input-append" style="margin-top:5px;">
+                <span class="add-on">Fixed room temperature</span>
+                <input type="number" id="heatloss_fixed_roomT_value" class="heatloss-control-input" value="20" step="0.1" style="width:50px; text-align:center;" disabled>
+                <span class="add-on">°C</span>
+                <span class="add-on">Enable <input type="checkbox" id="heatloss_fixed_roomT_check" style="margin:0;"></span>
+                <!-- Note: Mimics the 'Manual [checkbox]' structure -->
+            </div>
+
+          </div> <!-- End of #heatloss-controls -->
 
         </div> <!-- End of #heatloss-block -->
 
