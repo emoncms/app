@@ -468,9 +468,43 @@ global $path, $session, $v;
                 <input type="number" id="heatloss_fixed_roomT_value" class="heatloss-control-input" value="20" step="0.1" style="width:50px; text-align:center;" disabled>
                 <span class="add-on">°C</span>
                 <span class="add-on">Enable <input type="checkbox" id="heatloss_fixed_roomT_check" style="margin:0;"></span>
-                <!-- Note: Mimics the 'Manual [checkbox]' structure -->
             </div>
 
+            <!-- Control Group 3: Split Data (Single Line - Explicit Height) -->
+            <div class="input-prepend input-append" style="margin-top:5px;">
+                <!-- Prepend: Main Checkbox -->
+                <span class="add-on" style="height: 30px; box-sizing: border-box; vertical-align: middle;"> <!-- Set height -->
+                    <input type="checkbox" id="heatloss_split_data_check" style="margin:0 5px 0 0; vertical-align: middle;">Split data by
+                </span>
+                <!-- Middle Area: Radio Buttons -->
+                <span id="heatloss_split_options" style="display: inline-block;
+                                                         height: 30px; /* Explicit height */
+                                                         padding: 4px 6px; /* Adjust padding as needed for content centering */
+                                                         border: 1px solid #ccc;
+                                                         border-left: 0;
+                                                         border-right: 0;
+                                                         background-color: #eee;
+                                                         line-height: 20px; /* Helps center text vertically if height > line-height+padding */
+                                                         white-space: nowrap;
+                                                         vertical-align: middle;
+                                                         box-sizing: border-box; /* Crucial when setting explicit height */
+                                                         ">
+                     <label style="margin-right: 10px; cursor: pointer; display: inline;">
+                         <input type="radio" name="heatloss_split_by" id="heatloss_split_by_year" value="year" disabled style="margin:0 3px 0 0; vertical-align: middle;">year
+                     </label>
+                     <label style="cursor: pointer; display: inline;">
+                         <input type="radio" name="heatloss_split_by" id="heatloss_split_by_season" value="season" disabled style="margin:0 3px 0 0; vertical-align: middle;">season
+                     </label>
+                </span>
+                <!-- Append: Dependent Checkbox -->
+                <span class="add-on" style="height: 30px; box-sizing: border-box; vertical-align: middle;"> <!-- Set height -->
+                    <input type="checkbox" id="heatloss_split_regression_check" disabled style="margin:0 5px 0 3px; vertical-align: middle;">split regression
+                </span>
+            </div>
+            <!-- End of Control Group 3 -->
+    
+
+    
           </div> <!-- End of #heatloss-controls -->
 
         </div> <!-- End of #heatloss-block -->

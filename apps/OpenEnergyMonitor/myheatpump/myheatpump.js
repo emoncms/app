@@ -664,6 +664,56 @@ $("#heatloss_fixed_roomT_value").on('input change', function() {
     }
 });
 
+// 4. Split Data Checkbox Change Event
+$("#heatloss_split_data_check").on('change', function() {
+    var isChecked = $(this).is(":checked");
+    var $radioButtons = $('input[name="heatloss_split_by"]');
+    var $regressionCheck = $("#heatloss_split_regression_check");
+
+    // Enable/disable radio buttons
+    $radioButtons.prop('disabled', !isChecked);
+    // Enable/disable the regression checkbox
+    $regressionCheck.prop('disabled', !isChecked);
+
+    // If main checkbox is unchecked, also uncheck radios and regression checkbox
+    if (!isChecked) {
+        $radioButtons.prop('checked', false);
+        $regressionCheck.prop('checked', false);
+    }
+    // Optional: If checking, and nothing is selected, select a default (e.g., year)
+    else if (isChecked && $radioButtons.filter(':checked').length === 0) {
+         $('#heatloss_split_by_year').prop('checked', true);
+         // Note: Manually setting 'checked' won't trigger its 'change' event here.
+         // If the plot needs to update immediately based on the default selection,
+         // you might need to explicitly call plotHeatLossScatter() here too,
+         // or trigger the change event: $('#heatloss_split_by_year').trigger('change');
+    }
+
+    // Replot if the panel is visible
+    if ($("#heatloss-block").is(":visible")) {
+        // Assuming plotHeatLossScatter is defined elsewhere
+        plotHeatLossScatter();
+    }
+});
+
+// 5. Split Data Radio Button Change Event
+$('input[name="heatloss_split_by"]').on('change', function() {
+    // Only replot if the panel is visible AND the main split checkbox is checked
+    if ($("#heatloss-block").is(":visible") && $("#heatloss_split_data_check").is(":checked")) {
+         // Assuming plotHeatLossScatter is defined elsewhere
+         plotHeatLossScatter();
+    }
+});
+
+// 6. Split Regression Checkbox Change Event
+$("#heatloss_split_regression_check").on('change', function() {
+     // Only replot if the panel is visible AND the main split checkbox is checked
+     if ($("#heatloss-block").is(":visible") && $("#heatloss_split_data_check").is(":checked")) {
+         // Assuming plotHeatLossScatter is defined elsewhere
+         plotHeatLossScatter();
+     }
+});
+
 // --- End Heat Loss Control Event Listeners ---
 
 $("#show_dhw_temp").click(function () {

@@ -24,6 +24,31 @@ function plotHeatLossScatter() {
         console.warn("Heat Loss Plot: Invalid Fixed Room Temp input, using default 20°C.");
     }
 
+    // --- Get options for splitting data ---
+    // Check if the main 'Split data by' checkbox is enabled
+    var splitDataEnabled = $("#heatloss_split_data_check").is(":checked");
+
+    // Determine the dimension to split by (null if splitting is disabled)
+    var splitByValue = null; // Default to null (no split dimension selected or splitting disabled)
+    if (splitDataEnabled) {
+        // Find the radio button that is checked within the 'heatloss_split_by' group
+        var $checkedRadio = $('input[name="heatloss_split_by"]:checked');
+
+        if ($checkedRadio.length > 0) {
+            // Get the value ('year' or 'season') from the checked radio button
+            splitByValue = $checkedRadio.val();
+        } else {
+            // This case should ideally not happen if the UI logic correctly forces a selection
+            // when splitDataEnabled is true. But good to handle defensively.
+            console.warn("Heat Loss Plot: Split data enabled, but no split dimension (year/season) selected. Check UI logic.");
+            // Depending on desired behavior, you might want to force splitDataEnabled = false here,
+            // or default splitByValue = 'year'; For now, it stays null.
+        }
+    }
+
+    // Check if the 'split regression' checkbox is enabled.
+    var splitRegressionEnabled = $("#heatloss_split_regression_check").is(":checked");
+
     // Check if essential daily data is available
     if (typeof daily_data === 'undefined' || $.isEmptyObject(daily_data)) {
         console.log("Heat Loss Plot: daily_data not available.");
