@@ -718,6 +718,15 @@ $("#heatloss_split_regression_check").on('change', function() {
      }
 });
 
+
+// 7. Solar Gain Coloring Change event
+$("#heatloss_solar_gain_color").on('change', function() {
+    // Only replot if the panel is visible
+    if ($("#heatloss-block").is(":visible")) {
+        plotHeatLossScatter(); // Call the main plotting function
+    }
+});
+
 // --- End Heat Loss Control Event Listeners ---
 
 $("#show_dhw_temp").click(function () {

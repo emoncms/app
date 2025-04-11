@@ -502,7 +502,14 @@ global $path, $session, $v;
                 </span>
             </div>
             <!-- End of Control Group 3 -->
-    
+             
+            <!-- START: New Control Group 4: Solar power coloring -->
+            <div class="input-prepend input-append" style="margin-top:5px;">
+                <span class="add-on" style="height: 30px; box-sizing: border-box; vertical-align: middle;"> <!-- Adjust height if needed -->
+                    <input type="checkbox" id="heatloss_solar_gain_color" style="margin:0 5px 0 0; vertical-align: middle;">Color by solar gain
+                </span>
+            </div>
+            <!-- END: New Control Group 4 -->    
 
     
           </div> <!-- End of #heatloss-controls -->
