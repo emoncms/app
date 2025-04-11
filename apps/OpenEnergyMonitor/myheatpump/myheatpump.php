@@ -502,7 +502,7 @@ global $path, $session, $v;
                 </span>
             </div>
             <!-- End of Control Group 3 -->
-             
+
             <!-- START: New Control Group 4: Solar power coloring -->
             <div class="input-prepend input-append" style="margin-top:5px;">
                 <span class="add-on" style="height: 30px; box-sizing: border-box; vertical-align: middle;"> <!-- Adjust height if needed -->
@@ -560,8 +560,8 @@ global $path, $session, $v;
   config.db = <?php echo json_encode($config); ?>;
 </script>
 
-<?php $v=197; ?>
-<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<?php $v=199; ?>
+ <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_regression.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_powergraph.js?v=<?php echo $v; ?>"></script>
