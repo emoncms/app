@@ -1,6 +1,6 @@
-/**
- * Provides a rotating list of distinct colors for plotting multiple series.
- */
+/* Plotly Heat Loss Plot Implementation */
+
+// --- Color Management (Optional but helps match scatter/line) ---
 const plotColors = [
     '#FF6347', // Tomato
     '#4682B4', // SteelBlue
@@ -24,9 +24,9 @@ function resetPlotColorIndex() {
     colorIndex = 0;
 }
 
-
 /**
  * Reads and validates inputs from the Heat Loss plot settings UI.
+ * (Identical to original - no changes needed here)
  * @returns {object|null} An object containing validated configuration, or null if validation fails.
  */
 function getHeatLossInputs() {
@@ -80,8 +80,10 @@ function getHeatLossInputs() {
     return config;
 }
 
+
 /**
  * Checks if the necessary data is available for plotting based on the configuration.
+ * (Identical to original - no changes needed here)
  * @param {object} config - The configuration object from getHeatLossInputs.
  * @param {object} daily_data - The global daily_data object.
  * @returns {{sufficient: boolean, messages: string[]}} An object indicating sufficiency and any error/warning messages.
@@ -130,9 +132,10 @@ function checkDataSufficiency(config, daily_data) {
 
 /**
  * Prepares the data for the heat loss scatter plot, handling splitting if enabled.
+ * MODIFIED: Added 'timestamps' array to groups. Removed color assignment here.
  * @param {object} config - The configuration object.
  * @param {object} daily_data - The global daily_data object.
- * @returns {object|null} An object containing grouped data { groupKey: { data:[], xValues:[], yValues:[], label:'', color:'' } },
+ * @returns {object|null} An object containing grouped data { groupKey: { xValues:[], yValues:[], timestamps:[], label:'' } },
  *                        and overallMinX, overallMaxX, totalPoints. Returns null if no valid points found.
  */
 function prepareHeatLossPlotData(config, daily_data) {
@@ -157,7 +160,7 @@ function prepareHeatLossPlotData(config, daily_data) {
     let overallMinX = Infinity;
     let overallMaxX = -Infinity;
     let totalPoints = 0;
-    resetPlotColorIndex(); // Reset colors for each plot generation
+    // Color assignment moved to plotting stage
 
     for (let i = 0; i < heatDataArray.length; i++) {
         const timestamp = heatDataArray[i][0]; // Assuming timestamp is in milliseconds
@@ -184,7 +187,7 @@ function prepareHeatLossPlotData(config, daily_data) {
             if (heatValue > 0 && deltaT > config.minDeltaT) {
                 let groupKey = "all_data"; // Default if splitting is disabled
                 let groupLabel = 'Daily Heat Demand (' + config.bargraph_mode + (config.shouldUseFixedRoomT ? ', Fixed T_in=' + config.fixedRoomTValue + '°C' : '') + ')';
-                let groupColor = plotColors[0]; // Default color if no split
+                // groupColor removed
 
                 // --- Determine Group Key if Splitting ---
                 if (config.splitDataEnabled) {
@@ -197,11 +200,10 @@ function prepareHeatLossPlotData(config, daily_data) {
                         groupLabel = `${year}`;
                     } else if (config.splitByValue === 'season') {
                         // Season: July 1st to June 30th
-                        // If month is July (6) or later, it belongs to the season starting this year
-                        if (month >= 6) {
+                        if (month >= 6) { // July or later
                             groupKey = `${year}/${year + 1}`;
                             groupLabel = `Season ${year}/${year + 1}`;
-                        } else { // Otherwise, it belongs to the season that started last year
+                        } else { // Before July
                             groupKey = `${year - 1}/${year}`;
                             groupLabel = `Season ${year - 1}/${year}`;
                         }
@@ -210,23 +212,19 @@ function prepareHeatLossPlotData(config, daily_data) {
 
                 // --- Initialize group if it doesn't exist ---
                 if (!groupedData[groupKey]) {
-                    // Assign color when group is first created
-                    if (config.splitDataEnabled) {
-                        groupColor = getNextPlotColor();
-                    }
                      groupedData[groupKey] = {
-                         data: [],       // Holds [deltaT, heatValue, timestamp]
                          xValues: [],    // Holds deltaT
                          yValues: [],    // Holds heatValue (kW)
-                         label: groupLabel,
-                         color: groupColor
+                         timestamps: [], // Holds original timestamp for hover info
+                         label: groupLabel
+                         // color property removed
                      };
                 }
 
                 // --- Add data to the group ---
-                groupedData[groupKey].data.push([deltaT, heatValue, timestamp]);
                 groupedData[groupKey].xValues.push(deltaT);
                 groupedData[groupKey].yValues.push(heatValue);
+                groupedData[groupKey].timestamps.push(timestamp);
 
                 // Update overall bounds
                 if (deltaT < overallMinX) overallMinX = deltaT;
@@ -260,269 +258,187 @@ function prepareHeatLossPlotData(config, daily_data) {
 
 
 /**
- * Calculates linear regression and formats the result as a Flot series object
- * with detailed points along the line for better hover interaction.
+ * Calculates linear regression and formats the result as a Plotly trace object
+ * for a line segment. USES THE USER-PROVIDED linearRegression FUNCTION.
  * @param {number[]} xValues - Array of x-coordinates.
  * @param {number[]} yValues - Array of y-coordinates.
- * @param {string} labelPrefix - Prefix for the legend label (e.g., "Fit", "2023 Fit").
+ * @param {string} traceNamePrefix - Prefix for the trace name (legend label).
  * @param {string} color - Color for the regression line.
  * @param {number} minPlotX - Minimum x value boundary for plotting the line (e.g., 0).
  * @param {number} maxPlotX - Maximum x value boundary for plotting the line (e.g., 35).
- * @returns {object|null} A Flot series object for the regression line, or null if regression fails or line is invalid.
+ * @returns {object|null} A Plotly trace object for the regression line, or null if regression fails or line is invalid.
  */
-function calculateRegressionSeries(xValues, yValues, labelPrefix, color, minPlotX = 0, maxPlotX = 35) {
+function calculatePlotlyRegressionTrace(xValues, yValues, traceNamePrefix, color, minPlotX = 0, maxPlotX = 35) {
     if (!xValues || xValues.length < 2) {
-        console.warn("Heat Loss Plot: Not enough data points for regression for group:", labelPrefix);
+        console.warn("Heat Loss Plot: Not enough data points for regression for group:", traceNamePrefix);
         return null;
     }
 
+    // Call the user-provided linearRegression function
     const regressionResult = linearRegression(xValues, yValues);
-    let regressionLineData = [];
-    let regressionLabel = `${labelPrefix}: N/A`;
 
-    if (regressionResult) {
+    let regressionLabel = `${traceNamePrefix}: N/A`;
+    let lineX = [];
+    let lineY = [];
+
+    // Check if regressionResult is valid (not null and contains slope/intercept)
+    if (regressionResult && typeof regressionResult.slope === 'number' && typeof regressionResult.intercept === 'number') {
         const { slope, intercept, r2 } = regressionResult;
-        regressionLabel = `${labelPrefix}: HLC=${(slope * 1000).toFixed(1)} W/K` +
-                          `, Int=${(intercept * 1000).toFixed(1)} W` +
-                          ` (R²=${r2.toFixed(3)}, N=${xValues.length})`;
 
-        // --- Determine the actual range for the line segment (respecting y >= 0 and plot bounds) ---
+        // Format label string using the calculated r2
+        regressionLabel = `HLC=${(slope * 1000).toFixed(1)} W/K` +
+                          `, Int=${(intercept * 1000).toFixed(1)} W` +
+                          ` (R²=${r2 !== undefined && r2 !== null ? r2.toFixed(3) : 'N/A'}, N=${xValues.length})`;
+
+
+        // --- Determine the actual range for the line segment [startX, endX] (respecting y >= 0 and plot bounds) ---
+        // (Logic copied and adapted from original)
         let startX = minPlotX;
         let endX = maxPlotX;
-        const epsilon = 1e-9; // Tolerance for float comparisons
+        const epsilon = 1e-9;
 
         if (Math.abs(slope) > epsilon) {
-            // Line has a non-zero slope
             const xIntercept = -intercept / slope;
-
-            // Calculate Y values at the plot boundaries
             const yAtMinPlotX = slope * minPlotX + intercept;
             const yAtMaxPlotX = slope * maxPlotX + intercept;
 
-            // Adjust startX: must be >= minPlotX and where y >= 0
-            if (yAtMinPlotX < -epsilon && xIntercept > minPlotX) {
-                // Line starts below 0 at minPlotX, but crosses y=0 later
-                startX = xIntercept;
-            } else if (yAtMinPlotX < -epsilon && xIntercept <= minPlotX) {
-                 // Line is entirely below 0 at the start or crosses before minPlotX
-                 console.warn(`Regression line for ${labelPrefix} starts below y=0.`);
-                 // Check if it ever goes positive within the maxPlotX range
-                 if (yAtMaxPlotX < -epsilon) {
-                     console.warn(`Regression line for ${labelPrefix} is entirely below y=0 within plot range. Not plotting.`);
-                     return null; // Don't plot if the entire segment in range is negative
-                 }
-                 // If it crosses later (yAtMaxPlotX is positive), start at xIntercept, but clamped by minPlotX
-                 startX = Math.max(minPlotX, xIntercept);
+            // Adjust startX
+            if (yAtMinPlotX < -epsilon && xIntercept > minPlotX) startX = xIntercept;
+            else if (yAtMinPlotX < -epsilon && xIntercept <= minPlotX) {
+                if (yAtMaxPlotX < -epsilon) {
+                    console.warn(`Regression line for ${traceNamePrefix} is entirely below y=0 within plot range. Not plotting.`);
+                    return null; // Entirely negative in range
+                }
+                startX = Math.max(minPlotX, xIntercept);
+            } else startX = minPlotX;
 
-            } else {
-                 // Line starts at or above 0 at minPlotX
-                 startX = minPlotX;
-            }
+            // Adjust endX
+            if (yAtMaxPlotX < -epsilon && xIntercept < maxPlotX) endX = xIntercept;
+            else if (yAtMaxPlotX < -epsilon && xIntercept >= maxPlotX) endX = Math.min(maxPlotX, xIntercept);
+            else endX = maxPlotX;
 
-
-            // Adjust endX: must be <= maxPlotX and where y >= 0
-            if (yAtMaxPlotX < -epsilon && xIntercept < maxPlotX) {
-                // Line ends below 0 at maxPlotX, but crossed y=0 earlier
-                endX = xIntercept;
-            } else if (yAtMaxPlotX < -epsilon && xIntercept >= maxPlotX) {
-                 // Line is already below 0 before or at maxPlotX
-                 // This case *should* be covered by the startX logic if the line is entirely negative,
-                 // but good to be explicit. If startX was valid, we must end where y crosses 0.
-                 endX = Math.min(maxPlotX, xIntercept);
-            } else {
-                // Line ends at or above 0 at maxPlotX
-                endX = maxPlotX;
-            }
-
-        } else {
-            // Line is horizontal (slope is near zero)
+        } else { // Horizontal line
             if (intercept < -epsilon) {
-                // Horizontal line below y=0
-                console.warn(`Regression line for ${labelPrefix} is horizontal and below y=0. Not plotting.`);
-                return null;
+                 console.warn(`Regression line for ${traceNamePrefix} is horizontal and below y=0. Not plotting.`);
+                 return null; // Below y=0
             }
-            // Otherwise, the horizontal line is at y = intercept (>= 0)
-            // Use the original plot bounds for the horizontal line
             startX = minPlotX;
             endX = maxPlotX;
         }
 
-        // --- Generate detailed points for the calculated [startX, endX] segment ---
-
-        // Ensure startX is not greater than endX (could happen due to float issues or weird data)
+        // Ensure startX <= endX and clamp
         if (startX > endX + epsilon) {
-             console.warn(`Regression line for ${labelPrefix}: Calculated startX (${startX.toFixed(2)}) is greater than endX (${endX.toFixed(2)}). Not plotting line.`);
+             console.warn(`Regression line for ${traceNamePrefix}: Calculated startX (${startX.toFixed(2)}) is greater than endX (${endX.toFixed(2)}). Not plotting line.`);
              return null;
         }
-         // Clamp startX and endX to be within the original min/max plot bounds just in case
-         startX = Math.max(minPlotX, startX);
-         endX = Math.min(maxPlotX, endX);
-         // Recalculate if clamping changed things significantly - might not be necessary if initial logic is robust
-         if (startX > endX + epsilon) {
-              console.warn(`Regression line for ${labelPrefix}: Clamped startX (${startX.toFixed(2)}) is greater than clamped endX (${endX.toFixed(2)}). Not plotting line.`);
-              return null;
-         }
-
-
-        const xValuesSet = new Set();
-
-        // Add the precise start and end points
-        xValuesSet.add(startX);
-        xValuesSet.add(endX);
-
-        // Add integer points within the range
-        const firstInteger = Math.ceil(startX);
-        const lastInteger = Math.floor(endX);
-
-        for (let xInt = firstInteger; xInt <= lastInteger; xInt++) {
-             // Ensure the integer point is strictly within the calculated segment bounds
-             if (xInt >= startX - epsilon && xInt <= endX + epsilon) {
-                xValuesSet.add(xInt);
-             }
+        startX = Math.max(minPlotX, startX);
+        endX = Math.min(maxPlotX, endX);
+        if (startX > endX + epsilon) {
+             console.warn(`Regression line for ${traceNamePrefix}: Clamped startX (${startX.toFixed(2)}) is greater than clamped endX (${endX.toFixed(2)}). Not plotting line.`);
+             return null;
         }
 
-        // Convert Set to sorted array and calculate y values
-        const sortedXValues = Array.from(xValuesSet).sort((a, b) => a - b);
-        regressionLineData = sortedXValues.map(x => {
-            const y = slope * x + intercept;
-            // Clamp y at 0, although the startX/endX logic should mostly prevent negative y
-            return [x, Math.max(0, y)];
-        });
 
-        // Final check: ensure we have at least two distinct points to draw a line
-        if (regressionLineData.length < 2) {
-            console.warn("Regression line for", labelPrefix, " resulted in less than 2 points after processing. Not plotting line.");
-            return null;
+        // --- Generate points for the line segment ---
+        // For Plotly, we only strictly need the start and end points of the valid segment
+        const startY = Math.max(0, slope * startX + intercept);
+        const endY = Math.max(0, slope * endX + intercept);
+
+        // Check if the calculated points are valid numbers
+        if (isNaN(startX) || isNaN(startY) || isNaN(endX) || isNaN(endY)) {
+             console.warn(`Regression line for ${traceNamePrefix}: Invalid coordinates calculated (NaN). Not plotting line.`);
+             return null;
         }
+
+        // Ensure we have distinct points to draw a line segment
+        if (Math.abs(startX - endX) < epsilon && Math.abs(startY - endY) < epsilon) {
+            // Points are virtually identical, don't draw a zero-length line
+             console.warn(`Regression line for ${traceNamePrefix}: Start and end points are too close. Not plotting line.`);
+             return null;
+        }
+
+
+        lineX = [startX, endX];
+        lineY = [startY, endY];
 
     } else {
-        console.warn("Heat Loss Plot: Linear regression calculation failed for group:", labelPrefix);
+        // linearRegression returned null or invalid data
+        console.warn("Heat Loss Plot: Linear regression calculation failed or returned invalid result for group:", traceNamePrefix);
         return null;
     }
 
-    // Return the Flot series object
+    // Return the Plotly trace object
     return {
-        data: regressionLineData,
-        lines: { show: true, lineWidth: 2 },
-        points: { show: false }, // Keep points off for the line itself
-        color: color,
-        label: regressionLabel,
-        shadowSize: 0
+        x: lineX,
+        y: lineY,
+        mode: 'lines',
+        type: 'scatter', // Lines are a mode of scatter traces
+        name: regressionLabel, // This label contains the calculated values
+        line: {
+            color: color,
+            width: 2
+        },
+        hoverinfo: 'skip' // Don't show hover info for the line itself by default
     };
 }
 
-
 /**
- * Configures the options for the Flot plot.
- * @param {boolean} splitDataEnabled - Whether data splitting is active (affects legend).
- * @param {object[]} plotSeries - The array of series to be plotted (used for tooltip logic).
- * @returns {object} The Flot options object.
+ * Configures the layout options for the Plotly plot.
+ * @returns {object} The Plotly layout object.
  */
-function getHeatLossPlotOptions(splitDataEnabled, plotSeries) {
-     // Find the first scatter series to access its original data structure for the tooltip
-    const scatterSeriesExample = plotSeries.find(s => s.points && s.points.show);
-    const originalDataAccessor = scatterSeriesExample ? scatterSeriesExample.originalDataAccessor : 'data'; // How to get original [x,y,ts]
-
+function getPlotlyLayoutOptions() {
     return {
         xaxis: {
-            min: 0,
-            axisLabel: "Temperature Difference (T_inside - T_outside) [K or °C]",
-            axisLabelUseCanvas: true,
-            axisLabelFontSizePixels: 12,
-            axisLabelFontFamily: 'Verdana, Arial, Helvetica, Tahoma, sans-serif',
-            axisLabelPadding: 5,
-            font: { size: flot_font_size, color: "#555" },
-            // max: 35 // Optional: set a fixed max if desired
+            title: {
+                text: "Temperature Difference (T<sub>inside</sub> - T<sub>outside</sub>) [K or °C]" // Use subscript tags
+            },
+            rangemode: 'tozero', // Ensures axis starts at 0 (or less if data is negative)
+            // range: [0, 35], // Optional: set fixed range like [min, max]
+            gridcolor: '#eee', // Lighter grid lines
         },
         yaxis: {
-            min: 0,
-            axisLabel: "Average Heat Output [kW]",
-            axisLabelUseCanvas: true,
-            axisLabelFontSizePixels: 12,
-            axisLabelFontFamily: 'Verdana, Arial, Helvetica, Tahoma, sans-serif',
-            axisLabelPadding: 5,
-            font: { size: flot_font_size, color: "#555" },
+            title: {
+                text: "Average Heat Output [kW]"
+            },
+            rangemode: 'tozero', // Ensures axis starts at 0
+            gridcolor: '#eee',
         },
-        grid: {
-            show: true,
-            color: "#aaa",
-            hoverable: true,
-            clickable: false,
-            borderWidth: { top: 0, right: 0, bottom: 1, left: 1 },
-            borderColor: "#ccc",
-        },
-        tooltip: {
-            show: true,
-             content: function(label, xval, yval, flotItem) {
-                 // flotItem.seriesIndex: index in the plotSeries array
-                 // flotItem.dataIndex: index within the data of that series
-                 const currentSeries = plotSeries[flotItem.seriesIndex];
-
-                 if (currentSeries.points && currentSeries.points.show) { // Scatter point
-                    const originalDataArray = currentSeries[originalDataAccessor]; // Access the original data store
-                    const index = flotItem.dataIndex;
-
-                    if (index !== null && originalDataArray && index >= 0 && index < originalDataArray.length) {
-                        const originalPoint = originalDataArray[index]; // [deltaT, heatValue, timestamp]
-                        if (originalPoint && originalPoint.length >= 3) {
-                            const timestamp = originalPoint[2];
-                            let dateString = "N/A";
-                            if (timestamp !== null && !isNaN(timestamp)) {
-                                const dateObject = new Date(timestamp);
-                                if (!isNaN(dateObject.getTime())) {
-                                     dateString = dateObject.toLocaleDateString();
-                                } else { dateString = "Invalid Date"; }
-                            } else { dateString = "Invalid Timestamp"; }
-
-                            // Include series label if splitting is enabled
-                            const seriesLabelInfo = splitDataEnabled ? `<b>${currentSeries.label || 'Data'}</b><br>` : '';
-
-                            return `${seriesLabelInfo}` +
-                                   `<b>Date: ${dateString}</b><br>` +
-                                   `<b>ΔT:</b> ${xval.toFixed(1)} °C<br>` +
-                                   `<b>Avg Heat:</b> ${yval.toFixed(2)} kW`;
-                        } else { return "Data Format Error"; }
-                    } else { return "Data Index Error"; }
-                } else if (currentSeries.lines && currentSeries.lines.show) { // Regression line
-                    return `<b>${currentSeries.label || 'Fit'}</b><br>` + // Show regression label
-                           `ΔT: ${xval.toFixed(1)} °C<br>` +
-                           `Predicted Heat: ${yval.toFixed(2)} kW`;
-                }
-                 return ''; // Fallback
-             },
-            shifts: { x: 10, y: 20 },
-            defaultTheme: false,
-            lines: false
-        },
+        hovermode: 'closest', // Show tooltip for the nearest point
         legend: {
-            show: true,
-            position: "nw", // North-West corner
-            // Optional: more space if many legend items
-            // labelBoxBorderColor: "none",
-            // container: $("#heatloss-legend-container") // Define an external container if needed
-        }
+            x: 0.01, // Position slightly offset from left
+            y: 0.99, // Position slightly offset from top
+            bgcolor: 'rgba(255, 255, 255, 0.7)', // Semi-transparent background
+            bordercolor: '#ccc',
+            borderwidth: 1
+        },
+        margin: { l: 60, r: 20, t: 30, b: 50 }, // Adjust margins for labels
+        // title: { text: "Building Heat Loss Characteristic" } // Optional main title
     };
 }
 
-
 /**
- * Main function to plot the Heat Loss Scatter graph.
+ * Main function to plot the Heat Loss Scatter graph using Plotly.
  * Orchestrates input reading, data preparation, calculation, and plotting.
  */
 function plotHeatLossScatter() {
-    console.log("Attempting to plot Heat Loss Scatter...");
-    var plotDiv = $("#heatloss-plot");
-    var plotBound = $("#heatloss-plot-bound");
+    console.log("Attempting to plot Heat Loss Scatter using Plotly...");
+    const plotDiv = $("#heatloss-plot"); // Get the jQuery object
+    const plotElement = plotDiv[0]; // Get the raw DOM element for Plotly
+
+    if (!plotElement) {
+        console.error("Heat Loss Plot: Plot container #heatloss-plot not found.");
+        return;
+    }
 
     // 1. Get Inputs & Config
     const config = getHeatLossInputs();
-    if (!config) return; // Should not happen with current getHeatLossInputs
+    if (!config) return;
 
     // 2. Check Data Sufficiency
     const sufficiency = checkDataSufficiency(config, daily_data);
     if (!sufficiency.sufficient) {
-        var messageHtml = "<p style='text-align:center; padding-top:50px; color:#aaa;'>Cannot plot heat loss:<br>" + sufficiency.messages.join("<br>") + "</p>";
-        plotDiv.html(messageHtml);
+        const messageHtml = "<div style='text-align:center; padding: 50px; color:#aaa;'>Cannot plot heat loss:<br>" + sufficiency.messages.join("<br>") + "</div>";
+        plotDiv.html(messageHtml); // Use div for better centering
         return;
     }
 
@@ -534,123 +450,124 @@ function plotHeatLossScatter() {
          if (config.minDeltaT > -Infinity) noDataReason += ` with Min ΔT > ${config.minDeltaT}°C`;
          if (config.splitDataEnabled) noDataReason += ` split by ${config.splitByValue}`;
         noDataReason += ".";
-        plotDiv.html("<p style='text-align:center; padding-top:50px; color:#aaa;'>" + noDataReason + "</p>");
+        plotDiv.html("<div style='text-align:center; padding: 50px; color:#aaa;'>" + noDataReason + "</div>");
         return;
     }
 
-    // 4. Generate Plot Series (Scatter + Regression)
-    const plotSeries = [];
-    const allXValues = []; // For overall regression if needed
-    const allYValues = []; // For overall regression if needed
+    // 4. Generate Plotly Traces (Scatter + Regression)
+    const plotData = []; // Array to hold Plotly traces
+    const allXValues = []; // For overall regression
+    const allYValues = []; // For overall regression
 
-    // Create Scatter Series
+    resetPlotColorIndex(); // Reset colors for this plot generation
+
+    // Create Scatter and potentially individual Regression Traces
     for (const groupKey in preparedData.groups) {
         const group = preparedData.groups[groupKey];
-        if (group.data.length > 0) {
-             // Store original data separately for tooltip access if needed, Flot modifies the data array sometimes
-             const originalDataForTooltip = [...group.data];
+        if (group.xValues.length > 0) {
+            const groupColor = getNextPlotColor(); // Assign color per group
 
-            plotSeries.push({
-                 // Use only x,y for plotting, keep original data separately
-                 data: group.data.map(p => [p[0], p[1]]),
-                 originalDataAccessor: 'originalData', // Custom property name
-                 originalData: originalDataForTooltip, // Attach original data here
-                 points: { show: true, radius: 3, fill: true, fillColor: hexToRgba(group.color, 0.6) },
-                 lines: { show: false },
-                 color: group.color,
-                 label: group.label + ` (N=${group.data.length})`,
-                 groupKey: groupKey // Store group key if needed later
-            });
+            // Create Scatter Trace
+            const scatterTrace = {
+                x: group.xValues,
+                y: group.yValues,
+                mode: 'markers',
+                type: 'scatter',
+                name: group.label + ` (N=${group.xValues.length})`, // Name for legend
+                marker: {
+                    color: groupColor,
+                    size: 6,
+                    opacity: 0.7
+                },
+                // Pass timestamps as customdata for hovertemplate
+                customdata: group.timestamps.map(ts => {
+                    try {
+                        // Format date robustly
+                        if (ts === null || ts === undefined || isNaN(ts)) return "Invalid Date";
+                        const dateObj = new Date(ts);
+                        if (isNaN(dateObj.getTime())) return "Invalid Date";
+                        return dateObj.toLocaleDateString();
+                    } catch (e) {
+                        console.warn("Error formatting date for tooltip:", e);
+                        return "Date Error"; }
+                }),
+                // Define hover text format
+                 hovertemplate:
+                    `<b>Date: %{customdata}</b><br>` +
+                    `<b>ΔT:</b> %{x:.1f} K<br>` + // Use K for Kelvin difference
+                    `<b>Avg Heat:</b> %{y:.2f} kW` +
+                    `<extra></extra>`, // Hides the trace name suffix in tooltip
+                legendgroup: groupKey // Group scatter and its line in legend
+            };
+            plotData.push(scatterTrace);
 
-            // Collect all points for overall regression if needed
-            if (!config.splitRegressionEnabled) {
+            // Create Regression Trace for this group if enabled
+            if (config.splitRegressionEnabled) {
+                const regressionTrace = calculatePlotlyRegressionTrace(
+                    group.xValues,
+                    group.yValues,
+                    `${group.label} Fit`, // Prefix for the trace name
+                    groupColor, // Use the same color
+                    0, // Min X for line
+                    35 // Max X for line (adjust as needed)
+                );
+                if (regressionTrace) {
+                     // Prepend group label to the detailed regression fit label for clarity
+                     regressionTrace.name = `${group.label} Fit: ${regressionTrace.name}`;
+                     regressionTrace.legendgroup = groupKey; // Match legend group
+                     // Optionally shorten the scatter name if the fit line has full details
+                     // scatterTrace.name = group.label;
+                    plotData.push(regressionTrace);
+                }
+            } else {
+                // Collect all points for a single overall regression
                 allXValues.push(...group.xValues);
                 allYValues.push(...group.yValues);
             }
         }
     }
 
-    // Create Regression Series
-    if (config.splitRegressionEnabled) {
-        // Calculate and add regression for each group
-        for (const groupKey in preparedData.groups) {
-            const group = preparedData.groups[groupKey];
-             const regressionLine = calculateRegressionSeries(
-                group.xValues,
-                group.yValues,
-                `${group.label} Fit`, // Use group label in fit label
-                group.color, // Use same color as scatter
-                0, // Min X for line start
-                35 // Max X for line end (adjust as needed)
-            );
-            if (regressionLine) {
-                plotSeries.push(regressionLine);
-            }
-        }
-    } else {
-        // Calculate and add a single overall regression line
-        if (allXValues.length >= 2) {
-             const overallRegressionLine = calculateRegressionSeries(
-                allXValues,
-                allYValues,
-                "Overall Fit",
-                'rgba(0, 0, 255, 0.8)', // Specific color for overall fit (e.g., blue)
-                 0,
-                 35
-            );
-            if (overallRegressionLine) {
-                plotSeries.push(overallRegressionLine);
-            }
+    // Create Overall Regression Trace if not splitting regression
+    if (!config.splitRegressionEnabled && allXValues.length >= 2) {
+        const overallRegressionTrace = calculatePlotlyRegressionTrace(
+            allXValues,
+            allYValues,
+            "Overall Fit",
+            'rgba(0, 0, 0, 0.7)', // Distinct color (e.g., black)
+            0,
+            35
+        );
+        if (overallRegressionTrace) {
+             overallRegressionTrace.name = `Overall Fit: ${overallRegressionTrace.name}`; // Add prefix
+            plotData.push(overallRegressionTrace);
         } else {
-             console.warn("Heat Loss Plot: Not enough data points (>=2) for overall regression.");
+              // Warning already logged in calculatePlotlyRegressionTrace or linearRegression
+              console.log("Heat Loss Plot: Overall regression line not plotted (insufficient data or calculation failed).");
         }
     }
 
 
-    // 5. Get Plot Options
-    const plotOptions = getHeatLossPlotOptions(config.splitDataEnabled, plotSeries);
+    // 5. Get Plot Layout Options
+    const layout = getPlotlyLayoutOptions();
+    // Dynamically adjust x-axis range based on data if needed, otherwise uses defaults/rangemode
+    // layout.xaxis.range = [0, Math.max(35, preparedData.overallMaxX * 1.1)];
 
-    // 6. Plotting
-    var plotWidth = plotBound.width();
-    var plotHeight = plotBound.height();
-    if (plotHeight < 300) plotHeight = 400; // Min height
-
-    plotDiv.width(plotWidth);
-    plotDiv.height(plotHeight);
+    // 6. Plotting with Plotly
+    const plotConfig = {
+        responsive: true, // Allow plot to resize dynamically
+        displaylogo: false, // Hide Plotly logo
+        modeBarButtonsToRemove: ['select2d', 'lasso2d'] // Optional: remove unused buttons
+    };
 
     try {
-        plotDiv.empty(); // Clear previous content
-        $.plot(plotDiv, plotSeries, plotOptions);
-        console.log("Heat Loss Plot: Plot generated successfully.");
+        // Ensure plotDiv is cleared before rendering (important for updates)
+        Plotly.purge(plotElement); // More robust way to clear Plotly plots
+        Plotly.newPlot(plotElement, plotData, layout, plotConfig);
+        console.log("Heat Loss Plot: Plotly plot generated successfully.");
     } catch (e) {
-        console.error("Heat Loss Plot: Error during flot plotting:", e);
-        plotDiv.html("<p style='text-align:center; padding-top:50px; color:red;'>Error generating plot.</p>");
+        console.error("Heat Loss Plot: Error during Plotly plotting:", e);
+        plotDiv.html("<div style='text-align:center; padding: 50px; color:red;'>Error generating plot. Check console.</div>");
     }
 }
 
-/**
- * Helper function to convert hex color to rgba.
- * Needed because Flot fillColor doesn't automatically inherit alpha from the main color.
- * @param {string} hex - Hex color string (e.g., #FF6347).
- * @param {number} alpha - Alpha value (0.0 to 1.0).
- * @returns {string} rgba color string.
- */
-function hexToRgba(hex, alpha) {
-    var r, g, b;
-    // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    hex = hex.replace(shorthandRegex, function(m, r, g, b) {
-        return r + r + g + g + b + b;
-    });
 
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    if (result) {
-        r = parseInt(result[1], 16);
-        g = parseInt(result[2], 16);
-        b = parseInt(result[3], 16);
-        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-    } else {
-        // Fallback if hex is invalid
-        return `rgba(100, 100, 100, ${alpha})`; // Grey fallback
-    }
-}

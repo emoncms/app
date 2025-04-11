@@ -446,8 +446,8 @@ global $path, $session, $v;
         <div id="heatloss-block" style="background-color:#fff; padding:10px; display:none;">
           <!-- Content for the Heat Loss panel goes here -->
           <!-- Placeholder for the plot -->
-          <div id="heatloss-plot-bound" style="width:100%; height:400px; overflow:hidden; position:relative; border:1px dashed #ccc; margin-bottom:10px;">
-              <div id="heatloss-plot" style="height:400px;">Plot Placeholder</div>
+          <div id="heatloss-plot-bound" style="width:100%; height:600px; overflow:hidden; position:relative; border:1px dashed #ccc; margin-bottom:10px;">
+              <div id="heatloss-plot" style="height:600px;"></div>
           </div>
 
           <!-- Placeholder for controls -->
@@ -553,7 +553,8 @@ global $path, $session, $v;
   config.db = <?php echo json_encode($config); ?>;
 </script>
 
-<?php $v=196; ?>
+<?php $v=197; ?>
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_regression.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_powergraph.js?v=<?php echo $v; ?>"></script>
