@@ -241,6 +241,16 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power,$timezone = '
         $heat_kwh = get_cumulative_kwh($feed,$app->config->heatpump_heat_kwh,$start,$end);
     }
     
+    $solar_kwh = null; // Initialize solar kWh variable
+    if (isset($app->config->solar_elec_kwh) && $app->config->solar_elec_kwh > 0) { // Check if solar feed is configured
+        $solar_kwh = get_cumulative_kwh($feed, $app->config->solar_elec_kwh, $start, $end);
+        if ($solar_kwh !== null) {
+             $solar_kwh = number_format($solar_kwh, 4, '.', '') * 1; // Format like the others
+        }
+    }
+    
+    $cop_stats["combined"]["solar_kwh"] = $solar_kwh;
+
     $cop = null;
     if ($elec_kwh>0) {
         $cop = $heat_kwh / $elec_kwh;

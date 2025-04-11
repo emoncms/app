@@ -47,6 +47,10 @@ config.app = {
     "auto_detect_cooling":{"type":"checkbox", "default":false, "name": "Auto detect cooling", "description":"Auto detect summer cooling if cooling status feed is not present"},
     "enable_process_daily":{"type":"checkbox", "default":false, "name": "Enable daily pre-processor", "description":"Enable split between water and space heating in daily view"},
     "start_date": { "type": "value", "default": 0, "name": "Start date", "description": _("Start date for all time values (unix timestamp)") },
+    
+    // solar
+    "solar_elec_kwh": { "type": "feed", "autoname": "solar_elec_kwh", "description": "Cumulative solar energy kWh" },
+
 };
 config.feeds = feed.list();
 
