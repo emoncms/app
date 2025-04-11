@@ -638,6 +638,11 @@ function plotHeatLossScatter() {
         }
     }
 
+     // Perform the MULTILINEAR regression test on the overall aggregated data
+     console.log("--- Running Multilinear Regression Test (Overall Data) ---");
+     performMultilinearRegressionTest(allXValues, allSolarValues, allYValues);
+     console.log("--- End Multilinear Regression Test ---");
+
     // Create Overall Regression Trace if not splitting regression
     if (!config.splitRegressionEnabled && allXValues.length >= 2) {
         const overallRegressionTrace = calculatePlotlyRegressionTrace(
@@ -684,4 +689,96 @@ function plotHeatLossScatter() {
         console.error("Heat Loss Plot: Error during Plotly plotting:", e);
         plotDiv.html("<div style='text-align:center; padding: 50px; color:red;'>Error generating plot. Check console.</div>");
     }
+}
+
+
+/**
+ * Performs a multilinear regression test using Delta T and Solar Gain
+ * as independent variables to predict Heat Output.
+ * Logs the results to the console and returns the regression details.
+ *
+ * Filters out data points where any of the required values (heat, deltaT, solar)
+ * are null or non-numeric.
+ *
+ * @param {number[]} deltaTValues - Array of temperature differences (X1).
+ * @param {number[]} solarValues - Array of solar gain values (X2).
+ * @param {number[]} heatOutputValues - Array of heat output values (Y, dependent).
+ * @returns {object|null} The result object from multilinearRegression, or null if it fails.
+ */
+function performMultilinearRegressionTest(deltaTValues, solarValues, heatOutputValues) {
+    console.log("Attempting Multilinear Regression Test: Heat ~ DeltaT + SolarGain");
+
+    if (!deltaTValues || !solarValues || !heatOutputValues) {
+        console.warn("Multilinear Test: Missing one or more input data arrays.");
+        return null;
+    }
+
+    const n_initial = heatOutputValues.length;
+    if (deltaTValues.length !== n_initial || solarValues.length !== n_initial) {
+        console.warn(`Multilinear Test: Input array lengths mismatch. Heat: ${n_initial}, DeltaT: ${deltaTValues.length}, Solar: ${solarValues.length}`);
+        return null;
+    }
+
+    // Filter data: Keep only points where Heat, DeltaT, AND Solar are valid numbers
+    const filteredHeat = [];
+    const filteredDeltaT = [];
+    const filteredSolar = [];
+
+    for (let i = 0; i < n_initial; i++) {
+        const heat = heatOutputValues[i];
+        const deltaT = deltaTValues[i];
+        const solar = solarValues[i];
+
+        // Check if all three values are valid numbers
+        if (heat !== null && typeof heat === 'number' && !isNaN(heat) &&
+            deltaT !== null && typeof deltaT === 'number' && !isNaN(deltaT) &&
+            solar !== null && typeof solar === 'number' && !isNaN(solar))
+        {
+            filteredHeat.push(heat);
+            filteredDeltaT.push(deltaT);
+            filteredSolar.push(solar);
+        }
+    }
+
+    const n_filtered = filteredHeat.length;
+    console.log(`Multilinear Test: Filtered data points from ${n_initial} to ${n_filtered} (removing points with missing heat, deltaT, or solar).`);
+
+    // Check if enough data points remain for regression (need >= num_independent_vars + 1)
+    const num_independent_vars = 2; // DeltaT, Solar
+    if (n_filtered < num_independent_vars + 1) {
+        console.warn(`Multilinear Test: Not enough valid data points (${n_filtered}) for regression. Need at least ${num_independent_vars + 1}.`);
+        return null;
+    }
+
+    // Prepare independent variables array for the regression function
+    // Format: [[x1_1, x1_2,...], [x2_1, x2_2,...]]
+    const independentVars = [filteredDeltaT, filteredSolar];
+
+    // Call the multilinear regression function (assuming it's globally available)
+    let regressionResult = null;
+    try {
+        // Assuming multilinearRegression is defined in myheatpump_regression.js and loaded
+        regressionResult = multilinearRegression(independentVars, filteredHeat);
+    } catch (e) {
+        console.error("Multilinear Test: Error calling multilinearRegression function:", e);
+        return null;
+    }
+
+
+    console.log(regressionResult);
+    // Log results
+    if (regressionResult) {
+        console.log("--- Multilinear Regression Fit Details ---");
+        console.log(`  Equation: Heat_kW ≈ ${regressionResult.intercept.toFixed(4)} + ( ${regressionResult.coefficients[0].toFixed(4)} * DeltaT ) + ( ${regressionResult.coefficients[1].toFixed(4)} * SolarGain_kWh )`);
+        console.log(`  Intercept (β₀): ${regressionResult.intercept.toFixed(4)} kW`);
+        console.log(`  Coefficient for DeltaT (β₁): ${regressionResult.coefficients[0].toFixed(4)} kW/K`);
+        console.log(`  Coefficient for SolarGain (β₂): ${regressionResult.coefficients[1].toFixed(4)} kW/(kWh/day)`);
+        console.log(`  R-squared: ${regressionResult.r2.toFixed(4)}`);
+        console.log(`  Based on ${n_filtered} valid data points.`);
+        console.log("------------------------------------------");
+    } else {
+        console.warn("Multilinear Test: Regression calculation failed or returned null.");
+    }
+
+    return regressionResult;
 }
