@@ -51,6 +51,112 @@ function linearRegression(x, y) {
     };
 }
 
+
+
+/**
+ * Performs Multilinear Regression using matrix calculations via math.js.
+ * Finds coefficients (β₁, β₂, ...) and intercept (β₀) for the model:
+ * Y = β₀ + β₁X₁ + β₂X₂ + ... + β<0xE2><0x82><0x99>X<0xE2><0x82><0x99>
+ * Calculates β = (XᵀX)⁻¹XᵀY
+ *
+ * @param {number[][]} independentVars - An array of arrays. Each inner array holds the data
+ *                                      for one independent variable (X₁, X₂, ...).
+ *                                      Example: [[x1_1, x1_2,...], [x2_1, x2_2,...], ...]
+ * @param {number[]} dependentVar - An array holding the data for the dependent variable (Y).
+ *                                  Example: [y1, y2, y3,...]
+ *
+ * @returns {object|null} An object containing:
+ *                        - `coefficients`: An array [β₁, β₂, ...] corresponding to `independentVars`.
+ *                        - `intercept`: The calculated intercept (β₀).
+ *                        - `beta`: The full coefficient vector [β₀, β₁, β₂, ...].
+ *                        - `r2`: The R-squared value (coefficient of determination).
+ *                        Or null if regression cannot be performed.
+ */
+function multilinearRegression(independentVars, dependentVar) {
+    // 1. Check if math.js library is available
+    if (typeof math === 'undefined') {
+        console.error("Multilinear Regression Error: The 'math.js' library is not loaded.");
+        return null;
+    }
+
+    // 2. Input Validation (same as before)
+    if (!independentVars || independentVars.length === 0 || !dependentVar) {
+        console.error("Multilinear Regression Error: Invalid input variables provided.");
+        return null;
+    }
+    const numIndependentVars = independentVars.length;
+    const numDataPoints = dependentVar.length;
+
+    if (numDataPoints <= numIndependentVars) { // Need more points than variables (incl intercept)
+        console.error(`Multilinear Regression Error: Insufficient data points (${numDataPoints}). Need more than ${numIndependentVars} for ${numIndependentVars} independent vars + intercept.`);
+        return null;
+    }
+    // Check array lengths consistency
+    for (let i = 0; i < numIndependentVars; i++) {
+        if (!independentVars[i] || independentVars[i].length !== numDataPoints) {
+            console.error(`Multilinear Regression Error: Independent variable #${i + 1} length mismatch.`);
+            return null;
+        }
+    }
+     // Optional: Check for non-numeric values (math.js might handle some, but good practice)
+
+
+    try {
+        // 3. Construct the Design Matrix X (add column of 1s for intercept)
+        const X_data = [];
+        for (let i = 0; i < numDataPoints; i++) {
+            const row = [1]; // Start with 1 for the intercept
+            for (let j = 0; j < numIndependentVars; j++) {
+                row.push(independentVars[j][i]);
+            }
+            X_data.push(row);
+        }
+        const X = math.matrix(X_data);
+
+        // 4. Create the Dependent Variable Vector Y
+        const Y = math.matrix(dependentVar);
+
+        // 5. Calculate Coefficients: β = (XᵀX)⁻¹XᵀY
+        const XT = math.transpose(X);
+        const XTX = math.multiply(XT, X);
+        const XTX_inv = math.inv(XTX);
+        const XTY = math.multiply(XT, Y);
+        const beta = math.multiply(XTX_inv, XTY).valueOf(); // .valueOf() converts math.js matrix to plain array
+
+        // beta array is [intercept, coeff_X1, coeff_X2, ...]
+        const intercept = beta[0];
+        const coefficients = beta.slice(1);
+
+        // 6. Calculate R-squared (Optional but recommended)
+        const Y_mean = math.mean(dependentVar);
+        const Y_predicted = math.multiply(X, beta).valueOf(); // Get predicted Y values
+
+        let ss_tot = 0; // Total sum of squares
+        let ss_res = 0; // Residual sum of squares
+        for (let i = 0; i < numDataPoints; i++) {
+            ss_tot += Math.pow(dependentVar[i] - Y_mean, 2);
+            ss_res += Math.pow(dependentVar[i] - Y_predicted[i], 2);
+        }
+
+        const r2 = (ss_tot === 0) ? 1 : 1 - (ss_res / ss_tot); // Handle case where all Y are the same
+
+        return {
+            coefficients: coefficients, // [β₁, β₂, ...]
+            intercept: intercept,       // β₀
+            beta: beta,                 // Full vector [β₀, β₁, β₂, ...]
+            r2: r2
+        };
+
+    } catch (error) {
+        console.error("Error during multilinear regression calculation using math.js:", error);
+        // Common errors: Matrix not invertible (e.g., perfect collinearity), non-numeric data.
+        if (error.message && error.message.includes("Cannot calculate inverse")) {
+             console.error("  >> This often indicates perfect multicollinearity among independent variables.");
+        }
+        return null;
+    }
+}
+
 // **********************************************
 // ** NEW MULTILINEAR REGRESSION FUNCTION      **
 // **********************************************
@@ -76,7 +182,7 @@ function linearRegression(x, y) {
  *                        - `string`: A string representation of the equation.
  *                        Or null if regression cannot be performed (e.g., insufficient data, library missing).
  */
-function multilinearRegression(independentVars, dependentVar, precision = 6) {
+function multilinearRegression_rjs(independentVars, dependentVar, precision = 6) {
 
     // ****** DEBUG LOG ADDED ******
     console.log("DEBUG multilinearRegression: Received independentVars with length:", independentVars ? independentVars.length : 'undefined/null');
