@@ -745,8 +745,9 @@ function performMultilinearRegressionTest(deltaTValues, solarValues, heatOutputV
 
     // Check if enough data points remain for regression (need >= num_independent_vars + 1)
     const num_independent_vars = 2; // DeltaT, Solar
-    if (n_filtered < num_independent_vars + 1) {
-        console.warn(`Multilinear Test: Not enough valid data points (${n_filtered}) for regression. Need at least ${num_independent_vars + 1}.`);
+    const p_params = num_independent_vars + 1; // Number of parameters
+    if (n_filtered <= p_params) { // Check against p_params now
+        console.warn(`Multilinear Test: Not enough valid data points (${n_filtered}). Need more than ${p_params} for regression inference.`);
         return null;
     }
 
@@ -769,13 +770,45 @@ function performMultilinearRegressionTest(deltaTValues, solarValues, heatOutputV
     // Log results
     if (regressionResult) {
         console.log("--- Multilinear Regression Fit Details ---");
-        console.log(`  Equation: Heat_kW ≈ ${regressionResult.intercept.toFixed(4)} + ( ${regressionResult.coefficients[0].toFixed(4)} * DeltaT ) + ( ${regressionResult.coefficients[1].toFixed(4)} * SolarGain_kWh )`);
-        console.log(`  Intercept (β₀): ${regressionResult.intercept.toFixed(4)} kW`);
-        console.log(`  Coefficient for DeltaT (β₁): ${regressionResult.coefficients[0].toFixed(4)} kW/K`);
-        console.log(`  Coefficient for SolarGain (β₂): ${regressionResult.coefficients[1].toFixed(4)} kW/(kWh/day)`);
+        console.log(`  Model: Heat_kW = β₀ + β₁*DeltaT + β₂*SolarGain_kWh`);
+        console.log(`  N = ${regressionResult.n}, Parameters (p) = ${regressionResult.p}, DF = ${regressionResult.degreesOfFreedom}`);
         console.log(`  R-squared: ${regressionResult.r2.toFixed(4)}`);
-        console.log(`  Based on ${n_filtered} valid data points.`);
+        console.log(`  SSE: ${regressionResult.sse.toFixed(4)}`);
+
+        // Format and log coefficient details
+        const paramNames = ['Intercept (β₀)', 'DeltaT (β₁)', 'SolarGain (β₂)'];
+        console.log("\n  Parameter Estimates:");
+        console.log(`    ${'Parameter'.padEnd(18)} ${'Estimate'.padStart(12)} ${'Std. Error'.padStart(12)} ${'t-statistic'.padStart(12)} ${'p-value'.padStart(12)} ${'95% CI'.padStart(25)}`);
+        console.log(`    ${'-'.repeat(18)} ${'-'.repeat(12)} ${'-'.repeat(12)} ${'-'.repeat(12)} ${'-'.repeat(12)} ${'-'.repeat(25)}`);
+
+        if (regressionResult.beta && regressionResult.standardErrors) { // Check if inference results exist
+            regressionResult.beta.forEach((coeff, i) => {
+                const name = paramNames[i] || `Var_${i}`; // Fallback name
+                const estimateStr = coeff.toFixed(4).padStart(12);
+                const seStr = regressionResult.standardErrors[i].toFixed(4).padStart(12);
+                const tStatStr = regressionResult.tStats[i].toFixed(3).padStart(12);
+                // Format p-value: show "<0.001" or fixed decimals
+                let pValStr = "N/A";
+                if (!isNaN(regressionResult.pValues[i])) {
+                     pValStr = regressionResult.pValues[i] < 0.001 ? "<0.001" : regressionResult.pValues[i].toFixed(3);
+                }
+                pValStr = pValStr.padStart(12);
+
+                const ci = regressionResult.confidenceIntervals[i];
+                const ciStr = `[${ci[0].toFixed(4)}, ${ci[1].toFixed(4)}]`.padStart(25);
+
+                console.log(`    ${name.padEnd(18)} ${estimateStr} ${seStr} ${tStatStr} ${pValStr} ${ciStr}`);
+            });
+        } else {
+             // Log basic coefficients if inference failed
+             console.log(`    Intercept (β₀): ${regressionResult.intercept.toFixed(4)}`);
+             regressionResult.coefficients.forEach((coeff, i) => {
+                  console.log(`    Coefficient ${i+1}: ${coeff.toFixed(4)}`);
+             });
+              console.log("    (Could not calculate SE, t-stats, p-values, or CI - check warnings/errors)");
+        }
         console.log("------------------------------------------");
+
     } else {
         console.warn("Multilinear Test: Regression calculation failed or returned null.");
     }
