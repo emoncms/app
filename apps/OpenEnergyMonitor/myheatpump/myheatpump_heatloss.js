@@ -71,10 +71,14 @@ function getHeatLossInputs() {
     }
     config.splitRegressionEnabled = config.splitDataEnabled && $("#heatloss_split_regression_check").is(":checked"); // Regression split only possible if data is split
 
+     // Color by solar gain?
+    config.solarColoringEnabled = $("#heatloss_solar_gain_color").is(":checked");
+
     // Keys for accessing data
     config.heatKey = config.bargraph_mode + "_heat_kwh";
     config.insideTKey = "combined_roomT_mean";
     config.outsideTKey = "combined_outsideT_mean";
+    config.solarEKey = "combined_solar_kwh";
 
     console.log("Heat Loss Inputs:", config);
     return config;
@@ -152,6 +156,20 @@ function prepareHeatLossPlotData(config, daily_data) {
     const outsideTMap = new Map(daily_data[config.outsideTKey]);
     const insideTMap = (!config.shouldUseFixedRoomT && daily_data[config.insideTKey]) ? new Map(daily_data[config.insideTKey]) : null;
     const heatDataArray = daily_data[config.heatKey];
+    
+    // --- START: Fetch and Map Solar Data ---
+    const solarDataArray = daily_data[config.solarEKey];
+    let solarDataMap = null;
+    let solarDataAvailable = false;
+    if (solarDataArray && solarDataArray.length > 0) {
+        solarDataMap = new Map(solarDataArray);
+        solarDataAvailable = true;
+        console.log("Heat Loss Plot: Solar data found and mapped for key:", config.solarEKey);
+    } else {
+        console.log("Heat Loss Plot: Solar data not found or empty for key:", config.solarEKey);
+        // Continue without solar data, coloring will default later if enabled
+    }
+    // --- END: Fetch and Map Solar Data ---
 
     console.log("Heat Loss Plot: Processing", heatDataArray.length, "days of data for mode", config.bargraph_mode);
 
@@ -176,6 +194,17 @@ function prepareHeatLossPlotData(config, daily_data) {
         } else {
             insideTValue = null; // Should not happen if sufficiency check passed
         }
+
+        // --- START: Get Solar Value ---
+        let solarValue = null; // Default to null if not available or not found
+        if (solarDataAvailable && solarDataMap.has(timestamp)) {
+            const rawSolarValue = solarDataMap.get(timestamp);
+            // Ensure it's a valid number, otherwise keep it null
+            if (rawSolarValue !== null && typeof rawSolarValue === 'number' && !isNaN(rawSolarValue)) {
+                solarValue = rawSolarValue;
+            }
+        }
+        // --- END: Get Solar Value ---
 
         // Check validity
         if (heatValue !== null && typeof heatValue === 'number' && !isNaN(heatValue) &&
@@ -216,6 +245,7 @@ function prepareHeatLossPlotData(config, daily_data) {
                          xValues: [],    // Holds deltaT
                          yValues: [],    // Holds heatValue (kW)
                          timestamps: [], // Holds original timestamp for hover info
+                         solarValues: [], // Holds solar values if available
                          label: groupLabel
                          // color property removed
                      };
@@ -225,7 +255,7 @@ function prepareHeatLossPlotData(config, daily_data) {
                 groupedData[groupKey].xValues.push(deltaT);
                 groupedData[groupKey].yValues.push(heatValue);
                 groupedData[groupKey].timestamps.push(timestamp);
-
+                groupedData[groupKey].solarValues.push(solarValue);
                 // Update overall bounds
                 if (deltaT < overallMinX) overallMinX = deltaT;
                 if (deltaT > overallMaxX) overallMaxX = deltaT;
@@ -458,8 +488,35 @@ function plotHeatLossScatter() {
     const plotData = []; // Array to hold Plotly traces
     const allXValues = []; // For overall regression
     const allYValues = []; // For overall regression
+    const allSolarValues = [];
 
     resetPlotColorIndex(); // Reset colors for this plot generation
+
+    // --- Determine overall Solar Min/Max for consistent colorscale ---
+    let overallMinSolar = Infinity;
+    let overallMaxSolar = -Infinity;
+    let hasAnySolarData = false;
+    if (config.solarColoringEnabled) {
+        for (const groupKey in preparedData.groups) {
+            const group = preparedData.groups[groupKey];
+            if (group.solarValues && group.solarValues.length > 0) {
+                group.solarValues.forEach(val => {
+                    if (val !== null && typeof val === 'number' && !isNaN(val)) {
+                        hasAnySolarData = true;
+                        if (val < overallMinSolar) overallMinSolar = val;
+                        if (val > overallMaxSolar) overallMaxSolar = val;
+                    }
+                });
+            }
+        }
+        // Handle case where no valid solar data exists despite checkbox being ticked
+        if (!hasAnySolarData) {
+            console.log("Heat Loss Plot: Solar coloring enabled, but no valid solar data found. Reverting to group colors.");
+            // config.solarColoringEnabled = false; // Or handle directly in loop
+        } else {
+                console.log(`Heat Loss Plot: Applying solar coloring. Solar range: [${overallMinSolar}, ${overallMaxSolar}]`);
+        }
+    }
 
     // Create Scatter and potentially individual Regression Traces
     for (const groupKey in preparedData.groups) {
@@ -467,37 +524,90 @@ function plotHeatLossScatter() {
         if (group.xValues.length > 0) {
             const groupColor = getNextPlotColor(); // Assign color per group
 
+            // --- Prepare Customdata for Hover ---
+            const customDataForHover = group.timestamps.map((ts, index) => {
+                let dateStr = "Invalid Date";
+                try {
+                     if (ts !== null && ts !== undefined && !isNaN(ts)) {
+                        const dateObj = new Date(ts);
+                        if (!isNaN(dateObj.getTime())) {
+                             dateStr = dateObj.toLocaleDateString();
+                        }
+                     }
+                } catch (e) { console.warn("Error formatting date:", e); dateStr = "Date Error"; }
+
+                const solarVal = group.solarValues[index];
+                // Format solar value nicely for hover, handle null/undefined
+                const solarStr = (solarVal !== null && typeof solarVal === 'number' && !isNaN(solarVal))
+                                 ? solarVal.toFixed(2) + ' kWh'
+                                 : 'N/A';
+
+                return { date: dateStr, solar: solarStr, rawSolar: solarVal }; // Include raw value if needed for filtering later
+            });
+
+            let useSolarColoringForThisGroup = config.solarColoringEnabled && hasAnySolarData;
+
+            let markerConfig = {
+                size: 6,
+                opacity: 0.7,
+                color: groupColor // Default to group color
+            };
+            
+            if (useSolarColoringForThisGroup) {
+                 // Check if this specific group has any valid solar values
+                 const groupHasSolar = group.solarValues.some(sv => sv !== null && typeof sv === 'number' && !isNaN(sv));
+                 if (groupHasSolar) {
+                      markerConfig = {
+                         ...markerConfig, // Keep size, opacity
+                         color: group.solarValues, // Use the array of solar values for color
+                         colorscale: 'Jet', // Example: Yellow-Green-Blue
+                         // Use cmin/cmax for consistent scale across groups if splitting
+                         cmin: overallMinSolar,
+                         cmax: overallMaxSolar,
+                         colorbar: {
+                             title: {
+                                 text: 'Solar Gain<br>(kWh/day)', // Add units, allow line break
+                                 side: 'right'
+                             }
+                         },
+                         // Ensure points with null solar value get a specific color (e.g., grey)
+                         // Note: Plotly behavior with nulls in 'color' array can vary.
+                         // A common approach is pre-filtering or assigning a value outside the cmin/cmax range.
+                         // For simplicity here, we rely on Plotly's default (often transparent or lowest color).
+                      };
+                      console.log(`Applying solar colorscale to group: ${group.label}`);
+                 } else {
+                      // This group has no solar data, use the group color
+                      console.log(`Solar coloring enabled, but group ${group.label} has no solar data. Using group color.`);
+                      useSolarColoringForThisGroup = false; // Fallback for this specific group
+                      markerConfig.color = groupColor; // Already set, but being explicit
+                 }
+            } else {
+                // Solar coloring not enabled OR no valid solar data found overall
+                markerConfig.color = groupColor;
+            }
+            
             // Create Scatter Trace
+            // --- Create Scatter Trace ---
             const scatterTrace = {
                 x: group.xValues,
                 y: group.yValues,
                 mode: 'markers',
                 type: 'scatter',
-                name: group.label + ` (N=${group.xValues.length})`, // Name for legend
-                marker: {
-                    color: groupColor,
-                    size: 6,
-                    opacity: 0.7
-                },
-                // Pass timestamps as customdata for hovertemplate
-                customdata: group.timestamps.map(ts => {
-                    try {
-                        // Format date robustly
-                        if (ts === null || ts === undefined || isNaN(ts)) return "Invalid Date";
-                        const dateObj = new Date(ts);
-                        if (isNaN(dateObj.getTime())) return "Invalid Date";
-                        return dateObj.toLocaleDateString();
-                    } catch (e) {
-                        console.warn("Error formatting date for tooltip:", e);
-                        return "Date Error"; }
-                }),
-                // Define hover text format
-                 hovertemplate:
-                    `<b>Date: %{customdata}</b><br>` +
-                    `<b>ΔT:</b> %{x:.1f} K<br>` + // Use K for Kelvin difference
-                    `<b>Avg Heat:</b> %{y:.2f} kW` +
-                    `<extra></extra>`, // Hides the trace name suffix in tooltip
-                legendgroup: groupKey // Group scatter and its line in legend
+                name: group.label + ` (N=${group.xValues.length})`,
+                marker: markerConfig, // Assign the configured marker object
+                customdata: customDataForHover, // Use the enhanced custom data
+                hovertemplate: // Updated hover template
+                    `<b>Date: %{customdata.date}</b><br>` +
+                    `<b>ΔT:</b> %{x:.1f} K<br>` +
+                    `<b>Avg Heat:</b> %{y:.2f} kW<br>` +
+                    `<b>Solar Gain: %{customdata.solar}</b>` + // Add solar value
+                    `<extra></extra>`,
+                legendgroup: groupKey,
+                // If using solar coloring, consider hiding individual groups from legend
+                // unless splitting is also active, to avoid clutter.
+                // showlegend: !(useSolarColoringForThisGroup && !config.splitDataEnabled)
+                // Let's keep legend showing for now.
             };
             plotData.push(scatterTrace);
 
@@ -551,6 +661,11 @@ function plotHeatLossScatter() {
     const layout = getPlotlyLayoutOptions();
     // Dynamically adjust x-axis range based on data if needed, otherwise uses defaults/rangemode
     // layout.xaxis.range = [0, Math.max(35, preparedData.overallMaxX * 1.1)];
+     // If solar coloring was used, adjust right margin slightly for colorbar
+
+     if (config.solarColoringEnabled && hasAnySolarData) {
+        layout.margin = { l: 60, r: 80, t: 30, b: 50 }; // Increased right margin
+    }
 
     // 6. Plotting with Plotly
     const plotConfig = {
