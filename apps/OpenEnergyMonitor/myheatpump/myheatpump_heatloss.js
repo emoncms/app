@@ -695,7 +695,8 @@ function plotHeatLossScatter() {
 /**
  * Performs a multilinear regression test using Delta T and Solar Gain
  * as independent variables to predict Heat Output.
- * Logs the results to the console and returns the regression details.
+ * Logs the results to the console AND displays them in the dedicated text box,
+ * starting with a simplified summary sentence.
  *
  * Filters out data points where any of the required values (heat, deltaT, solar)
  * are null or non-numeric.
@@ -707,15 +708,31 @@ function plotHeatLossScatter() {
  */
 function performMultilinearRegressionTest(deltaTValues, solarValues, heatOutputValues) {
     console.log("Attempting Multilinear Regression Test: Heat ~ DeltaT + SolarGain");
+    let summarySentence = ""; // Initialize summary sentence string
+    let detailedOutputString = ""; // Initialize string for detailed stats
+    const resultsTextArea = document.getElementById('heatloss-mlr-results');
+
+    // Helper function to clear/update text area
+    const updateResultsDisplay = (message) => {
+        if (resultsTextArea) {
+            resultsTextArea.value = message;
+        }
+        console.log(message); // Also log simple status messages
+    };
+
+    // Clear previous results immediately
+    if (resultsTextArea) resultsTextArea.value = "Processing...";
 
     if (!deltaTValues || !solarValues || !heatOutputValues) {
-        console.warn("Multilinear Test: Missing one or more input data arrays.");
+        const msg = "Multilinear Test: Missing one or more input data arrays.";
+        updateResultsDisplay(msg);
         return null;
     }
 
     const n_initial = heatOutputValues.length;
     if (deltaTValues.length !== n_initial || solarValues.length !== n_initial) {
-        console.warn(`Multilinear Test: Input array lengths mismatch. Heat: ${n_initial}, DeltaT: ${deltaTValues.length}, Solar: ${solarValues.length}`);
+        const msg = `Multilinear Test: Input array lengths mismatch. Heat: ${n_initial}, DeltaT: ${deltaTValues.length}, Solar: ${solarValues.length}`;
+        updateResultsDisplay(msg);
         return null;
     }
 
@@ -729,7 +746,6 @@ function performMultilinearRegressionTest(deltaTValues, solarValues, heatOutputV
         const deltaT = deltaTValues[i];
         const solar = solarValues[i];
 
-        // Check if all three values are valid numbers
         if (heat !== null && typeof heat === 'number' && !isNaN(heat) &&
             deltaT !== null && typeof deltaT === 'number' && !isNaN(deltaT) &&
             solar !== null && typeof solar === 'number' && !isNaN(solar))
@@ -741,76 +757,166 @@ function performMultilinearRegressionTest(deltaTValues, solarValues, heatOutputV
     }
 
     const n_filtered = filteredHeat.length;
-    console.log(`Multilinear Test: Filtered data points from ${n_initial} to ${n_filtered} (removing points with missing heat, deltaT, or solar).`);
+    const filterMsg = `Multilinear Test: Filtered data points from ${n_initial} to ${n_filtered} (removing points with missing heat, deltaT, or solar).`;
+    console.log(filterMsg); // Log filtering info
 
-    // Check if enough data points remain for regression (need >= num_independent_vars + 1)
+    // Check if enough data points remain for regression
     const num_independent_vars = 2; // DeltaT, Solar
     const p_params = num_independent_vars + 1; // Number of parameters
-    if (n_filtered <= p_params) { // Check against p_params now
-        console.warn(`Multilinear Test: Not enough valid data points (${n_filtered}). Need more than ${p_params} for regression inference.`);
+    if (n_filtered <= p_params) {
+        const msg = `Multilinear Test: Not enough valid data points (${n_filtered}). Need more than ${p_params} for regression inference. Cannot perform analysis.\n(${filterMsg})`;
+        updateResultsDisplay(msg);
         return null;
     }
 
-    // Prepare independent variables array for the regression function
-    // Format: [[x1_1, x1_2,...], [x2_1, x2_2,...]]
+    // Prepare independent variables array
     const independentVars = [filteredDeltaT, filteredSolar];
 
-    // Call the multilinear regression function (assuming it's globally available)
+    // Call the multilinear regression function
     let regressionResult = null;
     try {
-        // Assuming multilinearRegression is defined in myheatpump_regression.js and loaded
         regressionResult = multilinearRegression(independentVars, filteredHeat);
     } catch (e) {
         console.error("Multilinear Test: Error calling multilinearRegression function:", e);
+        const msg = `Multilinear Test: Error during calculation: ${e.message || e}\nSee console for details.`;
+        updateResultsDisplay(msg);
         return null;
     }
 
+    console.log("Raw Regression Result Object:", regressionResult);
 
-    console.log(regressionResult);
-    // Log results
+    // Log and build formatted results string
     if (regressionResult) {
-        console.log("--- Multilinear Regression Fit Details ---");
-        console.log(`  Model: Heat_kW = β₀ + β₁*DeltaT + β₂*SolarGain_kWh`);
-        console.log(`  N = ${regressionResult.n}, Parameters (p) = ${regressionResult.p}, DF = ${regressionResult.degreesOfFreedom}`);
-        console.log(`  R-squared: ${regressionResult.r2.toFixed(4)}`);
-        console.log(`  SSE: ${regressionResult.sse.toFixed(4)}`);
+        // --- START: Build Simplified Summary Sentence ---
+        let interceptTerm = "N/A";
+        let deltaTTerm = "N/A";
+        let solarTerm = "N/A";
+        const hasCI = regressionResult.confidenceIntervals && regressionResult.confidenceIntervals.length === regressionResult.p;
 
-        // Format and log coefficient details
+        // Helper to format estimate with CI range or just point estimate
+        const formatTerm = (estimateKW, ciKW, unit = "W", precision = 0) => {
+            const factor = unit === "W" ? 1000 : 1;
+            if (hasCI && ciKW && ciKW.length === 2 && !isNaN(ciKW[0]) && !isNaN(ciKW[1])) {
+                // Format with CI range
+                const lower = (ciKW[0] * factor).toFixed(precision);
+                const upper = (ciKW[1] * factor).toFixed(precision);
+                 // Ensure lower is numerically less than upper for display
+                const minVal = Math.min(lower, upper);
+                const maxVal = Math.max(lower, upper);
+                return `between ${minVal} and ${maxVal} ${unit}`;
+            } else if (!isNaN(estimateKW)) {
+                 // Format with point estimate only
+                 return `around ${(estimateKW * factor).toFixed(precision)} ${unit}`;
+            } else {
+                 return `N/A`;
+            }
+        };
+         // Helper to format the *reduction* term for solar (handles negative CI correctly)
+        const formatReductionTerm = (estimateKW, ciKW, unit = "W", precision = 0) => {
+            const factor = unit === "W" ? 1000 : 1;
+             // Ensure estimate is negative for reduction
+             const pointEstimateReduction = estimateKW < 0 ? Math.abs(estimateKW * factor) : 0;
+
+             if (hasCI && ciKW && ciKW.length === 2 && !isNaN(ciKW[0]) && !isNaN(ciKW[1])) {
+                 // CI bounds for reduction are based on the absolute values of the original CI
+                 // The lower bound of reduction comes from the upper bound of the original CI (less negative)
+                 // The upper bound of reduction comes from the lower bound of the original CI (more negative)
+                 const lowerReduction = Math.abs(ciKW[1] * factor); // ciKW[1] is typically the less negative value
+                 const upperReduction = Math.abs(ciKW[0] * factor); // ciKW[0] is typically the more negative value
+
+                 // Ensure lower is numerically less than upper for display, and they are positive
+                 const minVal = Math.max(0, Math.min(lowerReduction, upperReduction)).toFixed(precision);
+                 const maxVal = Math.max(0, Math.max(lowerReduction, upperReduction)).toFixed(precision);
+
+                 if (minVal > 0 || maxVal > 0) { // Only show range if it indicates reduction
+                     return `between ${minVal} and ${maxVal} ${unit}`;
+                 } else { // If CI includes or is above zero, say reduction is uncertain/negligible
+                     return `an uncertain amount (CI includes zero or positive effect)`;
+                 }
+
+             } else if (!isNaN(estimateKW) && estimateKW < 0) {
+                  // Format with point estimate only
+                  return `around ${pointEstimateReduction.toFixed(precision)} ${unit}`;
+             } else {
+                  return `an uncertain amount`; // No CI and point estimate not negative or NaN
+             }
+        };
+
+
+        if (regressionResult.beta) {
+            interceptTerm = formatTerm(regressionResult.beta[0], hasCI ? regressionResult.confidenceIntervals[0] : null);
+            deltaTTerm = formatTerm(regressionResult.beta[1], hasCI ? regressionResult.confidenceIntervals[1] : null);
+            // Use specific formatter for solar reduction
+            solarTerm = formatReductionTerm(regressionResult.beta[2], hasCI ? regressionResult.confidenceIntervals[2] : null);
+        }
+
+        summarySentence = `Interpretation: For every 1°C increase in temperature difference (ΔT inside-outside), the required heating power increases by ${deltaTTerm}. Each kWh of daily solar gain (as per the defined input source) reduces this required power by ${solarTerm}. The model estimates a baseline heat load of ${interceptTerm} when ΔT and solar gain are zero (this may represent standing losses or model extrapolation).`;
+        summarySentence += `\n(R-squared: ${regressionResult.r2.toFixed(3)} - See full stats below for details and precision.)`;
+        // --- END: Build Simplified Summary Sentence ---
+
+        // --- START: Build Detailed Output String ---
+        detailedOutputString += "--- Multilinear Regression Fit Details ---\n";
+        detailedOutputString += `Model: Heat_kW = β₀ + β₁*DeltaT + β₂*SolarGain_kWh\n`;
+        detailedOutputString += `N = ${regressionResult.n}, Parameters (p) = ${regressionResult.p}, DF = ${regressionResult.degreesOfFreedom}\n`;
+        detailedOutputString += `R-squared: ${regressionResult.r2.toFixed(4)}\n`;
+        detailedOutputString += `SSE: ${regressionResult.sse.toFixed(4)}\n`;
+
         const paramNames = ['Intercept (β₀)', 'DeltaT (β₁)', 'SolarGain (β₂)'];
-        console.log("\n  Parameter Estimates:");
-        console.log(`    ${'Parameter'.padEnd(18)} ${'Estimate'.padStart(12)} ${'Std. Error'.padStart(12)} ${'t-statistic'.padStart(12)} ${'p-value'.padStart(12)} ${'95% CI'.padStart(25)}`);
-        console.log(`    ${'-'.repeat(18)} ${'-'.repeat(12)} ${'-'.repeat(12)} ${'-'.repeat(12)} ${'-'.repeat(12)} ${'-'.repeat(25)}`);
+        const header1 = `    ${'Parameter'.padEnd(18)} ${'Estimate'.padStart(12)} ${'Std. Error'.padStart(12)} ${'t-statistic'.padStart(12)} ${'p-value'.padStart(12)} ${'95% CI'.padStart(25)}`;
+        const header2 = `    ${'-'.repeat(18)} ${'-'.repeat(12)} ${'-'.repeat(12)} ${'-'.repeat(12)} ${'-'.repeat(12)} ${'-'.repeat(25)}`;
 
-        if (regressionResult.beta && regressionResult.standardErrors) { // Check if inference results exist
+        detailedOutputString += "\nParameter Estimates:\n";
+        detailedOutputString += header1 + "\n";
+        detailedOutputString += header2 + "\n";
+
+        if (regressionResult.beta && regressionResult.standardErrors && regressionResult.tStats && regressionResult.pValues && regressionResult.confidenceIntervals) {
             regressionResult.beta.forEach((coeff, i) => {
-                const name = paramNames[i] || `Var_${i}`; // Fallback name
+                const name = paramNames[i] || `Var_${i}`;
                 const estimateStr = coeff.toFixed(4).padStart(12);
                 const seStr = regressionResult.standardErrors[i].toFixed(4).padStart(12);
                 const tStatStr = regressionResult.tStats[i].toFixed(3).padStart(12);
-                // Format p-value: show "<0.001" or fixed decimals
                 let pValStr = "N/A";
-                if (!isNaN(regressionResult.pValues[i])) {
-                     pValStr = regressionResult.pValues[i] < 0.001 ? "<0.001" : regressionResult.pValues[i].toFixed(3);
+                if (regressionResult.pValues[i] !== null && !isNaN(regressionResult.pValues[i])) {
+                    pValStr = regressionResult.pValues[i] < 0.001 ? "<0.001" : regressionResult.pValues[i].toFixed(3);
                 }
                 pValStr = pValStr.padStart(12);
 
                 const ci = regressionResult.confidenceIntervals[i];
-                const ciStr = `[${ci[0].toFixed(4)}, ${ci[1].toFixed(4)}]`.padStart(25);
+                const ciStr = (ci && ci.length === 2 && !isNaN(ci[0]) && !isNaN(ci[1]))
+                              ? `[${ci[0].toFixed(4)}, ${ci[1].toFixed(4)}]`.padStart(25)
+                              : '[N/A]'.padStart(25);
 
-                console.log(`    ${name.padEnd(18)} ${estimateStr} ${seStr} ${tStatStr} ${pValStr} ${ciStr}`);
+                const line = `    ${name.padEnd(18)} ${estimateStr} ${seStr} ${tStatStr} ${pValStr} ${ciStr}`;
+                detailedOutputString += line + "\n";
             });
         } else {
-             // Log basic coefficients if inference failed
-             console.log(`    Intercept (β₀): ${regressionResult.intercept.toFixed(4)}`);
-             regressionResult.coefficients.forEach((coeff, i) => {
-                  console.log(`    Coefficient ${i+1}: ${coeff.toFixed(4)}`);
-             });
-              console.log("    (Could not calculate SE, t-stats, p-values, or CI - check warnings/errors)");
+            const basicInfo = "    (Could not calculate full inference statistics - SE, t, p, CI. Check regression function warnings.)";
+            detailedOutputString += basicInfo + "\n";
+            if (regressionResult.intercept !== undefined) {
+                const interceptLine = `    Intercept (β₀): ${regressionResult.intercept.toFixed(4)}`;
+                detailedOutputString += interceptLine + "\n";
+            }
+            if (regressionResult.coefficients) {
+                regressionResult.coefficients.forEach((coeff, i) => {
+                    const coeffLine = `    Coefficient ${i + 1}: ${coeff.toFixed(4)}`;
+                    detailedOutputString += coeffLine + "\n";
+                });
+            }
         }
-        console.log("------------------------------------------");
+        detailedOutputString += "------------------------------------------------------------------------------------------"; // Footer line
+        // --- END: Build Detailed Output String ---
+
+        // Update console with detailed results
+        console.log(detailedOutputString);
+
+        // Update text area with summary first, then details
+        if (resultsTextArea) {
+            resultsTextArea.value = summarySentence + "\n\n" + detailedOutputString;
+        }
 
     } else {
-        console.warn("Multilinear Test: Regression calculation failed or returned null.");
+        const msg = "Multilinear Test: Regression calculation failed or returned null.";
+        updateResultsDisplay(msg); // Update text box and console
     }
 
     return regressionResult;

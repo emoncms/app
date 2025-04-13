@@ -511,6 +511,17 @@ global $path, $session, $v;
             </div>
             <!-- END: New Control Group 4 -->    
 
+      
+            <!-- START: Multilinear Regression Results Text Box -->
+            <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
+                <label for="heatloss-mlr-results" style="font-weight: bold; display: block; margin-bottom: 5px;">Multilinear Regression Results (Heat ~ ΔT + Solar):</label>
+                <textarea id="heatloss-mlr-results" readonly
+                          style="width: 100%; height: 220px; font-family: monospace, Consolas, 'Courier New'; font-size: 11px; /* Slightly smaller fixed-width font */ background-color: #f8f8f8; border: 1px solid #ccc; padding: 8px; box-sizing: border-box; white-space: pre-wrap; /* Preserve whitespace AND wrap lines */ line-height: 1.3; overflow-y: auto; /* Ensure vertical scroll is available if needed */"
+                          placeholder="Multilinear regression results will appear here if solar data is available and sufficient data points exist..."
+                ></textarea>
+            </div>
+            <!-- END: Multilinear Regression Results Text Box -->
+
     
           </div> <!-- End of #heatloss-controls -->
 
