@@ -49,7 +49,7 @@ config.app = {
     "start_date": { "type": "value", "default": 0, "name": "Start date", "description": _("Start date for all time values (unix timestamp)") },
     
     // solar
-    "solar_elec_kwh": { "type": "feed", "autoname": "solar_elec_kwh", "description": "Cumulative solar energy kWh" },
+    "solar_elec_kwh": { "type": "feed", "autoname": "solar_elec_kwh", "optional": true, "description": "Cumulative solar energy kWh" },
 
 };
 config.feeds = feed.list();

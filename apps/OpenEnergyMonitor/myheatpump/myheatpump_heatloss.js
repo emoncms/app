@@ -215,7 +215,7 @@ function prepareHeatLossPlotData(config, daily_data) {
 
             if (heatValue > 0 && deltaT > config.minDeltaT) {
                 let groupKey = "all_data"; // Default if splitting is disabled
-                let groupLabel = 'Daily Heat Demand (' + config.bargraph_mode + (config.shouldUseFixedRoomT ? ', Fixed T_in=' + config.fixedRoomTValue + '°C' : '') + ')';
+                let groupLabel = 'Daily Heat Demand<br>(' + config.bargraph_mode + (config.shouldUseFixedRoomT ? ', Fixed T_in=' + config.fixedRoomTValue + '°C' : '') + ')';
                 // groupColor removed
 
                 // --- Determine Group Key if Splitting ---
@@ -316,9 +316,9 @@ function calculatePlotlyRegressionTrace(xValues, yValues, traceNamePrefix, color
         const { slope, intercept, r2 } = regressionResult;
 
         // Format label string using the calculated r2
-        regressionLabel = `HLC=${(slope * 1000).toFixed(1)} W/K` +
-                          `, Int=${(intercept * 1000).toFixed(1)} W` +
-                          ` (R²=${r2 !== undefined && r2 !== null ? r2.toFixed(3) : 'N/A'}, N=${xValues.length})`;
+        regressionLabel = `HLC=${(slope * 1000).toFixed(0)} W/K` +
+                          `, Int=${(intercept * 1000).toFixed(0)} W` +
+                          ` (R²=${r2 !== undefined && r2 !== null ? r2.toFixed(2) : 'N/A'})`;
 
 
         // --- Determine the actual range for the line segment [startX, endX] (respecting y >= 0 and plot bounds) ---
@@ -566,7 +566,7 @@ function plotHeatLossScatter() {
                          cmax: overallMaxSolar,
                          colorbar: {
                              title: {
-                                 text: 'Solar Gain<br>(kWh/day)', // Add units, allow line break
+                                 text: 'Solar Gain (kWh/day)', // Add units, allow line break
                                  side: 'right'
                              }
                          },
@@ -623,7 +623,7 @@ function plotHeatLossScatter() {
                 );
                 if (regressionTrace) {
                      // Prepend group label to the detailed regression fit label for clarity
-                     regressionTrace.name = `${group.label} Fit: ${regressionTrace.name}`;
+                     regressionTrace.name = `${group.label} Fit:<br>${regressionTrace.name}`;
                      regressionTrace.legendgroup = groupKey; // Match legend group
                      // Optionally shorten the scatter name if the fit line has full details
                      // scatterTrace.name = group.label;
@@ -633,6 +633,7 @@ function plotHeatLossScatter() {
                 // Collect all points for a single overall regression
                 allXValues.push(...group.xValues);
                 allYValues.push(...group.yValues);
+                allSolarValues.push(...group.solarValues); 
             }
         }
     }
@@ -648,7 +649,7 @@ function plotHeatLossScatter() {
             35
         );
         if (overallRegressionTrace) {
-             overallRegressionTrace.name = `Overall Fit: ${overallRegressionTrace.name}`; // Add prefix
+             overallRegressionTrace.name = `Overall Fit:<br>${overallRegressionTrace.name}`; // Add prefix
             plotData.push(overallRegressionTrace);
         } else {
               // Warning already logged in calculatePlotlyRegressionTrace or linearRegression
@@ -684,5 +685,3 @@ function plotHeatLossScatter() {
         plotDiv.html("<div style='text-align:center; padding: 50px; color:red;'>Error generating plot. Check console.</div>");
     }
 }
-
-
