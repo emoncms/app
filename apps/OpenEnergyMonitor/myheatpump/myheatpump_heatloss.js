@@ -222,7 +222,7 @@ function prepareHeatLossPlotData(config, daily_data) {
             }
         }
         // --- END: Get Solar Value ---
-        console.log(qualityHeatDataArray[i]);
+
         // Check validity
         if (heatValue !== null && typeof heatValue === 'number' && !isNaN(heatValue) &&
             insideTValue !== null && typeof insideTValue === 'number' && !isNaN(insideTValue) &&
