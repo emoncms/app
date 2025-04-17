@@ -471,7 +471,9 @@ function get_quality($data) {
     $count = count($data);
     if ($count<1) return 0;
 
-    if (!isset($data[0])) return 0;
+    # If only the first point is missing, this returns a total quality of 0
+    # this is wrong
+    # if (!isset($data[0])) return 0;
     
     $null_count = 0;
     for ($pos = 0; $pos < $count; $pos++) {
