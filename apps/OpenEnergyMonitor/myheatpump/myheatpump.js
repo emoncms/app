@@ -727,6 +727,21 @@ $("#heatloss_solar_gain_color").on('change', function() {
     }
 });
 
+// 8. Minimum Quality Input Change
+$("#heatloss_min_quality").on('input change', function() {
+    // Only replot if the panel is actually visible
+    if ($("#heatloss-block").is(":visible")) {
+        plotHeatLossScatter(); // Call the plotting function (defined in heatloss.js)
+    }
+});
+
+// 8. Minimum Heat Input Change
+$("#heatloss_min_heat").on('input change', function() {
+    // Only replot if the panel is actually visible
+    if ($("#heatloss-block").is(":visible")) {
+        plotHeatLossScatter(); // Call the plotting function (defined in heatloss.js)
+    }
+});
 // --- End Heat Loss Control Event Listeners ---
 
 $("#show_dhw_temp").click(function () {

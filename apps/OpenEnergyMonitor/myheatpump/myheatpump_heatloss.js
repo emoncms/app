@@ -74,11 +74,27 @@ function getHeatLossInputs() {
      // Color by solar gain?
     config.solarColoringEnabled = $("#heatloss_solar_gain_color").is(":checked");
 
+    // filtering parameters
+    config.minQuality = parseFloat($("#heatloss_min_quality").val());
+    if (isNaN(config.minQuality)) {
+        console.warn("Heat Loss Plot: Invalid Minimum Quality input, using no minimum.");
+        config.minQuality = 0;
+    }
+
+    config.minHeat = parseFloat($("#heatloss_min_heat").val());
+    if (isNaN(config.minHeat)) {
+        console.warn("Heat Loss Plot: Invalid Minimum Heat input, using no minimum.");
+        config.minHeat = 0;
+    }
+
     // Keys for accessing data
     config.heatKey = config.bargraph_mode + "_heat_kwh";
     config.insideTKey = "combined_roomT_mean";
     config.outsideTKey = "combined_outsideT_mean";
     config.solarEKey = "combined_solar_kwh";
+    config.quality_heatKey = "quality_heat";
+    config.quality_insideTKey = "quality_roomT";
+    config.quality_outsideTKey = "quality_outsideT";
 
     console.log("Heat Loss Inputs:", config);
     return config;
@@ -156,7 +172,8 @@ function prepareHeatLossPlotData(config, daily_data) {
     const outsideTMap = new Map(daily_data[config.outsideTKey]);
     const insideTMap = (!config.shouldUseFixedRoomT && daily_data[config.insideTKey]) ? new Map(daily_data[config.insideTKey]) : null;
     const heatDataArray = daily_data[config.heatKey];
-    
+    const qualityHeatDataArray = daily_data[config.quality_heatKey];
+
     // --- START: Fetch and Map Solar Data ---
     const solarDataArray = daily_data[config.solarEKey];
     let solarDataMap = null;
@@ -183,7 +200,7 @@ function prepareHeatLossPlotData(config, daily_data) {
     for (let i = 0; i < heatDataArray.length; i++) {
         const timestamp = heatDataArray[i][0]; // Assuming timestamp is in milliseconds
         const heatValue = heatDataArray[i][1] / 24.0; // kWh to kW
-
+        const qualityValue = qualityHeatDataArray[i][1];
         const outsideTValue = outsideTMap.get(timestamp);
         let insideTValue;
 
@@ -205,11 +222,12 @@ function prepareHeatLossPlotData(config, daily_data) {
             }
         }
         // --- END: Get Solar Value ---
-
+        console.log(qualityHeatDataArray[i]);
         // Check validity
         if (heatValue !== null && typeof heatValue === 'number' && !isNaN(heatValue) &&
             insideTValue !== null && typeof insideTValue === 'number' && !isNaN(insideTValue) &&
-            outsideTValue !== null && typeof outsideTValue === 'number' && !isNaN(outsideTValue))
+            outsideTValue !== null && typeof outsideTValue === 'number' && !isNaN(outsideTValue) &&
+            qualityValue >= config.minQuality && heatValue >= config.minHeat / 24.0)
         {
             const deltaT = insideTValue - outsideTValue;
 

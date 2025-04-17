@@ -511,6 +511,15 @@ global $path, $session, $v;
             </div>
             <!-- END: New Control Group 4 -->    
 
+            <!-- Control Group 5: Filter Controls -->
+            <div class="input-append" style="margin-top:5px;">
+                <input type="number" id="heatloss_min_quality" class="heatloss-control-input" value="95" step="1" style="width:50px; text-align:center;">
+                <span class="add-on">Minimum Quality %</span>
+            </div>
+            <div class="input-append" style="margin-top:5px;">
+                <input type="number" id="heatloss_min_heat" class="heatloss-control-input" value="0" step="1" style="width:50px; text-align:center;">
+                <span class="add-on">Minimum Heat kWh</span>
+            </div>
       
             <!-- START: Multilinear Regression Results Text Box -->
             <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
