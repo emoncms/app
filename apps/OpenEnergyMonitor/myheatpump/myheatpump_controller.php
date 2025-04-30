@@ -15,7 +15,7 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 function myheatpump_app_controller($route,$app,$appconfig,$apikey)
 {
     global $path, $session, $settings, $mysqli, $redis, $user;
-    $v = 1;
+    $v = 2;
 
     if (isset($app->userid) && !$user_timezone = $user->get_timezone($app->userid)) {
         $user_timezone = 'Europe/London';
@@ -76,7 +76,9 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
                 "heatpump_outsideT",
                 "heatpump_dhw",
                 "heatpump_ch",
-                "heatpump_targetT"
+                "heatpump_targetT",
+                "heatpump_dhwT",
+                "heatpump_dhwTargetT",
             );
 
             require_once "Modules/feed/feed_model.php";

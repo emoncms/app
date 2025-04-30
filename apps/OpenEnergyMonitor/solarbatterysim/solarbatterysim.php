@@ -512,7 +512,7 @@ function process_month(d) {
         // Charging when there is excess solar 
         if (solar>use) charge = solar-use;
         // Offpeak / night time charge
-        if (charging_offpeak) charge = input.battery_max_charge_rate;
+        if (charging_offpeak && offpeak) charge = input.battery_max_charge_rate;
         
         if (charge>0) {
             if (charge>input.battery_max_charge_rate) charge = input.battery_max_charge_rate;
