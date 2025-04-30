@@ -15,7 +15,7 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 function myheatpump_app_controller($route,$app,$appconfig,$apikey)
 {
     global $path, $session, $settings, $mysqli, $redis, $user;
-    $v = 1;
+    $v = 2;
 
     if (!$user_timezone = $user->get_timezone($session['userid'])) {
         $user_timezone = 'Europe/London';
