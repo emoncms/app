@@ -194,4 +194,4 @@ global $path, $session, $v;
     config.db = <?php echo json_encode($config); ?>;
 
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/co2monitor/co2monitor.js?v=4"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/co2monitor/co2monitor.js?v=5"></script>

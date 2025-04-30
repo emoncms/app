@@ -17,7 +17,7 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
     global $path, $session, $settings, $mysqli, $redis, $user;
     $v = 1;
 
-    if (!$user_timezone = $user->get_timezone($session['userid'])) {
+    if (isset($app->userid) && !$user_timezone = $user->get_timezone($app->userid)) {
         $user_timezone = 'Europe/London';
     }
     if (is_numeric($user_timezone)) $user_timezone = "Europe/London";
