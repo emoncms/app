@@ -436,7 +436,7 @@ global $path, $session, $v;
     <div class="row-fluid">
       <div class="span7 xapp-config-description">
         <div class="xapp-config-description-inner text-light">
-          <h2 class="app-config-title text-primary"><?php echo _('My Heatpump'); ?></h2>
+          <h2 class="app-config-title text-primary"><?php echo tr('My Heatpump'); ?></h2>
           <p class="lead">The My Heatpump app can be used to explore the performance of a heatpump including, electricity consumption, heat output, COP and system temperatures.</p>
           <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
           <p><strong class="text-white">Cumulative kWh</strong> feeds can be created from power feeds using the power_to_kwh input processor, which converts power data (measured in watts) into energy consumption data (measured in kWh).</p>

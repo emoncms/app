@@ -59,20 +59,20 @@ global $path, $session, $v;
 <!-- Top navigation bar -->
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="fuelmix btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo _('Fuel mix history') ?>">
-                <span class="d-xs-none"><?php echo _("Pwr") ?></span>
-                <span class="d-none d-xs-inline-block"><?php echo _("UK FUEL MIX") ?></span>
+        <li><button class="fuelmix btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo tr('Fuel mix history') ?>">
+                <span class="d-xs-none"><?php echo tr("Pwr") ?></span>
+                <span class="d-none d-xs-inline-block"><?php echo tr("UK FUEL MIX") ?></span>
             </button></li>
-        <li><button class="forecast active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo _('Wind & Solar forecast') ?>">
-                <span class="d-xs-none"><?php echo _("Pwr") ?></span>
-                <span class="d-none d-xs-inline-block"><?php echo _("FORECAST") ?></span>
+        <li><button class="forecast active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo tr('Wind & Solar forecast') ?>">
+                <span class="d-xs-none"><?php echo tr("Pwr") ?></span>
+                <span class="d-none d-xs-inline-block"><?php echo tr("FORECAST") ?></span>
             </button></li>
         </ul>
     <ul class="text-right nav nav-pills mb-0">
-        <li><button class="btn btn-large btn-link btn-inverse config-open" title="<?php echo _('Edit') ?>"><svg class="icon">
+        <li><button class="btn btn-large btn-link btn-inverse config-open" title="<?php echo tr('Edit') ?>"><svg class="icon">
                     <use xlink:href="#icon-wrench"></use>
                 </svg></button></li>
-        <li><button class="btn btn-large btn-link btn-inverse config-close hide" title="<?php echo _('Close') ?>"><svg class="icon">
+        <li><button class="btn btn-large btn-link btn-inverse config-close hide" title="<?php echo tr('Close') ?>"><svg class="icon">
                     <use xlink:href="#icon-close"></use>
                 </svg></button></li>
     </ul>
@@ -106,7 +106,7 @@ global $path, $session, $v;
         <div class="row-fluid">
             <div class="span7 xapp-config-description">
                 <div class="xapp-config-description-inner text-light">
-                    <h2 class="app-config-title text-primary"><?php echo _('UK Grid Visualisation'); ?></h2>
+                    <h2 class="app-config-title text-primary"><?php echo tr('UK Grid Visualisation'); ?></h2>
                     <p class="lead">Explore the UK grid fuel mix and wind and solar forecast.</p>
                 </div>
             </div>

@@ -176,7 +176,7 @@
     <div class="row-fluid">
         <div class="span7 app-config-description">
             <div class="app-config-description-inner text-light">
-                <h2 class="app-config-title text-primary"><?php echo _('Time of Use'); ?></h2>
+                <h2 class="app-config-title text-primary"><?php echo tr('Time of Use'); ?></h2>
                 <p class="lead">The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time.</p>
                 <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                 <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>

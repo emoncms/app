@@ -87,16 +87,16 @@ global $path, $session, $v;
 <!-- Top navigation bar -->
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="viewpower active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo _('Power View') ?>">
-                <span class="d-xs-none"><?php echo _("Pwr") ?></span>
-                <span class="d-none d-xs-inline-block"><?php echo _("Air change rate calculator from CO2 data") ?></span>
+        <li><button class="viewpower active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo tr('Power View') ?>">
+                <span class="d-xs-none"><?php echo tr("Pwr") ?></span>
+                <span class="d-none d-xs-inline-block"><?php echo tr("Air change rate calculator from CO2 data") ?></span>
             </button></li>
     </ul>
     <ul class="text-right nav nav-pills mb-0">
-        <li><button class="btn btn-large btn-link btn-inverse config-open" title="<?php echo _('Edit') ?>"><svg class="icon">
+        <li><button class="btn btn-large btn-link btn-inverse config-open" title="<?php echo tr('Edit') ?>"><svg class="icon">
                     <use xlink:href="#icon-wrench"></use>
                 </svg></button></li>
-        <li><button class="btn btn-large btn-link btn-inverse config-close hide" title="<?php echo _('Close') ?>"><svg class="icon">
+        <li><button class="btn btn-large btn-link btn-inverse config-close hide" title="<?php echo tr('Close') ?>"><svg class="icon">
                     <use xlink:href="#icon-close"></use>
                 </svg></button></li>
     </ul>
@@ -106,7 +106,7 @@ global $path, $session, $v;
 <div id="app-block" style="display:none">
     <!--
     <div class="d-flex justify-content-between">
-        <h5 class="electric-title text-md-larger text-light"><?php echo _('CO2') ?>: <span id="powernow">0</span> <span class="power-unit"> ppm</span></h5>
+        <h5 class="electric-title text-md-larger text-light"><?php echo tr('CO2') ?>: <span id="powernow">0</span> <span class="power-unit"> ppm</span></h5>
     </div>
 -->
 
@@ -116,9 +116,9 @@ global $path, $session, $v;
     </div>
 
     <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start d-flex justify-content-stretch btn-group">
-        <button class='visnav time btn btn-inverse btn-link btn-large py-1 px-2' time='24'><?php echo _('D') ?></button>
-        <button class='visnav time btn btn-inverse btn-link btn-large py-1 px-2' time='168'><?php echo _('W') ?></button>
-        <button class='visnav time btn btn-inverse btn-link btn-large py-1 px-2' time='720'><?php echo _('M') ?></button>
+        <button class='visnav time btn btn-inverse btn-link btn-large py-1 px-2' time='24'><?php echo tr('D') ?></button>
+        <button class='visnav time btn btn-inverse btn-link btn-large py-1 px-2' time='168'><?php echo tr('W') ?></button>
+        <button class='visnav time btn btn-inverse btn-link btn-large py-1 px-2' time='720'><?php echo tr('M') ?></button>
         <button id='zoomin' class='visnav btn btn-inverse btn-link btn-large py-1 px-2' >+</button>
         <button id='zoomout' class='visnav btn btn-inverse btn-link btn-large py-1 px-2' >-</button>
         <button id='left' class='visnav btn btn-inverse btn-link btn-large py-1 px-2' >&lt;</button>
@@ -148,11 +148,11 @@ global $path, $session, $v;
             <tr>
                 <th></th>
                 <th>Name</th>
-                <th scope="col" class="average"><?php echo _('Volume') ?></th>
-                <th scope="col" class="average"><?php echo _('Mean CO2') ?></th>
-                <th scope="col" class="decay hide"><?php echo _('Baseline CO2') ?></th>
-                <th scope="col" class="decay hide"><?php echo _('Air change rate') ?></th>
-                <th scope="col" class="decay hide"><?php echo _('R2') ?></th>
+                <th scope="col" class="average"><?php echo tr('Volume') ?></th>
+                <th scope="col" class="average"><?php echo tr('Mean CO2') ?></th>
+                <th scope="col" class="decay hide"><?php echo tr('Baseline CO2') ?></th>
+                <th scope="col" class="decay hide"><?php echo tr('Air change rate') ?></th>
+                <th scope="col" class="decay hide"><?php echo tr('R2') ?></th>
                 <th class="decay"></th>
             </tr>
             <tbody id="sensors_list"></tbody>
@@ -171,7 +171,7 @@ global $path, $session, $v;
         <div class="row-fluid">
             <div class="span7 xapp-config-description">
                 <div class="xapp-config-description-inner text-light">
-                    <h2 class="app-config-title text-primary"><?php echo _('CO2 Monitor'); ?></h2>
+                    <h2 class="app-config-title text-primary"><?php echo tr('CO2 Monitor'); ?></h2>
                     <p class="lead">Calculate room air change rates form CO2 decay curves.</p>
                     <img src="<?php echo $path; ?><?php echo $appdir; ?>preview.png" class="img-rounded">
                 </div>

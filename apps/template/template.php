@@ -37,16 +37,16 @@ global $path, $session, $v;
 <!-- Top navigation bar -->
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="viewpower active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo _('Power View') ?>">
-                <span class="d-xs-none"><?php echo _("Pwr") ?></span>
-                <span class="d-none d-xs-inline-block"><?php echo _("Power") ?></span>
+        <li><button class="viewpower active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo tr('Power View') ?>">
+                <span class="d-xs-none"><?php echo tr("Pwr") ?></span>
+                <span class="d-none d-xs-inline-block"><?php echo tr("Power") ?></span>
             </button></li>
     </ul>
     <ul class="text-right nav nav-pills mb-0">
-        <li><button class="btn btn-large btn-link btn-inverse config-open" title="<?php echo _('Edit') ?>"><svg class="icon">
+        <li><button class="btn btn-large btn-link btn-inverse config-open" title="<?php echo tr('Edit') ?>"><svg class="icon">
                     <use xlink:href="#icon-wrench"></use>
                 </svg></button></li>
-        <li><button class="btn btn-large btn-link btn-inverse config-close hide" title="<?php echo _('Close') ?>"><svg class="icon">
+        <li><button class="btn btn-large btn-link btn-inverse config-close hide" title="<?php echo tr('Close') ?>"><svg class="icon">
                     <use xlink:href="#icon-close"></use>
                 </svg></button></li>
     </ul>
@@ -56,11 +56,11 @@ global $path, $session, $v;
 <div id="app-block" style="display:none">
     <div class="d-flex justify-content-between">
         <div>
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('POWER') ?></h5>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('POWER') ?></h5>
             <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span id="powernow">0</span><span class="power-unit">W</span></h2>
         </div>
         <div class="text-xs-right">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('ENERGY') ?></h5>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('ENERGY') ?></h5>
             <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary "><span id="kwhwindow">---</span><span class="power-unit">kWh</span></h2>
         </div>
     </div>
@@ -78,7 +78,7 @@ global $path, $session, $v;
         <div class="row-fluid">
             <div class="span7 xapp-config-description">
                 <div class="xapp-config-description-inner text-light">
-                    <h2 class="app-config-title text-primary"><?php echo _('Template'); ?></h2>
+                    <h2 class="app-config-title text-primary"><?php echo tr('Template'); ?></h2>
                     <p class="lead">A basic app example useful for developing new apps.</p>
                     <img src="<?php echo $path; ?><?php echo $appdir; ?>preview.png" class="img-rounded">
                 </div>

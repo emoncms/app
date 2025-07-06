@@ -107,7 +107,7 @@ padding:10px;
     <div class="row-fluid">
         <div class="span7 app-config-description">
             <div class="app-config-description-inner text-light">
-                <h2 class="app-config-title text-primary"><?php echo _('Cost Comparison'); ?></h2>
+                <h2 class="app-config-title text-primary"><?php echo tr('Cost Comparison'); ?></h2>
                 <p class="lead">The Cost Comparison app allows you to compare your energy usage against energy suppliers tariffs including new time of use tariffs.</p>
                 <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                 <p><strong>Note:</strong> If you have solar or renewable energy generation then use the import_kwh feed to view the actual cost based on energy brought from the grid</p>

@@ -149,13 +149,13 @@
 
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="viewhistory btn btn-large btn-link btn-inverse" title="<?php echo _('View History') ?>">
-            <span class="d-xs-none"><?php echo _("Hist") ?></span>
-            <span class="d-none d-xs-inline"><?php echo _("History") ?></span>
+        <li><button class="viewhistory btn btn-large btn-link btn-inverse" title="<?php echo tr('View History') ?>">
+            <span class="d-xs-none"><?php echo tr("Hist") ?></span>
+            <span class="d-none d-xs-inline"><?php echo tr("History") ?></span>
         </button></li>
-        <li><button class="balanceline btn btn-large btn-link btn-inverse" title="<?php echo _('Show Balance') ?>">
-            <span class="d-xs-none"><?php echo _("Bal") ?></span>
-            <span class="d-none d-xs-inline"><?php echo _("Balance") ?></span>
+        <li><button class="balanceline btn btn-large btn-link btn-inverse" title="<?php echo tr('Show Balance') ?>">
+            <span class="d-xs-none"><?php echo tr("Bal") ?></span>
+            <span class="d-none d-xs-inline"><?php echo tr("Balance") ?></span>
         </li>
     </ul>
     <?php include(dirname(__DIR__).'/config-nav.php'); ?>
@@ -165,15 +165,15 @@
 <section id="app-block" style="display:none" class="block">
     <div class="d-flex justify-content-between">
         <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('HOUSE') ?></h5>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('HOUSE') ?></h5>
             <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-info"><span class="housenow">0</span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light px-1"><?php echo _('DIVERT') ?></h5>
+            <h5 class="electric-title mb-0 text-md-larger text-light px-1"><?php echo tr('DIVERT') ?></h5>
             <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-quaternary"><span class="divertnow">-</span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('TOTAL USE') ?></h5>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('TOTAL USE') ?></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
@@ -183,7 +183,7 @@
             </h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('SOLAR') ?></h5>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('SOLAR') ?></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-warning "><span class="generationnow"></span><span class="power-unit"></span></h2>
         </div>
     </div>
@@ -303,7 +303,7 @@
         <div class="row-fluid">
             <div class="span7 xapp-config-description">
                 <div class="xapp-config-description-inner text-light">
-                    <h2 class="app-config-title text-warning"><?php echo _('My Solar Divert'); ?></h2>
+                    <h2 class="app-config-title text-warning"><?php echo tr('My Solar Divert'); ?></h2>
                     <p class="lead">
                     The My Solar with Divert app can be used to explore onsite solar (and optionally wind) generation, self consumption, export and building consumption.</p>
                     <p>It is designed for users who divert some or all of their excess generated power to something. For example an immersion heater or electric car. It shows all of this both in realtime with a moving power graph view and historically with a daily and monthly bargraph.
@@ -325,7 +325,7 @@
 <script>
 function getTranslations(){
     return {
-        'Display power as kW': "<?php echo _('Display power as kW') ?>",
+        'Display power as kW': "<?php echo tr('Display power as kW') ?>",
     }
 }
 </script>
@@ -363,7 +363,7 @@ config.app = {
     "wind_kwh":{"optional":true, "type":"feed", "autoname":"wind_kwh", "description":"Cumulative wind generation in kWh"},
     "divert_kwh":{"optional":true, "type":"feed", "autoname":"divert_kwh", "description":"Cumulative divert energy in kWh"},
     "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "description":"Cumulative grid import in kWh"},
-    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")},
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":tr("Display power as kW")},
     //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
     "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
 }

@@ -59,21 +59,21 @@
 
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="viewpower active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo _('Power View') ?>">
-            <span class="d-xs-none"><?php echo _("Pwr") ?></span>
-            <span class="d-none d-xs-inline-block"><?php echo _("Power") ?></span>
+        <li><button class="viewpower active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo tr('Power View') ?>">
+            <span class="d-xs-none"><?php echo tr("Pwr") ?></span>
+            <span class="d-none d-xs-inline-block"><?php echo tr("Power") ?></span>
         </button></li>
-        <li><button class="viewhistory btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo _('View History') ?>">
-            <span class="d-xs-none"><?php echo _("Hist") ?></span>
-            <span class="d-none d-xs-inline-block"><?php echo _("History") ?></span>
+        <li><button class="viewhistory btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo tr('View History') ?>">
+            <span class="d-xs-none"><?php echo tr("Hist") ?></span>
+            <span class="d-none d-xs-inline-block"><?php echo tr("History") ?></span>
         </button></li>
-        <li><button class="balanceline btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo _('Show Balance') ?>">
-            <span class="d-xs-none"><?php echo _("Bal") ?></span>
-            <span class="d-none d-xs-inline-block"><?php echo _("Balance") ?></span>
+        <li><button class="balanceline btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo tr('Show Balance') ?>">
+            <span class="d-xs-none"><?php echo tr("Bal") ?></span>
+            <span class="d-none d-xs-inline-block"><?php echo tr("Balance") ?></span>
         </button></li>
-        <li><button id='show-all' class="hide bargraph-viewall btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo _('Show All') ?>">
-            <span class="d-xs-none"><?php echo _("All") ?></span>
-            <span class="d-none d-xs-inline-block"><?php echo _("Show All") ?></span>
+        <li><button id='show-all' class="hide bargraph-viewall btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo tr('Show All') ?>">
+            <span class="d-xs-none"><?php echo tr("All") ?></span>
+            <span class="d-none d-xs-inline-block"><?php echo tr("Show All") ?></span>
         </button></li>
     </ul>
     <?php include(dirname(__DIR__).'/config-nav.php'); ?>
@@ -83,7 +83,7 @@
 <section id="app-block" style="display:none" class="block">
     <div class="d-flex justify-content-between">
         <div>
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('USE NOW') ?></h5>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('USE NOW') ?></h5>
             <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow">0</span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
@@ -91,7 +91,7 @@
             <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-right">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('SOLAR PV') ?></h5>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('SOLAR PV') ?></h5>
             <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-warning "><span class="solarnow"></span><span class="power-unit"></span></h2>
         </div>
     </div>
@@ -104,21 +104,21 @@
     
     <div id="breakdown" class="d-flex justify-content-between py-lg-3 text-light">
         <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('USE') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo tr('USE') ?></h5>
             <h2 class="appbox-value total_use_kwh my-0">--</h2>
             <h5 class="appbox-units my-0">
                 kWh
             </h5>
         </div>
         <div class="appbox mb-3 text-warning">
-            <h5 class="appbox-title mb-1 text-light text-md-larger px-1"><?php echo _('SOLAR') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-md-larger px-1"><?php echo tr('SOLAR') ?></h5>
             <h2 class="appbox-value total_solar_kwh my-0">--</h2>
             <h5 class="appbox-units my-0">
                 kWh
             </h5>
         </div>
         <div class="appbox mb-3 text-success">
-            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('DIRECT') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo tr('DIRECT') ?></h5>
             <h2 class="appbox-value total_use_direct_prc my-0">--</h2>
             <h5 class="appbox-units my-0">
                 <span id="total_use_direct_kwh"></span>
@@ -126,7 +126,7 @@
             </h5>
         </div>
         <div class="appbox mb-3 text-tertiary">
-            <h5 class="appbox-title mb-1 text-light text-md-larger px-1"><?php echo _('EXPORT') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-md-larger px-1"><?php echo tr('EXPORT') ?></h5>
             <h2 class="appbox-value total_export_prc my-0">--</h2>
             <h5 class="appbox-units my-0">
                 <span id="total_export_kwh"></span>
@@ -134,7 +134,7 @@
             </h5>
         </div>
         <div class="appbox mb-3 text-danger">
-            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('GRID') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo tr('GRID') ?></h5>
             <h2 class="appbox-value total_import_prc my-0">--</h2>
             <h5 class="appbox-units my-0">
                 <span id="total_import_kwh"></span>
@@ -152,7 +152,7 @@
         <div class="row-fluid">
             <div class="span7 xapp-config-description">
                 <div class="xapp-config-description-inner text-light">
-                    <h2 class="app-config-title text-warning"><?php echo _('My Solar'); ?></h2>
+                    <h2 class="app-config-title text-warning"><?php echo tr('My Solar'); ?></h2>
                     <p class="lead">The My Solar app can be used to explore onsite solar generation, self consumption, export and building consumption both in realtime with a moving power graph view and historically with a daily and monthly bargraph.</p>
                     <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                     <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
@@ -169,16 +169,16 @@
 <script>
 function getTranslations(){
     return {
-        'House or building use in watts': "<?php echo _('House or building use in watts') ?>",
-        'Solar pv generation in watts': "<?php echo _('Solar pv generation in watts') ?>",
-        'Cumulative use in kWh': "<?php echo _('Cumulative use in kWh') ?>",
-        'Cumulative solar generation in kWh': "<?php echo _('Cumulative solar generation in kWh') ?>",
-        'Cumulative grid import in kWh': "<?php echo _('Cumulative grid import in kWh') ?>",
-        'Display power as kW': "<?php echo _('Display power as kW') ?>",
-        'Display solar power as 0 below this threshold in w': "<?php echo _('Display solar power as 0 below this threshold in w') ?>",
-        'PERFECT BALANCE': "<?php echo _('PERFECT BALANCE') ?>",
-        'EXPORTING': "<?php echo _('EXPORTING') ?>",
-        'IMPORTING': "<?php echo _('IMPORTING') ?>",
+        'House or building use in watts': "<?php echo tr('House or building use in watts') ?>",
+        'Solar pv generation in watts': "<?php echo tr('Solar pv generation in watts') ?>",
+        'Cumulative use in kWh': "<?php echo tr('Cumulative use in kWh') ?>",
+        'Cumulative solar generation in kWh': "<?php echo tr('Cumulative solar generation in kWh') ?>",
+        'Cumulative grid import in kWh': "<?php echo tr('Cumulative grid import in kWh') ?>",
+        'Display power as kW': "<?php echo tr('Display power as kW') ?>",
+        'Display solar power as 0 below this threshold in w': "<?php echo tr('Display solar power as 0 below this threshold in w') ?>",
+        'PERFECT BALANCE': "<?php echo tr('PERFECT BALANCE') ?>",
+        'EXPORTING': "<?php echo tr('EXPORTING') ?>",
+        'IMPORTING': "<?php echo tr('IMPORTING') ?>",
     }
 }
 </script>
@@ -207,14 +207,14 @@ if (!sessionwrite) $(".config-open").addClass('hide');
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "use":{"type":"feed", "autoname":"use", "description":_("House or building use in watts")},
-    "solar":{"type":"feed", "autoname":"solar", "description":_("Solar pv generation in watts")},
+    "use":{"type":"feed", "autoname":"use", "description":tr("House or building use in watts")},
+    "solar":{"type":"feed", "autoname":"solar", "description":tr("Solar pv generation in watts")},
     //"export":{"type":"feed", "autoname":"export", "engine":5, "description":"Exported solar in watts"},
-    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "description":_("Cumulative use in kWh")},
-    "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "description":_("Cumulative solar generation in kWh")},
-    "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "description":_("Cumulative grid import in kWh")},
-    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")},
-    "solar_disp_min":{"type":"value", "default":10, "name": "Solar Threshold", "description":_("Display solar power as 0 below this threshold in w")}
+    "use_kwh":{"optional":true, "type":"feed", "autoname":"use_kwh", "description":tr("Cumulative use in kWh")},
+    "solar_kwh":{"optional":true, "type":"feed", "autoname":"solar_kwh", "description":tr("Cumulative solar generation in kWh")},
+    "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "description":tr("Cumulative grid import in kWh")},
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":tr("Display power as kW")},
+    "solar_disp_min":{"type":"value", "default":10, "name": "Solar Threshold", "description":tr("Display solar power as 0 below this threshold in w")}
     //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
 };
 
@@ -461,17 +461,17 @@ function livefn()
     
     var balance = solar_now - use_now;
     if (balance==0) {
-        $(".balance-label").html(_("PERFECT BALANCE"));
+        $(".balance-label").html(tr("PERFECT BALANCE"));
         $(".balance").html("");
     }
     
     if (balance>0) {
-        $(".balance-label").text(_("EXPORTING"))
+        $(".balance-label").text(tr("EXPORTING"))
         $(".balance").parent()
         .removeClass('text-danger')
         .addClass('text-success')
     } else {
-        $(".balance-label").text(_("IMPORTING"))
+        $(".balance-label").text(tr("IMPORTING"))
         $(".balance").parent()
         .addClass('text-danger')
         .removeClass('text-success')

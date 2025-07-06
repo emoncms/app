@@ -108,7 +108,7 @@ global $path, $session, $v;
                         </table>
 
                         <div class="input-prepend input-append" style="padding-right:5px">
-                            <span class="add-on" style="width:50px"><?php echo _('Start') ?></span>
+                            <span class="add-on" style="width:50px"><?php echo tr('Start') ?></span>
                             <span id="datetimepicker1">
                                 <input id="request-start" data-format="dd/MM/yyyy hh:mm:ss" type="text" style="width:140px" />
                                 <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
@@ -116,7 +116,7 @@ global $path, $session, $v;
                         </div>
 
                         <div class="input-prepend input-append" style="padding-right:5px">
-                            <span class="add-on" style="width:50px"><?php echo _('End') ?></span>
+                            <span class="add-on" style="width:50px"><?php echo tr('End') ?></span>
                             <span id="datetimepicker2">
                                 <input id="request-end" data-format="dd/MM/yyyy hh:mm:ss" type="text" style="width:140px" />
                                 <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
@@ -163,7 +163,7 @@ global $path, $session, $v;
             <div class="row-fluid">
                 <div class="span7 appconfig-description">
                     <div class="appconfig-description-inner text-light">
-                        <h2 class="appconfig-title text-primary"><?php echo _('Octopus Agile'); ?></h2>
+                        <h2 class="appconfig-title text-primary"><?php echo tr('Octopus Agile'); ?></h2>
                         <p class="lead">Explore Octopus Agile tariff costs over time.</p>
                         <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                         <p><strong class="text-white">Import & Import kWh</strong> The standard naming for electricity imported from the grid in a household without solar PV is 'use' and 'use_kwh', this app expects 'import' and 'import_kwh' in order to provide compatibility with the Solar PV option as well. Select relevant house consumption feeds using the dropdown feed selectors as required. Feeds 'use_kwh' and 'solar_kwh' are optional.</p>

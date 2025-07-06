@@ -60,14 +60,14 @@ if ($session["read"] || $session["public_userid"]) {
 
         if (!$appconfig->app_table_exists) {
             $l2['notice'] = array(
-                "name"=>_('Please update database'),
+                "name"=>tr('Please update database'),
                 "href"=>"admin/db", 
                 "icon"=>"", 
                 "order"=>$_i
             );
         } else {
             $l2['new'] = array(
-                "name"=>_('New'),
+                "name"=>tr('New'),
                 "href"=>"app/new", 
                 "icon"=>"plus", 
                 "order"=>$_i

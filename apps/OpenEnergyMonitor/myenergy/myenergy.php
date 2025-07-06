@@ -16,8 +16,8 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script>
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="balanceline btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo _('Show Balance') ?>">
-            <?php echo _("Show Balance") ?>
+        <li><button class="balanceline btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo tr('Show Balance') ?>">
+            <?php echo tr("Show Balance") ?>
         </li>
     </ul>
     <?php include(dirname(__DIR__).'/config-nav.php'); ?>
@@ -27,7 +27,7 @@
 <section id="app-block" style="display:none" class="block">
     <div id="summary" class="d-flex justify-content-between">
         <div class="text-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('USE NOW') ?></h5>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('USE NOW') ?></h5>
             <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
         </div>
         <div class="text-center">
@@ -35,12 +35,12 @@
             <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span></h2>
         </div>
         <div class="text-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('RENEWABLE GEN') ?></h5>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('RENEWABLE GEN') ?></h5>
             <h2 class="power-value display-sm-4 display-md-3 display-lg-2 my-0 text-warning "><span class="gennow"></span><span class="power-unit"></span></h2>
 
             <h5 class="electric-title mt-0 mb-lg-3 text-md-larger ">
-                <span class="text-warning" title="<?php echo _('SOLAR') ?>"><span class="d-none d-sm-inline-block"><?php echo _('SOLAR') ?>: </span> <span class="solarnow">0</span><span class="power-unit"></span></span> | 
-                <span class="text-success" title="<?php echo _('WIND') ?>"><span class="d-none d-sm-inline-block"><?php echo _('WIND') ?>: </span> <span class="windnow">0</span><span class="power-unit"></span></span>
+                <span class="text-warning" title="<?php echo tr('SOLAR') ?>"><span class="d-none d-sm-inline-block"><?php echo tr('SOLAR') ?>: </span> <span class="solarnow">0</span><span class="power-unit"></span></span> | 
+                <span class="text-success" title="<?php echo tr('WIND') ?>"><span class="d-none d-sm-inline-block"><?php echo tr('WIND') ?>: </span> <span class="windnow">0</span><span class="power-unit"></span></span>
             </h5>
         </div>
     </div>
@@ -53,14 +53,14 @@
         
     <div id="breakdown" class="d-flex justify-content-between py-lg-3 text-light">
         <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('USE') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo tr('USE') ?></h5>
             <h2 class="appbox-value total_use_kwh my-0">--</h2>
             <h5 class="appbox-units my-0">
                 kWh
             </h5>
         </div>
         <div class="appbox mb-3 text-tertiary">
-            <h5 class="appbox-title mb-1 text-light text-md-larger px-1"><?php echo _('WIND') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-md-larger px-1"><?php echo tr('WIND') ?></h5>
             <h2 class="appbox-value total_wind_kwh my-0">--</h2>
             <h5 class="appbox-units my-0">
                 <span id="total_export_kwh"></span>
@@ -68,14 +68,14 @@
             </h5>
         </div>
         <div class="appbox mb-3 text-warning">
-            <h5 class="appbox-title mb-1 text-light text-md-larger px-1"><?php echo _('SOLAR') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-md-larger px-1"><?php echo tr('SOLAR') ?></h5>
             <h2 class="appbox-value total_solar_kwh my-0">--</h2>
             <h5 class="appbox-units my-0">
                 kWh
             </h5>
         </div>
         <div class="appbox mb-3 text-success">
-            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('DIRECT') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo tr('DIRECT') ?></h5>
             <h2 class="appbox-value total_use_direct_prc my-0">--</h2>
             <h5 class="appbox-units my-0">
                 <span id="total_use_direct_kwh"></span>
@@ -83,7 +83,7 @@
             </h5>
         </div>
         <div class="appbox mb-3 text-danger">
-            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo _('GRID') ?></h5>
+            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo tr('GRID') ?></h5>
             <h2 class="appbox-value total_use_via_store_kwh my-0">--</h2>
             <h5 class="appbox-units my-0">
                 <span id="total_import_kwh"></span>
@@ -98,7 +98,7 @@
     <div class="row-fluid">
         <div class="span7">
             <div class="text-light">
-                <h2 class="app-config-title text-warning"><?php echo _('My Solar'); ?> & <?php echo _('Wind'); ?></h2>
+                <h2 class="app-config-title text-warning"><?php echo tr('My Solar'); ?> & <?php echo tr('Wind'); ?></h2>
                 <p class="lead">This app extends the My Solar app by adding in a 'share of UK wind' estimate.</p>
                 <p>The share of wind estimate is calculated by using real-time electricity data from wind power in the uk and then scaling it so that the annual wind generation matches a percentage of annual household consumption. The default estimate assumes 60% or near 2000 kWh annually. This is close to the fuel mix quoted by two of the UK's leading green electricity suppliers.</p>
                 <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
@@ -116,10 +116,10 @@
 <script>
 function getTranslations(){
     return {
-        'House or building use in watts': "<?php echo _('House or building use in watts') ?>",
-        'Solar pv generation in watts': "<?php echo _('Solar pv generation in watts') ?>",
-        'kWh of wind energy bought annually': "<?php echo _('kWh of wind energy bought annually') ?>",
-        'Display power as kW': "<?php echo _('Display power as kW') ?>",
+        'House or building use in watts': "<?php echo tr('House or building use in watts') ?>",
+        'Solar pv generation in watts': "<?php echo tr('Solar pv generation in watts') ?>",
+        'kWh of wind energy bought annually': "<?php echo tr('kWh of wind energy bought annually') ?>",
+        'Display power as kW': "<?php echo tr('Display power as kW') ?>",
     }
 }
 </script>
@@ -147,10 +147,10 @@ if (!sessionwrite) $(".config-open").hide();
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "use":{"type":"feed", "autoname":"use", "description":_("House or building use in watts")},
-    "solar":{"optional":true, "type":"feed", "autoname":"solar", "description":_("Solar pv generation in watts")},
-    "windkwh":{"type":"value", "default":2000, "name": "kWh Wind", "description":_("kWh of wind energy bought annually")},
-    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
+    "use":{"type":"feed", "autoname":"use", "description":tr("House or building use in watts")},
+    "solar":{"optional":true, "type":"feed", "autoname":"solar", "description":tr("Solar pv generation in watts")},
+    "windkwh":{"type":"value", "default":2000, "name": "kWh Wind", "description":tr("kWh of wind energy bought annually")},
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":tr("Display power as kW")}
 };
 
 config.id = <?php echo $id; ?>;

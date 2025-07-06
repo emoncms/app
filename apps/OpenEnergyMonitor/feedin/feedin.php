@@ -51,7 +51,7 @@
     <div class="row-fluid">
         <div class="span7 app-config-description">
             <div class="app-config-description-inner text-light">
-                <h2 class="app-config-title text-primary"><?php echo _('Feed-in tariff'); ?></h2>
+                <h2 class="app-config-title text-primary"><?php echo tr('Feed-in tariff'); ?></h2>
                 <p class="lead">The feed-in tariff app is a simple home energy monitoring app to explore onsite energy generation, feed-in and self-consumption, as well as the buildings overall consumption and cost.</p>
                 <p><strong class="text-black">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                 <p><strong class="text-light">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>

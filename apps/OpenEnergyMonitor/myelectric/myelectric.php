@@ -15,8 +15,8 @@
 
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="btn btn-large btn-link btn-inverse myelectric-view-cost" ><?php echo _("Cost") ?></button></li>
-        <li><button class="btn btn-large btn-link btn-inverse myelectric-view-kwh active" ><?php echo _("kWh") ?></button></li>
+        <li><button class="btn btn-large btn-link btn-inverse myelectric-view-cost" ><?php echo tr("Cost") ?></button></li>
+        <li><button class="btn btn-large btn-link btn-inverse myelectric-view-kwh active" ><?php echo tr("kWh") ?></button></li>
     </ul>
     <?php include(dirname(__DIR__).'/config-nav.php'); ?>
 </nav>
@@ -24,13 +24,13 @@
 <section id="app-block" style="display:none">
     <div class="d-flex justify-content-between">
         <div>
-            <h5 class="electric-title mb-0 text-sm-larger text-light"><?php echo _('POWER NOW') ?></h5>
+            <h5 class="electric-title mb-0 text-sm-larger text-light"><?php echo tr('POWER NOW') ?></h5>
             <h2 class="power-value display-sm-4 display-sm-3 display-lg-2 mt-0 mb-lg-3 text-primary">
                 <span id="powernow">0</span>
             </h2>
         </div>
         <div class="text-xs-right">
-            <h5 class="electric-title mb-0 text-sm-larger text-light"><?php echo _('TODAY') ?></h5>
+            <h5 class="electric-title mb-0 text-sm-larger text-light"><?php echo tr('TODAY') ?></h5>
             <h2 class="power-value display-sm-4 display-sm-3 display-lg-2 mt-0 mb-lg-3 text-primary">
                 <span id="usetoday_units_a"></span>
                 <span id="usetoday"></span>
@@ -53,7 +53,7 @@
 
     <div id="breakdown" class="d-flex justify-content-between py-lg-2 text-light">
         <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title my-0 text-light text-sm-larger"><?php echo _('WEEK') ?></h5>
+            <h5 class="appbox-title my-0 text-light text-sm-larger"><?php echo tr('WEEK') ?></h5>
             <h3 class="appbox-value mb-0 text-sm-larger">
                 <span class="u1a"></span>
                 <span id="week_kwh"></span>
@@ -67,7 +67,7 @@
         </div>
 
         <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title my-0 text-light text-sm-larger"><?php echo _('MONTH') ?></h5>
+            <h5 class="appbox-title my-0 text-light text-sm-larger"><?php echo tr('MONTH') ?></h5>
             <h3 class="appbox-value mb-0 text-sm-larger">
                 <span class="u1a"></span>
                 <span id="month_kwh"></span>
@@ -81,7 +81,7 @@
         </div>
 
         <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title my-0 text-light text-sm-larger"><?php echo _('YEAR') ?></h5>
+            <h5 class="appbox-title my-0 text-light text-sm-larger"><?php echo tr('YEAR') ?></h5>
             <h3 class="appbox-value mb-0 text-sm-larger">
                 <span class="u1a"></span>
                 <span id="year_kwh"></span>
@@ -95,7 +95,7 @@
         </div>
 
         <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title my-0 text-light text-sm-larger"><?php echo _('ALL') ?></h5>
+            <h5 class="appbox-title my-0 text-light text-sm-larger"><?php echo tr('ALL') ?></h5>
             <h3 class="appbox-value mb-0 text-sm-larger">
                 <span class="u1a"></span>
                 <span id="alltime_kwh"></span>
@@ -117,7 +117,7 @@
         <div class="row-fluid">
             <div class="span9 appconfig-description">
                 <div class="appconfig-description-inner text-light">
-                    <h2 class="appconfig-title text-primary"><?php echo _('My Electric'); ?></h2>
+                    <h2 class="appconfig-title text-primary"><?php echo tr('My Electric'); ?></h2>
                     <p class="lead">The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time. It includes a real-time view and a historic kWh per day bar graph.</p>
                     <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                     <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
@@ -135,11 +135,11 @@
 <script>
 function getTranslations(){
     return {
-        'House or building use in watts': "<?php echo _('House or building use in watts') ?>",
-        'Cumulative use in kWh': "<?php echo _('Cumulative use in kWh') ?>",
-        'Unit cost of electricity e.g £/kWh': "<?php echo _('Unit cost of electricity e.g £/kWh') ?>",
-        'Currency symbol (£,$,€...)': "<?php echo _('Currency symbol (£,$,€...)') ?>",
-        'Display power as kW': "<?php echo _('Display power as kW') ?>",
+        'House or building use in watts': "<?php echo tr('House or building use in watts') ?>",
+        'Cumulative use in kWh': "<?php echo tr('Cumulative use in kWh') ?>",
+        'Unit cost of electricity e.g £/kWh': "<?php echo tr('Unit cost of electricity e.g £/kWh') ?>",
+        'Currency symbol (£,$,€...)': "<?php echo tr('Currency symbol (£,$,€...)') ?>",
+        'Display power as kW': "<?php echo tr('Display power as kW') ?>",
     }
 }
 </script>
@@ -172,7 +172,7 @@ config.app = {
     "use_kwh":{"type":"feed", "autoname":"use_kwh", "description":"Cumulative use in kWh"},
     "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity e.g £/kWh"},
     "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$,€...)"},
-    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":_("Display power as kW")}
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":tr("Display power as kW")}
 };
 
 config.id = <?php echo $id; ?>;

@@ -168,9 +168,9 @@
 
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="viewhistory btn btn-large btn-link btn-inverse" title="<?php echo _('View History') ?>">
-            <span class="d-xs-none"><?php echo _("Hist") ?></span>
-            <span class="d-none d-xs-inline"><?php echo _("History") ?></span>
+        <li><button class="viewhistory btn btn-large btn-link btn-inverse" title="<?php echo tr('View History') ?>">
+            <span class="d-xs-none"><?php echo tr("Hist") ?></span>
+            <span class="d-none d-xs-inline"><?php echo tr("History") ?></span>
         </button></li>
     </ul>
     <?php include(dirname(__DIR__).'/config-nav.php'); ?>
@@ -180,7 +180,7 @@
 <section id="app-block" style="display:none" class="block">
     <div class="d-flex justify-content-between">
         <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('USE') ?></h5>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('USE') ?></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
@@ -190,21 +190,21 @@
             </h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('SOLAR') ?></h5>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('SOLAR') ?></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-warning "><span class="generationnow"></span><span class="power-unit"></span></h2>
         </div>
     </div>
     <div class="d-flex justify-content-between">
         <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="battery_charge_discharge_title"><?php echo _('BATTERY POWER') ?></span></h5>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="battery_charge_discharge_title"><?php echo tr('BATTERY POWER') ?></span></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="battery_charge_discharge">-</span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="discharge_time_left_title"><?php echo _('BATTERY TIME LEFT') ?></span></h5>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="discharge_time_left_title"><?php echo tr('BATTERY TIME LEFT') ?></span></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="discharge_time_left">-</span></h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo _('STATE OF CHARGE') ?></h5>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('STATE OF CHARGE') ?></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="battery_soc">-</span>%</h2>
         </div>
     </div>
@@ -324,7 +324,7 @@
         <div class="row-fluid">
             <div class="span7 xappconfig-description">
                 <div class="xappconfig-description-inner text-light">
-                    <h2 class="appconfig-title text-warning"><?php echo _('My Solar & Battery'); ?></h2>
+                    <h2 class="appconfig-title text-warning"><?php echo tr('My Solar & Battery'); ?></h2>
                     <p class="lead">
                     This app can be used to explore onsite solar generation, self consumption, battery integration, export and building consumption.</p>
                     <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
@@ -344,7 +344,7 @@
 <script>
 function getTranslations(){
     return {
-        'Display power as kW': "<?php echo _('Display power as kW') ?>",
+        'Display power as kW': "<?php echo tr('Display power as kW') ?>",
     }
 }
 </script>

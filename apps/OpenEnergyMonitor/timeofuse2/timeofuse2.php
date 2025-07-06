@@ -166,7 +166,7 @@
     <div class="row-fluid">
         <div class="span7 app-config-description">
             <div class="app-config-description-inner text-light">
-                <h2 class="app-config-title text-primary"><?php echo _('Time of Use - flexible'); ?></h2>
+                <h2 class="app-config-title text-primary"><?php echo tr('Time of Use - flexible'); ?></h2>
                 <p class="lead">The "Time of Use - flexible" app is a simple home energy monitoring app for exploring home or building electricity consumption and cost over time. It allows you to track multiple electricity tariffs as used in Australia.</p>
                 <h3 class="text-white">Cumulative kWh</h3> 
                 <p> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
