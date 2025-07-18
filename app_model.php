@@ -58,7 +58,7 @@ class AppConfig
             
             // Replace all backslashes to avoid conflicts with paths on windows machines
             $file = str_replace('\\', '/', $file);
-            if(basename($file ,".json") == 'app') {
+            if(basename($file,".json") == 'app') {
                 $dir = dirname($file);
                 
                 $content = (array) json_decode(file_get_contents($file));
