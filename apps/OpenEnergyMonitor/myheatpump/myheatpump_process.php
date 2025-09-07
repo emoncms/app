@@ -324,7 +324,9 @@ function process_stats($data, $interval, $starting_power) {
 
         $dhw = false;
         if ($dhw_enable) {
-            $dhw = $data["heatpump_dhw"][$z];
+            if (isset($data["heatpump_dhw"][$z])) {
+                $dhw = $data["heatpump_dhw"][$z];
+            }
         }
 
         $cool = false;
@@ -514,7 +516,9 @@ function calculate_window_cops($data, $interval, $starting_power) {
 
         $dhw = false;
         if ($dhw_enable) {
-            $dhw = $data["heatpump_dhw"][$z];
+            if (isset($data["heatpump_dhw"][$z])) {
+                $dhw = $data["heatpump_dhw"][$z];
+            }
         }
 
         $cool = false;
@@ -632,7 +636,9 @@ function carnot_simulator($data, $starting_power) {
         
         $dhw = false;
         if ($dhw_enable) {
-            $dhw = $data["heatpump_dhw"][$z];
+            if (isset($data["heatpump_dhw"][$z])) {
+                $dhw = $data["heatpump_dhw"][$z];
+            }
         }
 
         $a = $flowT + $condensing_offset + 273;

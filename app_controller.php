@@ -16,7 +16,7 @@ function app_controller()
 {
     global $mysqli,$redis,$path,$session,$route,$user,$settings,$v;
     // Force cache reload of css and javascript
-    $v = 37;
+    $v = 38;
 
     $result = false;
 
@@ -194,18 +194,20 @@ function app_controller()
 
     // If we have an id then we can get the app
     if (isset($_GET['id'])) {
-        $app = $appconfig->get_app_by_id($_GET['id']);
+        $app = $appconfig->get_app_by_id((int)$_GET['id']);
 
-        // If public mode is enabled then check if the app is public
-        if ($public) {
-            if (!$app->public) {
-                $app = false;
-            }
-        // If public mode is not enabled then check if the app belongs to the user
-        // and is not listed as public
-        } else {
-            if ($app->userid != $userid && !$app->public) {
-                $app = false;
+        if ($app) {
+            // If public mode is enabled then check if the app is public
+            if ($public) {
+                if (isset($app->public) && !$app->public) {
+                    $app = false;
+                }
+            // If public mode is not enabled then check if the app belongs to the user
+            // and is not listed as public
+            } else {
+                if ($app->userid != $userid && !$app->public) {
+                    $app = false;
+                }
             }
         }
     }

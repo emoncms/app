@@ -26,7 +26,7 @@ if ($session["read"] || $session["public_userid"]) {
     //    $userid = $user->get_id_from_apikey($apikey);
     
     $l2 = array();
-    
+    $_i = 0;    
     if ($userid)
     {
         $apikey_str = "";
