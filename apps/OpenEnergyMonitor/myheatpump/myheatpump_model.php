@@ -336,19 +336,19 @@ class MyHeatPump {
         
         $result = array("start"=>0, "end"=>0);
 
-        if (isset($app->config->heatpump_elec)) {
+        if (isset($app->config->heatpump_elec) && $this->feed->exist($app->config->heatpump_elec)) {
             $meta = $this->feed->get_meta($app->config->heatpump_elec);
             $result['start'] = $meta->start_time;
             $result['end'] = $meta->end_time;
         }
 
-        if (isset($app->config->heatpump_heat)) {
+        if (isset($app->config->heatpump_heat) && $this->feed->exist($app->config->heatpump_heat)) {
             $meta = $this->feed->get_meta($app->config->heatpump_heat);
             if ($meta->start_time>$result['start']) $result['start'] = $meta->start_time;
             if ($meta->end_time<$result['end']) $result['end'] = $meta->end_time;
         }
 
-        if (isset($app->config->start_date) && $app->config->start_date>$result['start']) {
+        if (isset($app->config->start_date) && $app->config->start_date !== null && $app->config->start_date>$result['start']) {
             $result['start'] = $app->config->start_date*1;
         }
 

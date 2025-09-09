@@ -625,7 +625,7 @@ function carnot_simulator($data, $starting_power) {
         $flowT = $data["heatpump_flowT"][$z];
         $returnT = $data["heatpump_returnT"][$z];
         
-        if ($data["heatpump_outsideT"][$z] !== null) {
+        if (isset($data["heatpump_outsideT"][$z]) && $data["heatpump_outsideT"][$z] !== null) {
             $ambientT = $data["heatpump_outsideT"][$z];
         }
 
@@ -864,7 +864,9 @@ function process_weighted_average($data, $interval) {
         $outsideT = null;
 
         if ($outsideT_available) {
-            $outsideT = $data["heatpump_outsideT"][$z];
+            if (isset($data["heatpump_outsideT"][$z])) {
+                $outsideT = $data["heatpump_outsideT"][$z];
+            }
         }
 
         // if any of the values are null, skip this iteration
