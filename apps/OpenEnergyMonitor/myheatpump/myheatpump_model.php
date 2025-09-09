@@ -349,7 +349,9 @@ class MyHeatPump {
         }
 
         if (isset($app->config->start_date) && $app->config->start_date !== null && $app->config->start_date>$result['start']) {
-            $result['start'] = $app->config->start_date*1;
+            if (is_numeric($app->config->start_date)) {
+                $result['start'] = $app->config->start_date*1;
+            }
         }
 
         if ($result['start']==0) $result['start'] = false;
