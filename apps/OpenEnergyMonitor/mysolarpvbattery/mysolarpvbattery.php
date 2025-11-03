@@ -577,7 +577,7 @@ function livefn()
     var battery_discharge_now = parseInt(feeds[config.app.battery_discharge.value].value);
     
     var battery_soc_now = "---";
-    if (config.app.battery_soc.value) {
+    if (config.app.battery_soc.value && feeds[config.app.battery_soc.value] != undefined) {
         battery_soc_now = parseInt(feeds[config.app.battery_soc.value].value);
     }
     
@@ -1257,7 +1257,7 @@ $(function() {
 // App log
 // ----------------------------------------------------------------------
 function app_log (level, message) {
-    if (level=="ERROR") alert(level+": "+message);
+    // if (level=="ERROR") alert(level+": "+message);
     console.log(level+": "+message);
 }
 </script>

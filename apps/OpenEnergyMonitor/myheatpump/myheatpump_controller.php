@@ -92,7 +92,7 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
                     
                     $feed_meta = array();
                     $meta = $feed->get_meta($feedid);
-                    
+                                        
                     $feed_meta['feedid'] = $feedid;
                     
                     if (isset($meta->start_time)) {
@@ -109,6 +109,10 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
 
                     if (isset($meta->npoints)) {
                         $feed_meta['npoints'] = $meta->npoints;
+                    }
+                    
+                    if ($unit = $redis->hget("feed:$feedid","unit")) {
+                       $feed_meta['unit'] = $unit;
                     }
                     
                     $result["feeds"][$feed_name] = $feed_meta;
