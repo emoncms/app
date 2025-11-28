@@ -74,6 +74,16 @@ config.app = {
         "type": "feed",
         "autoname": "solar_kwh"
     },
+    "battery_charge_kwh": {
+        "optional": true,
+        "type": "feed",
+        "autoname": "battery_charge_kwh"
+    },
+    "battery_discharge_kwh": {
+        "optional": true,
+        "type": "feed",
+        "autoname": "battery_discharge_kwh"
+    },
     "meter_kwh_hh": {
         "optional": true,
         "type": "feed",
@@ -406,7 +416,8 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
             var date = hours + ":" + minutes;
             if (!profile_mode) date += ", " + days[d.getDay()] + " " + months[d.getMonth()] + " " + d.getDate();
 
-            var text = "";
+            var text = date + "<br>";
+
             if (profile_mode) {
                 if (item.series.label == 'Import') {
                     text += "Cumulative ";
@@ -415,19 +426,49 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
                 }
             }
 
-            text += item.series.label
-            text += "<br>" + date + "<br>";
-
-            if (item.series.label == 'Import') {
-                if (view_mode == "energy") text += (itemValue).toFixed(3) + " kWh";
-                if (view_mode == "cost") text += (itemValue * 100 * 1.05).toFixed(2) + "p";
-            } else if (item.series.label == 'Outgoing') {
-                text += (itemValue).toFixed(2) + " p/kWh (inc VAT)";
-            } else if (item.series.label == 'Carbon Intensity') {
-                text += itemValue + " gCO2/kWh";
+            if (item.series.label == 'Import' || item.series.label == 'Used Solar' || item.series.label == 'Export') {
+                if (view_mode == "energy") {
+                    if (data["import"][z] != undefined && data["import"][z][1] != null) {
+                        text += "Import: " + (data["import"][z][1]).toFixed(3) + " kWh<br>";
+                    }
+                    if (data["solar_used"][z] != undefined && data["solar_used"][z][1] != null) {
+                        text += "Used Solar: " + (data["solar_used"][z][1]).toFixed(3) + " kWh<br>";
+                    }
+                    if (data["export"][z] != undefined && data["export"][z][1] != null) {
+                        text += "Export: " + (data["export"][z][1] * -1).toFixed(3) + " kWh<br>";
+                    }
+                } else {
+                    if (data["import"][z] != undefined && data["import"][z][1] != null) {
+                        text += "Import Cost: " + (data["import"][z][1] * 100 * 1.05).toFixed(2) + "p<br>";
+                    }
+                    if (data["solar_used"][z] != undefined && data["solar_used"][z][1] != null) {
+                        text += "Used Solar Value: " + (data["solar_used"][z][1] * 100 * 1.05).toFixed(2) + "p<br>";
+                    }
+                    if (data["export"][z] != undefined && data["export"][z][1] != null) {
+                        text += "Export Value: " + (data["export"][z][1] * -100 * 1.05).toFixed(2) + "p<br>";
+                    }
+                }
             } else {
-                text += (itemValue * 1.05).toFixed(2) + " p/kWh (inc VAT)";
+                if (item.series.label == 'Outgoing') {
+                    text += "Export Tariff: " + (itemValue).toFixed(2) + " p/kWh (inc VAT)";
+                }
+
+                if (item.series.label == 'Carbon Intensity') {
+                    text += "Carbon Intensity: " + itemValue.toFixed(0) + " gCO2/kWh<br>";
+                }
+
+                if (item.series.label == config.app.tariff_A.value) {
+                    text += item.series.label + ": " + (itemValue).toFixed(2) + " p/kWh (inc VAT)";
+                }
+
+                if (item.series.label == config.app.tariff_B.value) {
+                    text += item.series.label + ": " + (itemValue).toFixed(2) + " p/kWh (inc VAT)";
+                }
+
             }
+
+            
+            
 
             tooltip(item.pageX, item.pageY, text, "#fff", "#000");
         }
@@ -601,7 +642,17 @@ function graph_load() {
     var use_kwh = [];
     if (solarpv_mode) use_kwh = feed.getdata(feeds["use_kwh"].id, view.start, view.end, interval);
     var solar_kwh = [];
-    if (solarpv_mode) solar_kwh = feed.getdata(feeds["solar_kwh"].id, view.start, view.end, interval);
+    var battery_charge_kwh = [];
+    var battery_discharge_kwh = [];
+    if (solarpv_mode) {
+        solar_kwh = feed.getdata(feeds["solar_kwh"].id, view.start, view.end, interval);
+        if (feeds["battery_charge_kwh"] != undefined) {
+            battery_charge_kwh = feed.getdata(feeds["battery_charge_kwh"].id, view.start, view.end, interval);
+        }
+        if (feeds["battery_discharge_kwh"] != undefined) {
+            battery_discharge_kwh = feed.getdata(feeds["battery_discharge_kwh"].id, view.start, view.end, interval);
+        }
+    }
     var meter_kwh_hh = []
     if (smart_meter_data) meter_kwh_hh = feed.getdata(feeds["meter_kwh_hh"].id, view.start, view.end, interval);
 
@@ -714,6 +765,13 @@ function graph_load() {
             if (solarpv_mode) {
                 use_kwh[z + 1] = [this_halfhour + 1800000, feeds["use_kwh"].value]
                 solar_kwh[z + 1] = [this_halfhour + 1800000, feeds["solar_kwh"].value]
+
+                if (feeds["battery_charge_kwh"] != undefined) {
+                    battery_charge_kwh[z + 1] = [this_halfhour + 1800000, feeds["battery_charge_kwh"].value]
+                }
+                if (feeds["battery_discharge_kwh"] != undefined) {
+                    battery_discharge_kwh[z + 1] = [this_halfhour + 1800000, feeds["battery_discharge_kwh"].value]
+                }
             }
             break;
         }
@@ -870,9 +928,35 @@ function graph_load() {
                 }
                 if (kwh_solar < 0.0) kwh_solar = 0.0;
 
+                // battery charge
+                let kwh_battery_charge = 0;
+                if (battery_charge_kwh.length > 0) {
+                    if (battery_charge_kwh[z] != undefined && battery_charge_kwh[z - 1] != undefined) {
+                        if (battery_charge_kwh[z][1] != null && battery_charge_kwh[z - 1][1] != null) {
+                            kwh_battery_charge = (battery_charge_kwh[z][1] - battery_charge_kwh[z - 1][1]);
+                        }
+                    }
+                    if (kwh_battery_charge < 0.0) kwh_battery_charge = 0.0;
+                }
+
+                // battery discharge
+                let kwh_battery_discharge = 0;
+                if (battery_discharge_kwh.length > 0) {
+                    if (battery_discharge_kwh[z] != undefined && battery_discharge_kwh[z - 1] != undefined) {
+                        if (battery_discharge_kwh[z][1] != null && battery_discharge_kwh[z - 1][1] != null) {
+                            kwh_battery_discharge = (battery_discharge_kwh[z][1] - battery_discharge_kwh[z - 1][1]);
+                        }
+                    }
+                    if (kwh_battery_discharge < 0.0) kwh_battery_discharge = 0.0;
+                }
+
+                // adjust use by battery charge / discharge
+                let kwh_use_after_battery = kwh_use - kwh_battery_discharge + kwh_battery_charge;
+
                 // calc export & self consumption
-                let kwh_solar_used = kwh_use - kwh_import;
+                let kwh_solar_used = kwh_use_after_battery - kwh_import;
                 let kwh_export = kwh_solar - kwh_solar_used;
+
 
                 // half hourly datasets for graph
                 data["use"].push([time, kwh_use]);
