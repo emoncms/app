@@ -709,13 +709,6 @@ function graph_load() {
     var sum_co2 = 0;
     var sum_co2_n = 0;
 
-    // line of best fit
-    var sumX = 0
-    var sumY = 0
-    var sumXY = 0
-    var sumX2 = 0
-    var n = 0
-
     var monthly_data = {};
 
     this_halfhour_index = -1;
@@ -769,6 +762,14 @@ function graph_load() {
         // ----------------------------------------------------
         let kwh_import = 0;
 
+        // solar battery variables
+        let kwh_export = 0;
+        let kwh_use = 0;
+        let kwh_solar = 0;
+        let kwh_battery_charge = 0;
+        let kwh_battery_discharge = 0;
+        let balance = 0;
+
         // Use cumulative import data if available by default
         if (cumulative_import_data) {
             kwh_import = import_kwh_hh[z][1];
@@ -777,6 +778,39 @@ function graph_load() {
         } else if (smart_meter_data) {
             kwh_import = meter_kwh_hh[z][1];
         }
+
+        // ----------------------------------------------------
+        // If solar or battery mode fetch kwh_use
+        if (solarpv_mode || battery_mode) {
+            kwh_use = use_kwh_hh[z][1];
+            balance += kwh_use;
+        }
+
+        // If solar mode, fetch kwh_solar
+        if (solarpv_mode) {
+            kwh_solar = solar_kwh_hh[z][1];
+            balance -= kwh_solar;
+        }
+
+        // if battery mode, fetch battery charge and discharge
+        if (battery_mode) {
+            kwh_battery_charge = battery_charge_kwh_hh[z][1];
+            kwh_battery_discharge = battery_discharge_kwh_hh[z][1];
+            balance += kwh_battery_charge;
+            balance -= kwh_battery_discharge;
+        }
+
+        // If solar mode and no battery, calculate import from use and solar
+        if (solarpv_mode || battery_mode) {
+            if (balance >= 0) {
+                kwh_import = balance;
+                kwh_export = 0;
+            } else {
+                kwh_import = 0;
+                kwh_export = balance * -1;
+            }
+        }
+        // ----------------------------------------------------
 
         // Alternatively use meter data in place of cumulative import data if user selected
         if (smart_meter_data && use_meter_kwh_hh) {
@@ -854,74 +888,28 @@ function graph_load() {
             sum_co2_n++;
         }
 
-        // Calculations for line of best fit comparison between meter and smart meter data
-        if (smart_meter_data) {
-            if (meter_kwh_hh[z] != undefined && import_kwh[z] != undefined) {
-                if (meter_kwh_hh[z][1] != null) {
-                    // Calculate line of best fit variables
-                    // Suggested calibration
-                    var XY = 1.0 * kwh_import * meter_kwh_hh[z][1];
-                    var X2 = 1.0 * kwh_import * kwh_import;
-                    sumX += 1.0 * kwh_import;
-                    sumY += 1.0 * meter_kwh_hh[z][1];
-                    sumXY += XY;
-                    sumX2 += X2;
-                    n++;
-                }
-            }
-        }
-
-        // ----------------------------------------------------
-        // Solar PV agile outgoing
-        // ----------------------------------------------------
-        if (solarpv_mode) {
-            let kwh_use = use_kwh_hh[z][1];
-            let kwh_solar = solar_kwh_hh[z][1];
-
-            let kwh_solar_used = 0;
-
-            if (battery_mode) {
-                let kwh_battery_charge = battery_charge_kwh_hh[z][1];
-                let kwh_battery_discharge = battery_discharge_kwh_hh[z][1];
-                let kwh_use_after_battery = kwh_use - kwh_battery_discharge + kwh_battery_charge;
-                kwh_solar_used = kwh_use_after_battery - kwh_import;
-            } else {
-                kwh_solar_used = kwh_use - kwh_import;
-            }
-
-            let kwh_export = kwh_solar - kwh_solar_used;
-
-            // half hourly datasets for graph
+        // We may explort in battery mode
+        if (solarpv_mode || battery_mode) {
             data["use"].push([time, kwh_use]);
             data["export"].push([time, kwh_export * -1]);
-            data["solar_used"].push([time, kwh_solar_used]);
-
             total_kwh_export += kwh_export
-            total_kwh_solar_used += kwh_solar_used
-
             let cost_export = data.outgoing[z][1] * 0.01 * -1;
-
             data["export_cost"].push([time, kwh_export * cost_export * -1]);
-            data["solar_used_cost"].push([time, kwh_solar_used * unitcost_tariff_A]);
-
             total_cost_export += kwh_export * cost_export
+        }
+
+        // Solar used calculation
+        if (solarpv_mode) {
+            let kwh_solar_used = kwh_solar - kwh_export;
+            data["solar_used"].push([time, kwh_solar_used]);
+            total_kwh_solar_used += kwh_solar_used
+            data["solar_used_cost"].push([time, kwh_solar_used * unitcost_tariff_A]);
             total_cost_solar_used += kwh_solar_used * unitcost_tariff_A
         }
     }
-
-    if (n > 1) {
-        var slope = ((n * sumXY - (sumX * sumY)) / (n * sumX2 - (sumX * sumX)));
-        var intercept = (sumY - slope * sumX) / n;
-        console.log("Suggested calibration:\nslope:" + slope.toFixed(6) + " intercept:" + intercept.toFixed(6));
-        var prc_error = (1.0 - (sumY / sumX)) * 100;
-
-        if (prc_error > 0) {
-            console.log("Realtime feed is: " + prc_error.toFixed(2) + "% above meter data");
-            $("#meter_kwh_hh_comparison").html("Realtime feed is: " + prc_error.toFixed(2) + "% above meter data");
-        } else {
-            console.log("Realtime feed is: " + Math.abs(prc_error).toFixed(2) + "% below meter data")
-            $("#meter_kwh_hh_comparison").html("Realtime feed is: " + Math.abs(prc_error).toFixed(2) + "% below meter data");
-        }
+    
+    if (smart_meter_data) {
+        calibration_line_of_best_fit(import_kwh_hh, meter_kwh_hh);
     }
 
     var unit_cost_import_tariff_A = (total_cost_import_tariff_A / total_kwh_import_tariff_A);
@@ -1084,6 +1072,51 @@ function convert_cumulative_kwh_to_kwh_hh(cumulative_kwh_data, limit_positive=fa
     }
 
     return kwh_hh_data;
+}
+
+function calibration_line_of_best_fit(import_kwh, meter_kwh_hh) 
+{
+    if (import_kwh.length != meter_kwh_hh.length) {
+        console.log("Calibration line of best fit: Data length mismatch");
+        return;
+    }
+
+    var sumX = 0
+    var sumY = 0
+    var sumXY = 0
+    var sumX2 = 0
+    var n = 0
+
+    for (var z = 0; z < import_kwh.length; z++) {
+        if (meter_kwh_hh[z] != undefined && import_kwh[z] != undefined) {
+            if (meter_kwh_hh[z][1] != null) {
+                // Calculate line of best fit variables
+                // Suggested calibration
+                var XY = 1.0 * import_kwh[z][1] * meter_kwh_hh[z][1];
+                var X2 = 1.0 * import_kwh[z][1] * import_kwh[z][1];
+                sumX += 1.0 * import_kwh[z][1];
+                sumY += 1.0 * meter_kwh_hh[z][1];
+                sumXY += XY;
+                sumX2 += X2;
+                n++;
+            }
+        }
+    }
+
+    if (n > 1) {
+        var slope = ((n * sumXY - (sumX * sumY)) / (n * sumX2 - (sumX * sumX)));
+        var intercept = (sumY - slope * sumX) / n;
+        console.log("Suggested calibration:\nslope:" + slope.toFixed(6) + " intercept:" + intercept.toFixed(6));
+        var prc_error = (1.0 - (sumY / sumX)) * 100;
+
+        if (prc_error > 0) {
+            console.log("Realtime feed is: " + prc_error.toFixed(2) + "% above meter data");
+            $("#meter_kwh_hh_comparison").html("Realtime feed is: " + prc_error.toFixed(2) + "% above meter data");
+        } else {
+            console.log("Realtime feed is: " + Math.abs(prc_error).toFixed(2) + "% below meter data")
+            $("#meter_kwh_hh_comparison").html("Realtime feed is: " + Math.abs(prc_error).toFixed(2) + "% below meter data");
+        }
+    }
 }
 
 function graph_draw() {
