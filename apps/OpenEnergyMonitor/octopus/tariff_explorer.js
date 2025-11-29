@@ -396,6 +396,13 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
     if (item) {
         var z = item.dataIndex;
 
+        var isStepped = item.series.lines && item.series.lines.steps;
+
+        if (isStepped) {
+            z = Math.floor(z / 2);
+        }
+
+
         if (previousPoint != item.datapoint) {
             previousPoint = item.datapoint;
 
@@ -416,7 +423,7 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
             var date = hours + ":" + minutes;
             if (!profile_mode) date += ", " + days[d.getDay()] + " " + months[d.getMonth()] + " " + d.getDate();
 
-            var text = date + "<br>";
+            var text = z + " " + date + "<br>";
 
             if (profile_mode) {
                 if (item.series.label == 'Import') {
@@ -426,49 +433,45 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
                 }
             }
 
-            if (item.series.label == 'Import' || item.series.label == 'Used Solar' || item.series.label == 'Export') {
-                if (view_mode == "energy") {
-                    if (data["import"][z] != undefined && data["import"][z][1] != null) {
-                        text += "Import: " + (data["import"][z][1]).toFixed(3) + " kWh<br>";
-                    }
-                    if (data["solar_used"][z] != undefined && data["solar_used"][z][1] != null) {
-                        text += "Used Solar: " + (data["solar_used"][z][1]).toFixed(3) + " kWh<br>";
-                    }
-                    if (data["export"][z] != undefined && data["export"][z][1] != null) {
-                        text += "Export: " + (data["export"][z][1] * -1).toFixed(3) + " kWh<br>";
-                    }
-                } else {
-                    if (data["import"][z] != undefined && data["import"][z][1] != null) {
-                        text += "Import Cost: " + (data["import"][z][1] * 100 * 1.05).toFixed(2) + "p<br>";
-                    }
-                    if (data["solar_used"][z] != undefined && data["solar_used"][z][1] != null) {
-                        text += "Used Solar Value: " + (data["solar_used"][z][1] * 100 * 1.05).toFixed(2) + "p<br>";
-                    }
-                    if (data["export"][z] != undefined && data["export"][z][1] != null) {
-                        text += "Export Value: " + (data["export"][z][1] * -100 * 1.05).toFixed(2) + "p<br>";
-                    }
+            if (view_mode == "energy") {
+                if (data["import"][z] != undefined && data["import"][z][1] != null) {
+                    text += "Import: " + (data["import"][z][1]).toFixed(3) + " kWh<br>";
+                }
+                if (data["solar_used"][z] != undefined && data["solar_used"][z][1] != null) {
+                    text += "Used Solar: " + (data["solar_used"][z][1]).toFixed(3) + " kWh<br>";
+                }
+                if (data["export"][z] != undefined && data["export"][z][1] != null) {
+                    text += "Export: " + (data["export"][z][1] * -1).toFixed(3) + " kWh<br>";
                 }
             } else {
-                if (item.series.label == 'Outgoing') {
-                    text += "Export Tariff: " + (itemValue).toFixed(2) + " p/kWh (inc VAT)";
+                if (data["import"][z] != undefined && data["import"][z][1] != null) {
+                    text += "Import Cost: " + (data["import"][z][1] * 100 * 1.05).toFixed(2) + "p<br>";
                 }
-
-                if (item.series.label == 'Carbon Intensity') {
-                    text += "Carbon Intensity: " + itemValue.toFixed(0) + " gCO2/kWh<br>";
+                if (data["solar_used"][z] != undefined && data["solar_used"][z][1] != null) {
+                    text += "Used Solar Value: " + (data["solar_used"][z][1] * 100 * 1.05).toFixed(2) + "p<br>";
                 }
-
-                if (item.series.label == config.app.tariff_A.value) {
-                    text += item.series.label + ": " + (itemValue).toFixed(2) + " p/kWh (inc VAT)";
+                if (data["export"][z] != undefined && data["export"][z][1] != null) {
+                    text += "Export Value: " + (data["export"][z][1] * -100 * 1.05).toFixed(2) + "p<br>";
                 }
-
-                if (item.series.label == config.app.tariff_B.value) {
-                    text += item.series.label + ": " + (itemValue).toFixed(2) + " p/kWh (inc VAT)";
-                }
-
             }
 
-            
-            
+            text += "<br>";
+
+            if (data["outgoing"][z] != undefined && data["outgoing"][z][1] != null) {
+                text += "Export Tariff: " + (data["outgoing"][z][1]).toFixed(2) + " p/kWh (inc VAT)<br>";
+            }
+
+            if (show_carbonintensity && data["carbonintensity"][z] != undefined && data["carbonintensity"][z][1] != null) {
+                text += "Carbon Intensity: " + (data["carbonintensity"][z][1]).toFixed(0) + " gCO2/kWh<br>";
+            }
+
+            if (data["tariff_A"][z] != undefined && data["tariff_A"][z][1] != null) {
+                text += config.app.tariff_A.value+": " + (data["tariff_A"][z][1]).toFixed(2) + " p/kWh (inc VAT)<br>";
+            }
+
+            if (data["tariff_B"][z] != undefined && data["tariff_B"][z][1] != null) {
+                text += config.app.tariff_B.value+": " + (data["tariff_B"][z][1]).toFixed(2) + " p/kWh (inc VAT)<br>";
+            }
 
             tooltip(item.pageX, item.pageY, text, "#fff", "#000");
         }
@@ -669,7 +672,7 @@ function graph_load() {
         for (var z in tariff_A_data) {
             data["tariff_A"].push(tariff_A_data[z]);
             //Add 30 minutes to each reading to get a stepped graph
-            data["tariff_A"].push([tariff_A_data[z][0] + (intervalms - 1), tariff_A_data[z][1]]);
+            // data["tariff_A"].push([tariff_A_data[z][0] + (intervalms - 1), tariff_A_data[z][1]]);
         }
     }
 
@@ -679,7 +682,7 @@ function graph_load() {
         for (var z in tariff_B_data) {
             data["tariff_B"].push(tariff_B_data[z]);
             //Add 30 minutes to each reading to get a stepped graph
-            data["tariff_B"].push([tariff_B_data[z][0] + (intervalms - 1), tariff_B_data[z][1]]);
+            // data["tariff_B"].push([tariff_B_data[z][0] + (intervalms - 1), tariff_B_data[z][1]]);
         }
     }
 
@@ -689,7 +692,7 @@ function graph_load() {
         for (var z in outgoing_data) {
             data["outgoing"].push(outgoing_data[z]);
             //Add 30 minutes to each reading to get a stepped graph
-            data["outgoing"].push([outgoing_data[z][0] + (intervalms - 1), outgoing_data[z][1]]);
+            // data["outgoing"].push([outgoing_data[z][0] + (intervalms - 1), outgoing_data[z][1]]);
         }
     }
 
@@ -699,7 +702,7 @@ function graph_load() {
         for (var z in carbonintensity) {
             data["carbonintensity"].push(carbonintensity[z]);
             // Add 30 minutes to each reading to get a stepped graph
-            data["carbonintensity"].push([carbonintensity[z][0] + (intervalms - 1), carbonintensity[z][1]]);
+            // data["carbonintensity"].push([carbonintensity[z][0] + (intervalms - 1), carbonintensity[z][1]]);
         }
     }
 
@@ -823,14 +826,14 @@ function graph_load() {
 
             // Unit cost on tariff A
             let unitcost_tariff_A = null;
-            if (data.tariff_A[2 * (z - 1)][1] != null) {
-                unitcost_tariff_A = data.tariff_A[2 * (z - 1)][1] * 0.01;
+            if (data.tariff_A[z - 1][1] != null) {
+                unitcost_tariff_A = data.tariff_A[z - 1][1] * 0.01;
             }
 
             // Unit cost on tariff B
             let unitcost_tariff_B = null;
-            if (data.tariff_B[2 * (z - 1)][1] != null) {
-                unitcost_tariff_B = data.tariff_B[2 * (z - 1)][1] * 0.01;
+            if (data.tariff_B[z - 1][1] != null) {
+                unitcost_tariff_B = data.tariff_B[z - 1][1] * 0.01;
             }
 
             // Import cost for this half hour on tariff A
@@ -882,7 +885,7 @@ function graph_load() {
 
             // Carbon Intensity
             if (show_carbonintensity) {
-                let co2intensity = data.carbonintensity[2 * (z - 1)][1];
+                let co2intensity = data.carbonintensity[z - 1][1];
                 let co2_hh = kwh_import * (co2intensity * 0.001)
                 total_co2 += co2_hh
                 sum_co2 += co2intensity
@@ -966,7 +969,7 @@ function graph_load() {
                 total_kwh_export += kwh_export
                 total_kwh_solar_used += kwh_solar_used
 
-                let cost_export = data.outgoing[2 * (z - 1)][1] * 0.01 * -1;
+                let cost_export = data.outgoing[z - 1][1] * 0.01 * -1;
 
                 data["export_cost"].push([time, kwh_export * cost_export * -1]);
                 data["solar_used_cost"].push([time, kwh_solar_used * unitcost_tariff_A]);
@@ -1160,7 +1163,7 @@ function graph_draw() {
         let cost_last_halfhour = data["import_cost_tariff_A"][this_halfhour_index][1] * 100;
         $("#cost_halfhour").html("(" + cost_last_halfhour.toFixed(2) + "<span class='units'>p</span>)");
 
-        let unit_price = data["tariff_A"][2 * this_halfhour_index][1] * 1.05;
+        let unit_price = data["tariff_A"][this_halfhour_index][1] * 1.05;
         $("#unit_price").html(unit_price.toFixed(2) + "<span class='units'>p</span>");
 
         $(".last_halfhour_stats").show();
@@ -1252,6 +1255,7 @@ function graph_draw() {
         color: "#fb1a80",
         lines: {
             show: true,
+            steps: true,
             align: "left",
             lineWidth: 1
         }
@@ -1263,6 +1267,7 @@ function graph_draw() {
         color: "#941afb",
         lines: {
             show: true,
+            steps: true,
             align: "center",
             lineWidth: 1
         }
@@ -1274,6 +1279,7 @@ function graph_draw() {
         color: "#888",
         lines: {
             show: true,
+            steps: true,
             align: "left",
             lineWidth: 1
         }
@@ -1286,6 +1292,7 @@ function graph_draw() {
         color: "#7c1a80",
         lines: {
             show: true,
+            steps: true,
             align: "left",
             lineWidth: 1
         }
