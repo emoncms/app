@@ -605,7 +605,7 @@ function graph_load() {
     }
 
     // Determine if required battery feeds are available
-    if (feeds["battery_charge_kwh"] != undefined && feeds["battery_discharge_kwh"] != undefined) {
+    if (feeds["battery_charge_kwh"] != undefined && feeds["battery_discharge_kwh"] != undefined && feeds["use_kwh"] != undefined) {
         battery_mode = true;
     }
 
@@ -629,8 +629,11 @@ function graph_load() {
         import_kwh = feed.getdata(feeds["import_kwh"].id, view.start, view.end, interval);
     }
 
-    if (solarpv_mode) {
+    if (solarpv_mode || battery_mode) {
         use_kwh = feed.getdata(feeds["use_kwh"].id, view.start, view.end, interval);
+    }
+
+    if (solarpv_mode) {
         solar_kwh = feed.getdata(feeds["solar_kwh"].id, view.start, view.end, interval);
     }
 
@@ -658,7 +661,7 @@ function graph_load() {
     }
 
     // Outgoing
-    if (config.app.region != undefined && solarpv_mode) {
+    if (config.app.region != undefined && (solarpv_mode || battery_mode)) {
         data["outgoing"] = getdataremote(regions_outgoing[config.app.region.value], view.start, view.end, interval);
         // Invert export tariff
         for (var z in data["outgoing"]) data["outgoing"][z][1] *= -1;
@@ -719,8 +722,11 @@ function graph_load() {
             import_kwh[z + 1] = [this_halfhour + 1800000, feeds["import_kwh"].value]
             this_halfhour_index = z
 
-            if (solarpv_mode) {
+            if (solarpv_mode || battery_mode) {
                 use_kwh[z + 1] = [this_halfhour + 1800000, feeds["use_kwh"].value]
+            }
+
+            if (solarpv_mode) {
                 solar_kwh[z + 1] = [this_halfhour + 1800000, feeds["solar_kwh"].value]
             }
 
