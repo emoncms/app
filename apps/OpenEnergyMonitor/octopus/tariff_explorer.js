@@ -167,6 +167,7 @@ var this_halfhour_index = -1;
 view.limit_x = false;
 var cumulative_import_data = false;
 var solarpv_mode = false;
+var battery_mode = false;
 var smart_meter_data = false;
 var use_meter_kwh_hh = false;
 
@@ -200,6 +201,7 @@ function show() {
     }
 
     solarpv_mode = false;
+    battery_mode = false;
 
     resize();
 
@@ -597,7 +599,15 @@ function graph_load() {
         datetimepicker2.setStartDate(new Date(view.start));
     }
 
-    if (feeds["use_kwh"] != undefined && feeds["solar_kwh"] != undefined) solarpv_mode = true;
+    // Determine if required solar PV feeds are available
+    if (feeds["use_kwh"] != undefined && feeds["solar_kwh"] != undefined) {
+        solarpv_mode = true;
+    }
+
+    // Determine if required battery feeds are available
+    if (feeds["battery_charge_kwh"] != undefined && feeds["battery_discharge_kwh"] != undefined) {
+        battery_mode = true;
+    }
 
     if (feeds["meter_kwh_hh"] != undefined) {
         smart_meter_data = true;
@@ -618,17 +628,17 @@ function graph_load() {
     if (cumulative_import_data) {
         import_kwh = feed.getdata(feeds["import_kwh"].id, view.start, view.end, interval);
     }
-    if (solarpv_mode) use_kwh = feed.getdata(feeds["use_kwh"].id, view.start, view.end, interval);
 
     if (solarpv_mode) {
+        use_kwh = feed.getdata(feeds["use_kwh"].id, view.start, view.end, interval);
         solar_kwh = feed.getdata(feeds["solar_kwh"].id, view.start, view.end, interval);
-        if (feeds["battery_charge_kwh"] != undefined) {
-            battery_charge_kwh = feed.getdata(feeds["battery_charge_kwh"].id, view.start, view.end, interval);
-        }
-        if (feeds["battery_discharge_kwh"] != undefined) {
-            battery_discharge_kwh = feed.getdata(feeds["battery_discharge_kwh"].id, view.start, view.end, interval);
-        }
     }
+
+    if (battery_mode) {
+        battery_charge_kwh = feed.getdata(feeds["battery_charge_kwh"].id, view.start, view.end, interval);
+        battery_discharge_kwh = feed.getdata(feeds["battery_discharge_kwh"].id, view.start, view.end, interval);
+    }
+
     if (smart_meter_data) meter_kwh_hh = feed.getdata(feeds["meter_kwh_hh"].id, view.start, view.end, interval);
 
     data = {};
@@ -715,16 +725,15 @@ function graph_load() {
         if (import_kwh[z][0] == this_halfhour) {
             import_kwh[z + 1] = [this_halfhour + 1800000, feeds["import_kwh"].value]
             this_halfhour_index = z
+
             if (solarpv_mode) {
                 use_kwh[z + 1] = [this_halfhour + 1800000, feeds["use_kwh"].value]
                 solar_kwh[z + 1] = [this_halfhour + 1800000, feeds["solar_kwh"].value]
+            }
 
-                if (feeds["battery_charge_kwh"] != undefined) {
-                    battery_charge_kwh[z + 1] = [this_halfhour + 1800000, feeds["battery_charge_kwh"].value]
-                }
-                if (feeds["battery_discharge_kwh"] != undefined) {
-                    battery_discharge_kwh[z + 1] = [this_halfhour + 1800000, feeds["battery_discharge_kwh"].value]
-                }
+            if (battery_mode) {
+                battery_charge_kwh[z + 1] = [this_halfhour + 1800000, feeds["battery_charge_kwh"].value]
+                battery_discharge_kwh[z + 1] = [this_halfhour + 1800000, feeds["battery_discharge_kwh"].value]
             }
             break;
         }
@@ -866,25 +875,21 @@ function graph_load() {
         // Solar PV agile outgoing
         // ----------------------------------------------------
         if (solarpv_mode) {
-
-            // calculate half hour kwh
             let kwh_use = use_kwh_hh[z][1];
-
             let kwh_solar = solar_kwh_hh[z][1];
 
-            // battery charge
-            let kwh_battery_charge = battery_charge_kwh_hh[z][1];
+            let kwh_solar_used = 0;
 
-            // battery discharge
-            let kwh_battery_discharge = battery_discharge_kwh_hh[z][1];
+            if (battery_mode) {
+                let kwh_battery_charge = battery_charge_kwh_hh[z][1];
+                let kwh_battery_discharge = battery_discharge_kwh_hh[z][1];
+                let kwh_use_after_battery = kwh_use - kwh_battery_discharge + kwh_battery_charge;
+                kwh_solar_used = kwh_use_after_battery - kwh_import;
+            } else {
+                kwh_solar_used = kwh_use - kwh_import;
+            }
 
-            // adjust use by battery charge / discharge
-            let kwh_use_after_battery = kwh_use - kwh_battery_discharge + kwh_battery_charge;
-
-            // calc export & self consumption
-            let kwh_solar_used = kwh_use_after_battery - kwh_import;
             let kwh_export = kwh_solar - kwh_solar_used;
-
 
             // half hourly datasets for graph
             data["use"].push([time, kwh_use]);
@@ -946,10 +951,7 @@ function graph_load() {
 
     if (show_carbonintensity) {
         var window_co2_intensity = 1000 * total_co2 / total_kwh_import;
-        var mean_co2 = sum_co2 / sum_co2_n;
-
         $("#carbonintensity_result").html("Total CO2: " + (total_co2).toFixed(1) + "kgCO2, Consumption intensity: " + window_co2_intensity.toFixed(0) + " gCO2/kWh")
-        // , Average intensity: "+mean_co2.toFixed(0)+" gCO2/kWh"
     }
 
     if (solarpv_mode) {
