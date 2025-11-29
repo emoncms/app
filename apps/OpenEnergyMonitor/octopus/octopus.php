@@ -30,9 +30,6 @@ global $path, $session, $v;
 
                 <div class="block-bound">
                     <div class="bluenav config-open"><i class="icon-wrench icon-white"></i></div>
-                    <!--<div class="bluenav viewcostenergy">VIEW COST</div>-->
-                    <div class="bluenav cost">Cost</div>
-                    <div class="bluenav energy bluenav-active">Energy</div>
                     <div id="app-title" class="block-title">Time of use tariff explorer</div>
                 </div>
 
