@@ -423,7 +423,7 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
             var date = hours + ":" + minutes;
             if (!profile_mode) date += ", " + days[d.getDay()] + " " + months[d.getMonth()] + " " + d.getDate();
 
-            var text = z + " " + date + "<br>";
+            var text = date + "<br>";
 
             if (profile_mode) {
                 if (item.series.label == 'Import') {
