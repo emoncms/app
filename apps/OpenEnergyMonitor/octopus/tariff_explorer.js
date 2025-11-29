@@ -433,50 +433,66 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
                 }
             }
 
-            if (view_mode == "energy") {
-                if (data["import"][z] != undefined && data["import"][z][1] != null) {
-                    text += "Import: " + (data["import"][z][1]).toFixed(3) + " kWh<br>";
+            let import_kwh = get_data_value_at_index("import", z);
+            let solar_used_kwh = get_data_value_at_index("solar_used", z);
+            let export_kwh = get_data_value_at_index("export", z);
+            let tariff_A = get_data_value_at_index("tariff_A", z);
+            let tariff_B = get_data_value_at_index("tariff_B", z);
+            let outgoing = get_data_value_at_index("outgoing", z);
+            let carbonintensity = get_data_value_at_index("carbonintensity", z);
+
+            if (import_kwh != null) {
+                text += "Import: " + import_kwh.toFixed(3) + " kWh";
+                if (tariff_A != null) {
+                    let cost = import_kwh * tariff_A;
+                    text += " (" + cost.toFixed(2) + "p cost)";
                 }
-                if (data["solar_used"][z] != undefined && data["solar_used"][z][1] != null) {
-                    text += "Used Solar: " + (data["solar_used"][z][1]).toFixed(3) + " kWh<br>";
+            }
+
+            if (solar_used_kwh != null) {
+                text += "<br>Used Solar: " + solar_used_kwh.toFixed(3) + " kWh";
+                if (tariff_A != null) {
+                    let cost = solar_used_kwh * tariff_A;
+                    text += " (" + cost.toFixed(2) + "p saved)";
                 }
-                if (data["export"][z] != undefined && data["export"][z][1] != null) {
-                    text += "Export: " + (data["export"][z][1] * -1).toFixed(3) + " kWh<br>";
-                }
-            } else {
-                if (data["import"][z] != undefined && data["import"][z][1] != null) {
-                    text += "Import Cost: " + (data["import"][z][1] * 100 * 1.05).toFixed(2) + "p<br>";
-                }
-                if (data["solar_used"][z] != undefined && data["solar_used"][z][1] != null) {
-                    text += "Used Solar Value: " + (data["solar_used"][z][1] * 100 * 1.05).toFixed(2) + "p<br>";
-                }
-                if (data["export"][z] != undefined && data["export"][z][1] != null) {
-                    text += "Export Value: " + (data["export"][z][1] * -100 * 1.05).toFixed(2) + "p<br>";
+            }
+
+            if (export_kwh != null) {
+                text += "<br>Export: " + (export_kwh * -1).toFixed(3) + " kWh";
+                if (outgoing != null) {
+                    let cost = export_kwh * outgoing;
+                    text += " (" + cost.toFixed(2) + "p gained)";
                 }
             }
 
             text += "<br>";
 
-            if (data["outgoing"][z] != undefined && data["outgoing"][z][1] != null) {
-                text += "Export Tariff: " + (data["outgoing"][z][1]).toFixed(2) + " p/kWh (inc VAT)<br>";
+            if (outgoing != null) {
+                text += "Export Tariff: " + outgoing.toFixed(2) + " p/kWh (inc VAT)<br>";
             }
 
-            if (show_carbonintensity && data["carbonintensity"][z] != undefined && data["carbonintensity"][z][1] != null) {
-                text += "Carbon Intensity: " + (data["carbonintensity"][z][1]).toFixed(0) + " gCO2/kWh<br>";
+            if (show_carbonintensity && carbonintensity != null) {
+                text += "Carbon Intensity: " + carbonintensity.toFixed(0) + " gCO2/kWh<br>";
             }
 
-            if (data["tariff_A"][z] != undefined && data["tariff_A"][z][1] != null) {
-                text += config.app.tariff_A.value+": " + (data["tariff_A"][z][1]).toFixed(2) + " p/kWh (inc VAT)<br>";
+            if (tariff_A != null) {
+                text += config.app.tariff_A.value+": " + tariff_A.toFixed(2) + " p/kWh (inc VAT)<br>";
             }
 
-            if (data["tariff_B"][z] != undefined && data["tariff_B"][z][1] != null) {
-                text += config.app.tariff_B.value+": " + (data["tariff_B"][z][1]).toFixed(2) + " p/kWh (inc VAT)<br>";
+            if (tariff_B != null) {
+                text += config.app.tariff_B.value+": " + tariff_B.toFixed(2) + " p/kWh (inc VAT)<br>";
             }
 
             tooltip(item.pageX, item.pageY, text, "#fff", "#000");
         }
     } else $("#tooltip").remove();
 });
+
+function get_data_value_at_index(key, index) {
+    if (data[key] == undefined) return null;
+    if (data[key][index] == undefined) return null;
+    return data[key][index][1];
+}
 
 $('#placeholder').bind("plotselected", function(event, ranges) {
     var start = ranges.xaxis.from;
