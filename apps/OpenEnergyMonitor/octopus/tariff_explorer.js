@@ -218,7 +218,7 @@ function show() {
         }
     });
 
-    setPeriod('T');
+    setPeriod('168');
     graph_load();
     graph_draw();
 
@@ -310,162 +310,6 @@ function updater() {
     });
 }
 
-// -------------------------------------------------------------------------------
-// EVENTS
-// -------------------------------------------------------------------------------
-// The buttons for these graph events are hidden when in historic mode 
-// The events are loaded at the start here and dont need to be unbinded and binded again.
-$("#zoomout").click(function() {
-    view.zoomout();
-    graph_load();
-    graph_draw();
-});
-$("#zoomin").click(function() {
-    view.zoomin();
-    graph_load();
-    graph_draw();
-});
-$('#right').click(function() {
-    view.pan_speed = 0.5;
-    view.panright();
-    graph_load();
-    graph_draw();
-});
-$('#left').click(function() {
-    view.pan_speed = 0.5;
-    view.panleft();
-    graph_load();
-    graph_draw();
-});
-$('#fastright').click(function() {
-    view.pan_speed = 1.0;
-    view.panright();
-    graph_load();
-    graph_draw();
-});
-$('#fastleft').click(function() {
-    view.pan_speed = 1.0;
-    view.panleft();
-    graph_load();
-    graph_draw();
-});
-
-
-$('.time').click(function() {
-    setPeriod($(this).attr("time"));
-    // view.timewindow(period);
-    graph_load();
-    graph_draw();
-});
-
-$('.time-select').change(function() {
-    var val = $(this).val();
-
-    if (val == "C") {
-
-    } else {
-        setPeriod(val);
-        // view.timewindow(period);
-        graph_load();
-        graph_draw();
-    }
-});
-
-$('#placeholder').bind("plothover", function(event, pos, item) {
-    if (item) {
-        var z = item.dataIndex;
-
-        var isStepped = item.series.lines && item.series.lines.steps;
-
-        if (isStepped) {
-            z = Math.floor(z / 2);
-        }
-
-
-        if (previousPoint != item.datapoint) {
-            previousPoint = item.datapoint;
-
-            $("#tooltip").remove();
-            var itemTime = item.datapoint[0];
-            var itemValue = item.datapoint[1];
-
-            var d = new Date(itemTime);
-            var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            var hours = d.getHours();
-            if (hours < 10) hours = "0" + hours;
-            var minutes = d.getMinutes();
-            if (minutes < 10) minutes = "0" + minutes;
-            var seconds = d.getSeconds();
-            if (seconds < 10) seconds = "0" + seconds;
-
-            var date = hours + ":" + minutes;
-            if (!profile_mode) date += ", " + days[d.getDay()] + " " + months[d.getMonth()] + " " + d.getDate();
-
-            var text = date + "<br>";
-
-            if (profile_mode) {
-                if (item.series.label == 'Import') {
-                    text += "Cumulative ";
-                } else {
-                    text += "Average ";
-                }
-            }
-
-            let import_kwh = get_data_value_at_index("import", z);
-            let solar_used_kwh = get_data_value_at_index("solar_used", z);
-            let export_kwh = get_data_value_at_index("export", z);
-            let tariff_A = get_data_value_at_index("tariff_A", z);
-            let tariff_B = get_data_value_at_index("tariff_B", z);
-            let outgoing = get_data_value_at_index("outgoing", z);
-            let carbonintensity = get_data_value_at_index("carbonintensity", z);
-
-            if (import_kwh != null) {
-                text += "Import: " + import_kwh.toFixed(3) + " kWh";
-                if (tariff_A != null) {
-                    let cost = import_kwh * tariff_A;
-                    text += " (" + cost.toFixed(2) + "p cost)";
-                }
-            }
-
-            if (solar_used_kwh != null) {
-                text += "<br>Used Solar: " + solar_used_kwh.toFixed(3) + " kWh";
-                if (tariff_A != null) {
-                    let cost = solar_used_kwh * tariff_A;
-                    text += " (" + cost.toFixed(2) + "p saved)";
-                }
-            }
-
-            if (export_kwh != null) {
-                text += "<br>Export: " + (export_kwh * -1).toFixed(3) + " kWh";
-                if (outgoing != null) {
-                    let cost = export_kwh * outgoing;
-                    text += " (" + cost.toFixed(2) + "p gained)";
-                }
-            }
-
-            text += "<br>";
-
-            if (outgoing != null) {
-                text += "Export Tariff: " + outgoing.toFixed(2) + " p/kWh (inc VAT)<br>";
-            }
-
-            if (show_carbonintensity && carbonintensity != null) {
-                text += "Carbon Intensity: " + carbonintensity.toFixed(0) + " gCO2/kWh<br>";
-            }
-
-            if (tariff_A != null) {
-                text += config.app.tariff_A.value+": " + tariff_A.toFixed(2) + " p/kWh (inc VAT)<br>";
-            }
-
-            if (tariff_B != null) {
-                text += config.app.tariff_B.value+": " + tariff_B.toFixed(2) + " p/kWh (inc VAT)<br>";
-            }
-
-            tooltip(item.pageX, item.pageY, text, "#fff", "#000");
-        }
-    } else $("#tooltip").remove();
-});
 
 function get_data_value_at_index(key, index) {
     if (data[key] == undefined) return null;
@@ -473,107 +317,6 @@ function get_data_value_at_index(key, index) {
     return data[key][index][1];
 }
 
-$('#placeholder').bind("plotselected", function(event, ranges) {
-    var start = ranges.xaxis.from;
-    var end = ranges.xaxis.to;
-    panning = true;
-
-    view.start = start;
-    view.end = end;
-    graph_load();
-    graph_draw();
-
-    $(".time-select").val("C");
-
-    setTimeout(function() {
-        panning = false;
-    }, 100);
-});
-
-$("#use_meter_kwh_hh").click(function() {
-    use_meter_kwh_hh = $(this)[0].checked;
-    graph_load();
-    graph_draw();
-});
-
-$("#show_carbonintensity").click(function() {
-    show_carbonintensity = $(this)[0].checked;
-    graph_load();
-    graph_draw();
-    if (!show_carbonintensity) $("#carbonintensity_result").html("");
-});
-
-$("#show_profile").click(function() {
-    profile_draw();
-});
-
-$("#download-csv").click(function() {
-
-    var csv = [];
-
-    if (solarpv_mode) {
-        keys = ["tariff_A", "tariff_B", "outgoing", "use", "import", "import_cost_tariff_A", "import_cost_tariff_B", "export", "export_cost", "solar_used", "solar_used_cost", "meter_kwh_hh", "meter_kwh_hh_cost"]
-    } else {
-        keys = ["tariff_A", "tariff_B", "import", "import_cost_tariff_A", "import_cost_tariff_B", "meter_kwh_hh", "meter_kwh_hh_cost"]
-    }
-
-    csv.push("time," + keys.join(","))
-
-    for (var z in data["import"]) {
-        var time = data["import"][z][0]
-
-        var line = [];
-        line.push(datetime_string(time))
-
-        for (var i in keys) {
-            let key = keys[i];
-
-            var value = null; 
-            
-            if (data[key][z] != undefined) value = data[key][z][1];
-            if (!isNaN(value) && value != null) value = value.toFixed(3)
-            line.push(value)
-        }
-
-        csv.push(line.join(","));
-    }
-
-    download_data("tariff-data.csv", csv.join("\n"));
-});
-
-$('#datetimepicker1').on("changeDate", function(e) {
-    var timewindowStart = parseTimepickerTime($("#request-start").val());
-    if (!timewindowStart) {
-        alert("Please enter a valid start date.");
-        return false;
-    }
-    if (timewindowStart * 1000 >= view.end) {
-        alert("Start date must be further back in time than end date.");
-        return false;
-    }
-
-    view.start = timewindowStart * 1000;
-    graph_load();
-    graph_draw();
-    $(".time-select").val("C");
-});
-
-$('#datetimepicker2').on("changeDate", function(e) {
-    var timewindowEnd = parseTimepickerTime($("#request-end").val());
-    if (!timewindowEnd) {
-        alert("Please enter a valid end date.");
-        return false;
-    }
-    if (view.start >= timewindowEnd * 1000) {
-        alert("Start date must be further back in time than end date.");
-        return false;
-    }
-
-    view.end = timewindowEnd * 1000;
-    graph_load();
-    graph_draw();
-    $(".time-select").val("C");
-});
 
 // -------------------------------------------------------------------------------
 // FUNCTIONS
@@ -644,6 +387,30 @@ function graph_load() {
 
     if (smart_meter_data) meter_kwh_hh = feed.getdata(feeds["meter_kwh_hh"].id, view.start, view.end, interval);
 
+    // Add last half hour of current day to cumulative data if missing
+    this_halfhour_index = -1;
+    var this_halfhour = Math.floor((new Date()).getTime() / 1800000) * 1800000
+    for (var z = 1; z < import_kwh.length; z++) {
+        if (import_kwh[z][0] == this_halfhour) {
+            import_kwh[z + 1] = [this_halfhour + 1800000, feeds["import_kwh"].value]
+            this_halfhour_index = z
+
+            if (solarpv_mode || battery_mode) {
+                use_kwh[z + 1] = [this_halfhour + 1800000, feeds["use_kwh"].value]
+            }
+
+            if (solarpv_mode) {
+                solar_kwh[z + 1] = [this_halfhour + 1800000, feeds["solar_kwh"].value]
+            }
+
+            if (battery_mode) {
+                battery_charge_kwh[z + 1] = [this_halfhour + 1800000, feeds["battery_charge_kwh"].value]
+                battery_discharge_kwh[z + 1] = [this_halfhour + 1800000, feeds["battery_discharge_kwh"].value]
+            }
+            break;
+        }
+    }
+
     data = {};
     data["tariff_A"] = []
     data["tariff_B"] = []
@@ -651,12 +418,12 @@ function graph_load() {
     data["carbonintensity"] = []
 
     // Tariff A
-    if (config.app.region != undefined && octopus_feed_list[config.app.tariff_A.value][config.app.region.value] != undefined) {
+    if (config.app.region != undefined && octopus_feed_list[config.app.tariff_A.value] != undefined && octopus_feed_list[config.app.tariff_A.value][config.app.region.value] != undefined) {
         data["tariff_A"] = getdataremote(octopus_feed_list[config.app.tariff_A.value][config.app.region.value], view.start, view.end, interval);
     }
 
     // Tariff B
-    if (config.app.region != undefined && octopus_feed_list[config.app.tariff_B.value][config.app.region.value] != undefined) {
+    if (config.app.region != undefined && octopus_feed_list[config.app.tariff_B.value] != undefined && octopus_feed_list[config.app.tariff_B.value][config.app.region.value] != undefined) {
         data["tariff_B"] = getdataremote(octopus_feed_list[config.app.tariff_B.value][config.app.region.value], view.start, view.end, interval);
     }
 
@@ -714,29 +481,6 @@ function graph_load() {
 
     var monthly_data = {};
 
-    this_halfhour_index = -1;
-    // Add last half hour
-    var this_halfhour = Math.floor((new Date()).getTime() / 1800000) * 1800000
-    for (var z = 1; z < import_kwh.length; z++) {
-        if (import_kwh[z][0] == this_halfhour) {
-            import_kwh[z + 1] = [this_halfhour + 1800000, feeds["import_kwh"].value]
-            this_halfhour_index = z
-
-            if (solarpv_mode || battery_mode) {
-                use_kwh[z + 1] = [this_halfhour + 1800000, feeds["use_kwh"].value]
-            }
-
-            if (solarpv_mode) {
-                solar_kwh[z + 1] = [this_halfhour + 1800000, feeds["solar_kwh"].value]
-            }
-
-            if (battery_mode) {
-                battery_charge_kwh[z + 1] = [this_halfhour + 1800000, feeds["battery_charge_kwh"].value]
-                battery_discharge_kwh[z + 1] = [this_halfhour + 1800000, feeds["battery_discharge_kwh"].value]
-            }
-            break;
-        }
-    }
 
     // Convert cumulative import data to half hourly kwh
     // Core import data conversion
@@ -892,6 +636,11 @@ function graph_load() {
 
         // Solar used calculation
         if (solarpv_mode) {
+
+            let solar_direct = Math.min(kwh_solar, kwh_use);
+            // Any additional solar used to charge battery
+            let solar_to_battery = Math.min(Math.max(0, kwh_solar - solar_direct), kwh_battery_charge);
+
             let kwh_solar_used = kwh_solar - kwh_export;
             data["solar_used"].push([time, kwh_solar_used]);
             total_kwh_solar_used += kwh_solar_used
@@ -900,6 +649,9 @@ function graph_load() {
         }
     }
     
+    // --------------------------------------------------------------------------------------
+
+
     if (smart_meter_data) {
         calibration_line_of_best_fit(import_kwh_hh, meter_kwh_hh);
     }
@@ -1145,14 +897,19 @@ function graph_draw() {
 
     graph_series = [];
 
-    if (solarpv_mode) graph_series.push({
-        label: "Used Solar",
-        data: data["solar_used"],
-        yaxis: 1,
-        color: "#bec745",
-        stack: true,
-        bars: bars
-    });
+    // Solar used data
+    if (solarpv_mode) {
+        graph_series.push({
+            label: "Used Solar",
+            data: data["solar_used"],
+            yaxis: 1,
+            color: "#bec745",
+            stack: true,
+            bars: bars
+        });
+    }
+
+    // Import data
     graph_series.push({
         label: "Import",
         data: data["import"],
@@ -1161,22 +918,30 @@ function graph_draw() {
         stack: true,
         bars: bars
     });
-    if (solarpv_mode) graph_series.push({
-        label: "Export",
-        data: data["export"],
-        yaxis: 1,
-        color: "#dccc1f",
-        stack: false,
-        bars: bars
-    });
-    if (smart_meter_data && !solarpv_mode) graph_series.push({
-        label: "Import Actual",
-        data: data["meter_kwh_hh"],
-        yaxis: 1,
-        color: "#1d8dbc",
-        stack: false,
-        bars: bars
-    });
+
+    // Export data
+    if (solarpv_mode || battery_mode) {
+        graph_series.push({
+            label: "Export",
+            data: data["export"],
+            yaxis: 1,
+            color: "#dccc1f",
+            stack: false,
+            bars: bars
+        });
+    }
+
+    // Smart meter data
+    if (smart_meter_data && !solarpv_mode) {
+        graph_series.push({
+            label: "Import Actual",
+            data: data["meter_kwh_hh"],
+            yaxis: 1,
+            color: "#1d8dbc",
+            stack: false,
+            bars: bars
+        });
+    }
 
     // price signals
     graph_series.push({
@@ -1191,30 +956,36 @@ function graph_draw() {
             lineWidth: 1
         }
     });
-    if (solarpv_mode) graph_series.push({
-        label: "Outgoing",
-        data: data["outgoing"],
-        yaxis: 2,
-        color: "#941afb",
-        lines: {
-            show: true,
-            steps: true,
-            align: "center",
-            lineWidth: 1
-        }
-    });
-    if (show_carbonintensity) graph_series.push({
-        label: "Carbon Intensity",
-        data: data["carbonintensity"],
-        yaxis: 2,
-        color: "#888",
-        lines: {
-            show: true,
-            steps: true,
-            align: "left",
-            lineWidth: 1
-        }
-    });
+
+    if (solarpv_mode) {
+        graph_series.push({
+            label: "Outgoing",
+            data: data["outgoing"],
+            yaxis: 2,
+            color: "#941afb",
+            lines: {
+                show: true,
+                steps: true,
+                align: "center",
+                lineWidth: 1
+            }
+        });
+    }
+
+    if (show_carbonintensity) {
+        graph_series.push({
+            label: "Carbon Intensity",
+            data: data["carbonintensity"],
+            yaxis: 2,
+            color: "#888",
+            lines: {
+                show: true,
+                steps: true,
+                align: "left",
+                lineWidth: 1
+            }
+        });
+    }
 
     graph_series.push({
         label: config.app.tariff_B.value,
@@ -1276,107 +1047,13 @@ function graph_draw() {
         },
         legend: {
             position: "NW",
-            noColumns: 5
+            noColumns: 6
         }
     }
     $.plot($('#placeholder'), graph_series, options);
 }
 
-function profile_draw() {
-    profile_mode = true;
-    $("#history-title").html("PROFILE");
 
-    var profile_unitprice = [];
-
-    for (var z = 0; z < 48; z++) {
-        let time = profile_kwh[z][0]
-        let value = 100 * profile_cost[z][1] / profile_kwh[z][1]
-        profile_unitprice[z * 2] = [time, value];
-        profile_unitprice[z * 2 + 1] = [time + 1800000, value];
-    }
-
-    var bars = {
-        show: true,
-        align: "left",
-        barWidth: 0.9 * 1800 * 1000,
-        fill: 1.0,
-        lineWidth: 0
-    };
-
-    graph_series = [];
-
-    graph_series.push({
-        label: "Import",
-        data: profile_kwh,
-        yaxis: 1,
-        color: "#44b3e2",
-        stack: true,
-        bars: bars
-    });
-
-    graph_series.push({
-        label: config.app.tariff_A.value,
-        data: profile_unitprice,
-        yaxis: 2,
-        color: "#fb1a80",
-        lines: {
-            show: true,
-            align: "left",
-            lineWidth: 1
-        }
-    });
-
-    var options = {
-        xaxis: {
-            mode: "time",
-            timezone: "browser",
-            // min: start, max: end, 
-            font: {
-                size: flot_font_size,
-                color: "#666"
-            },
-            reserveSpace: false
-        },
-        yaxes: [{
-                position: 'left',
-                font: {
-                    size: flot_font_size,
-                    color: "#666"
-                },
-                reserveSpace: false
-            },
-            {
-                position: 'left',
-                alignTicksWithAxis: 1,
-                font: {
-                    size: flot_font_size,
-                    color: "#666"
-                },
-                reserveSpace: false
-            }
-        ],
-        grid: {
-            show: true,
-            color: "#aaa",
-            borderWidth: 0,
-            hoverable: true,
-            clickable: true,
-            // labelMargin:0,
-            // axisMargin:0
-            margin: {
-                top: 30
-            }
-        },
-        selection: {
-            mode: "x"
-        },
-        legend: {
-            position: "NW",
-            noColumns: 5
-        }
-    }
-    $.plot($('#placeholder'), graph_series, options);
-}
 
 // -------------------------------------------------------------------------------
 // RESIZE
@@ -1392,6 +1069,7 @@ function resize() {
     var width = placeholder_bound.width();
     var height = window_height - topblock - 250;
     if (height < 250) height = 250;
+    if (height > 500) height = 500;
 
     placeholder.width(width);
     placeholder_bound.height(height);
@@ -1426,8 +1104,9 @@ $(function() {
 })
 
 // ----------------------------------------------------------------------
-// App log
+// HELPER FUNCTIONS
 // ----------------------------------------------------------------------
+
 function app_log(level, message) {
     if (level == "ERROR") alert(level + ": " + message);
     console.log(level + ": " + message);
@@ -1479,9 +1158,6 @@ function parseTimepickerTime(timestr) {
     return new Date(date[2], date[1] - 1, date[0], time[0], time[1], time[2], 0).getTime() / 1000;
 }
 
-// ----------------------------------------------------------------------
-// Remote data request
-// ----------------------------------------------------------------------
 function getdataremote(id, start, end, interval) {
     var data = [];
     $.ajax({
@@ -1499,6 +1175,179 @@ function getdataremote(id, start, end, interval) {
     });
     return data;
 }
+
+
+// -------------------------------------------------------------------------------
+// EVENTS
+// -------------------------------------------------------------------------------
+$('#placeholder').bind("plothover", function(event, pos, item) {
+    if (item) {
+        var z = item.dataIndex;
+
+        var isStepped = item.series.lines && item.series.lines.steps;
+
+        if (isStepped) {
+            z = Math.floor(z / 2);
+        }
+
+
+        if (previousPoint != item.datapoint) {
+            previousPoint = item.datapoint;
+
+            $("#tooltip").remove();
+            var itemTime = item.datapoint[0];
+            var itemValue = item.datapoint[1];
+
+            var d = new Date(itemTime);
+            var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var hours = d.getHours();
+            if (hours < 10) hours = "0" + hours;
+            var minutes = d.getMinutes();
+            if (minutes < 10) minutes = "0" + minutes;
+            var seconds = d.getSeconds();
+            if (seconds < 10) seconds = "0" + seconds;
+
+            var date = hours + ":" + minutes;
+            if (!profile_mode) date += ", " + days[d.getDay()] + " " + months[d.getMonth()] + " " + d.getDate();
+
+            var text = date + "<br>";
+
+            if (profile_mode) {
+                if (item.series.label == 'Import') {
+                    text += "Cumulative ";
+                } else {
+                    text += "Average ";
+                }
+            }
+
+            let import_kwh = get_data_value_at_index("import", z);
+            let solar_used_kwh = get_data_value_at_index("solar_used", z);
+            let export_kwh = get_data_value_at_index("export", z);
+            let tariff_A = get_data_value_at_index("tariff_A", z);
+            let tariff_B = get_data_value_at_index("tariff_B", z);
+            let outgoing = get_data_value_at_index("outgoing", z);
+            let carbonintensity = get_data_value_at_index("carbonintensity", z);
+
+            if (import_kwh != null) {
+                text += "Import: " + import_kwh.toFixed(3) + " kWh";
+                if (tariff_A != null) {
+                    let cost = import_kwh * tariff_A;
+                    text += " (" + cost.toFixed(2) + "p cost)";
+                }
+            }
+
+            if (solar_used_kwh != null) {
+                text += "<br>Used Solar: " + solar_used_kwh.toFixed(3) + " kWh";
+                if (tariff_A != null) {
+                    let cost = solar_used_kwh * tariff_A;
+                    text += " (" + cost.toFixed(2) + "p saved)";
+                }
+            }
+
+            if (export_kwh != null) {
+                text += "<br>Export: " + (export_kwh * -1).toFixed(3) + " kWh";
+                if (outgoing != null) {
+                    let cost = export_kwh * outgoing;
+                    text += " (" + cost.toFixed(2) + "p gained)";
+                }
+            }
+
+            text += "<br>";
+
+            if (outgoing != null) {
+                text += "Export Tariff: " + outgoing.toFixed(2) + " p/kWh (inc VAT)<br>";
+            }
+
+            if (show_carbonintensity && carbonintensity != null) {
+                text += "Carbon Intensity: " + carbonintensity.toFixed(0) + " gCO2/kWh<br>";
+            }
+
+            if (tariff_A != null) {
+                text += config.app.tariff_A.value+": " + tariff_A.toFixed(2) + " p/kWh (inc VAT)<br>";
+            }
+
+            if (tariff_B != null) {
+                text += config.app.tariff_B.value+": " + tariff_B.toFixed(2) + " p/kWh (inc VAT)<br>";
+            }
+
+            tooltip(item.pageX, item.pageY, text, "#fff", "#000");
+        }
+    } else $("#tooltip").remove();
+});
+
+
+$("#zoomout").click(function() {
+    view.zoomout();
+    graph_load();
+    graph_draw();
+});
+$("#zoomin").click(function() {
+    view.zoomin();
+    graph_load();
+    graph_draw();
+});
+$('#right').click(function() {
+    view.pan_speed = 0.5;
+    view.panright();
+    graph_load();
+    graph_draw();
+});
+$('#left').click(function() {
+    view.pan_speed = 0.5;
+    view.panleft();
+    graph_load();
+    graph_draw();
+});
+$('#fastright').click(function() {
+    view.pan_speed = 1.0;
+    view.panright();
+    graph_load();
+    graph_draw();
+});
+$('#fastleft').click(function() {
+    view.pan_speed = 1.0;
+    view.panleft();
+    graph_load();
+    graph_draw();
+});
+
+$('.time').click(function() {
+    setPeriod($(this).attr("time"));
+    // view.timewindow(period);
+    graph_load();
+    graph_draw();
+});
+
+$('.time-select').change(function() {
+    var val = $(this).val();
+
+    if (val == "C") {
+
+    } else {
+        setPeriod(val);
+        // view.timewindow(period);
+        graph_load();
+        graph_draw();
+    }
+});
+
+$('#placeholder').bind("plotselected", function(event, ranges) {
+    var start = ranges.xaxis.from;
+    var end = ranges.xaxis.to;
+    panning = true;
+
+    view.start = start;
+    view.end = end;
+    graph_load();
+    graph_draw();
+
+    $(".time-select").val("C");
+
+    setTimeout(function() {
+        panning = false;
+    }, 100);
+});
 
 // zoom to month by timestamp
 $("#monthly-data").on("click", ".zoom-to-month", function() {
@@ -1534,4 +1383,85 @@ $("#octopus_totals").on("change", "select", function() {
 
     graph_load();
     graph_draw();
+});
+
+$("#use_meter_kwh_hh").click(function() {
+    use_meter_kwh_hh = $(this)[0].checked;
+    graph_load();
+    graph_draw();
+});
+
+$("#show_carbonintensity").click(function() {
+    show_carbonintensity = $(this)[0].checked;
+    graph_load();
+    graph_draw();
+    if (!show_carbonintensity) $("#carbonintensity_result").html("");
+});
+
+$("#download-csv").click(function() {
+
+    var csv = [];
+
+    if (solarpv_mode) {
+        keys = ["tariff_A", "tariff_B", "outgoing", "use", "import", "import_cost_tariff_A", "import_cost_tariff_B", "export", "export_cost", "solar_used", "solar_used_cost", "meter_kwh_hh", "meter_kwh_hh_cost"]
+    } else {
+        keys = ["tariff_A", "tariff_B", "import", "import_cost_tariff_A", "import_cost_tariff_B", "meter_kwh_hh", "meter_kwh_hh_cost"]
+    }
+
+    csv.push("time," + keys.join(","))
+
+    for (var z in data["import"]) {
+        var time = data["import"][z][0]
+
+        var line = [];
+        line.push(datetime_string(time))
+
+        for (var i in keys) {
+            let key = keys[i];
+
+            var value = null; 
+            
+            if (data[key][z] != undefined) value = data[key][z][1];
+            if (!isNaN(value) && value != null) value = value.toFixed(3)
+            line.push(value)
+        }
+
+        csv.push(line.join(","));
+    }
+
+    download_data("tariff-data.csv", csv.join("\n"));
+});
+
+$('#datetimepicker1').on("changeDate", function(e) {
+    var timewindowStart = parseTimepickerTime($("#request-start").val());
+    if (!timewindowStart) {
+        alert("Please enter a valid start date.");
+        return false;
+    }
+    if (timewindowStart * 1000 >= view.end) {
+        alert("Start date must be further back in time than end date.");
+        return false;
+    }
+
+    view.start = timewindowStart * 1000;
+    graph_load();
+    graph_draw();
+    $(".time-select").val("C");
+});
+
+$('#datetimepicker2').on("changeDate", function(e) {
+    var timewindowEnd = parseTimepickerTime($("#request-end").val());
+    if (!timewindowEnd) {
+        alert("Please enter a valid end date.");
+        return false;
+    }
+    if (view.start >= timewindowEnd * 1000) {
+        alert("Start date must be further back in time than end date.");
+        return false;
+    }
+
+    view.end = timewindowEnd * 1000;
+    graph_load();
+    graph_draw();
+    $(".time-select").val("C");
 });

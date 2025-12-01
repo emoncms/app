@@ -87,8 +87,8 @@ global $path, $session, $v;
                 </div>
 
                 <div style="background-color:rgba(68,179,226,0.1); padding:10px;">
-                    <div id="placeholder_bound" style="width:100%; height:500px;">
-                        <div id="placeholder" style="height:500px"></div>
+                    <div id="placeholder_bound" style="width:100%; height:400px;">
+                        <div id="placeholder" style="height:400px"></div>
                     </div>
                 </div>
 
@@ -190,3 +190,4 @@ global $path, $session, $v;
 
 <!-- include tariff_explorer.js -->
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/octopus/tariff_explorer.js?v=<?php echo time(); ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/octopus/profile.js?v=<?php echo time(); ?>"></script>
