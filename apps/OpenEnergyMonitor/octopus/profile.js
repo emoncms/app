@@ -2,6 +2,44 @@ $("#show_profile").click(function() {
     profile_draw();
 });
 
+function process_profile_data(data, tariff_key) {
+    // Used to generate averaged profile
+    var profile_kwh = [];
+    var profile_cost = [];
+
+    var d = new Date();
+    d.setHours(0, 0, 0, 0);
+    var profile_start = d.getTime();
+
+    // Initialize profile arrays
+    for (var hh = 0; hh < 48; hh++) {
+        let profile_time = profile_start + hh * 1800 * 1000;
+        profile_kwh[hh] = [profile_time, 0.0]
+        profile_cost[hh] = [profile_time, 0.0]
+    }
+
+    // Process data into profile
+    for (var z = 0; z < data["import"].length; z++) {
+        let time = data["import"][z][0];
+        let import_kwh_hh = data["import"][z][1];
+
+        if (data[tariff_key][z][1] != null) {
+            let import_unitrate = data[tariff_key][z][1] * 0.01;
+            let import_cost_hh = import_kwh_hh * import_unitrate;
+
+            d.setTime(time);
+            let hh = d.getHours() * 2 + d.getMinutes() / 30;
+            profile_kwh[hh][1] += import_kwh_hh
+            profile_cost[hh][1] += import_cost_hh 
+        }
+    }
+
+    return {
+        kwh: profile_kwh,
+        cost: profile_cost
+    };
+}
+
 function profile_draw() {
     profile_mode = true;
     $("#history-title").html("PROFILE");

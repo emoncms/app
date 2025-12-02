@@ -17,7 +17,7 @@ global $path, $session, $v;
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
-
+<script src="<?php echo $path; ?>Lib/vue.min.js"></script>
 
 <?php $v += 8; ?>
 <link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/octopus/tariff_explorer.css?v=<?php echo $v; ?>" rel="stylesheet">
@@ -94,15 +94,11 @@ global $path, $session, $v;
 
                 <div class="power-graph-footer" style="background-color:#f0f0f0; color:#333; display:none">
                     <div style="padding:20px;">
-                        <table style="width:100%" class="table">
-                            <tr>
-                                <th></th>
-                                <th>Energy</th>
-                                <th>Cost / Value</th>
-                                <th>Unit price</th>
-                            </tr>
-                            <tbody id="octopus_totals"></tbody>
-                        </table>
+
+                        <div class="input-prepend" style="padding-right:5px">
+                            <span class="add-on"><?php echo tr('Tariff') ?></span>
+                            <select id="tariff-select" ></select>
+                        </div>
 
                         <div class="input-prepend input-append" style="padding-right:5px">
                             <span class="add-on" style="width:50px"><?php echo tr('Start') ?></span>
@@ -119,6 +115,72 @@ global $path, $session, $v;
                                 <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
                             </span>
                         </div>
+
+                        <div id="vue-app">
+                            <table style="width:100%" class="table">
+                                <tr>
+                                    <th></th>
+                                    <th>Energy</th>
+                                    <th>Cost / Value</th>
+                                    <th>Unit price</th>
+                                </tr>
+                                <tr>
+                                    <td>Import</td>
+                                    <td>{{ total.import.kwh | toFixed(3) }} kWh</td>
+                                    <td>£{{ total.import.cost | toFixed(2) }}</td>
+                                    <td>{{ 100*total.import.cost / total.import.kwh | toFixed(1) }} p/kWh</td>
+                                </tr>
+                                <tr>
+                                    <td>Export</td>
+                                    <td>{{ total.export.kwh | toFixed(3) }} kWh</td>
+                                    <td>£{{ total.export.value | toFixed(2) }} (export value)</td>
+                                    <td>{{ 100*total.export.value / total.export.kwh | toFixed(1) }} p/kWh</td>
+                                </tr>
+                                <tr>
+                                    <td>- Solar direct self consumption</td>
+                                    <td>{{ total.solar_direct.kwh | toFixed(3) }} kWh</td>
+                                    <td>£{{ total.solar_direct.value | toFixed(2) }} (avoided import cost)</td>
+                                    <td>{{ 100*total.solar_direct.value / total.solar_direct.kwh | toFixed(1) }} p/kWh</td>
+                                </tr>
+                                <tr>
+                                    <td>- Solar to battery charging</td>
+                                    <td>{{ total.solar_to_battery.kwh | toFixed(3) }} kWh</td>
+                                    <td>£{{ total.solar_to_battery.value | toFixed(2) }} (forgone export value)</td>
+                                    <td>{{ 100*total.solar_to_battery.value / total.solar_to_battery.kwh | toFixed(1) }} p/kWh</td>
+                                </tr>
+                                <tr>
+                                    <td>- Battery to load</td>
+                                    <td>{{ total.battery_to_load.kwh | toFixed(3) }} kWh</td>
+                                    <td>£{{ total.battery_to_load.value | toFixed(2) }} (avoided import cost)</td>
+                                    <td>{{ 100*total.battery_to_load.value / total.battery_to_load.kwh | toFixed(1) }} p/kWh</td>
+                                </tr>
+                                <tr>
+                                    <th>Net cost</th>
+                                    <th>{{ total.net.kwh | toFixed(3) }} kWh</td>
+                                    <th>£{{ (total.net.cost) | toFixed(2) }} (£{{ total.import_only.cost - total.net.cost | toFixed(2) }} saving)</th>
+                                    <th>{{ 100*(total.net.cost) / total.net.kwh | toFixed(1) }} p/kWh</th>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Comparison: Solar only</td>
+                                    <td></td>
+                                    <td>£{{ total.solar_only.cost | toFixed(2) }} (£{{ total.import_only.cost - total.solar_only.cost | toFixed(2) }} saving)</td>
+                                    <td>{{ 100*total.solar_only.cost / total.solar_only.kwh | toFixed(1) }} p/kWh</td>
+                                </tr>
+                                <tr>
+                                    <td>Comparison: Import only</td>
+                                    <td></td>
+                                    <td>£{{ total.import_only.cost | toFixed(2) }}</td>
+                                    <td>{{ 100*total.import_only.cost / total.import_only.kwh | toFixed(1) }} p/kWh</td>
+                                </tr>
+                            </table>
+                        </div>
+
 
                         <button class="btn" style="float:right" id="download-csv">Download CSV</button>
                         <button class="btn hide" style="float:right" id="show_profile">Show Profile</button>
