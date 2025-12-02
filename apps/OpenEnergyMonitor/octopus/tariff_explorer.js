@@ -371,6 +371,7 @@ function graph_load() {
     //delete feeds["battery_charge_kwh"];
     //delete feeds["battery_discharge_kwh"];
     //delete feeds["solar_kwh"];
+    //delete feeds["import_kwh"];
 
     // We need either total consumption, import data or smart meter data for the standard import mode
     // - if import_kwh is available we use that as default
@@ -526,6 +527,7 @@ function process_energy_data(data, solarpv_mode, battery_mode) {
     calculated["solar_direct"] = [];
     calculated["solar_to_battery"] = [];
     calculated["battery_to_load"] = [];
+    calculated["grid_to_battery"] = [];
 
     for (var z = 0; z < view.npoints; z++) {
         let time = view.start + (z * intervalms);
@@ -574,11 +576,12 @@ function process_energy_data(data, solarpv_mode, battery_mode) {
         }
 
         // Solar used calculation
+        let solar_to_battery = 0;
         if (solarpv_mode) {
             let solar_direct = Math.min(kwh_solar, kwh_use);
             calculated["solar_direct"].push([time, solar_direct]);
 
-            let solar_to_battery = Math.min(Math.max(0, kwh_solar - solar_direct), kwh_battery_charge);
+            solar_to_battery = Math.min(Math.max(0, kwh_solar - solar_direct), kwh_battery_charge);
             calculated["solar_to_battery"].push([time, solar_to_battery]);
         }
 
@@ -591,6 +594,15 @@ function process_energy_data(data, solarpv_mode, battery_mode) {
             }
             let battery_to_load = Math.min(kwh_battery_discharge, load);
             calculated["battery_to_load"].push([time, battery_to_load]);
+
+            // Charge from grid
+            let grid_to_battery = kwh_battery_charge;
+            // If solar PV mode, subtract solar to battery
+            if (solarpv_mode) {
+                grid_to_battery -= solar_to_battery;
+            }
+            calculated["grid_to_battery"].push([time, grid_to_battery]);
+
         }
     }
     return calculated;
@@ -606,6 +618,7 @@ function process_costs(data, import_tariff_key, export_tariff_key) {
         export: { kwh: 0, value: 0 },
         solar_direct: { kwh: 0, value: 0 },
         solar_to_battery: { kwh: 0, value: 0 },
+        grid_to_battery: { kwh: 0, cost: 0 },
         battery_to_load: { kwh: 0, value: 0 },
         net : { kwh: 0, cost: 0 },
         // comparisons
@@ -658,18 +671,22 @@ function process_costs(data, import_tariff_key, export_tariff_key) {
                     let battery_to_load = data["battery_to_load"][z][1];
                     total.battery_to_load.kwh += battery_to_load
                     total.battery_to_load.value += battery_to_load * import_unitrate
+
+                    let grid_to_battery = data["grid_to_battery"][z][1];
+                    total.grid_to_battery.kwh += grid_to_battery
+                    total.grid_to_battery.cost += grid_to_battery * import_unitrate
                 }
             }
         }
     }
 
     // Net cost
-    total.net.kwh = total.import.kwh + total.solar_direct.kwh + total.battery_to_load.kwh;
+    total.net.kwh = total.import.kwh - total.grid_to_battery.kwh + total.solar_direct.kwh + total.battery_to_load.kwh;
     total.net.cost = total.import.cost - total.export.value;
 
     // Cost comparisons
-    total.import_only.kwh = total.import.kwh + total.solar_direct.kwh + total.battery_to_load.kwh;
-    total.import_only.cost = total.import.cost + total.solar_direct.value + total.battery_to_load.value;
+    total.import_only.kwh = total.import.kwh - total.grid_to_battery.kwh + total.solar_direct.kwh + total.battery_to_load.kwh;
+    total.import_only.cost = total.import.cost - total.grid_to_battery.cost + total.solar_direct.value + total.battery_to_load.value;
     total.solar_only.kwh = total.import_only.kwh;
     total.solar_only.cost = total.import_only.cost - total.solar_direct.value - total.solar_to_battery.value - total.export.value;
 
@@ -909,6 +926,16 @@ function graph_draw() {
             data: data["battery_to_load"],
             yaxis: 1,
             color: "#f39c12",
+            stack: true,
+            bars: bars
+        });
+
+        // Charge from grid
+        graph_series.push({
+            label: "Grid to battery",
+            data: data["grid_to_battery"],
+            yaxis: 1,
+            color: "#f5c469",
             stack: true,
             bars: bars
         });

@@ -149,6 +149,12 @@ global $path, $session, $v;
                                     <td>{{ 100*total.solar_to_battery.value / total.solar_to_battery.kwh | toFixed(1) }} p/kWh</td>
                                 </tr>
                                 <tr>
+                                    <td>- Grid to battery charging</td>
+                                    <td>{{ total.grid_to_battery.kwh | toFixed(3) }} kWh</td>
+                                    <td>£{{ total.grid_to_battery.cost | toFixed(2) }} (import cost)</td>
+                                    <td>{{ 100*total.grid_to_battery.cost / total.grid_to_battery.kwh | toFixed(1) }} p/kWh</td>
+                                </tr>
+                                <tr>
                                     <td>- Battery to load</td>
                                     <td>{{ total.battery_to_load.kwh | toFixed(3) }} kWh</td>
                                     <td>£{{ total.battery_to_load.value | toFixed(2) }} (avoided import cost)</td>
