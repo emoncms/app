@@ -372,6 +372,7 @@ function graph_load() {
     //delete feeds["battery_discharge_kwh"];
     //delete feeds["solar_kwh"];
     //delete feeds["import_kwh"];
+    delete feeds["use_kwh"];
 
     // We need either total consumption, import data or smart meter data for the standard import mode
     // - if import_kwh is available we use that as default
@@ -390,7 +391,7 @@ function graph_load() {
 
     // We need total consumption, battery charge and battery discharge data for battery mode
     // - when in battery mode we calculate import from consumption minus battery discharge plus battery charge
-    if (feeds["battery_charge_kwh"] != undefined && feeds["battery_discharge_kwh"] != undefined && feeds["use_kwh"] != undefined) {
+    if (feeds["battery_charge_kwh"] != undefined && feeds["battery_discharge_kwh"] != undefined) {
         battery_mode = true;
     }
 
@@ -463,6 +464,19 @@ function graph_load() {
         } else if (data['meter_kwh'] != undefined) {
             data["import_kwh"] = data["meter_kwh"];
             data["use_kwh"] = data["meter_kwh"];
+        }
+    }
+
+    // Derive use_kwh if import_kwh is available and battery data is present
+    if (battery_mode && !solarpv_mode && data["use_kwh"] == undefined && data["import_kwh"] != undefined) {
+        data["use_kwh"] = [];
+        for (var z = 0; z < view.npoints; z++) {
+            let time = view.start + (z * intervalms);
+            let import_kwh = data["import_kwh"][z][1];
+            let battery_charge_kwh = data["battery_charge_kwh"][z][1];
+            let battery_discharge_kwh = data["battery_discharge_kwh"][z][1];
+            let use_kwh = import_kwh + battery_discharge_kwh - battery_charge_kwh;
+            data["use_kwh"].push([time, use_kwh]);
         }
     }
 
