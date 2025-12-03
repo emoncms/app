@@ -372,7 +372,7 @@ function graph_load() {
     //delete feeds["battery_discharge_kwh"];
     //delete feeds["solar_kwh"];
     //delete feeds["import_kwh"];
-    delete feeds["use_kwh"];
+    // delete feeds["use_kwh"];
 
     // We need either total consumption, import data or smart meter data for the standard import mode
     // - if import_kwh is available we use that as default
