@@ -573,8 +573,15 @@ function process_energy_data(data, solarpv_mode, battery_mode) {
 
         // if battery mode, fetch battery charge and discharge
         if (battery_mode) {
-            kwh_battery_charge = data['battery_charge_kwh'][z][1];
-            kwh_battery_discharge = data['battery_discharge_kwh'][z][1];
+
+            let battery_balance = data['battery_charge_kwh'][z][1] - data['battery_discharge_kwh'][z][1];
+
+            if (battery_balance > 0) {
+                kwh_battery_charge = battery_balance;
+            } else {
+                kwh_battery_discharge = battery_balance * -1;
+            }
+
             balance += kwh_battery_charge;
             balance -= kwh_battery_discharge;
         }
