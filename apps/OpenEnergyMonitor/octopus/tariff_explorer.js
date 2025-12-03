@@ -25,7 +25,7 @@ if (!sessionwrite) $(".config-open").hide();
 // Configuration
 // ----------------------------------------------------------------------
 
-var tariff_options = [
+var import_tariff_options = [
     "AGILE-18-02-21",
     "AGILE-22-07-22",
     "AGILE-22-08-31",
@@ -43,6 +43,11 @@ var tariff_options = [
     "FLUX-IMPORT-23-02-14"
     // Custom opens tariff builder
     // "CUSTOM"
+];
+
+var export_tariff_options = [
+    "agile_export",            //"AGILE-EXPORT-22-10-14",
+    "FLUX-EXPORT-23-02-14"
 ];
 
 config.app = {
@@ -99,14 +104,21 @@ config.app = {
         "type": "select",
         "name": "Select tariff A:",
         "default": "AGILE-23-12-06",
-        "options": tariff_options
+        "options": import_tariff_options
     },
 
     "tariff_B": {
         "type": "select",
         "name": "Select tariff B:",
         "default": "INTELLI-VAR-22-10-14",
-        "options": tariff_options
+        "options": import_tariff_options
+    },
+
+    "export_tariff": {
+        "type": "select",
+        "name": "Select export tariff:",
+        "default": "agile_export",
+        "options": export_tariff_options
     },
 
     "public": {
@@ -133,23 +145,6 @@ config.hideapp = function() {
 };
 
 var octopus_feed_list = {};
-
-var regions_outgoing = {
-    "A_Eastern_England": 399374,
-    "B_East_Midlands": 399361,
-    "C_London": 399362,
-    "D_Merseyside_and_Northern_Wales": 399363,
-    "E_West_Midlands": 399364,
-    "F_North_Eastern_England": 399365,
-    "G_North_Western_England": 399366,
-    "H_Southern_England": 399367,
-    "J_South_Eastern_England": 399368,
-    "K_Southern_Wales": 399369,
-    "L_South_Western_England": 399370,
-    "M_Yorkshire": 399371,
-    "N_Southern_Scotland": 399372,
-    "P_Northern_Scotland": 399373
-}
 
 // ----------------------------------------------------------------------
 // APPLICATION
@@ -178,7 +173,8 @@ var profile_cost = {};
 var app = new Vue({
     el: '#vue-app',
     data: {
-        total: {}
+        total: {},
+        days: 0
     },
     filters: {
         toFixed: function (value, decimals) {
@@ -202,11 +198,22 @@ function init() {
     datetimepicker1 = $('#datetimepicker1').data('datetimepicker');
     datetimepicker2 = $('#datetimepicker2').data('datetimepicker');
 
-    var tariff_select = "";
-    for (var z in tariff_options) {
-        tariff_select += "<option value='" + tariff_options[z] + "'>" + tariff_options[z] + "</option>";
+    // Import tariff select
+    var import_tariff_select = "";
+    for (var z in import_tariff_options) {
+        import_tariff_select += "<option value='" + import_tariff_options[z] + "'>" + import_tariff_options[z] + "</option>";
     }
-    $("#tariff-select").html(tariff_select);
+    $("#import-tariff-select").html(import_tariff_select);
+
+    // Export tariff select
+    var export_tariff_select = "";
+    for (var z in export_tariff_options) {
+        let key = export_tariff_options[z];
+        let name = key;
+        if (key == "agile_export") name = "AGILE-EXPORT-22-10-14"; // temporary hardcode mapping
+        export_tariff_select += "<option value='" + key + "'>" + name + "</option>";
+    }
+    $("#export-tariff-select").html(export_tariff_select);
 }
 
 function show() {
@@ -347,7 +354,8 @@ function get_data_value_at_index(key, index) {
 
 function graph_load() {
     $(".power-graph-footer").show();
-    $("#tariff-select").val(config.app.tariff_A.value);
+    $("#import-tariff-select").val(config.app.tariff_A.value);
+    $("#export-tariff-select").val(config.app.export_tariff.value);
 
     var interval = 1800;
     var intervalms = interval * 1000;
@@ -368,10 +376,12 @@ function graph_load() {
     // -----------------------------------------------------------------------
     // 1. Data requirements checks
     // -----------------------------------------------------------------------
-    //delete feeds["battery_charge_kwh"];
-    //delete feeds["battery_discharge_kwh"];
-    //delete feeds["solar_kwh"];
-    //delete feeds["import_kwh"];
+    
+    // Uncomment to test missing data and handling of different modes
+    // delete feeds["battery_charge_kwh"];
+    // delete feeds["battery_discharge_kwh"];
+    // delete feeds["solar_kwh"];
+    // delete feeds["import_kwh"];
     // delete feeds["use_kwh"];
 
     // We need either total consumption, import data or smart meter data for the standard import mode
@@ -394,11 +404,6 @@ function graph_load() {
     if (feeds["battery_charge_kwh"] != undefined && feeds["battery_discharge_kwh"] != undefined) {
         battery_mode = true;
     }
-
-    // Flags for data availability
-    var import_kwh_available = false;
-    var use_kwh_available = false;
-    var smart_meter_data_available = false;
 
     // -----------------------------------------------------------------------
     // 2. User account data download
@@ -485,7 +490,7 @@ function graph_load() {
     // -----------------------------------------------------------------------
 
     data["import_tariff"] = []
-    data["outgoing"] = []
+    data["export_tariff"] = []
     data["carbonintensity"] = []
 
     // Tariff A
@@ -493,11 +498,11 @@ function graph_load() {
         data["import_tariff"] = getdataremote(octopus_feed_list[config.app.tariff_A.value][config.app.region.value], view.start, view.end, interval);
     }
 
-    // Outgoing
+    // Export tariff
     if (config.app.region != undefined && (solarpv_mode || battery_mode)) {
-        data["outgoing"] = getdataremote(regions_outgoing[config.app.region.value], view.start, view.end, interval);
+        data["export_tariff"] = getdataremote(octopus_feed_list[config.app.export_tariff.value][config.app.region.value], view.start, view.end, interval);
         // Invert export tariff
-        for (var z in data["outgoing"]) data["outgoing"][z][1] *= -1;
+        for (var z in data["export_tariff"]) data["export_tariff"][z][1] *= -1;
     }
 
     // Carbon Intensity
@@ -512,8 +517,10 @@ function graph_load() {
         data[key] = calculated[key];
     }
 
-    let costs = process_costs(data,"import_tariff","outgoing");
+    let costs = process_costs(data,"import_tariff","export_tariff");
     app.total = costs;
+
+    app.days = (view.end - view.start) / (1000 * 3600 * 24);
 
     // if (show_carbonintensity) {
     //     let co2 = process_carbon_intensity(data);
@@ -637,7 +644,12 @@ function process_costs(data, import_tariff_key, export_tariff_key) {
         net : { kwh: 0, cost: 0 },
         // comparisons
         import_only: { kwh: 0, cost: 0 },
-        solar_only: { kwh: 0, cost: 0 }
+        solar_only: { kwh: 0, cost: 0 },
+        // totals only
+        use: { kwh: 0 },
+        solar: { kwh: 0 },
+        battery_charge: { kwh: 0 },
+        battery_discharge: { kwh: 0 }
     };
 
     let import_cost_hh_data = [];
@@ -661,6 +673,10 @@ function process_costs(data, import_tariff_key, export_tariff_key) {
 
         import_cost_hh_data.push([time, import_cost_hh]);
 
+        // Use
+        let use_kwh_hh = data["use_kwh"][z][1];
+        total.use.kwh += use_kwh_hh;
+
         let export_unitrate = null; 
         if (solarpv_mode || battery_mode) {
             if (data[export_tariff_key][z][1] != null) {
@@ -671,9 +687,11 @@ function process_costs(data, import_tariff_key, export_tariff_key) {
                 total.export.value += export_kwh * export_unitrate;
 
                 if (solarpv_mode) {
+                    let solar_kwh = data["solar_kwh"][z][1];
                     let solar_direct = data["solar_direct"][z][1];
                     let solar_to_battery = data["solar_to_battery"][z][1];
 
+                    total.solar.kwh += solar_kwh;
                     total.solar_direct.kwh += solar_direct
                     total.solar_direct.value += solar_direct * import_unitrate
 
@@ -689,6 +707,12 @@ function process_costs(data, import_tariff_key, export_tariff_key) {
                     let grid_to_battery = data["grid_to_battery"][z][1];
                     total.grid_to_battery.kwh += grid_to_battery
                     total.grid_to_battery.cost += grid_to_battery * import_unitrate
+
+                    let battery_discharge = data["battery_discharge_kwh"][z][1];
+                    total.battery_discharge.kwh += battery_discharge;
+
+                    let battery_charge = data["battery_charge_kwh"][z][1];
+                    total.battery_charge.kwh += battery_charge;
                 }
             }
         }
@@ -790,7 +814,7 @@ function draw_tables(total, monthly_data) {
         var monthly_out = "";
 
         var monthly_sum_kwh = 0;
-        var monthly_sum_kwh_tariff_A = 0;
+        var monthly_sum_kwh_tariff_A = 0;outgoing
         var monthly_sum_kwh_tariff_B = 0;
         var monthly_sum_cost_import_tariff_A = 0;
         var monthly_sum_cost_import_tariff_B = 0;
@@ -995,8 +1019,8 @@ function graph_draw() {
 
     if (solarpv_mode) {
         graph_series.push({
-            label: "Outgoing",
-            data: data["outgoing"],
+            label: config.app.export_tariff.value,
+            data: data["export_tariff"],
             yaxis: 2,
             color: "#941afb",
             lines: {
@@ -1325,7 +1349,7 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
             let export_kwh = get_data_value_at_index("export", z);
             let tariff_A = get_data_value_at_index("tariff_A", z);
             let tariff_B = get_data_value_at_index("tariff_B", z);
-            let outgoing = get_data_value_at_index("outgoing", z);
+            let export_tariff_value = get_data_value_at_index("export_tariff", z);
             let carbonintensity = get_data_value_at_index("carbonintensity", z);
 
             if (import_kwh != null && import_kwh > 0.001) {
@@ -1347,8 +1371,8 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
 
                 if (solar_to_battery_kwh != null && solar_to_battery_kwh > 0.001) {
                     text += "<br>Solar to Battery: " + solar_to_battery_kwh.toFixed(3) + " kWh";
-                    if (outgoing != null) {
-                        let cost = solar_to_battery_kwh * outgoing;
+                    if (export_tariff_value != null) {
+                        let cost = solar_to_battery_kwh * export_tariff_value;
                         text += " (£" + (cost / 100).toFixed(2) + " forgone export value)";
                     }
                 }
@@ -1366,16 +1390,16 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
 
             if (export_kwh != null && export_kwh < -0.001) {
                 text += "<br>Export: " + (export_kwh * -1).toFixed(3) + " kWh";
-                if (outgoing != null) {
-                    let cost = export_kwh * outgoing;
+                if (export_tariff_value != null) {
+                    let cost = export_kwh * export_tariff_value;
                     text += " (" + cost.toFixed(2) + "p gained)";
                 }
             }
 
             text += "<br>";
 
-            if (outgoing != null) {
-                text += "Export Tariff: " + outgoing.toFixed(2) + " p/kWh (inc VAT)<br>";
+            if (export_tariff_value != null) {
+                text += "Export Tariff: " + export_tariff_value.toFixed(2) + " p/kWh (inc VAT)<br>";
             }
 
             if (show_carbonintensity && carbonintensity != null) {
@@ -1509,7 +1533,7 @@ $("#download-csv").click(function() {
     var csv = [];
 
     if (solarpv_mode) {
-        keys = ["tariff_A", "tariff_B", "outgoing", "use", "import", "import_cost_tariff_A", "import_cost_tariff_B", "export", "solar_used", "solar_used_cost", "meter_kwh_hh", "meter_kwh_hh_cost"]
+        keys = ["tariff_A", "tariff_B", "export_tariff", "use", "import", "import_cost_tariff_A", "import_cost_tariff_B", "export", "solar_used", "solar_used_cost", "meter_kwh_hh", "meter_kwh_hh_cost"]
     } else {
         keys = ["tariff_A", "tariff_B", "import", "import_cost_tariff_A", "import_cost_tariff_B", "meter_kwh_hh", "meter_kwh_hh_cost"]
     }
@@ -1572,10 +1596,20 @@ $('#datetimepicker2').on("changeDate", function(e) {
     $(".time-select").val("C");
 });
 
-$("#tariff-select").change(function() {
+$("#import-tariff-select").change(function() {
     config.app.tariff_A.value = $(this).val();
 
     config.db.tariff_A = config.app.tariff_A.value;
+    config.set();
+
+    graph_load();
+    graph_draw();
+});
+
+$("#export-tariff-select").change(function() {
+    config.app.export_tariff.value = $(this).val();
+
+    config.db.export_tariff = config.app.export_tariff.value;
     config.set();
 
     graph_load();
