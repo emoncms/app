@@ -79,6 +79,7 @@ function myheatpump_app_controller($route,$app,$appconfig,$apikey)
                 "heatpump_targetT",
                 "heatpump_dhwT",
                 "heatpump_dhwTargetT",
+                "boiler_heat"
             );
 
             require_once "Modules/feed/feed_model.php";
