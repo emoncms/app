@@ -301,6 +301,7 @@ class MyHeatPump {
 
         // Aux consumption
         $row["immersion_kwh"] = $stats['immersion_kwh'];
+        $row["boiler_kwh"] = $stats['boiler_kwh'];
 
         // Weighted averages
         if ($stats['stats']['weighted']!=false) {
@@ -477,6 +478,7 @@ class MyHeatPump {
         $totals['cosy_cost'] = 0;
         $totals['go_cost'] = 0;
         $totals['immersion_kwh'] = 0;
+        $totals['boiler_kwh'] = 0;
 
         // Quality
         $quality_fields = array('elec','heat','flowT','returnT','outsideT','roomT');
@@ -518,6 +520,7 @@ class MyHeatPump {
             $totals['go_cost'] += $go_cost;
 
             $totals['immersion_kwh'] += $row->immersion_kwh;
+            $totals['boiler_kwh'] += $row->boiler_kwh;
             
             $days++;
         }
@@ -590,6 +593,7 @@ class MyHeatPump {
         }
 
         $stats['immersion_kwh'] = $totals['immersion_kwh'];
+        $stats['boiler_kwh'] = $totals['boiler_kwh'];
 
         $stats['unit_rate_agile'] = null;
         $stats['unit_rate_cosy'] = null;

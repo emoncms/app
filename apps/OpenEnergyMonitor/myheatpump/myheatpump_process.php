@@ -181,7 +181,7 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power,$timezone = '
     // --------------------------------------------------------------------------------------------------------------    
     $data = array();
     
-    $feeds = array("heatpump_elec","heatpump_flowT","heatpump_returnT","heatpump_outsideT","heatpump_roomT","heatpump_heat","heatpump_dhw","heatpump_error","heatpump_cooling","immersion_elec");
+    $feeds = array("heatpump_elec","heatpump_flowT","heatpump_returnT","heatpump_outsideT","heatpump_roomT","heatpump_heat","heatpump_dhw","heatpump_error","heatpump_cooling","immersion_elec","boiler_heat");
     
     foreach ($feeds as $key) {
         $data[$key] = false;
@@ -198,6 +198,7 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power,$timezone = '
     }
 
     $immersion_kwh = process_aux($data, $interval);
+    $boiler_kwh = process_boiler($data, $interval);
     
     $cop_stats = calculate_window_cops($data, $interval, $starting_power);
     
@@ -269,7 +270,8 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power,$timezone = '
         "roomT"=>get_quality($data["heatpump_roomT"])
       ],
       "errors" => $errors,
-      "immersion_kwh" => $immersion_kwh
+      "immersion_kwh" => $immersion_kwh,
+      "boiler_kwh" => $boiler_kwh
     ];
     
     return $result;
@@ -830,6 +832,21 @@ function process_aux($data, $interval) {
         }
     }
     return number_format($immersion_kwh,3,'.','')*1;
+}
+
+// Calculate kWh boiler
+function process_boiler($data, $interval) {
+    $boiler_kwh = 0;
+    if (isset($data["boiler_heat"]) && is_array($data["boiler_heat"])) {
+        $power_to_kwh = 1.0 * $interval / 3600000.0;
+        foreach ($data["boiler_heat"] as $heat) {
+            // Only include positive values less than 500kW
+            if ($heat !== null && $heat >= 0 && $heat < 500000) {
+                $boiler_kwh += $heat * $power_to_kwh;
+            }
+        }
+    }
+    return number_format($boiler_kwh,3,'.','')*1;
 }
 
 // Weighted average calculation

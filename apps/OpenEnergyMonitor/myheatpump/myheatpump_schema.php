@@ -112,6 +112,7 @@ $schema['myheatpump_daily_stats'] = array(
 
     // Auxilary consumption
     'immersion_kwh' => array('type' => 'float', 'name'=>'Immersion', 'group'=>'Auxilary consumption', 'dp'=>0, 'unit'=>'kWh'),
+    'boiler_kwh' => array('type' => 'float', 'name'=>'Boiler', 'group'=>'Auxilary consumption', 'dp'=>0, 'unit'=>'kWh'),
 
     // Unit rates
     'unit_rate_agile' => array('type' => 'float', 'name'=>'Unit rate agile', 'group'=>'Unit rates', 'dp'=>1, 'unit'=>'p/kWh'),
