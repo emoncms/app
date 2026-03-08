@@ -452,6 +452,8 @@ class MyHeatPump {
 
         $categories = array('combined','running','space','water','cooling');
 
+        $weight_by_heat = true;
+
         // Totals only
         $totals = array();
         $total_fields = array('elec_kwh','heat_kwh','data_length');
@@ -463,10 +465,14 @@ class MyHeatPump {
 
         // sum x data_length
         $sum = array();
+        $sum_length = array();
+        $sum_heat_kwh = array();
         $sum_fields = array('elec_mean','heat_mean','flowT_mean','returnT_mean','outsideT_mean','roomT_mean','prc_carnot');
         foreach ($categories as $category) {
             foreach ($sum_fields as $field) {
                 $sum[$category][$field] = 0;
+                $sum_length[$category][$field] = 0;
+                $sum_heat_kwh[$category][$field] = 0;
             }
         }
 
@@ -477,6 +483,9 @@ class MyHeatPump {
         $totals['agile_cost'] = 0;
         $totals['cosy_cost'] = 0;
         $totals['go_cost'] = 0;
+        $totals['eon_next_pumped_v2_cost'] = 0;
+        $totals['error_air'] = 0;
+        $totals['error_air_kwh'] = 0;
         $totals['immersion_kwh'] = 0;
         $totals['boiler_kwh'] = 0;
 
@@ -497,7 +506,15 @@ class MyHeatPump {
                     $totals[$category][$field] += $row->{$category."_".$field};
                 }
                 foreach ($sum_fields as $field) {
-                    $sum[$category][$field] += $row->{$category."_".$field} * $row->{$category."_data_length"};
+                    if ($row->{$category."_".$field} != null) {
+                        if ($weight_by_heat) {
+                            $sum[$category][$field] += $row->{$category."_".$field} * $row->{$category."_heat_kwh"};
+                        } else {
+                            $sum[$category][$field] += $row->{$category."_".$field} * $row->{$category."_data_length"};
+                        }
+                        $sum_length[$category][$field] += $row->{$category."_data_length"};
+                        $sum_heat_kwh[$category][$field] += $row->{$category."_heat_kwh"};
+                    }
                 }
             }
 
@@ -519,6 +536,12 @@ class MyHeatPump {
             $go_cost = $row->unit_rate_go * 0.01 * $totals['from_energy_feeds']['elec_kwh'];
             $totals['go_cost'] += $go_cost;
 
+            //$eon_next_pumped_v2_cost = $row->unit_rate_eon_next_pumped_v2 * 0.01 * $totals['from_energy_feeds']['elec_kwh'];
+            //$totals['eon_next_pumped_v2_cost'] += $eon_next_pumped_v2_cost;
+
+            $totals['error_air'] += $row->error_air;
+            $totals['error_air_kwh'] += $row->error_air_kwh;
+
             $totals['immersion_kwh'] += $row->immersion_kwh;
             $totals['boiler_kwh'] += $row->boiler_kwh;
             
@@ -534,8 +557,15 @@ class MyHeatPump {
         foreach ($categories as $category) {
             foreach ($sum_fields as $field) {
                 $mean[$category][$field] = null;
-                if ($totals[$category]['data_length'] > 0) {
-                    $mean[$category][$field] = $sum[$category][$field] / $totals[$category]['data_length'];
+
+                if ($weight_by_heat) {
+                    if ($sum_heat_kwh[$category][$field] > 0) {
+                        $mean[$category][$field] = $sum[$category][$field] / $sum_heat_kwh[$category][$field];
+                    }
+                } else {
+                    if ($sum_length[$category][$field] > 0) {
+                        $mean[$category][$field] = $sum[$category][$field] / $sum_length[$category][$field];
+                    }
                 }
             }
         }
@@ -592,22 +622,97 @@ class MyHeatPump {
             $stats['quality_'.$field] = $quality[$field];
         }
 
+        $stats['error_air'] = $totals['error_air'];
+        $stats['error_air_kwh'] = $totals['error_air_kwh'];
+
         $stats['immersion_kwh'] = $totals['immersion_kwh'];
         $stats['boiler_kwh'] = $totals['boiler_kwh'];
 
         $stats['unit_rate_agile'] = null;
         $stats['unit_rate_cosy'] = null;
         $stats['unit_rate_go'] = null;
+        $stats['unit_rate_eon_next_pumped_v2'] = null;
 
         if ($totals['from_energy_feeds']['elec_kwh'] > 0) {
             $stats['unit_rate_agile'] = round(100*$totals['agile_cost'] / $totals['from_energy_feeds']['elec_kwh'],1);
             $stats['unit_rate_cosy'] = round(100*$totals['cosy_cost'] / $totals['from_energy_feeds']['elec_kwh'],1);
             $stats['unit_rate_go'] = round(100*$totals['go_cost'] / $totals['from_energy_feeds']['elec_kwh'],1);
+            $stats['unit_rate_eon_next_pumped_v2'] = round(100*$totals['eon_next_pumped_v2_cost'] / $totals['from_energy_feeds']['elec_kwh'],1);
         }
 
         if ($stats['unit_rate_agile'] === 0) $stats['unit_rate_agile'] = null;
         if ($stats['unit_rate_cosy'] === 0) $stats['unit_rate_cosy'] = null;
         if ($stats['unit_rate_go'] === 0) $stats['unit_rate_go'] = null;
+        if ($stats['unit_rate_eon_next_pumped_v2'] === 0) $stats['unit_rate_eon_next_pumped_v2'] = null;
+
+        $weighted_flowT_sum = 0;
+        $weighted_outsideT_sum = 0;
+        $weighted_flowT_minus_outsideT_sum = 0;
+        $weighted_flowT_minus_returnT_sum = 0;
+        $weighted_elec_sum = 0;
+        $weighted_heat_sum = 0;
+        $total_kwh_elec = 0;
+        $total_kwh_heat = 0;
+        $total_kwh_heat_running = 0;
+        $total_kwh_elec_running = 0;
+        $total_kwh_carnot_elec = 0;
+        $total_time_on = 0;
+        $total_time_total = 0;
+        $total_cycle_count = 0;
+
+        foreach ($rows as $row) {
+            $kwh_elec = $row->weighted_kwh_elec;
+            $kwh_heat = $row->weighted_kwh_heat;
+
+            $weighted_flowT_sum += $row->weighted_flowT * $kwh_heat;
+            $weighted_outsideT_sum += $row->weighted_outsideT * $kwh_heat;
+            $weighted_flowT_minus_outsideT_sum += ($row->weighted_flowT_minus_outsideT) * $kwh_heat;
+            $weighted_flowT_minus_returnT_sum += ($row->weighted_flowT_minus_returnT) * $kwh_heat;
+            $weighted_elec_sum += $row->weighted_elec * $kwh_elec;
+            $weighted_heat_sum += $row->weighted_heat * $kwh_heat;
+
+            $total_kwh_elec += $kwh_elec;
+            $total_kwh_heat += $kwh_heat;
+
+            $total_kwh_heat_running += $row->weighted_kwh_heat_running;
+            $total_kwh_elec_running += $row->weighted_kwh_elec_running;
+            $total_kwh_carnot_elec += $row->weighted_kwh_carnot_elec;
+            $total_time_on += $row->weighted_time_on;
+            $total_time_total += $row->weighted_time_total;
+            $total_cycle_count += $row->weighted_cycle_count;
+        }
+        $stats['weighted_flowT'] = null;
+        $stats['weighted_outsideT'] = null;
+        $stats['weighted_flowT_minus_outsideT'] = null;
+        $stats['weighted_flowT_minus_returnT'] = null;
+        $stats['weighted_elec'] = null;
+        $stats['weighted_heat'] = null;
+
+        if ($total_kwh_heat > 0) {
+            $stats['weighted_flowT'] = $weighted_flowT_sum / $total_kwh_heat;
+            $stats['weighted_outsideT'] = $weighted_outsideT_sum / $total_kwh_heat;
+            $stats['weighted_flowT_minus_outsideT'] = $weighted_flowT_minus_outsideT_sum / $total_kwh_heat;
+            $stats['weighted_flowT_minus_returnT'] = $weighted_flowT_minus_returnT_sum / $total_kwh_heat;
+            $stats['weighted_heat'] = $weighted_heat_sum / $total_kwh_heat;
+        }
+
+        if ($total_kwh_elec > 0) {
+            $stats['weighted_elec'] = $weighted_elec_sum / $total_kwh_elec;
+        }
+
+        $stats['weighted_prc_carnot'] = 0;
+        if ($total_kwh_elec_running > 0 && $total_kwh_carnot_elec > 0) {
+            $stats['weighted_prc_carnot'] = 100 * ($total_kwh_heat_running / $total_kwh_elec_running) / ($total_kwh_heat_running / $total_kwh_carnot_elec);
+        }
+
+        $stats['weighted_kwh_elec'] = $total_kwh_elec;
+        $stats['weighted_kwh_heat'] = $total_kwh_heat;
+        $stats['weighted_kwh_heat_running'] = $total_kwh_heat_running;
+        $stats['weighted_kwh_elec_running'] = $total_kwh_elec_running;
+        $stats['weighted_kwh_carnot_elec'] = $total_kwh_carnot_elec;
+        $stats['weighted_time_on'] = $total_time_on;
+        $stats['weighted_time_total'] = $total_time_total;
+        $stats['weighted_cycle_count'] = $total_cycle_count;
 
         return $stats;
     }
