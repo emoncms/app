@@ -332,8 +332,42 @@
                     This app can be used to explore onsite solar generation, self consumption, battery integration, export and building consumption.</p>
                     <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                     <p><strong class="text-white">History view:</strong> Daily energy flow breakdown feeds can be generated from the power feeds using the <strong class="text-white">Solar battery kWh flows</strong> post-processor (<code>solarbatterykwh</code>).</p>
-                    <img src="../Modules/app/images/mysolar_app.png" class="d-none d-sm-inline-block">
                 </div>
+
+                <div style="border: 1px solid #fff; padding: 10px; margin-top: 20px; color:#fff;">
+                    <p><b>Auto generate kWh flow feeds</b></p>
+                    <p style="color:#aaa; font-size:13px; margin-bottom:12px;">
+                        The following feeds are required for the history view. They are generated from the power feeds
+                        using the <strong style="color:#fff;">Solar battery kWh flows</strong> post-processor (<code>solarbatterykwh</code>).
+                        The feed tag/node will be set to match the app name: <strong class="autogen-appname" style="color:#dccc1f;"></strong>
+                    </p>
+                    <table style="width:100%; border-collapse:collapse; font-size:13px;" id="autogen-feed-list">
+                        <thead>
+                            <tr style="color:#aaa; border-bottom:1px solid #444;">
+                                <th style="text-align:left; padding:4px 8px;">Feed name</th>
+                                <th style="text-align:left; padding:4px 8px;">Node</th>
+                                <th style="text-align:center; padding:4px 8px;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="autogen-feed-rows">
+                            <!-- populated by JS -->
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                        <button id="btn-create-feeds" class="btn btn-warning btn-sm" style="display:none;" onclick="create_missing_feeds()">
+                            &#43; Create missing feeds
+                        </button>
+                        <button id="btn-run-processor" class="btn btn-success btn-sm" style="display:none;" onclick="run_post_processor()">
+                            &#9654; Run post-processor
+                        </button>
+                        <button id="btn-reset-feeds" class="btn btn-danger btn-sm" style="display:none;" onclick="reset_feeds()">
+                            &#10006; Reset / clear feeds
+                        </button>
+                        <span id="autogen-status" style="font-size:12px; color:#aaa; margin-left:4px;"></span>
+                    </div>
+                </div>
+
             </div>
             <div class="span5 app-config pt-3"></div>
         </div>
@@ -356,8 +390,8 @@ function getTranslations(){
 // ----------------------------------------------------------------------
 // Globals
 // ----------------------------------------------------------------------
-var apikey = "<?php print $apikey; ?>";
-var sessionwrite = <?php echo $session['write']; ?>;
+var apikey = "<?php echo isset($apikey) ? $apikey : ''; ?>";
+var sessionwrite = <?php echo isset($session['write']) ? intval($session['write']) : 0; ?>;
 feed.apikey = apikey;
 feed.public_userid = public_userid;
 feed.public_username = public_username;
@@ -387,24 +421,26 @@ config.app = {
     "battery_soc":{"optional":true, "type":"feed", "autoname":"battery_soc", "description":"Battery state of charge in kWh"},
 
     // History feeds (energy flow breakdown from solarbatterykwh post-processor)
-    "solar_to_load_kwh":{"optional":true, "type":"feed", "autoname":"solar_to_load_kwh", "description":"Cumulative solar to load energy in kWh"},
-    "solar_to_grid_kwh":{"optional":true, "type":"feed", "autoname":"solar_to_grid_kwh", "description":"Cumulative solar to grid (export) energy in kWh"},
-    "solar_to_battery_kwh":{"optional":true, "type":"feed", "autoname":"solar_to_battery_kwh", "description":"Cumulative solar to battery energy in kWh"},
-    "battery_to_load_kwh":{"optional":true, "type":"feed", "autoname":"battery_to_load_kwh", "description":"Cumulative battery to load energy in kWh"},
-    "battery_to_grid_kwh":{"optional":true, "type":"feed", "autoname":"battery_to_grid_kwh", "description":"Cumulative battery to grid energy in kWh"},
-    "grid_to_load_kwh":{"optional":true, "type":"feed", "autoname":"grid_to_load_kwh", "description":"Cumulative grid to load energy in kWh"},
-    "grid_to_battery_kwh":{"optional":true, "type":"feed", "autoname":"grid_to_battery_kwh", "description":"Cumulative grid to battery energy in kWh"},
+    "solar_to_load_kwh":{"autogenerate":true, "optional":true, "type":"feed", "autoname":"solar_to_load_kwh", "description":"Cumulative solar to load energy in kWh"},
+    "solar_to_grid_kwh":{"autogenerate":true, "optional":true, "type":"feed", "autoname":"solar_to_grid_kwh", "description":"Cumulative solar to grid (export) energy in kWh"},
+    "solar_to_battery_kwh":{"autogenerate":true, "optional":true, "type":"feed", "autoname":"solar_to_battery_kwh", "description":"Cumulative solar to battery energy in kWh"},
+    "battery_to_load_kwh":{"autogenerate":true, "optional":true, "type":"feed", "autoname":"battery_to_load_kwh", "description":"Cumulative battery to load energy in kWh"},
+    "battery_to_grid_kwh":{"autogenerate":true, "optional":true, "type":"feed", "autoname":"battery_to_grid_kwh", "description":"Cumulative battery to grid energy in kWh"},
+    "grid_to_load_kwh":{"autogenerate":true, "optional":true, "type":"feed", "autoname":"grid_to_load_kwh", "description":"Cumulative grid to load energy in kWh"},
+    "grid_to_battery_kwh":{"autogenerate":true, "optional":true, "type":"feed", "autoname":"grid_to_battery_kwh", "description":"Cumulative grid to battery energy in kWh"},
 
     // Other options
     "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description": "Display power as kW"},
     "battery_capacity_kwh":{"type":"value", "default":0, "name":"Battery Capacity", "description":"Battery capacity in kWh"}
     }
 
-config.id = <?php echo $id; ?>;
-config.name = "<?php echo $name; ?>";
-config.public = <?php echo $public; ?>;
-config.db = <?php echo json_encode($config); ?>;
+config.id = <?php echo isset($id) ? intval($id) : 0; ?>;
+config.name = "<?php echo isset($name) ? addslashes($name) : ''; ?>";
+config.public = <?php echo isset($public) ? intval($public) : 0; ?>;
+config.db = <?php echo isset($config) ? json_encode($config) : 'null'; ?>;
 config.feeds = feed.list();
+
+var feeds_by_tag_name = feed.by_tag_and_name(config.feeds);
 
 config.initapp = function(){init()};
 config.showapp = function(){show()};
@@ -447,6 +483,7 @@ config.init();
 function init()
 {        
     app_log("INFO","solar & battery init");
+    render_autogen_feed_list();
 
     view.end = power_end;
     view.start = power_start;
@@ -541,8 +578,8 @@ function show()
     live = setInterval(livefn,5000);
 
     // Trigger post processor for kWh data
-    let process_timeout = 1;
-
+    let process_timeout = 60; // seconds
+    /*
     $.ajax({
         url: path + "app/process",
         data: { id: config.id, apikey: apikey, timeout: process_timeout },
@@ -552,6 +589,7 @@ function show()
             console.log(result);
         }
     });
+    */
 }
 
 function resize() 
@@ -1343,5 +1381,188 @@ $(function() {
 function app_log (level, message) {
     // if (level=="ERROR") alert(level+": "+message);
     console.log(level+": "+message);
+}
+
+// ----------------------------------------------------------------------
+// Helper: return array of feeds that should be auto-generated
+// ----------------------------------------------------------------------
+function get_autogen_feeds() {
+
+    var autogen_node_name = "app_mysolarpvbattery_"+config.id;
+
+    var autogen_feeds = [];
+    for (var key in config.app) {
+        if (config.app.hasOwnProperty(key) && config.app[key].autogenerate) {
+            let feed_name = config.app[key].autoname || key;
+            let feedid = false;
+
+            if (feeds_by_tag_name[autogen_node_name]!=undefined) {
+                if (feeds_by_tag_name[autogen_node_name][feed_name]!=undefined) {
+                    feedid = feeds_by_tag_name[autogen_node_name][feed_name]['id'];
+                }
+            }
+
+            autogen_feeds.push({
+                key: key,
+                name: feed_name,
+                feedid: feedid
+            });
+        }
+    }
+    return autogen_feeds;
+}
+
+// ----------------------------------------------------------------------
+// Auto-generate feed list
+// ----------------------------------------------------------------------
+function render_autogen_feed_list() {
+    var autogen_feeds = get_autogen_feeds();
+
+    var autogen_node_name = "app_mysolarpvbattery_"+config.id;
+    $(".autogen-appname").text(autogen_node_name);
+
+    var tbody = $("#autogen-feed-rows");
+    tbody.empty();
+    var missing_count = 0;
+
+    for (var j = 0; j < autogen_feeds.length; j++) {
+
+        var status_html = "<span style='color:#5cb85c; font-weight:bold;'>&#10003; exists</span>";
+        if (autogen_feeds[j].feedid==false) {
+            status_html = "<span style='color:#f0ad4e; font-weight:bold;'>&#10007; missing</span>";
+            missing_count++;
+        }
+
+        tbody.append(
+            "<tr style='background:" + ((j % 2 === 0) ? "#1e1e1e" : "#252525") + ";'>" +
+            "  <td style='padding:6px 8px; font-family:monospace; color:#fff;'>" + autogen_feeds[j].name + "</td>" +
+            "  <td style='padding:6px 8px; color:#aaa;'>" + autogen_node_name + "</td>" +
+            "  <td style='padding:6px 8px; text-align:center;'>" + status_html + "</td>" +
+            "</tr>"
+        );
+    }
+
+    var all_present = (missing_count === 0);
+    $("#btn-create-feeds").toggle(!all_present);
+    $("#btn-run-processor").toggle(all_present);
+    $("#btn-reset-feeds").toggle(all_present);
+    $("#autogen-status").text("");
+}
+
+// ----------------------------------------------------------------------
+// Auto-generate feed actions
+// ----------------------------------------------------------------------
+function create_missing_feeds() {
+    var autogen_node_name = "app_mysolarpvbattery_"+config.id;
+
+    $("#autogen-status").text("Creating feeds...").css("color","#aaa");
+    $("#btn-create-feeds").prop("disabled", true);
+
+    var missing = [];
+    var autogen_feeds = get_autogen_feeds();
+    for (var i = 0; i < autogen_feeds.length; i++)    {
+        if (autogen_feeds[i].feedid == false) {
+            missing.push(autogen_feeds[i].name);
+        }
+    }
+
+    var requests = [];
+    for (var i = 0; i < missing.length; i++) {
+        requests.push($.ajax({
+            url: path + "feed/create.json",
+            data: { tag: autogen_node_name, name: missing[i], datatype: 1, engine: 5,
+                    options: JSON.stringify({ interval: 1800 }), apikey: apikey },
+            dataType: "json"
+        }));
+    }
+
+    $.when.apply($, requests).then(function() {
+        var results = missing.length === 1 ? [arguments] : Array.prototype.slice.call(arguments);
+        var errors = results.filter(function(r) { return !(r[0] && r[0].feedid); }).length;
+        var created = results.length - errors;
+        config.feeds = feed.list();
+        render_autogen_feed_list();
+        $("#autogen-status")
+            .text(errors === 0 ? "Created " + created + " feed(s) successfully."
+                               : "Created " + created + " feed(s), " + errors + " error(s).")
+            .css("color", errors === 0 ? "#5cb85c" : "#f0ad4e");
+    }, function() {
+        $("#autogen-status").text("One or more feeds could not be created.").css("color","#d9534f");
+    }).always(function() {
+        $("#btn-create-feeds").prop("disabled", false);
+    });
+}
+
+function run_post_processor() {
+    $("#autogen-status").text("Starting post-processor...").css("color","#aaa");
+    $("#btn-run-processor").prop("disabled", true);
+
+    var autogen_node_name = "app_mysolarpvbattery_"+config.id;
+
+    $.ajax({
+        url: path + "app/process",
+        data: { id: config.id, apikey: apikey, tag: autogen_node_name },
+        dataType: "json",
+        timeout: 120000,
+        success: function(result) {
+            console.log("run_post_processor: result", result);
+            if (result && result.success) {
+                $("#autogen-status").text("Post-processor completed successfully.").css("color","#5cb85c");
+            } else {
+                var msg = (result && result.message) ? result.message : "Unknown response";
+                $("#autogen-status").text("Post-processor: " + msg).css("color","#f0ad4e");
+            }
+        },
+        error: function(xhr) {
+            console.error("run_post_processor: AJAX error", xhr.responseText);
+            $("#autogen-status").text("Post-processor failed: " + xhr.statusText).css("color","#d9534f");
+        },
+        complete: function() { $("#btn-run-processor").prop("disabled", false); }
+    });
+}
+
+function reset_feeds() {
+    if (!confirm("Are you sure you want to clear all 7 kWh flow feeds? This cannot be undone.")) return;
+    $("#autogen-status").text("Clearing feeds...").css("color","#aaa");
+    $("#btn-reset-feeds").prop("disabled", true);
+
+    var autogen_feeds = get_autogen_feeds();
+    var feed_ids = [];
+    for (var i = 0; i < autogen_feeds.length; i++)    {
+        if (autogen_feeds[i].feedid) {
+            feed_ids.push(autogen_feeds[i].feedid);
+        }
+    }
+
+    if (feed_ids.length === 0) {
+        $("#autogen-status").text("No matching feeds found to clear.").css("color","#f0ad4e");
+        $("#btn-reset-feeds").prop("disabled", false);
+        return;
+    }
+
+    var requests = [];
+    for (var i = 0; i < feed_ids.length; i++) {
+        requests.push($.ajax({
+            url: path + "feed/clear.json",
+            data: { id: feed_ids[i], apikey: apikey },
+            dataType: "json"
+        }));
+    }
+
+    $.when.apply($, requests).then(function() {
+        var results = feed_ids.length === 1 ? [arguments] : Array.prototype.slice.call(arguments);
+        var errors = results.filter(function(r) { return !(r[0] && r[0].success); }).length;
+        var cleared = results.length - errors;
+        config.feeds = feed.list();
+        render_autogen_feed_list();
+        $("#autogen-status")
+            .text(errors === 0 ? "Cleared " + cleared + " feed(s) successfully."
+                               : "Cleared " + cleared + " feed(s), " + errors + " error(s).")
+            .css("color", errors === 0 ? "#5cb85c" : "#f0ad4e");
+    }, function() {
+        $("#autogen-status").text("One or more feeds could not be cleared.").css("color","#d9534f");
+    }).always(function() {
+        $("#btn-reset-feeds").prop("disabled", false);
+    });
 }
 </script>

@@ -147,6 +147,10 @@ var config = {
         out += "<br>";
 
         for (var z in config.app) {
+
+            // Skip any entries that are listed as autogenerate
+            if (config.app[z].autogenerate!=undefined && config.app[z].autogenerate) continue;
+
             out += "<div class='app-config-box' key='"+z+"'>";
             if (config.app[z].type=="feed") {
                 

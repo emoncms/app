@@ -40,56 +40,50 @@ function mysolarpvbattery_app_controller($route,$app,$appconfig,$apikey)
         $route->format = "json";
         $userid = $session['userid'];
 
+        $tag = isset($_GET['tag']) ? $_GET['tag'] : (isset($_POST['tag']) ? $_POST['tag'] : '');
+        if (empty($tag)) {
+            return array("success" => false, "message" => "Missing tag parameter");
+        }
+
         require_once "Modules/feed/feed_model.php";
         $feed = new Feed($mysqli,$redis,$settings['feed']);
+
+        $required = ["solar_to_load_kwh","solar_to_grid_kwh","solar_to_battery_kwh",
+                     "battery_to_load_kwh","battery_to_grid_kwh","grid_to_load_kwh","grid_to_battery_kwh"];
+
+        $resolved = array();
+        foreach ($required as $name) {
+            $fid = $feed->exists_tag_name($userid, $tag, $name);
+            if (!$fid) {
+                return array("success" => false, "message" => "Feed not found: $tag/$name");
+            }
+            $resolved[$name] = intval($fid);
+        }
 
         include "Modules/postprocess/postprocess_model.php";
         $postprocess = new PostProcess($mysqli, $redis, $feed);
         $processes = $postprocess->get_processes("$linked_modules_dir/postprocess");
         $process_classes = $postprocess->get_process_classes();
 
-        $clear_solarbatterykwh = false;
         $solarbatterykwh_config = (object) array(
-            // Input feeds
-            "solar" => $feed->get_id($userid, "solar"),
-            "use" => $feed->get_id($userid, "use"),
-            "grid" => $feed->get_id($userid, "grid"),
-            "battery_power" => $feed->get_id($userid, "battery_power"),
+            "solar"               => $feed->get_id($userid, "solar"),
+            "use"                 => $feed->get_id($userid, "use"),
+            "grid"                => $feed->get_id($userid, "grid"),
+            "battery_power"       => $feed->get_id($userid, "battery_power"),
 
-            // Output kWh flow feeds
-            "solar_to_load_kwh" => get_or_create_feed($feed, $userid, "solarbatterykwh", "solar_to_load_kwh", 10, $clear_solarbatterykwh),
-            "solar_to_grid_kwh" => get_or_create_feed($feed, $userid, "solarbatterykwh", "solar_to_grid_kwh", 10, $clear_solarbatterykwh),
-            "solar_to_battery_kwh" => get_or_create_feed($feed, $userid, "solarbatterykwh", "solar_to_battery_kwh", 10, $clear_solarbatterykwh),
-            "battery_to_load_kwh" => get_or_create_feed($feed, $userid, "solarbatterykwh", "battery_to_load_kwh", 10, $clear_solarbatterykwh),
-            "battery_to_grid_kwh" => get_or_create_feed($feed, $userid, "solarbatterykwh", "battery_to_grid_kwh", 10, $clear_solarbatterykwh),
-            "grid_to_load_kwh" => get_or_create_feed($feed, $userid, "solarbatterykwh", "grid_to_load_kwh", 10, $clear_solarbatterykwh),
-            "grid_to_battery_kwh" => get_or_create_feed($feed, $userid, "solarbatterykwh", "grid_to_battery_kwh", 10, $clear_solarbatterykwh),
+            "solar_to_load_kwh"    => $resolved["solar_to_load_kwh"],
+            "solar_to_grid_kwh"    => $resolved["solar_to_grid_kwh"],
+            "solar_to_battery_kwh" => $resolved["solar_to_battery_kwh"],
+            "battery_to_load_kwh"  => $resolved["battery_to_load_kwh"],
+            "battery_to_grid_kwh"  => $resolved["battery_to_grid_kwh"],
+            "grid_to_load_kwh"     => $resolved["grid_to_load_kwh"],
+            "grid_to_battery_kwh"  => $resolved["grid_to_battery_kwh"],
 
-            // Control params
-            "process_mode" => "all",
+            "process_mode"  => "all",
             "process_start" => 0,
-            "process" => "solarbatterykwh"
+            "process"       => "solarbatterykwh"
         );
 
         return $process_classes[$solarbatterykwh_config->process]->process($solarbatterykwh_config);
     }
-}
-
-function get_or_create_feed($feed, $userid, $node, $feedname, $interval, $clear = false) {
-
-    $feedid = $feed->exists_tag_name($userid, $node, $feedname);
-    if (!$feedid) {
-        $meta = new stdClass();
-        $meta->interval = $interval;
-        $result = $feed->create($userid, $node, $feedname, 5, $meta);
-        if ($result['success']) {
-            $feedid = $result['feedid'];
-        }
-    }
-    
-    if ($clear) {
-    	$feed->clear($feedid);
-    }
-    
-    return $feedid;
 }
