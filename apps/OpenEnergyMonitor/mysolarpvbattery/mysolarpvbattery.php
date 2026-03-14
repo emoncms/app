@@ -1481,6 +1481,7 @@ function create_missing_feeds() {
         var errors = results.filter(function(r) { return !(r[0] && r[0].feedid); }).length;
         var created = results.length - errors;
         config.feeds = feed.list();
+        feeds_by_tag_name = feed.by_tag_and_name(config.feeds);
         render_autogen_feed_list();
         $("#autogen-status")
             .text(errors === 0 ? "Created " + created + " feed(s) successfully."
