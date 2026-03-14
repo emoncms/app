@@ -1,0 +1,5 @@
+{
+    "title"          : "Solar PV & Battery Template",
+    "description"    : "A simpler version of the My Solar Battery app, power view only and key calculations",
+    "order"         : 20
+}
