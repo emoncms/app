@@ -481,8 +481,8 @@ function remove_null_values(data, interval) {
     let last_valid_pos = 0;
     for (let pos = 0; pos < data.length; pos++) {
         if (data[pos][1] != null) {
-            let null_duration_ms = (pos - last_valid_pos) * interval;
-            if (null_duration_ms < 900000) {   // 900000 ms = 15 minutes
+            let null_duration_s = (pos - last_valid_pos) * interval;
+            if (null_duration_s < 900) {   // 900000 ms = 15 minutes
                 for (let x = last_valid_pos + 1; x < pos; x++) {
                     data[x][1] = data[last_valid_pos][1];
                 }
