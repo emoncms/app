@@ -540,6 +540,18 @@ function show()
     livefn();
     live = setInterval(livefn,5000);
 
+    // Trigger post processor for kWh data
+    let process_timeout = 1;
+
+    $.ajax({
+        url: path + "app/process",
+        data: { id: config.id, apikey: apikey, timeout: process_timeout },
+        async: true,
+        success: function (result) {
+            console.log("Post processor triggered successfully");
+            console.log(result);
+        }
+    });
 }
 
 function resize() 
