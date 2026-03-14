@@ -39,7 +39,6 @@ function mysolarpvbattery_app_controller($route,$app,$appconfig,$apikey)
     else if ($route->action == "process" && $session['write']) {
         $route->format = "json";
         $userid = $session['userid'];
-        $tag = prop("tag",true);
 
         require_once "Modules/feed/feed_model.php";
         $feed = new Feed($mysqli,$redis,$settings['feed']);
@@ -49,11 +48,13 @@ function mysolarpvbattery_app_controller($route,$app,$appconfig,$apikey)
         $processes = $postprocess->get_processes("$linked_modules_dir/postprocess");
         $process_classes = $postprocess->get_process_classes();
 
+        $tag = "app_mysolarpvbattery_".$app->id;
+        
         $process_conf = (object) array(
-            "solar"               => $feed->get_id($userid, "solar"),
-            "use"                 => $feed->get_id($userid, "use"),
-            "grid"                => $feed->get_id($userid, "grid"),
-            "battery_power"       => $feed->get_id($userid, "battery_power"),
+            "solar"               => (int) $app->config->solar,
+            "use"                 => (int) $app->config->use,
+            "grid"                => (int) $app->config->grid,
+            "battery_power"       => (int) $app->config->battery_power,
 
             "solar_to_load_kwh"    => $feed->exists_tag_name($userid, $tag, "solar_to_load_kwh"),
             "solar_to_grid_kwh"    => $feed->exists_tag_name($userid, $tag, "solar_to_grid_kwh"),

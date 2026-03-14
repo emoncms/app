@@ -1498,11 +1498,9 @@ function run_post_processor() {
     $("#autogen-status").text("Starting post-processor...").css("color","#aaa");
     $("#btn-run-processor").prop("disabled", true);
 
-    var autogen_node_name = "app_mysolarpvbattery_"+config.id;
-
     $.ajax({
         url: path + "app/process",
-        data: { id: config.id, apikey: apikey, tag: autogen_node_name },
+        data: { id: config.id, apikey: apikey },
         dataType: "json",
         timeout: 120000,
         success: function(result) {
