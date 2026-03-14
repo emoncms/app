@@ -331,7 +331,7 @@
                     <p class="lead">
                     This app can be used to explore onsite solar generation, self consumption, battery integration, export and building consumption.</p>
                     <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-                    <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+                    <p><strong class="text-white">History view:</strong> Daily energy flow breakdown feeds can be generated from the power feeds using the <strong class="text-white">Solar battery kWh flows</strong> post-processor (<code>solarbatterykwh</code>).</p>
                     <img src="../Modules/app/images/mysolar_app.png" class="d-none d-sm-inline-block">
                 </div>
             </div>
@@ -672,8 +672,8 @@ function livefn()
         $(".battery_charge_discharge").html(net_battery_charge);
         $(".discharge_time_left").html("--");
     } else if (net_battery_charge<0) {
-        if (config.app && config.app.kw && config.app.battery_capacity_kwh.value > 0 && battery_soc_now >= 0) {
-            const total_capacity = config.app.battery_capacity_kwh.value * 1000;
+        if (config.app.battery_capacity_kwh.value > 0 && battery_soc_now >= 0 && powerUnit === 'kW') {
+            const total_capacity = config.app.battery_capacity_kwh.value;
             const energy_remaining = total_capacity * battery_soc_now / 100;
             const total_time_left_mins = (energy_remaining / -(net_battery_charge)) * 60;
 
@@ -1023,8 +1023,8 @@ function powergraph_events() {
 // --------------------------------------------------------------------------------------
 function init_bargraph() {
     bargraph_initialized = true;
-    // Fetch the start_time covering all flow kWh feeds - this is used for the 'all time' button
-    latest_start_time = 0;
+    // Fetch the earliest start_time across all flow kWh feeds - this is used for the 'all time' button
+    var earliest_start_time = Infinity;
     var flow_feeds = [
         config.app.solar_to_load_kwh.value,
         config.app.solar_to_grid_kwh.value,
@@ -1036,8 +1036,9 @@ function init_bargraph() {
     ];
     for (var i = 0; i < flow_feeds.length; i++) {
         var m = feed.getmeta(flow_feeds[i]);
-        if (m.start_time > latest_start_time) latest_start_time = m.start_time;
+        if (m.start_time < earliest_start_time) earliest_start_time = m.start_time;
     }
+    latest_start_time = earliest_start_time;
     view.first_data = latest_start_time * 1000;
 }
 
@@ -1045,8 +1046,8 @@ function load_bargraph() {
     var interval = 3600*24;
     var intervalms = interval * 1000;
     
-    end = view.end;
-    start = view.start;
+    var end = view.end;
+    var start = view.start;
     
     end = Math.ceil(end/intervalms)*intervalms;
     start = Math.floor(start/intervalms)*intervalms;
@@ -1068,11 +1069,6 @@ function load_bargraph() {
     battery_to_grid_kwhd_data  = [];
     grid_to_load_kwhd_data     = [];
     grid_to_battery_kwhd_data  = [];
-    // Derived totals retained for hover labels
-    solar_kwhd_data      = [];
-    use_kwhd_data        = [];
-    import_kwhd_data     = [];
-    export_kwhd_data     = [];
     
     if (solar_to_load_kwh_data.length) {
         for (var day=0; day<solar_to_load_kwh_data.length; day++)
@@ -1091,12 +1087,6 @@ function load_bargraph() {
                 battery_to_load!=null && battery_to_grid!=null &&
                 grid_to_load!=null && grid_to_battery!=null)
             {
-                // Reconstruct aggregate totals for display
-                var solar_kwh  = solar_to_load + solar_to_grid + solar_to_battery;
-                var use_kwh    = solar_to_load + battery_to_load + grid_to_load;
-                var import_kwh = grid_to_load + grid_to_battery;
-                var export_kwh = solar_to_grid + battery_to_grid;
-                
                 solar_to_load_kwhd_data.push([time, solar_to_load]);
                 solar_to_grid_kwhd_data.push([time, solar_to_grid]);
                 solar_to_battery_kwhd_data.push([time, solar_to_battery]);
@@ -1104,24 +1094,12 @@ function load_bargraph() {
                 battery_to_grid_kwhd_data.push([time, battery_to_grid]);
                 grid_to_load_kwhd_data.push([time, grid_to_load]);
                 grid_to_battery_kwhd_data.push([time, grid_to_battery]);
-                solar_kwhd_data.push([time, solar_kwh]);
-                use_kwhd_data.push([time, use_kwh]);
-                import_kwhd_data.push([time, import_kwh]);
-                export_kwhd_data.push([time, export_kwh * -1]);
             }
         }
     }
     
     var series = [];
 
-    // Stack 2: total use (above zero baseline)
-    series.push({
-        data: use_kwhd_data,
-        label: "Use",
-        color: "#0699fa",
-        bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.9, lineWidth: 0 },
-        stack: 2
-    });
     // Stack 1: onsite use breakdown (solar direct, battery to load, grid to load shown as positive bars)
     series.push({
         data: solar_to_load_kwhd_data,
@@ -1144,7 +1122,11 @@ function load_bargraph() {
         bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.9, lineWidth: 0 },
         stack: 1
     });
-    // Stack 0: exports (shown as negative bars below zero)
+    // Stack 0: exports (shown as negative bars below zero) - build inline
+    var export_kwhd_data = [];
+    for (var i = 0; i < solar_to_grid_kwhd_data.length; i++) {
+        export_kwhd_data.push([solar_to_grid_kwhd_data[i][0], -1 * (solar_to_grid_kwhd_data[i][1] + battery_to_grid_kwhd_data[i][1])]);
+    }
     series.push({
         data: export_kwhd_data,
         label: "Total Export",
@@ -1176,8 +1158,8 @@ function draw_bargraph()
     
     var plot = $.plot($('#placeholder'),historyseries,options);
     
-    $('#placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use & Total Use</div>");
-    $('#placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> Exported solar</div>");
+    $('#placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use &amp; Total Use</div>");
+    $('#placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> Total export (solar + battery to grid)</div>");
 }
 
 // ------------------------------------------------------------------------------------------
