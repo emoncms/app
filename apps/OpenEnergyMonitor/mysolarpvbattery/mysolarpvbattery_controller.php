@@ -39,51 +39,35 @@ function mysolarpvbattery_app_controller($route,$app,$appconfig,$apikey)
     else if ($route->action == "process" && $session['write']) {
         $route->format = "json";
         $userid = $session['userid'];
-
-        $tag = isset($_GET['tag']) ? $_GET['tag'] : (isset($_POST['tag']) ? $_POST['tag'] : '');
-        if (empty($tag)) {
-            return array("success" => false, "message" => "Missing tag parameter");
-        }
+        $tag = prop("tag",true);
 
         require_once "Modules/feed/feed_model.php";
         $feed = new Feed($mysqli,$redis,$settings['feed']);
-
-        $required = ["solar_to_load_kwh","solar_to_grid_kwh","solar_to_battery_kwh",
-                     "battery_to_load_kwh","battery_to_grid_kwh","grid_to_load_kwh","grid_to_battery_kwh"];
-
-        $resolved = array();
-        foreach ($required as $name) {
-            $fid = $feed->exists_tag_name($userid, $tag, $name);
-            if (!$fid) {
-                return array("success" => false, "message" => "Feed not found: $tag/$name");
-            }
-            $resolved[$name] = intval($fid);
-        }
 
         include "Modules/postprocess/postprocess_model.php";
         $postprocess = new PostProcess($mysqli, $redis, $feed);
         $processes = $postprocess->get_processes("$linked_modules_dir/postprocess");
         $process_classes = $postprocess->get_process_classes();
 
-        $solarbatterykwh_config = (object) array(
+        $process_conf = (object) array(
             "solar"               => $feed->get_id($userid, "solar"),
             "use"                 => $feed->get_id($userid, "use"),
             "grid"                => $feed->get_id($userid, "grid"),
             "battery_power"       => $feed->get_id($userid, "battery_power"),
 
-            "solar_to_load_kwh"    => $resolved["solar_to_load_kwh"],
-            "solar_to_grid_kwh"    => $resolved["solar_to_grid_kwh"],
-            "solar_to_battery_kwh" => $resolved["solar_to_battery_kwh"],
-            "battery_to_load_kwh"  => $resolved["battery_to_load_kwh"],
-            "battery_to_grid_kwh"  => $resolved["battery_to_grid_kwh"],
-            "grid_to_load_kwh"     => $resolved["grid_to_load_kwh"],
-            "grid_to_battery_kwh"  => $resolved["grid_to_battery_kwh"],
+            "solar_to_load_kwh"    => $feed->exists_tag_name($userid, $tag, "solar_to_load_kwh"),
+            "solar_to_grid_kwh"    => $feed->exists_tag_name($userid, $tag, "solar_to_grid_kwh"),
+            "solar_to_battery_kwh" => $feed->exists_tag_name($userid, $tag, "solar_to_battery_kwh"),
+            "battery_to_load_kwh"  => $feed->exists_tag_name($userid, $tag, "battery_to_load_kwh"),
+            "battery_to_grid_kwh"  => $feed->exists_tag_name($userid, $tag, "battery_to_grid_kwh"),
+            "grid_to_load_kwh"     => $feed->exists_tag_name($userid, $tag, "grid_to_load_kwh"),
+            "grid_to_battery_kwh"  => $feed->exists_tag_name($userid, $tag, "grid_to_battery_kwh"),
 
             "process_mode"  => "all",
             "process_start" => 0,
             "process"       => "solarbatterykwh"
         );
 
-        return $process_classes[$solarbatterykwh_config->process]->process($solarbatterykwh_config);
+        return $process_classes[$process_conf->process]->process($process_conf);
     }
 }
