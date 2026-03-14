@@ -68,6 +68,10 @@ function mysolarpvbattery_app_controller($route,$app,$appconfig,$apikey)
             "process"       => "solarbatterykwh"
         );
 
-        return $process_classes[$process_conf->process]->process($process_conf);
+        // capture and silence any internal prints
+        ob_start();
+        $result = $process_classes[$process_conf->process]->process($process_conf);
+        ob_end_clean();
+        return $result;
     }
 }
