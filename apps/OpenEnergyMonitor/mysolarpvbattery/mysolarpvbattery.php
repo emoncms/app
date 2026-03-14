@@ -375,12 +375,15 @@ if (!sessionwrite) $(".openconfig").hide();
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    // Standard mysolar feeds
+    // == Key power feeds ==
+    // technically we should only need 3 out of these 4 feeds as they are linked by conservation of energy
+    // perhaps this could be intelligently checked in the future to simplify setup
     "use":{"type":"feed", "autoname":"use", "description":"House or building use in watts"},
     "solar":{"type":"feed", "autoname":"solar", "description":"Solar generation in watts"},
-    // Battery feeds
     "battery_power":{"type":"feed", "autoname":"battery_power", "description":"Battery power in watts (positive for discharge, negative for charge)"},
     "grid":{"type":"feed", "autoname":"grid", "description":"Grid power in watts (positive for import, negative for export)"},
+
+    // Battery state of charge feed (optional)
     "battery_soc":{"optional":true, "type":"feed", "autoname":"battery_soc", "description":"Battery state of charge in kWh"},
 
     // History feeds
