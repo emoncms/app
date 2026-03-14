@@ -87,8 +87,8 @@ global $path, $session, $v;
 
     <div class="d-flex justify-content-between mt-2 px-2">
         <div class="text-center">
-            <h5 class="electric-title mb-0" style="font-size:0.9rem;color:#aaa"><?php echo tr('USE') ?></h5>
-            <h3 class="mt-0 mb-1" style="color:#aaa"><span id="use_kwh">---</span><small>kWh</small></h3>
+            <h5 class="electric-title mb-0" style="font-size:0.9rem;color:#0699fa"><?php echo tr('USE') ?></h5>
+            <h3 class="mt-0 mb-1" style="color:#0699fa"><span id="use_kwh">---</span><small>kWh</small></h3>
         </div>
         <div class="text-center">
             <h5 class="electric-title mb-0" style="font-size:0.9rem;color:#f4c009"><?php echo tr('SOLAR') ?></h5>
