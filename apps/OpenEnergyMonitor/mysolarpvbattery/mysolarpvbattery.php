@@ -1453,45 +1453,35 @@ function render_autogen_feed_list() {
 // Auto-generate feed actions
 // ----------------------------------------------------------------------
 function create_missing_feeds() {
-    var autogen_node_name = "app_mysolarpvbattery_"+config.id;
+    const autogen_node_name = "app_mysolarpvbattery_" + config.id;
+    const missing = get_autogen_feeds().filter(f => !f.feedid);
+    let created = 0, errors = 0;
 
-    $("#autogen-status").text("Creating feeds...").css("color","#aaa");
+    $("#autogen-status").text("Creating feeds...").css("color", "#aaa");
     $("#btn-create-feeds").prop("disabled", true);
 
-    var missing = [];
-    var autogen_feeds = get_autogen_feeds();
-    for (var i = 0; i < autogen_feeds.length; i++)    {
-        if (autogen_feeds[i].feedid == false) {
-            missing.push(autogen_feeds[i].name);
-        }
-    }
-
-    var requests = [];
-    for (var i = 0; i < missing.length; i++) {
-        requests.push($.ajax({
+    missing.forEach(item => {
+        $.ajax({
             url: path + "feed/create.json",
-            data: { tag: autogen_node_name, name: missing[i], datatype: 1, engine: 5,
+            data: { tag: autogen_node_name, name: item.name, datatype: 1, engine: 5,
                     options: JSON.stringify({ interval: 1800 }), apikey: apikey },
-            dataType: "json"
-        }));
-    }
-
-    $.when.apply($, requests).then(function() {
-        var results = missing.length === 1 ? [arguments] : Array.prototype.slice.call(arguments);
-        var errors = results.filter(function(r) { return !(r[0] && r[0].feedid); }).length;
-        var created = results.length - errors;
-        config.feeds = feed.list();
-        feeds_by_tag_name = feed.by_tag_and_name(config.feeds);
-        render_autogen_feed_list();
-        $("#autogen-status")
-            .text(errors === 0 ? "Created " + created + " feed(s) successfully."
-                               : "Created " + created + " feed(s), " + errors + " error(s).")
-            .css("color", errors === 0 ? "#5cb85c" : "#f0ad4e");
-    }, function() {
-        $("#autogen-status").text("One or more feeds could not be created.").css("color","#d9534f");
-    }).always(function() {
-        $("#btn-create-feeds").prop("disabled", false);
+            dataType: "json",
+            async: false,
+            success: (res) => (res && res.feedid) ? created++ : errors++,
+            error: () => errors++
+        });
     });
+
+    // Update state and UI
+    config.feeds = feed.list();
+    feeds_by_tag_name = feed.by_tag_and_name(config.feeds);
+    render_autogen_feed_list();
+
+    const statusText = errors === 0 ? `Created ${created} feed(s) successfully.` 
+                                    : `Created ${created} feed(s), ${errors} error(s).`;
+    
+    $("#autogen-status").text(statusText).css("color", errors === 0 ? "#5cb85c" : "#f0ad4e");
+    $("#btn-create-feeds").prop("disabled", false);
 }
 
 function run_post_processor() {
@@ -1522,46 +1512,38 @@ function run_post_processor() {
 
 function reset_feeds() {
     if (!confirm("Are you sure you want to clear all 7 kWh flow feeds? This cannot be undone.")) return;
-    $("#autogen-status").text("Clearing feeds...").css("color","#aaa");
-    $("#btn-reset-feeds").prop("disabled", true);
 
-    var autogen_feeds = get_autogen_feeds();
-    var feed_ids = [];
-    for (var i = 0; i < autogen_feeds.length; i++)    {
-        if (autogen_feeds[i].feedid) {
-            feed_ids.push(autogen_feeds[i].feedid);
-        }
-    }
-
+    const feed_ids = get_autogen_feeds().filter(f => f.feedid).map(f => f.feedid);
+    
     if (feed_ids.length === 0) {
-        $("#autogen-status").text("No matching feeds found to clear.").css("color","#f0ad4e");
-        $("#btn-reset-feeds").prop("disabled", false);
+        $("#autogen-status").text("No matching feeds found to clear.").css("color", "#f0ad4e");
         return;
     }
 
-    var requests = [];
-    for (var i = 0; i < feed_ids.length; i++) {
-        requests.push($.ajax({
-            url: path + "feed/clear.json",
-            data: { id: feed_ids[i], apikey: apikey },
-            dataType: "json"
-        }));
-    }
+    $("#autogen-status").text("Clearing feeds...").css("color", "#aaa");
+    $("#btn-reset-feeds").prop("disabled", true);
 
-    $.when.apply($, requests).then(function() {
-        var results = feed_ids.length === 1 ? [arguments] : Array.prototype.slice.call(arguments);
-        var errors = results.filter(function(r) { return !(r[0] && r[0].success); }).length;
-        var cleared = results.length - errors;
-        config.feeds = feed.list();
-        render_autogen_feed_list();
-        $("#autogen-status")
-            .text(errors === 0 ? "Cleared " + cleared + " feed(s) successfully."
-                               : "Cleared " + cleared + " feed(s), " + errors + " error(s).")
-            .css("color", errors === 0 ? "#5cb85c" : "#f0ad4e");
-    }, function() {
-        $("#autogen-status").text("One or more feeds could not be cleared.").css("color","#d9534f");
-    }).always(function() {
-        $("#btn-reset-feeds").prop("disabled", false);
+    let cleared = 0, errors = 0;
+
+    feed_ids.forEach(id => {
+        $.ajax({
+            url: path + "feed/clear.json",
+            data: { id: id, apikey: apikey },
+            dataType: "json",
+            async: false,
+            success: (res) => (res && res.success) ? cleared++ : errors++,
+            error: () => errors++
+        });
     });
+
+    // Refresh data and update UI
+    config.feeds = feed.list();
+    render_autogen_feed_list();
+
+    const statusText = errors === 0 ? `Cleared ${cleared} feed(s) successfully.` 
+                                    : `Cleared ${cleared} feed(s), ${errors} error(s).`;
+
+    $("#autogen-status").text(statusText).css("color", errors === 0 ? "#5cb85c" : "#f0ad4e");
+    $("#btn-reset-feeds").prop("disabled", false);
 }
 </script>
