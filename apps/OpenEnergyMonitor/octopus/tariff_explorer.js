@@ -742,10 +742,10 @@ function draw_tables(total, monthly_data) {
         $("#monthly-data thead tr").html(
             "<th>Month</th>" +
             "<th>Consumption (kWh)</th>" +
-            "<th>" + tariff_A_name + " cost</th>" +
-            "<th>" + tariff_A_name + " rate</th>" +
-            "<th>" + tariff_B_name + " cost</th>" +
-            "<th>" + tariff_B_name + " rate</th>" +
+            "<th>Tariff A cost</th>" +
+            "<th>Tariff A rate</th>" +
+            "<th>Tariff B cost</th>" +
+            "<th>Tariff B rate</th>" +
             "<th>Cheaper tariff</th>" +
             "<th></th>"
         );
