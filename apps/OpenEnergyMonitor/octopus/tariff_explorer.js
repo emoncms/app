@@ -1221,27 +1221,73 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
             let outgoing = get_data_value_at_index("outgoing", z);
             let carbonintensity = get_data_value_at_index("carbonintensity", z);
 
-            if (import_kwh != null) {
-                text += "Import: " + import_kwh.toFixed(3) + " kWh";
-                if (tariff_A != null) {
-                    let cost = import_kwh * tariff_A;
-                    text += " (" + cost.toFixed(2) + "p cost)";
-                }
-            }
+            let solar_to_load_kwh    = get_data_value_at_index("solar_to_load", z);
+            let solar_to_grid_kwh    = get_data_value_at_index("solar_to_grid", z);
+            let solar_to_battery_kwh = get_data_value_at_index("solar_to_battery", z);
+            let battery_to_load_kwh  = get_data_value_at_index("battery_to_load", z);
+            let battery_to_grid_kwh  = get_data_value_at_index("battery_to_grid", z);
+            let grid_to_load_kwh     = get_data_value_at_index("grid_to_load", z);
+            let grid_to_battery_kwh  = get_data_value_at_index("grid_to_battery", z);
 
-            if (solar_used_kwh != null) {
-                text += "<br>Used Solar: " + solar_used_kwh.toFixed(3) + " kWh";
-                if (tariff_A != null) {
-                    let cost = solar_used_kwh * tariff_A;
-                    text += " (" + cost.toFixed(2) + "p saved)";
+            if (flow_mode) {
+                if (solar_to_load_kwh != null) {
+                    text += "&#9728; Solar &rarr; Load: " + solar_to_load_kwh.toFixed(3) + " kWh";
+                    if (tariff_A != null) text += " (" + (solar_to_load_kwh * tariff_A).toFixed(2) + "p saved)<br>";
+                    else text += "<br>";
                 }
-            }
+                if (solar_to_battery_kwh != null) {
+                    text += "&#9728; Solar &rarr; Battery: " + solar_to_battery_kwh.toFixed(3) + " kWh";
+                    if (tariff_A != null) text += " (" + (solar_to_battery_kwh * tariff_A).toFixed(2) + "p saved)<br>";
+                    else text += "<br>";
+                }
+                if (solar_to_grid_kwh != null) {
+                    text += "&#9728; Solar &rarr; Grid: " + solar_to_grid_kwh.toFixed(3) + " kWh";
+                    if (outgoing != null) text += " (" + (solar_to_grid_kwh * outgoing).toFixed(2) + "p gained)<br>";
+                    else text += "<br>";
+                }
+                if (battery_to_load_kwh != null) {
+                    text += "&#x1F50B; Battery &rarr; Load: " + battery_to_load_kwh.toFixed(3) + " kWh";
+                    if (tariff_A != null) text += " (" + (battery_to_load_kwh * tariff_A).toFixed(2) + "p saved)<br>";
+                    else text += "<br>";
+                }
+                if (battery_to_grid_kwh != null) {
+                    text += "&#x1F50B; Battery &rarr; Grid: " + battery_to_grid_kwh.toFixed(3) + " kWh";
+                    if (outgoing != null) text += " (" + (battery_to_grid_kwh * outgoing).toFixed(2) + "p gained)<br>";
+                    else text += "<br>";
+                }
+                if (grid_to_load_kwh != null) {
+                    text += "&#x1F4A1; Grid &rarr; Load: " + grid_to_load_kwh.toFixed(3) + " kWh";
+                    if (tariff_A != null) text += " (" + (grid_to_load_kwh * tariff_A).toFixed(2) + "p cost)<br>";
+                    else text += "<br>";
+                }
+                if (grid_to_battery_kwh != null) {
+                    text += "&#x1F4A1; Grid &rarr; Battery: " + grid_to_battery_kwh.toFixed(3) + " kWh";
+                    if (tariff_A != null) text += " (" + (grid_to_battery_kwh * tariff_A).toFixed(2) + "p cost)<br>";
+                    else text += "<br>";
+                }
+            } else {
+                if (import_kwh != null) {
+                    text += "Import: " + import_kwh.toFixed(3) + " kWh";
+                    if (tariff_A != null) {
+                        let cost = import_kwh * tariff_A;
+                        text += " (" + cost.toFixed(2) + "p cost)";
+                    }
+                }
 
-            if (export_kwh != null) {
-                text += "<br>Export: " + (export_kwh * -1).toFixed(3) + " kWh";
-                if (outgoing != null) {
-                    let cost = export_kwh * outgoing;
-                    text += " (" + cost.toFixed(2) + "p gained)";
+                if (solar_used_kwh != null) {
+                    text += "<br>Used Solar: " + solar_used_kwh.toFixed(3) + " kWh";
+                    if (tariff_A != null) {
+                        let cost = solar_used_kwh * tariff_A;
+                        text += " (" + cost.toFixed(2) + "p saved)";
+                    }
+                }
+
+                if (export_kwh != null) {
+                    text += "<br>Export: " + (export_kwh * -1).toFixed(3) + " kWh";
+                    if (outgoing != null) {
+                        let cost = export_kwh * outgoing;
+                        text += " (" + cost.toFixed(2) + "p gained)";
+                    }
                 }
             }
 
