@@ -428,9 +428,7 @@ function graph_load() {
         profile_cost[hh] = [profile_time, 0.0]
     }
 
-    var total = {
-        import_tariff_A: { kwh: 0, cost: 0 },
-        import_tariff_B: { kwh: 0, cost: 0 },
+    var total_template = {
 
         // Per-flow kWh totals
         solar_to_load_kwh:    0,
@@ -465,6 +463,7 @@ function graph_load() {
 
         co2: 0
     }
+    var total = JSON.parse(JSON.stringify(total_template)); // deep copy
 
     var monthly_data = {};
 
@@ -545,111 +544,28 @@ function graph_load() {
         data["grid_to_load"].push([time, kwh_grid_to_load]);
         data["grid_to_battery"].push([time, kwh_grid_to_battery]);
 
-        // Accumulate per-flow kWh totals
-        total.solar_to_load_kwh    += kwh_solar_to_load;
-        total.solar_to_grid_kwh    += kwh_solar_to_grid;
-        total.solar_to_battery_kwh += kwh_solar_to_battery;
-        total.battery_to_load_kwh  += kwh_battery_to_load;
-        total.battery_to_grid_kwh  += kwh_battery_to_grid;
-        total.grid_to_load_kwh     += kwh_grid_to_load;
-        total.grid_to_battery_kwh  += kwh_grid_to_battery;
-
         let outgoing_unit = (data.outgoing[z] != undefined && data.outgoing[z][1] != null)
             ? data.outgoing[z][1] * 0.01 * -1  // already inverted, so this is positive p/kWh
             : null;
 
-        if (outgoing_unit != null) {
-            // Per-flow export values
-            total.tariff_A.solar_to_grid_value    += kwh_solar_to_grid    * outgoing_unit;
-            total.tariff_A.battery_to_grid_value  += kwh_battery_to_grid  * outgoing_unit;
+        var flows = {
+            solar_to_load:    kwh_solar_to_load,
+            solar_to_grid:    kwh_solar_to_grid,
+            solar_to_battery: kwh_solar_to_battery,
+            battery_to_load:  kwh_battery_to_load,
+            battery_to_grid:  kwh_battery_to_grid,
+            grid_to_load:     kwh_grid_to_load,
+            grid_to_battery:  kwh_grid_to_battery
+        };
 
-            total.tariff_B.solar_to_grid_value    += kwh_solar_to_grid    * outgoing_unit;
-            total.tariff_B.battery_to_grid_value  += kwh_battery_to_grid  * outgoing_unit;
-        }
-
-        if (unitcost_tariff_A != null) {
-            // Per-flow avoided/saved cost at tariff A rate
-            total.tariff_A.solar_to_load_value    += kwh_solar_to_load    * unitcost_tariff_A;
-            total.tariff_A.solar_to_battery_value += kwh_solar_to_battery * unitcost_tariff_A;
-            total.tariff_A.battery_to_load_value  += kwh_battery_to_load  * unitcost_tariff_A;
-            total.tariff_A.grid_to_load_cost      += kwh_grid_to_load     * unitcost_tariff_A;
-            total.tariff_A.grid_to_battery_cost   += kwh_grid_to_battery  * unitcost_tariff_A;
-        }
-
-        if (unitcost_tariff_B != null) {
-            // Per-flow avoided/saved cost at tariff B rate
-            total.tariff_B.solar_to_load_value    += kwh_solar_to_load    * unitcost_tariff_B;
-            total.tariff_B.solar_to_battery_value += kwh_solar_to_battery * unitcost_tariff_B;
-            total.tariff_B.battery_to_load_value  += kwh_battery_to_load  * unitcost_tariff_B;
-            total.tariff_B.grid_to_load_cost      += kwh_grid_to_load     * unitcost_tariff_B;
-            total.tariff_B.grid_to_battery_cost   += kwh_grid_to_battery  * unitcost_tariff_B;
-        }
+        accumulate_flows(total, flows, outgoing_unit, unitcost_tariff_A, unitcost_tariff_B);
 
         // Accumulate monthly data
         if (monthly_data[startOfMonth] == undefined) {
-            monthly_data[startOfMonth] = {
-                solar_to_load_kwh:    0,
-                solar_to_grid_kwh:    0,
-                solar_to_battery_kwh: 0,
-                battery_to_load_kwh:  0,
-                battery_to_grid_kwh:  0,
-                grid_to_load_kwh:     0,
-                grid_to_battery_kwh:  0,
-                import_kwh:           0,
-                export_kwh:           0,
-                consumption_kwh:      0,
-                tariff_A: {
-                    solar_to_load_value:    0,
-                    solar_to_battery_value: 0,
-                    solar_to_grid_value:    0,
-                    battery_to_load_value:  0,
-                    battery_to_grid_value:  0,
-                    grid_to_load_cost:      0,
-                    grid_to_battery_cost:   0
-                },
-                tariff_B: {
-                    solar_to_load_value:    0,
-                    solar_to_battery_value: 0,
-                    solar_to_grid_value:    0,
-                    battery_to_load_value:  0,
-                    battery_to_grid_value:  0,
-                    grid_to_load_cost:      0,
-                    grid_to_battery_cost:   0
-                }
-            };
+            monthly_data[startOfMonth] = JSON.parse(JSON.stringify(total_template)); // deep copy
         }
         var m = monthly_data[startOfMonth];
-        m.solar_to_load_kwh    += kwh_solar_to_load;
-        m.solar_to_grid_kwh    += kwh_solar_to_grid;
-        m.solar_to_battery_kwh += kwh_solar_to_battery;
-        m.battery_to_load_kwh  += kwh_battery_to_load;
-        m.battery_to_grid_kwh  += kwh_battery_to_grid;
-        m.grid_to_load_kwh     += kwh_grid_to_load;
-        m.grid_to_battery_kwh  += kwh_grid_to_battery;
-        m.import_kwh           += kwh_import;
-        m.export_kwh           += (kwh_solar_to_grid + kwh_battery_to_grid);
-        m.consumption_kwh      += (kwh_solar_to_load + kwh_battery_to_load + kwh_grid_to_load);
-
-        if (outgoing_unit != null) {
-            m.tariff_A.solar_to_grid_value   += kwh_solar_to_grid   * outgoing_unit;
-            m.tariff_A.battery_to_grid_value += kwh_battery_to_grid * outgoing_unit;
-            m.tariff_B.solar_to_grid_value   += kwh_solar_to_grid   * outgoing_unit;
-            m.tariff_B.battery_to_grid_value += kwh_battery_to_grid * outgoing_unit;
-        }
-        if (unitcost_tariff_A != null) {
-            m.tariff_A.solar_to_load_value    += kwh_solar_to_load    * unitcost_tariff_A;
-            m.tariff_A.solar_to_battery_value += kwh_solar_to_battery * unitcost_tariff_A;
-            m.tariff_A.battery_to_load_value  += kwh_battery_to_load  * unitcost_tariff_A;
-            m.tariff_A.grid_to_load_cost      += kwh_grid_to_load     * unitcost_tariff_A;
-            m.tariff_A.grid_to_battery_cost   += kwh_grid_to_battery  * unitcost_tariff_A;
-        }
-        if (unitcost_tariff_B != null) {
-            m.tariff_B.solar_to_load_value    += kwh_solar_to_load    * unitcost_tariff_B;
-            m.tariff_B.solar_to_battery_value += kwh_solar_to_battery * unitcost_tariff_B;
-            m.tariff_B.battery_to_load_value  += kwh_battery_to_load  * unitcost_tariff_B;
-            m.tariff_B.grid_to_load_cost      += kwh_grid_to_load     * unitcost_tariff_B;
-            m.tariff_B.grid_to_battery_cost   += kwh_grid_to_battery  * unitcost_tariff_B;
-        }
+        accumulate_flows(m, flows, outgoing_unit, unitcost_tariff_A, unitcost_tariff_B);
     }
 
     // if (smart_meter_data && !flow_mode) {
@@ -657,6 +573,37 @@ function graph_load() {
     // }
 
     draw_tables(total, monthly_data);
+}
+
+function accumulate_flows(bucket, flows, outgoing_unit, unitcost_tariff_A, unitcost_tariff_B) {
+    bucket.solar_to_load_kwh    += flows.solar_to_load;
+    bucket.solar_to_grid_kwh    += flows.solar_to_grid;
+    bucket.solar_to_battery_kwh += flows.solar_to_battery;
+    bucket.battery_to_load_kwh  += flows.battery_to_load;
+    bucket.battery_to_grid_kwh  += flows.battery_to_grid;
+    bucket.grid_to_load_kwh     += flows.grid_to_load;
+    bucket.grid_to_battery_kwh  += flows.grid_to_battery;
+
+    if (outgoing_unit != null) {
+        bucket.tariff_A.solar_to_grid_value   += flows.solar_to_grid   * outgoing_unit;
+        bucket.tariff_A.battery_to_grid_value += flows.battery_to_grid * outgoing_unit;
+        bucket.tariff_B.solar_to_grid_value   += flows.solar_to_grid   * outgoing_unit;
+        bucket.tariff_B.battery_to_grid_value += flows.battery_to_grid * outgoing_unit;
+    }
+    if (unitcost_tariff_A != null) {
+        bucket.tariff_A.solar_to_load_value    += flows.solar_to_load    * unitcost_tariff_A;
+        bucket.tariff_A.solar_to_battery_value += flows.solar_to_battery * unitcost_tariff_A;
+        bucket.tariff_A.battery_to_load_value  += flows.battery_to_load  * unitcost_tariff_A;
+        bucket.tariff_A.grid_to_load_cost      += flows.grid_to_load     * unitcost_tariff_A;
+        bucket.tariff_A.grid_to_battery_cost   += flows.grid_to_battery  * unitcost_tariff_A;
+    }
+    if (unitcost_tariff_B != null) {
+        bucket.tariff_B.solar_to_load_value    += flows.solar_to_load    * unitcost_tariff_B;
+        bucket.tariff_B.solar_to_battery_value += flows.solar_to_battery * unitcost_tariff_B;
+        bucket.tariff_B.battery_to_load_value  += flows.battery_to_load  * unitcost_tariff_B;
+        bucket.tariff_B.grid_to_load_cost      += flows.grid_to_load     * unitcost_tariff_B;
+        bucket.tariff_B.grid_to_battery_cost   += flows.grid_to_battery  * unitcost_tariff_B;
+    }
 }
 
 function draw_tables(total, monthly_data) {
@@ -773,7 +720,7 @@ function draw_tables(total, monthly_data) {
             ) * vat;
 
             // Effective unit rate against total consumption
-            var consumption = md.consumption_kwh;
+            var consumption = md.solar_to_load_kwh + md.battery_to_load_kwh + md.grid_to_load_kwh;
             var unit_rate_A = consumption > 0 ? (net_cost_A / consumption) * 100 : NaN;
             var unit_rate_B = consumption > 0 ? (net_cost_B / consumption) * 100 : NaN;
 
