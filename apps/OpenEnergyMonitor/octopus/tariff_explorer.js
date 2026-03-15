@@ -595,31 +595,19 @@ function graph_load() {
 
 function draw_tables(total, monthly_data) {
 
-    var unit_cost_import_tariff_A = (total.import_tariff_A.cost / total.import_tariff_A.kwh);
-    var unit_cost_import_tariff_B = (total.import_tariff_B.cost / total.import_tariff_B.kwh);
+    // Populate standalone tariff selectors (built once, then just set value)
+    ["tariff_A", "tariff_B"].forEach(function(id) {
+        var sel = $("#" + id);
+        if (sel.find("option").length === 0) {
+            for (var key in tariff_options) {
+                sel.append("<option>" + tariff_options[key] + "</option>");
+            }
+        }
+    });
+    $("#tariff_A").val(config.app.tariff_A.value);
+    $("#tariff_B").val(config.app.tariff_B.value);
 
     var out = "";
-    out += "<tr>";
-    out += "<td><select id='tariff_A'>";
-    for (var key in tariff_options) {
-        out += "<option>" + tariff_options[key] + "</option>";
-    }
-    out += "</select></td>";
-    out += "<td>" + total.import_tariff_A.kwh.toFixed(1) + " kWh</td>";
-    out += "<td>£" + (total.import_tariff_A.cost * 1.05).toFixed(2) + "</td>";
-    out += "<td>" + (unit_cost_import_tariff_A * 100 * 1.05).toFixed(1) + "p/kWh (inc VAT)</td>";
-    out += "</tr>";
-
-    out += "<tr>";
-    out += "<td><select id='tariff_B'>";
-    for (var key in tariff_options) {
-        out += "<option>" + tariff_options[key] + "</option>";
-    }
-    out += "</select></td>";
-    out += "<td>" + total.import_tariff_B.kwh.toFixed(1) + " kWh</td>";
-    out += "<td>£" + (total.import_tariff_B.cost * 1.05).toFixed(2) + "</td>";
-    out += "<td>" + (unit_cost_import_tariff_B * 100 * 1.05).toFixed(1) + "p/kWh (inc VAT)</td>";
-    out += "</tr>";
 
     if (show_carbonintensity) {
         var window_co2_intensity = 1000 * total.co2 / total.import_kwh;
@@ -627,16 +615,25 @@ function draw_tables(total, monthly_data) {
     }
 
     // Helper: one table row per energy flow
-    function flow_row(label, kwh, value_gbp, value_label, color) {
-        var r = "<tr style='border-left:4px solid " + color + "'>";
+    function flow_row(label, kwh, value_gbp, value_label, color, rowStyle) {
+        var value_color;
+        if (value_label.indexOf("avoided") !== -1) {
+            value_color = "#888";
+        } else if (value_label.indexOf("earned") !== -1) {
+            value_color = "#4a9e4a";
+        } else {
+            value_color = "#c0392b";
+        }
+
+        var r = "<tr style='border-left:4px solid " + color + (rowStyle ? ";" + rowStyle : "") + "'>";
         r += "<td>" + label + "</td>";
         r += "<td>" + kwh.toFixed(2) + " kWh</td>";
-        r += "<td>" + (value_gbp !== null ? (value_gbp >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(value_gbp).toFixed(2) : "&mdash;") + "</td>";
+        r += "<td style='color:" + value_color + "'>" + (value_gbp !== null ? (value_gbp >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(value_gbp).toFixed(2) : "&mdash;") + "</td>";
 
         // unit price value_gbp / kwh, only if kwh > 0 and value_gbp is not null
         if (value_gbp !== null && kwh > 0) {
             let unit_price = value_gbp / kwh;
-            r += "<td>" + (unit_price * 100).toFixed(1) + " p/kWh</td>";
+            r += "<td style='color:" + value_color + "'>" + (unit_price * 100).toFixed(1) + " p/kWh</td>";
         } else {
             r += "<td>&mdash;</td>";
         }
@@ -646,8 +643,6 @@ function draw_tables(total, monthly_data) {
         return r;
     }
 
-    out += "<tr style='font-weight:bold;background:#f5f5f5'><td colspan='4'>Energy flow breakdown</td></tr>";
-
     out += flow_row("&#9728; Solar &rarr; Load",         total.solar_to_load_kwh,    total.tariff_A.solar_to_load_value * 1.05,    "avoided import cost (tariff A)", "#bec745");
     out += flow_row("&#9728; Solar &rarr; Battery",      total.solar_to_battery_kwh, total.tariff_A.solar_to_battery_value * 1.05, "avoided import cost (tariff A)", "#a3d977");
     out += flow_row("&#9728; Solar &rarr; Grid (export)",total.solar_to_grid_kwh,    total.tariff_A.solar_to_grid_value * 1.05,    "earned at export tariff",        "#dccc1f");
@@ -656,12 +651,19 @@ function draw_tables(total, monthly_data) {
     out += flow_row("&#x1F4A1; Grid &rarr; Load",        total.grid_to_load_kwh,     (total.tariff_A.grid_to_load_cost * 1.05),   "cost at tariff A",               "#44b3e2");
     out += flow_row("&#x1F4A1; Grid &rarr; Battery",     total.grid_to_battery_kwh,  (total.tariff_A.grid_to_battery_cost * 1.05),"cost at tariff A",               "#82cbfc");
 
+    // Summary row: net cost = grid costs - earnings, unit cost = net cost / total consumption
+    var net_cost_gbp = (
+        (total.tariff_A.grid_to_load_cost + total.tariff_A.grid_to_battery_cost) -
+        (total.tariff_A.solar_to_grid_value + total.tariff_A.battery_to_grid_value)
+    ) * 1.05;
+    var total_consumption_kwh = total.solar_to_load_kwh + total.battery_to_load_kwh + total.grid_to_load_kwh;
+
+    // spacer row
+    out += flow_row("Net result", total_consumption_kwh, net_cost_gbp, "grid costs minus export earnings", "#000",
+        "font-weight:bold;background-color:#e8e8e8");
 
     $("#show_profile").show();
     $("#octopus_totals").html(out);
-    // Set tariff_A
-    $("#tariff_A").val(config.app.tariff_A.value);
-    $("#tariff_B").val(config.app.tariff_B.value);
 
     /*
     var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -699,7 +701,7 @@ function draw_tables(total, monthly_data) {
                 monthly_out += "<td></td>";
             }
             
-            monthly_out += "<td>£" + tariff_B_cost.toFixed(2) + "</td>";
+            monthly_out += "<td>£" + monthly_sum_cost_import_tariff_B.toFixed(2) + "</td>";
             if (!isNaN(tariff_B_unit_cost)) {
                 monthly_out += "<td>" + tariff_B_unit_cost.toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>";
             } else {
@@ -1277,7 +1279,7 @@ $("#monthly-data").on("click", ".zoom-to-month", function() {
     return false;
 });
 
-$("#octopus_totals").on("change", "select", function() {
+$("#tariff_A, #tariff_B").on("change", function() {
     config.app.tariff_A.value = $("#tariff_A").val();
     config.app.tariff_B.value = $("#tariff_B").val();
 

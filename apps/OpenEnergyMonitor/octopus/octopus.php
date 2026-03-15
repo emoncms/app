@@ -94,12 +94,25 @@ global $path, $session, $v;
 
                 <div class="power-graph-footer" style="background-color:#f0f0f0; color:#333; display:none">
                     <div style="padding:20px;">
+
+                        <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end; background:#fff; border-radius:8px; padding:14px 18px; margin-bottom:16px; box-shadow:0 1px 4px rgba(0,0,0,0.07);">
+                            <div style="flex:1; min-width:180px;">
+                                <label style="font-size:12px; font-weight:600; color:#555; margin-bottom:4px; display:block;">&#9679; Tariff A</label>
+                                <select id="tariff_A" class="form-control" style="font-size:13px;"></select>
+                            </div>
+                            <div style="flex:1; min-width:180px;">
+                                <label style="font-size:12px; font-weight:600; color:#555; margin-bottom:4px; display:block;">&#9679; Tariff B</label>
+                                <select id="tariff_B" class="form-control" style="font-size:13px;"></select>
+                            </div>
+                        </div>
+
                         <table style="width:100%" class="table">
                             <tr>
-                                <th></th>
+                                <th>Energy flow</th>
                                 <th>Energy</th>
-                                <th>Cost / Value</th>
+                                <th>Value / Cost</th>
                                 <th>Unit price</th>
+                                <th></th>
                             </tr>
                             <tbody id="octopus_totals"></tbody>
                         </table>
