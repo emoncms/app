@@ -442,6 +442,10 @@ config.feeds = feed.list();
 
 var feeds_by_tag_name = feed.by_tag_and_name(config.feeds);
 
+config.autogen_node_prefix = "app_mysolarpvbattery";
+config.autogen_feed_defaults = { datatype: 1, engine: 5, options: { interval: 1800 } };
+config.autogen_feeds_by_tag_name = feeds_by_tag_name;
+
 config.initapp = function(){init()};
 config.showapp = function(){show()};
 config.hideapp = function(){hide()};
@@ -1385,165 +1389,25 @@ function app_log (level, message) {
 
 // ----------------------------------------------------------------------
 // Helper: return array of feeds that should be auto-generated
+// (delegates to config.autogen.get_feeds in appconf.js)
 // ----------------------------------------------------------------------
 function get_autogen_feeds() {
-
-    var autogen_node_name = "app_mysolarpvbattery_"+config.id;
-
-    var autogen_feeds = [];
-    for (var key in config.app) {
-        if (config.app.hasOwnProperty(key) && config.app[key].autogenerate) {
-            let feed_name = config.app[key].autoname || key;
-            let feedid = false;
-
-            if (feeds_by_tag_name[autogen_node_name]!=undefined) {
-                if (feeds_by_tag_name[autogen_node_name][feed_name]!=undefined) {
-                    feedid = feeds_by_tag_name[autogen_node_name][feed_name]['id'];
-                }
-            }
-
-            autogen_feeds.push({
-                key: key,
-                name: feed_name,
-                feedid: feedid
-            });
-        }
-    }
-    return autogen_feeds;
+    return config.autogen.get_feeds();
 }
 
 // ----------------------------------------------------------------------
 // Auto-generate feed list
+// (delegates to config.autogen.render_feed_list in appconf.js)
 // ----------------------------------------------------------------------
 function render_autogen_feed_list() {
-    var autogen_feeds = get_autogen_feeds();
-
-    var autogen_node_name = "app_mysolarpvbattery_"+config.id;
-    $(".autogen-appname").text(autogen_node_name);
-
-    var tbody = $("#autogen-feed-rows");
-    tbody.empty();
-    var missing_count = 0;
-
-    for (var j = 0; j < autogen_feeds.length; j++) {
-
-        var status_html = "<span style='color:#5cb85c; font-weight:bold;'>&#10003; exists</span>";
-        if (autogen_feeds[j].feedid==false) {
-            status_html = "<span style='color:#f0ad4e; font-weight:bold;'>&#10007; missing</span>";
-            missing_count++;
-        }
-
-        tbody.append(
-            "<tr style='background:" + ((j % 2 === 0) ? "#1e1e1e" : "#252525") + ";'>" +
-            "  <td style='padding:6px 8px; font-family:monospace; color:#fff;'>" + autogen_feeds[j].name + "</td>" +
-            "  <td style='padding:6px 8px; color:#aaa;'>" + autogen_node_name + "</td>" +
-            "  <td style='padding:6px 8px; text-align:center;'>" + status_html + "</td>" +
-            "</tr>"
-        );
-    }
-
-    var all_present = (missing_count === 0);
-    $("#btn-create-feeds").toggle(!all_present);
-    $("#btn-run-processor").toggle(all_present);
-    $("#btn-reset-feeds").toggle(all_present);
-    $("#autogen-status").text("");
+    config.autogen.render_feed_list();
 }
 
 // ----------------------------------------------------------------------
 // Auto-generate feed actions
+// (delegate to config.autogen.* in appconf.js)
 // ----------------------------------------------------------------------
-function create_missing_feeds() {
-    const autogen_node_name = "app_mysolarpvbattery_" + config.id;
-    const missing = get_autogen_feeds().filter(f => !f.feedid);
-    let created = 0, errors = 0;
-
-    $("#autogen-status").text("Creating feeds...").css("color", "#aaa");
-    $("#btn-create-feeds").prop("disabled", true);
-
-    missing.forEach(item => {
-        $.ajax({
-            url: path + "feed/create.json",
-            data: { tag: autogen_node_name, name: item.name, datatype: 1, engine: 5,
-                    options: JSON.stringify({ interval: 1800 }), apikey: apikey },
-            dataType: "json",
-            async: false,
-            success: (res) => (res && res.feedid) ? created++ : errors++,
-            error: () => errors++
-        });
-    });
-
-    // Update state and UI
-    config.feeds = feed.list();
-    feeds_by_tag_name = feed.by_tag_and_name(config.feeds);
-    render_autogen_feed_list();
-
-    const statusText = errors === 0 ? `Created ${created} feed(s) successfully.` 
-                                    : `Created ${created} feed(s), ${errors} error(s).`;
-    
-    $("#autogen-status").text(statusText).css("color", errors === 0 ? "#5cb85c" : "#f0ad4e");
-    $("#btn-create-feeds").prop("disabled", false);
-}
-
-function run_post_processor() {
-    $("#autogen-status").text("Starting post-processor...").css("color","#aaa");
-    $("#btn-run-processor").prop("disabled", true);
-
-    $.ajax({
-        url: path + "app/process",
-        data: { id: config.id, apikey: apikey },
-        dataType: "json",
-        timeout: 120000,
-        success: function(result) {
-            console.log("run_post_processor: result", result);
-            if (result && result.success) {
-                $("#autogen-status").text("Post-processor completed successfully.").css("color","#5cb85c");
-            } else {
-                var msg = (result && result.message) ? result.message : "Unknown response";
-                $("#autogen-status").text("Post-processor: " + msg).css("color","#f0ad4e");
-            }
-        },
-        error: function(xhr) {
-            console.error("run_post_processor: AJAX error", xhr.responseText);
-            $("#autogen-status").text("Post-processor failed: " + xhr.statusText).css("color","#d9534f");
-        },
-        complete: function() { $("#btn-run-processor").prop("disabled", false); }
-    });
-}
-
-function reset_feeds() {
-    if (!confirm("Are you sure you want to clear all 7 kWh flow feeds? This cannot be undone.")) return;
-
-    const feed_ids = get_autogen_feeds().filter(f => f.feedid).map(f => f.feedid);
-    
-    if (feed_ids.length === 0) {
-        $("#autogen-status").text("No matching feeds found to clear.").css("color", "#f0ad4e");
-        return;
-    }
-
-    $("#autogen-status").text("Clearing feeds...").css("color", "#aaa");
-    $("#btn-reset-feeds").prop("disabled", true);
-
-    let cleared = 0, errors = 0;
-
-    feed_ids.forEach(id => {
-        $.ajax({
-            url: path + "feed/clear.json",
-            data: { id: id, apikey: apikey },
-            dataType: "json",
-            async: false,
-            success: (res) => (res && res.success) ? cleared++ : errors++,
-            error: () => errors++
-        });
-    });
-
-    // Refresh data and update UI
-    config.feeds = feed.list();
-    render_autogen_feed_list();
-
-    const statusText = errors === 0 ? `Cleared ${cleared} feed(s) successfully.` 
-                                    : `Cleared ${cleared} feed(s), ${errors} error(s).`;
-
-    $("#autogen-status").text(statusText).css("color", errors === 0 ? "#5cb85c" : "#f0ad4e");
-    $("#btn-reset-feeds").prop("disabled", false);
-}
+function create_missing_feeds()  { config.autogen.create_missing_feeds(); }
+function run_post_processor()    { config.autogen.run_post_processor(); }
+function reset_feeds()           { config.autogen.reset_feeds(); }
 </script>
