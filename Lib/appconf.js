@@ -147,6 +147,10 @@ var config = {
         out += "<br>";
 
         for (var z in config.app) {
+
+            // Skip any entries that are listed as autogenerate
+            if (config.app[z].autogenerate!=undefined && config.app[z].autogenerate) continue;
+
             out += "<div class='app-config-box' key='"+z+"'>";
             if (config.app[z].type=="feed") {
                 
@@ -529,5 +533,202 @@ var config = {
         var aName = a.longname.toLowerCase();
         var bName = b.longname.toLowerCase(); 
         return ((aName < bName) ? -1 : ((aName > bName) ? 1 : 0));
+    },
+
+    // -----------------------------------------------------------------------
+    // autogen: helpers for apps that declare feeds with autogenerate:true
+    //
+    // Apps opt in by setting before calling config.init():
+    //
+    //   config.autogen_node_prefix = "app_myappname";
+    //     The tag used for auto-generated feeds becomes
+    //     config.autogen_node_prefix + "_" + config.id
+    //     Defaults to "app_" + config.id when not set.
+    //
+    //   config.autogen_feed_defaults = { datatype: 1, engine: 5, options: { interval: 1800 } };
+    //     Merged into each feed/create.json request.
+    //     Defaults to { datatype: 1, engine: 5, options: { interval: 1800 } } when not set.
+    //
+    //   config.autogen_feeds_by_tag_name = feed.by_tag_and_name(config.feeds);
+    //     Lookup used to check which feeds already exist.
+    //     Must be kept up to date by the app after refreshing config.feeds.
+    // -----------------------------------------------------------------------
+    autogen: {
+
+        // Return the node tag string used for all auto-generated feeds
+        node_name: function() {
+            var prefix = config.autogen_node_prefix || ("app_" + config.id);
+            return prefix + "_" + config.id;
+        },
+
+        // Return array of { key, name, feedid } for every feed marked autogenerate:true
+        get_feeds: function() {
+            var node_name = config.autogen.node_name();
+            var lookup = config.autogen_feeds_by_tag_name || {};
+            var feeds = [];
+
+            for (var key in config.app) {
+                if (config.app.hasOwnProperty(key) && config.app[key].autogenerate) {
+                    var feed_name = config.app[key].autoname || key;
+                    var feedid = false;
+
+                    if (lookup[node_name] != undefined) {
+                        if (lookup[node_name][feed_name] != undefined) {
+                            feedid = lookup[node_name][feed_name]['id'];
+                        }
+                    }
+
+                    feeds.push({ key: key, name: feed_name, feedid: feedid });
+                }
+            }
+            return feeds;
+        },
+
+        // Render the feed status table into #autogen-feed-rows and toggle action buttons
+        render_feed_list: function() {
+            var autogen_feeds = config.autogen.get_feeds();
+            var node_name = config.autogen.node_name();
+
+            $(".autogen-appname").text(node_name);
+
+            var tbody = $("#autogen-feed-rows");
+            tbody.empty();
+            var missing_count = 0;
+
+            for (var j = 0; j < autogen_feeds.length; j++) {
+                var status_html = "<span style='color:#5cb85c; font-weight:bold;'>&#10003; exists</span>";
+                if (!autogen_feeds[j].feedid) {
+                    status_html = "<span style='color:#f0ad4e; font-weight:bold;'>&#10007; missing</span>";
+                    missing_count++;
+                }
+
+                tbody.append(
+                    "<tr style='background:" + ((j % 2 === 0) ? "#1e1e1e" : "#252525") + ";'>" +
+                    "  <td style='padding:6px 8px; font-family:monospace; color:#fff;'>" + autogen_feeds[j].name + "</td>" +
+                    "  <td style='padding:6px 8px; color:#aaa;'>" + node_name + "</td>" +
+                    "  <td style='padding:6px 8px; text-align:center;'>" + status_html + "</td>" +
+                    "</tr>"
+                );
+            }
+
+            var all_present = (missing_count === 0);
+            $("#btn-create-feeds").toggle(!all_present);
+            $("#btn-run-processor").toggle(all_present);
+            $("#btn-reset-feeds").toggle(all_present);
+            $("#autogen-status").text("");
+        },
+
+        // Create any feeds that are missing
+        create_missing_feeds: function() {
+            var node_name = config.autogen.node_name();
+            var missing = config.autogen.get_feeds().filter(function(f) { return !f.feedid; });
+            var defaults = config.autogen_feed_defaults || { datatype: 1, engine: 5, options: { interval: 1800 } };
+            var created = 0, errors = 0;
+
+            $("#autogen-status").text("Creating feeds...").css("color", "#aaa");
+            $("#btn-create-feeds").prop("disabled", true);
+
+            missing.forEach(function(item) {
+                $.ajax({
+                    url: path + "feed/create.json",
+                    data: $.extend({}, defaults, {
+                        tag: node_name,
+                        name: item.name,
+                        options: JSON.stringify(defaults.options || { interval: 1800 }),
+                        apikey: apikey
+                    }),
+                    dataType: "json",
+                    async: false,
+                    success: function(res) { (res && res.feedid) ? created++ : errors++; },
+                    error: function() { errors++; }
+                });
+            });
+
+            // Refresh feed lookups
+            config.feeds = feed.list();
+            config.feedsbyname = {};
+            config.feedsbyid = {};
+            for (var z in config.feeds) config.feedsbyname[config.feeds[z].name] = config.feeds[z];
+            for (var z in config.feeds) config.feedsbyid[config.feeds[z].id]   = config.feeds[z];
+            config.autogen_feeds_by_tag_name = feed.by_tag_and_name(config.feeds);
+
+            // Populate config.app[key].value for the newly created autogen feeds
+            config.load();
+
+            config.autogen.render_feed_list();
+
+            var statusText = errors === 0
+                ? "Created " + created + " feed(s) successfully."
+                : "Created " + created + " feed(s), " + errors + " error(s).";
+            $("#autogen-status").text(statusText).css("color", errors === 0 ? "#5cb85c" : "#f0ad4e");
+            $("#btn-create-feeds").prop("disabled", false);
+        },
+
+        // Trigger the app post-processor via app/process
+        run_post_processor: function() {
+            $("#autogen-status").text("Starting post-processor...").css("color", "#aaa");
+            $("#btn-run-processor").prop("disabled", true);
+
+            $.ajax({
+                url: path + "app/process",
+                data: { id: config.id, apikey: apikey },
+                dataType: "json",
+                timeout: 120000,
+                success: function(result) {
+                    if (result && result.success) {
+                        $("#autogen-status").text("Post-processor completed successfully.").css("color", "#5cb85c");
+                    } else {
+                        var msg = (result && result.message) ? result.message : "Unknown response";
+                        $("#autogen-status").text("Post-processor: " + msg).css("color", "#f0ad4e");
+                    }
+                },
+                error: function(xhr) {
+                    $("#autogen-status").text("Post-processor failed: " + xhr.statusText).css("color", "#d9534f");
+                },
+                complete: function() { $("#btn-run-processor").prop("disabled", false); }
+            });
+        },
+
+        // Clear (reset) all auto-generated feeds after confirmation
+        reset_feeds: function() {
+            var autogen_feeds = config.autogen.get_feeds();
+            var count = autogen_feeds.filter(function(f) { return f.feedid; }).length;
+
+            if (!confirm("Are you sure you want to clear all " + count + " auto-generated feed(s)? This cannot be undone.")) return;
+
+            var feed_ids = autogen_feeds.filter(function(f) { return f.feedid; }).map(function(f) { return f.feedid; });
+
+            if (feed_ids.length === 0) {
+                $("#autogen-status").text("No matching feeds found to clear.").css("color", "#f0ad4e");
+                return;
+            }
+
+            $("#autogen-status").text("Clearing feeds...").css("color", "#aaa");
+            $("#btn-reset-feeds").prop("disabled", true);
+
+            var cleared = 0, errors = 0;
+
+            feed_ids.forEach(function(id) {
+                $.ajax({
+                    url: path + "feed/clear.json",
+                    data: { id: id, apikey: apikey },
+                    dataType: "json",
+                    async: false,
+                    success: function(res) { (res && res.success) ? cleared++ : errors++; },
+                    error: function() { errors++; }
+                });
+            });
+
+            // Refresh feed list
+            config.feeds = feed.list();
+            config.autogen_feeds_by_tag_name = feed.by_tag_and_name(config.feeds);
+            config.autogen.render_feed_list();
+
+            var statusText = errors === 0
+                ? "Cleared " + cleared + " feed(s) successfully."
+                : "Cleared " + cleared + " feed(s), " + errors + " error(s).";
+            $("#autogen-status").text(statusText).css("color", errors === 0 ? "#5cb85c" : "#f0ad4e");
+            $("#btn-reset-feeds").prop("disabled", false);
+        }
     }
 }
