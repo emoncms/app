@@ -644,9 +644,17 @@ var config = {
                 });
             });
 
-            // Refresh feed list
+            // Refresh feed lookups
             config.feeds = feed.list();
+            config.feedsbyname = {};
+            config.feedsbyid = {};
+            for (var z in config.feeds) config.feedsbyname[config.feeds[z].name] = config.feeds[z];
+            for (var z in config.feeds) config.feedsbyid[config.feeds[z].id]   = config.feeds[z];
             config.autogen_feeds_by_tag_name = feed.by_tag_and_name(config.feeds);
+
+            // Populate config.app[key].value for the newly created autogen feeds
+            config.load();
+
             config.autogen.render_feed_list();
 
             var statusText = errors === 0
