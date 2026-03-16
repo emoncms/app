@@ -568,10 +568,6 @@ function load_powergraph() {
     var grid_now = 0;
     var battery_soc_now = 0;
     
-    var total_solar_kwh = 0;
-    var total_use_kwh = 0;
-    var total_import_kwh = 0;
-    var total_export_kwh = 0;
     var total_solar_to_load_kwh = 0;
     var total_solar_to_grid_kwh = 0;
     var total_solar_to_battery_kwh = 0;
@@ -691,10 +687,6 @@ function load_powergraph() {
             }
 
             // Accumulate kWh totals
-            total_solar_kwh += solar * power_to_kwh;
-            total_use_kwh += use * power_to_kwh;
-            total_import_kwh += import_power * power_to_kwh;
-            total_export_kwh += export_power * power_to_kwh;
             total_solar_to_load_kwh += solar_to_load * power_to_kwh;
             total_solar_to_grid_kwh += solar_to_grid * power_to_kwh;
             total_solar_to_battery_kwh += solar_to_battery * power_to_kwh;
