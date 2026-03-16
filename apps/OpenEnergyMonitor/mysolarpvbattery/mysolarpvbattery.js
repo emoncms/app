@@ -167,6 +167,7 @@ var latest_start_time = 0;
 var panning = false;
 var bargraph_initialized = false;
 var bargraph_loaded = false;
+var kwhd_data = {};
 
 // ----------------------------------------------------------------------
 // check_history_feeds: return true if the right kWh flow feeds are available
@@ -940,106 +941,71 @@ function load_bargraph() {
     
     end = Math.ceil(end/intervalms)*intervalms;
     start = Math.floor(start/intervalms)*intervalms;
-    
-    // Load energy flow kWh data directly from post-processor feeds (only those relevant to the mode)
-    var grid_to_load_kwh_data     = config.app.grid_to_load_kwh.value     ? feed.getdata(config.app.grid_to_load_kwh.value,    start,end,"daily",0,1) : [];
-    var solar_to_load_kwh_data    = (mode.has_solar && config.app.solar_to_load_kwh.value)    ? feed.getdata(config.app.solar_to_load_kwh.value,   start,end,"daily",0,1) : [];
-    var solar_to_grid_kwh_data    = (mode.has_solar && config.app.solar_to_grid_kwh.value)    ? feed.getdata(config.app.solar_to_grid_kwh.value,   start,end,"daily",0,1) : [];
-    var solar_to_battery_kwh_data = (mode.has_solar && mode.has_battery && config.app.solar_to_battery_kwh.value) ? feed.getdata(config.app.solar_to_battery_kwh.value,start,end,"daily",0,1) : [];
-    var battery_to_load_kwh_data  = (mode.has_battery && config.app.battery_to_load_kwh.value) ? feed.getdata(config.app.battery_to_load_kwh.value, start,end,"daily",0,1) : [];
-    var battery_to_grid_kwh_data  = (mode.has_battery && config.app.battery_to_grid_kwh.value) ? feed.getdata(config.app.battery_to_grid_kwh.value, start,end,"daily",0,1) : [];
-    var grid_to_battery_kwh_data  = (mode.has_battery && config.app.grid_to_battery_kwh.value) ? feed.getdata(config.app.grid_to_battery_kwh.value, start,end,"daily",0,1) : [];
-    
-    // Per-day arrays for graph and hover access
-    solar_to_load_kwhd_data    = [];
-    solar_to_grid_kwhd_data    = [];
-    solar_to_battery_kwhd_data = [];
-    battery_to_load_kwhd_data  = [];
-    battery_to_grid_kwhd_data  = [];
-    grid_to_load_kwhd_data     = [];
-    grid_to_battery_kwhd_data  = [];
-    
-    // Use grid_to_load as the reference dataset length
-    var ref_data = grid_to_load_kwh_data.length ? grid_to_load_kwh_data : solar_to_load_kwh_data;
-    
-    if (ref_data.length) {
-        for (var day=0; day<ref_data.length; day++)
-        {
-            var time = ref_data[day][0];
-            
-            var solar_to_load    = kwhd_val(solar_to_load_kwh_data,    day);
-            var solar_to_grid    = kwhd_val(solar_to_grid_kwh_data,    day);
-            var solar_to_battery = kwhd_val(solar_to_battery_kwh_data, day);
-            var battery_to_load  = kwhd_val(battery_to_load_kwh_data,  day);
-            var battery_to_grid  = kwhd_val(battery_to_grid_kwh_data,  day);
-            var grid_to_load     = kwhd_val(grid_to_load_kwh_data,     day);
-            var grid_to_battery  = kwhd_val(grid_to_battery_kwh_data,  day);
 
-            // Only skip if the required feeds for this mode are null
-            var required_ok = (grid_to_load_kwh_data[day] && grid_to_load_kwh_data[day][1] !== null) ||
-                              (solar_to_load_kwh_data[day] && solar_to_load_kwh_data[day][1] !== null);
-            if (!required_ok) continue;
+    // Feed definitions: key -> { guard, feedkey }
+    // guard: condition under which this flow feed is applicable to the current mode
+    var flow_defs = [
+        { key: 'grid_to_load',     guard: true,                              },
+        { key: 'solar_to_load',    guard: mode.has_solar,                    },
+        { key: 'solar_to_grid',    guard: mode.has_solar,                    },
+        { key: 'solar_to_battery', guard: mode.has_solar && mode.has_battery },
+        { key: 'battery_to_load',  guard: mode.has_battery,                  },
+        { key: 'battery_to_grid',  guard: mode.has_battery,                  },
+        { key: 'grid_to_battery',  guard: mode.has_battery,                  }
+    ];
 
-            solar_to_load_kwhd_data.push([time, solar_to_load]);
-            solar_to_grid_kwhd_data.push([time, solar_to_grid]);
-            solar_to_battery_kwhd_data.push([time, solar_to_battery]);
-            battery_to_load_kwhd_data.push([time, battery_to_load]);
-            battery_to_grid_kwhd_data.push([time, battery_to_grid]);
-            grid_to_load_kwhd_data.push([time, grid_to_load]);
-            grid_to_battery_kwhd_data.push([time, grid_to_battery]);
-        }
-    }
-    
-    var series = [];
-
-    // Stack 1: onsite use breakdown (positive bars)
-    if (mode.has_solar) {
-        series.push({
-            data: solar_to_load_kwhd_data,
-            label: "Solar to Load",
-            color: "#dccc1f",
-            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.9, lineWidth: 0 },
-            stack: 1
-        });
-    }
-    if (mode.has_battery) {
-        series.push({
-            data: battery_to_load_kwhd_data,
-            label: "Battery to Load",
-            color: "#fbb450",
-            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.9, lineWidth: 0 },
-            stack: 1
-        });
-    }
-    series.push({
-        data: grid_to_load_kwhd_data,
-        label: "Grid to Load",
-        color: "#82cbfc",
-        bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.9, lineWidth: 0 },
-        stack: 1
+    // Load raw daily delta data for each applicable flow
+    var raw = {};
+    flow_defs.forEach(function(d) {
+        raw[d.key] = (d.guard && config.app[d.key+"_kwh"].value)
+            ? feed.getdata(config.app[d.key+"_kwh"].value, start, end, "daily", 0, 1)
+            : [];
     });
 
-    // Stack 0: exports (shown as negative bars below zero, split by source)
-    if (mode.has_solar && solar_to_grid_kwhd_data.length > 0) {
-        series.push({
-            data: invert_kwhd_data(solar_to_grid_kwhd_data),
-            label: "Solar to Grid",
-            color: "#dccc1f",
-            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.9, lineWidth: 0 },
-            stack: 0
+    // Per-day arrays for graph and hover access (global so bargraph_events can read them)
+    kwhd_data = {};
+    flow_defs.forEach(function(d) { kwhd_data[d.key] = []; });
+
+    // Use grid_to_load as the reference dataset, falling back to solar_to_load
+    var ref_data = raw['grid_to_load'].length ? raw['grid_to_load'] : raw['solar_to_load'];
+
+    for (var day = 0; day < ref_data.length; day++) {
+        var time = ref_data[day][0];
+
+        // Only skip days where both reference feeds are null
+        // var required_ok = (raw['grid_to_load'][day]  && raw['grid_to_load'][day][1]  !== null) ||
+        //                   (raw['solar_to_load'][day] && raw['solar_to_load'][day][1] !== null);
+        // if (!required_ok) continue;
+
+        flow_defs.forEach(function(d) {
+            kwhd_data[d.key].push([time, kwhd_val(raw[d.key], day)]);
         });
     }
-    if (mode.has_battery && battery_to_grid_kwhd_data.length > 0) {
-        series.push({
-            data: invert_kwhd_data(battery_to_grid_kwhd_data),
-            label: "Battery to Grid",
-            color: "#fbb450",
-            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.9, lineWidth: 0 },
-            stack: 0
-        });
-    }
+
+    // Series definitions: label, color, stack (1=positive/load, 0=negative/export)
+    var series_defs = [
+        // Stack 1: onsite use breakdown (positive bars above zero)
+        { key: 'solar_to_load',    label: "Solar to Load",    color: "#dccc1f", stack: 1, guard: mode.has_solar,    invert: false },
+        { key: 'battery_to_load',  label: "Battery to Load",  color: "#fbb450", stack: 1, guard: mode.has_battery,  invert: false },
+        { key: 'grid_to_load',     label: "Grid to Load",     color: "#82cbfc", stack: 1, guard: true,              invert: false },
+        // Stack 0: exports (negative bars below zero)
+        { key: 'solar_to_grid',    label: "Solar to Grid",    color: "#dccc1f", stack: 0, guard: mode.has_solar,    invert: true  },
+        { key: 'battery_to_grid',  label: "Battery to Grid",  color: "#fbb450", stack: 0, guard: mode.has_battery,  invert: true  }
+    ];
+
+    historyseries = [];
     
-    historyseries = series;
+    series_defs.forEach(function(def) {
+        var data = kwhd_data[def.key];
+        if (!def.guard || !data.length) return;
+        historyseries.push({
+            data:  def.invert ? invert_kwhd_data(data) : data,
+            label: def.label,
+            color: def.color,
+            bars:  { show: true, align: "center", barWidth: 0.8 * 3600 * 24 * 1000, fill: 0.9, lineWidth: 0 },
+            stack: def.stack
+        });
+    });
 }
 
 function invert_kwhd_data(data) {
@@ -1096,13 +1062,13 @@ function bargraph_events() {
             var mode = get_mode();
             
             // Read directly from the fine-grained flow feed data arrays (0 when not applicable in mode)
-            var solar_to_load    = kwhd_val(solar_to_load_kwhd_data,    z);
-            var solar_to_grid    = kwhd_val(solar_to_grid_kwhd_data,    z);
-            var solar_to_battery = kwhd_val(solar_to_battery_kwhd_data, z);
-            var battery_to_load  = kwhd_val(battery_to_load_kwhd_data,  z);
-            var battery_to_grid  = kwhd_val(battery_to_grid_kwhd_data,  z);
-            var grid_to_load     = kwhd_val(grid_to_load_kwhd_data,     z);
-            var grid_to_battery  = kwhd_val(grid_to_battery_kwhd_data,  z);
+            var solar_to_load    = kwhd_val(kwhd_data['solar_to_load'],    z);
+            var solar_to_grid    = kwhd_val(kwhd_data['solar_to_grid'],    z);
+            var solar_to_battery = kwhd_val(kwhd_data['solar_to_battery'], z);
+            var battery_to_load  = kwhd_val(kwhd_data['battery_to_load'],  z);
+            var battery_to_grid  = kwhd_val(kwhd_data['battery_to_grid'],  z);
+            var grid_to_load     = kwhd_val(kwhd_data['grid_to_load'],     z);
+            var grid_to_battery  = kwhd_val(kwhd_data['grid_to_battery'],  z);
 
             // Reconstruct aggregate totals
             var solar_kwh      = solar_to_load + solar_to_grid + solar_to_battery;
@@ -1140,7 +1106,7 @@ function bargraph_events() {
             history_start = view.start;
             history_end = view.end;
             // Use whichever per-day data array has data
-            var ref_day_data = grid_to_load_kwhd_data.length ? grid_to_load_kwhd_data : solar_to_load_kwhd_data;
+            var ref_day_data = kwhd_data['grid_to_load'].length ? kwhd_data['grid_to_load'] : kwhd_data['solar_to_load'];
             view.start = ref_day_data[z][0];
             view.end = view.start + 86400*1000;
 
