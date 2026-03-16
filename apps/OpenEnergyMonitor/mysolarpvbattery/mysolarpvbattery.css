@@ -1,0 +1,141 @@
+.statstable {
+    width: 100%;
+    border-spacing: 10px;
+    border-collapse: separate;
+}
+
+.statsbox {
+    width: 20%;
+    text-align: center;
+    vertical-align: middle;
+    background: #262626;
+}
+
+.statsbox-inner-unit {
+    color: #333;
+}
+
+.statsbox-padded {
+    padding: 10px;
+}
+
+.statsbox-inner-arrow {
+    color: #999;
+}
+
+.statsbox-title {
+    font-weight: bold;
+    font-size: 20px;
+    padding-bottom: 15px;
+}
+
+.statsbox-value {
+    font-weight: bold;
+    font-size: 36px;
+}
+
+.statsbox-units {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.statsbox-prc {
+    font-weight: normal;
+    font-size: 16px;
+}
+
+.statsbox-arrow-down {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.statsbox-arrow-down:after {
+    top: 100%;
+    left: 50%;
+    border: solid transparent;
+    content: " ";
+    width: 0; 
+    height: 0; 
+    position: absolute;
+    pointer-events: none;
+    border-top-color: #999;
+    border-width: 16px;
+    margin-left: -16px;
+}
+
+.statsbox-arrow-right {
+    position: relative;
+    margin-right: 16px;
+}
+
+.statsbox-arrow-right:after {
+  left: 100%;
+  top: 50%;
+  border: solid transparent;
+  content: " ";
+  width: 0; 
+  height: 0; 
+  position: absolute;
+  pointer-events: none;
+  border-left-color: #999;
+  border-width: 16px;
+  margin-top: -16px;
+}
+
+.statsbox-arrow-left {
+    position: relative;
+    margin-left: 16px;
+}
+
+.statsbox-arrow-left:before {
+  right: 100%;
+  top: 60%;
+  border: solid transparent;
+  content: " ";
+  width: 0; 
+  height: 0; 
+  position: absolute;
+  pointer-events: none;
+  border-right-color: #999;
+  border-width: 16px;
+  margin-top: -16px;
+}
+
+.tooltip-item {
+}
+
+.tooltip-title {
+  color: #aaa;
+  font-weight:bold;
+  font-size:12px;
+}
+
+.tooltip-value {
+  color: #fff;
+  font-weight:bold;
+  font-size:14px;
+}
+
+.tooltip-units {
+  color: #fff;
+  font-weight:bold;
+  font-size:10px;
+}
+
+/*Small devices (landscape phones, 576px and up)*/
+@media (max-width: 576px) {
+  #statsbox-generation { padding-bottom:18px; }
+  .statsbox-padded { padding: 4px; }
+  .statsbox-title { font-size: 14px; padding-bottom: 5px; } /* 20px */
+  .statsbox-value { font-size:28px; } /* 36px */
+  .statsbox-units { font-size:14px; } /* 16px */
+  .statsbox-prc { font-size: 14px; } /* 16px */
+  .statsbox-arrow-down:after {
+    border-width: 10px;
+    margin-left: -10px;
+  }
+  .statsbox-arrow-right:after {
+    border-width: 10px;
+    margin-top: -10px;
+  }
+}
