@@ -723,29 +723,16 @@ function load_powergraph() {
         }
     }
     
-    // Derived totals for display
-    var total_solar_direct_kwh = total_solar_to_load_kwh;
-    var total_solar_export_kwh = total_solar_to_grid_kwh;           // solar→grid only
-    var total_all_export_kwh = total_solar_to_grid_kwh + total_battery_to_grid_kwh; // total export for grid balance
-    var total_battery_charge_from_solar_kwh = total_solar_to_battery_kwh;
-    var total_import_direct_kwh = total_grid_to_load_kwh;
-    var total_import_for_battery_kwh = total_grid_to_battery_kwh;
-    var total_battery_discharge_kwh = total_battery_to_load_kwh;   // battery→load only
-    var total_grid_balance_kwh = total_import_kwh - total_all_export_kwh;
-    
+    // Update stats boxes with totals and ratios derived from the flow decomposition
     updateStats({
-        solar_kwh:        total_solar_kwh,
-        use_kwh:          total_use_kwh,
-        grid_balance_kwh: total_grid_balance_kwh,
-        solar_to_load:    total_solar_direct_kwh,
-        solar_to_grid:    total_solar_export_kwh,
-        solar_to_battery: total_battery_charge_from_solar_kwh,
-        battery_to_load:  total_battery_discharge_kwh,
+        solar_to_load:    total_solar_to_load_kwh,
+        solar_to_grid:    total_solar_to_grid_kwh,
+        solar_to_battery: total_solar_to_battery_kwh,
+        battery_to_load:  total_battery_to_load_kwh,
         battery_to_grid:  total_battery_to_grid_kwh,
-        grid_to_load:     total_import_direct_kwh,
-        grid_to_battery:  total_import_for_battery_kwh
+        grid_to_load:     total_grid_to_load_kwh,
+        grid_to_battery:  total_grid_to_battery_kwh
     }, mode);
-    
     
     var soc_change = 0; 
     if (mode.has_battery && config.app.battery_soc.value) {
@@ -786,10 +773,18 @@ function load_powergraph() {
 // mode: { has_solar, has_battery }
 // ----------------------------------------------------------------------
 function updateStats(d, mode) {
-    $(".total_solar_kwh").html(d.solar_kwh.toFixed(1));
-    $(".total_use_kwh").html(d.use_kwh.toFixed(1));
+
+    // Reconstruct aggregate totals
+    var solar_kwh      = d.solar_to_load + d.solar_to_grid + d.solar_to_battery;
+    var use_kwh        = d.solar_to_load + d.battery_to_load + d.grid_to_load;
+    var import_kwh     = d.grid_to_load + d.grid_to_battery;
+    var export_kwh     = d.solar_to_grid + d.battery_to_grid;
+    var grid_balance_kwh   = import_kwh - export_kwh;
+
+    $(".total_solar_kwh").html(solar_kwh.toFixed(1));
+    $(".total_use_kwh").html(use_kwh.toFixed(1));
     $(".total_import_direct_kwh").html(d.grid_to_load.toFixed(1));
-    $(".total_grid_balance_kwh").html(d.grid_balance_kwh.toFixed(1));
+    $(".total_grid_balance_kwh").html(grid_balance_kwh.toFixed(1));
     $(".use_from_import_prc").html((100 * d.grid_to_load / d.use_kwh).toFixed(0) + "%");
 
     if (mode.has_solar && d.solar_kwh) {
@@ -1001,19 +996,19 @@ function load_bargraph() {
         // Series definitions: label, color, stack (1=positive/load, 0=negative/export)
         var series_defs = [
             // Stack 1: onsite use breakdown (positive bars above zero)
-            { key: 'solar_to_load',    label: "Solar to Load",    color: "#dccc1f", stack: 1, guard: mode.has_solar,    invert: false },
-            { key: 'battery_to_load',  label: "Battery to Load",  color: "#fbb450", stack: 1, guard: mode.has_battery,  invert: false },
-            { key: 'grid_to_load',     label: "Grid to Load",     color: "#82cbfc", stack: 1, guard: true,              invert: false },
+            { key: 'solar_to_load',    label: "Solar to Load",    color: "#dccc1f", stack: 1, invert: false },
+            { key: 'battery_to_load',  label: "Battery to Load",  color: "#fbb450", stack: 1, invert: false },
+            { key: 'grid_to_load',     label: "Grid to Load",     color: "#82cbfc", stack: 1, invert: false },
             // Stack 0: exports (negative bars below zero)
-            { key: 'solar_to_grid',    label: "Solar to Grid",    color: "#dccc1f", stack: 0, guard: mode.has_solar,    invert: true  },
-            { key: 'battery_to_grid',  label: "Battery to Grid",  color: "#fbb450", stack: 0, guard: mode.has_battery,  invert: true  }
+            { key: 'solar_to_grid',    label: "Solar to Grid",    color: "#dccc1f", stack: 0, invert: true  },
+            { key: 'battery_to_grid',  label: "Battery to Grid",  color: "#fbb450", stack: 0, invert: true  }
         ];
 
         historyseries = [];
         
         series_defs.forEach(function(def) {
             var data = kwhd_data[def.key];
-            if (!def.guard || !data.length) return;
+            if (!data.length) return;
             historyseries.push({
                 data:  def.invert ? invert_kwhd_data(data) : data,
                 label: def.label,
@@ -1090,17 +1085,7 @@ function bargraph_events() {
             var grid_to_load     = kwhd_val(kwhd_data['grid_to_load'],     z);
             var grid_to_battery  = kwhd_val(kwhd_data['grid_to_battery'],  z);
 
-            // Reconstruct aggregate totals
-            var solar_kwh      = solar_to_load + solar_to_grid + solar_to_battery;
-            var use_kwh        = solar_to_load + battery_to_load + grid_to_load;
-            var import_kwh     = grid_to_load + grid_to_battery;
-            var export_kwh     = solar_to_grid + battery_to_grid;
-            var grid_balance   = import_kwh - export_kwh;
-
             updateStats({
-                solar_kwh:        solar_kwh,
-                use_kwh:          use_kwh,
-                grid_balance_kwh: grid_balance,
                 solar_to_load:    solar_to_load,
                 solar_to_grid:    solar_to_grid,
                 solar_to_battery: solar_to_battery,
