@@ -53,8 +53,8 @@ function mysolarpvbattery_app_controller($route,$app,$appconfig,$apikey)
         $process_conf = (object) array(
             "solar"               => (int) $app->config->solar,
             "use"                 => (int) $app->config->use,
-            "grid"                => (int) $app->config->grid,
-            "battery_power"       => (int) $app->config->battery_power,
+            "grid"                => (int) isset($app->config->grid) ? $app->config->grid : 0,
+            "battery_power"       => (int) isset($app->config->battery_power) ? $app->config->battery_power : 0,
 
             "solar_to_load_kwh"    => $feed->exists_tag_name($userid, $tag, "solar_to_load_kwh"),
             "solar_to_grid_kwh"    => $feed->exists_tag_name($userid, $tag, "solar_to_grid_kwh"),

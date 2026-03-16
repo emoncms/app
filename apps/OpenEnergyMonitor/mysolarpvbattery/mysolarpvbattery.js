@@ -90,13 +90,13 @@ config.check = function() {
 
     if (has_solar && has_battery) {
         // Need at least 3 of the 4 feeds
-        return ((use_ok?1:0) + (solar_ok?1:0) + (bat_ok?1:0) + (grid_ok?1:0)) >= 3;
+        return [use_ok, solar_ok, bat_ok, grid_ok].filter(Boolean).length >= 3;
     } else if (has_solar && !has_battery) {
         // Need at least 2 of (use, solar, grid)
-        return ((use_ok?1:0) + (solar_ok?1:0) + (grid_ok?1:0)) >= 2;
+        return [use_ok, solar_ok, grid_ok].filter(Boolean).length >= 2;
     } else if (!has_solar && has_battery) {
         // Need at least 2 of (use, battery_power, grid)
-        return ((use_ok?1:0) + (bat_ok?1:0) + (grid_ok?1:0)) >= 2;
+        return [use_ok, bat_ok, grid_ok].filter(Boolean).length >= 2;
     } else {
         // Consumption only: need at least 1 of (use, grid)
         return use_ok || grid_ok;
@@ -187,29 +187,7 @@ function check_history_feeds(mode) {
     return true;
 }
 
-// ----------------------------------------------------------------------
-// update_mode_ui: show/hide app-block sections based on the current mode
-// ----------------------------------------------------------------------
-function update_mode_ui(mode) {
-    if (mode.has_solar) {
-        $(".solar-section").show();
-    } else {
-        $(".solar-section").hide();
-    }
 
-    if (mode.has_battery) {
-        $(".battery-section").show();
-    } else {
-        $(".battery-section").hide();
-    }
-
-    // The stats table rows for solar export and battery flows
-    if (mode.has_solar) {
-        $("#statsbox-generation").show();
-    } else {
-        $("#statsbox-generation").hide();
-    }
-}
 
 var timeWindow = (3600000*24.0*30);
 var history_end = +new Date;
@@ -236,9 +214,6 @@ function init()
     // Apply hidden flags (also used by autogen feed list and config UI)
     config.ui_before_render();
 
-    // Show/hide UI sections based on mode
-    update_mode_ui(mode);
-
     render_autogen_feed_list();
 
     view.end = power_end;
@@ -264,12 +239,8 @@ function init()
 
     // Show history bargraph button only when all required kWh flow feeds are available for the current mode
     var has_history = check_history_feeds(mode);
-    if (has_history) {
-        init_bargraph();
-        $(".viewhistory").show();
-    } else {
-        $(".viewhistory").hide();
-    }
+    if (has_history) init_bargraph();
+    $(".viewhistory").toggle(has_history);
     
     // The buttons for these powergraph events are hidden when in historic mode 
     // The events are loaded at the start here and dont need to be unbinded and binded again.
@@ -435,24 +406,18 @@ function livefn()
     if (autoupdate) {
         var updatetime = feeds[ref_feed_id] ? feeds[ref_feed_id].time : now * 0.001;
 
-        if (mode.has_solar && config.app.solar.value) {
-            timeseries.append("solar", updatetime, solar_now);
-            timeseries.trim_start("solar", view.start*0.001);
-        }
-        timeseries.append("use", updatetime, use_now);
-        timeseries.trim_start("use", view.start*0.001);
-
-        if (mode.has_battery && config.app.battery_power.value) {
-            timeseries.append("battery_power", updatetime, battery_power_now);
-            timeseries.trim_start("battery_power", view.start*0.001);
-        }
-        timeseries.append("grid", updatetime, grid_now);
-        timeseries.trim_start("grid", view.start*0.001);
-        
-        if (mode.has_battery && config.app.battery_soc.value) {
-            timeseries.append("battery_soc", updatetime, battery_soc_now);
-            timeseries.trim_start("battery_soc", view.start*0.001);
-        }
+        var ts_updates = [
+            { key: "solar",         value: solar_now,         guard: mode.has_solar   && config.app.solar.value },
+            { key: "use",           value: use_now,           guard: true },
+            { key: "battery_power", value: battery_power_now, guard: mode.has_battery && config.app.battery_power.value },
+            { key: "grid",          value: grid_now,          guard: true },
+            { key: "battery_soc",   value: battery_soc_now,   guard: mode.has_battery && config.app.battery_soc.value }
+        ];
+        ts_updates.forEach(function(ts) {
+            if (!ts.guard) return;
+            timeseries.append(ts.key, updatetime, ts.value);
+            timeseries.trim_start(ts.key, view.start * 0.001);
+        });
        
         // Advance view
         view.end = now;
@@ -492,20 +457,16 @@ function livefn()
         $('#app-block').removeClass('in_kw');
     }
 
-    if (balance==0) {
-        $(".balance-label").html("PERFECT BALANCE");
-        $(".balance").html("--");
-    }
-    
-    if (balance>0) {
-        $(".balance-label").html("EXPORTING");
-        $(".balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+powerUnit+"</b></span>");
-    }
-    
-    if (balance<0) {
-        $(".balance-label").html("IMPORTING");
-        $(".balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+powerUnit+"</b></span>");
-    }
+    var balanceInfo = balance === 0
+        ? { label: "PERFECT BALANCE", value: "--",                                                                      color: null }
+        : balance > 0
+        ? { label: "EXPORTING",        value: Math.round(Math.abs(balance)) + powerUnit, color: "#2ed52e" }
+        : { label: "IMPORTING",        value: Math.round(Math.abs(balance)) + powerUnit, color: "#d52e2e" };
+    $(".balance-label").html(balanceInfo.label);
+    $(".balance").html(balanceInfo.color
+        ? "<span style='color:" + balanceInfo.color + "'><b>" + balanceInfo.value + "</b></span>"
+        : balanceInfo.value
+    );
     
     $(".generationnow").html(gen_now);
     $(".usenow").html(use_now);
@@ -766,37 +727,18 @@ function load_powergraph() {
     var total_battery_discharge_kwh = total_battery_to_load_kwh;   // battery→load only
     var total_grid_balance_kwh = total_import_kwh - total_all_export_kwh;
     
-    $(".total_solar_kwh").html(total_solar_kwh.toFixed(1));
-    $(".total_use_kwh").html(total_use_kwh.toFixed(1));
-    $(".total_import_direct_kwh").html(total_import_direct_kwh.toFixed(1));
-    $(".total_grid_balance_kwh").html(total_grid_balance_kwh.toFixed(1));
-    if (total_solar_kwh) {
-        $(".total_solar_direct_kwh").html(total_solar_direct_kwh.toFixed(1));
-        $(".total_solar_export_kwh").html(total_solar_export_kwh.toFixed(1));
-        $(".solar_export_prc").html((100*total_solar_export_kwh/total_solar_kwh).toFixed(0)+"%");
-        $(".solar_direct_prc").html((100*total_solar_direct_kwh/total_solar_kwh).toFixed(0)+"%");
-        $(".solar_to_battery_prc").html((100*total_battery_charge_from_solar_kwh/total_solar_kwh).toFixed(0)+"%");
-        
-        $(".use_from_solar_prc").html((100*total_solar_direct_kwh/total_use_kwh).toFixed(0)+"%");
-    }
-    $(".use_from_import_prc").html((100*total_import_direct_kwh/total_use_kwh).toFixed(0)+"%");
-    $(".total_battery_charge_from_solar_kwh").html(total_battery_charge_from_solar_kwh.toFixed(1));
-    $(".total_import_for_battery_kwh").html(total_import_for_battery_kwh.toFixed(1));
-    $(".total_battery_discharge_kwh").html(total_battery_discharge_kwh.toFixed(1));
-    $(".total_battery_to_grid_kwh").html(total_battery_to_grid_kwh.toFixed(1));
-    $(".use_from_battery_prc").html((100*total_battery_to_load_kwh/total_use_kwh).toFixed(0)+"%");
-    
-    if (total_import_for_battery_kwh>=0.1) {
-        $("#battery_import").show();
-    } else {
-        $("#battery_import").hide();
-    }
-    
-    if (total_battery_to_grid_kwh>=0.1) {
-        $("#battery_export").show();
-    } else {
-        $("#battery_export").hide();
-    }
+    updateStats({
+        solar_kwh:        total_solar_kwh,
+        use_kwh:          total_use_kwh,
+        grid_balance_kwh: total_grid_balance_kwh,
+        solar_to_load:    total_solar_direct_kwh,
+        solar_to_grid:    total_solar_export_kwh,
+        solar_to_battery: total_battery_charge_from_solar_kwh,
+        battery_to_load:  total_battery_discharge_kwh,
+        battery_to_grid:  total_battery_to_grid_kwh,
+        grid_to_load:     total_import_direct_kwh,
+        grid_to_battery:  total_import_for_battery_kwh
+    }, mode);
     
     
     var soc_change = 0; 
@@ -832,6 +774,54 @@ function load_powergraph() {
     if (show_battery_soc && mode.has_battery && config.app.battery_soc.value) powerseries.push({data:battery_soc_data, label: "SOC", yaxis:2, color: "#888"});
 }
 
+// ----------------------------------------------------------------------
+// updateStats: write all stats-box DOM values from a flat flow data object.
+// Keys match the flow naming convention used throughout the app.
+// mode: { has_solar, has_battery }
+// ----------------------------------------------------------------------
+function updateStats(d, mode) {
+    $(".total_solar_kwh").html(d.solar_kwh.toFixed(1));
+    $(".total_use_kwh").html(d.use_kwh.toFixed(1));
+    $(".total_import_direct_kwh").html(d.grid_to_load.toFixed(1));
+    $(".total_grid_balance_kwh").html(d.grid_balance_kwh.toFixed(1));
+    $(".use_from_import_prc").html((100 * d.grid_to_load / d.use_kwh).toFixed(0) + "%");
+
+    if (mode.has_solar && d.solar_kwh) {
+        $(".total_solar_direct_kwh").html(d.solar_to_load.toFixed(1));
+        $(".total_solar_export_kwh").html(d.solar_to_grid.toFixed(1));
+        $(".solar_export_prc").html((100 * d.solar_to_grid    / d.solar_kwh).toFixed(0) + "%");
+        $(".solar_direct_prc").html((100 * d.solar_to_load    / d.solar_kwh).toFixed(0) + "%");
+        $(".solar_to_battery_prc").html((100 * d.solar_to_battery / d.solar_kwh).toFixed(0) + "%");
+        $(".use_from_solar_prc").html((100 * d.solar_to_load    / d.use_kwh).toFixed(0) + "%");
+    }
+
+    if (mode.has_battery) {
+        $(".total_battery_charge_from_solar_kwh").html(d.solar_to_battery.toFixed(1));
+        $(".total_import_for_battery_kwh").html(d.grid_to_battery.toFixed(1));
+        $(".total_battery_discharge_kwh").html(d.battery_to_load.toFixed(1));
+        $(".total_battery_to_grid_kwh").html(d.battery_to_grid.toFixed(1));
+        $(".use_from_battery_prc").html((100 * d.battery_to_load / d.use_kwh).toFixed(0) + "%");
+        toggleBatteryFlowVisibility(d.grid_to_battery, d.battery_to_grid);
+    }
+}
+
+// ----------------------------------------------------------------------
+// toggleBatteryFlowVisibility: show/hide the battery import/export rows
+// based on whether the flow values are significant (>= 0.1 kWh).
+// ----------------------------------------------------------------------
+function toggleBatteryFlowVisibility(grid_to_battery, battery_to_grid) {
+    $("#battery_import").toggle(grid_to_battery >= 0.1);
+    $("#battery_export").toggle(battery_to_grid >= 0.1);
+}
+
+// ----------------------------------------------------------------------
+// kwhd_val: safely read a daily kWh value from a feed data array.
+// Returns 0 when the entry or its value is null/undefined.
+// ----------------------------------------------------------------------
+function kwhd_val(arr, idx) {
+    return (arr[idx] && arr[idx][1] !== null) ? arr[idx][1] : 0;
+}
+
 function draw_powergraph() {
 
     var options = {
@@ -853,10 +843,7 @@ function draw_powergraph() {
 // POWER GRAPH EVENTS
 // ------------------------------------------------------------------------------------------
 function powergraph_events() {
-    $(".visnav[time=1]").show();
-    $(".visnav[time=3]").show();
-    $(".visnav[time=6]").show();
-    $(".visnav[time=24]").show();
+    $(".visnav[time=1], .visnav[time=3], .visnav[time=6], .visnav[time=24]").show();
             
     $('#placeholder').unbind("plotclick");
     $('#placeholder').unbind("plothover");
@@ -980,13 +967,13 @@ function load_bargraph() {
         {
             var time = ref_data[day][0];
             
-            var solar_to_load    = (solar_to_load_kwh_data[day]    && solar_to_load_kwh_data[day][1]    !== null) ? solar_to_load_kwh_data[day][1]    : 0;
-            var solar_to_grid    = (solar_to_grid_kwh_data[day]    && solar_to_grid_kwh_data[day][1]    !== null) ? solar_to_grid_kwh_data[day][1]    : 0;
-            var solar_to_battery = (solar_to_battery_kwh_data[day] && solar_to_battery_kwh_data[day][1] !== null) ? solar_to_battery_kwh_data[day][1] : 0;
-            var battery_to_load  = (battery_to_load_kwh_data[day]  && battery_to_load_kwh_data[day][1]  !== null) ? battery_to_load_kwh_data[day][1]  : 0;
-            var battery_to_grid  = (battery_to_grid_kwh_data[day]  && battery_to_grid_kwh_data[day][1]  !== null) ? battery_to_grid_kwh_data[day][1]  : 0;
-            var grid_to_load     = (grid_to_load_kwh_data[day]     && grid_to_load_kwh_data[day][1]     !== null) ? grid_to_load_kwh_data[day][1]     : 0;
-            var grid_to_battery  = (grid_to_battery_kwh_data[day]  && grid_to_battery_kwh_data[day][1]  !== null) ? grid_to_battery_kwh_data[day][1]  : 0;
+            var solar_to_load    = kwhd_val(solar_to_load_kwh_data,    day);
+            var solar_to_grid    = kwhd_val(solar_to_grid_kwh_data,    day);
+            var solar_to_battery = kwhd_val(solar_to_battery_kwh_data, day);
+            var battery_to_load  = kwhd_val(battery_to_load_kwh_data,  day);
+            var battery_to_grid  = kwhd_val(battery_to_grid_kwh_data,  day);
+            var grid_to_load     = kwhd_val(grid_to_load_kwh_data,     day);
+            var grid_to_battery  = kwhd_val(grid_to_battery_kwh_data,  day);
 
             // Only skip if the required feeds for this mode are null
             var required_ok = (grid_to_load_kwh_data[day] && grid_to_load_kwh_data[day][1] !== null) ||
@@ -1083,10 +1070,7 @@ function draw_bargraph()
 // - click through to power graph
 // ------------------------------------------------------------------------------------------
 function bargraph_events() {
-    $(".visnav[time=1]").hide();
-    $(".visnav[time=3]").hide();
-    $(".visnav[time=6]").hide();
-    $(".visnav[time=24]").hide();
+    $(".visnav[time=1], .visnav[time=3], .visnav[time=6], .visnav[time=24]").hide();
             
     $('#placeholder').unbind("plotclick");
     $('#placeholder').unbind("plothover");
@@ -1102,54 +1086,33 @@ function bargraph_events() {
             var mode = get_mode();
             
             // Read directly from the fine-grained flow feed data arrays (0 when not applicable in mode)
-            var total_solar_to_load    = (solar_to_load_kwhd_data[z]    && solar_to_load_kwhd_data[z][1]    !== null) ? solar_to_load_kwhd_data[z][1]    : 0;
-            var total_solar_to_grid    = (solar_to_grid_kwhd_data[z]    && solar_to_grid_kwhd_data[z][1]    !== null) ? solar_to_grid_kwhd_data[z][1]    : 0;
-            var total_solar_to_battery = (solar_to_battery_kwhd_data[z] && solar_to_battery_kwhd_data[z][1] !== null) ? solar_to_battery_kwhd_data[z][1] : 0;
-            var total_battery_to_load  = (battery_to_load_kwhd_data[z]  && battery_to_load_kwhd_data[z][1]  !== null) ? battery_to_load_kwhd_data[z][1]  : 0;
-            var total_battery_to_grid  = (battery_to_grid_kwhd_data[z]  && battery_to_grid_kwhd_data[z][1]  !== null) ? battery_to_grid_kwhd_data[z][1]  : 0;
-            var total_grid_to_load     = (grid_to_load_kwhd_data[z]     && grid_to_load_kwhd_data[z][1]     !== null) ? grid_to_load_kwhd_data[z][1]     : 0;
-            var total_grid_to_battery  = (grid_to_battery_kwhd_data[z]  && grid_to_battery_kwhd_data[z][1]  !== null) ? grid_to_battery_kwhd_data[z][1]  : 0;
+            var solar_to_load    = kwhd_val(solar_to_load_kwhd_data,    z);
+            var solar_to_grid    = kwhd_val(solar_to_grid_kwhd_data,    z);
+            var solar_to_battery = kwhd_val(solar_to_battery_kwhd_data, z);
+            var battery_to_load  = kwhd_val(battery_to_load_kwhd_data,  z);
+            var battery_to_grid  = kwhd_val(battery_to_grid_kwhd_data,  z);
+            var grid_to_load     = kwhd_val(grid_to_load_kwhd_data,     z);
+            var grid_to_battery  = kwhd_val(grid_to_battery_kwhd_data,  z);
 
             // Reconstruct aggregate totals
-            var total_solar_kwh  = total_solar_to_load + total_solar_to_grid + total_solar_to_battery;
-            var total_use_kwh    = total_solar_to_load + total_battery_to_load + total_grid_to_load;
-            var total_import_kwh = total_grid_to_load + total_grid_to_battery;
-            var total_export_kwh = total_solar_to_grid + total_battery_to_grid;
-            var total_grid_balance_kwh = total_import_kwh - total_export_kwh;
+            var solar_kwh      = solar_to_load + solar_to_grid + solar_to_battery;
+            var use_kwh        = solar_to_load + battery_to_load + grid_to_load;
+            var import_kwh     = grid_to_load + grid_to_battery;
+            var export_kwh     = solar_to_grid + battery_to_grid;
+            var grid_balance   = import_kwh - export_kwh;
 
-            $(".total_solar_kwh").html(total_solar_kwh.toFixed(1));
-            $(".total_use_kwh").html(total_use_kwh.toFixed(1));
-            $(".total_import_direct_kwh").html(total_grid_to_load.toFixed(1));
-            $(".total_grid_balance_kwh").html(total_grid_balance_kwh.toFixed(1));
-            if (mode.has_solar && total_solar_kwh) {
-                $(".total_solar_direct_kwh").html(total_solar_to_load.toFixed(1));
-                $(".total_solar_export_kwh").html(total_solar_to_grid.toFixed(1));
-                $(".solar_export_prc").html((100*total_solar_to_grid/total_solar_kwh).toFixed(0)+"%");
-                $(".solar_direct_prc").html((100*total_solar_to_load/total_solar_kwh).toFixed(0)+"%");
-                $(".solar_to_battery_prc").html((100*total_solar_to_battery/total_solar_kwh).toFixed(0)+"%");
-                $(".use_from_solar_prc").html((100*total_solar_to_load/total_use_kwh).toFixed(0)+"%");
-            }
-            $(".use_from_import_prc").html((100*total_grid_to_load/total_use_kwh).toFixed(0)+"%");
-            if (mode.has_battery) {
-                $(".total_battery_charge_from_solar_kwh").html(total_solar_to_battery.toFixed(1));
-                $(".total_import_for_battery_kwh").html(total_grid_to_battery.toFixed(1));
-                $(".total_battery_discharge_kwh").html(total_battery_to_load.toFixed(1));
-                $(".total_battery_to_grid_kwh").html(total_battery_to_grid.toFixed(1));
-                $(".use_from_battery_prc").html((100*total_battery_to_load/total_use_kwh).toFixed(0)+"%");
-            
-                if (total_grid_to_battery>=0.1) {
-                    $("#battery_import").show();
-                } else {
-                    $("#battery_import").hide();
-                }
-            
-                if (total_battery_to_grid>=0.1) {
-                    $("#battery_export").show();
-                } else {
-                    $("#battery_export").hide();
-                }
-            }
-            
+            updateStats({
+                solar_kwh:        solar_kwh,
+                use_kwh:          use_kwh,
+                grid_balance_kwh: grid_balance,
+                solar_to_load:    solar_to_load,
+                solar_to_grid:    solar_to_grid,
+                solar_to_battery: solar_to_battery,
+                battery_to_load:  battery_to_load,
+                battery_to_grid:  battery_to_grid,
+                grid_to_load:     grid_to_load,
+                grid_to_battery:  grid_to_battery
+            }, mode);
             $(".battery_soc_change").html("---");
 
         } else {
