@@ -119,6 +119,9 @@ var config = {
         $("body").css('background-color','#222');
         $("#footer").css('background-color','#181818');
         $("#footer").css('color','#999');
+
+        // Allow apps to update hidden flags (or other config.app properties) before rendering
+        if (typeof config.ui_before_render === 'function') config.ui_before_render();
         
         // Remove old config items that are no longer used/described in new config definition
         if (config.db.constructor===Array) config.db = {};
@@ -150,6 +153,9 @@ var config = {
 
             // Skip any entries that are listed as autogenerate
             if (config.app[z].autogenerate!=undefined && config.app[z].autogenerate) continue;
+
+            // Skip items that have been hidden by the app (e.g. feeds not relevant to the current mode)
+            if (config.app[z].hidden === true) continue;
 
             out += "<div class='app-config-box' key='"+z+"'>";
             if (config.app[z].type=="feed") {
@@ -333,6 +339,9 @@ var config = {
             
             config.db[key] = value;
             config.set();
+
+            // Allow apps to react to a value change (e.g. re-render UI when a mode checkbox changes)
+            if (typeof config.ui_after_value_change === 'function') config.ui_after_value_change(key);
         });
 
         $(".app-config-name").unbind("change");
@@ -569,6 +578,9 @@ var config = {
 
             for (var key in config.app) {
                 if (config.app.hasOwnProperty(key) && config.app[key].autogenerate) {
+                    // Skip hidden feeds (e.g. battery feeds when has_battery is off)
+                    if (config.app[key].hidden === true) continue;
+
                     var feed_name = config.app[key].autoname || key;
                     var feedid = false;
 

@@ -16,7 +16,7 @@ function mysolarpvbattery_app_controller($route,$app,$appconfig,$apikey)
 {
 
     global $path, $session, $settings, $mysqli, $redis, $user, $linked_modules_dir;
-    $v = 2;
+    $v = 3;
 
     // ----------------------------------------------------
     // Main app view route
