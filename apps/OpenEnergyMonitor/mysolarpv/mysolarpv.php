@@ -596,20 +596,21 @@ function draw_powergraph() {
     
     // Consider loading totals from kWh feeds if available
     // Need to avoid too many requests here, currently updating every 10s
-    /*
-    console.log("-----");
-    
+
     skwh = get_kwh_between_two_timestamps('solar_kwh',view.start*0.001,view.end*0.001);
-    console.log(skwh);
-    
+
     ukwh = get_kwh_between_two_timestamps('use_kwh',view.start*0.001,view.end*0.001);
-    console.log(ukwh);
     
     ikwh = get_kwh_between_two_timestamps('import_kwh',view.start*0.001,view.end*0.001);
-    console.log(ikwh);
-    
-    console.log((ukwh-ikwh)/skwh)
-    */
+	dkwh = ukwh - ikwh
+	ekwh = skwh - dkwh
+
+	if (t>3600*24*30) { // over 30 days
+		//console.log("Using kWh feeds")
+		if (typeof skwh !== 'undefined') total_solar_kwh = skwh
+		if (typeof ukwh !== 'undefined') total_use_kwh = ukwh
+		if (typeof dkwh !== 'undefined') total_use_direct_kwh = dkwh
+    }
     
     if (total_solar_kwh < 1) {
     	$(".total_solar_kwh").html(total_solar_kwh.toFixed(2));
