@@ -510,8 +510,13 @@ function draw(load) {
         draw_powergraph();
     }
     if (viewmode=="bargraph") {
-        if (load) load_bargraph();
-        draw_bargraph();
+        if (load) {
+            // draw called from load
+            load_bargraph();
+        } else {
+            draw_bargraph();
+        }
+        
     }
 }
 
@@ -954,58 +959,73 @@ function load_bargraph() {
         { key: 'grid_to_battery',  guard: mode.has_battery,                  }
     ];
 
-    // Load raw daily delta data for each applicable flow
-    var raw = {};
+    var keys_to_load = [];
+    var feedids = [];
     flow_defs.forEach(function(d) {
-        raw[d.key] = (d.guard && config.app[d.key+"_kwh"].value)
-            ? feed.getdata(config.app[d.key+"_kwh"].value, start, end, "daily", 0, 1)
-            : [];
+        if (d.guard && config.app[d.key + "_kwh"] && config.app[d.key + "_kwh"].value) {
+            keys_to_load.push(d.key);
+            feedids.push(config.app[d.key + "_kwh"].value);
+        }
     });
-
-    // Per-day arrays for graph and hover access (global so bargraph_events can read them)
-    kwhd_data = {};
-    flow_defs.forEach(function(d) { kwhd_data[d.key] = []; });
-
-    // Use grid_to_load as the reference dataset, falling back to solar_to_load
-    var ref_data = raw['grid_to_load'].length ? raw['grid_to_load'] : raw['solar_to_load'];
-
-    for (var day = 0; day < ref_data.length; day++) {
-        var time = ref_data[day][0];
-
-        // Only skip days where both reference feeds are null
-        // var required_ok = (raw['grid_to_load'][day]  && raw['grid_to_load'][day][1]  !== null) ||
-        //                   (raw['solar_to_load'][day] && raw['solar_to_load'][day][1] !== null);
-        // if (!required_ok) continue;
-
-        flow_defs.forEach(function(d) {
-            kwhd_data[d.key].push([time, kwhd_val(raw[d.key], day)]);
-        });
-    }
-
-    // Series definitions: label, color, stack (1=positive/load, 0=negative/export)
-    var series_defs = [
-        // Stack 1: onsite use breakdown (positive bars above zero)
-        { key: 'solar_to_load',    label: "Solar to Load",    color: "#dccc1f", stack: 1, guard: mode.has_solar,    invert: false },
-        { key: 'battery_to_load',  label: "Battery to Load",  color: "#fbb450", stack: 1, guard: mode.has_battery,  invert: false },
-        { key: 'grid_to_load',     label: "Grid to Load",     color: "#82cbfc", stack: 1, guard: true,              invert: false },
-        // Stack 0: exports (negative bars below zero)
-        { key: 'solar_to_grid',    label: "Solar to Grid",    color: "#dccc1f", stack: 0, guard: mode.has_solar,    invert: true  },
-        { key: 'battery_to_grid',  label: "Battery to Grid",  color: "#fbb450", stack: 0, guard: mode.has_battery,  invert: true  }
-    ];
-
-    historyseries = [];
     
-    series_defs.forEach(function(def) {
-        var data = kwhd_data[def.key];
-        if (!def.guard || !data.length) return;
-        historyseries.push({
-            data:  def.invert ? invert_kwhd_data(data) : data,
-            label: def.label,
-            color: def.color,
-            bars:  { show: true, align: "center", barWidth: 0.8 * 3600 * 24 * 1000, fill: 0.9, lineWidth: 0 },
-            stack: def.stack
+    // Load raw daily delta data for each applicable flow
+    feed.getdata(feedids, start, end, "daily", 0, 1, 0, 0, function (all_data) {
+
+        var raw = {};
+        var idx = 0;
+        keys_to_load.forEach(function(key) {
+            raw[key] = all_data[idx].data;
+            idx++;
         });
-    });
+
+        // Per-day arrays for graph and hover access (global so bargraph_events can read them)
+        kwhd_data = {};
+        flow_defs.forEach(function(d) { kwhd_data[d.key] = []; });
+
+        // Use grid_to_load as the reference dataset, falling back to solar_to_load
+        var ref_data = raw['grid_to_load'].length ? raw['grid_to_load'] : raw['solar_to_load'];
+
+        for (var day = 0; day < ref_data.length; day++) {
+            var time = ref_data[day][0];
+
+            // Only skip days where both reference feeds are null
+            // var required_ok = (raw['grid_to_load'][day]  && raw['grid_to_load'][day][1]  !== null) ||
+            //                   (raw['solar_to_load'][day] && raw['solar_to_load'][day][1] !== null);
+            // if (!required_ok) continue;
+
+            flow_defs.forEach(function(d) {
+                kwhd_data[d.key].push([time, kwhd_val(raw[d.key], day)]);
+            });
+        }
+
+        // Series definitions: label, color, stack (1=positive/load, 0=negative/export)
+        var series_defs = [
+            // Stack 1: onsite use breakdown (positive bars above zero)
+            { key: 'solar_to_load',    label: "Solar to Load",    color: "#dccc1f", stack: 1, guard: mode.has_solar,    invert: false },
+            { key: 'battery_to_load',  label: "Battery to Load",  color: "#fbb450", stack: 1, guard: mode.has_battery,  invert: false },
+            { key: 'grid_to_load',     label: "Grid to Load",     color: "#82cbfc", stack: 1, guard: true,              invert: false },
+            // Stack 0: exports (negative bars below zero)
+            { key: 'solar_to_grid',    label: "Solar to Grid",    color: "#dccc1f", stack: 0, guard: mode.has_solar,    invert: true  },
+            { key: 'battery_to_grid',  label: "Battery to Grid",  color: "#fbb450", stack: 0, guard: mode.has_battery,  invert: true  }
+        ];
+
+        historyseries = [];
+        
+        series_defs.forEach(function(def) {
+            var data = kwhd_data[def.key];
+            if (!def.guard || !data.length) return;
+            historyseries.push({
+                data:  def.invert ? invert_kwhd_data(data) : data,
+                label: def.label,
+                color: def.color,
+                bars:  { show: true, align: "center", barWidth: 0.8 * 3600 * 24 * 1000, fill: 0.9, lineWidth: 0 },
+                stack: def.stack
+            });
+        });
+
+        draw_bargraph();
+
+    }, false);
 }
 
 function invert_kwhd_data(data) {
