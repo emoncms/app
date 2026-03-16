@@ -1019,25 +1019,35 @@ function load_bargraph() {
         stack: 1
     });
 
-    // Stack 0: exports (shown as negative bars below zero)
-    var export_kwhd_data = [];
-    for (var i = 0; i < solar_to_grid_kwhd_data.length; i++) {
-        var export_val = 0;
-        if (mode.has_solar)   export_val += solar_to_grid_kwhd_data[i][1];
-        if (mode.has_battery) export_val += battery_to_grid_kwhd_data[i][1];
-        export_kwhd_data.push([solar_to_grid_kwhd_data[i][0], -1 * export_val]);
-    }
-    if (export_kwhd_data.length > 0) {
+    // Stack 0: exports (shown as negative bars below zero, split by source)
+    if (mode.has_solar && solar_to_grid_kwhd_data.length > 0) {
         series.push({
-            data: export_kwhd_data,
-            label: "Total Export",
+            data: invert_kwhd_data(solar_to_grid_kwhd_data),
+            label: "Solar to Grid",
             color: "#dccc1f",
+            bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.9, lineWidth: 0 },
+            stack: 0
+        });
+    }
+    if (mode.has_battery && battery_to_grid_kwhd_data.length > 0) {
+        series.push({
+            data: invert_kwhd_data(battery_to_grid_kwhd_data),
+            label: "Battery to Grid",
+            color: "#fbb450",
             bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.9, lineWidth: 0 },
             stack: 0
         });
     }
     
     historyseries = series;
+}
+
+function invert_kwhd_data(data) {
+    var neg_data = [];
+    for (var i = 0; i < data.length; i++) {
+        neg_data.push([data[i][0], -1 * data[i][1]]);
+    }
+    return neg_data;
 }
 
 // ------------------------------------------------------------------------------------------
