@@ -51,8 +51,8 @@ function mysolarpvbattery_app_controller($route,$app,$appconfig,$apikey)
         $tag = "app_mysolarpvbattery_".$app->id;
         
         $process_conf = (object) array(
-            "solar"               => (int) $app->config->solar,
-            "use"                 => (int) $app->config->use,
+            "solar"               => (int) isset($app->config->solar) ? $app->config->solar : 0,
+            "use"                 => (int) isset($app->config->use) ? $app->config->use : 0,
             "grid"                => (int) isset($app->config->grid) ? $app->config->grid : 0,
             "battery_power"       => (int) isset($app->config->battery_power) ? $app->config->battery_power : 0,
 
