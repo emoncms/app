@@ -39,21 +39,19 @@
         </div>
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light"><span class="balance-label">-</span></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-success">
-                <span class="balance"></span>
-            </h2>
+            <h2 class="power-value display-md-3 display-lg-2 my-0 text-success"><span class="balance"></span></h2>
         </div>
         <div class="text-xs-center solar-section">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('SOLAR') ?></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-warning"><span class="solarnow"></span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center battery-section">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="battery_charge_discharge_title"><?php echo tr('BATTERY POWER') ?></span></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="battery_charge_discharge">-</span><span class="power-unit"></span></h2>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="battery_now_title"><?php echo tr('BATTERY POWER') ?></span></h5>
+            <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="battery_now">-</span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center battery-section">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="discharge_time_left_title"><?php echo tr('BATTERY TIME LEFT') ?></span></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="discharge_time_left">-</span></h2>
+            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="battery_time_left_title"><?php echo tr('BATTERY TIME LEFT') ?></span></h5>
+            <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="battery_time_left">-</span></h2>
         </div>
         <div class="text-xs-center battery-section">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('STATE OF CHARGE') ?></h5>

@@ -21,7 +21,7 @@ config.app = {
     // == System configuration ==
     // Select which metering points are present on the system.
     // When has_solar=false, the solar feed is hidden and solar power is treated as 0.
-    // When has_battery=false, the battery_power feed is hidden and battery power is treated as 0.
+    // When has_battery=false, the battery feed is hidden and battery power is treated as 0.
     // In each mode, conservation of energy allows one feed to be derived from the others:
     //   Full (solar+battery): GRID=USE-SOLAR-BATTERY, USE=GRID+SOLAR+BATTERY, SOLAR=USE-GRID-BATTERY, BATTERY=USE-GRID-SOLAR
     //   Solar only:           GRID=USE-SOLAR,         USE=GRID+SOLAR,         SOLAR=USE-GRID
@@ -36,7 +36,7 @@ config.app = {
     // Any single missing feed will be derived from the other three (or two in solar/battery-only modes).
     "use":{"optional":true, "type":"feed", "autoname":"use", "description":"House or building use in watts"},
     "solar":{"optional":true, "type":"feed", "autoname":"solar", "description":"Solar generation in watts (only shown when has_solar is enabled)"},
-    "battery_power":{"optional":true, "type":"feed", "autoname":"battery_power", "description":"Battery power in watts, positive for discharge, negative for charge (only shown when has_battery is enabled)"},
+    "battery":{"optional":true, "type":"feed", "autoname":"battery_power", "description":"Battery power in watts, positive for discharge, negative for charge (only shown when has_battery is enabled)"},
     "grid":{"optional":true, "type":"feed", "autoname":"grid", "description":"Grid power in watts (positive for import, negative for export)"},
 
     // Battery state of charge feed (optional)
@@ -60,9 +60,9 @@ config.app = {
 // Custom check: enforce the correct minimum set of feeds based on mode.
 // This overrides the appconf.js default check() which just tests optional flags.
 // Rules:
-//   has_solar + has_battery: at least 3 of (use, solar, battery_power, grid) must be configured
+//   has_solar + has_battery: at least 3 of (use, solar, battery, grid) must be configured
 //   has_solar only:          at least 2 of (use, solar, grid) must be configured
-//   has_battery only:        at least 2 of (use, battery_power, grid) must be configured
+//   has_battery only:        at least 2 of (use, battery, grid) must be configured
 //   consumption only:        at least 1 of (use, grid) must be configured
 // ----------------------------------------------------------------------
 config.check = function() {
@@ -84,7 +84,7 @@ config.check = function() {
 
     var use_ok   = feed_resolved("use");
     var solar_ok = feed_resolved("solar");
-    var bat_ok   = feed_resolved("battery_power");
+    var bat_ok   = feed_resolved("battery");
     var grid_ok  = feed_resolved("grid");
 
     if (has_solar && has_battery) {
@@ -94,7 +94,7 @@ config.check = function() {
         // Need at least 2 of (use, solar, grid)
         return [use_ok, solar_ok, grid_ok].filter(Boolean).length >= 2;
     } else if (!has_solar && has_battery) {
-        // Need at least 2 of (use, battery_power, grid)
+        // Need at least 2 of (use, battery, grid)
         return [use_ok, bat_ok, grid_ok].filter(Boolean).length >= 2;
     } else {
         // Consumption only: need at least 1 of (use, grid)
@@ -130,7 +130,7 @@ config.ui_before_render = function() {
     // solar feed: only relevant if has_solar is on
     config.app.solar.hidden         = !mode.has_solar;
     // battery feeds: only relevant if has_battery is on
-    config.app.battery_power.hidden = !mode.has_battery;
+    config.app.battery.hidden = !mode.has_battery;
     config.app.battery_soc.hidden   = !mode.has_battery;
     config.app.battery_capacity_kwh.hidden = !mode.has_battery;
     // autogenerate feeds: hide battery-specific ones if no battery, solar-specific if no solar
@@ -172,10 +172,12 @@ var kwhd_data = {};
 // == Flow decomposition control variables ==
 
 // Which feeds are actually available
-var use_available = false;
-var solar_available = false;
-var battery_power_available = false;
-var grid_available = false;
+var available = {
+    use: false,
+    solar: false,
+    battery: false,
+    grid: false
+};
 
 // which feed to derive (if any) based on the config; false = no derivation needed
 var derive = false; 
@@ -238,7 +240,7 @@ function init()
     view.start = power_start;
 
     // Load metadata from whatever feeds are actually configured to find data end time
-    var feeds_to_check = ["use", "solar", "battery_power", "grid"];
+    var feeds_to_check = ["use", "solar", "battery", "grid"];
     for (var i = 0; i < feeds_to_check.length; i++) {
         var key = feeds_to_check[i];
         if (config.app[key].value) {
@@ -331,54 +333,54 @@ function show()
 
 // -------------------------------------------------------------------------------------------------------
 // Flow decomposition
-// Conservation of energy: use = solar + battery_power + grid
-// battery_power: positive = discharge, negative = charge
+// Conservation of energy: use = solar + battery + grid
+// battery: positive = discharge, negative = charge
 // grid: positive = import, negative = export
 // -------------------------------------------------------------------------------------------------------
 
 function flow_available() {
 
-    // 4 feeds: solar, use, battery_power, grid
+    // 4 feeds: solar, use, battery, grid
     // 3 feeds
-    // 2 feeds (need at least use or grid, second can be solar or battery_power)
+    // 2 feeds (need at least use or grid, second can be solar or battery)
     // 1 feed (use or grid)
 
     // Availability
-    if (config.app.has_solar.value && config.app.solar.value) solar_available = true;
-    if (config.app.use.value) use_available = true;
-    if (config.app.has_battery.value && config.app.battery_power.value) battery_power_available = true;
-    if (config.app.grid.value) grid_available = true;
+    if (config.app.has_solar.value && config.app.solar.value) available.solar = true;
+    if (config.app.use.value) available.use = true;
+    if (config.app.has_battery.value && config.app.battery.value) available.battery = true;
+    if (config.app.grid.value) available.grid = true;
 
     var number_of_feeds = 0;
-    if (solar_available) number_of_feeds++;
-    if (use_available) number_of_feeds++;
-    if (battery_power_available) number_of_feeds++;
-    if (grid_available) number_of_feeds++;
+    if (available.solar) number_of_feeds++;
+    if (available.use) number_of_feeds++;
+    if (available.battery) number_of_feeds++;
+    if (available.grid) number_of_feeds++;
 
     // 3 Feeds: Just find the one that is missing
     if (number_of_feeds === 3) {
-        if (!grid_available) derive = "grid";
-        else if (!use_available) derive = "use";
-        else if (!solar_available) derive = "solar";
-        else if (!battery_power_available) derive = "battery_power";
+        if (!available.grid) derive = "grid";
+        else if (!available.use) derive = "use";
+        else if (!available.solar) derive = "solar";
+        else if (!available.battery) derive = "battery";
     }
 
     // 2 Feeds: Specific logic based on your priority rules
     else if (number_of_feeds === 2) {
 
-        if (solar_available && battery_power_available) {
+        if (available.solar && available.battery) {
             // We cant derive in this scenario
         }
         
-        if (solar_available) {
-            if (use_available) derive = "grid";
-            else if (grid_available) derive = "use";
+        if (available.solar) {
+            if (available.use) derive = "grid";
+            else if (available.grid) derive = "use";
             assume_zero_battery = true; // if battery feed is missing, assume no battery power (solar-only mode)
         }
 
-        if (battery_power_available) {
-            if (use_available) derive = "grid";
-            else if (grid_available) derive = "use";
+        if (available.battery) {
+            if (available.use) derive = "grid";
+            else if (available.grid) derive = "use";
             assume_zero_solar = true; // if solar feed is missing, assume no solar generation (battery-only mode)
         }
     }
@@ -392,20 +394,20 @@ function flow_available() {
 function flow_derive_missing(input) {
     var solar = input.solar;
     var use = input.use;
-    var battery_power = input.battery_power;
+    var battery = input.battery;
     var grid = input.grid;
 
     if (assume_zero_solar) solar = 0;
-    if (assume_zero_battery) battery_power = 0;
+    if (assume_zero_battery) battery = 0;
 
     if (derive === "grid") {
-        grid = use - solar - battery_power;
+        grid = use - solar - battery;
     } else if (derive === "use") {
-        use = solar + battery_power + grid;
+        use = solar + battery + grid;
     } else if (derive === "solar") {
-        solar = use - battery_power - grid;
-    } else if (derive === "battery_power") {
-        battery_power = use - solar - grid;
+        solar = use - battery - grid;
+    } else if (derive === "battery") {
+        battery = use - solar - grid;
     }
 
     return input;
@@ -415,7 +417,7 @@ function flow_calculation(input) {
 
     var solar = input.solar;
     var use = input.use;
-    var battery_power = input.battery_power;
+    var battery = input.battery;
     var grid = input.grid;
 
     // Import/export split: positive grid = import, negative grid = export
@@ -424,19 +426,19 @@ function flow_calculation(input) {
     // SOLAR flows
     var solar_to_load = Math.min(solar, use);
     var solar_to_battery = 0;
-    if (battery_power < 0) {
+    if (battery < 0) {
         // Battery is charging: solar to battery is the lesser of available solar and battery charge power
-        solar_to_battery = Math.min(solar - solar_to_load, -battery_power);
+        solar_to_battery = Math.min(solar - solar_to_load, -battery);
     }
     var solar_to_grid = solar - solar_to_load - solar_to_battery;
 
     // BATTERY flows
     var battery_to_load = 0;
     var battery_to_grid = 0;
-    if (battery_power > 0) {
+    if (battery > 0) {
         // Battery is discharging
-        battery_to_load = Math.min(battery_power, use - solar_to_load);
-        battery_to_grid = battery_power - battery_to_load;
+        battery_to_load = Math.min(battery, use - solar_to_load);
+        battery_to_grid = battery - battery_to_load;
     }
 
     // GRID flows
@@ -444,7 +446,7 @@ function flow_calculation(input) {
     var grid_to_battery = 0;
     if (import_power > 0) {
         grid_to_load = Math.min(import_power, use - solar_to_load - battery_to_load);
-        grid_to_battery = Math.min(import_power - grid_to_load, battery_power < 0 ? -battery_power - solar_to_battery : 0);
+        grid_to_battery = Math.min(import_power - grid_to_load, battery < 0 ? -battery - solar_to_battery : 0);
     }
 
     return {
@@ -504,10 +506,10 @@ function livefn()
     if (feeds === null) { return; }
 
     var input = {
-        solar: solar_available && feeds[config.app.solar.value]!=undefined ? parseFloat(feeds[config.app.solar.value].value) : null,
-        use: use_available && feeds[config.app.use.value]!=undefined ? parseFloat(feeds[config.app.use.value].value) : null,
-        battery_power: battery_power_available && feeds[config.app.battery_power.value]!=undefined ? parseFloat(feeds[config.app.battery_power.value].value) : null,
-        grid: grid_available && feeds[config.app.grid.value]!=undefined ? parseFloat(feeds[config.app.grid.value].value) : null
+        solar: available.solar && feeds[config.app.solar.value]!=undefined ? parseFloat(feeds[config.app.solar.value].value) : null,
+        use: available.use && feeds[config.app.use.value]!=undefined ? parseFloat(feeds[config.app.use.value].value) : null,
+        battery: available.battery && feeds[config.app.battery.value]!=undefined ? parseFloat(feeds[config.app.battery.value].value) : null,
+        grid: available.grid && feeds[config.app.grid.value]!=undefined ? parseFloat(feeds[config.app.grid.value].value) : null
     }
 
     input = flow_derive_missing(input);
@@ -525,12 +527,11 @@ function livefn()
         var updatetime = feeds[ref_feed_id] ? feeds[ref_feed_id].time : now * 0.001;
 
         var ts_updates = [
-            { key: "solar",         value: input.solar,         guard: mode.has_solar   && config.app.solar.value },
-            { key: "use",           value: input.use,           guard: true },
-            { key: "battery_power", value: input.battery_power, guard: mode.has_battery && config.app.battery_power.value },
-            { key: "grid",          value: input.grid,          guard: true },
-            { key: "battery_soc",   value: battery_soc_now,   guard: mode.has_battery && config.app.battery_soc.value }
-        ];
+            available.solar ? { key: "solar", value: input.solar, guard: config.app.solar.value } : null,
+            available.use ? { key: "use", value: input.use, guard: config.app.use.value } : null,
+            available.battery ? { key: "battery", value: input.battery, guard: config.app.battery.value } : null,
+            available.grid ? { key: "grid", value: input.grid, guard: config.app.grid.value } : null
+        ]
         ts_updates.forEach(function(ts) {
             if (!ts.guard) return;
             timeseries.append(ts.key, updatetime, ts.value);
@@ -543,18 +544,17 @@ function livefn()
     }
 
     // Calculate time left
-    var time_left = battery_time_left({
+    $(".battery_time_left").html(battery_time_left({
         capacity: config.app.battery_capacity_kwh.value,
         soc: battery_soc_now,
-        battery_power: input.battery_power
-    });
-    $(".discharge_time_left").html(time_left);
+        battery: input.battery
+    }));
 
     // convert W to kW
     if(powerUnit === 'kW') {
         input.solar = as_kw(input.solar)
         input.use = as_kw(input.use)
-        input.battery_power = as_kw(input.battery_power)
+        input.battery = as_kw(input.battery)
         input.grid = as_kw(input.grid)
         
         $('.power-unit').text('kW')
@@ -568,6 +568,7 @@ function livefn()
     $(".usenow").html(input.use);
     $(".battery_soc").html(battery_soc_now);
     
+    // Grid import/export status
     if (input.grid > 0) {
         $(".balance-label").html("IMPORTING");
         $(".balance").html("<span style='color:#d52e2e'><b>" + Math.round(input.grid) + " " + powerUnit + "</b></span>");
@@ -578,32 +579,33 @@ function livefn()
         $(".balance-label").html("BALANCED");
         $(".balance").html("--");
     }
-
     
     // Battery charge/discharge status
-    if (input.battery_power<0) {
-        $(".battery_charge_discharge_title").html("BATTERY CHARGING");
-    } else if (input.battery_power>0) {
-        $(".battery_charge_discharge_title").html("BATTERY DISCHARGING");
+    if (input.battery<0) {
+        $(".battery_now_title").html("BATTERY CHARGING");
+    } else if (input.battery>0) {
+        $(".battery_now_title").html("BATTERY DISCHARGING");
     } else {
-        $(".battery_charge_discharge_title").html("BATTERY POWER");
+        $(".battery_now_title").html("BATTERY POWER");
     }
-    $(".battery_charge_discharge").html(Math.abs(input.battery_power));
+    $(".battery_now").html(Math.abs(input.battery));
 
     // Only redraw the graph if its the power graph and auto update is turned on
     if (viewmode=="powergraph" && autoupdate) draw(true);
 }
 
 // Capacity in kWh, power in W, returns time left as string "Xh Ym"
-function battery_time_left({ capacity, soc, battery_power }) {
-    if (capacity <= 0 || soc < 0 || battery_power === 0) return "--";
+function battery_time_left({ capacity, soc, battery }) {
+    if (capacity <= 0 || soc < 0 || battery === 0) return "--";
+
+    console.log("Calculating battery time left with capacity=" + capacity + " kWh, soc=" + soc + "%, battery=" + battery + " W");
 
     // if discharging, soc_part is soc; if charging, soc_part is 100-soc (time to full charge)
-    let soc_part = battery_power>0 ? soc : (100 - soc);
+    let soc_part = battery>0 ? soc : (100 - soc);
     let energy_remaining_kwh = (capacity * soc_part) / 100;
 
-    let battery_power_kw = Math.abs(battery_power * 0.001); // convert W to kW
-    let time_left_hours = energy_remaining_kwh / battery_power_kw;
+    let battery_kw = Math.abs(battery * 0.001); // convert W to kW
+    let time_left_hours = energy_remaining_kwh / battery_kw;
 
     const hours_left = Math.floor(time_left_hours);
     const mins_left = Math.floor((time_left_hours*60) % 60);
@@ -641,16 +643,16 @@ function load_powergraph() {
         reload = false;
         
         // getdata params: feedid,start,end,interval,average=0,delta=0,skipmissing=0,limitinterval=0,callback=false,context=false,timeformat='unixms'
-        if (solar_available) {
+        if (available.solar) {
             timeseries.load("solar", remove_null_values(feed.getdata(config.app.solar.value, view.start, view.end, view.interval, 1, 0, 0, 0, false, false, 'notime'), view.interval));
         }
-        if (use_available) {
+        if (available.use) {
             timeseries.load("use", remove_null_values(feed.getdata(config.app.use.value, view.start, view.end, view.interval, 1, 0, 0, 0, false, false, 'notime'), view.interval));
         }
-        if (battery_power_available) {
-            timeseries.load("battery_power", remove_null_values(feed.getdata(config.app.battery_power.value, view.start, view.end, view.interval, 1, 0, 0, 0, false, false, 'notime'), view.interval));
+        if (available.battery) {
+            timeseries.load("battery", remove_null_values(feed.getdata(config.app.battery.value, view.start, view.end, view.interval, 1, 0, 0, 0, false, false, 'notime'), view.interval));
         }
-        if (grid_available) {
+        if (available.grid) {
             timeseries.load("grid", remove_null_values(feed.getdata(config.app.grid.value, view.start, view.end, view.interval, 1, 0, 0, 0, false, false, 'notime'), view.interval));
         }
         if (config.app.battery_soc.value) {
@@ -689,15 +691,15 @@ function load_powergraph() {
         var time = datastart + (1000 * interval * z);
         
         var input = {
-            solar: solar_available ? timeseries.value("solar",z) : null,
-            use: use_available ? timeseries.value("use",z) : null,
-            battery_power: battery_power_available ? timeseries.value("battery_power",z) : null,
-            grid: grid_available ? timeseries.value("grid",z) : null
+            solar: available.solar ? timeseries.value("solar",z) : null,
+            use: available.use ? timeseries.value("use",z) : null,
+            battery: available.battery ? timeseries.value("battery",z) : null,
+            grid: available.grid ? timeseries.value("grid",z) : null
         }
 
         input = flow_derive_missing(input);
 
-        if (input.solar !== null || input.use !== null || input.battery_power !== null || input.grid !== null) {
+        if (input.solar !== null || input.use !== null || input.battery !== null || input.grid !== null) {
 
             var flow = flow_calculation(input);
 
