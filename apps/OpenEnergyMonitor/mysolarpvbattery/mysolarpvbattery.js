@@ -155,7 +155,6 @@ config.ui_after_value_change = function(key) {
 var feeds = {};
 
 var live = false;
-var show_battery_soc = 1;
 var reload = true;
 var autoupdate = true;
 var lastupdate = +new Date;
@@ -178,6 +177,7 @@ var available = {
     battery: false,
     grid: false
 };
+var battery_soc_available = false;
 
 // which feed to derive (if any) based on the config; false = no derivation needed
 var derive = false; 
@@ -385,6 +385,11 @@ function flow_available() {
         }
     }
 
+    // Battery state of charge feed availability
+    if (available.battery && config.app.battery_soc.value) {
+        battery_soc_available = true;
+    }
+
     console.log("Number of feeds configured: " + number_of_feeds);
     console.log("Deriving feed: " + derive);
     console.log("Assume zero solar: " + assume_zero_solar);
@@ -512,7 +517,7 @@ function livefn()
     input = flow_derive_missing(input);
 
     var battery_soc_now = "---";
-    if (config.app.battery_soc.value && feeds[config.app.battery_soc.value] != undefined) {
+    if (battery_soc_available && feeds[config.app.battery_soc.value] != undefined) {
         battery_soc_now = parseInt(feeds[config.app.battery_soc.value].value);
     }
 
@@ -659,7 +664,7 @@ function load_powergraph() {
         if (available.grid) {
             timeseries.load("grid", remove_null_values(feed.getdata(config.app.grid.value, view.start, view.end, view.interval, 1, 0, 0, 0, false, false, 'notime'), view.interval));
         }
-        if (config.app.battery_soc.value) {
+        if (battery_soc_available) {
             timeseries.load("battery_soc", remove_null_values(feed.getdata(config.app.battery_soc.value, view.start, view.end, view.interval, 0, 0, 0, 0, false, false, 'notime'), view.interval));
         }
     }
@@ -727,7 +732,7 @@ function load_powergraph() {
         }
 
         // SOC
-        if (mode.has_battery && config.app.battery_soc.value) {
+        if (battery_soc_available) {
             battery_soc_now = timeseries.value("battery_soc",z);
         }
         battery_soc_data.push([time, battery_soc_now]);
@@ -745,36 +750,24 @@ function load_powergraph() {
     });
     
     var soc_change = 0; 
-    if (mode.has_battery && config.app.battery_soc.value) {
+    if (battery_soc_available) {
         soc_change = battery_soc_now-timeseries.value("battery_soc",0);
     }
     var sign = ""; if (soc_change>0) sign = "+";
     $(".battery_soc_change").html(sign+soc_change.toFixed(1));
     
     powerseries = [];
+    powerseries.push({data: solar_to_load_data,    label: "Solar to Load",    color: "#abddff", stack: 1, lines: {lineWidth: 0, fill: 0.75}});
+    powerseries.push({data: solar_to_grid_data,    label: "Solar to Grid",    color: "#dccc1f", stack: 1, lines: {lineWidth: 0, fill: 1.0}});
+    powerseries.push({data: solar_to_battery_data, label: "Solar to Battery", color: "#fba050", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+    powerseries.push({data: battery_to_load_data,  label: "Battery to Load",  color: "#ffd08e", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+    powerseries.push({data: battery_to_grid_data,  label: "Battery to Grid",  color: "#fabb68", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+    powerseries.push({data: grid_to_load_data,     label: "Grid to Load",     color: "#82cbfc", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+    powerseries.push({data: grid_to_battery_data,  label: "Grid to Battery",  color: "#fb7b50", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
 
-    // Only include solar series when has_solar is on
-    if (mode.has_solar) {
-        powerseries.push({data: solar_to_load_data,    label: "Solar to Load",    color: "#abddff", stack: 1, lines: {lineWidth: 0, fill: 0.75}});
-        powerseries.push({data: solar_to_grid_data,    label: "Solar to Grid",    color: "#dccc1f", stack: 1, lines: {lineWidth: 0, fill: 1.0}});
+    if (battery_soc_available) {
+        powerseries.push({data:battery_soc_data, label: "SOC", yaxis:2, color: "#888"});
     }
-    // Only include battery series when has_battery is on
-    if (mode.has_battery) {
-        powerseries.push({data: solar_to_battery_data, label: "Solar to Battery", color: "#fba050", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-        powerseries.push({data: battery_to_load_data,  label: "Battery to Load",  color: "#ffd08e", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-        powerseries.push({data: battery_to_grid_data,  label: "Battery to Grid",  color: "#fabb68", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    }
-    if (!mode.has_solar && !mode.has_battery) {
-        // Consumption only: show use (grid_to_load is all of use)
-        powerseries.push({data: grid_to_load_data, label: "Use", color: "#82cbfc", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    } else {
-        powerseries.push({data: grid_to_load_data,     label: "Grid to Load",     color: "#82cbfc", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-        if (mode.has_battery) {
-            powerseries.push({data: grid_to_battery_data,  label: "Grid to Battery",  color: "#fb7b50", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-        }
-    }
-    
-    if (show_battery_soc && mode.has_battery && config.app.battery_soc.value) powerseries.push({data:battery_soc_data, label: "SOC", yaxis:2, color: "#888"});
 }
 
 // ----------------------------------------------------------------------
@@ -878,10 +871,12 @@ function powergraph_events() {
                     if (series.label.toUpperCase()=="SOC") {
                         tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "%"]);
                     } else {
-                        if ( series.data[item.dataIndex][1] >= 1000) {
-                            tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(0)/1000 , "kW"]);
-                        } else {
-                            tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W"]);
+                        if (series.data[item.dataIndex][1] != 0) {
+                            if ( series.data[item.dataIndex][1] >= 1000) {
+                                tooltip_items.push([series.label.toUpperCase(), (series.data[item.dataIndex][1]/1000.0).toFixed(1) , "kW"]);
+                            } else {
+                                tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W"]);
+                            }
                         }
                     }
                 }
