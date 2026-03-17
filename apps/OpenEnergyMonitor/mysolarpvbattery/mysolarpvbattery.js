@@ -839,6 +839,9 @@ function toggleBatteryFlowVisibility(grid_to_battery, battery_to_grid) {
 // Returns 0 when the entry or its value is null/undefined.
 // ----------------------------------------------------------------------
 function kwhd_val(arr, idx) {
+    if (arr === null || arr === undefined) return 0;
+    if (arr[idx] === undefined) return 0;
+
     return (arr[idx] && arr[idx][1] !== null) ? arr[idx][1] : 0;
 }
 
