@@ -84,12 +84,12 @@ var timeseries = {
     value: function (name, index)
     {
         if (datastore[name]==undefined) {
-            app_log("ERROR","timeseries.value datastore["+name+"] is undefined");
+            // app_log("ERROR","timeseries.value datastore["+name+"] is undefined");
             return false;
         }
         
         if (datastore[name].data[index]==undefined) {
-            app_log("ERROR","timeseries.value datastore["+name+"].data["+index+"] is undefined, data length: "+datastore[name].data.length);
+            // app_log("ERROR","timeseries.value datastore["+name+"].data["+index+"] is undefined, data length: "+datastore[name].data.length);
             return null;
         } else {
             return datastore[name].data[index][1];
