@@ -500,54 +500,60 @@ function livefn()
     lastupdate = now;
     var powerUnit = config.app && config.app.kw && config.app.kw.value===true ? 'kW' : 'W';
 
-    var mode = get_mode();
-
     var feeds = feed.listbyid();
     if (feeds === null) { return; }
 
-    var input = {
-        solar: available.solar && feeds[config.app.solar.value]!=undefined ? parseFloat(feeds[config.app.solar.value].value) : null,
-        use: available.use && feeds[config.app.use.value]!=undefined ? parseFloat(feeds[config.app.use.value].value) : null,
-        battery: available.battery && feeds[config.app.battery.value]!=undefined ? parseFloat(feeds[config.app.battery.value].value) : null,
-        grid: available.grid && feeds[config.app.grid.value]!=undefined ? parseFloat(feeds[config.app.grid.value].value) : null
+    var input = {};
+    for (const key in available) {
+        // if feed is available use its value, otherwise null
+        input[key] = available[key] && feeds[config.app[key].value]!=undefined ? parseFloat(feeds[config.app[key].value].value) : null;
     }
 
     input = flow_derive_missing(input);
 
     var battery_soc_now = "---";
-    if (mode.has_battery && config.app.battery_soc.value && feeds[config.app.battery_soc.value] != undefined) {
+    if (config.app.battery_soc.value && feeds[config.app.battery_soc.value] != undefined) {
         battery_soc_now = parseInt(feeds[config.app.battery_soc.value].value);
     }
 
-    // Determine the reference time for autoupdate (use whichever feed we have)
-    var ref_feed_key = config.app.solar.value ? "solar" : (config.app.use.value ? "use" : "grid");
-    var ref_feed_id  = config.app[ref_feed_key].value;
-
     if (autoupdate) {
-        var updatetime = feeds[ref_feed_id] ? feeds[ref_feed_id].time : now * 0.001;
 
-        var ts_updates = [
-            available.solar ? { key: "solar", value: input.solar, guard: config.app.solar.value } : null,
-            available.use ? { key: "use", value: input.use, guard: config.app.use.value } : null,
-            available.battery ? { key: "battery", value: input.battery, guard: config.app.battery.value } : null,
-            available.grid ? { key: "grid", value: input.grid, guard: config.app.grid.value } : null
-        ]
-        ts_updates.forEach(function(ts) {
-            if (!ts.guard) return;
-            timeseries.append(ts.key, updatetime, ts.value);
-            timeseries.trim_start(ts.key, view.start * 0.001);
-        });
-       
-        // Advance view
-        view.end = now;
-        view.start = now - live_timerange;
+        var updatetime = false;
+
+        // Find and update time based on the first available.
+        for (const key in available) {
+            if (available[key] && feeds[config.app[key].value]!=undefined) {
+                updatetime = feeds[config.app[key].value].time * 0.001;
+                break;
+            }
+        }
+
+        if (updatetime) {
+            // Append new data to timeseries for each available feed, and trim old data outside of view
+            for (const key in available) {
+                if (available[key]) {
+                    timeseries.append(key, updatetime, input[key]);
+                    timeseries.trim_start(key, view.start * 0.001);
+                }
+            }
+
+            // add soc if available
+            if (battery_soc_now !== "---") {
+                timeseries.append("battery_soc", updatetime, battery_soc_now);
+                timeseries.trim_start("battery_soc", view.start * 0.001);
+            }
+        
+            // Advance view
+            view.end = now;
+            view.start = now - live_timerange;
+        }
     }
 
     // Calculate time left
     $(".battery_time_left").html(battery_time_left({
         capacity: config.app.battery_capacity_kwh.value,
         soc: battery_soc_now,
-        battery: input.battery
+        battery_power: input.battery
     }));
 
     // convert W to kW
@@ -595,17 +601,15 @@ function livefn()
 }
 
 // Capacity in kWh, power in W, returns time left as string "Xh Ym"
-function battery_time_left({ capacity, soc, battery }) {
-    if (capacity <= 0 || soc < 0 || battery === 0) return "--";
-
-    console.log("Calculating battery time left with capacity=" + capacity + " kWh, soc=" + soc + "%, battery=" + battery + " W");
+function battery_time_left({ capacity, soc, battery_power }) {
+    if (capacity <= 0 || soc < 0 || soc>100 || soc=="---" || battery_power === 0 || battery_power === null) return "--";
 
     // if discharging, soc_part is soc; if charging, soc_part is 100-soc (time to full charge)
-    let soc_part = battery>0 ? soc : (100 - soc);
+    let soc_part = battery_power>0 ? soc : (100 - soc);
     let energy_remaining_kwh = (capacity * soc_part) / 100;
 
-    let battery_kw = Math.abs(battery * 0.001); // convert W to kW
-    let time_left_hours = energy_remaining_kwh / battery_kw;
+    let battery_power_kw = Math.abs(battery_power * 0.001); // convert W to kW
+    let time_left_hours = energy_remaining_kwh / battery_power_kw;
 
     const hours_left = Math.floor(time_left_hours);
     const mins_left = Math.floor((time_left_hours*60) % 60);
