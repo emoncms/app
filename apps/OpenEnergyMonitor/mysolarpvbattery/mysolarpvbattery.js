@@ -134,8 +134,8 @@ config.ui_before_render = function() {
     config.app.battery_soc.hidden   = !mode.has_battery;
     config.app.battery_capacity_kwh.hidden = !mode.has_battery;
     // autogenerate feeds: hide battery-specific ones if no battery, solar-specific if no solar
-    config.app.solar_to_load_kwh.hidden    = false; // always potentially present
-    config.app.solar_to_grid_kwh.hidden    = false;
+    config.app.solar_to_load_kwh.hidden    = !mode.has_solar;
+    config.app.solar_to_grid_kwh.hidden    = !mode.has_solar;
     config.app.solar_to_battery_kwh.hidden = !mode.has_battery || !mode.has_solar;
     config.app.battery_to_load_kwh.hidden  = !mode.has_battery;
     config.app.battery_to_grid_kwh.hidden  = !mode.has_battery;
@@ -385,8 +385,16 @@ function flow_available() {
         }
     }
 
+    // 1 Feed (dervice use from grid or vice versa, assume zero solar and battery)
+    else if (number_of_feeds === 1) {
+        if (available.use) derive = "grid";
+        else if (available.grid) derive = "use";
+        assume_zero_solar = true;
+        assume_zero_battery = true;
+    }
+
     // Battery state of charge feed availability
-    if (available.battery && config.app.battery_soc.value) {
+    if ((available.battery || derive == "battery") && config.app.battery_soc.value) {
         battery_soc_available = true;
     }
 
@@ -788,7 +796,7 @@ function updateStats(d) {
     var export_kwh     = d.solar_to_grid + d.battery_to_grid;
     var grid_balance_kwh   = import_kwh - export_kwh;
 
-    var use_from_import_prc = d.use_kwh > 0 ? (100 * d.grid_to_load / d.use_kwh).toFixed(0) + "%" : "";
+    var use_from_import_prc = use_kwh > 0 ? (100 * d.grid_to_load / use_kwh).toFixed(0) + "%" : "";
     var solar_export_prc = solar_kwh > 0 ? (100 * d.solar_to_grid / solar_kwh).toFixed(0) + "%" : "";
     var solar_to_load_prc = solar_kwh > 0 ? (100 * d.solar_to_load / solar_kwh).toFixed(0) + "%" : "";
     var solar_to_battery_prc = solar_kwh > 0 ? (100 * d.solar_to_battery / solar_kwh).toFixed(0) + "%" : "";
@@ -1188,7 +1196,7 @@ function remove_null_values(data, interval) {
     for (let pos = 0; pos < data.length; pos++) {
         if (data[pos][1] != null) {
             let null_duration_s = (pos - last_valid_pos) * interval;
-            if (null_duration_s < 900) {   // 900000 ms = 15 minutes
+            if (null_duration_s < 900) {   // 900 seconds = 15 minutes
                 for (let x = last_valid_pos + 1; x < pos; x++) {
                     data[x][1] = data[last_valid_pos][1];
                 }
