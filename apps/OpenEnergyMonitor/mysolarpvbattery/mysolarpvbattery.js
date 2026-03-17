@@ -1,4 +1,3 @@
-
 // ----------------------------------------------------------------------
 // Globals
 // ----------------------------------------------------------------------
@@ -326,19 +325,8 @@ function show()
     livefn();
     live = setInterval(livefn,5000);
 
-    // Trigger post processor for kWh data
-    let process_timeout = 60; // seconds
-    /*
-    $.ajax({
-        url: path + "app/process",
-        data: { id: config.id, apikey: apikey, timeout: process_timeout },
-        async: true,
-        success: function (result) {
-            console.log("Post processor triggered successfully");
-            console.log(result);
-        }
-    });
-    */
+    // Trigger process here
+    run_post_processor();
 }
 
 // -------------------------------------------------------------------------------------------------------
@@ -515,7 +503,6 @@ function livefn()
     var feeds = feed.listbyid();
     if (feeds === null) { return; }
 
-
     var input = {
         solar: solar_available && feeds[config.app.solar.value]!=undefined ? parseFloat(feeds[config.app.solar.value].value) : null,
         use: use_available && feeds[config.app.use.value]!=undefined ? parseFloat(feeds[config.app.use.value].value) : null,
@@ -524,11 +511,6 @@ function livefn()
     }
 
     input = flow_derive_missing(input);
-
-    var solar_now = input.solar;
-    var use_now = input.use;
-    var battery_power_now = input.battery_power;
-    var grid_now = input.grid;
 
     var battery_soc_now = "---";
     if (mode.has_battery && config.app.battery_soc.value && feeds[config.app.battery_soc.value] != undefined) {
@@ -543,10 +525,10 @@ function livefn()
         var updatetime = feeds[ref_feed_id] ? feeds[ref_feed_id].time : now * 0.001;
 
         var ts_updates = [
-            { key: "solar",         value: solar_now,         guard: mode.has_solar   && config.app.solar.value },
-            { key: "use",           value: use_now,           guard: true },
-            { key: "battery_power", value: battery_power_now, guard: mode.has_battery && config.app.battery_power.value },
-            { key: "grid",          value: grid_now,          guard: true },
+            { key: "solar",         value: input.solar,         guard: mode.has_solar   && config.app.solar.value },
+            { key: "use",           value: input.use,           guard: true },
+            { key: "battery_power", value: input.battery_power, guard: mode.has_battery && config.app.battery_power.value },
+            { key: "grid",          value: input.grid,          guard: true },
             { key: "battery_soc",   value: battery_soc_now,   guard: mode.has_battery && config.app.battery_soc.value }
         ];
         ts_updates.forEach(function(ts) {
@@ -560,83 +542,72 @@ function livefn()
         view.start = now - live_timerange;
     }
 
-    // balance = grid export (positive) or import (negative), shown from grid perspective
-    // negative grid_now = export = positive balance
-    var balance = -grid_now;
-
-    var battery_charge_now = 0;
-    var battery_discharge_now = 0;
-    if (mode.has_battery) {
-        if (battery_power_now > 0) {
-            battery_discharge_now = battery_power_now;
-        } else {
-            battery_charge_now = -battery_power_now;
-        }
-    }
+    // Calculate time left
+    var time_left = battery_time_left({
+        capacity: config.app.battery_capacity_kwh.value,
+        soc: battery_soc_now,
+        battery_power: input.battery_power
+    });
+    $(".discharge_time_left").html(time_left);
 
     // convert W to kW
-    var gen_now;
     if(powerUnit === 'kW') {
-        gen_now = as_kw(solar_now)
-        solar_now = as_kw(solar_now)
-        use_now = as_kw(use_now)
-        balance = as_kw(balance)
-        battery_charge_now = as_kw(battery_charge_now)
-        battery_discharge_now = as_kw(battery_discharge_now)
+        input.solar = as_kw(input.solar)
+        input.use = as_kw(input.use)
+        input.battery_power = as_kw(input.battery_power)
+        input.grid = as_kw(input.grid)
+        
         $('.power-unit').text('kW')
         $('#app-block').addClass('in_kw');
     } else {
-        solar_now = Math.round(solar_now)
-        gen_now = solar_now
-        balance = Math.round(balance)
         $('.power-unit').text('W')
         $('#app-block').removeClass('in_kw');
     }
 
-    var balanceInfo = balance === 0
-        ? { label: "PERFECT BALANCE", value: "--",                                                                      color: null }
-        : balance > 0
-        ? { label: "EXPORTING",        value: Math.round(Math.abs(balance)) + powerUnit, color: "#2ed52e" }
-        : { label: "IMPORTING",        value: Math.round(Math.abs(balance)) + powerUnit, color: "#d52e2e" };
-    $(".balance-label").html(balanceInfo.label);
-    $(".balance").html(balanceInfo.color
-        ? "<span style='color:" + balanceInfo.color + "'><b>" + balanceInfo.value + "</b></span>"
-        : balanceInfo.value
-    );
-    
-    $(".generationnow").html(gen_now);
-    $(".usenow").html(use_now);
+    $(".solarnow").html(input.solar);
+    $(".usenow").html(input.use);
     $(".battery_soc").html(battery_soc_now);
+    
+    if (input.grid > 0) {
+        $(".balance-label").html("IMPORTING");
+        $(".balance").html("<span style='color:#d52e2e'><b>" + Math.round(input.grid) + " " + powerUnit + "</b></span>");
+    } else if (input.grid < 0) {
+        $(".balance-label").html("EXPORTING");
+        $(".balance").html("<span style='color:#2ed52e'><b>" + Math.round(-input.grid) + " " + powerUnit + "</b></span>");
+    } else {
+        $(".balance-label").html("BALANCED");
+        $(".balance").html("--");
+    }
 
-    const net_battery_charge = battery_charge_now - battery_discharge_now;
-    if (net_battery_charge>0) {
+    
+    // Battery charge/discharge status
+    if (input.battery_power<0) {
         $(".battery_charge_discharge_title").html("BATTERY CHARGING");
-        $(".battery_charge_discharge").html(net_battery_charge);
-        $(".discharge_time_left").html("--");
-    } else if (net_battery_charge<0) {
-        if (config.app.battery_capacity_kwh.value > 0 && battery_soc_now >= 0 && powerUnit === 'kW') {
-            const total_capacity = config.app.battery_capacity_kwh.value;
-            const energy_remaining = total_capacity * battery_soc_now / 100;
-            const total_time_left_mins = (energy_remaining / -(net_battery_charge)) * 60;
-
-            const hours_left = Math.floor(total_time_left_mins / 60);
-            const mins_left = Math.floor(total_time_left_mins % 60);
-            const battery_time_left_text = `${hours_left}h ${mins_left}m`
-            $(".discharge_time_left").html(battery_time_left_text);
-        } else {
-            $(".discharge_time_left").html("--");
-        }
-
+    } else if (input.battery_power>0) {
         $(".battery_charge_discharge_title").html("BATTERY DISCHARGING");
-        $(".battery_charge_discharge").html(-net_battery_charge);
     } else {
         $(".battery_charge_discharge_title").html("BATTERY POWER");
-        $(".battery_charge_discharge").html(0);
-        $(".discharge_time_left").html("--");
     }
-    
+    $(".battery_charge_discharge").html(Math.abs(input.battery_power));
+
     // Only redraw the graph if its the power graph and auto update is turned on
     if (viewmode=="powergraph" && autoupdate) draw(true);
+}
+
+// Capacity in kWh, power in W, returns time left as string "Xh Ym"
+function battery_time_left({ capacity, soc, battery_power }) {
+    if (capacity <= 0 || soc < 0 || battery_power === 0) return "--";
+
+    // if discharging, soc_part is soc; if charging, soc_part is 100-soc (time to full charge)
+    let soc_part = battery_power>0 ? soc : (100 - soc);
+    let energy_remaining_kwh = (capacity * soc_part) / 100;
+
+    let battery_power_kw = Math.abs(battery_power * 0.001); // convert W to kW
+    let time_left_hours = energy_remaining_kwh / battery_power_kw;
+
+    const hours_left = Math.floor(time_left_hours);
+    const mins_left = Math.floor((time_left_hours*60) % 60);
+    return `${hours_left}h ${mins_left}m`;
 }
 
 function draw(load) {
@@ -765,7 +736,7 @@ function load_powergraph() {
         battery_to_grid:  total_battery_to_grid_kwh,
         grid_to_load:     total_grid_to_load_kwh,
         grid_to_battery:  total_grid_to_battery_kwh
-    }, mode);
+    });
     
     var soc_change = 0; 
     if (mode.has_battery && config.app.battery_soc.value) {
@@ -803,9 +774,8 @@ function load_powergraph() {
 // ----------------------------------------------------------------------
 // updateStats: write all stats-box DOM values from a flat flow data object.
 // Keys match the flow naming convention used throughout the app.
-// mode: { has_solar, has_battery }
 // ----------------------------------------------------------------------
-function updateStats(d, mode) {
+function updateStats(d) {
 
     // Reconstruct aggregate totals
     var solar_kwh      = d.solar_to_load + d.solar_to_grid + d.solar_to_battery;
@@ -1103,7 +1073,7 @@ function bargraph_events() {
                 battery_to_grid:  kwhd_val(kwhd_data['battery_to_grid'], z),
                 grid_to_load:     kwhd_val(kwhd_data['grid_to_load'], z),
                 grid_to_battery:  kwhd_val(kwhd_data['grid_to_battery'], z)
-            }, mode);
+            });
             $(".battery_soc_change").html("---");
 
         } else {

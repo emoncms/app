@@ -18,7 +18,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
 
 <!-- load mysolarpvbattery.css -->
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.css?v=1" rel="stylesheet">
+<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.css?v=2" rel="stylesheet">
 
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
@@ -32,32 +32,30 @@
 
 
 <section id="app-block" style="display:none" class="block">
-    <div class="d-flex justify-content-between">
+    <div class="stats-grid">
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('USE') ?></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="balance-label">-</h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-success ">
+            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="balance-label">-</span></h5>
+            <h2 class="power-value display-md-3 display-lg-2 my-0 text-success">
                 <span class="balance"></span>
             </h2>
         </div>
         <div class="text-xs-center solar-section">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('SOLAR') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-warning "><span class="generationnow"></span><span class="power-unit"></span></h2>
+            <h2 class="power-value display-md-3 display-lg-2 my-0 text-warning"><span class="solarnow"></span><span class="power-unit"></span></h2>
         </div>
-    </div>
-    <div class="d-flex justify-content-between battery-section">
-        <div class="text-xs-center">
+        <div class="text-xs-center battery-section">
             <h5 class="electric-title mb-0 text-md-larger text-light"><span class="battery_charge_discharge_title"><?php echo tr('BATTERY POWER') ?></span></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="battery_charge_discharge">-</span><span class="power-unit"></span></h2>
         </div>
-        <div class="text-xs-center">
+        <div class="text-xs-center battery-section">
             <h5 class="electric-title mb-0 text-md-larger text-light"><span class="discharge_time_left_title"><?php echo tr('BATTERY TIME LEFT') ?></span></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="discharge_time_left">-</span></h2>
         </div>
-        <div class="text-xs-center">
+        <div class="text-xs-center battery-section">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('STATE OF CHARGE') ?></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="battery_soc">-</span>%</h2>
         </div>
@@ -200,4 +198,4 @@ config.db = <?php echo isset($config) ? json_encode($config) : 'null'; ?>;
 </script>]
 
 <!-- load mysolarpvbattery.js -->
-<script src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.js?v=3"></script>
+<script src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.js?v=4"></script>
