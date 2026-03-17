@@ -356,9 +356,9 @@ function flow_available() {
     // 1 feed (use or grid)
 
     // Availability
-    if (config.app.solar.value) solar_available = true;
+    if (config.app.has_solar.value && config.app.solar.value) solar_available = true;
     if (config.app.use.value) use_available = true;
-    if (config.app.battery_power.value) battery_power_available = true;
+    if (config.app.has_battery.value && config.app.battery_power.value) battery_power_available = true;
     if (config.app.grid.value) grid_available = true;
 
     var number_of_feeds = 0;
@@ -369,24 +369,28 @@ function flow_available() {
 
     // 3 Feeds: Just find the one that is missing
     if (number_of_feeds === 3) {
-        if (!config.app.grid.value) derive = "grid";
-        else if (!config.app.use.value) derive = "use";
-        else if (!config.app.solar.value) derive = "solar";
-        else if (!config.app.battery_power.value) derive = "battery_power";
+        if (!grid_available) derive = "grid";
+        else if (!use_available) derive = "use";
+        else if (!solar_available) derive = "solar";
+        else if (!battery_power_available) derive = "battery_power";
     }
 
     // 2 Feeds: Specific logic based on your priority rules
     else if (number_of_feeds === 2) {
+
+        if (solar_available && battery_power_available) {
+            // We cant derive in this scenario
+        }
         
-        if (config.app.solar.value) {
-            if (config.app.use.value) derive = "grid";
-            else if (config.app.grid.value) derive = "use";
+        if (solar_available) {
+            if (use_available) derive = "grid";
+            else if (grid_available) derive = "use";
             assume_zero_battery = true; // if battery feed is missing, assume no battery power (solar-only mode)
         }
 
-        if (config.app.battery_power.value) {
-            if (config.app.use.value) derive = "grid";
-            else if (config.app.grid.value) derive = "use";
+        if (battery_power_available) {
+            if (use_available) derive = "grid";
+            else if (grid_available) derive = "use";
             assume_zero_solar = true; // if solar feed is missing, assume no solar generation (battery-only mode)
         }
     }
