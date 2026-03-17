@@ -354,13 +354,27 @@ function graph_load() {
     var grid_to_battery_kwh_data  = [];
     var meter_kwh_hh = [];
 
-    solar_to_load_kwh_data    = feed.getdata(feeds["solar_to_load_kwh"].id,    view.start, view.end, interval, 0, 1);
-    solar_to_grid_kwh_data    = feed.getdata(feeds["solar_to_grid_kwh"].id,    view.start, view.end, interval, 0, 1);
-    solar_to_battery_kwh_data = feed.getdata(feeds["solar_to_battery_kwh"].id, view.start, view.end, interval, 0, 1);
-    battery_to_load_kwh_data  = feed.getdata(feeds["battery_to_load_kwh"].id,  view.start, view.end, interval, 0, 1);
-    battery_to_grid_kwh_data  = feed.getdata(feeds["battery_to_grid_kwh"].id,  view.start, view.end, interval, 0, 1);
-    grid_to_load_kwh_data     = feed.getdata(feeds["grid_to_load_kwh"].id,     view.start, view.end, interval, 0, 1);
-    grid_to_battery_kwh_data  = feed.getdata(feeds["grid_to_battery_kwh"].id,  view.start, view.end, interval, 0, 1);
+    if (feeds["solar_to_load_kwh"]!=undefined) {
+        solar_to_load_kwh_data    = feed.getdata(feeds["solar_to_load_kwh"].id,    view.start, view.end, interval, 0, 1);
+    }
+    if (feeds["solar_to_grid_kwh"]!=undefined) {
+        solar_to_grid_kwh_data    = feed.getdata(feeds["solar_to_grid_kwh"].id,    view.start, view.end, interval, 0, 1);
+    }
+    if (feeds["solar_to_battery_kwh"]!=undefined) {
+        solar_to_battery_kwh_data = feed.getdata(feeds["solar_to_battery_kwh"].id, view.start, view.end, interval, 0, 1);
+    }
+    if (feeds["battery_to_load_kwh"]!=undefined) {
+        battery_to_load_kwh_data  = feed.getdata(feeds["battery_to_load_kwh"].id,  view.start, view.end, interval, 0, 1);
+    }
+    if (feeds["battery_to_grid_kwh"]!=undefined) {
+        battery_to_grid_kwh_data  = feed.getdata(feeds["battery_to_grid_kwh"].id,  view.start, view.end, interval, 0, 1);
+    }
+    if (feeds["grid_to_load_kwh"]!=undefined) {
+        grid_to_load_kwh_data     = feed.getdata(feeds["grid_to_load_kwh"].id,     view.start, view.end, interval, 0, 1);
+    }
+    if (feeds["grid_to_battery_kwh"]!=undefined) {
+        grid_to_battery_kwh_data  = feed.getdata(feeds["grid_to_battery_kwh"].id,  view.start, view.end, interval, 0, 1);
+    }
 
     if (smart_meter_data) meter_kwh_hh = feed.getdata(feeds["meter_kwh_hh"].id, view.start, view.end, interval);
 
