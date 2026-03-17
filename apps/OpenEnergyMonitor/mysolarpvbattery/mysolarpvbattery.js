@@ -415,7 +415,12 @@ function flow_derive_missing(input) {
         battery = use - solar - grid;
     }
 
-    return input;
+    return {
+        solar: solar,
+        use: use,
+        battery: battery,
+        grid: grid
+    }
 }
 
 function flow_calculation(input) {
@@ -957,6 +962,13 @@ function load_bargraph() {
     
     // Load raw daily delta data for each applicable flow
     feed.getdata(feedids, start, end, "daily", 0, 1, 0, 0, function (all_data) {
+
+        // if success false
+        if (all_data.success === false) {
+            historyseries = [];
+            draw_bargraph();
+            return;
+        }
 
         var raw = {};
         var idx = 0;
