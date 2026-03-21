@@ -115,7 +115,7 @@ var config = {
     },
 
     UI: function() {
-        $(".app-config").html("");
+        $("#app-config-content").html("");
         $("body").css('background-color','#222');
         $("#footer").css('background-color','#181818');
         $("#footer").css('color','#999');
@@ -188,7 +188,7 @@ var config = {
         
         out += "<br><div style='text-align:center;'><button class='btn app-launch' style='padding:10px; display:none'>Launch App</button><button class='btn btn-danger app-delete' style='padding:10px; margin-left:20px'><i class='icon-trash icon-app-config'></i> Delete</button></div>";
         
-        $(".app-config").html(out);
+        $("#app-config-content").html(out);
 
         for (var z in config.app) {
             var configItem = $(".app-config-box[key="+z+"]");
