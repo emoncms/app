@@ -1,3 +1,13 @@
+
+<?php
+    global $path;
+    $app_conf_path = $path . 'Modules/app/Lib/appconf/';
+    $app_conf_version = 1;
+?>
+
+<link href="<?php echo $app_conf_path; ?>appconf.css?v=1" rel="stylesheet">
+<script type="text/javascript" src="<?php echo $app_conf_path; ?>appconf.js?v=1"></script>
+
 <section id="app-setup" class="hide pb-3">
     <!-- instructions and settings -->
     <div class="px-3">
@@ -18,6 +28,16 @@
                         using the <strong style="color:#fff;">Solar battery kWh flows</strong> post-processor (<code>solarbatterykwh</code>).
                         The feed tag/node will be set to match the app name: <strong class="autogen-appname" style="color:#dccc1f;"></strong>
                     </p>
+
+                    <!-- Input text box to set the node name of the feeds to be generated -->
+                    <div style="margin-bottom:12px;">
+                        <label for="feed-node-input" style="font-size:13px; color:#aaa;">Feed node:</label>
+                        <input type="text" id="feed-node-input" class="form-control form-control-sm" style="width:200px; display:inline-block; margin-left:8px;" placeholder="Enter feed node name">
+                        <button id="set-node-btn" class="btn btn-secondary btn-sm" style="margin-left:8px;" onclick="set_feed_node()">
+                            Set node
+                        </button>
+                    </div>
+
                     <table style="width:100%; border-collapse:collapse; font-size:13px;" id="autogen-feed-list">
                         <thead>
                             <tr style="color:#aaa; border-bottom:1px solid #444;">
