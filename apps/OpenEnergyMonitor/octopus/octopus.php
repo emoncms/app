@@ -167,27 +167,9 @@ global $path, $session, $v;
         </div>
     </div>
 
-    <section id="app-setup" class="hide pb-3">
-        <!-- instructions and settings -->
-        <div class="px-3">
-            <div class="row-fluid">
-                <div class="span7 appconfig-description">
-                    <div class="appconfig-description-inner text-light">
-                        <h2 class="appconfig-title text-primary"><?php echo tr('Octopus Agile'); ?></h2>
-                        <p class="lead">Explore Octopus Agile tariff costs over time.</p>
-                        <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-                        <p><strong class="text-white">Import & Import kWh</strong> The standard naming for electricity imported from the grid in a household without solar PV is 'use' and 'use_kwh', this app expects 'import' and 'import_kwh' in order to provide compatibility with the Solar PV option as well. Select relevant house consumption feeds using the dropdown feed selectors as required. Feeds 'use_kwh' and 'solar_kwh' are optional.</p>
-                        <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor. To create cumulative kWh feeds from historic power data try the postprocess module.</p>
-                        <p><strong class="text-white">meter_kwh_hh</strong> If you have half hourly Octopus smart meter data available select the applicable feed.</p>
-                        <p><strong class="text-white">Optional: Octopus Outgoing</strong> Include total house consumption (use_kwh) and solar PV (solar_kwh) feeds to explore octopus outgoing feed-in-tariff potential.</p>
-                        <img src="../Modules/app/images/agile_app.png" class="d-none d-sm-inline-block">
-                    </div>
-                </div>
-                <div class="span5 app-config pt-3"></div>
-            </div>
-        </div>
-    </section>
 </div>
+
+<?php include('Modules/app/Lib/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
 

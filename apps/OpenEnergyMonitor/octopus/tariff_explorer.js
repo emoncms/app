@@ -52,48 +52,81 @@ config.app = {
         "name": "Title",
         "description": "Optional title for app"
     },
+
+    // == System configuration ==
+    // Select which metering points are present on the system.
+    // When has_solar=false, the solar feed is hidden and solar power is treated as 0.
+    // When has_battery=false, the battery feed is hidden and battery power is treated as 0.
+    // In each mode, conservation of energy allows one feed to be derived from the others:
+    //   Full (solar+battery): GRID=USE-SOLAR-BATTERY, USE=GRID+SOLAR+BATTERY, SOLAR=USE-GRID-BATTERY, BATTERY=USE-GRID-SOLAR
+    //   Solar only:           GRID=USE-SOLAR,         USE=GRID+SOLAR,         SOLAR=USE-GRID
+    //   Battery only:         GRID=USE-BATTERY,       USE=GRID+BATTERY,       BATTERY=USE-GRID
+    //   Consumption only:     no derivation; only USE (or GRID) feed needed
+    "has_solar":{"type":"checkbox", "default":1, "name":"Has solar PV", "description":"Does the system have solar PV generation?"},
+    "has_battery":{"type":"checkbox", "default":1, "name":"Has battery", "description":"Does the system have a battery?"},
+
+    // == Key power feeds ==
+    // All four feeds are optional at the config level; the custom check() below enforces the
+    // correct minimum set depending on the has_solar / has_battery mode.
+    // Any single missing feed will be derived from the other three (or two in solar/battery-only modes).
+    // These power feeds are used to auto-generate the cumulative kWh feeds below.
+    "use":{"optional":true, "type":"feed", "autoname":"use", "description":"House or building use in watts"},
+    "solar":{"optional":true, "type":"feed", "autoname":"solar", "description":"Solar generation in watts (only shown when has_solar is enabled)"},
+    "battery":{"optional":true, "type":"feed", "autoname":"battery_power", "description":"Battery power in watts, positive for discharge, negative for charge (only shown when has_battery is enabled)"},
+    "grid":{"optional":true, "type":"feed", "autoname":"grid", "description":"Grid power in watts (positive for import, negative for export)"},
+
+    // We actually use this cumulative kWh feeds to generate the half hourly data
+    // the power feeds above are used to auto-generate these feeds.
     "solar_to_load_kwh": {
+        "autogenerate":true,
         "optional": true,
         "type": "feed",
         "autoname": "solar_to_load_kwh",
         "description": "Cumulative solar to load energy in kWh"
     },
     "solar_to_grid_kwh": {
+        "autogenerate":true,
         "optional": true,
         "type": "feed",
         "autoname": "solar_to_grid_kwh",
         "description": "Cumulative solar to grid (export) energy in kWh"
     },
     "solar_to_battery_kwh": {
+        "autogenerate":true,
         "optional": true,
         "type": "feed",
         "autoname": "solar_to_battery_kwh",
         "description": "Cumulative solar to battery energy in kWh"
     },
     "battery_to_load_kwh": {
+        "autogenerate":true,
         "optional": true,
         "type": "feed",
         "autoname": "battery_to_load_kwh",
         "description": "Cumulative battery to load energy in kWh"
     },
     "battery_to_grid_kwh": {
+        "autogenerate":true,
         "optional": true,
         "type": "feed",
         "autoname": "battery_to_grid_kwh",
         "description": "Cumulative battery to grid energy in kWh"
     },
     "grid_to_load_kwh": {
+        "autogenerate":true,
         "optional": true,
         "type": "feed",
         "autoname": "grid_to_load_kwh",
         "description": "Cumulative grid to load energy in kWh"
     },
     "grid_to_battery_kwh": {
+        "autogenerate":true,
         "optional": true,
         "type": "feed",
         "autoname": "grid_to_battery_kwh",
         "description": "Cumulative grid to battery energy in kWh"
     },
+    
     "meter_kwh_hh": {
         "optional": true,
         "type": "feed",
@@ -132,16 +165,98 @@ config.app = {
 };
 
 
+// ----------------------------------------------------------------------
+// Custom check: enforce the correct minimum set of feeds based on mode.
+// This overrides the appconf.js default check() which just tests optional flags.
+// Rules:
+//   has_solar + has_battery: at least 3 of (use, solar, battery, grid) must be configured
+//   has_solar only:          at least 2 of (use, solar, grid) must be configured
+//   has_battery only:        at least 2 of (use, battery, grid) must be configured
+//   consumption only:        at least 1 of (use, grid) must be configured
+// ----------------------------------------------------------------------
+config.check = function() {
+    // Read mode from db (persisted) or app default
+    var has_solar   = (config.db.has_solar   !== undefined) ? (config.db.has_solar   != 0) : (config.app.has_solar.default   != 0);
+    var has_battery = (config.db.has_battery !== undefined) ? (config.db.has_battery != 0) : (config.app.has_battery.default != 0);
+
+    // Helper: is a feed key resolved (either auto-matched by name or explicitly set in db)?
+    function feed_resolved(key) {
+        if (config.db[key] == "disable") return false; // explicitly disabled
+        if (config.db[key] != undefined) {
+            // user-set: check the feed id still exists
+            return config.feedsbyid[config.db[key]] !== undefined;
+        }
+        // auto-match by name
+        var autoname = config.app[key] && config.app[key].autoname;
+        return autoname && config.feedsbyname[autoname] !== undefined;
+    }
+
+    var use_ok   = feed_resolved("use");
+    var solar_ok = feed_resolved("solar");
+    var bat_ok   = feed_resolved("battery");
+    var grid_ok  = feed_resolved("grid");
+
+    if (has_solar && has_battery) {
+        // Need at least 3 of the 4 feeds
+        return [use_ok, solar_ok, bat_ok, grid_ok].filter(Boolean).length >= 3;
+    } else if (has_solar && !has_battery) {
+        // Need at least 2 of (use, solar, grid)
+        return [use_ok, solar_ok, grid_ok].filter(Boolean).length >= 2;
+    } else if (!has_solar && has_battery) {
+        // Need at least 2 of (use, battery, grid)
+        return [use_ok, bat_ok, grid_ok].filter(Boolean).length >= 2;
+    } else {
+        // Consumption only: need at least 1 of (use, grid)
+        return use_ok || grid_ok;
+    }
+};
+
+
 config.feeds = feed.list();
 
-config.initapp = function() {
-    init()
+var feeds_by_tag_name = feed.by_tag_and_name(config.feeds);
+
+config.autogen_node_prefix = "app_mysolarpvbattery";
+config.autogen_feed_defaults = { datatype: 1, engine: 5, options: { interval: 1800 } };
+config.autogen_feeds_by_tag_name = feeds_by_tag_name;
+
+
+config.initapp = function(){init()};
+config.showapp = function(){show()};
+config.hideapp = function(){hide()};
+
+// ----------------------------------------------------------------------
+// Config UI helpers: hide/show feeds based on the current mode
+// ----------------------------------------------------------------------
+function get_mode() {
+    var has_solar   = (config.db.has_solar   !== undefined) ? (config.db.has_solar   != 0) : (config.app.has_solar.default   != 0);
+    var has_battery = (config.db.has_battery !== undefined) ? (config.db.has_battery != 0) : (config.app.has_battery.default != 0);
+    return { has_solar: has_solar, has_battery: has_battery };
+}
+
+// Called by appconf.js before rendering the config UI
+config.ui_before_render = function() {
+    var mode = get_mode();
+
+    // solar feed: only relevant if has_solar is on
+    config.app.solar.hidden         = !mode.has_solar;
+    // battery feeds: only relevant if has_battery is on
+    config.app.battery.hidden = !mode.has_battery;
+    // autogenerate feeds: hide battery-specific ones if no battery, solar-specific if no solar
+    config.app.solar_to_load_kwh.hidden    = !mode.has_solar;
+    config.app.solar_to_grid_kwh.hidden    = !mode.has_solar;
+    config.app.solar_to_battery_kwh.hidden = !mode.has_battery || !mode.has_solar;
+    config.app.battery_to_load_kwh.hidden  = !mode.has_battery;
+    config.app.battery_to_grid_kwh.hidden  = !mode.has_battery;
+    config.app.grid_to_battery_kwh.hidden  = !mode.has_battery;
 };
-config.showapp = function() {
-    show()
-};
-config.hideapp = function() {
-    hide()
+
+// Called by appconf.js after any config value is changed; re-renders UI when a mode checkbox changes
+config.ui_after_value_change = function(key) {
+    if (key === 'has_solar' || key === 'has_battery') {
+        config.UI();
+    }
+    render_autogen_feed_list();
 };
 
 var octopus_feed_list = {};
@@ -185,6 +300,14 @@ var profile_cost = {};
 config.init();
 
 function init() {
+
+    var mode = get_mode();
+
+    // Apply hidden flags (also used by autogen feed list and config UI)
+    config.ui_before_render();
+
+    render_autogen_feed_list();
+
     $("#datetimepicker1").datetimepicker({
         language: 'en-EN'
     });
@@ -1421,3 +1544,28 @@ $('#datetimepicker2').on("changeDate", function(e) {
     graph_draw();
     $(".time-select").val("C");
 });
+
+
+// ----------------------------------------------------------------------
+// Helper: return array of feeds that should be auto-generated
+// (delegates to config.autogen.get_feeds in appconf.js)
+// ----------------------------------------------------------------------
+function get_autogen_feeds() {
+    return config.autogen.get_feeds();
+}
+
+// ----------------------------------------------------------------------
+// Auto-generate feed list
+// (delegates to config.autogen.render_feed_list in appconf.js)
+// ----------------------------------------------------------------------
+function render_autogen_feed_list() {
+    config.autogen.render_feed_list();
+}
+
+// ----------------------------------------------------------------------
+// Auto-generate feed actions
+// (delegate to config.autogen.* in appconf.js)
+// ----------------------------------------------------------------------
+function create_missing_feeds()  { config.autogen.create_missing_feeds(); }
+function run_post_processor()    { config.autogen.run_post_processor(); }
+function reset_feeds()           { config.autogen.reset_feeds(); }

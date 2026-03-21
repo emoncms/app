@@ -147,6 +147,7 @@ config.ui_after_value_change = function(key) {
     if (key === 'has_solar' || key === 'has_battery') {
         config.UI();
     }
+    render_autogen_feed_list();
 };
 
 // ----------------------------------------------------------------------
