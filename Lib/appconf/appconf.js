@@ -1,3 +1,6 @@
+
+
+
 var config = {
 
     initialized: false,
@@ -115,254 +118,10 @@ var config = {
     },
 
     UI: function() {
-        $("#app-config-content").html("");
         $("body").css('background-color','#222');
         $("#footer").css('background-color','#181818');
         $("#footer").css('color','#999');
-
-        // Allow apps to update hidden flags (or other config.app properties) before rendering
-        if (typeof config.ui_before_render === 'function') config.ui_before_render();
-        
-        // Remove old config items that are no longer used/described in new config definition
-        if (config.db.constructor===Array) config.db = {};
-        
-        for (var z in config.db) {
-            if (config.db[z]==undefined) delete config.db[z];
-        }
-
-        // Draw the config interface from the config object:
-        var out = "";
-
-        // Option to set app name
-        out += "<div class='app-config-box'>";
-        out += "<i class='status icon-ok-sign icon-app-config'></i> <b>App name (menu)</b>";
-        out += "<br><span class='app-config-info'></span>";
-        out += "<input class='app-config-name' type='text' key='"+z+"' value='"+config.name+"' / >";
-        out += "</div>";
-        // Option to set public or private
-        out += "<div class='app-config-box'>";
-        out += "<i class='status icon-ok-sign icon-app-config'></i> <b>Public</b>";
-        out += "<br><span class='app-config-info'>Make app public</span>";
-        var checked = ""; if (config.public) checked = "checked";
-        out += " <input class='app-config-public' type='checkbox' style='margin-top:-2px' "+checked+" / >";
-        out += "</div>";
-        
-        out += "<br>";
-
-        for (var z in config.app) {
-
-            // Skip any entries that are listed as autogenerate
-            if (config.app[z].autogenerate!=undefined && config.app[z].autogenerate) continue;
-
-            // Skip items that have been hidden by the app (e.g. feeds not relevant to the current mode)
-            if (config.app[z].hidden === true) continue;
-
-            out += "<div class='app-config-box' key='"+z+"'>";
-            if (config.app[z].type=="feed") {
-                
-                var selection_mode = "AUTO";
-                if (config.db[z]=="disable") selection_mode = "DISABLED";
-                
-                out += "<i class='status icon-ok-sign icon-app-config'></i> <b class='feed-name' key='"+z+"'>"+config.app[z].autoname+" <span class='feed-auto'>["+selection_mode+"]</span></b><i class='app-config-edit icon-pencil icon-app-config' style='float:right; cursor:pointer'></i>";
-                out += "<br><span class='app-config-info'></span>";
-                out += "<div class='feed-select-div input-append'><select class='feed-select'></select><button class='btn feed-select-ok'>ok</button></div>";
-            } else if (config.app[z].type=="value") {
-                out += "<i class='status icon-ok-sign icon-app-config'></i> <b>"+config.app[z].name+"</b>";
-                out += "<br><span class='app-config-info'></span>";
-                out += "<input class='app-config-value' type='text' key='"+z+"' value='"+config.app[z].default+"' / >";
-            } else if (config.app[z].type=="checkbox") {
-                out += "<i class='status icon-ok-sign icon-app-config'></i> <b>"+config.app[z].name+"</b>";
-                out += "<br><span class='app-config-info'></span>";
-                var checked = ""; if (config.app[z].default) checked = "checked";
-                out += " <input class='app-config-value' type='checkbox' key='"+z+"' "+checked+" / >";
-            } else if (config.app[z].type=="select") {
-                out += "<i class='status icon-ok-sign icon-white'></i> <b>"+config.app[z].name+"</b>";
-                out += "<select class='app-config-value' key='"+z+"' style='margin-top:5px; width:100%'>";
-                for (var o in config.app[z].options) {
-                    out += "<option>"+config.app[z].options[o]+"</option>";
-                }
-                out += "</select>";
-            }
-            out += "</div>";
-        }
-        
-        out += "<br><div style='text-align:center;'><button class='btn app-launch' style='padding:10px; display:none'>Launch App</button><button class='btn btn-danger app-delete' style='padding:10px; margin-left:20px'><i class='icon-trash icon-app-config'></i> Delete</button></div>";
-        
-        $("#app-config-content").html(out);
-
-        for (var z in config.app) {
-            var configItem = $(".app-config-box[key="+z+"]");
-            
-            if (config.app[z].type=="feed") {
-                // Create list of feeds that satisfy engine requirement
-                var out = "<option value=0>Select "+z+" feed:</option>" +
-                        "<option value=auto>AUTO SELECT</option>" + 
-                        "<option value=disable>DISABLE</option>"
-                
-                var feedsbygroup = [];
-                for (var f in config.feedsbyid)  {
-                    if (config.engine_check(config.feedsbyid[f], config.app[z])) {
-                        var group = (config.feedsbyid[f].tag === null ? "NoGroup" : config.feedsbyid[f].tag);
-                        if (group != "Deleted") {
-                            if (!feedsbygroup[group]) feedsbygroup[group] = []
-                            feedsbygroup[group].push(config.feedsbyid[f]);
-                        }
-                    }
-                }
-                for (group in feedsbygroup) {
-                    out += "<optgroup label='"+group+"'>";
-                    for (f in feedsbygroup[group]) {
-                        out += "<option value="+feedsbygroup[group][f].id+">"+feedsbygroup[group][f].name+"</option>";
-                    }
-                    out += "</optgroup>";
-                }
-                configItem.find(".feed-select").html(out);
-                
-                var feedvalid = false;
-                // Check for existing configuration
-                if (config.db[z]!=undefined) {
-                    var feedid = config.db[z];
-                    if (config.feedsbyid[feedid]!=undefined && config.engine_check(config.feedsbyid[feedid],config.app[z])) {
-                        var keyappend = ""; if (z!=config.feedsbyid[feedid].name) keyappend = z+": ";
-                        configItem.find(".feed-name").html(keyappend+config.feedsbyid[feedid].name);
-                        configItem.find(".feed-select").val(feedid);
-                        configItem.find(".feed-select-div").hide();
-                        feedvalid = true;
-                    } else {
-                        // Invalid feedid remove from configuration
-                        delete config.db[z]; 
-                    }
-                }
-                
-                // Important that this is not an else here as an invalid feedid 
-                // in the section above will call delete making the item undefined again
-                if (config.db[z]==undefined) {
-                    // Auto match feeds that follow the naming convention
-                    for (var n in config.feedsbyid) {
-                        if (config.feedsbyid[n].name==config.app[z].autoname && config.engine_check(config.feedsbyid[n],config.app[z])) {
-                            configItem.find(".feed-select").val("auto");
-                            configItem.find(".feed-select-div").hide();
-                            feedvalid = true;
-                        }
-                    }
-                }
-                
-                // Indicator icon to show if setup correctly or not
-                if (!feedvalid) {
-                    configItem.find(".status").removeClass("icon-ok-sign"); 
-                    configItem.find(".status").addClass("icon-remove-circle");
-                }
-            }
-            
-            if (config.app[z].type=="value") {
-                if (config.db[z]!=undefined) configItem.find(".app-config-value").val(config.db[z]);
-            }
-
-            if (config.app[z].type=="checkbox") {
-                if (config.db[z]!=undefined) configItem.find(".app-config-value")[0].checked = config.db[z];
-            }
-
-            if (config.app[z].type=="select") {
-                if (config.db[z]!=undefined) configItem.find(".app-config-value").val(config.db[z]);
-            }
-                        
-            // Set description
-            configItem.find(".app-config-info").html(config.app[z].description);
-        }
-        
-        if (config.check()) {
-            $(".app-launch").show();
-        }
-
-        // Brings up the feed selector if the pencil item is clicked
-        $(".app-config-edit").unbind("click");
-        $(".app-config-edit").click(function(){
-            var key = $(this).parent().attr("key");
-            var configItem = $(".app-config-box[key="+key+"]");
-            
-            if (config.app[key].type=="feed") {
-                configItem.find(".feed-select-div").show();
-            }
-        });
-
-        $(".feed-select-ok").unbind("click");
-        $(".feed-select-ok").click(function(){
-            var key = $(this).parent().parent().attr("key");
-            var configItem = $(".app-config-box[key="+key+"]");
-            
-            var feedid = $(this).parent().find(".feed-select").val();
-            
-            if (feedid!="auto" && feedid!=0 && feedid!="disable") {
-                config.db[key] = feedid;
-                var keyappend = ""; if (key!=config.feedsbyid[feedid].name) keyappend = key+": ";
-                configItem.find(".feed-name").html(keyappend+config.feedsbyid[feedid].name);
-                configItem.find(".status").addClass("icon-ok-sign"); 
-                configItem.find(".status").removeClass("icon-remove-circle");
-                // Save config
-            }
-            
-            if (feedid=="auto") {
-                delete config.db[key];
-                configItem.find(".feed-name").html(config.app[key].autoname+" <span class='feed-auto'>[AUTO]</span>");
-            }
-            
-            if (feedid=="disable") {
-                config.db[key] = "disable"
-                configItem.find(".feed-name").html(config.app[key].autoname+" <span class='feed-auto'>[DISABLED]</span>");
-            }
-            
-            if (feedid!=0 ) {
-                configItem.find(".feed-select-div").hide();
-                config.set();
-                
-                if (config.check()) {
-                    $(".app-launch").show();
-                } else {
-                    $(".app-launch").hide();
-                }
-            }
-        });
-        
-        $(".app-config-value").unbind("click");
-        $(".app-config-value").change(function(){
-            var value = false;
-            var key = $(this).parent().attr("key");
-            var configItem = $(".app-config-box[key="+key+"]");
-
-            if (config.app[key].type=="value") {
-                value = $(this).val();
-            } else if (config.app[key].type=="checkbox") {
-                value = $(this)[0].checked;
-            } else if (config.app[key].type=="select") {
-                value = $(this).val();
-            }
-            
-            config.db[key] = value;
-            config.set();
-
-            // Allow apps to react to a value change (e.g. re-render UI when a mode checkbox changes)
-            if (typeof config.ui_after_value_change === 'function') config.ui_after_value_change(key);
-        });
-
-        $(".app-config-name").unbind("change");
-        $(".app-config-name").change(function(){
-            var value = $(this).val();
-            config.name = value;
-            config.set_name();
-        });
-
-        $(".app-config-public").unbind("change");
-        $(".app-config-public").change(function(){
-            var value = $(this)[0].checked;
-            config.public = 1*value;
-            config.set_public();
-        });
-
-        // set-node-btn
-        $("#set-node-btn").unbind("click");
-        $("#set-node-btn").click(function() {
-            config.autogen.set_node();
-        });
+        vue_config.renderUI();
     },
 
     check: function()
@@ -577,7 +336,7 @@ var config = {
 
         // Set autogenerate node name when the user clicks "Set node" button
         set_node: function() {
-            var node_name = $("#feed-node-input").val().trim();
+            var node_name = vue_config.autogen_node.trim();
             if (node_name) {
                 config.db['autogenerate_nodename'] = node_name;
                 config.app.autogenerate_nodename.value = node_name;
@@ -614,38 +373,9 @@ var config = {
             return feeds;
         },
 
-        // Render the feed status table into #autogen-feed-rows and toggle action buttons
+        // Render the autogen feed list — delegates to vue_config
         render_feed_list: function() {
-            var autogen_feeds = config.autogen.get_feeds();
-            var node_name = config.autogen.node_name();
-
-            $("#feed-node-input").val(node_name);
-
-            var tbody = $("#autogen-feed-rows");
-            tbody.empty();
-            var missing_count = 0;
-
-            for (var j = 0; j < autogen_feeds.length; j++) {
-                var status_html = "<span style='color:#5cb85c; font-weight:bold;'>&#10003; exists</span>";
-                if (!autogen_feeds[j].feedid) {
-                    status_html = "<span style='color:#f0ad4e; font-weight:bold;'>&#10007; missing</span>";
-                    missing_count++;
-                }
-
-                tbody.append(
-                    "<tr style='background:" + ((j % 2 === 0) ? "#1e1e1e" : "#252525") + ";'>" +
-                    "  <td style='padding:6px 8px; font-family:monospace; color:#fff;'>" + autogen_feeds[j].name + "</td>" +
-                    "  <td style='padding:6px 8px; color:#aaa;'>" + node_name + "</td>" +
-                    "  <td style='padding:6px 8px; text-align:center;'>" + status_html + "</td>" +
-                    "</tr>"
-                );
-            }
-
-            var all_present = (missing_count === 0);
-            $("#btn-create-feeds").toggle(!all_present);
-            $("#btn-run-processor").toggle(all_present);
-            $("#btn-reset-feeds").toggle(all_present);
-            $("#autogen-status").text("");
+            vue_config.renderAutogenFeedList();
         },
 
         // Create any feeds that are missing
@@ -655,8 +385,8 @@ var config = {
             var defaults = config.autogen_feed_defaults || { datatype: 1, engine: 5, options: { interval: 1800 } };
             var created = 0, errors = 0;
 
-            $("#autogen-status").text("Creating feeds...").css("color", "#aaa");
-            $("#btn-create-feeds").prop("disabled", true);
+            vue_config.autogen_status = "Creating feeds...";
+            vue_config.autogen_status_color = "#aaa";
 
             missing.forEach(function(item) {
                 $.ajax({
@@ -690,14 +420,14 @@ var config = {
             var statusText = errors === 0
                 ? "Created " + created + " feed(s) successfully."
                 : "Created " + created + " feed(s), " + errors + " error(s).";
-            $("#autogen-status").text(statusText).css("color", errors === 0 ? "#5cb85c" : "#f0ad4e");
-            $("#btn-create-feeds").prop("disabled", false);
+            vue_config.autogen_status = statusText;
+            vue_config.autogen_status_color = errors === 0 ? "#5cb85c" : "#f0ad4e";
         },
 
         // Trigger the app post-processor via app/process
         run_post_processor: function() {
-            $("#autogen-status").text("Starting post-processor...").css("color", "#aaa");
-            $("#btn-run-processor").prop("disabled", true);
+            vue_config.autogen_status = "Starting post-processor...";
+            vue_config.autogen_status_color = "#aaa";
 
             $.ajax({
                 url: path + "app/process",
@@ -706,16 +436,19 @@ var config = {
                 timeout: 120000,
                 success: function(result) {
                     if (result && result.success) {
-                        $("#autogen-status").text("Post-processor completed successfully.").css("color", "#5cb85c");
+                        vue_config.autogen_status = "Post-processor completed successfully.";
+                        vue_config.autogen_status_color = "#5cb85c";
                     } else {
                         var msg = (result && result.message) ? result.message : "Unknown response";
-                        $("#autogen-status").text("Post-processor: " + msg).css("color", "#f0ad4e");
+                        vue_config.autogen_status = "Post-processor: " + msg;
+                        vue_config.autogen_status_color = "#f0ad4e";
                     }
                 },
                 error: function(xhr) {
-                    $("#autogen-status").text("Post-processor failed: " + xhr.statusText).css("color", "#d9534f");
+                    vue_config.autogen_status = "Post-processor failed: " + xhr.statusText;
+                    vue_config.autogen_status_color = "#d9534f";
                 },
-                complete: function() { $("#btn-run-processor").prop("disabled", false); }
+                complete: function() { }
             });
         },
 
@@ -729,12 +462,13 @@ var config = {
             var feed_ids = autogen_feeds.filter(function(f) { return f.feedid; }).map(function(f) { return f.feedid; });
 
             if (feed_ids.length === 0) {
-                $("#autogen-status").text("No matching feeds found to clear.").css("color", "#f0ad4e");
+                vue_config.autogen_status = "No matching feeds found to clear.";
+                vue_config.autogen_status_color = "#f0ad4e";
                 return;
             }
 
-            $("#autogen-status").text("Clearing feeds...").css("color", "#aaa");
-            $("#btn-reset-feeds").prop("disabled", true);
+            vue_config.autogen_status = "Clearing feeds...";
+            vue_config.autogen_status_color = "#aaa";
 
             var cleared = 0, errors = 0;
 
@@ -757,8 +491,211 @@ var config = {
             var statusText = errors === 0
                 ? "Cleared " + cleared + " feed(s) successfully."
                 : "Cleared " + cleared + " feed(s), " + errors + " error(s).";
-            $("#autogen-status").text(statusText).css("color", errors === 0 ? "#5cb85c" : "#f0ad4e");
-            $("#btn-reset-feeds").prop("disabled", false);
+            vue_config.autogen_status = statusText;
+            vue_config.autogen_status_color = errors === 0 ? "#5cb85c" : "#f0ad4e";
         }
     }
 }
+
+
+var vue_config = new Vue({
+    el: '#vue-config',
+    data: {
+        app_name: "App Name",
+        app_description: "This app can be used to explore onsite solar generation, self consumption, battery integration, export and building consumption.",
+        config_name: "",
+        config_public: false,
+        config_items: [],
+        config_valid: false,
+        autogen_node: "",
+        autogen_feeds: [],
+        autogen_all_present: false,
+        autogen_status: "",
+        autogen_status_color: "#aaa"
+    },
+    methods: {
+
+        // Build config_items from config.app and refresh all derived state.
+        // Called by config.UI() every time the panel needs to (re-)render.
+        renderUI: function() {
+            if (typeof config.ui_before_render === 'function') config.ui_before_render();
+
+            if (config.db.constructor === Array) config.db = {};
+            for (var z in config.db) { if (config.db[z] == undefined) delete config.db[z]; }
+
+            this.config_name   = config.name;
+            this.config_public = !!config.public;
+
+            var items = [];
+            for (var z in config.app) {
+                if (config.app[z].autogenerate != undefined && config.app[z].autogenerate) continue;
+                if (config.app[z].hidden === true) continue;
+
+                var item = {
+                    key:           z,
+                    type:          config.app[z].type,
+                    label:         config.app[z].name || config.app[z].autoname || z,
+                    description:   config.app[z].description || "",
+                    // feed-specific
+                    displayName:   config.app[z].autoname || z,
+                    selectionMode: "AUTO",
+                    isValid:       false,
+                    showSelector:  false,
+                    feedGroups:    [],
+                    selectedFeedId: 0,
+                    // value / checkbox / select
+                    inputValue:    config.app[z].default !== undefined ? config.app[z].default : "",
+                    selectOptions: config.app[z].options || []
+                };
+
+                if (item.type === "feed") {
+                    // Build grouped feed options
+                    var byGroup = {};
+                    for (var f in config.feedsbyid) {
+                        if (config.engine_check(config.feedsbyid[f], config.app[z])) {
+                            var grp = (config.feedsbyid[f].tag === null ? "NoGroup" : config.feedsbyid[f].tag);
+                            if (grp !== "Deleted") {
+                                if (!byGroup[grp]) byGroup[grp] = [];
+                                byGroup[grp].push(config.feedsbyid[f]);
+                            }
+                        }
+                    }
+                    var feedGroups = [];
+                    for (var g in byGroup) feedGroups.push({ name: g, feeds: byGroup[g] });
+                    item.feedGroups = feedGroups;
+
+                    // Resolve current selection
+                    var feedvalid = false;
+                    if (config.db[z] != undefined) {
+                        if (config.db[z] === "disable") {
+                            item.selectionMode  = "DISABLED";
+                            item.selectedFeedId = "disable";
+                        } else {
+                            var feedid = config.db[z];
+                            if (config.feedsbyid[feedid] != undefined && config.engine_check(config.feedsbyid[feedid], config.app[z])) {
+                                var keyappend = (z != config.feedsbyid[feedid].name) ? z + ": " : "";
+                                item.displayName    = keyappend + config.feedsbyid[feedid].name;
+                                item.selectionMode  = "";
+                                item.selectedFeedId = feedid * 1;
+                                feedvalid = true;
+                            } else {
+                                delete config.db[z];
+                            }
+                        }
+                    }
+                    // Auto-match by name if nothing is configured
+                    if (config.db[z] == undefined) {
+                        for (var n in config.feedsbyid) {
+                            if (config.feedsbyid[n].name == config.app[z].autoname && config.engine_check(config.feedsbyid[n], config.app[z])) {
+                                item.selectedFeedId = "auto";
+                                item.selectionMode  = "AUTO";
+                                feedvalid = true;
+                            }
+                        }
+                    }
+                    item.isValid = feedvalid;
+
+                } else if (item.type === "value" || item.type === "checkbox" || item.type === "select") {
+                    if (config.db[z] != undefined) item.inputValue = config.db[z];
+                }
+
+                items.push(item);
+            }
+
+            this.config_items = items;
+            this.config_valid = config.check();
+        },
+
+        editFeed: function(key) {
+            var item = this.config_items.find(function(i) { return i.key === key; });
+            item.showSelector = true;
+        },
+
+        selectFeed: function(key, feedid) {
+            if (feedid == 0) return;
+            var item = this.config_items.find(function(i) { return i.key === key; });
+
+            if (feedid !== "auto" && feedid !== "disable") {
+                config.db[key] = feedid;
+                var keyappend = (key != config.feedsbyid[feedid].name) ? key + ": " : "";
+                item.displayName   = keyappend + config.feedsbyid[feedid].name;
+                item.selectionMode = "";
+                item.isValid       = true;
+            }
+            if (feedid === "auto") {
+                delete config.db[key];
+                item.displayName   = config.app[key].autoname;
+                item.selectionMode = "AUTO";
+                item.isValid       = true;
+            }
+            if (feedid === "disable") {
+                config.db[key]     = "disable";
+                item.displayName   = config.app[key].autoname;
+                item.selectionMode = "DISABLED";
+                item.isValid       = false;
+            }
+
+            item.showSelector = false;
+            config.set();
+            this.config_valid = config.check();
+        },
+
+        changeValue: function(key, value) {
+            var item = this.config_items.find(function(i) { return i.key === key; });
+            item.inputValue  = value;
+            config.db[key]   = value;
+            config.set();
+            if (typeof config.ui_after_value_change === 'function') config.ui_after_value_change(key);
+        },
+
+        changeName: function(event) {
+            var value = event.target.value;
+            this.config_name = value;
+            config.name = value;
+            config.set_name();
+        },
+
+        changePublic: function(event) {
+            var value = event.target.checked;
+            this.config_public = value;
+            config.public = value ? 1 : 0;
+            config.set_public();
+        },
+
+        setNode: function() {
+            config.autogen.set_node();
+        },
+
+        // Rebuild the autogen feed list rows and button visibility from config.autogen state.
+        // Replaces config.autogen.render_feed_list().
+        renderAutogenFeedList: function() {
+            var autogen_feeds = config.autogen.get_feeds();
+            var node_name = config.autogen.node_name();
+
+            this.autogen_node = node_name;
+
+            var missing_count = 0;
+            var rows = [];
+            for (var j = 0; j < autogen_feeds.length; j++) {
+                if (!autogen_feeds[j].feedid) missing_count++;
+                rows.push({ name: autogen_feeds[j].name, node: node_name, feedid: autogen_feeds[j].feedid });
+            }
+            this.autogen_feeds = rows;
+            this.autogen_all_present = (missing_count === 0);
+            this.autogen_status = "";
+            this.autogen_status_color = "#aaa";
+        },
+
+        createMissingFeeds: function() {
+            config.autogen.create_missing_feeds();
+        },
+
+        runPostProcessor: function() {
+            config.autogen.run_post_processor();
+        },
+
+        resetFeeds: function() {
+            config.autogen.reset_feeds();
+        }
+    }
+});
