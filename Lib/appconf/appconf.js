@@ -328,7 +328,7 @@ var config = {
             var value = false;
             var key = $(this).parent().attr("key");
             var configItem = $(".app-config-box[key="+key+"]");
-            
+
             if (config.app[key].type=="value") {
                 value = $(this).val();
             } else if (config.app[key].type=="checkbox") {
@@ -356,6 +356,12 @@ var config = {
             var value = $(this)[0].checked;
             config.public = 1*value;
             config.set_public();
+        });
+
+        // set-node-btn
+        $("#set-node-btn").unbind("click");
+        $("#set-node-btn").click(function() {
+            config.autogen.set_node();
         });
     },
 
@@ -566,9 +572,20 @@ var config = {
 
         // Return the node tag string used for all auto-generated feeds
         node_name: function() {
-            // var prefix = config.autogen_node_prefix || ("app_" + config.id);
-            // return prefix + "_" + config.id;
-            return config.autogen_node_prefix; 
+            return config.app.autogenerate_nodename.value;
+        },
+
+        // Set autogenerate node name when the user clicks "Set node" button
+        set_node: function() {
+            var node_name = $("#feed-node-input").val().trim();
+            if (node_name) {
+                config.db['autogenerate_nodename'] = node_name;
+                config.app.autogenerate_nodename.value = node_name;
+                config.set();
+                config.autogen.render_feed_list();
+            } else {
+                alert("Please enter a valid node name");
+            }
         },
 
         // Return array of { key, name, feedid } for every feed marked autogenerate:true

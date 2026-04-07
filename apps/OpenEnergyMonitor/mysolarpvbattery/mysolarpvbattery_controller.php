@@ -48,7 +48,10 @@ function mysolarpvbattery_app_controller($route,$app,$appconfig,$apikey)
         $processes = $postprocess->get_processes("$linked_modules_dir/postprocess");
         $process_classes = $postprocess->get_process_classes();
 
-        $tag = "app_mysolarpvbattery_".$app->id;
+        if (!isset($app->config->autogenerate_nodename)) {
+            return array("success"=>false, "message"=>"Feed node name not set");
+        }
+        $tag = $app->config->autogenerate_nodename;
         
         $process_conf = (object) array(
             "solar"               => (int) isset($app->config->solar) ? $app->config->solar : 0,

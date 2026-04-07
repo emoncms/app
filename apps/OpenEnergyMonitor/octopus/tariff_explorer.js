@@ -77,6 +77,17 @@ config.app = {
 
     // We actually use this cumulative kWh feeds to generate the half hourly data
     // the power feeds above are used to auto-generate these feeds.
+
+    // Node name for auto-generated feeds, common with mysolarpvbattery app.
+    "autogenerate_nodename": {
+        "hidden": true,
+        "type": "value",
+        "default": "solar_battery_kwh_flows",
+        "name": "Auto-generate feed node name",
+        "description": ""
+    },
+
+    // Auto-generated cumulative kWh feeds 
     "solar_to_load_kwh": {
         "autogenerate":true,
         "optional": true,
@@ -216,7 +227,6 @@ config.feeds = feed.list();
 
 var feeds_by_tag_name = feed.by_tag_and_name(config.feeds);
 
-config.autogen_node_prefix = "solar_battery_kwh_flows";
 config.autogen_feed_defaults = { datatype: 1, engine: 5, options: { interval: 1800 } };
 config.autogen_feeds_by_tag_name = feeds_by_tag_name;
 
@@ -1092,8 +1102,12 @@ function resize() {
 
     var width = placeholder_bound.width();
     var height = window_height - topblock - 250;
-    if (height < 250) height = 250;
     if (height > 500) height = 500;
+
+
+    // min size to avoid flot errors
+    if (height<180) height = 180;
+    if (width<200) width = 200;
 
     placeholder.width(width);
     placeholder_bound.height(height);

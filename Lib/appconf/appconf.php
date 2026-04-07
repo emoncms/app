@@ -30,8 +30,8 @@
                     <div style="margin-bottom:12px;">
                         <label for="feed-node-input" style="font-size:13px; color:#aaa;"><b>Feed node:</b></label>
                         <div class="input-append">
-                        <input type="text" id="feed-node-input" class="app-config-value" style="width:200px" placeholder="Enter feed node name">
-                        <button id="set-node-btn" class="btn btn-secondary" style="margin-top:5px" onclick="set_feed_node()">
+                        <input type="text" id="feed-node-input" style="width:200px" placeholder="Enter feed node name">
+                        <button id="set-node-btn" class="btn btn-secondary" style="margin-top:5px">
                             Set node
                         </button>
                         </div>

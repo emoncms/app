@@ -43,6 +43,17 @@ config.app = {
     "battery_soc":{"optional":true, "type":"feed", "autoname":"battery_soc", "description":"Battery state of charge in % (only shown when has_battery is enabled)"},
 
     // History feeds (energy flow breakdown from solarbatterykwh post-processor)
+
+    // Node name for auto-generated feeds, common with mysolarpvbattery app.
+    "autogenerate_nodename": {
+        "hidden": true,
+        "type": "value",
+        "default": "solar_battery_kwh_flows",
+        "name": "Auto-generate feed node name",
+        "description": ""
+    },
+
+    // Auto-generated cumulative kWh feeds 
     "solar_to_load_kwh":{"autogenerate":true, "optional":true, "type":"feed", "autoname":"solar_to_load_kwh", "description":"Cumulative solar to load energy in kWh"},
     "solar_to_grid_kwh":{"autogenerate":true, "optional":true, "type":"feed", "autoname":"solar_to_grid_kwh", "description":"Cumulative solar to grid (export) energy in kWh"},
     "solar_to_battery_kwh":{"autogenerate":true, "optional":true, "type":"feed", "autoname":"solar_to_battery_kwh", "description":"Cumulative solar to battery energy in kWh"},
