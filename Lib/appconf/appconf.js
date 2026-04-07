@@ -56,37 +56,6 @@ var config = {
         $("body").on("click",".config-close", function(event) {
             config.closeConfig();
         });
-
-        // save and show app
-        $("body").on("click",".app-launch",function() {
-            $(".ajax-loader").show();
-            config.closeConfig();
-            config.load();
-            if (!config.initialized) {
-                config.initapp();
-                config.initialized = true;
-            }
-            config.showapp();
-        });
-
-        $("body").on("click",".app-delete",function(){
-            console.log("delete: "+config.id);
-            $.ajax({ 
-                url: path+"app/remove", 
-                data: "id="+config.id,
-                dataType: 'text',
-                async: false, 
-                success: function(result){
-                    try {
-                        result = JSON.parse(result);
-                        if (result.success != undefined && !result.success) appLog("ERROR", result.message);
-                        window.location = path+"app/view";
-                    } catch (e) {
-                        app.log("ERROR","Could not parse /setconfig reply, error: "+e);
-                    }
-                } 
-            });
-        });
     },
 
     /**
@@ -660,6 +629,36 @@ var vue_config = new Vue({
             this.config_public = value;
             config.public = value ? 1 : 0;
             config.set_public();
+        },
+
+        launchApp: function() {
+            $(".ajax-loader").show();
+            config.closeConfig();
+            config.load();
+            if (!config.initialized) {
+                config.initapp();
+                config.initialized = true;
+            }
+            config.showapp();
+        },
+
+        deleteApp: function() {
+            console.log("delete: " + config.id);
+            $.ajax({
+                url: path + "app/remove",
+                data: "id=" + config.id,
+                dataType: 'text',
+                async: false,
+                success: function(result) {
+                    try {
+                        result = JSON.parse(result);
+                        if (result.success != undefined && !result.success) appLog("ERROR", result.message);
+                        window.location = path + "app/view";
+                    } catch (e) {
+                        console.log("Could not parse /remove reply, error: " + e);
+                    }
+                }
+            });
         },
 
         setNode: function() {

@@ -134,8 +134,8 @@
 
                 <br>
                 <div style="text-align:center;">
-                    <button class="btn app-launch" style="padding:10px" v-show="config_valid">Launch App</button>
-                    <button class="btn btn-danger app-delete" style="padding:10px; margin-left:20px"><i class="icon-trash icon-app-config"></i> Delete</button>
+                    <button class="btn app-launch" style="padding:10px" v-show="config_valid" @click="launchApp">Launch App</button>
+                    <button class="btn btn-danger app-delete" style="padding:10px; margin-left:20px" @click="deleteApp"><i class="icon-trash icon-app-config"></i> Delete</button>
                 </div>
 
             </div>
