@@ -182,7 +182,7 @@
                 <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
             </div>
         </div>
-        <div class="span5 app-config pt-3"></div>
+        <div id="app-config-content" class="span5 app-config pt-3"></div>
     </div>
 </section>
 

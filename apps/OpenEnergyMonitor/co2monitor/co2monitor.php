@@ -176,7 +176,7 @@ global $path, $session, $v;
                     <img src="<?php echo $path; ?><?php echo $appdir; ?>preview.png" class="img-rounded">
                 </div>
             </div>
-            <div class="span5 app-config pt-3"></div>
+            <div id="app-config-content" class="span5 app-config pt-3"></div>
         </div>
     </div>
 </section>

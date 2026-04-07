@@ -245,7 +245,7 @@ textarea {
             Explore impact and savings of installing solar and battery storage
         </div>
     </div>
-    <div class="app-config"></div>
+    <div id="app-config-content" class="app-config"></div>
 </div>
 
 <div class="ajax-loader"></div>

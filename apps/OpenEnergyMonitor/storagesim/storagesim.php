@@ -298,7 +298,7 @@ global $path, $session, $v;
             Explore adding energy storage to increase supply and demand matching.
         </div>
     </div>
-    <div class="app-config"></div>
+    <div id="app-config-content" class="app-config"></div>
 </div>
 
 <div class="ajax-loader"></div>

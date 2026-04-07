@@ -53,17 +53,24 @@ textarea {
   
   <button class="btn" id="copy_to_clipboard" title="Copy CSV data to clipboard">Copy <i class="icon-share-alt"></i></button><br><br>
  
-</div>    
+</div>
 
-<div id="app-setup" style="display:none; padding-top:50px" class="block">
-    <h2 class="app-config-title">Profile explorer</h2>
-    <div class="app-config-description">
-        <div class="app-config-description-inner">
-            Explore average daily profiles for different months of the year.
+<section id="app-setup" class="hide pb-3">
+    <!-- instructions and settings -->
+    <div class="px-3">
+        <div class="row-fluid">
+            <div class="span7 xapp-config-description">
+                <div class="xapp-config-description-inner text-light">
+                    <h2 class="app-config-title text-primary"><?php echo tr('Profile explorer'); ?></h2>
+                    <p class="lead">
+                    Explore average daily profiles for different months of the year.
+                    </p>
+                </div>
+            </div>
+            <div id="app-config-content" class="span5 app-config pt-3"></div>
         </div>
     </div>
-    <div class="app-config"></div>
-</div>
+</section>
 
 <div class="ajax-loader"></div>
 

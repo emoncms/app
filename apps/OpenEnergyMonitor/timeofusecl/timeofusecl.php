@@ -198,7 +198,7 @@ global $path, $session, $v;
                 https://www.epochconverter.com/days</a> provides an easy reference.</p>
             </div>
         </div>
-        <div class="span5 app-config pt-3"></div>
+        <div id="app-config-content" class="span5 app-config pt-3"></div>
     </div>
 </section>
 
