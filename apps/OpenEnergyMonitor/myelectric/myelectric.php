@@ -2,10 +2,10 @@
     defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf.js?v=<?php echo $v; ?>"></script>
+<link href="<?php echo $path; ?>Modules/app/Lib/appconf/appconf.css?v=<?php echo $v; ?>" rel="stylesheet">
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf/appconf.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/graph_bars.js?v=<?php echo $v; ?>"></script> 
@@ -115,7 +115,7 @@
     <!-- instructions and settings -->
     <div class="px-3">
         <div class="row-fluid">
-            <div class="span9 appconfig-description">
+            <div class="span7 appconfig-description">
                 <div class="appconfig-description-inner text-light">
                     <h2 class="appconfig-title text-primary"><?php echo tr('My Electric'); ?></h2>
                     <p class="lead">The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time. It includes a real-time view and a historic kWh per day bar graph.</p>
@@ -124,7 +124,7 @@
                     <img src="../Modules/app/images/myelectric_app.png" class="d-none d-sm-inline-block">
                 </div>
             </div>
-            <div class="span3 app-config pt-3"></div>
+            <div id="app-config-content" class="span5 app-config pt-3"></div>
         </div>
     </div>
 </section>

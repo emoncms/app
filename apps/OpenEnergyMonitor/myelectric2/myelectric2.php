@@ -2,11 +2,11 @@
     defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />    
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf.js?v=<?php echo $v; ?>"></script>
+<link href="<?php echo $path; ?>Modules/app/Lib/appconf/appconf.css?v=<?php echo $v; ?>" rel="stylesheet">
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf/appconf.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
@@ -159,16 +159,15 @@
     <!-- instructions and settings -->
     <div class="px-3">
         <div class="row-fluid">
-            <div class="span9 app-config-description">
+            <div class="span7 app-config-description">
                 <div class="app-config-description-inner text-light">
                     <h2 class="app-config-title text-primary"><?php echo tr('My Electric 2'); ?></h2>
                     <p class="lead">The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time.</p>
                     <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                     <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
-                    <img src="../Modules/app/images/myelectric_app.png" class="d-none d-sm-inline-block">
                 </div>
             </div>
-            <div class="span3 app-config pt-3"></div>
+            <div id="app-config-content" class="span5 app-config pt-3"></div>
         </div>
     </div>
 </section>
@@ -205,7 +204,7 @@ config.app = {
     "use_kwh":{"type":"feed", "autoname":"use_kwh"},
     "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity £/kWh"},
     "currency":{"type":"value", "default":"£", "name": "Currency", "description":"Currency symbol (£,$..)"},
-    "showcomparison":{"type":"checkbox", "default":true, "name": "Show comparison", "description":"Energy stack comparison"}
+    "showcomparison":{"type":"checkbox", "default":false, "name": "Show comparison", "description":"Energy stack comparison"}
 };
 config.id = <?php echo $id; ?>;
 config.name = "<?php echo $name; ?>";

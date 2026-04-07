@@ -2,10 +2,10 @@
     defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf.js?v=<?php echo $v; ?>"></script>
+<link href="<?php echo $path; ?>Modules/app/Lib/appconf/appconf.css?v=<?php echo $v; ?>" rel="stylesheet">
+<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf/appconf.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
@@ -103,10 +103,9 @@
                 <p>The share of wind estimate is calculated by using real-time electricity data from wind power in the uk and then scaling it so that the annual wind generation matches a percentage of annual household consumption. The default estimate assumes 60% or near 2000 kWh annually. This is close to the fuel mix quoted by two of the UK's leading green electricity suppliers.</p>
                 <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                 <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
-                <img src="../Modules/app/images/mysolar_app.png" class="d-none d-sm-inline-block">
             </div>
         </div>
-        <div class="span5 app-config pt-3"></div>
+        <div id="app-config-content" class="span5 app-config pt-3"></div>
     </div>
 </section>
 
