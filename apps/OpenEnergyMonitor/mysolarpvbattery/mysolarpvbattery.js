@@ -106,7 +106,7 @@ config.feeds = feed.list();
 
 var feeds_by_tag_name = feed.by_tag_and_name(config.feeds);
 
-config.autogen_node_prefix = "app_mysolarpvbattery";
+config.autogen_node_prefix = "solar_battery_kwh_flows";
 config.autogen_feed_defaults = { datatype: 1, engine: 5, options: { interval: 1800 } };
 config.autogen_feeds_by_tag_name = feeds_by_tag_name;
 

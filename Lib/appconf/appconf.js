@@ -566,8 +566,9 @@ var config = {
 
         // Return the node tag string used for all auto-generated feeds
         node_name: function() {
-            var prefix = config.autogen_node_prefix || ("app_" + config.id);
-            return prefix + "_" + config.id;
+            // var prefix = config.autogen_node_prefix || ("app_" + config.id);
+            // return prefix + "_" + config.id;
+            return config.autogen_node_prefix; 
         },
 
         // Return array of { key, name, feedid } for every feed marked autogenerate:true
@@ -601,7 +602,7 @@ var config = {
             var autogen_feeds = config.autogen.get_feeds();
             var node_name = config.autogen.node_name();
 
-            $(".autogen-appname").text(node_name);
+            $("#feed-node-input").val(node_name);
 
             var tbody = $("#autogen-feed-rows");
             tbody.empty();

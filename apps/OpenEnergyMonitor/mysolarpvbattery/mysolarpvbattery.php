@@ -168,7 +168,7 @@
     </table>
 </section>
 
-<?php include('Modules/app/Lib/appconf.php'); ?>
+<?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
 
@@ -194,4 +194,4 @@ config.db = <?php echo isset($config) ? json_encode($config) : 'null'; ?>;
 </script>]
 
 <!-- load mysolarpvbattery.js -->
-<script src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.js?v=6"></script>
+<script src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.js?v=7"></script>

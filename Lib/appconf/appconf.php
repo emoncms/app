@@ -2,7 +2,7 @@
 <?php
     global $path;
     $app_conf_path = $path . 'Modules/app/Lib/appconf/';
-    $app_conf_version = 2;
+    $app_conf_version = 4;
 ?>
 
 <link href="<?php echo $app_conf_path; ?>appconf.css?v=<?php echo $app_conf_version; ?>" rel="stylesheet">
@@ -24,16 +24,17 @@
                     <p><b>Auto generate kWh flow feeds</b></p>
                     <p style="color:#aaa; font-size:13px; margin-bottom:12px;">
                         The following feeds are required for historic half-hourly and daily analysis. They are generated from the power feeds using feed post-processing.
-                        The feed tag/node will be set to match the app name: <strong class="autogen-appname" style="color:#dccc1f;"></strong>
                     </p>
 
                     <!-- Input text box to set the node name of the feeds to be generated -->
                     <div style="margin-bottom:12px;">
-                        <label for="feed-node-input" style="font-size:13px; color:#aaa;">Feed node:</label>
-                        <input type="text" id="feed-node-input" class="app-config-value" style="width:200px; display:inline-block; margin-left:8px;" placeholder="Enter feed node name">
-                        <button id="set-node-btn" class="btn btn-secondary btn-sm" style="margin-left:8px;" onclick="set_feed_node()">
+                        <label for="feed-node-input" style="font-size:13px; color:#aaa;"><b>Feed node:</b></label>
+                        <div class="input-append">
+                        <input type="text" id="feed-node-input" class="app-config-value" style="width:200px" placeholder="Enter feed node name">
+                        <button id="set-node-btn" class="btn btn-secondary" style="margin-top:5px" onclick="set_feed_node()">
                             Set node
                         </button>
+                        </div>
                     </div>
 
                     <table style="width:100%; border-collapse:collapse; font-size:13px;" id="autogen-feed-list">
