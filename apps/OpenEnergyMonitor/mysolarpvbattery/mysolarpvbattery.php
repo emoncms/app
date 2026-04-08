@@ -18,18 +18,21 @@
 <!-- load mysolarpvbattery.css -->
 <link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.css?v=2" rel="stylesheet">
 
-<nav id="buttons" class="d-flex justify-content-between">
-    <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="viewhistory btn btn-large btn-link btn-inverse" title="<?php echo tr('View History') ?>">
-            <span class="d-xs-none"><?php echo tr("Hist") ?></span>
-            <span class="d-none d-xs-inline"><?php echo tr("History") ?></span>
-        </button></li>
-    </ul>
-    <?php include(dirname(__DIR__).'/config-nav.php'); ?>
-</nav>
 
 
 <section id="app-block" style="display:none" class="block">
+
+    <nav id="buttons" class="d-flex justify-content-between">
+        <ul id="tabs" class="nav nav-pills mb-0">
+            <li><button class="viewhistory btn btn-large btn-link btn-inverse" title="<?php echo tr('View History') ?>">
+                <span class="d-xs-none"><?php echo tr("Hist") ?></span>
+                <span class="d-none d-xs-inline"><?php echo tr("History") ?></span>
+            </button></li>
+        </ul>
+        <?php include(dirname(__DIR__).'/config-nav.php'); ?>
+    </nav>
+
+
     <div class="stats-grid">
         <div class="text-xs-center">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('USE') ?></h5>
@@ -168,6 +171,9 @@
     </table>
 </section>
 
+<div id="appconf-description" style="display:none">
+    <p class="lead">This app can be used to explore onsite solar generation, self consumption, battery integration, export and building consumption.</p>
+</div>
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
@@ -186,6 +192,8 @@ function getTranslations(){
 var apikey = "<?php echo isset($apikey) ? $apikey : ''; ?>";
 var sessionwrite = <?php echo isset($session['write']) ? intval($session['write']) : 0; ?>;
 
+config.app_name = "My Solar PV Battery";
+config.app_name_color = "#dccc1f";
 config.id = <?php echo isset($id) ? intval($id) : 0; ?>;
 config.name = "<?php echo isset($name) ? addslashes($name) : ''; ?>";
 config.public = <?php echo isset($public) ? intval($public) : 0; ?>;

@@ -18,12 +18,12 @@
         <div class="row-fluid">
             <div class="span7 xappconfig-description app-config">
                 <div class="xappconfig-description-inner text-light">
-                    <h2 class="appconfig-title text-warning">{{ app_name }}</h2>
-                    <p class="lead">{{ app_description }}</p>
+                    <h2 class="appconfig-title" :style="{ color: app_name_color }">{{ app_name }}</h2>
+                    <div v-html="app_description"></div>
                     <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                 </div>
 
-                <div style="border: 1px solid #fff; padding: 10px; margin-top: 20px; color:#fff;">
+                <div style="border: 1px solid #fff; padding: 10px; margin-top: 20px; color:#fff;" v-if="autogen_feeds.length > 0">
                     <p><b>Auto generate kWh flow feeds</b></p>
                     <p style="color:#aaa; font-size:13px; margin-bottom:12px;">
                         The following feeds are required for historic half-hourly and daily analysis. They are generated from the power feeds using feed post-processing.

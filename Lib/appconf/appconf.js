@@ -12,9 +12,18 @@ var config = {
     feeds: {},
     feedsbyid: {},
     feedsbyname: {},
-    
+    app_name: "",
+    // Common options: 
+    // Blue: #44b3e2, Green: #5cb85c, Yellow: #f0ad4e, Red: #d9534f, Grey: #aaa
+    app_name_color: "#44b3e2",
+
     init: function() {
         // console.log("CONFIG: Init");
+
+        vue_config.app_name = config.app_name;
+        vue_config.app_name_color = config.app_name_color || "#44b3e2";
+        let html = $("#appconf-description").html();
+        vue_config.app_description = html ? html : "";
         
         for (var z in config.feeds) config.feedsbyname[config.feeds[z].name] = config.feeds[z];
         for (var z in config.feeds) config.feedsbyid[config.feeds[z].id] = config.feeds[z];
@@ -471,7 +480,8 @@ var vue_config = new Vue({
     el: '#vue-config',
     data: {
         app_name: "App Name",
-        app_description: "This app can be used to explore onsite solar generation, self consumption, battery integration, export and building consumption.",
+        app_name_color: "#44b3e2",
+        app_description: "",
         config_name: "",
         config_public: false,
         config_items: [],

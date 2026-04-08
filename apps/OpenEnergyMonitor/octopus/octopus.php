@@ -167,6 +167,9 @@ global $path, $session, $v;
 
 </div>
 
+<div id="appconf-description" style="display:none">
+    <p class="lead">Explore time of use tariff costs over time.</p>
+</div>
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
@@ -175,6 +178,9 @@ global $path, $session, $v;
     var apikey = "<?php print $apikey; ?>";
     var sessionwrite = <?php echo $session['write']; ?>;
 
+    config.app_name = "Octopus Tariff Explorer";
+    config.app_name_color = "#44b3e2";
+    
     config.id = <?php echo $id; ?>;
     config.name = "<?php echo $name; ?>";
     config.public = <?php echo $public; ?>;
