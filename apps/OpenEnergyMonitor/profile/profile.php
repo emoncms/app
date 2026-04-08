@@ -3,9 +3,6 @@
     global $path, $session, $v;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
-
-<link href="<?php echo $path; ?>Modules/app/Lib/appconf/appconf.css?v=<?php echo $v; ?>" rel="stylesheet">
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf/appconf.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
@@ -55,22 +52,10 @@ textarea {
  
 </div>
 
-<section id="app-setup" class="hide pb-3">
-    <!-- instructions and settings -->
-    <div class="px-3">
-        <div class="row-fluid">
-            <div class="span7 xapp-config-description">
-                <div class="xapp-config-description-inner text-light">
-                    <h2 class="app-config-title text-primary"><?php echo tr('Profile explorer'); ?></h2>
-                    <p class="lead">
-                    Explore average daily profiles for different months of the year.
-                    </p>
-                </div>
-            </div>
-            <div id="app-config-content" class="span5 app-config pt-3"></div>
-        </div>
-    </div>
-</section>
+<div id="appconf-description" style="display:none">
+    <p class="lead">Explore average daily profiles for different months of the year.</p>
+</div>
+<?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
 
@@ -114,6 +99,7 @@ config.app = {
     "feed_type":{"type":"select", "options": ['Cumulative kWh','Power (W)','Other'], "name": "Feed type", "default": 'Cumulative kWh'},
     "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
 };
+config.app_name = "Profile Explorer";
 config.id = <?php echo $id; ?>;
 config.name = "<?php echo $name; ?>";
 config.public = <?php echo $public; ?>;

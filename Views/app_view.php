@@ -8,7 +8,7 @@
 
   <div id="available-apps">
 
-    <p><b>Core Emoncms apps:</b></p>
+    <p><b>Featured apps:</b></p>
 
     <div class="app-group">
       <div class="app-item" v-for="(app, index) in apps" :key="index" :app="index" v-if="app.primary">
@@ -18,7 +18,7 @@
     </div>
     <br>
 
-    <p><b>Other Emoncms apps:</b></p>
+    <p><b>All apps:</b></p>
 
     <div class="app-group">
       <div class="app-item" v-for="(app, index) in apps" :key="index" :app="index" v-if="!app.primary">

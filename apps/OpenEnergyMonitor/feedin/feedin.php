@@ -5,8 +5,6 @@
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/graph.css?v=<?php echo $v; ?>" rel="stylesheet">
 
-<link href="<?php echo $path; ?>Modules/app/Lib/appconf/appconf.css?v=<?php echo $v; ?>" rel="stylesheet">
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf/appconf.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/data.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/graph.js?v=<?php echo $v; ?>"></script>
 
@@ -46,20 +44,11 @@
     <div id="graph" class="app-block"></div>
 </section>
 
-<section id="app-setup" class="hide pb-3 px-3">
-    <!-- instructions and settings -->
-    <div class="row-fluid">
-        <div class="span7 app-config-description">
-            <div class="app-config-description-inner text-light">
-                <h2 class="app-config-title text-primary"><?php echo tr('Feed-in tariff'); ?></h2>
-                <p class="lead">The feed-in tariff app is a simple home energy monitoring app to explore onsite energy generation, feed-in and self-consumption, as well as the buildings overall consumption and cost.</p>
-                <p><strong class="text-black">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-                <p><strong class="text-light">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
-            </div>
-        </div>
-        <div id="app-config-content" class="span5 app-config pt-3"></div>
-    </div>
-</section>
+<div id="appconf-description" style="display:none">
+    <p class="lead">The feed-in tariff app is a simple home energy monitoring app to explore onsite energy generation, feed-in and self-consumption, as well as the buildings overall consumption and cost.</p>
+</div>
+<?php include('Modules/app/Lib/appconf/appconf.php'); ?>
+
 
 <div class="ajax-loader"></div>
 
@@ -138,6 +127,7 @@ config.app = {
     }
 };
 
+config.app_name = "Feed-in";
 config.id = <?php echo $id; ?>;
 config.name = "<?php echo $name; ?>";
 config.public = <?php echo $public; ?>;

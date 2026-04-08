@@ -4,8 +4,6 @@
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
-<link href="<?php echo $path; ?>Modules/app/Lib/appconf/appconf.css?v=<?php echo $v; ?>" rel="stylesheet">
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf/appconf.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
@@ -93,21 +91,11 @@
     </div>
 </section>
 
-<section id="app-setup" class="hide pb-3 px-3">
-    <!-- instructions and settings -->
-    <div class="row-fluid">
-        <div class="span7">
-            <div class="text-light">
-                <h2 class="app-config-title text-warning"><?php echo tr('My Solar'); ?> & <?php echo tr('Wind'); ?></h2>
-                <p class="lead">This app extends the My Solar app by adding in a 'share of UK wind' estimate.</p>
-                <p>The share of wind estimate is calculated by using real-time electricity data from wind power in the uk and then scaling it so that the annual wind generation matches a percentage of annual household consumption. The default estimate assumes 60% or near 2000 kWh annually. This is close to the fuel mix quoted by two of the UK's leading green electricity suppliers.</p>
-                <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-                <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
-            </div>
-        </div>
-        <div id="app-config-content" class="span5 app-config pt-3"></div>
-    </div>
-</section>
+<div id="appconf-description" class="hide">
+    <p class="lead">This app extends the My Solar app by adding in a 'share of UK wind' estimate.</p>
+    <p>The share of wind estimate is calculated by using real-time electricity data from wind power in the uk and then scaling it so that the annual wind generation matches a percentage of annual household consumption. The default estimate assumes 60% or near 2000 kWh annually. This is close to the fuel mix quoted by two of the UK's leading green electricity suppliers.</p>
+</div>
+<?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
 
@@ -151,6 +139,9 @@ config.app = {
     "windkwh":{"type":"value", "default":2000, "name": "kWh Wind", "description":tr("kWh of wind energy bought annually")},
     "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":tr("Display power as kW")}
 };
+
+config.app_name = "My Energy";
+config.app_name_color = "#5cb85c";
 
 config.id = <?php echo $id; ?>;
 config.name = "<?php echo $name; ?>";
@@ -254,6 +245,7 @@ function resize()
 
     if (height>width) height = width;
     if (height<180) height = 180;
+    if (width<200) width = 200;
 
     placeholder.width(width);
     placeholder_bound.height(height);

@@ -135,6 +135,10 @@ global $path, $session, $v;
     
 </div>
 
+
+<div id="appconf-description" style="display:none">
+    <p class="lead">Template solar and battery app, power view only and key calculations.</p>
+</div>
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
@@ -143,6 +147,8 @@ global $path, $session, $v;
     // Transfer php variables to javascript
     var apikey = "<?php print $apikey; ?>";
     var sessionwrite = <?php echo $session['write']; ?>;
+
+    config.app_name = "Solar Template App";
     config.id = <?php echo $id; ?>;
     config.name = "<?php echo $name; ?>";
     config.public = <?php echo $public; ?>;

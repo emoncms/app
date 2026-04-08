@@ -3,9 +3,6 @@
     global $path, $session, $v;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
-
-<link href="<?php echo $path; ?>Modules/app/Lib/appconf/appconf.css?v=<?php echo $v; ?>" rel="stylesheet">
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf/appconf.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/graph_bars.js?v=<?php echo $v; ?>"></script> 
@@ -110,24 +107,10 @@
     </div>
 </section>
 
-
-<section id="app-setup" class="hide pb-3">
-    <!-- instructions and settings -->
-    <div class="px-3">
-        <div class="row-fluid">
-            <div class="span7 appconfig-description">
-                <div class="appconfig-description-inner text-light">
-                    <h2 class="appconfig-title text-primary"><?php echo tr('My Electric'); ?></h2>
-                    <p class="lead">The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time. It includes a real-time view and a historic kWh per day bar graph.</p>
-                    <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-                    <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
-                    <img src="../Modules/app/images/myelectric_app.png" class="d-none d-sm-inline-block">
-                </div>
-            </div>
-            <div id="app-config-content" class="span5 app-config pt-3"></div>
-        </div>
-    </div>
-</section>
+<div id="appconf-description" style="display:none">
+    <p class="lead">The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time. It includes a real-time view and a historic kWh per day bar graph.</p>
+</div>
+<?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
 
@@ -175,6 +158,7 @@ config.app = {
     "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":tr("Display power as kW")}
 };
 
+config.app_name = "My Electric";
 config.id = <?php echo $id; ?>;
 config.name = "<?php echo $name; ?>";
 config.public = <?php echo $public; ?>;

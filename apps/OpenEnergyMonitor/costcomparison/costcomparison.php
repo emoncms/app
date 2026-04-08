@@ -4,8 +4,6 @@
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />
-<link href="<?php echo $path; ?>Modules/app/Lib/appconf/appconf.css?v=<?php echo $v; ?>" rel="stylesheet">
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf/appconf.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script>
@@ -102,22 +100,11 @@ padding:10px;
 </section>
 <div class="ajax-loader"></div>
 
-<section id="app-setup" class="hide pb-3 px-3">
-    <!-- instructions and settings -->
-    <div class="row-fluid">
-        <div class="span7 app-config-description">
-            <div class="app-config-description-inner text-light">
-                <h2 class="app-config-title text-primary"><?php echo tr('Cost Comparison'); ?></h2>
-                <p class="lead">The Cost Comparison app allows you to compare your energy usage against energy suppliers tariffs including new time of use tariffs.</p>
-                <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-                <p><strong>Note:</strong> If you have solar or renewable energy generation then use the import_kwh feed to view the actual cost based on energy brought from the grid</p>
-                <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
-                <img src="<?php echo $path; echo $appdir; ?>preview.png" class="d-none d-sm-inline-block">
-            </div>
-        </div>
-        <div id="app-config-content" class="span5 app-config pt-3"></div>
-    </div>
-</section>
+<div id="appconf-description" style="display:none">
+    <p class="lead">The Cost Comparison app allows you to compare your energy usage against energy suppliers tariffs including new time of use tariffs.</p>
+    <p><strong>Note:</strong> If you have solar or renewable energy generation then use the import_kwh feed to view the actual cost based on energy brought from the grid</p>
+</div>
+<?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <script type="text/javascript">
 // ----------------------------------------------------------------------
@@ -155,6 +142,7 @@ config.app = {
     }
 };
 
+config.app_name = "Cost Comparison";
 config.id = <?php echo $id; ?>;
 config.name = "<?php echo $name; ?>";
 config.public = <?php echo $public; ?>;

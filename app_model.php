@@ -107,7 +107,7 @@ class AppConfig
         }
 
         $apps = array();
-        $result = $this->mysqli->query("SELECT `id`, `app`, `name`, `public` FROM app WHERE `userid`='$userid'");
+        $result = $this->mysqli->query("SELECT `id`, `app`, `name`, `public` FROM app WHERE `userid`='$userid' ORDER BY `id` ASC");
         while ($row = $result->fetch_object()) {
             $apps[] = $row;
         }

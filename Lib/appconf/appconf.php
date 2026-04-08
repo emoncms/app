@@ -74,6 +74,9 @@
                     </div>
                 </div>
 
+                <button class="btn btn-danger mt-3" v-if="enable_process_daily" @click="reloadDailyData">Reload daily data</button>
+
+
             </div>
             <div id="app-config-content" class="span5 app-config pt-3">
 

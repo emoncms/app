@@ -376,7 +376,6 @@ global $path, $session, $v;
   <p class="lead">The My Heatpump app can be used to explore the performance of a heatpump including, electricity consumption, heat output, COP and system temperatures.</p>
   <p><strong class="text-white">Share publicly:</strong> Check the "public" check box if you want to share your dashboard publicly, and ensure that the associated feeds are also made public by adjusting their settings on the feeds page.</p>
   <p><strong class="text-white">Start date:</strong> To modify the start date for cumulative total electricity consumption, heat output and SCOP, input a unix timestamp corresponding to your desired starting date and time.</p>
-  <button class="btn btn-danger mt-3" id="clear-daily-data" style="display:none">Reload daily data</button>
 </div>
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 

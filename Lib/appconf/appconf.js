@@ -472,6 +472,25 @@ var config = {
             vue_config.autogen_status = statusText;
             vue_config.autogen_status_color = errors === 0 ? "#5cb85c" : "#f0ad4e";
         }
+    },
+
+    // Reset daily data
+    reset_daily_data: function() {
+        $.ajax({
+            url: path + "app/cleardaily",
+            data: { id: config.id, apikey: apikey },
+            async: true,
+            dataType: "json",
+            success: function (result) {
+                if (result.success) {
+                    alert("Daily data cleared, please refresh the page to reload data");
+                    app_log("INFO", "Daily data cleared");
+                } else {
+                    alert("Failed to clear daily data");
+                    app_log("ERROR", "Failed to clear daily data");
+                }
+            }
+        });
     }
 }
 
@@ -490,7 +509,10 @@ var vue_config = new Vue({
         autogen_feeds: [],
         autogen_all_present: false,
         autogen_status: "",
-        autogen_status_color: "#aaa"
+        autogen_status_color: "#aaa",
+
+        // Button only currently used by myheatpump app.
+        enable_process_daily: false
     },
     methods: {
 
@@ -504,6 +526,13 @@ var vue_config = new Vue({
 
             this.config_name   = config.name;
             this.config_public = !!config.public;
+
+            // config.app.enable_process_daily.value
+            if (config.app.enable_process_daily != undefined && config.app.enable_process_daily.value) {
+                this.enable_process_daily = true;
+            } else {
+                this.enable_process_daily = false;
+            }
 
             var items = [];
             for (var z in config.app) {
@@ -705,6 +734,10 @@ var vue_config = new Vue({
 
         resetFeeds: function() {
             config.autogen.reset_feeds();
+        },
+
+        reloadDailyData: function() {
+            config.reset_daily_data();
         }
     }
 });
