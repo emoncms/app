@@ -237,9 +237,7 @@ config.app = {
     "cl_use":{"type":"feed", "autoname":"cl_use", "engine":5, "description":"Controlled Load power feed (W)"},
     "cl_kwh":{"type":"feed", "autoname":"cl_kwh", "engine":5, "description":"Controlled Load accumulated kWh"},
     "cl_cost":{"type":"value", "default":"0.17", "name":"Controlled Load Cost",
-        "description":"Cost of the controlled Load accumulated kWh, currency/kWh."},
-        
-    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
+        "description":"Cost of the controlled Load accumulated kWh, currency/kWh."}        
 };
 
 config.app_name = "Time of Use - flexible + CL";

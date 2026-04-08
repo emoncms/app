@@ -345,9 +345,8 @@ config.app = {
     "wind_kwh":{"optional":true, "type":"feed", "autoname":"wind_kwh", "description":"Cumulative wind generation in kWh"},
     "divert_kwh":{"optional":true, "type":"feed", "autoname":"divert_kwh", "description":"Cumulative divert energy in kWh"},
     "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "description":"Cumulative grid import in kWh"},
-    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":tr("Display power as kW")},
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":tr("Display power as kW")}
     //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
-    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
 }
 
 config.app_name = "My Solar PV Divert";

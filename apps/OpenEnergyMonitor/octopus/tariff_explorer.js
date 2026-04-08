@@ -163,14 +163,6 @@ config.app = {
         "name": "Select tariff B:",
         "default": "INTELLI-VAR-22-10-14",
         "options": tariff_options
-    },
-
-    "public": {
-        "type": "checkbox",
-        "name": "Public",
-        "default": 0,
-        "optional": true,
-        "description": "Make app public"
     }
 
 };

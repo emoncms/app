@@ -254,9 +254,7 @@ config.app = {
         "description":"List of weekend tier start times. See description on the left for details"},
     "ph_days":{"type":"value", "default":"2017:2,104,107,115,163,275,359,360;2018:1",
         "name":"Public Holiday days",
-        "description":"List of public holidays. See description on the left for details"},
-        
-    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
+        "description":"List of public holidays. See description on the left for details"}
 };
 
 config.app_name = "Time of Use - flexible";

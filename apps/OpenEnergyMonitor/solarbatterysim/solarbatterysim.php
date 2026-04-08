@@ -277,8 +277,7 @@ config.app = {
     "solar":{"type":"feed", "autoname":"solar_kwh","optional":true}, 
     "solar_capacity":{"type":"value", "name": "Solar capacity (W)", "default": 1250, "optional":true, "description":"Enter solar capacity"},
     "public_solar_feed":{"type":"value", "name": "Public solar feed id", "default": 462987, "optional":true, "description":"Hosted on emoncms.org"},
-    "public_solar_capacity":{"type":"value", "name": "Public solar feed id", "default": 1250, "optional":true, "description":"Solar capacity of public dataset"},
-    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
+    "public_solar_capacity":{"type":"value", "name": "Public solar feed id", "default": 1250, "optional":true, "description":"Solar capacity of public dataset"}
 };
 config.app_name = "Solar & Battery Simulator";
 config.id = <?php echo $id; ?>;
