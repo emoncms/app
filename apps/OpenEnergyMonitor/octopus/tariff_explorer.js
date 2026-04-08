@@ -429,6 +429,22 @@ function updater() {
         for (var key in config.app) {
             if (config.app[key].value) feeds[key] = result[config.app[key].value];
         }
+
+        // Update live stats value for current half-hour if feeds are present
+        // use grid feed for import reference.
+        if (config.app.grid.value != undefined) {
+            var grid_feed_id = config.app.grid.value;
+            var grid_value = result[grid_feed_id] != undefined ? result[grid_feed_id].value : null;
+            if (grid_value != null) {
+                if (grid_value < 0) {
+                    $("#import_export").html("EXPORT NOW");
+                } else {
+                    $("#import_export").html("IMPORT NOW");
+                }
+                $("#power_now").html(Math.abs(grid_value) + " W");
+            }
+        }
+
     });
 }
 
@@ -930,27 +946,29 @@ function graph_draw() {
     profile_mode = false;
     $("#history-title").html("HISTORY");
 
-    /*
+    
     if (this_halfhour_index != -1) {
 
-        let kwh_last_halfhour = data["import"][this_halfhour_index][1];
+        let kwh_grid_to_load    = get_data_value_at_index("grid_to_load",    this_halfhour_index);
+        let kwh_grid_to_battery = get_data_value_at_index("grid_to_battery", this_halfhour_index);
+        let kwh_last_halfhour = (kwh_grid_to_load != null ? kwh_grid_to_load : 0)
+                              + (kwh_grid_to_battery != null ? kwh_grid_to_battery : 0);
 
-        if (kwh_last_halfhour != null) {
-            $("#kwh_halfhour").html(kwh_last_halfhour.toFixed(2) + "<span class='units'>kWh</span>");
-        } else {
-            $("#kwh_halfhour").html("N/A");
+        $("#kwh_halfhour").html(kwh_last_halfhour.toFixed(2) + "<span class='units'>kWh</span>");
+
+        let tariff_A_unit = get_data_value_at_index("tariff_A", this_halfhour_index);
+        if (tariff_A_unit != null) {
+            let cost_last_halfhour = kwh_last_halfhour * tariff_A_unit;
+            $("#cost_halfhour").html("(" + cost_last_halfhour.toFixed(2) + "<span class='units'>p</span>)");
+
+            let unit_price = tariff_A_unit * 1.05;
+            $("#unit_price").html(unit_price.toFixed(2) + "<span class='units'>p</span>");
         }
-
-        let cost_last_halfhour = data["import_cost_tariff_A"][this_halfhour_index][1] * 100;
-        $("#cost_halfhour").html("(" + cost_last_halfhour.toFixed(2) + "<span class='units'>p</span>)");
-
-        let unit_price = data["tariff_A"][this_halfhour_index][1] * 1.05;
-        $("#unit_price").html(unit_price.toFixed(2) + "<span class='units'>p</span>");
 
         $(".last_halfhour_stats").show();
     } else {
         $(".last_halfhour_stats").hide();
-    }*/
+    }
 
     var bars = {
         show: true,

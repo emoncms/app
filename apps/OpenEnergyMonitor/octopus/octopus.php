@@ -35,7 +35,7 @@ global $path, $session, $v;
                     <table style="width:100%">
                         <tr>
                             <td style="width:40%">
-                                <div class="electric-title">IMPORT NOW</div>
+                                <div class="electric-title" id="import_export">IMPORT NOW</div>
                                 <div class="power-value"><span id="power_now">0</span></div>
                             </td>
 
