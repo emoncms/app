@@ -643,35 +643,30 @@ function livefn()
 }
 
 function solar_battery_visibility() {
-    if (available.solar) {
-        $("#live-solar-title").addClass("text-light");
-        $("#live-solar-value").addClass("text-warning");
-        $("#solar-box").css("background-color", "#dccc1f");
-        $("#solar-to-grid-box").css("--statsbox-color", "#999");
-        $("#solar-to-load-box").css("--statsbox-color", "#999");
-        if (available.battery) {
-            $("#solar-to-battery-box").css("--statsbox-color", "#999");
-        } else {
-            $("#solar-to-battery-box").css("--statsbox-color", "#333");
-        }
-    } else {
-        $("#live-solar-title").removeClass("text-light");
-        $("#live-solar-value").removeClass("text-warning");
-        $("#solar-box").css("background-color", "#262626");
-        $("#solar-to-grid-box").css("--statsbox-color", "#333");
-        $("#solar-to-load-box").css("--statsbox-color", "#333");
-        $("#solar-to-battery-box").css("--statsbox-color", "#333");
-    }
+    var s = available.solar;
+    var b = available.battery;
 
-    if (available.battery) {
-        $("#battery-box").css("background-color", "#fb7b50");
-        $("#discharge-box").css("--statsbox-color", "#666");
-    } else {
-        $("#battery-box").css("background-color", "#262626");
-        $("#discharge-box").css("--statsbox-color", "#333");
-    }
+    $("#live-solar-title").toggleClass("text-light", s);
+    $("#live-solar-value").toggleClass("text-warning", s);
 
-    $("#grid-to-load-box").css("--statsbox-color", "#999");
+    var boxColors = {
+        "#solar-box":   s ? "#dccc1f" : "#262626",
+        "#battery-box": b ? "#fb7b50" : "#262626"
+    };
+    for (var id in boxColors) $(id).css("background-color", boxColors[id]);
+
+    var arrowColors = {
+        "#solar-to-grid-box":    s         ? "#999" : "#333",
+        "#solar-to-load-box":    s         ? "#999" : "#333",
+        "#solar-to-battery-box": s && b    ? "#999" : "#333",
+        "#discharge-box":        b         ? "#666" : "#333",
+        "#grid-to-load-box":                          "#999"
+    };
+    for (var id in arrowColors) $(id).css("--statsbox-color", arrowColors[id]);
+
+    $(".prc-solar").toggle(s);
+    $(".prc-battery").toggle(b);
+    $(".prc-solar-battery").toggle(s && b);
 }
 
 // Capacity in kWh, power in W, returns time left as string "Xh Ym"

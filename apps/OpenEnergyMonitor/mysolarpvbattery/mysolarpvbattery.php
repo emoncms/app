@@ -74,15 +74,15 @@
                         <div class="statsbox-title"><span class="generationtitle">SOLAR</span></div>
                         <div><span class="statsbox-value total_solar_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                         <div style="position: absolute; width: 50%; left: 0%; bottom: 0%">
-                            <span class="statsbox-prc solar_to_battery_prc">0</span>
+                            <span class="statsbox-prc solar_to_battery_prc prc-solar-battery">0</span>
                         </div>
                         <div style="position: absolute; width: 50%; left: 50%; bottom: 0%">
-                            <span class="statsbox-prc solar_direct_prc">0</span>
+                            <span class="statsbox-prc solar_direct_prc prc-solar">0</span>
                         </div>
                         <div style="position: absolute; height: 100%; right: 0%; top: 0%">
                             <div style="display: table; height: 100%; border-spacing: 0px;">
                             <div style="display: table-cell; vertical-align: middle;">
-                            <span class="statsbox-prc solar_export_prc">0</span>
+                            <span class="statsbox-prc solar_export_prc prc-solar">0</span>
                             </div>
                             </div>
                         </div>
@@ -156,10 +156,10 @@
                         <div class="statsbox-title">HOUSE</div>
                         <div><span class="statsbox-value total_use_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                         <div style="position: absolute; width: 0%; left: 3px; top: 40%">
-                            <div><span class="statsbox-prc use_from_battery_prc">0</span></div>
+                            <div><span class="statsbox-prc use_from_battery_prc prc-battery">0</span></div>
                         </div>
                         <div style="position: absolute; width: 33.33333%; left: 0%; top: 0%">
-                            <div><span class="statsbox-prc use_from_solar_prc">0</span></div>
+                            <div><span class="statsbox-prc use_from_solar_prc prc-solar">0</span></div>
                         </div>
                         <div style="position: absolute; width: 33.33333%; left: 66.66667%; top: 0%">
                             <div><span class="statsbox-prc use_from_import_prc">0</span></div>
