@@ -277,6 +277,7 @@ var regions_outgoing = {
 // ----------------------------------------------------------------------
 var feeds = {};
 var data = {};
+var time_to_index_map = {};
 var graph_series = [];
 var previousPoint = false;
 var panning = false;
@@ -345,6 +346,7 @@ function show() {
     });
 
     setPeriod('168');
+    $(".time-select").val('168');
     graph_load();
     graph_draw();
 
@@ -711,6 +713,13 @@ function graph_load(time_window_changed = true) {
     //     calibration_line_of_best_fit(data["import"], meter_kwh_hh);
     // }
 
+    // Create time to index map using grid_to_load feed as reference (should be present in all modes)
+    time_to_index_map = {};
+    for (var z = 0; z < grid_to_load_kwh_data.length; z++) {
+        time_to_index_map[grid_to_load_kwh_data[z][0]] = z;
+    }
+
+    // Clear baseline summary if time window changed (as this may affect the selected baseline period)
     if (time_window_changed) {
         baseline_monthly_summary = {};
     }
@@ -1090,8 +1099,9 @@ function graph_draw() {
             mode: "x"
         },
         legend: {
+            show: true,
             position: "NW",
-            noColumns: 6
+            noColumns: 1
         }
     }
     $.plot($('#placeholder'), graph_series, options);
@@ -1274,19 +1284,14 @@ function calibration_line_of_best_fit(import_kwh, meter_kwh_hh)
 // -------------------------------------------------------------------------------
 $('#placeholder').bind("plothover", function(event, pos, item) {
     if (item) {
-        var z = item.dataIndex;
-
-        var isStepped = item.series.lines && item.series.lines.steps;
-
-        if (isStepped) {
-            z = Math.floor(z / 2);
-        }
 
         if (previousPoint != item.datapoint) {
             previousPoint = item.datapoint;
 
             $("#tooltip").remove();
             var itemTime = item.datapoint[0];
+
+            var z = time_to_index_map[itemTime];
 
             var d = new Date(itemTime);
             var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -1323,37 +1328,37 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
             let grid_to_load_kwh     = get_data_value_at_index("grid_to_load", z);
             let grid_to_battery_kwh  = get_data_value_at_index("grid_to_battery", z);
 
-            if (solar_to_load_kwh != null) {
+            if (solar_to_load_kwh != null && solar_to_load_kwh > 0) {
                 text += "&#9728; Solar &rarr; Load: " + solar_to_load_kwh.toFixed(3) + " kWh";
                 if (tariff != null) text += " (" + (solar_to_load_kwh * tariff).toFixed(2) + "p saved)<br>";
                 else text += "<br>";
             }
-            if (solar_to_battery_kwh != null) {
+            if (solar_to_battery_kwh != null && solar_to_battery_kwh > 0) {
                 text += "&#9728; Solar &rarr; Battery: " + solar_to_battery_kwh.toFixed(3) + " kWh";
                 if (tariff != null) text += " (" + (solar_to_battery_kwh * tariff).toFixed(2) + "p saved)<br>";
                 else text += "<br>";
             }
-            if (solar_to_grid_kwh != null) {
+            if (solar_to_grid_kwh != null && solar_to_grid_kwh > 0) {
                 text += "&#9728; Solar &rarr; Grid: " + solar_to_grid_kwh.toFixed(3) + " kWh";
                 if (outgoing != null) text += " (" + (solar_to_grid_kwh * outgoing).toFixed(2) + "p gained)<br>";
                 else text += "<br>";
             }
-            if (battery_to_load_kwh != null) {
+            if (battery_to_load_kwh != null && battery_to_load_kwh > 0) {
                 text += "&#x1F50B; Battery &rarr; Load: " + battery_to_load_kwh.toFixed(3) + " kWh";
                 if (tariff != null) text += " (" + (battery_to_load_kwh * tariff).toFixed(2) + "p saved)<br>";
                 else text += "<br>";
             }
-            if (battery_to_grid_kwh != null) {
+            if (battery_to_grid_kwh != null && battery_to_grid_kwh > 0) {
                 text += "&#x1F50B; Battery &rarr; Grid: " + battery_to_grid_kwh.toFixed(3) + " kWh";
                 if (outgoing != null) text += " (" + (battery_to_grid_kwh * outgoing).toFixed(2) + "p gained)<br>";
                 else text += "<br>";
             }
-            if (grid_to_load_kwh != null) {
+            if (grid_to_load_kwh != null && grid_to_load_kwh > 0) {
                 text += "&#x1F4A1; Grid &rarr; Load: " + grid_to_load_kwh.toFixed(3) + " kWh";
                 if (tariff != null) text += " (" + (grid_to_load_kwh * tariff).toFixed(2) + "p cost)<br>";
                 else text += "<br>";
             }
-            if (grid_to_battery_kwh != null) {
+            if (grid_to_battery_kwh != null && grid_to_battery_kwh > 0) {
                 text += "&#x1F4A1; Grid &rarr; Battery: " + grid_to_battery_kwh.toFixed(3) + " kWh";
                 if (tariff != null) text += " (" + (grid_to_battery_kwh * tariff).toFixed(2) + "p cost)<br>";
                 else text += "<br>";

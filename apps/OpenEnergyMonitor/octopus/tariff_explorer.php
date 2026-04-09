@@ -65,6 +65,8 @@ global $path, $session, $v;
                         <span class="bluenav" id="fastleft">&lt;&lt;</span>
                         <span class="bluenav" id="right">&gt;</span>
                         <span class="bluenav" id="left">&lt;</span>
+                        <span class="bluenav" id="zoomout">-</span>
+                        <span class="bluenav" id="zoomin">+</span>
 
                         <select class="time-select">
                             <option value='8760'>Previous 365 days</option>
