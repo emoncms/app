@@ -98,16 +98,6 @@ global $path, $session, $v;
                             <select id="tariff" class="form-control" style="font-size:13px;"></select>
                         </div>
 
-                        <table style="width:100%" class="table">
-                            <tr>
-                                <th>Energy flow</th>
-                                <th>Energy</th>
-                                <th>Value / Cost</th>
-                                <th>Unit price</th>
-                                <th></th>
-                            </tr>
-                            <tbody id="octopus_totals"></tbody>
-                        </table>
 
                         <div class="input-prepend input-append" style="padding-right:5px">
                             <span class="add-on" style="width:50px"><?php echo tr('Start') ?></span>
@@ -125,6 +115,17 @@ global $path, $session, $v;
                             </span>
                         </div>
 
+                        <table style="width:100%" class="table">
+                            <tr>
+                                <th>Energy flow</th>
+                                <th>Energy</th>
+                                <th>Value / Cost</th>
+                                <th>Unit price</th>
+                                <th></th>
+                            </tr>
+                            <tbody id="octopus_totals"></tbody>
+                        </table>
+
                         <button class="btn" style="float:right" id="download-csv">Download CSV</button>
                         <button class="btn hide" style="float:right" id="show_profile">Show Profile</button>
                         <div id="use_meter_kwh_hh_bound" class="hide"><input id="use_meter_kwh_hh" type="checkbox" checked /> <span style="font-size:12px">Show energy and costs based on Octopus smart meter data where available</span>
@@ -140,6 +141,8 @@ global $path, $session, $v;
                                 <thead><tr></tr></thead>
                                 <tbody id="monthly-data-body"></tbody>
                             </table>
+
+                            <button id="save-baseline" class="btn">Save baseline</button>
                         </div>
 
                     </div>

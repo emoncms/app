@@ -291,6 +291,9 @@ var use_meter_kwh_hh = false;
 var profile_kwh = {};
 var profile_cost = {};
 
+var monthly_summary = {};
+var baseline_monthly_summary = {};
+
 config.init();
 
 function init() {
@@ -460,7 +463,7 @@ function get_data_value_at_index(key, index) {
 // - graph_draw
 // - resize
 
-function graph_load() {
+function graph_load(time_window_changed = true) {
     $(".power-graph-footer").show();
 
     var interval = 1800;
@@ -482,39 +485,44 @@ function graph_load() {
         $("#use_meter_kwh_hh_bound").show();
     }
 
-    // Load energy flow feeds (cumulative kWh, delta=1 returns half-hourly differences directly)
-    var solar_to_load_kwh_data    = [];
-    var solar_to_grid_kwh_data    = [];
-    var solar_to_battery_kwh_data = [];
-    var battery_to_load_kwh_data  = [];
-    var battery_to_grid_kwh_data  = [];
-    var grid_to_load_kwh_data     = [];
-    var grid_to_battery_kwh_data  = [];
-    var meter_kwh_hh = [];
 
-    if (feeds["solar_to_load_kwh"]!=undefined) {
-        solar_to_load_kwh_data    = feed.getdata(feeds["solar_to_load_kwh"].id,    view.start, view.end, interval, 0, 1);
-    }
-    if (feeds["solar_to_grid_kwh"]!=undefined) {
-        solar_to_grid_kwh_data    = feed.getdata(feeds["solar_to_grid_kwh"].id,    view.start, view.end, interval, 0, 1);
-    }
-    if (feeds["solar_to_battery_kwh"]!=undefined) {
-        solar_to_battery_kwh_data = feed.getdata(feeds["solar_to_battery_kwh"].id, view.start, view.end, interval, 0, 1);
-    }
-    if (feeds["battery_to_load_kwh"]!=undefined) {
-        battery_to_load_kwh_data  = feed.getdata(feeds["battery_to_load_kwh"].id,  view.start, view.end, interval, 0, 1);
-    }
-    if (feeds["battery_to_grid_kwh"]!=undefined) {
-        battery_to_grid_kwh_data  = feed.getdata(feeds["battery_to_grid_kwh"].id,  view.start, view.end, interval, 0, 1);
-    }
-    if (feeds["grid_to_load_kwh"]!=undefined) {
-        grid_to_load_kwh_data     = feed.getdata(feeds["grid_to_load_kwh"].id,     view.start, view.end, interval, 0, 1);
-    }
-    if (feeds["grid_to_battery_kwh"]!=undefined) {
-        grid_to_battery_kwh_data  = feed.getdata(feeds["grid_to_battery_kwh"].id,  view.start, view.end, interval, 0, 1);
-    }
 
-    if (smart_meter_data) meter_kwh_hh = feed.getdata(feeds["meter_kwh_hh"].id, view.start, view.end, interval);
+    if (time_window_changed) {
+        // Load energy flow feeds (cumulative kWh, delta=1 returns half-hourly differences directly)
+        solar_to_load_kwh_data    = [];
+        solar_to_grid_kwh_data    = [];
+        solar_to_battery_kwh_data = [];
+        battery_to_load_kwh_data  = [];
+        battery_to_grid_kwh_data  = [];
+        grid_to_load_kwh_data     = [];
+        grid_to_battery_kwh_data  = [];
+        meter_kwh_hh = [];
+
+
+        if (feeds["solar_to_load_kwh"]!=undefined) {
+            solar_to_load_kwh_data    = feed.getdata(feeds["solar_to_load_kwh"].id,    view.start, view.end, interval, 0, 1);
+        }
+        if (feeds["solar_to_grid_kwh"]!=undefined) {
+            solar_to_grid_kwh_data    = feed.getdata(feeds["solar_to_grid_kwh"].id,    view.start, view.end, interval, 0, 1);
+        }
+        if (feeds["solar_to_battery_kwh"]!=undefined) {
+            solar_to_battery_kwh_data = feed.getdata(feeds["solar_to_battery_kwh"].id, view.start, view.end, interval, 0, 1);
+        }
+        if (feeds["battery_to_load_kwh"]!=undefined) {
+            battery_to_load_kwh_data  = feed.getdata(feeds["battery_to_load_kwh"].id,  view.start, view.end, interval, 0, 1);
+        }
+        if (feeds["battery_to_grid_kwh"]!=undefined) {
+            battery_to_grid_kwh_data  = feed.getdata(feeds["battery_to_grid_kwh"].id,  view.start, view.end, interval, 0, 1);
+        }
+        if (feeds["grid_to_load_kwh"]!=undefined) {
+            grid_to_load_kwh_data     = feed.getdata(feeds["grid_to_load_kwh"].id,     view.start, view.end, interval, 0, 1);
+        }
+        if (feeds["grid_to_battery_kwh"]!=undefined) {
+            grid_to_battery_kwh_data  = feed.getdata(feeds["grid_to_battery_kwh"].id,  view.start, view.end, interval, 0, 1);
+        }
+
+        if (smart_meter_data) meter_kwh_hh = feed.getdata(feeds["meter_kwh_hh"].id, view.start, view.end, interval);
+    }
 
     // Detect current half-hour index for live stats (use grid_to_load feed or meter as reference)
     this_halfhour_index = -1;
@@ -598,9 +606,10 @@ function graph_load() {
 
         co2: 0
     }
-    var total = JSON.parse(JSON.stringify(total_template)); // deep copy
 
-    var monthly_data = {};
+    // assign global
+    total = JSON.parse(JSON.stringify(total_template)); // deep copy
+    monthly_data = {};
 
     // Determine data length and primary time reference
     var data_length = grid_to_load_kwh_data.length;
@@ -701,7 +710,11 @@ function graph_load() {
     //     calibration_line_of_best_fit(data["import"], meter_kwh_hh);
     // }
 
-    draw_tables(total, monthly_data);
+    if (time_window_changed) {
+        baseline_monthly_summary = {};
+    }
+
+    draw_tables();
 }
 
 function get_value_at_index(data_array, index, default_value = null) {
@@ -733,7 +746,7 @@ function accumulate_flows(bucket, flows, outgoing_unit, unitcost_tariff) {
     }
 }
 
-function draw_tables(total, monthly_data) {
+function draw_tables() {
 
     // Populate standalone tariff selectors (built once, then just set value)
     ["tariff"].forEach(function(id) {
@@ -824,6 +837,9 @@ function draw_tables(total, monthly_data) {
         var sum_consumption_kwh   = 0;
         var sum_net_cost_tariff = 0;
 
+        // Saves this monthly summary for use in base-line comparison.
+        monthly_summary = {};
+
         for (var month in monthly_data) {
             var md = monthly_data[month];
             var d = new Date(parseInt(month));
@@ -849,19 +865,31 @@ function draw_tables(total, monthly_data) {
                 ? "<td>" + unit_rate.toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>"
                 : "<td>&mdash;</td>";
 
-            // Which tariff is cheaper this month
-            // if (!isNaN(unit_rate) && !isNaN(unit_rate_B)) {
-            //     if (unit_rate < unit_rate_B) {
-            //        monthly_out += "<td style='color:#1a6abf;font-weight:bold'>A</td>";
-            //    } else if (unit_rate_B < unit_rate) {
-            //        monthly_out += "<td style='color:#7c1a80;font-weight:bold'>B</td>";
-            //    } else {
-            //        monthly_out += "<td>=</td>";
-            //    }
-            //} else {
-            //    monthly_out += "<td>&mdash;</td>";
-            //}
-            //monthly_out += "<td>&mdash;</td>";
+            // Baseline comparison if data exists
+            if (baseline_monthly_summary[month] != undefined) {
+                // index will match as monthly_summary is built in chronological order
+                var baseline_net_cost = baseline_monthly_summary[month].net_cost_tariff;
+                var baseline_unit_rate = baseline_monthly_summary[month].unit_rate_tariff;
+
+                // Baseline comparison
+                monthly_out += "<td>" + (baseline_net_cost >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(baseline_net_cost).toFixed(2) + "</td>";
+                monthly_out += !isNaN(baseline_unit_rate)
+                    ? "<td>" + baseline_unit_rate.toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>"
+                    : "<td>&mdash;</td>";
+
+                // Which tariff is cheaper this month
+                if (!isNaN(unit_rate) && !isNaN(baseline_unit_rate)) {
+                    if (unit_rate < baseline_unit_rate) {
+                        monthly_out += "<td style='color:#1a6abf;font-weight:bold'>A</td>";
+                    } else if (baseline_unit_rate < unit_rate) {
+                        monthly_out += "<td style='color:#7c1a80;font-weight:bold'>B</td>";
+                    } else {
+                        monthly_out += "<td>=</td>";
+                    }
+                } else {
+                    monthly_out += "<td>&mdash;</td>";
+                }
+            }
 
             // Link icon to zoom to this month
             monthly_out += "<td><i class='icon-eye-open zoom-to-month' timestamp='" + month + "' style='cursor:pointer'></i></td>";
@@ -869,6 +897,12 @@ function draw_tables(total, monthly_data) {
 
             sum_consumption_kwh   += consumption;
             sum_net_cost_tariff += net_cost;
+
+            monthly_summary[month] = {
+                consumption_kwh: consumption,
+                net_cost_tariff: net_cost,
+                unit_rate_tariff: unit_rate
+            };
         }
 
         // Totals row
@@ -1416,19 +1450,19 @@ $("#tariff").on("change", function() {
 
     config.set();
 
-    graph_load();
+    graph_load(false);
     graph_draw();
 });
 
 $("#use_meter_kwh_hh").click(function() {
     use_meter_kwh_hh = $(this)[0].checked;
-    graph_load();
+    graph_load(false);
     graph_draw();
 });
 
 $("#show_carbonintensity").click(function() {
     show_carbonintensity = $(this)[0].checked;
-    graph_load();
+    graph_load(false);
     graph_draw();
     if (!show_carbonintensity) $("#carbonintensity_result").html("");
 });
@@ -1495,6 +1529,12 @@ $('#datetimepicker2').on("changeDate", function(e) {
     graph_load();
     graph_draw();
     $(".time-select").val("C");
+});
+
+// Save monthly data as baseline to be compared against tariff change
+$("#save-baseline").click(function() {
+    baseline_monthly_summary = JSON.parse(JSON.stringify(monthly_summary));
+    draw_tables();
 });
 
 
