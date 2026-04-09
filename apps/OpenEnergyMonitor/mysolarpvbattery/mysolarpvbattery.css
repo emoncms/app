@@ -9,10 +9,11 @@
     text-align: center;
     vertical-align: middle;
     background: #262626;
+    --statsbox-color: #333;
 }
 
 .statsbox-inner-unit {
-    color: #333;
+    color: var(--statsbox-color);
 }
 
 .statsbox-padded {
@@ -20,7 +21,7 @@
 }
 
 .statsbox-inner-arrow {
-    color: #999;
+    color: var(--statsbox-color);
 }
 
 .statsbox-title {
@@ -36,11 +37,13 @@
 .statsbox-value {
     font-weight: bold;
     font-size: 36px;
+    color: var(--statsbox-color);
 }
 
 .statsbox-units {
     font-weight: bold;
     font-size: 16px;
+    color: var(--statsbox-color);
 }
 
 .statsbox-prc {
@@ -62,7 +65,7 @@
     height: 0; 
     position: absolute;
     pointer-events: none;
-    border-top-color: #999;
+    border-top-color: var(--statsbox-color);
     border-width: 16px;
     margin-left: -16px;
 }
@@ -81,7 +84,7 @@
   height: 0; 
   position: absolute;
   pointer-events: none;
-  border-left-color: #999;
+  border-left-color: var(--statsbox-color);
   border-width: 16px;
   margin-top: -16px;
 }
@@ -100,7 +103,7 @@
   height: 0; 
   position: absolute;
   pointer-events: none;
-  border-right-color: #999;
+  border-right-color: var(--statsbox-color);
   border-width: 16px;
   margin-top: -16px;
 }

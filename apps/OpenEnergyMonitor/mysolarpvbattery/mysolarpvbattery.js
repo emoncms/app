@@ -647,11 +647,31 @@ function solar_battery_visibility() {
         $("#live-solar-title").addClass("text-light");
         $("#live-solar-value").addClass("text-warning");
         $("#solar-box").css("background-color", "#dccc1f");
+        $("#solar-to-grid-box").css("--statsbox-color", "#999");
+        $("#solar-to-load-box").css("--statsbox-color", "#999");
+        if (available.battery) {
+            $("#solar-to-battery-box").css("--statsbox-color", "#999");
+        } else {
+            $("#solar-to-battery-box").css("--statsbox-color", "#333");
+        }
     } else {
         $("#live-solar-title").removeClass("text-light");
         $("#live-solar-value").removeClass("text-warning");
         $("#solar-box").css("background-color", "#262626");
+        $("#solar-to-grid-box").css("--statsbox-color", "#333");
+        $("#solar-to-load-box").css("--statsbox-color", "#333");
+        $("#solar-to-battery-box").css("--statsbox-color", "#333");
     }
+
+    if (available.battery) {
+        $("#battery-box").css("background-color", "#fb7b50");
+        $("#discharge-box").css("--statsbox-color", "#666");
+    } else {
+        $("#battery-box").css("background-color", "#262626");
+        $("#discharge-box").css("--statsbox-color", "#333");
+    }
+
+    $("#grid-to-load-box").css("--statsbox-color", "#999");
 }
 
 // Capacity in kWh, power in W, returns time left as string "Xh Ym"
