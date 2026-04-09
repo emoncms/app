@@ -824,18 +824,28 @@ function draw_tables() {
 
         // Update table headers with selected tariff names
         var tariff_name = config.app.tariff.value;
-        $("#monthly-data thead tr").html(
-            "<th>Month</th>" +
+
+        var heading = "<th>Month</th>" +
             "<th>Consumption (kWh)</th>" +
             "<th>Tariff cost</th>" +
-            "<th>Tariff rate</th>" + 
-            "<th></th>"
-        );
+            "<th>Tariff rate</th>"
+
+        if (baseline_monthly_summary != undefined && Object.keys(baseline_monthly_summary).length > 0) {
+            heading += "<th>Baseline cost</th>" +
+                "<th>Baseline rate</th>" +
+                "<th>Cheaper tariff</th>";
+        }
+
+        heading += "<th></th>";
+
+
+        $("#monthly-data thead tr").html(heading);
 
         var monthly_out = "";
 
         var sum_consumption_kwh   = 0;
         var sum_net_cost_tariff = 0;
+        var sum_net_cost_baseline = 0;
 
         // Saves this monthly summary for use in base-line comparison.
         monthly_summary = {};
@@ -889,6 +899,8 @@ function draw_tables() {
                 } else {
                     monthly_out += "<td>&mdash;</td>";
                 }
+
+                sum_net_cost_baseline += baseline_net_cost;
             }
 
             // Link icon to zoom to this month
@@ -913,8 +925,17 @@ function draw_tables() {
         monthly_out += "<td>" + sum_consumption_kwh.toFixed(1) + " kWh</td>";
         monthly_out += "<td>" + (sum_net_cost_tariff >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(sum_net_cost_tariff).toFixed(2) + "</td>";
         monthly_out += !isNaN(total_unit_rate)
-            ? "<td>" + total_unit_rate.toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>"
-            : "<td>&mdash;</td>";
+            ? "<td>" + total_unit_rate.toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>": "<td>&mdash;</td>";
+
+        if (baseline_monthly_summary != undefined && Object.keys(baseline_monthly_summary).length > 0) {
+            var baseline_total_unit_rate = sum_consumption_kwh > 0 ? (sum_net_cost_baseline / sum_consumption_kwh) * 100 : NaN;
+            monthly_out += "<td>" + (sum_net_cost_baseline >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(sum_net_cost_baseline).toFixed(2) + "</td>";
+            monthly_out += !isNaN(baseline_total_unit_rate)
+                ? "<td>" + baseline_total_unit_rate.toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>": "<td>&mdash;</td>";
+        }
+
+
+            
         monthly_out += "<td></td>";
         monthly_out += "</tr>";
 
