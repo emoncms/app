@@ -666,7 +666,9 @@ function solar_battery_visibility() {
         "#solar-to-grid-box":    s         ? "#999" : "#333",
         "#solar-to-load-box":    s         ? "#999" : "#333",
         "#solar-to-battery-box": s && b    ? "#999" : "#333",
-        "#discharge-box":        b         ? "#666" : "#333",
+        "#battery-to-load-box":  b         ? "#999" : "#333",
+        "#battery-to-grid-box":  b         ? "#999" : "#333",
+        "#grid-to-battery-box":  b         ? "#999" : "#333",
         "#grid-to-load-box":                          "#999"
     };
     for (var id in arrowColors) $(id).css("--statsbox-color", arrowColors[id]);

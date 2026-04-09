@@ -105,13 +105,13 @@
         </tr>
         
         <tr>
-            <td id="charge-from-solar-box" class="statsbox">
+            <td id="solar-to-battery-box" class="statsbox">
                 <div class="statsbox-inner-arrow">
                     <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_battery_charge_from_solar_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
 
-            <td id="grid-charge-box" class="statsbox" style="text-align:left">
+            <td id="grid-to-battery-box" class="statsbox" style="text-align:left">
                 <div id="battery_import" class="statsbox-inner-arrow">
                     <div class="statsbox-padded statsbox-arrow-left" style="padding:10px 0px 0px 10px"><div class="statsbox-flow-title">GRID CHARGE</div><span class="statsbox-value total_import_for_battery_kwh" style="font-size:22px">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
@@ -123,7 +123,7 @@
                 </div>
             </td>
 
-            <td id="battery-to-grid-box" class="statsbox style="text-align:right">
+            <td id="battery-to-grid-box" class="statsbox" style="text-align:right">
                 <div id="battery_export" class="statsbox-inner-arrow">
                     <div class="statsbox-padded statsbox-arrow-right" style="padding:10px 10px 0px 0px"><div class="statsbox-flow-title">BATTERY TO GRID</div><span class="statsbox-value total_battery_to_grid_kwh" style="font-size:22px">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
@@ -144,7 +144,7 @@
                 </div>
             </td>
 
-            <td id="discharge-box" class="statsbox">
+            <td id="battery-to-load-box" class="statsbox">
                 <div class="statsbox-inner-arrow">
                     <div class="statsbox-padded statsbox-arrow-right"><span class="statsbox-value total_battery_discharge_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
@@ -202,4 +202,4 @@ config.db = <?php echo isset($config) ? json_encode($config) : 'null'; ?>;
 </script>
 
 <!-- load mysolarpvbattery.js -->
-<script src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.js?v=13"></script>
+<script src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.js?v=14"></script>
