@@ -327,6 +327,7 @@ function show()
 
 
     flow_available();
+    solar_battery_visibility();
 
     if (check_history_feeds(mode)) {
         if (!bargraph_initialized) init_bargraph();
@@ -340,7 +341,9 @@ function show()
     live = setInterval(livefn,5000);
 
     // Trigger process here
-    run_post_processor();
+    setTimeout(function() {
+        start_post_processor();
+    }, 1000);
 }
 
 // -------------------------------------------------------------------------------------------------------
@@ -635,6 +638,20 @@ function livefn()
 
     // Only redraw the graph if its the power graph and auto update is turned on
     if (viewmode=="powergraph" && autoupdate) draw(true);
+    // If 
+
+}
+
+function solar_battery_visibility() {
+    if (available.solar) {
+        $("#live-solar-title").addClass("text-light");
+        $("#live-solar-value").addClass("text-warning");
+        $("#solar-box").css("background-color", "#dccc1f");
+    } else {
+        $("#live-solar-title").removeClass("text-light");
+        $("#live-solar-value").removeClass("text-warning");
+        $("#solar-box").css("background-color", "#262626");
+    }
 }
 
 // Capacity in kWh, power in W, returns time left as string "Xh Ym"
@@ -1258,5 +1275,5 @@ function render_autogen_feed_list() {
 // (delegate to config.autogen.* in appconf.js)
 // ----------------------------------------------------------------------
 function create_missing_feeds()  { config.autogen.create_missing_feeds(); }
-function run_post_processor()    { config.autogen.run_post_processor(); }
+function start_post_processor()    { config.autogen.start_post_processor(); }
 function reset_feeds()           { config.autogen.reset_feeds(); }

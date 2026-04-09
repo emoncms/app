@@ -57,7 +57,7 @@ function octopus_app_controller($route,$app,$appconfig,$apikey)
             "solar"               => (int) isset($app->config->solar) ? $app->config->solar : 0,
             "use"                 => (int) isset($app->config->use) ? $app->config->use : 0,
             "grid"                => (int) isset($app->config->grid) ? $app->config->grid : 0,
-            "battery_power"       => (int) isset($app->config->battery_power) ? $app->config->battery_power : 0,
+            "battery"       => (int) isset($app->config->battery) ? $app->config->battery : 0,
 
             "solar_to_load_kwh"    => $feed->exists_tag_name($userid, $tag, "solar_to_load_kwh"),
             "solar_to_grid_kwh"    => $feed->exists_tag_name($userid, $tag, "solar_to_grid_kwh"),

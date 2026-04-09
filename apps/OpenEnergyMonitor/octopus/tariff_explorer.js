@@ -355,6 +355,11 @@ function show() {
     updater();
     updaterinst = setInterval(updater, 5000);
     $(".ajax-loader").hide();
+
+    // Trigger process here
+    setTimeout(function() {
+        start_post_processor();
+    }, 1000);
 }
 
 function setPeriod(period) {
@@ -646,13 +651,13 @@ function graph_load() {
 
         // Read half-hourly energy flow values directly from post-processed feeds (delta=1)
         // Clamp negatives to zero for safety
-        kwh_solar_to_load    = Math.max(0, solar_to_load_kwh_data[z][1]    != null ? solar_to_load_kwh_data[z][1]    : 0);
-        kwh_solar_to_grid    = Math.max(0, solar_to_grid_kwh_data[z][1]    != null ? solar_to_grid_kwh_data[z][1]    : 0);
-        kwh_solar_to_battery = Math.max(0, solar_to_battery_kwh_data[z][1] != null ? solar_to_battery_kwh_data[z][1] : 0);
-        kwh_battery_to_load  = Math.max(0, battery_to_load_kwh_data[z][1]  != null ? battery_to_load_kwh_data[z][1]  : 0);
-        kwh_battery_to_grid  = Math.max(0, battery_to_grid_kwh_data[z][1]  != null ? battery_to_grid_kwh_data[z][1]  : 0);
-        kwh_grid_to_load     = Math.max(0, grid_to_load_kwh_data[z][1]     != null ? grid_to_load_kwh_data[z][1]     : 0);
-        kwh_grid_to_battery  = Math.max(0, grid_to_battery_kwh_data[z][1]  != null ? grid_to_battery_kwh_data[z][1]  : 0);
+        kwh_solar_to_load    = Math.max(0, get_value_at_index(solar_to_load_kwh_data, z, 0));
+        kwh_solar_to_grid    = Math.max(0, get_value_at_index(solar_to_grid_kwh_data, z, 0));
+        kwh_solar_to_battery = Math.max(0, get_value_at_index(solar_to_battery_kwh_data, z, 0));
+        kwh_battery_to_load  = Math.max(0, get_value_at_index(battery_to_load_kwh_data, z, 0));
+        kwh_battery_to_grid  = Math.max(0, get_value_at_index(battery_to_grid_kwh_data, z, 0));
+        kwh_grid_to_load     = Math.max(0, get_value_at_index(grid_to_load_kwh_data, z, 0));
+        kwh_grid_to_battery  = Math.max(0, get_value_at_index(grid_to_battery_kwh_data, z, 0));
 
         // Derive aggregate values from flows
         kwh_import = kwh_grid_to_load + kwh_grid_to_battery;
@@ -728,6 +733,13 @@ function graph_load() {
     // }
 
     draw_tables(total, monthly_data);
+}
+
+function get_value_at_index(data_array, index, default_value = null) {
+    if (data_array[index] != undefined && data_array[index][1] != null) {
+        return data_array[index][1];
+    }
+    return default_value;
 }
 
 function accumulate_flows(bucket, flows, outgoing_unit, unitcost_tariff_A, unitcost_tariff_B) {
@@ -1591,5 +1603,5 @@ function render_autogen_feed_list() {
 // (delegate to config.autogen.* in appconf.js)
 // ----------------------------------------------------------------------
 function create_missing_feeds()  { config.autogen.create_missing_feeds(); }
-function run_post_processor()    { config.autogen.run_post_processor(); }
+function start_post_processor()    { config.autogen.start_post_processor(); }
 function reset_feeds()           { config.autogen.reset_feeds(); }
