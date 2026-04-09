@@ -667,6 +667,8 @@ function solar_battery_visibility() {
     $(".prc-solar").toggle(s);
     $(".prc-battery").toggle(b);
     $(".prc-solar-battery").toggle(s && b);
+
+    $(".battery-section").toggle(b);
 }
 
 // Capacity in kWh, power in W, returns time left as string "Xh Ym"

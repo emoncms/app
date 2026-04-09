@@ -34,27 +34,27 @@
 
 
     <div class="stats-grid">
-        <div class="text-xs-center">
+        <div>
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('USE') ?></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
         </div>
-        <div class="text-xs-center">
+        <div>
             <h5 class="electric-title mb-0 text-md-larger text-light"><span class="balance-label">-</span></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-success"><span class="balance"></span></h2>
         </div>
-        <div class="text-xs-center solar-section">
+        <div>
             <h5 id="live-solar-title" class="electric-title mb-0 text-md-larger text-light"><?php echo tr('SOLAR') ?></h5>
             <h2 id="live-solar-value" class="power-value display-md-3 display-lg-2 my-0 text-warning"><span class="solarnow"></span><span class="power-unit"></span></h2>
         </div>
-        <div class="text-xs-center battery-section">
+        <div class="battery-section">
             <h5 class="electric-title mb-0 text-md-larger text-light"><span class="battery_now_title"><?php echo tr('BATTERY POWER') ?></span></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="battery_now">-</span><span class="power-unit"></span></h2>
         </div>
-        <div class="text-xs-center battery-section">
+        <div class="battery-section">
             <h5 class="electric-title mb-0 text-md-larger text-light"><span class="battery_time_left_title"><?php echo tr('BATTERY TIME LEFT') ?></span></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="battery_time_left">-</span></h2>
         </div>
-        <div class="text-xs-center battery-section">
+        <div class="battery-section">
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('STATE OF CHARGE') ?></h5>
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="battery_soc">-</span>%</h2>
         </div>
@@ -105,13 +105,13 @@
         </tr>
         
         <tr>
-            <td id="charge-from-solar-box" class="statsbox battery-section">
+            <td id="charge-from-solar-box" class="statsbox">
                 <div class="statsbox-inner-arrow">
                     <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_battery_charge_from_solar_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
 
-            <td id="grid-charge-box" class="statsbox battery-section" style="text-align:left">
+            <td id="grid-charge-box" class="statsbox" style="text-align:left">
                 <div id="battery_import" class="statsbox-inner-arrow">
                     <div class="statsbox-padded statsbox-arrow-left" style="padding:10px 0px 0px 10px"><div class="statsbox-flow-title">GRID CHARGE</div><span class="statsbox-value total_import_for_battery_kwh" style="font-size:22px">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
@@ -123,7 +123,7 @@
                 </div>
             </td>
 
-            <td id="battery-to-grid-box" class="statsbox battery-section" style="text-align:right">
+            <td id="battery-to-grid-box" class="statsbox style="text-align:right">
                 <div id="battery_export" class="statsbox-inner-arrow">
                     <div class="statsbox-padded statsbox-arrow-right" style="padding:10px 10px 0px 0px"><div class="statsbox-flow-title">BATTERY TO GRID</div><span class="statsbox-value total_battery_to_grid_kwh" style="font-size:22px">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
@@ -137,14 +137,14 @@
         </tr>
         
         <tr>
-            <td id="battery-box" class="statsbox battery-section" style="background: #fb7b50">
+            <td id="battery-box" class="statsbox" style="background: #fb7b50">
                 <div class="statsbox-padded statsbox-inner-unit">
                     <div class="statsbox-title">BATTERY</div>
                     <div><span class="statsbox-value battery_soc_change">0</span> <span class="statsbox-units">%</span></div>
                 </div>
             </td>
 
-            <td id="discharge-box" class="statsbox battery-section">
+            <td id="discharge-box" class="statsbox">
                 <div class="statsbox-inner-arrow">
                     <div class="statsbox-padded statsbox-arrow-right"><span class="statsbox-value total_battery_discharge_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
