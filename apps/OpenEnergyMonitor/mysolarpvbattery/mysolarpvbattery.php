@@ -16,7 +16,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
 
 <!-- load mysolarpvbattery.css -->
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.css?v=4" rel="stylesheet">
+<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.css?v=5" rel="stylesheet">
 
 
 
@@ -202,4 +202,4 @@ config.db = <?php echo isset($config) ? json_encode($config) : 'null'; ?>;
 </script>
 
 <!-- load mysolarpvbattery.js -->
-<script src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.js?v=12"></script>
+<script src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.js?v=13"></script>

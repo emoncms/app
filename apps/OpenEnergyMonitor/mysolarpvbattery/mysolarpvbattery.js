@@ -334,7 +334,6 @@ function show()
     }
     
     load_powergraph();
-    resize();
     powergraph_events();
     
     livefn();
@@ -344,6 +343,9 @@ function show()
     setTimeout(function() {
         start_post_processor();
     }, 1000);
+
+    // resize after a delay to ensure the DOM is fully rendered and dimensions are correct
+    setTimeout(resize, 100);
 }
 
 // -------------------------------------------------------------------------------------------------------
@@ -505,23 +507,28 @@ function resize()
 {
     app_log("INFO","solar & battery resize");
     
-    var top_offset = 0;
     var placeholder_bound = $('#placeholder_bound');
     var placeholder = $('#placeholder');
 
-    var is_landscape = $(window).height() < $(window).width();
     var width = placeholder_bound.width();
-    var height = $(window).height()*(is_landscape ? 0.3: 0.3);
 
-    if (height>width) height = width;
+    // Calculate height from the top of the chart to the bottom of the viewport,
+    // leaving enough room for the stats table below to remain visible.
+    var bottom_margin = $('.statstable').outerHeight(true) + 64;
+    var offset_top = placeholder_bound.offset().top - $(window).scrollTop();
+    var height = $(window).height() - offset_top - bottom_margin;
+
+    // In landscape cap at 60% of window width to avoid an overly tall chart
+    var is_landscape = $(window).height() < $(window).width();
+    if (is_landscape) height = Math.min(height, width * 0.6);
 
     // min size to avoid flot errors
-    if (height<180) height = 180;
-    if (width<200) width = 200;
+    if (height < 180) height = 180;
+    if (width  < 200) width  = 200;
 
     placeholder.width(width);
     placeholder_bound.height(height);
-    placeholder.height(height-top_offset);
+    placeholder.height(height);
     
     draw(false)
 }
