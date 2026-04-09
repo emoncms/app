@@ -77,19 +77,34 @@ config.app = {
         "name": "Title",
         "description": "Optional title for app"
     },
-    "solar": {
+    "solar_power": {
         "type": "feed",
-        "autoname": "solar",
+        "autoname": "solar_power",
         "optional": true
     },
-    "import": {
+    "solar_energy": {
         "type": "feed",
-        "autoname": "import",
+        "autoname": "solar_energy",
+        "optional": true
+    },
+    "import_power": {
+        "type": "feed",
+        "autoname": "import_power",
         "optional": false
     },
-    "export": {
+    "import_energy": {
         "type": "feed",
-        "autoname": "export",
+        "autoname": "import_energy",
+        "optional": false
+    },
+    "export_power": {
+        "type": "feed",
+        "autoname": "export_power",
+        "optional": true
+    },
+    "export_energy": {
+        "type": "feed",
+        "autoname": "export_energy",
         "optional": true
     },
     "import_cost": {
@@ -172,7 +187,7 @@ function setup() {
     data.setup(Graph.POWER, [Graph.SOLAR, Graph.IMPORT, Graph.EXPORT], config);
     data.setup(Graph.ENERGY, [Graph.SOLAR, Graph.IMPORT, Graph.EXPORT], config);
     data.register([Graph.SOLAR, Graph.IMPORT, Graph.EXPORT, 
-        "solar", "import", "export"], config);
+        "solar_power", "import_power", "export_power"], config);
     
     return graph.setup(data, config).then(function(result) {
         update();
@@ -230,17 +245,17 @@ function drawPowerValues(values) {
 		}
 		return parseFloat(values[key][1]);
 	};
-    var imp = getPowerValue("import", values);
+    var imp = getPowerValue("import_power", values);
     if (imp == null) {
     	return;
     }
     var cons = imp;
-    var solar = getPowerValue("solar", values);
+    var solar = getPowerValue("solar_power", values);
     if (solar == null) {
         solar = 0;
     }
     else {
-        var exp = getPowerValue("export", values);
+        var exp = getPowerValue("export_power", values);
         if (exp != null) {
             var selfCons = Math.max(0, solar - exp);
             if (selfCons != null) {
@@ -266,7 +281,7 @@ function drawPowerValues(values) {
         $("#cons-power").html(cons.toFixed(fixed)+"<span class='unit'>"+unit+"</span>");
         $(".consumption.power").removeClass('cost').show();
         
-        if (values["solar"] != undefined && solar != null) {
+        if (values["solar_power"] != undefined && solar != null) {
             $("#gen-power").html(solar.toFixed(fixed)+"<span class='unit'>"+unit+"</span>");
             $(".generation.power").removeClass('cost').show();
         }
@@ -289,7 +304,7 @@ function drawPowerValues(values) {
         $("#cons-power").html(config.app.currency.value+costNow.toFixed(fixed)+"<span class='unit'>/hr</span>");
         $(".consumption.power").addClass('cost').show();
         
-        if (values["solar"] != undefined && solar != null && 
+        if (values["solar_power"] != undefined && solar != null && 
                 config.app.export_cost.value > 0) {
             
             var fitNow = solar*config.app.export_cost.value*0.001;

@@ -35,7 +35,7 @@ config.app = {
     // correct minimum set depending on the has_solar / has_battery mode.
     // Any single missing feed will be derived from the other three (or two in solar/battery-only modes).
     "use":{"optional":true, "type":"feed", "autoname":"use", "description":"House or building use in watts"},
-    "solar":{"optional":true, "type":"feed", "autoname":"solar", "description":"Solar generation in watts (only shown when has_solar is enabled)"},
+    "solar":{"optional":true, "type":"feed", "autoname":"solar", "description":"Solar generation in watts"},
     "battery":{"optional":true, "type":"feed", "autoname":"battery_power", "description":"Battery power in watts, positive for discharge, negative for charge (only shown when has_battery is enabled)"},
     "grid":{"optional":true, "type":"feed", "autoname":"grid", "description":"Grid power in watts (positive for import, negative for export)"},
 
@@ -617,10 +617,10 @@ function livefn()
     // Grid import/export status
     if (input.grid > 0) {
         $(".balance-label").html("IMPORTING");
-        $(".balance").html("<span style='color:#d52e2e'><b>" + Math.round(input.grid) + " " + powerUnit + "</b></span>");
+        $(".balance").html(`<span style='color:#d52e2e'><span class="grid_now">${Math.round(input.grid)}</span><span class="power-unit">${powerUnit}</span></span>`);
     } else if (input.grid < 0) {
         $(".balance-label").html("EXPORTING");
-        $(".balance").html("<span style='color:#2ed52e'><b>" + Math.round(-input.grid) + " " + powerUnit + "</b></span>");
+        $(".balance").html(`<span style='color:#2ed52e'><span class="grid_now">${Math.round(-input.grid)}</span><span class="power-unit">${powerUnit}</span></span>`);
     } else {
         $(".balance-label").html("BALANCED");
         $(".balance").html("--");
@@ -807,8 +807,8 @@ function load_powergraph() {
     
     powerseries = [];
     powerseries.push({data: solar_to_load_data,    label: "Solar to Load",    color: "#abddff", stack: 1, lines: {lineWidth: 0, fill: 0.75}});
-    powerseries.push({data: solar_to_grid_data,    label: "Solar to Grid",    color: "#dccc1f", stack: 1, lines: {lineWidth: 0, fill: 1.0}});
     powerseries.push({data: solar_to_battery_data, label: "Solar to Battery", color: "#fba050", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+    powerseries.push({data: solar_to_grid_data,    label: "Solar to Grid",    color: "#dccc1f", stack: 1, lines: {lineWidth: 0, fill: 1.0}});
     powerseries.push({data: battery_to_load_data,  label: "Battery to Load",  color: "#ffd08e", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
     powerseries.push({data: battery_to_grid_data,  label: "Battery to Grid",  color: "#fabb68", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
     powerseries.push({data: grid_to_load_data,     label: "Grid to Load",     color: "#82cbfc", stack: 1, lines: {lineWidth: 0, fill: 0.8}});

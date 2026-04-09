@@ -29,6 +29,10 @@
     padding-bottom: 15px;
 }
 
+.statsbox-flow-title {
+    font-size: 16px;
+}
+
 .statsbox-value {
     font-weight: bold;
     font-size: 36px;
@@ -124,19 +128,27 @@
 
 /*Small devices (landscape phones, 576px and up)*/
 @media (max-width: 576px) {
+  #app-block { padding: 0; }
   #statsbox-generation { padding-bottom:18px; }
+  .statstable { border-spacing: 4px; }
   .statsbox-padded { padding: 4px; }
-  .statsbox-title { font-size: 14px; padding-bottom: 5px; } /* 20px */
-  .statsbox-value { font-size:28px; } /* 36px */
-  .statsbox-units { font-size:14px; } /* 16px */
-  .statsbox-prc { font-size: 14px; } /* 16px */
+  .statsbox-title { font-size: 12px; padding-bottom: 4px; } /* 20px */
+  .statsbox-flow-title { font-size: 12px; padding-bottom: 2px; line-height:12px; } /* 20px */
+
+  .statsbox-value { font-size: 20px; } /* 36px */
+  .statsbox-units { display: none; } /* hide units */
+  .statsbox-prc { font-size: 12px; } /* 16px */
   .statsbox-arrow-down:after {
-    border-width: 10px;
-    margin-left: -10px;
+    border-width: 8px;
+    margin-left: -8px;
   }
   .statsbox-arrow-right:after {
-    border-width: 10px;
-    margin-top: -10px;
+    border-width: 8px;
+    margin-top: -8px;
+  }
+  .statsbox-arrow-left:before {
+    border-width: 8px;
+    margin-top: -8px;
   }
 }
 

@@ -377,7 +377,8 @@ var config = {
                         tag: node_name,
                         name: item.name,
                         options: JSON.stringify(defaults.options || { interval: 1800 }),
-                        apikey: apikey
+                        apikey: apikey,
+                        unit: "kWh"
                     }),
                     dataType: "json",
                     async: false,
