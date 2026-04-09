@@ -293,6 +293,7 @@ var profile_cost = {};
 
 var monthly_summary = {};
 var baseline_monthly_summary = {};
+var baseline_tariff_name = "";
 
 config.init();
 
@@ -824,15 +825,17 @@ function draw_tables() {
 
         // Update table headers with selected tariff names
         var tariff_name = config.app.tariff.value;
+        var has_baseline = baseline_monthly_summary != undefined && Object.keys(baseline_monthly_summary).length > 0;
+
+        var tariff_label = tariff_name + (has_baseline ? " (A)" : "");
+        var baseline_label = (baseline_tariff_name || "Baseline") + " (B)";
 
         var heading = "<th>Month</th>" +
             "<th>Consumption (kWh)</th>" +
-            "<th>Tariff cost</th>" +
-            "<th>Tariff rate</th>"
+            "<th>" + tariff_label + "</th>";
 
-        if (baseline_monthly_summary != undefined && Object.keys(baseline_monthly_summary).length > 0) {
-            heading += "<th>Baseline cost</th>" +
-                "<th>Baseline rate</th>" +
+        if (has_baseline) {
+            heading += "<th>" + baseline_label + "</th>" +
                 "<th>Cheaper tariff</th>";
         }
 
@@ -869,11 +872,12 @@ function draw_tables() {
             monthly_out += "<td>" + d.getFullYear() + " " + months[d.getMonth()] + "</td>";
             monthly_out += "<td>" + consumption.toFixed(1) + " kWh</td>";
 
-            // Tariff A
-            monthly_out += "<td>" + (net_cost >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(net_cost).toFixed(2) + "</td>";
-            monthly_out += !isNaN(unit_rate)
-                ? "<td>" + unit_rate.toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>"
-                : "<td>&mdash;</td>";
+            // Tariff A: cost + rate merged
+            if (!isNaN(unit_rate)) {
+                monthly_out += "<td>" + (net_cost >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(net_cost).toFixed(2) + " <span style='font-size:12px;color:#888'>" + unit_rate.toFixed(1) + " p/kWh</span></td>";
+            } else {
+                monthly_out += "<td>" + (net_cost >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(net_cost).toFixed(2) + "</td>";
+            }
 
             // Baseline comparison if data exists
             if (baseline_monthly_summary[month] != undefined) {
@@ -881,11 +885,12 @@ function draw_tables() {
                 var baseline_net_cost = baseline_monthly_summary[month].net_cost_tariff;
                 var baseline_unit_rate = baseline_monthly_summary[month].unit_rate_tariff;
 
-                // Baseline comparison
-                monthly_out += "<td>" + (baseline_net_cost >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(baseline_net_cost).toFixed(2) + "</td>";
-                monthly_out += !isNaN(baseline_unit_rate)
-                    ? "<td>" + baseline_unit_rate.toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>"
-                    : "<td>&mdash;</td>";
+                // Baseline: cost + rate merged
+                if (!isNaN(baseline_unit_rate)) {
+                    monthly_out += "<td>" + (baseline_net_cost >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(baseline_net_cost).toFixed(2) + " <span style='font-size:12px;color:#888'>" + baseline_unit_rate.toFixed(1) + " p/kWh</span></td>";
+                } else {
+                    monthly_out += "<td>" + (baseline_net_cost >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(baseline_net_cost).toFixed(2) + "</td>";
+                }
 
                 // Which tariff is cheaper this month
                 if (!isNaN(unit_rate) && !isNaN(baseline_unit_rate)) {
@@ -923,15 +928,19 @@ function draw_tables() {
         monthly_out += "<tr style='font-weight:bold;background-color:#e8e8e8'>";
         monthly_out += "<td>Total</td>";
         monthly_out += "<td>" + sum_consumption_kwh.toFixed(1) + " kWh</td>";
-        monthly_out += "<td>" + (sum_net_cost_tariff >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(sum_net_cost_tariff).toFixed(2) + "</td>";
-        monthly_out += !isNaN(total_unit_rate)
-            ? "<td>" + total_unit_rate.toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>": "<td>&mdash;</td>";
+        if (!isNaN(total_unit_rate)) {
+            monthly_out += "<td>" + (sum_net_cost_tariff >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(sum_net_cost_tariff).toFixed(2) + " <span style='font-size:12px;color:#888'>" + total_unit_rate.toFixed(1) + " p/kWh</span></td>";
+        } else {
+            monthly_out += "<td>" + (sum_net_cost_tariff >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(sum_net_cost_tariff).toFixed(2) + "</td>";
+        }
 
         if (baseline_monthly_summary != undefined && Object.keys(baseline_monthly_summary).length > 0) {
             var baseline_total_unit_rate = sum_consumption_kwh > 0 ? (sum_net_cost_baseline / sum_consumption_kwh) * 100 : NaN;
-            monthly_out += "<td>" + (sum_net_cost_baseline >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(sum_net_cost_baseline).toFixed(2) + "</td>";
-            monthly_out += !isNaN(baseline_total_unit_rate)
-                ? "<td>" + baseline_total_unit_rate.toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>": "<td>&mdash;</td>";
+            if (!isNaN(baseline_total_unit_rate)) {
+                monthly_out += "<td>" + (sum_net_cost_baseline >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(sum_net_cost_baseline).toFixed(2) + " <span style='font-size:12px;color:#888'>" + baseline_total_unit_rate.toFixed(1) + " p/kWh</span></td>";
+            } else {
+                monthly_out += "<td>" + (sum_net_cost_baseline >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(sum_net_cost_baseline).toFixed(2) + "</td>";
+            }
         }
 
 
@@ -1555,6 +1564,7 @@ $('#datetimepicker2').on("changeDate", function(e) {
 // Save monthly data as baseline to be compared against tariff change
 $("#save-baseline").click(function() {
     baseline_monthly_summary = JSON.parse(JSON.stringify(monthly_summary));
+    baseline_tariff_name = config.app.tariff.value;
     draw_tables();
 });
 
