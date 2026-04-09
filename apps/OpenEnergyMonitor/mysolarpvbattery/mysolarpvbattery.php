@@ -43,8 +43,8 @@
             <h2 class="power-value display-md-3 display-lg-2 my-0 text-success"><span class="balance"></span></h2>
         </div>
         <div class="text-xs-center solar-section">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('SOLAR') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-warning"><span class="solarnow"></span><span class="power-unit"></span></h2>
+            <h5 id="live-solar-title" class="electric-title mb-0 text-md-larger text-light"><?php echo tr('SOLAR') ?></h5>
+            <h2 id="live-solar-value" class="power-value display-md-3 display-lg-2 my-0 text-warning"><span class="solarnow"></span><span class="power-unit"></span></h2>
         </div>
         <div class="text-xs-center battery-section">
             <h5 class="electric-title mb-0 text-md-larger text-light"><span class="battery_now_title"><?php echo tr('BATTERY POWER') ?></span></h5>
@@ -68,7 +68,7 @@
         
     <table class="statstable">
         <tr>
-            <td class="statsbox solar-section" colspan="3" style="background: #dccc1f">
+            <td id="solar-box" class="statsbox solar-section" colspan="3" style="background: #dccc1f">
                 <div class="statsbox-inner-unit">
                     <div id="statsbox-generation" class="statsbox-padded" style="position: relative;">
                         <div class="statsbox-title"><span class="generationtitle">SOLAR</span></div>
@@ -202,4 +202,4 @@ config.db = <?php echo isset($config) ? json_encode($config) : 'null'; ?>;
 </script>]
 
 <!-- load mysolarpvbattery.js -->
-<script src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.js?v=8"></script>
+<script src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.js?v=10"></script>

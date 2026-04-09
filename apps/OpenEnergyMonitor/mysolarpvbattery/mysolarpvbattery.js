@@ -327,6 +327,7 @@ function show()
 
 
     flow_available();
+    solar_battery_visibility();
 
     if (check_history_feeds(mode)) {
         if (!bargraph_initialized) init_bargraph();
@@ -630,6 +631,20 @@ function livefn()
 
     // Only redraw the graph if its the power graph and auto update is turned on
     if (viewmode=="powergraph" && autoupdate) draw(true);
+    // If 
+
+}
+
+function solar_battery_visibility() {
+    if (available.solar) {
+        $("#live-solar-title").addClass("text-light");
+        $("#live-solar-value").addClass("text-warning");
+        $("#solar-box").css("background-color", "#dccc1f");
+    } else {
+        $("#live-solar-title").removeClass("text-light");
+        $("#live-solar-value").removeClass("text-warning");
+        $("#solar-box").css("background-color", "#262626");
+    }
 }
 
 // Capacity in kWh, power in W, returns time left as string "Xh Ym"
