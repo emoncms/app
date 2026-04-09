@@ -355,6 +355,11 @@ function show() {
     updater();
     updaterinst = setInterval(updater, 5000);
     $(".ajax-loader").hide();
+
+    // Trigger process here
+    setTimeout(function() {
+        start_post_processor();
+    }, 1000);
 }
 
 function setPeriod(period) {
@@ -1598,5 +1603,5 @@ function render_autogen_feed_list() {
 // (delegate to config.autogen.* in appconf.js)
 // ----------------------------------------------------------------------
 function create_missing_feeds()  { config.autogen.create_missing_feeds(); }
-function run_post_processor()    { config.autogen.run_post_processor(); }
+function start_post_processor()    { config.autogen.start_post_processor(); }
 function reset_feeds()           { config.autogen.reset_feeds(); }

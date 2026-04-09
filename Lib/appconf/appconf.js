@@ -307,6 +307,9 @@ var config = {
     // -----------------------------------------------------------------------
     autogen: {
 
+        post_process_already_running: false,
+        post_process_run_count: 0,
+
         // Return the node tag string used for all auto-generated feeds
         node_name: function() {
             return config.app.autogenerate_nodename.value;
@@ -353,6 +356,7 @@ var config = {
 
         // Render the autogen feed list — delegates to vue_config
         render_feed_list: function() {
+            config.autogen.refresh_autogen_feed_references();
             vue_config.renderAutogenFeedList();
         },
 
@@ -391,6 +395,7 @@ var config = {
             config.autogen_feeds_by_tag_name = feed.by_tag_and_name(config.feeds);
 
             // Populate config.app[key].value for the newly created autogen feeds
+            config.autogen.refresh_autogen_feed_references();
             config.load();
 
             config.autogen.render_feed_list();
@@ -402,10 +407,30 @@ var config = {
             vue_config.autogen_status_color = errors === 0 ? "#5cb85c" : "#f0ad4e";
         },
 
+        start_post_processor: function() {
+            if (config.autogen.post_process_already_running) {
+                vue_config.autogen_status = "Post-processor is already running, please wait...";
+                vue_config.autogen_status_color = "#f0ad4e";
+                return false;
+            } else {
+                config.autogen.post_process_already_running = true;
+            }
+            config.autogen.post_process_run_count = 0;
+            config.autogen.run_post_processor();
+        },
+
         // Trigger the app post-processor via app/process
         run_post_processor: function() {
-            vue_config.autogen_status = "Starting post-processor...";
-            vue_config.autogen_status_color = "#aaa";
+
+            if (config.autogen.post_process_run_count == 0) {
+                vue_config.autogen_status = "Starting post-processor...";
+                vue_config.autogen_status_color = "#aaa";
+            } else {
+                vue_config.autogen_status = "Post-processor is still running, please wait...";
+                vue_config.autogen_status_color = "#f0ad4e";
+            }
+            
+            config.autogen.post_process_run_count++;
 
             $.ajax({
                 url: path + "app/process",
@@ -414,17 +439,38 @@ var config = {
                 timeout: 120000,
                 success: function(result) {
                     if (result && result.success) {
-                        vue_config.autogen_status = "Post-processor completed successfully.";
-                        vue_config.autogen_status_color = "#5cb85c";
+
+                        if (result.more_to_process) {
+                            vue_config.autogen_status = "Post-processor is still running, please wait...";
+                            vue_config.autogen_status_color = "#f0ad4e";
+                            // run post processor again but only a maximum of 30 times (5 mins) to prevent infinite loops in case of an issue
+                            if (config.autogen.post_process_run_count < 30) {
+                                setTimeout(function() {
+                                    config.autogen.run_post_processor();
+                                }, 1000);
+                            } else {
+                                vue_config.autogen_status = "Post-processor is taking longer than expected, please check the app logs.";
+                                vue_config.autogen_status_color = "#f0ad4e";
+                                config.autogen.post_process_already_running = false;
+                            }
+                        } else {
+                            vue_config.autogen_status = "Post-processor completed successfully.";
+                            vue_config.autogen_status_color = "#5cb85c";
+                            config.autogen.post_process_already_running = false;
+                        }
+
+
                     } else {
                         var msg = (result && result.message) ? result.message : "Unknown response";
                         vue_config.autogen_status = "Post-processor: " + msg;
                         vue_config.autogen_status_color = "#f0ad4e";
+                        config.autogen.post_process_already_running = false;
                     }
                 },
                 error: function(xhr) {
                     vue_config.autogen_status = "Post-processor failed: " + xhr.statusText;
                     vue_config.autogen_status_color = "#d9534f";
+                    config.autogen.post_process_already_running = false;
                 },
                 complete: function() { }
             });
@@ -471,6 +517,21 @@ var config = {
                 : "Cleared " + cleared + " feed(s), " + errors + " error(s).";
             vue_config.autogen_status = statusText;
             vue_config.autogen_status_color = errors === 0 ? "#5cb85c" : "#f0ad4e";
+        },
+
+        // Update config.app[key].value for each autogen feed based on current feedid lookups so that the UI shows correct feed selections
+        refresh_autogen_feed_references: function() {
+            var feeds = config.autogen.get_feeds();
+            for (var i in feeds) {
+                var f = feeds[i];
+                if (f.feedid) {
+                    config.app[f.key].value = f.feedid;
+                    config.db[f.key] = f.feedid;
+                } else {
+                    delete config.db[f.key];
+                    config.app[f.key].value = false;
+                }
+            }
         }
     },
 
@@ -729,7 +790,7 @@ var vue_config = new Vue({
         },
 
         runPostProcessor: function() {
-            config.autogen.run_post_processor();
+            config.autogen.start_post_processor();
         },
 
         resetFeeds: function() {
