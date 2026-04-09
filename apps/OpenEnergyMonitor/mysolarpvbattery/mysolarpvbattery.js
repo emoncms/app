@@ -815,7 +815,10 @@ function load_powergraph() {
     powerseries.push({data: grid_to_battery_data,  label: "Grid to Battery",  color: "#fb7b50", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
 
     if (battery_soc_available) {
-        powerseries.push({data:battery_soc_data, label: "SOC", yaxis:2, color: "#888"});
+        // only add if time period is less or equall to 1 month
+        if ((view.end - view.start) <= 3600000*24*32) {
+            powerseries.push({data:battery_soc_data, label: "SOC", yaxis:2, color: "#888"});
+        }
     }
 }
 
