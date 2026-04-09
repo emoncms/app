@@ -32,25 +32,16 @@ global $path, $session, $v;
                 </div>
 
                 <div style="background-color:#fff; color:#333; padding:10px;">
-                    <table style="width:100%">
-                        <tr>
-                            <td style="width:40%">
-                                <div class="electric-title" id="import_export">IMPORT NOW</div>
-                                <div class="power-value"><span id="power_now">0</span></div>
-                            </td>
-
-                            <td style="text-align:center" class="last_halfhour_stats">
-                                <div class="electric-title">CURRENT PRICE</div>
-                                <div class="power-value"><span id="unit_price"></span></div>
-                            </td>
-
-                            <td style="text-align:right" class="last_halfhour_stats">
-                                <div class="electric-title">CURRENT HALF HOUR</div>
-                                <div class="halfhour-value"><span id="kwh_halfhour"></span> <span id="cost_halfhour"></span></div>
-                            </td>
-
-                        </tr>
-                    </table>
+                    <div style="display:grid; grid-template-columns:2fr 3fr; align-items:center; text-align: center;">
+                        <div>
+                            <b id="import_export" style="color:#44b3e2">IMPORT NOW</b>
+                            <div class="power-value"><span id="power_now">0</span></div>
+                        </div>
+                        <div style="text-align:center" class="last_halfhour_stats">
+                            <b style="color:#44b3e2">CURRENT PRICE</b>
+                            <div class="power-value"><span id="unit_price"></span></div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -95,6 +86,19 @@ global $path, $session, $v;
                 <div class="power-graph-footer" style="background-color:#f0f0f0; color:#333; display:none">
                     <div style="padding:20px;">
 
+
+
+                        <table style="width:100%" class="table">
+                            <tr>
+                                <th>Energy flow</th>
+                                <th>Energy</th>
+                                <th>Value / Cost</th>
+                                <th>Unit price</th>
+                                <th></th>
+                            </tr>
+                            <tbody id="octopus_totals"></tbody>
+                        </table>
+
                         <div class="input-prepend" style="padding-right:5px">
                             <span class="add-on">Select Tariff</span>
                             <select id="tariff" class="form-control" style="font-size:13px;"></select>
@@ -116,17 +120,6 @@ global $path, $session, $v;
                                 <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
                             </span>
                         </div>
-
-                        <table style="width:100%" class="table">
-                            <tr>
-                                <th>Energy flow</th>
-                                <th>Energy</th>
-                                <th>Value / Cost</th>
-                                <th>Unit price</th>
-                                <th></th>
-                            </tr>
-                            <tbody id="octopus_totals"></tbody>
-                        </table>
 
                         <button class="btn" style="float:right" id="download-csv">Download CSV</button>
                         <button class="btn hide" style="float:right" id="show_profile">Show Profile</button>
