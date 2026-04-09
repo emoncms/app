@@ -374,7 +374,14 @@ function flow_available() {
         if (!available.grid) derive = "grid";
         else if (!available.use) derive = "use";
         else if (!available.solar) derive = "solar";
-        else if (!available.battery) derive = "battery";
+        else if (!available.battery) {
+            if (config.app.has_battery.value) {
+                derive = "battery";
+            } else {
+                // If all feeds are preset but battery is disabled by config, assume battery=0 and recalculate grid from use and solar
+                derive = "grid";
+            }
+        }
     }
 
     // 2 Feeds: Specific logic based on your priority rules
