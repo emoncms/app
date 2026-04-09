@@ -95,12 +95,8 @@ global $path, $session, $v;
 
                         <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end; background:#fff; border-radius:8px; padding:14px 18px; margin-bottom:16px; box-shadow:0 1px 4px rgba(0,0,0,0.07);">
                             <div style="flex:1; min-width:180px;">
-                                <label style="font-size:12px; font-weight:600; color:#555; margin-bottom:4px; display:block;">&#9679; Tariff A</label>
-                                <select id="tariff_A" class="form-control" style="font-size:13px;"></select>
-                            </div>
-                            <div style="flex:1; min-width:180px;">
-                                <label style="font-size:12px; font-weight:600; color:#555; margin-bottom:4px; display:block;">&#9679; Tariff B</label>
-                                <select id="tariff_B" class="form-control" style="font-size:13px;"></select>
+                                <label style="font-size:12px; font-weight:600; color:#555; margin-bottom:4px; display:block;">&#9679; Tariff</label>
+                                <select id="tariff" class="form-control" style="font-size:13px;"></select>
                             </div>
                         </div>
 
@@ -143,18 +139,7 @@ global $path, $session, $v;
                         <!-- Monthly data table -->
                         <div id="monthly-data" class="hide mt-3">
                             <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Month</th>
-                                        <th>Energy (kWh)</th>
-                                        <th>Tariff A Cost (&pound;)</th>
-                                        <th></th>
-                                        <th>Tariff B Cost (&pound;)</th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
+                                <thead><tr></tr></thead>
                                 <tbody id="monthly-data-body"></tbody>
                             </table>
                         </div>
