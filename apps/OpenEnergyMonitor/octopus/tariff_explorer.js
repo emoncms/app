@@ -815,8 +815,7 @@ function draw_tables(total, monthly_data) {
             "<th>Month</th>" +
             "<th>Consumption (kWh)</th>" +
             "<th>Tariff cost</th>" +
-            "<th>Tariff rate</th>" +
-            "<th>Cheaper tariff</th>" +
+            "<th>Tariff rate</th>" + 
             "<th></th>"
         );
 
@@ -862,7 +861,7 @@ function draw_tables(total, monthly_data) {
             //} else {
             //    monthly_out += "<td>&mdash;</td>";
             //}
-            monthly_out += "<td>&mdash;</td>";
+            //monthly_out += "<td>&mdash;</td>";
 
             // Link icon to zoom to this month
             monthly_out += "<td><i class='icon-eye-open zoom-to-month' timestamp='" + month + "' style='cursor:pointer'></i></td>";
@@ -882,7 +881,7 @@ function draw_tables(total, monthly_data) {
         monthly_out += !isNaN(total_unit_rate)
             ? "<td>" + total_unit_rate.toFixed(1) + " <span style='font-size:12px'>p/kWh</span></td>"
             : "<td>&mdash;</td>";
-        monthly_out += "<td></td><td></td>";
+        monthly_out += "<td></td>";
         monthly_out += "</tr>";
 
         $("#monthly-data-body").html(monthly_out);
