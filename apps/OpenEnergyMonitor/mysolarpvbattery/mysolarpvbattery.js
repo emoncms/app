@@ -454,6 +454,9 @@ function flow_derive_missing(input) {
     var battery = input.battery;
     var grid = input.grid;
 
+    if (solar<0) solar = 0;
+    if (use<0) use = 0;
+
     if (assume_zero_solar) solar = 0;
     if (assume_zero_battery) battery = 0;
 
