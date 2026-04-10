@@ -34,10 +34,12 @@ var config = {
                 if (session_write == undefined) {
                     config.showConfig();          // Show setup block
                     config.UI();                  // Populate setup UI options
+                    config.autogen.render_feed_list();
                 } else {
                     if (session_write) {
                         config.showConfig();          // Show setup block
                         config.UI();                  // Populate setup UI options
+                        config.autogen.render_feed_list();
                     } else {
                         alert("Invalid app configuration");
                     }
@@ -312,7 +314,12 @@ var config = {
 
         // Return the node tag string used for all auto-generated feeds
         node_name: function() {
-            return config.app.autogenerate_nodename.value;
+            var node_name = config.app.autogenerate_nodename.default;
+            if (config.app.autogenerate_nodename.value != undefined) {
+                node_name = config.app.autogenerate_nodename.value;
+            }
+
+            return node_name.trim();
         },
 
         // Set autogenerate node name when the user clicks "Set node" button
