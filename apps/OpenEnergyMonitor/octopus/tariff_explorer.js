@@ -778,6 +778,8 @@ function draw_tables() {
 
     // Helper: one table row per energy flow
     function flow_row(label, kwh, value_gbp, value_label, color, rowStyle) {
+        if (kwh === 0) return ""; // skip zero rows for clarity
+
         var value_color;
         if (value_label.indexOf("avoided") !== -1) {
             value_color = "#888";
@@ -805,13 +807,13 @@ function draw_tables() {
         return r;
     }
 
-    out += flow_row("&#9728; Solar &rarr; Load",         total.solar_to_load_kwh,    total.tariff.solar_to_load_value * 1.05,    "avoided import cost (tariff A)", "#bec745");
-    out += flow_row("&#9728; Solar &rarr; Battery",      total.solar_to_battery_kwh, total.tariff.solar_to_battery_value * 1.05, "avoided import cost (tariff A)", "#a3d977");
+    out += flow_row("&#9728; Solar &rarr; Load",         total.solar_to_load_kwh,    total.tariff.solar_to_load_value * 1.05,    "avoided import cost", "#bec745");
+    out += flow_row("&#9728; Solar &rarr; Battery",      total.solar_to_battery_kwh, total.tariff.solar_to_battery_value * 1.05, "avoided import cost", "#a3d977");
     out += flow_row("&#9728; Solar &rarr; Grid (export)",total.solar_to_grid_kwh,    total.tariff.solar_to_grid_value * 1.05,    "earned at export tariff",        "#dccc1f");
-    out += flow_row("&#x1F50B; Battery &rarr; Load",     total.battery_to_load_kwh,  total.tariff.battery_to_load_value * 1.05,  "avoided import cost (tariff A)", "#fbb450");
+    out += flow_row("&#x1F50B; Battery &rarr; Load",     total.battery_to_load_kwh,  total.tariff.battery_to_load_value * 1.05,  "avoided import cost", "#fbb450");
     out += flow_row("&#x1F50B; Battery &rarr; Grid (export)", total.battery_to_grid_kwh, total.tariff.battery_to_grid_value * 1.05, "earned at export tariff",   "#f0913a");
-    out += flow_row("&#x1F4A1; Grid &rarr; Load",        total.grid_to_load_kwh,     (total.tariff.grid_to_load_cost * 1.05),   "cost at tariff A",               "#44b3e2");
-    out += flow_row("&#x1F4A1; Grid &rarr; Battery",     total.grid_to_battery_kwh,  (total.tariff.grid_to_battery_cost * 1.05),"cost at tariff A",               "#82cbfc");
+    out += flow_row("&#x1F4A1; Grid &rarr; Load",        total.grid_to_load_kwh,     (total.tariff.grid_to_load_cost * 1.05),   "import cost",               "#44b3e2");
+    out += flow_row("&#x1F4A1; Grid &rarr; Battery",     total.grid_to_battery_kwh,  (total.tariff.grid_to_battery_cost * 1.05),"import cost",               "#82cbfc");
 
     // Summary row: net cost = grid costs - earnings, unit cost = net cost / total consumption
     var net_cost_gbp = (
@@ -970,18 +972,18 @@ function graph_draw() {
 
     
     if (this_halfhour_index != -1) {
+        
+        // let kwh_grid_to_load    = get_data_value_at_index("grid_to_load",    this_halfhour_index);
+        // let kwh_grid_to_battery = get_data_value_at_index("grid_to_battery", this_halfhour_index);
+        // let kwh_last_halfhour = (kwh_grid_to_load != null ? kwh_grid_to_load : 0)
+        //                       + (kwh_grid_to_battery != null ? kwh_grid_to_battery : 0);
 
-        let kwh_grid_to_load    = get_data_value_at_index("grid_to_load",    this_halfhour_index);
-        let kwh_grid_to_battery = get_data_value_at_index("grid_to_battery", this_halfhour_index);
-        let kwh_last_halfhour = (kwh_grid_to_load != null ? kwh_grid_to_load : 0)
-                              + (kwh_grid_to_battery != null ? kwh_grid_to_battery : 0);
-
-        $("#kwh_halfhour").html(kwh_last_halfhour.toFixed(2) + "<span class='units'>kWh</span>");
+        // $("#kwh_halfhour").html(kwh_last_halfhour.toFixed(2) + "<span class='units'>kWh</span>");
 
         let tariff_unit = get_data_value_at_index("tariff", this_halfhour_index);
         if (tariff_unit != null) {
-            let cost_last_halfhour = kwh_last_halfhour * tariff_unit;
-            $("#cost_halfhour").html("(" + cost_last_halfhour.toFixed(2) + "<span class='units'>p</span>)");
+            // let cost_last_halfhour = kwh_last_halfhour * tariff_unit;
+            // $("#cost_halfhour").html("(" + cost_last_halfhour.toFixed(2) + "<span class='units'>p</span>)");
 
             let unit_price = tariff_unit * 1.05;
             $("#unit_price").html(unit_price.toFixed(2) + "<span class='units'>p</span>");
@@ -1129,6 +1131,10 @@ function resize() {
     if (height<180) height = 180;
     if (width<200) width = 200;
 
+    if (height > width*0.8) {
+        height = width*0.8;
+    }
+
     placeholder.width(width);
     placeholder_bound.height(height);
     placeholder.height(height - top_offset);
@@ -1145,6 +1151,14 @@ function resize() {
         $(".electric-title").css("font-size", "20px");
         $(".power-value").css("font-size", "50px");
         $(".halfhour-value").css("font-size", "40px");
+    }
+
+    if (width <= 500) {
+        $("#zoomout").hide();
+        $("#zoomin").hide();
+    } else {
+        $("#zoomout").show();
+        $("#zoomin").show();
     }
 }
 
