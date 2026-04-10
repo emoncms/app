@@ -772,7 +772,8 @@ function draw_tables() {
     var out = "";
 
     if (show_carbonintensity) {
-        var window_co2_intensity = 1000 * total.co2 / total.import_kwh;
+        var total_import_kwh = total.grid_to_load_kwh + total.grid_to_battery_kwh;
+        var window_co2_intensity = total_import_kwh > 0 ? 1000 * total.co2 / total_import_kwh : 0;
         $("#carbonintensity_result").html("Total CO2: " + (total.co2).toFixed(1) + "kgCO2, Consumption intensity: " + window_co2_intensity.toFixed(0) + " gCO2/kWh")
     }
 
@@ -1101,7 +1102,7 @@ function graph_draw() {
             mode: "x"
         },
         legend: {
-            show: true,
+            show: $('#placeholder').width() > 500,
             position: "NW",
             noColumns: 1
         }
@@ -1380,17 +1381,19 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
 
             text += "<br>";
 
+            if (tariff != null) {
+                text += "<span style='color:#fb1a80'>&#x25CF;</span> Import Tariff: " + tariff.toFixed(2) + " p/kWh (inc VAT)<br>";
+            }
+
             if (outgoing != null) {
-                text += "Export Tariff: " + outgoing.toFixed(2) + " p/kWh (inc VAT)<br>";
+                text += "<span style='color:#941afb'>&#x25CF;</span> Export Tariff: " + outgoing.toFixed(2) + " p/kWh (inc VAT)<br>";
             }
 
             if (show_carbonintensity && carbonintensity != null) {
-                text += "Carbon Intensity: " + carbonintensity.toFixed(0) + " gCO2/kWh<br>";
+                text += "&#x1F331; Carbon Intensity: " + carbonintensity.toFixed(0) + " gCO2/kWh<br>";
             }
 
-            if (tariff != null) {
-                text += config.app.tariff.value+": " + tariff.toFixed(2) + " p/kWh (inc VAT)<br>";
-            }
+
 
             tooltip(item.pageX, item.pageY, text, "#fff", "#000");
         }
