@@ -683,13 +683,13 @@ function solar_battery_visibility() {
     for (var id in boxColors) $(id).css("background-color", boxColors[id]);
 
     var arrowColors = {
-        "#solar-to-grid-box":    s         ? "#999" : "#333",
-        "#solar-to-load-box":    s         ? "#999" : "#333",
-        "#solar-to-battery-box": s && b    ? "#999" : "#333",
-        "#battery-to-load-box":  b         ? "#999" : "#333",
-        "#battery-to-grid-box":  b         ? "#999" : "#333",
-        "#grid-to-battery-box":  b         ? "#999" : "#333",
-        "#grid-to-load-box":                          "#999"
+        "#solar-to-grid-box":    s         ? flow_colors["solar_to_grid"]    : "#333",
+        "#solar-to-load-box":    s         ? flow_colors["solar_to_load"]    : "#333",
+        "#solar-to-battery-box": s && b    ? flow_colors["solar_to_battery"] : "#333",
+        "#battery-to-load-box":  b         ? flow_colors["battery_to_load"]  : "#333",
+        "#battery-to-grid-box":  b         ? flow_colors["battery_to_grid"]  : "#333",
+        "#grid-to-battery-box":  b         ? flow_colors["grid_to_battery"]  : "#333",
+        "#grid-to-load-box":               flow_colors["grid_to_load"]
     };
     for (var id in arrowColors) $(id).css("--statsbox-color", arrowColors[id]);
 
@@ -981,13 +981,13 @@ function powergraph_events() {
                 var series = powerseries[i];
                 if (series.data[item.dataIndex]!=undefined && series.data[item.dataIndex][1]!=null) {
                     if (series.label.toUpperCase()=="SOC") {
-                        tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "%"]);
+                        tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "%", series.color]);
                     } else {
                         if (series.data[item.dataIndex][1] != 0) {
                             if ( series.data[item.dataIndex][1] >= 1000) {
-                                tooltip_items.push([series.label.toUpperCase(), (series.data[item.dataIndex][1]/1000.0).toFixed(1) , "kW"]);
+                                tooltip_items.push([series.label.toUpperCase(), (series.data[item.dataIndex][1]/1000.0).toFixed(1) , "kW", series.color]);
                             } else {
-                                tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W"]);
+                                tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W", series.color]);
                             }
                         }
                     }
@@ -1266,7 +1266,8 @@ function show_tooltip(x, y, values) {
     for (i = 0; i < values.length; i++) {
         var value = values[i];
         var row = $('<tr class="tooltip-item"/>').appendTo(table);
-        $('<td style="padding-right: 8px"><span class="tooltip-title">'+value[0]+'</span></td>').appendTo(row);
+        var swatch = value[3] ? '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+value[3]+';margin-right:6px"></span>' : '';
+        $('<td style="padding-right: 8px">'+swatch+'<span class="tooltip-title">'+value[0]+'</span></td>').appendTo(row);
         $('<td><span class="tooltip-value">'+value[1]+'</span> <span class="tooltip-units">'+value[2]+'</span></td>').appendTo(row);
     }
 
