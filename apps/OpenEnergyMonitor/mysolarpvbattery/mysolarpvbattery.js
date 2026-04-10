@@ -593,7 +593,7 @@ function livefn()
         // Find and update time based on the first available.
         for (const key in available) {
             if (available[key] && feeds[config.app[key].value]!=undefined) {
-                updatetime = feeds[config.app[key].value].time * 0.001;
+                updatetime = feeds[config.app[key].value].time;
                 break;
             }
         }
@@ -602,7 +602,7 @@ function livefn()
             // Append new data to timeseries for each available feed, and trim old data outside of view
             for (const key in available) {
                 if (available[key]) {
-                    timeseries.append(key, updatetime, input[key]);
+                    timeseries.append(key, updatetime, input[key], true);
                     timeseries.trim_start(key, view.start * 0.001);
                 }
             }

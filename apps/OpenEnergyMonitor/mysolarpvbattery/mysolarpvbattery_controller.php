@@ -16,7 +16,7 @@ function mysolarpvbattery_app_controller($route,$app,$appconfig,$apikey)
 {
 
     global $path, $session, $settings, $mysqli, $redis, $user, $linked_modules_dir;
-    $v = 4;
+    $v = 6;
 
     // ----------------------------------------------------
     // Main app view route
@@ -29,7 +29,15 @@ function mysolarpvbattery_app_controller($route,$app,$appconfig,$apikey)
         $result .= "\n\n <!-- app specific view -->\n";
 
         $dir = $appconfig->get_app_dir($app->app);
-        $result .= view($dir.$app->app.".php",array("id"=>$app->id, "name"=>$app->name, "public"=>$app->public, "appdir"=>$dir, "config"=>$app->config, "apikey"=>$apikey));
+        $result .= view($dir.$app->app.".php",array(
+            "id"=>$app->id, 
+            "name"=>$app->name, 
+            "public"=>$app->public, 
+            "appdir"=>$dir, 
+            "config"=>$app->config, 
+            "apikey"=>$apikey,
+            "v"=>$v
+        ));
         return $result;
     }
 
