@@ -14,6 +14,26 @@ $(window).ready(function(){
 });
 if (!sessionwrite) $(".openconfig").hide();
 
+var flow_colors_old = {
+    "solar_to_load":    "#abddff", 
+    "solar_to_battery": "#fba050", 
+    "solar_to_grid":    "#dccc1f",
+    "battery_to_load":  "#ffd08e",
+    "battery_to_grid":  "#fabb68",
+    "grid_to_load":     "#82cbfc",
+    "grid_to_battery":  "#fb7b50"
+};
+
+var flow_colors = {
+    "solar_to_load":    "#bec745", 
+    "solar_to_battery": "#a3d977", 
+    "solar_to_grid":    "#dccc1f",
+    "battery_to_load":  "#fbb450",
+    "battery_to_grid":  "#f0913a",
+    "grid_to_load":     "#44b3e2",
+    "grid_to_battery":  "#82cbfc"
+};
+
 // ----------------------------------------------------------------------
 // Configuration
 // ----------------------------------------------------------------------
@@ -843,13 +863,13 @@ function load_powergraph() {
     $(".battery_soc_change").html(sign+soc_change.toFixed(1));
     
     powerseries = [];
-    powerseries.push({data: solar_to_load_data,    label: "Solar to Load",    color: "#abddff", stack: 1, lines: {lineWidth: 0, fill: 0.75}});
-    powerseries.push({data: solar_to_battery_data, label: "Solar to Battery", color: "#fba050", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: solar_to_grid_data,    label: "Solar to Grid",    color: "#dccc1f", stack: 1, lines: {lineWidth: 0, fill: 1.0}});
-    powerseries.push({data: battery_to_load_data,  label: "Battery to Load",  color: "#ffd08e", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: battery_to_grid_data,  label: "Battery to Grid",  color: "#fabb68", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: grid_to_load_data,     label: "Grid to Load",     color: "#82cbfc", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: grid_to_battery_data,  label: "Grid to Battery",  color: "#fb7b50", stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+    powerseries.push({data: solar_to_load_data,    label: "Solar to Load",    color: flow_colors["solar_to_load"],    stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+    powerseries.push({data: solar_to_battery_data, label: "Solar to Battery", color: flow_colors["solar_to_battery"], stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+    powerseries.push({data: solar_to_grid_data,    label: "Solar to Grid",    color: flow_colors["solar_to_grid"],    stack: 1, lines: {lineWidth: 0, fill: 1.0}});
+    powerseries.push({data: battery_to_load_data,  label: "Battery to Load",  color: flow_colors["battery_to_load"],  stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+    powerseries.push({data: battery_to_grid_data,  label: "Battery to Grid",  color: flow_colors["battery_to_grid"],  stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+    powerseries.push({data: grid_to_load_data,     label: "Grid to Load",     color: flow_colors["grid_to_load"],     stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+    powerseries.push({data: grid_to_battery_data,  label: "Grid to Battery",  color: flow_colors["grid_to_battery"],  stack: 1, lines: {lineWidth: 0, fill: 0.8}});
 
     if (battery_soc_available) {
         // only add if time period is less or equall to 1 month
@@ -1084,12 +1104,12 @@ function load_bargraph() {
         // Series definitions: label, color, stack (1=positive/load, 0=negative/export)
         var series_defs = [
             // Stack 1: onsite use breakdown (positive bars above zero)
-            { key: 'solar_to_load',    label: "Solar to Load",    color: "#dccc1f", stack: 1, invert: false },
-            { key: 'battery_to_load',  label: "Battery to Load",  color: "#fbb450", stack: 1, invert: false },
-            { key: 'grid_to_load',     label: "Grid to Load",     color: "#82cbfc", stack: 1, invert: false },
+            { key: 'solar_to_load',    label: "Solar to Load",    color: flow_colors["solar_to_load"],    stack: 1, invert: false },
+            { key: 'battery_to_load',  label: "Battery to Load",  color: flow_colors["battery_to_load"],  stack: 1, invert: false },
+            { key: 'grid_to_load',     label: "Grid to Load",     color: flow_colors["grid_to_load"],     stack: 1, invert: false },
             // Stack 0: exports (negative bars below zero)
-            { key: 'solar_to_grid',    label: "Solar to Grid",    color: "#dccc1f", stack: 0, invert: true  },
-            { key: 'battery_to_grid',  label: "Battery to Grid",  color: "#fbb450", stack: 0, invert: true  }
+            { key: 'solar_to_grid',    label: "Solar to Grid",    color: flow_colors["solar_to_grid"],    stack: 0, invert: true  },
+            { key: 'battery_to_grid',  label: "Battery to Grid",  color: flow_colors["battery_to_grid"],  stack: 0, invert: true  }
         ];
 
         historyseries = [];

@@ -10,6 +10,16 @@ var profile_mode = false;
 
 var show_carbonintensity = $("#show_carbonintensity")[0].checked;
 
+var flow_colors = {
+    "solar_to_load": "#bec745",
+    "solar_to_battery": "#a3d977",
+    "solar_to_grid": "#dccc1f",
+    "battery_to_load": "#fbb450",
+    "battery_to_grid": "#f0913a",
+    "grid_to_load": "#44b3e2",
+    "grid_to_battery": "#82cbfc"
+};
+
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
@@ -808,13 +818,13 @@ function draw_tables() {
         return r;
     }
 
-    out += flow_row("&#9728; Solar &rarr; Load",         total.solar_to_load_kwh,    total.tariff.solar_to_load_value * 1.05,    "avoided import cost", "#bec745");
-    out += flow_row("&#9728; Solar &rarr; Battery",      total.solar_to_battery_kwh, total.tariff.solar_to_battery_value * 1.05, "avoided import cost", "#a3d977");
-    out += flow_row("&#9728; Solar &rarr; Grid (export)",total.solar_to_grid_kwh,    total.tariff.solar_to_grid_value * 1.05,    "earned at export tariff",        "#dccc1f");
-    out += flow_row("&#x1F50B; Battery &rarr; Load",     total.battery_to_load_kwh,  total.tariff.battery_to_load_value * 1.05,  "avoided import cost", "#fbb450");
-    out += flow_row("&#x1F50B; Battery &rarr; Grid (export)", total.battery_to_grid_kwh, total.tariff.battery_to_grid_value * 1.05, "earned at export tariff",   "#f0913a");
-    out += flow_row("&#x1F4A1; Grid &rarr; Load",        total.grid_to_load_kwh,     (total.tariff.grid_to_load_cost * 1.05),   "import cost",               "#44b3e2");
-    out += flow_row("&#x1F4A1; Grid &rarr; Battery",     total.grid_to_battery_kwh,  (total.tariff.grid_to_battery_cost * 1.05),"import cost",               "#82cbfc");
+    out += flow_row("&#9728; Solar &rarr; Load",         total.solar_to_load_kwh,    total.tariff.solar_to_load_value * 1.05,    "avoided import cost", flow_colors.solar_to_load);
+    out += flow_row("&#9728; Solar &rarr; Battery",      total.solar_to_battery_kwh, total.tariff.solar_to_battery_value * 1.05, "avoided import cost", flow_colors.solar_to_battery);
+    out += flow_row("&#9728; Solar &rarr; Grid (export)",total.solar_to_grid_kwh,    total.tariff.solar_to_grid_value * 1.05,    "earned at export tariff", flow_colors.solar_to_grid);
+    out += flow_row("&#x1F50B; Battery &rarr; Load",     total.battery_to_load_kwh,  total.tariff.battery_to_load_value * 1.05,  "avoided import cost", flow_colors.battery_to_load);
+    out += flow_row("&#x1F50B; Battery &rarr; Grid (export)", total.battery_to_grid_kwh, total.tariff.battery_to_grid_value * 1.05, "earned at export tariff", flow_colors.battery_to_grid);
+    out += flow_row("&#x1F4A1; Grid &rarr; Load",        total.grid_to_load_kwh,     (total.tariff.grid_to_load_cost * 1.05),   "import cost", flow_colors.grid_to_load);
+    out += flow_row("&#x1F4A1; Grid &rarr; Battery",     total.grid_to_battery_kwh,  (total.tariff.grid_to_battery_cost * 1.05),"import cost", flow_colors.grid_to_battery);
 
     // Summary row: net cost = grid costs - earnings, unit cost = net cost / total consumption
     var net_cost_gbp = (
@@ -1006,13 +1016,13 @@ function graph_draw() {
     graph_series = [];
 
     // All 7 disaggregated flows stacked as positive bars
-    graph_series.push({ label: "Solar to Load",    data: data["solar_to_load"],    yaxis: 1, color: "#bec745", stack: true, bars: bars });
-    graph_series.push({ label: "Solar to Battery", data: data["solar_to_battery"], yaxis: 1, color: "#a3d977", stack: true, bars: bars });
-    graph_series.push({ label: "Solar to Grid",    data: data["solar_to_grid"],    yaxis: 1, color: "#dccc1f", stack: true, bars: bars });
-    graph_series.push({ label: "Battery to Load",  data: data["battery_to_load"],  yaxis: 1, color: "#fbb450", stack: true, bars: bars });
-    graph_series.push({ label: "Battery to Grid",  data: data["battery_to_grid"],  yaxis: 1, color: "#f0913a", stack: true, bars: bars });
-    graph_series.push({ label: "Grid to Load",     data: data["grid_to_load"],     yaxis: 1, color: "#44b3e2", stack: true, bars: bars });
-    graph_series.push({ label: "Grid to Battery",  data: data["grid_to_battery"],  yaxis: 1, color: "#82cbfc", stack: true, bars: bars });
+    graph_series.push({ label: "Solar to Load",    data: data["solar_to_load"],    yaxis: 1, color: flow_colors.solar_to_load, stack: true, bars: bars });
+    graph_series.push({ label: "Solar to Battery", data: data["solar_to_battery"], yaxis: 1, color: flow_colors.solar_to_battery, stack: true, bars: bars });
+    graph_series.push({ label: "Solar to Grid",    data: data["solar_to_grid"],    yaxis: 1, color: flow_colors.solar_to_grid, stack: true, bars: bars });
+    graph_series.push({ label: "Battery to Load",  data: data["battery_to_load"],  yaxis: 1, color: flow_colors.battery_to_load, stack: true, bars: bars });
+    graph_series.push({ label: "Battery to Grid",  data: data["battery_to_grid"],  yaxis: 1, color: flow_colors.battery_to_grid, stack: true, bars: bars });
+    graph_series.push({ label: "Grid to Load",     data: data["grid_to_load"],     yaxis: 1, color: flow_colors.grid_to_load, stack: true, bars: bars });
+    graph_series.push({ label: "Grid to Battery",  data: data["grid_to_battery"],  yaxis: 1, color: flow_colors.grid_to_battery, stack: true, bars: bars });
 
     // price signals
     graph_series.push({
