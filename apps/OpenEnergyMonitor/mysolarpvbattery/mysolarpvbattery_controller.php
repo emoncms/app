@@ -67,6 +67,9 @@ function mysolarpvbattery_app_controller($route,$app,$appconfig,$apikey)
             "grid_to_load_kwh"     => $feed->exists_tag_name($userid, $tag, "grid_to_load_kwh"),
             "grid_to_battery_kwh"  => $feed->exists_tag_name($userid, $tag, "grid_to_battery_kwh"),
 
+            // For testing
+            // "solar_kwh"            => $feed->exists_tag_name($userid, $tag, "solar_kwh"),
+
             "process_mode"  => "all",
             "process_start" => 0,
             "process"       => "solarbatterykwh"
