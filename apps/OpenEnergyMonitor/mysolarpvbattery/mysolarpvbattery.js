@@ -771,6 +771,9 @@ function load_powergraph() {
     var interval = view.interval;
     var power_to_kwh = interval / 3600000.0;
 
+    var battery_soc_start = null;
+    var battery_soc_end = null;
+
     for (var z=0; z<timeseries.length(ts_ref); z++) {
         var time = datastart + (1000 * interval * z);
         
@@ -809,6 +812,14 @@ function load_powergraph() {
         // SOC
         if (battery_soc_available) {
             battery_soc_now = timeseries.value("battery_soc",z);
+
+            if (battery_soc_start === null && battery_soc_now !== null) {
+                battery_soc_start = battery_soc_now;
+            }
+
+            if (battery_soc_now !== null) {
+                battery_soc_end = battery_soc_now;
+            }
         }
         battery_soc_data.push([time, battery_soc_now]);
     }
@@ -826,9 +837,9 @@ function load_powergraph() {
     
     var soc_change = 0; 
     if (battery_soc_available) {
-        soc_change = battery_soc_now-timeseries.value("battery_soc",0);
+        soc_change = battery_soc_end-battery_soc_start;
     }
-    var sign = ""; if (soc_change>0) sign = "+";
+    var sign = ""; if (soc_change>=0) sign = "+";
     $(".battery_soc_change").html(sign+soc_change.toFixed(1));
     
     powerseries = [];
