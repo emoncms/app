@@ -692,8 +692,8 @@ function solar_battery_visibility() {
     $("#live-solar-value").toggleClass("text-warning", s);
 
     var boxColors = {
-        "#solar-box":   s ? "#dccc1f" : "#262626",
-        "#battery-box": b ? "#fb7b50" : "#262626"
+        "#solar-box":   s ? "#dccc1f" : "#282828",
+        "#battery-box": b ? "#fb7b50" : "#282828"
     };
     for (var id in boxColors) $(id).css("background-color", boxColors[id]);
 
