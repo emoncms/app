@@ -726,7 +726,12 @@ function battery_time_left({ capacity, soc, battery_power }) {
 
     const hours_left = Math.floor(time_left_hours);
     const mins_left = Math.floor((time_left_hours*60) % 60);
-    return `${hours_left}h ${mins_left}m`;
+
+    let time_left_str = "";
+    if (hours_left > 0) time_left_str += `${hours_left}h `;
+    if (hours_left < 10) time_left_str += `${mins_left}m`; // show minutes only if less than 10h left
+
+    return time_left_str.trim();
 }
 
 function draw(load) {
