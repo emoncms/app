@@ -41,7 +41,7 @@
         </div>
         <div>
             <h5 class="power-title text-light"><span class="balance-label">-</span></h5>
-            <h2 class="power-value"><span class="grid-now">0</span><span class="power-unit">W</span></h2>
+            <h2 class="power-value text-success"><span class="grid-now">0</span><span class="power-unit">W</span></h2>
         </div>
         <div>
             <h5 id="live-solar-title" class="power-title text-light"><?php echo tr('SOLAR') ?></h5>
@@ -49,11 +49,11 @@
         </div>
         <div class="battery-section">
             <h5 class="power-title text-light"><span class="d-none d-sm-inline"><?php echo tr('BATTERY'); ?></span> <span class="battery_now_title"><?php echo tr('POWER') ?></span></h5>
-            <h2 class="power-value text-quaternary"><span class="battery-now">-</span><span class="power-unit"></span></h2>
+            <h2 class="power-value text-quaternary"><span class="battery-now">--</span><span class="power-unit"></span></h2>
         </div>
         <div class="battery-section">
             <h5 class="power-title text-light"><span class="battery_time_left_title"><span class="d-inline d-sm-none"><?php echo tr('TIME LEFT') ?></span><span class="d-none d-sm-inline"><?php echo tr('BATTERY TIME LEFT') ?></span></span></h5>
-            <h2 class="power-value text-quaternary"><span class="battery_time_left">-</span></h2>
+            <h2 class="power-value text-quaternary"><span class="battery_time_left">--</span></h2>
         </div>
         <div class="battery-section">
             <h5 class="power-title text-light"><span class="d-inline d-sm-none"><?php echo tr('SOC') ?></span><span class="d-none d-sm-inline"><?php echo tr('STATE OF CHARGE') ?></span></h5>

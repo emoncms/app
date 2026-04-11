@@ -658,7 +658,10 @@ function livefn()
         $(".grid-now").parent().css("color","#2ed52e");
     } else {
         $(".balance-label").html("BALANCED");
-        // $(".grid-now").parent().css("color","#999");
+        // clear css color to fallback to default and hide unit when grid=0
+        $(".grid-now").parent().css("color", "");
+        $(".grid-now").siblings('.power-unit').text("");
+        grid = "--";
     }
     $(".grid-now").html(grid);
     
