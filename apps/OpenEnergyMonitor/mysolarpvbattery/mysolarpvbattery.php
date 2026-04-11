@@ -41,7 +41,7 @@
         </div>
         <div>
             <h5 class="power-title text-light"><span class="balance-label">-</span></h5>
-            <h2 class="power-value text-success"><span class="grid-now">0</span><span class="power-unit">W</span></h2>
+            <h2 class="power-value"><span class="grid-now">0</span><span class="power-unit">W</span></h2>
         </div>
         <div>
             <h5 id="live-solar-title" class="power-title text-light"><?php echo tr('SOLAR') ?></h5>
