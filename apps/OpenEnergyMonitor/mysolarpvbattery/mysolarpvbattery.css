@@ -301,8 +301,7 @@ body {
 #graph-nav .app-btn + .app-btn { border-left: 1px solid rgba(255,255,255,0.12); }
 
 /* Graph placeholder */
-#placeholder_bound { width: 100%; min-height: 300px; }
-#placeholder       { height: 100%; }
+#placeholder_bound { width: 100%;}
 
 /* Solar generation box: percentage overlays */
 #statsbox-generation { position: relative; }

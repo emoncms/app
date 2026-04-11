@@ -24,7 +24,7 @@ var flow_colors_old = {
     "grid_to_battery":  "#fb7b50"
 };
 
-var flow_colors = {
+var flow_colors_tariff_app = {
     "solar_to_load":    "#bec745", 
     "solar_to_battery": "#a3d977", 
     "solar_to_grid":    "#dccc1f",
@@ -32,6 +32,16 @@ var flow_colors = {
     "battery_to_grid":  "#f0913a",
     "grid_to_load":     "#44b3e2",
     "grid_to_battery":  "#82cbfc"
+};
+
+var flow_colors = {
+    "solar_to_load":    "#F5C518", // bright amber   – direct solar use
+    "solar_to_battery": "#C8A000", // darker gold    – solar into storage
+    "solar_to_grid":    "#FFE066", // light yellow   – solar export
+    "battery_to_load":  "#4ADE80", // bright green   – battery discharge
+    "battery_to_grid":  "#86EFAC", // soft green     – battery export
+    "grid_to_load":     "#38BDF8", // sky blue       – grid import
+    "grid_to_battery":  "#7DD3FC"  // light blue     – grid charging battery
 };
 
 // ----------------------------------------------------------------------
@@ -542,12 +552,12 @@ function resize()
     var height = $(window).height() - offset_top - bottom_margin;
 
     // In landscape cap at 60% of window width to avoid an overly tall chart
-    var is_landscape = $(window).height() < $(window).width();
-    if (is_landscape) height = Math.min(height, width * 0.6);
+    //var is_landscape = $(window).height() < $(window).width();
+    //if (is_landscape) height = Math.min(height, width * 0.6);
 
     // min size to avoid flot errors
-    if (height < 180) height = 180;
-    if (width  < 200) width  = 200;
+    if (height < 100) height = 100;
+    if (width  < 100) width  = 100;
 
     placeholder.width(width);
     placeholder_bound.height(height);

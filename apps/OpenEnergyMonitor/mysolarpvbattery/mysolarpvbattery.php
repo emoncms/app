@@ -77,7 +77,7 @@
             <button id='left' class='visnav app-btn' >&lt;</button>
             <button id='right' class='visnav app-btn' >&gt;</button>
         </div>
-        
+
         <div id="placeholder_bound">
             <div id="placeholder"></div>
         </div>
