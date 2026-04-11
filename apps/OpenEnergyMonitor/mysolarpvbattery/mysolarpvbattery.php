@@ -188,6 +188,7 @@
 
 <div id="appconf-description" style="display:none">
     <p class="lead">This app can be used to explore onsite solar generation, self consumption, battery integration, export and building consumption.</p>
+    <p><b style="color:#fff">Derive missing feed:</b> If you do not have one out of the selectable power feeds, this app can derive this data from the others using conservation of energy.</p>
 </div>
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 

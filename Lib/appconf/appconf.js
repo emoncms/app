@@ -228,6 +228,17 @@ var config = {
                 try {
                     result = JSON.parse(result);
                     if (result.success != undefined && !result.success) appLog("ERROR", result.message);
+
+                    // If success update config.app with latest from config.db
+                    for (var key in config.app) {
+                        if (config.app[key].type == "feed" || config.app[key].type == "value" || config.app[key].type == "checkbox" || config.app[key].type == "select") {
+                            if (config.db[key] != undefined) {
+                                config.app[key].value = config.db[key];
+                                // console.log("Updated config.app["+key+"].value to "+config.db[key]);
+                            }
+                        }
+                    }
+
                 } catch (e) {
                     try {
                         app.log("ERROR","Could not parse /setconfig reply, error: "+e);
@@ -570,6 +581,7 @@ var vue_config = new Vue({
         app_name: "App Name",
         app_name_color: "#44b3e2",
         app_description: "",
+        app_instructions: "",
         config_name: "",
         config_public: false,
         config_items: [],
@@ -618,6 +630,7 @@ var vue_config = new Vue({
                     selectionMode: "AUTO",
                     isValid:       false,
                     showSelector:  false,
+                    derivable:     config.app[z].derivable || false,
                     feedGroups:    [],
                     selectedFeedId: 0,
                     // value / checkbox / select
@@ -647,6 +660,9 @@ var vue_config = new Vue({
                         if (config.db[z] === "disable") {
                             item.selectionMode  = "DISABLED";
                             item.selectedFeedId = "disable";
+                        } else if (config.db[z] === "derive") {
+                            item.selectionMode  = "DERIVE";
+                            item.selectedFeedId = "derive";
                         } else {
                             var feedid = config.db[z];
                             if (config.feedsbyid[feedid] != undefined && config.engine_check(config.feedsbyid[feedid], config.app[z])) {
@@ -692,7 +708,7 @@ var vue_config = new Vue({
             if (feedid == 0) return;
             var item = this.config_items.find(function(i) { return i.key === key; });
 
-            if (feedid !== "auto" && feedid !== "disable") {
+            if (feedid !== "auto" && feedid !== "disable" && feedid !== "derive") {
                 config.db[key] = feedid;
                 var keyappend = (key != config.feedsbyid[feedid].name) ? key + ": " : "";
                 item.displayName   = keyappend + config.feedsbyid[feedid].name;
@@ -711,10 +727,17 @@ var vue_config = new Vue({
                 item.selectionMode = "DISABLED";
                 item.isValid       = false;
             }
+            if (feedid === "derive") {
+                config.db[key]     = "derive";
+                item.displayName   = config.app[key].autoname;
+                item.selectionMode = "DERIVE";
+                item.isValid       = true;
+            }
 
             item.showSelector = false;
             config.set();
             this.config_valid = config.check();
+            if (typeof config.ui_after_value_change === 'function') config.ui_after_value_change(key);
         },
 
         changeValue: function(key, value) {

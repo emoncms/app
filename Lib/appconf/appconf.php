@@ -20,6 +20,7 @@
                 <div class="xappconfig-description-inner text-light">
                     <h2 class="appconfig-title" :style="{ color: app_name_color }">{{ app_name }}</h2>
                     <div v-html="app_description"></div>
+                    <div v-html="app_instructions"></div>
                     <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
                 </div>
 
@@ -106,7 +107,8 @@
                             <select class="feed-select" v-model="item.selectedFeedId">
                                 <option :value="0">Select {{ item.key }} feed:</option>
                                 <option value="auto">AUTO SELECT</option>
-                                <option value="disable">DISABLE</option>
+                                <option value="derive" v-if="item.derivable!=undefined">DERIVE</option>
+                                <option v-else value="disable">DISABLE</option>
                                 <optgroup v-for="group in item.feedGroups" :label="group.name">
                                     <option v-for="f in group.feeds" :value="f.id">{{ f.name }}</option>
                                 </optgroup>

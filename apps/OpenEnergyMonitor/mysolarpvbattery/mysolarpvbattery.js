@@ -78,10 +78,10 @@ config.app = {
     // All four feeds are optional at the config level; the custom check() below enforces the
     // correct minimum set depending on the has_solar / has_battery mode.
     // Any single missing feed will be derived from the other three (or two in solar/battery-only modes).
-    "use":{"optional":true, "type":"feed", "autoname":"use", "description":"House or building use in watts"},
-    "solar":{"optional":true, "type":"feed", "autoname":"solar", "description":"Solar generation in watts"},
-    "battery":{"optional":true, "type":"feed", "autoname":"battery_power", "description":"Battery power in watts, positive for discharge, negative for charge (only shown when has_battery is enabled)"},
-    "grid":{"optional":true, "type":"feed", "autoname":"grid", "description":"Grid power in watts (positive for import, negative for export)"},
+    "use":{"optional":true, "type":"feed", "derivable":true, "autoname":"use", "description":"House or building use in watts"},
+    "solar":{"optional":true, "type":"feed", "derivable":true, "autoname":"solar", "description":"Solar generation in watts"},
+    "battery":{"optional":true, "type":"feed", "derivable":true, "autoname":"battery_power", "description":"Battery power in watts, positive for discharge, negative for charge (only shown when has_battery is enabled)"},
+    "grid":{"optional":true, "type":"feed", "derivable":true, "autoname":"grid", "description":"Grid power in watts (positive for import, negative for export)"},
 
     // Battery state of charge feed (optional)
     "battery_soc":{"optional":true, "type":"feed", "autoname":"battery_soc", "description":"Battery state of charge in % (only shown when has_battery is enabled)"},
@@ -194,12 +194,12 @@ config.ui_before_render = function() {
     config.app.solar_to_battery_kwh.hidden = !mode.has_battery || !mode.has_solar;
     config.app.battery_to_load_kwh.hidden  = !mode.has_battery;
     config.app.battery_to_grid_kwh.hidden  = !mode.has_battery;
-    config.app.grid_to_battery_kwh.hidden  = !mode.has_battery;
+    config.app.grid_to_battery_kwh.hidden  = !mode.has_battery;   
 };
 
 // Called by appconf.js after any config value is changed; re-renders UI when a mode checkbox changes
 config.ui_after_value_change = function(key) {
-    if (key === 'has_solar' || key === 'has_battery') {
+    if (key === 'has_solar' || key === 'has_battery' || key === 'use' || key === 'solar' || key === 'battery' || key === 'grid') {
         config.UI();
     }
     render_autogen_feed_list();
@@ -406,11 +406,33 @@ function flow_available() {
     // 2 feeds (need at least use or grid, second can be solar or battery)
     // 1 feed (use or grid)
 
+
     // Availability
-    if (config.app.has_solar.value && config.app.solar.value) available.solar = true;
-    if (config.app.use.value) available.use = true;
-    if (config.app.has_battery.value && config.app.battery.value) available.battery = true;
-    if (config.app.grid.value) available.grid = true;
+    let feedids = {};
+    let feeds_to_check = ["use", "solar", "battery", "grid"];
+    for (let i = 0; i < feeds_to_check.length; i++) {
+        let key = feeds_to_check[i];
+        if (config.app[key].value != "disable" && config.app[key].value != "derive") {
+            feedids[key] = config.app[key].value*1;
+        } else {
+            feedids[key] = false;
+        }
+    }
+
+    available = {
+        use: false,
+        solar: false,
+        battery: false,
+        grid: false
+    };
+
+    derive = false;
+
+    // Availability
+    if (config.app.has_solar.value && feedids['solar']) available.solar = true;
+    if (feedids['use']) available.use = true;
+    if (config.app.has_battery.value && feedids['battery']) available.battery = true;
+    if (feedids['grid']) available.grid = true;
 
     var number_of_feeds = 0;
     if (available.solar) number_of_feeds++;
@@ -466,10 +488,15 @@ function flow_available() {
         battery_soc_available = true;
     }
 
-    console.log("Number of feeds configured: " + number_of_feeds);
-    console.log("Deriving feed: " + derive);
-    console.log("Assume zero solar: " + assume_zero_solar);
-    console.log("Assume zero battery: " + assume_zero_battery);
+    return {
+        has_solar: config.app.has_solar.value,
+        has_battery: config.app.has_battery.value,
+        number_of_feeds: number_of_feeds,
+        available: available,
+        derive: derive,
+        assume_zero_solar: assume_zero_solar,
+        assume_zero_battery: assume_zero_battery
+    }
 }
 
 function flow_derive_missing(input) {
@@ -799,7 +826,8 @@ function load_powergraph() {
     // -------------------------------------------------------------------------------------------------------
 
     // Determine which feed we use as the time axis reference (any loaded feed will do)
-    var ts_ref = config.app.use.value ? "use" : (config.app.grid.value ? "grid" : "solar");
+    var ts_ref = ["use", "grid", "solar", "battery"].find(key => available[key]) || false;
+    console.log("Time reference feed: " + ts_ref);
     
     var solar_to_load_data = [];
     var solar_to_grid_data = [];
@@ -1362,6 +1390,9 @@ function get_autogen_feeds() {
 // ----------------------------------------------------------------------
 function render_autogen_feed_list() {
     config.autogen.render_feed_list();
+
+    //let result = flow_available();
+    //vue_config.app_instructions = JSON.stringify(result, null, 2);
 }
 
 // ----------------------------------------------------------------------
