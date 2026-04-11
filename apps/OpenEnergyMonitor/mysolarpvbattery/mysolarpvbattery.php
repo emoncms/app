@@ -3,8 +3,6 @@
     global $path, $session;
 ?>
 
-<link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
-
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
@@ -16,75 +14,92 @@
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
 
 <!-- load mysolarpvbattery.css -->
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.css?v=5" rel="stylesheet">
+<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.css?v=<?php echo $v; ?>" rel="stylesheet">
 
 
 
 <section id="app-block" style="display:none" class="block">
 
-    <nav id="buttons" class="d-flex justify-content-between">
-        <ul id="tabs" class="nav nav-pills mb-0">
-            <li><button class="viewhistory btn btn-large btn-link btn-inverse" title="<?php echo tr('View History') ?>">
-                <span class="d-xs-none"><?php echo tr("Hist") ?></span>
-                <span class="d-none d-xs-inline"><?php echo tr("History") ?></span>
+    <nav class="app-top-bar d-flex justify-content-between">
+        <ul id="tabs" class="btn-list">
+            <li><button class="viewhistory app-btn" title="<?php echo tr('View History') ?>">
+                <span class="label-short"><?php echo tr("Hist") ?></span>
+                <span class="label-full"><?php echo tr("History") ?></span>
             </button></li>
         </ul>
-        <?php include(dirname(__DIR__).'/config-nav.php'); ?>
+        <ul class="btn-list">
+            <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button></li>
+            <li><button class="app-btn config-close d-none" title="<?php echo tr('Close') ?>"><svg class="icon"><use xlink:href="#icon-close"></use></svg></button></li>
+        </ul>
     </nav>
 
+    <div style="padding:5px; background-color: #262626; border-radius: 0.375rem; margin-bottom: 1rem;">
 
     <div class="stats-grid">
         <div>
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('USE') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
+            <h5 class="power-title text-light"><?php echo tr('USE') ?></h5>
+            <h2 class="power-value text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
         </div>
         <div>
-            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="balance-label">-</span></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-success"><span class="balance"></span></h2>
+            <h5 class="power-title text-light"><span class="balance-label">-</span></h5>
+            <h2 class="power-value text-success"><span class="balance"></span></h2>
         </div>
         <div>
-            <h5 id="live-solar-title" class="electric-title mb-0 text-md-larger text-light"><?php echo tr('SOLAR') ?></h5>
-            <h2 id="live-solar-value" class="power-value display-md-3 display-lg-2 my-0 text-warning"><span class="solarnow"></span><span class="power-unit"></span></h2>
+            <h5 id="live-solar-title" class="power-title text-light"><?php echo tr('SOLAR') ?></h5>
+            <h2 id="live-solar-value" class="power-value text-warning"><span class="solarnow"></span><span class="power-unit"></span></h2>
         </div>
         <div class="battery-section">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="battery_now_title"><?php echo tr('BATTERY POWER') ?></span></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="battery_now">-</span><span class="power-unit"></span></h2>
+            <h5 class="power-title text-light"><span class="battery_now_title"><?php echo tr('BATTERY POWER') ?></span></h5>
+            <h2 class="power-value text-quaternary"><span class="battery_now">-</span><span class="power-unit"></span></h2>
         </div>
         <div class="battery-section">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="battery_time_left_title"><?php echo tr('BATTERY TIME LEFT') ?></span></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="battery_time_left">-</span></h2>
+            <h5 class="power-title text-light"><span class="battery_time_left_title"><?php echo tr('BATTERY TIME LEFT') ?></span></h5>
+            <h2 class="power-value text-quaternary"><span class="battery_time_left">-</span></h2>
         </div>
         <div class="battery-section">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('STATE OF CHARGE') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-quaternary"><span class="battery_soc">-</span>%</h2>
+            <h5 class="power-title text-light"><?php echo tr('STATE OF CHARGE') ?></h5>
+            <h2 class="power-value text-quaternary"><span class="battery_soc">-</span>%</h2>
         </div>
+    </div>
     </div>
 
-    <?php include(dirname(__DIR__).'/graph-nav.php'); ?>
-    
-    <div id="placeholder_bound" style="width:100%; height:500px;">
-        <div id="placeholder" style="height:500px"></div>
+    <div style="padding:5px; background-color: #262626; border-radius: 0.375rem; margin-bottom: 1rem;">
+        <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
+            <button class='visnav time app-btn' time='1'>1<?php echo tr('h') ?></button>
+            <button class='visnav time app-btn' time='3'>3<?php echo tr('h') ?></button>
+            <button class='visnav time app-btn' time='6'>6<?php echo tr('h') ?></button>
+            <button class='visnav time app-btn' time='24'><?php echo tr('D') ?></button>
+            <button class='visnav time app-btn' time='168'><?php echo tr('W') ?></button>
+            <button class='visnav time app-btn' time='720'><?php echo tr('M') ?></button>
+            <button class='visnav time app-btn' time='8760'><?php echo tr('Y') ?></button>
+            <button id='zoomin' class='visnav app-btn' >+</button>
+            <button id='zoomout' class='visnav app-btn' >-</button>
+            <button id='left' class='visnav app-btn' >&lt;</button>
+            <button id='right' class='visnav app-btn' >&gt;</button>
+        </div>
+        
+        <div id="placeholder_bound">
+            <div id="placeholder"></div>
+        </div>
     </div>
         
+    <div style="padding:5px; background-color: #262626; border-radius: 0.375rem; margin-bottom: 1rem;">
+
     <table class="statstable">
         <tr>
-            <td id="solar-box" class="statsbox solar-section" colspan="3" style="background: #dccc1f">
+            <td id="solar-box" class="statsbox solar-section" colspan="3">
                 <div class="statsbox-inner-unit">
-                    <div id="statsbox-generation" class="statsbox-padded" style="position: relative;">
+                    <div id="statsbox-generation" class="statsbox-padded">
                         <div class="statsbox-title"><span class="generationtitle">SOLAR</span></div>
                         <div><span class="statsbox-value total_solar_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                        <div style="position: absolute; width: 50%; left: 0%; bottom: 0%">
+                        <div class="prc-solar-to-battery">
                             <span class="statsbox-prc solar_to_battery_prc prc-solar-battery">0</span>
                         </div>
-                        <div style="position: absolute; width: 50%; left: 50%; bottom: 0%">
+                        <div class="prc-solar-direct">
                             <span class="statsbox-prc solar_direct_prc prc-solar">0</span>
                         </div>
-                        <div style="position: absolute; height: 100%; right: 0%; top: 0%">
-                            <div style="display: table; height: 100%; border-spacing: 0px;">
-                            <div style="display: table-cell; vertical-align: middle;">
+                        <div class="prc-solar-export">
                             <span class="statsbox-prc solar_export_prc prc-solar">0</span>
-                            </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -96,7 +111,7 @@
                 </div>
             </td>
 
-            <td id="grid-box" class="statsbox" style="background: #d52e2e">
+            <td id="grid-box" class="statsbox">
                 <div class="statsbox-padded statsbox-inner-unit">
                     <div class="statsbox-title">GRID</div>
                     <div><span class="statsbox-value total_grid_balance_kwh">0</span> <span class="statsbox-units">kWh</span></div>
@@ -111,9 +126,9 @@
                 </div>
             </td>
 
-            <td id="grid-to-battery-box" class="statsbox" style="text-align:left">
+            <td id="grid-to-battery-box" class="statsbox">
                 <div id="battery_import" class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-left" style="padding:10px 0px 0px 10px"><div class="statsbox-flow-title">GRID CHARGE</div><span class="statsbox-value total_import_for_battery_kwh" style="font-size:22px">0</span> <span class="statsbox-units">kWh</span></div>
+                    <div class="statsbox-padded statsbox-arrow-left"><div class="statsbox-flow-title">GRID CHARGE</div><span class="statsbox-value total_import_for_battery_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
             
@@ -123,9 +138,9 @@
                 </div>
             </td>
 
-            <td id="battery-to-grid-box" class="statsbox" style="text-align:right">
+            <td id="battery-to-grid-box" class="statsbox">
                 <div id="battery_export" class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-right" style="padding:10px 10px 0px 0px"><div class="statsbox-flow-title">BATTERY TO GRID</div><span class="statsbox-value total_battery_to_grid_kwh" style="font-size:22px">0</span> <span class="statsbox-units">kWh</span></div>
+                    <div class="statsbox-padded statsbox-arrow-right"><div class="statsbox-flow-title">BATTERY TO GRID</div><span class="statsbox-value total_battery_to_grid_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
             
@@ -137,7 +152,7 @@
         </tr>
         
         <tr>
-            <td id="battery-box" class="statsbox" style="background: #fb7b50">
+            <td id="battery-box" class="statsbox">
                 <div class="statsbox-padded statsbox-inner-unit">
                     <div class="statsbox-title">BATTERY</div>
                     <div><span class="statsbox-value battery_soc_change">0</span> <span class="statsbox-units">%</span></div>
@@ -150,25 +165,26 @@
                 </div>
             </td>
 
-            <td id="house-box" class="statsbox" colspan="3" style="background: #82cbfc">
+            <td id="house-box" class="statsbox" colspan="3">
                 <div class="statsbox-inner-unit">
-                    <div class="statsbox-padded" style="position: relative;">
+                    <div class="statsbox-padded">
                         <div class="statsbox-title">HOUSE</div>
                         <div><span class="statsbox-value total_use_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                        <div style="position: absolute; width: 0%; left: 3px; top: 40%">
-                            <div><span class="statsbox-prc use_from_battery_prc prc-battery">0</span></div>
+                        <div class="prc-battery-to-house">
+                            <span class="statsbox-prc use_from_battery_prc prc-battery">0</span>
                         </div>
-                        <div style="position: absolute; width: 33.33333%; left: 0%; top: 0%">
-                            <div><span class="statsbox-prc use_from_solar_prc prc-solar">0</span></div>
+                        <div class="prc-solar-to-house">
+                            <span class="statsbox-prc use_from_solar_prc prc-solar">0</span>
                         </div>
-                        <div style="position: absolute; width: 33.33333%; left: 66.66667%; top: 0%">
-                            <div><span class="statsbox-prc use_from_import_prc">0</span></div>
+                        <div class="prc-grid-to-house">
+                            <span class="statsbox-prc use_from_import_prc">0</span>
                         </div>
                     </div>
                 </div>
             </td>
         </tr>
     </table>
+    </div>
 </section>
 
 <div id="appconf-description" style="display:none">
@@ -176,7 +192,7 @@
 </div>
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
+<div class="ajax-loader"></div>
 
 <script src="<?php echo $path; ?>Lib/misc/gettext.js?v=<?php echo $v; ?>"></script> 
 <script>
@@ -202,4 +218,4 @@ config.db = <?php echo isset($config) ? json_encode($config) : 'null'; ?>;
 </script>
 
 <!-- load mysolarpvbattery.js -->
-<script src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.js?v=17"></script>
+<script src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.js?v=<?php echo $v; ?>"></script>

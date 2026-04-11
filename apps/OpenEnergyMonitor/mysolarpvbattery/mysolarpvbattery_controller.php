@@ -16,15 +16,14 @@ function mysolarpvbattery_app_controller($route,$app,$appconfig,$apikey)
 {
 
     global $path, $session, $settings, $mysqli, $redis, $user, $linked_modules_dir;
-    $v = 6;
+    $v = 7;
 
     // ----------------------------------------------------
     // Main app view route
     // ----------------------------------------------------
     if ($route->action == "view" || $route->action == "") {
         $route->format = "html";
-        $result = "\n<!-- global app css and js -->";
-        $result .= "\n" . '<link href="' . $path . 'Modules/app/Views/css/app.css?v=' . $v . '" rel="stylesheet">';
+        $result = "\n<!-- global app js -->";
         $result .= "\n" . '<script src="' . $path . 'Modules/app/Views/js/app.js?v=' . $v . '"></script>';
         $result .= "\n\n <!-- app specific view -->\n";
 

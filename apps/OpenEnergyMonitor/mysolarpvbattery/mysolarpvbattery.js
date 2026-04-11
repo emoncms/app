@@ -949,8 +949,8 @@ function draw_powergraph() {
     var options = {
         lines: { fill: false },
         xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end},
-        yaxes: [{ min: 0 },{ min: 0, max: 100 }],
-        grid: { hoverable: true, clickable: true },
+        yaxes: [{ min: 0, reserveSpace: false },{ min: 0, max: 100, reserveSpace: false }],
+        grid: { hoverable: true, clickable: true, borderWidth: 0 },
         selection: { mode: "x" },
         legend: { show: false }
     }

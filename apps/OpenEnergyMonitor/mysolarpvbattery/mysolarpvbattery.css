@@ -1,3 +1,155 @@
+/* =====================================================================
+   Dark theme
+   (previously in Modules/app/Views/css/dark.css)
+   ===================================================================== */
+
+body {
+    background-color: #222;
+}
+
+.content-container {
+    max-width: 1150px;
+}
+
+#app-block {
+    padding: 0;
+}
+
+.app-top-bar {
+    padding: .5rem 0;
+    border-bottom: 1px solid #333;
+    margin-bottom: .4rem;
+}
+
+/* btn-list: replaces Bootstrap .nav .nav-pills */
+.btn-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* app-btn: replaces Bootstrap btn + btn-large + btn-link + btn-inverse.
+   Explicitly resets Bootstrap properties so it is self-contained. */
+.app-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25em;
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+    white-space: nowrap;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    text-shadow: none;
+    color: #aaa;
+    opacity: .6;
+    transition: opacity .3s linear;
+    text-decoration: none;
+}
+.app-btn:hover,
+.app-btn:active {
+    opacity: 1;
+    text-decoration: none;
+}
+.app-btn.active {
+    color: white;
+    opacity: .8;
+    font-weight: bold;
+    text-decoration: underline;
+}
+.app-btn[disabled],
+.app-btn[disabled]:hover {
+    color: #616161;
+    opacity: .8;
+    background: rgba(6, 153, 250, 0.06);
+}
+
+/* History button: short label by default, full label on wider screens */
+.app-btn .label-short { display: inline; }
+.app-btn .label-full  { display: none; }
+@media (min-width: 480px) {
+    .app-btn .label-short { display: none; }
+    .app-btn .label-full  { display: inline; }
+}
+
+.visnavblock {
+    color: #0699fa;
+    font-size: 18px;
+}
+
+.visnav {
+    background-color: rgba(6,153,250,0.1);
+    flex-grow: 1;
+}
+
+.visnav:focus,
+.visnav:active,
+.visnav:hover {
+    color: #0699fa;
+    text-decoration: none!important;
+}
+
+#footer {
+    margin: 0;
+    background-color: #181818;
+    color: #999;
+}
+
+.ajax-loader {
+    background: #222
+        url(../../../images/ajax-loader.gif)
+        center
+        no-repeat;
+}
+
+@media (min-width: 576px) {
+    .visnav {
+        flex-grow: 0;
+        min-width: 3em;
+    }
+}
+
+
+/* =====================================================================
+   Power display
+   ===================================================================== */
+
+.power-title {
+    margin: 0;
+    font-size: 1rem;
+    color: #aaa;
+}
+
+.power-value {
+    margin: 0;
+    line-height: 1.2;
+    font-size: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .power-title { font-size: 1.34rem; }
+    .power-value    { font-size: 4.5rem; }
+}
+
+/* kW mode: scale down power values so larger numbers still fit */
+#app-block.in_kw .power-value              { font-size: 1rem; }
+@media (min-width: 768px)  { #app-block.in_kw .power-value { font-size: 3rem; } }
+@media (min-width: 992px)  { #app-block.in_kw .power-value { font-size: 4.4rem; } }
+@media (min-width: 1200px) { #app-block.in_kw .power-value { font-size: 4.5rem; } }
+
+
+/* =====================================================================
+   Stats table
+   ===================================================================== */
+
 .statstable {
     width: 100%;
     border-spacing: 10px;
@@ -12,16 +164,13 @@
     --statsbox-color: #333;
 }
 
-.statsbox-inner-unit {
+.statsbox-inner-unit,
+.statsbox-inner-arrow {
     color: var(--statsbox-color);
 }
 
 .statsbox-padded {
     padding: 10px;
-}
-
-.statsbox-inner-arrow {
-    color: var(--statsbox-color);
 }
 
 .statsbox-title {
@@ -76,17 +225,17 @@
 }
 
 .statsbox-arrow-right:after {
-  left: 100%;
-  top: 50%;
-  border: solid transparent;
-  content: " ";
-  width: 0; 
-  height: 0; 
-  position: absolute;
-  pointer-events: none;
-  border-left-color: var(--statsbox-color);
-  border-width: 16px;
-  margin-top: -16px;
+    left: 100%;
+    top: 50%;
+    border: solid transparent;
+    content: " ";
+    width: 0;
+    height: 0;
+    position: absolute;
+    pointer-events: none;
+    border-left-color: var(--statsbox-color);
+    border-width: 16px;
+    margin-top: -16px;
 }
 
 .statsbox-arrow-left {
@@ -95,20 +244,17 @@
 }
 
 .statsbox-arrow-left:before {
-  right: 100%;
-  top: 60%;
-  border: solid transparent;
-  content: " ";
-  width: 0; 
-  height: 0; 
-  position: absolute;
-  pointer-events: none;
-  border-right-color: var(--statsbox-color);
-  border-width: 16px;
-  margin-top: -16px;
-}
-
-.tooltip-item {
+    right: 100%;
+    top: 60%;
+    border: solid transparent;
+    content: " ";
+    width: 0;
+    height: 0;
+    position: absolute;
+    pointer-events: none;
+    border-right-color: var(--statsbox-color);
+    border-width: 16px;
+    margin-top: -16px;
 }
 
 .tooltip-title {
@@ -129,7 +275,49 @@
   font-size:10px;
 }
 
-/*Small devices (landscape phones, 576px and up)*/
+/* Box background colours (solar/battery overridden by JS when feeds unavailable) */
+#solar-box   { background: #dccc1f; }
+#grid-box    { background: #d52e2e; }
+#battery-box { background: #fb7b50; }
+#house-box   { background: #82cbfc; }
+
+/* Text alignment for battery flow label boxes */
+#grid-to-battery-box { text-align: left; }
+#battery-to-grid-box { text-align: right; }
+
+/* Battery flow label boxes: padding adjusted to leave room for the arrow */
+#battery_import .statsbox-arrow-left  { padding: 10px 0 0 10px; }
+#battery_export .statsbox-arrow-right { padding: 10px 10px 0 0; }
+
+/* Value font size in battery flow label boxes */
+#grid-to-battery-box .statsbox-value,
+#battery-to-grid-box .statsbox-value { font-size: 22px; }
+
+/* Rounded corners on first and last graph-nav buttons */
+#graph-nav .app-btn:first-child { border-radius: 0.375rem 0 0 0.375rem; }
+#graph-nav .app-btn:last-child  { border-radius: 0 0.375rem 0.375rem 0; }
+
+/* Faint dividing lines between buttons */
+#graph-nav .app-btn + .app-btn { border-left: 1px solid rgba(255,255,255,0.12); }
+
+/* Graph placeholder */
+#placeholder_bound { width: 100%; min-height: 300px; }
+#placeholder       { height: 100%; }
+
+/* Solar generation box: percentage overlays */
+#statsbox-generation { position: relative; }
+.prc-solar-to-battery { position: absolute; width: 50%; left: 0;      bottom: 0; }
+.prc-solar-direct     { position: absolute; width: 50%; left: 50%;    bottom: 0; }
+.prc-solar-export     { position: absolute; height: 100%; right: 0; top: 0;
+                        display: flex; align-items: center; }
+
+/* House box: percentage overlays */
+#house-box .statsbox-padded { position: relative; }
+.prc-battery-to-house { position: absolute; width: 0;         left: 3px;        top: 40%; }
+.prc-solar-to-house   { position: absolute; width: 33.33333%; left: 0;          top: 0; }
+.prc-grid-to-house    { position: absolute; width: 33.33333%; left: 66.66667%;  top: 0; }
+
+/* Mobile (max 576px) */
 @media (max-width: 576px) {
   #app-block { padding: 0; }
   #statsbox-generation { padding-bottom:18px; }
@@ -168,8 +356,3 @@
     min-width: 0;
 }
 
-@media (max-width: 576px) {
-    .stats-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
