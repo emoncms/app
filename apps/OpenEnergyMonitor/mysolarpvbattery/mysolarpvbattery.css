@@ -72,12 +72,19 @@ body {
     background: rgba(6, 153, 250, 0.06);
 }
 
-/* History button: short label by default, full label on wider screens */
-.app-btn .label-short { display: inline; }
-.app-btn .label-full  { display: none; }
-@media (min-width: 480px) {
-    .app-btn .label-short { display: none; }
-    .app-btn .label-full  { display: inline; }
+/* Display utilities */
+.d-none    { display: none !important; }
+.d-inline  { display: inline !important; }
+.d-block   { display: block !important; }
+@media (min-width: 576px) {
+    .d-sm-none   { display: none !important; }
+    .d-sm-inline { display: inline !important; }
+    .d-sm-block  { display: block !important; }
+}
+@media (min-width: 768px) {
+    .d-md-none   { display: none !important; }
+    .d-md-inline { display: inline !important; }
+    .d-md-block  { display: block !important; }
 }
 
 .visnavblock {
@@ -124,26 +131,30 @@ body {
 
 .power-title {
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: #aaa;
 }
 
 .power-value {
     margin: 0;
-    line-height: 1.2;
-    font-size: 1.5rem;
+    line-height: 1.6;
+    font-size: 1.7rem;
 }
 
 @media (min-width: 768px) {
-    .power-title { font-size: 1.34rem; }
-    .power-value    { font-size: 4.5rem; }
+    .power-title { font-size: 1.0rem; }
+    .power-value    { font-size: 2.5rem; }
+}
+
+@media (min-width: 992px) {
+    .power-title { font-size: 1.2rem; }
+    .power-value    { font-size: 3.5rem; }
 }
 
 /* kW mode: scale down power values so larger numbers still fit */
-#app-block.in_kw .power-value              { font-size: 1rem; }
-@media (min-width: 768px)  { #app-block.in_kw .power-value { font-size: 3rem; } }
-@media (min-width: 992px)  { #app-block.in_kw .power-value { font-size: 4.4rem; } }
-@media (min-width: 1200px) { #app-block.in_kw .power-value { font-size: 4.5rem; } }
+#app-block.in_kw .power-value              { font-size: 0.9rem; }
+@media (min-width: 768px)  { #app-block.in_kw .power-value { font-size: 2.5rem; } }
+@media (min-width: 992px)  { #app-block.in_kw .power-value { font-size: 3.5rem; } }
 
 
 /* =====================================================================
@@ -316,17 +327,15 @@ body {
 .prc-solar-to-house   { position: absolute; width: 33.33333%; left: 0;          top: 0; }
 .prc-grid-to-house    { position: absolute; width: 33.33333%; left: 66.66667%;  top: 0; }
 
-/* Mobile (max 576px) */
-@media (max-width: 576px) {
+/* Mobile (max 768px): */
+@media (max-width: 768px) {
   #app-block { padding: 0; }
-  #statsbox-generation { padding-bottom:18px; }
   .statstable { border-spacing: 4px; }
   .statsbox-padded { padding: 4px; }
-  .statsbox-title { font-size: 12px; padding-bottom: 4px; } /* 20px */
+  .statsbox-title { font-size: 16px; padding-bottom: 4px; } /* 20px */
   .statsbox-flow-title { font-size: 12px; padding-bottom: 2px; line-height:12px; } /* 20px */
 
   .statsbox-value { font-size: 20px; } /* 36px */
-  .statsbox-units { display: none; } /* hide units */
   .statsbox-prc { font-size: 12px; } /* 16px */
   .statsbox-arrow-down:after {
     border-width: 8px;
@@ -340,6 +349,12 @@ body {
     border-width: 8px;
     margin-top: -8px;
   }
+}
+
+/* Mobile (max 576px) */
+@media (max-width: 576px) {
+  .statsbox-title { font-size: 12px; padding-bottom: 4px; } /* 20px */
+  .statsbox-units { display: none; } /* hide units */
 }
 
 .stats-grid {

@@ -23,8 +23,7 @@
     <nav class="app-top-bar d-flex justify-content-between">
         <ul id="tabs" class="btn-list">
             <li><button class="viewhistory app-btn" title="<?php echo tr('View History') ?>">
-                <span class="label-short"><?php echo tr("Hist") ?></span>
-                <span class="label-full"><?php echo tr("History") ?></span>
+                <span><?php echo tr("Daily") ?></span>
             </button></li>
         </ul>
         <ul class="btn-list">
@@ -53,7 +52,7 @@
             <h2 class="power-value text-quaternary"><span class="battery_now">-</span><span class="power-unit"></span></h2>
         </div>
         <div class="battery-section">
-            <h5 class="power-title text-light"><span class="battery_time_left_title"><?php echo tr('BATTERY TIME LEFT') ?></span></h5>
+            <h5 class="power-title text-light"><span class="battery_time_left_title"><span class="d-inline d-sm-none"><?php echo tr('TIME LEFT') ?></span><span class="d-none d-sm-inline"><?php echo tr('BATTERY TIME LEFT') ?></span></span></h5>
             <h2 class="power-value text-quaternary"><span class="battery_time_left">-</span></h2>
         </div>
         <div class="battery-section">
