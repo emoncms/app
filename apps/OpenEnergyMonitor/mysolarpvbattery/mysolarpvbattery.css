@@ -141,6 +141,10 @@ body {
     font-size: 1.7rem;
 }
 
+.power-unit {
+    /*font-weight: normal;*/
+}
+
 @media (min-width: 768px) {
     .power-title { font-size: 1.0rem; }
     .power-value    { font-size: 2.5rem; }
@@ -150,12 +154,6 @@ body {
     .power-title { font-size: 1.2rem; }
     .power-value    { font-size: 3.5rem; }
 }
-
-/* kW mode: scale down power values so larger numbers still fit */
-#app-block.in_kw .power-value              { font-size: 0.9rem; }
-@media (min-width: 768px)  { #app-block.in_kw .power-value { font-size: 2.5rem; } }
-@media (min-width: 992px)  { #app-block.in_kw .power-value { font-size: 3.5rem; } }
-
 
 /* =====================================================================
    Stats table

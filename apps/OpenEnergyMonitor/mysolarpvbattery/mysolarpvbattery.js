@@ -638,50 +638,44 @@ function livefn()
         battery_power: input.battery
     }));
 
-    // convert W to kW
-    if(powerUnit === 'kW') {
-        input.solar = as_kw(input.solar)
-        input.use = as_kw(input.use)
-        input.battery = as_kw(input.battery)
-        input.grid = as_kw(input.grid)
-        
-        $('.power-unit').text('kW')
-        $('#app-block').addClass('in_kw');
-    } else {
-        $('.power-unit').text('W')
-        $('#app-block').removeClass('in_kw');
-    }
+    $('.power-unit').text(powerUnit);
 
-    $(".solarnow").html(input.solar);
-    $(".usenow").html(input.use);
+    let scale = powerUnit === 'kW' ? 0.001 : 1;
+    let dp = powerUnit === 'kW' ? 1 : 0;
+
+    $(".solar-now").html(toFixed(input.solar * scale, dp));
+    $(".use-now").html(toFixed(input.use * scale, dp));
     $(".battery_soc").html(battery_soc_now);
     
     // Grid import/export status
+    let grid = toFixed(Math.abs(input.grid) * scale, dp);
+
     if (input.grid > 0) {
         $(".balance-label").html("IMPORTING");
-        $(".balance").html(`<span style='color:#d52e2e'><span class="grid_now">${Math.round(input.grid)}</span><span class="power-unit">${powerUnit}</span></span>`);
+        $(".gird-now").parent().css("color","#d52e2e");
     } else if (input.grid < 0) {
         $(".balance-label").html("EXPORTING");
-        $(".balance").html(`<span style='color:#2ed52e'><span class="grid_now">${Math.round(-input.grid)}</span><span class="power-unit">${powerUnit}</span></span>`);
+        $(".grid-now").parent().css("color","#2ed52e");
     } else {
         $(".balance-label").html("BALANCED");
-        $(".balance").html("--");
+        // $(".grid-now").parent().css("color","#999");
     }
+    $(".grid-now").html(grid);
     
     // Battery charge/discharge status
-    if (input.battery<0) {
-        $(".battery_now_title").html("BATTERY CHARGING");
-    } else if (input.battery>0) {
-        $(".battery_now_title").html("BATTERY DISCHARGING");
+    let battery = toFixed(Math.abs(input.battery) * scale, dp);
+
+    if (input.battery > 0) {
+        $(".battery_now_title").html("DISCHARGING");
+    } else if (input.battery < 0) {
+        $(".battery_now_title").html("CHARGING");
     } else {
-        $(".battery_now_title").html("BATTERY POWER");
+        $(".battery_now_title").html("POWER");
     }
-    $(".battery_now").html(Math.abs(input.battery));
+    $(".battery-now").html(battery);
 
     // Only redraw the graph if its the power graph and auto update is turned on
     if (viewmode=="powergraph" && autoupdate) draw(true);
-    // If 
-
 }
 
 function solar_battery_visibility() {
@@ -713,6 +707,11 @@ function solar_battery_visibility() {
     $(".prc-solar-battery").toggle(s && b);
 
     $(".battery-section").toggle(b);
+}
+
+function toFixed(num, dp) {
+    if (num === null || num === undefined || isNaN(num)) return "--";
+    return parseFloat(num).toFixed(dp);
 }
 
 // Capacity in kWh, power in W, returns time left as string "Xh Ym"
