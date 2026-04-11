@@ -306,8 +306,8 @@ body {
 
 /* Solar generation box: percentage overlays */
 #statsbox-generation { position: relative; }
-.prc-solar-to-battery { position: absolute; width: 50%; left: 0;      bottom: 0; }
-.prc-solar-direct     { position: absolute; width: 50%; left: 50%;    bottom: 0; }
+.prc-solar-to-battery { position: absolute; width: 33.3%; left: 0;      bottom: 0; }
+.prc-solar-direct     { position: absolute; width: 33.3%; left: 66.66%;    bottom: 0; }
 .prc-solar-export     { position: absolute; height: 100%; right: 0; top: 0;
                         display: flex; align-items: center; }
 
