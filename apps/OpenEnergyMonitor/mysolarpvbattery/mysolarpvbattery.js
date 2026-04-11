@@ -44,6 +44,18 @@ var flow_colors_contrast = {
     "grid_to_battery":  "#7DD3FC"  // light blue     – grid charging battery
 };
 
+// flow_colors_blend: each flow is 66% source + 33% destination, blended from 4 base colors:
+//   Solar=#FFD700 (yellow), Battery=#FF7700 (orange), Grid=#E03030 (red), Home=#3399DD (blue)
+var flow_colors_blend = {
+    "solar_to_load":    "#B9C049", // 66% yellow + 33% blue
+    "solar_to_battery": "#FFB500", // 66% yellow + 33% orange
+    "solar_to_grid":    "#F29E10", // 66% yellow + 33% red
+    "battery_to_load":  "#B98149", // 66% orange + 33% blue
+    "battery_to_grid":  "#F25E10", // 66% orange + 33% red
+    "grid_to_load":     "#A55269", // 66% red    + 33% blue
+    "grid_to_battery":  "#E84720"  // 66% red    + 33% orange
+};
+
 var flow_colors = flow_colors_tariff_app;
 
 // ----------------------------------------------------------------------
