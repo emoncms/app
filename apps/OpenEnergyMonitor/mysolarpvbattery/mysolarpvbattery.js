@@ -652,7 +652,7 @@ function livefn()
 
     if (input.grid > 0) {
         $(".balance-label").html("IMPORTING");
-        $(".gird-now").parent().css("color","#d52e2e");
+        $(".grid-now").parent().css("color","#d52e2e");
     } else if (input.grid < 0) {
         $(".balance-label").html("EXPORTING");
         $(".grid-now").parent().css("color","#2ed52e");
