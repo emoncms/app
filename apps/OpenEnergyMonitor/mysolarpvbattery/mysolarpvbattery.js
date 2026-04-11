@@ -34,7 +34,7 @@ var flow_colors_tariff_app = {
     "grid_to_battery":  "#82cbfc"
 };
 
-var flow_colors = {
+var flow_colors_contrast = {
     "solar_to_load":    "#F5C518", // bright amber   – direct solar use
     "solar_to_battery": "#C8A000", // darker gold    – solar into storage
     "solar_to_grid":    "#FFE066", // light yellow   – solar export
@@ -43,6 +43,8 @@ var flow_colors = {
     "grid_to_load":     "#38BDF8", // sky blue       – grid import
     "grid_to_battery":  "#7DD3FC"  // light blue     – grid charging battery
 };
+
+var flow_colors = flow_colors_tariff_app;
 
 // ----------------------------------------------------------------------
 // Configuration
@@ -1170,7 +1172,7 @@ function draw_bargraph()
     
     var options = {
         xaxis: { mode: "time", timezone: "browser", minTickSize: [1, "day"] },
-        grid: { hoverable: true, clickable: true, markings: markings },
+        grid: { hoverable: true, clickable: true, markings: markings, borderWidth: 0 },
         selection: { mode: "x" },
         legend: { show: false }
     };
