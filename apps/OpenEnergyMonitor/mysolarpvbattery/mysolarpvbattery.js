@@ -211,7 +211,6 @@ config.ui_after_value_change = function(key) {
 var feeds = {};
 
 var live = false;
-var reload = true;
 var autoupdate = true;
 var lastupdate = +new Date;
 var viewmode = "powergraph";
@@ -320,14 +319,13 @@ function init()
     
     // The buttons for these powergraph events are hidden when in historic mode 
     // The events are loaded at the start here and dont need to be unbinded and binded again.
-    $("#zoomout").click(function () {view.zoomout(); reload = true; autoupdate = false; draw(true);});
-    $("#zoomin").click(function () {view.zoomin(); reload = true; autoupdate = false; draw(true);});
-    $('#right').click(function () {view.panright(); reload = true; autoupdate = false; draw(true);});
-    $('#left').click(function () {view.panleft(); reload = true; autoupdate = false; draw(true);});
+    $("#zoomout").click(function () {view.zoomout(); autoupdate = false; draw(true);});
+    $("#zoomin").click(function () {view.zoomin(); autoupdate = false; draw(true);});
+    $('#right').click(function () {view.panright(); autoupdate = false; draw(true);});
+    $('#left').click(function () {view.panleft(); autoupdate = false; draw(true);});
     
     $('.time').click(function () {
-        view.timewindow($(this).attr("time")/24.0); 
-        reload = true; 
+        view.timewindow($(this).attr("time")/24.0);
         autoupdate = true;
         live_timerange = view.end - view.start;
         draw(true);
@@ -377,7 +375,7 @@ function show()
         if (!bargraph_initialized) init_bargraph();
     }
     
-    load_powergraph();
+    draw(true);
     powergraph_events();
     
     livefn();
@@ -616,6 +614,7 @@ function livefn()
 {
     // Check if the updater ran in the last 60s if it did not the app was sleeping
     // and so the data needs a full reload.
+    var reload = false;
     var now = +new Date();
     if ((now-lastupdate)>60000) reload = true;
     lastupdate = now;
@@ -716,7 +715,7 @@ function livefn()
     $(".battery-now").html(battery);
 
     // Only redraw the graph if its the power graph and auto update is turned on
-    if (viewmode=="powergraph" && autoupdate) draw(true);
+    if (viewmode=="powergraph" && (autoupdate || reload)) process_and_draw_power_graph();
 }
 
 function solar_battery_visibility() {
@@ -778,8 +777,11 @@ function battery_time_left({ capacity, soc, battery_power }) {
 
 function draw(load) {
     if (viewmode=="powergraph") {
-        if (load) load_powergraph();
-        draw_powergraph();
+        if (load) {
+            load_process_draw_power_graph();
+        } else {
+            draw_powergraph();
+        }
     }
     if (viewmode=="bargraph") {
         if (load) {
@@ -792,153 +794,6 @@ function draw(load) {
     }
 }
 
-function load_powergraph() {
-    view.calc_interval(1500); // npoints = 1500;
-
-    var mode = get_mode();
-
-    // if we have all 4 feeds then we can just load them directly with no derivation needed
-
-    // -------------------------------------------------------------------------------------------------------
-    // LOAD DATA ON INIT OR RELOAD
-    // Only load feeds that are actually configured; missing ones will be derived.
-    // -------------------------------------------------------------------------------------------------------
-    if (reload) {
-        reload = false;
-        
-        // getdata params: feedid,start,end,interval,average=0,delta=0,skipmissing=0,limitinterval=0,callback=false,context=false,timeformat='unixms'
-        if (available.solar) {
-            timeseries.load("solar", remove_null_values(feed.getdata(config.app.solar.value, view.start, view.end, view.interval, 1, 0, 0, 0, false, false, 'notime'), view.interval));
-        }
-        if (available.use) {
-            timeseries.load("use", remove_null_values(feed.getdata(config.app.use.value, view.start, view.end, view.interval, 1, 0, 0, 0, false, false, 'notime'), view.interval));
-        }
-        if (available.battery) {
-            timeseries.load("battery", remove_null_values(feed.getdata(config.app.battery.value, view.start, view.end, view.interval, 1, 0, 0, 0, false, false, 'notime'), view.interval));
-        }
-        if (available.grid) {
-            timeseries.load("grid", remove_null_values(feed.getdata(config.app.grid.value, view.start, view.end, view.interval, 1, 0, 0, 0, false, false, 'notime'), view.interval));
-        }
-        if (battery_soc_available) {
-            timeseries.load("battery_soc", remove_null_values(feed.getdata(config.app.battery_soc.value, view.start, view.end, view.interval, 0, 0, 0, 0, false, false, 'notime'), view.interval));
-        }
-    }
-    // -------------------------------------------------------------------------------------------------------
-
-    // Determine which feed we use as the time axis reference (any loaded feed will do)
-    var ts_ref = ["use", "grid", "solar", "battery"].find(key => available[key]) || false;
-    console.log("Time reference feed: " + ts_ref);
-    
-    var solar_to_load_data = [];
-    var solar_to_grid_data = [];
-    var solar_to_battery_data = [];
-    var battery_to_load_data = [];
-    var battery_to_grid_data = [];
-    var grid_to_load_data = [];
-    var grid_to_battery_data = [];
-    var battery_soc_data = [];
-    
-    var total_solar_to_load_kwh = 0;
-    var total_solar_to_grid_kwh = 0;
-    var total_solar_to_battery_kwh = 0;
-    var total_battery_to_load_kwh = 0;
-    var total_battery_to_grid_kwh = 0;
-    var total_grid_to_load_kwh = 0;
-    var total_grid_to_battery_kwh = 0;
-
-    let battery_soc_now = null;
-
-    var datastart = timeseries.start_time(ts_ref);
-    var interval = view.interval;
-    var power_to_kwh = interval / 3600000.0;
-
-    var battery_soc_start = null;
-    var battery_soc_end = null;
-
-    for (var z=0; z<timeseries.length(ts_ref); z++) {
-        var time = datastart + (1000 * interval * z);
-        
-        var input = {
-            solar: available.solar ? timeseries.value("solar",z) : null,
-            use: available.use ? timeseries.value("use",z) : null,
-            battery: available.battery ? timeseries.value("battery",z) : null,
-            grid: available.grid ? timeseries.value("grid",z) : null
-        }
-
-        input = flow_derive_missing(input);
-
-        if (input.solar !== null || input.use !== null || input.battery !== null || input.grid !== null) {
-
-            var flow = flow_calculation(input);
-
-            // Accumulate kWh totals
-            total_solar_to_load_kwh += flow.solar_to_load * power_to_kwh;
-            total_solar_to_grid_kwh += flow.solar_to_grid * power_to_kwh;
-            total_solar_to_battery_kwh += flow.solar_to_battery * power_to_kwh;
-            total_battery_to_load_kwh += flow.battery_to_load * power_to_kwh;
-            total_battery_to_grid_kwh += flow.battery_to_grid * power_to_kwh;
-            total_grid_to_load_kwh += flow.grid_to_load * power_to_kwh;
-            total_grid_to_battery_kwh += flow.grid_to_battery * power_to_kwh;
-
-            solar_to_load_data.push([time, flow.solar_to_load]);
-            solar_to_grid_data.push([time, flow.solar_to_grid]);
-            solar_to_battery_data.push([time, flow.solar_to_battery]);
-            battery_to_load_data.push([time, flow.battery_to_load]);
-            battery_to_grid_data.push([time, flow.battery_to_grid]);
-            grid_to_load_data.push([time, flow.grid_to_load]);
-            grid_to_battery_data.push([time, flow.grid_to_battery]);
-
-        }
-
-        // SOC
-        if (battery_soc_available) {
-            battery_soc_now = timeseries.value("battery_soc",z);
-
-            if (battery_soc_start === null && battery_soc_now !== null) {
-                battery_soc_start = battery_soc_now;
-            }
-
-            if (battery_soc_now !== null) {
-                battery_soc_end = battery_soc_now;
-            }
-        }
-        battery_soc_data.push([time, battery_soc_now]);
-    }
-
-    // Update stats boxes with totals and ratios derived from the flow decomposition
-    updateStats({
-        solar_to_load:    total_solar_to_load_kwh,
-        solar_to_grid:    total_solar_to_grid_kwh,
-        solar_to_battery: total_solar_to_battery_kwh,
-        battery_to_load:  total_battery_to_load_kwh,
-        battery_to_grid:  total_battery_to_grid_kwh,
-        grid_to_load:     total_grid_to_load_kwh,
-        grid_to_battery:  total_grid_to_battery_kwh
-    });
-    
-    var soc_change = 0; 
-    if (battery_soc_available) {
-        soc_change = battery_soc_end-battery_soc_start;
-    }
-    var sign = ""; if (soc_change>=0) sign = "+";
-    $(".battery_soc_change").html(sign+soc_change.toFixed(1));
-    
-    powerseries = [];
-    powerseries.push({data: solar_to_load_data,    label: "Solar to Load",    color: flow_colors["solar_to_load"],    stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: solar_to_battery_data, label: "Solar to Battery", color: flow_colors["solar_to_battery"], stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: solar_to_grid_data,    label: "Solar to Grid",    color: flow_colors["solar_to_grid"],    stack: 1, lines: {lineWidth: 0, fill: 1.0}});
-    powerseries.push({data: battery_to_load_data,  label: "Battery to Load",  color: flow_colors["battery_to_load"],  stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: battery_to_grid_data,  label: "Battery to Grid",  color: flow_colors["battery_to_grid"],  stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: grid_to_load_data,     label: "Grid to Load",     color: flow_colors["grid_to_load"],     stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: grid_to_battery_data,  label: "Grid to Battery",  color: flow_colors["grid_to_battery"],  stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-
-    if (battery_soc_available) {
-        // only add if time period is less or equall to 1 month
-        if ((view.end - view.start) <= 3600000*24*32) {
-            powerseries.push({data:battery_soc_data, label: "SOC", yaxis:2, color: "#888"});
-        }
-    }
-}
 
 // ----------------------------------------------------------------------
 // updateStats: write all stats-box DOM values from a flat flow data object.
@@ -991,382 +846,11 @@ function toggleBatteryFlowVisibility(grid_to_battery, battery_to_grid) {
     $("#battery_export").toggle(battery_to_grid >= 0.1);
 }
 
-// ----------------------------------------------------------------------
-// kwhd_val: safely read a daily kWh value from a feed data array.
-// Returns 0 when the entry or its value is null/undefined.
-// ----------------------------------------------------------------------
-function kwhd_val(arr, idx) {
-    if (arr === null || arr === undefined) return 0;
-    if (arr[idx] === undefined) return 0;
-
-    return (arr[idx] && arr[idx][1] !== null) ? arr[idx][1] : 0;
-}
-
-function draw_powergraph() {
-
-    var options = {
-        lines: { fill: false },
-        xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end},
-        yaxes: [{ min: 0, reserveSpace: false },{ min: 0, max: 100, reserveSpace: false }],
-        grid: { hoverable: true, clickable: true, borderWidth: 0 },
-        selection: { mode: "x" },
-        legend: { show: false }
-    }
-    
-    options.xaxis.min = view.start;
-    options.xaxis.max = view.end;
-    $.plot($('#placeholder'),powerseries,options);
-    $(".ajax-loader").hide();
-}
-
-// ------------------------------------------------------------------------------------------
-// POWER GRAPH EVENTS
-// ------------------------------------------------------------------------------------------
-function powergraph_events() {
-    $(".visnav[time=1], .visnav[time=3], .visnav[time=6], .visnav[time=24]").show();
-            
-    $('#placeholder').unbind("plotclick");
-    $('#placeholder').unbind("plothover");
-    $('#placeholder').unbind("plotselected");
-
-    $('#placeholder').bind("plothover", function (event, pos, item)
-    {
-        if (item) {
-            // Show tooltip
-            var tooltip_items = [];
-
-            var date = new Date(item.datapoint[0]);
-            tooltip_items.push(["TIME", dateFormat(date, 'HH:MM'), ""]);
-
-            for (i = 0; i < powerseries.length; i++) {
-                var series = powerseries[i];
-                if (series.data[item.dataIndex]!=undefined && series.data[item.dataIndex][1]!=null) {
-                    if (series.label.toUpperCase()=="SOC") {
-                        tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "%", series.color]);
-                    } else {
-                        if (series.data[item.dataIndex][1] != 0) {
-                            if ( series.data[item.dataIndex][1] >= 1000) {
-                                tooltip_items.push([series.label.toUpperCase(), (series.data[item.dataIndex][1]/1000.0).toFixed(1) , "kW", series.color]);
-                            } else {
-                                tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W", series.color]);
-                            }
-                        }
-                    }
-                }
-            }
-            show_tooltip(pos.pageX+10, pos.pageY+5, tooltip_items);
-        } else {
-            // Hide tooltip
-            hide_tooltip();
-        }
-    });
-
-    $('#placeholder').bind("plotselected", function (event, ranges) {
-        view.start = ranges.xaxis.from;
-        view.end = ranges.xaxis.to;
-
-        autoupdate = false;
-        reload = true; 
-        
-        var now = +new Date();
-        if (Math.abs(view.end-now)<30000) {
-            autoupdate = true;
-            live_timerange = view.end - view.start;
-        }
-
-        draw(true);
-    });
-}
-
-// ======================================================================================
-// PART 2: BAR GRAPH PAGE
-// ======================================================================================
-
-// --------------------------------------------------------------------------------------
-// INIT BAR GRAPH
-// - load cumulative kWh feeds
-// - calculate used solar, solar, used and exported kwh/d
-// --------------------------------------------------------------------------------------
-function init_bargraph() {
-    bargraph_initialized = true;
-    // Fetch the earliest start_time from grid_to_load
-    var m = feed.getmeta(config.app.grid_to_load_kwh.value);
-    var earliest_start_time = m.start_time;
-    latest_start_time = earliest_start_time;
-    view.first_data = latest_start_time * 1000;
-}
-
-function load_bargraph() {
-    var interval = 3600*24;
-    var intervalms = interval * 1000;
-    var mode = get_mode();
-    
-    var end = view.end;
-    var start = view.start;
-    
-    end = Math.ceil(end/intervalms)*intervalms;
-    start = Math.floor(start/intervalms)*intervalms;
-
-    // Feed definitions: key -> { guard, feedkey }
-    // guard: condition under which this flow feed is applicable to the current mode
-    var flow_defs = [
-        { key: 'grid_to_load',     guard: true,                              },
-        { key: 'solar_to_load',    guard: mode.has_solar,                    },
-        { key: 'solar_to_grid',    guard: mode.has_solar,                    },
-        { key: 'solar_to_battery', guard: mode.has_solar && mode.has_battery },
-        { key: 'battery_to_load',  guard: mode.has_battery,                  },
-        { key: 'battery_to_grid',  guard: mode.has_battery,                  },
-        { key: 'grid_to_battery',  guard: mode.has_battery,                  }
-    ];
-
-    var keys_to_load = [];
-    var feedids = [];
-    flow_defs.forEach(function(d) {
-        if (d.guard && config.app[d.key + "_kwh"] && config.app[d.key + "_kwh"].value) {
-            keys_to_load.push(d.key);
-            feedids.push(config.app[d.key + "_kwh"].value);
-        }
-    });
-    
-    // Load raw daily delta data for each applicable flow
-    feed.getdata(feedids, start, end, "daily", 0, 1, 0, 0, function (all_data) {
-
-        // if success false
-        if (all_data.success === false) {
-            historyseries = [];
-            draw_bargraph();
-            return;
-        }
-
-        var raw = {};
-        var idx = 0;
-        keys_to_load.forEach(function(key) {
-            raw[key] = all_data[idx].data;
-            idx++;
-        });
-
-        // Per-day arrays for graph and hover access (global so bargraph_events can read them)
-        kwhd_data = {};
-        flow_defs.forEach(function(d) { kwhd_data[d.key] = []; });
-
-        for (var day = 0; day < raw['grid_to_load'].length; day++) {
-            var time = raw['grid_to_load'][day][0];
-
-            // Only skip days where both reference feeds are null
-            // var required_ok = (raw['grid_to_load'][day]  && raw['grid_to_load'][day][1]  !== null) ||
-            //                   (raw['solar_to_load'][day] && raw['solar_to_load'][day][1] !== null);
-            // if (!required_ok) continue;
-
-            flow_defs.forEach(function(d) {
-                kwhd_data[d.key].push([time, kwhd_val(raw[d.key], day)]);
-            });
-        }
-
-        // Series definitions: label, color, stack (1=positive/load, 0=negative/export)
-        var series_defs = [
-            // Stack 1: onsite use breakdown (positive bars above zero)
-            { key: 'solar_to_load',    label: "Solar to Load",    color: flow_colors["solar_to_load"],    stack: 1, invert: false },
-            { key: 'battery_to_load',  label: "Battery to Load",  color: flow_colors["battery_to_load"],  stack: 1, invert: false },
-            { key: 'grid_to_load',     label: "Grid to Load",     color: flow_colors["grid_to_load"],     stack: 1, invert: false },
-            // Stack 0: exports (negative bars below zero)
-            { key: 'solar_to_grid',    label: "Solar to Grid",    color: flow_colors["solar_to_grid"],    stack: 0, invert: true  },
-            { key: 'battery_to_grid',  label: "Battery to Grid",  color: flow_colors["battery_to_grid"],  stack: 0, invert: true  }
-        ];
-
-        historyseries = [];
-        
-        series_defs.forEach(function(def) {
-            var data = kwhd_data[def.key];
-            if (!data.length) return;
-            historyseries.push({
-                data:  def.invert ? invert_kwhd_data(data) : data,
-                label: def.label,
-                color: def.color,
-                bars:  { show: true, align: "center", barWidth: 0.8 * 3600 * 24 * 1000, fill: 0.9, lineWidth: 0 },
-                stack: def.stack
-            });
-        });
-
-        draw_bargraph();
-
-    }, false);
-}
-
-function invert_kwhd_data(data) {
-    var neg_data = [];
-    for (var i = 0; i < data.length; i++) {
-        neg_data.push([data[i][0], -1 * data[i][1]]);
-    }
-    return neg_data;
-}
-
-// ------------------------------------------------------------------------------------------
-// DRAW BAR GRAPH
-// Because the data for the bargraph only needs to be loaded once at the start we seperate out
-// the data loading part to init and the draw part here just draws the bargraph to the flot
-// placeholder overwritting the power graph as the view is changed.
-// ------------------------------------------------------------------------------------------    
-function draw_bargraph()
-{
-    var markings = [];
-    markings.push({ color: "#ccc", lineWidth: 1, yaxis: { from: 0, to: 0 } });
-    
-    var options = {
-        xaxis: { mode: "time", timezone: "browser", minTickSize: [1, "day"] },
-        grid: { hoverable: true, clickable: true, markings: markings, borderWidth: 0 },
-        selection: { mode: "x" },
-        legend: { show: false }
-    };
-    
-    var plot = $.plot($('#placeholder'),historyseries,options);
-    
-    $('#placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use &amp; Total Use</div>");
-    $('#placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> Total export (solar + battery to grid)</div>");
-}
-
-// ------------------------------------------------------------------------------------------
-// BAR GRAPH EVENTS
-// - show bar values on hover
-// - click through to power graph
-// ------------------------------------------------------------------------------------------
-function bargraph_events() {
-    $(".visnav[time=1], .visnav[time=3], .visnav[time=6], .visnav[time=24]").hide();
-            
-    $('#placeholder').unbind("plotclick");
-    $('#placeholder').unbind("plothover");
-    $('#placeholder').unbind("plotselected");
-    $('.bargraph-viewall').unbind("click");
-    
-    // Show day's figures on the bottom of the page
-    
-    $('#placeholder').bind("plothover", function (event, pos, item)
-    {
-        if (item) {
-            var z = item.dataIndex;
-            var mode = get_mode();
-            
-            // Read directly from the fine-grained flow feed data arrays (0 when not applicable in mode)
-            updateStats({
-                solar_to_load:    kwhd_val(kwhd_data['solar_to_load'], z),
-                solar_to_grid:    kwhd_val(kwhd_data['solar_to_grid'], z),
-                solar_to_battery: kwhd_val(kwhd_data['solar_to_battery'], z),
-                battery_to_load:  kwhd_val(kwhd_data['battery_to_load'], z),
-                battery_to_grid:  kwhd_val(kwhd_data['battery_to_grid'], z),
-                grid_to_load:     kwhd_val(kwhd_data['grid_to_load'], z),
-                grid_to_battery:  kwhd_val(kwhd_data['grid_to_battery'], z)
-            });
-            $(".battery_soc_change").html("---");
-
-        } else {
-            // Hide tooltip
-            hide_tooltip();
-        }
-    });
-
-    // Auto click through to power graph
-    $('#placeholder').bind("plotclick", function (event, pos, item)
-    {
-        if (item && !panning) {
-            var z = item.dataIndex;
-            
-            history_start = view.start;
-            history_end = view.end;
-            // Use whichever per-day data array has data
-            var ref_day_data = kwhd_data['grid_to_load'].length ? kwhd_data['grid_to_load'] : kwhd_data['solar_to_load'];
-            view.start = ref_day_data[z][0];
-            view.end = view.start + 86400*1000;
-
-            $(".balanceline").attr('disabled',false);
-            $(".viewhistory").toggleClass('active');
-            
-            reload = true; 
-            autoupdate = false;
-            viewmode = "powergraph";
-            
-            draw(true);
-            powergraph_events();
-        }
-    });
-    
-    
-    $('#placeholder').bind("plotselected", function (event, ranges) {
-        view.start = ranges.xaxis.from;
-        view.end = ranges.xaxis.to;
-        draw(true);
-        panning = true; setTimeout(function() {panning = false; }, 100);
-    });
-    
-    $('.bargraph-viewall').click(function () {
-        view.start = latest_start_time * 1000;
-        view.end = +new Date;
-        draw(true);
-    });
-}
-
-// ------------------------------------------------------------------------------------------
-// TOOLTIP HANDLING
-// Show & hide the tooltip
-// ------------------------------------------------------------------------------------------
-function show_tooltip(x, y, values) {
-    var tooltip = $('#tooltip');
-    if (!tooltip[0]) {
-        tooltip = $('<div id="tooltip"></div>')
-            .css({
-                position: "absolute",
-                display: "none",
-                border: "1px solid #545454",
-                padding: "8px",
-                "background-color": "#333",
-            })
-            .appendTo("body");
-    }
-
-    tooltip.html('');
-    var table = $('<table/>').appendTo(tooltip);
-
-    for (i = 0; i < values.length; i++) {
-        var value = values[i];
-        var row = $('<tr class="tooltip-item"/>').appendTo(table);
-        var swatch = value[3] ? '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+value[3]+';margin-right:6px"></span>' : '';
-        $('<td style="padding-right: 8px">'+swatch+'<span class="tooltip-title">'+value[0]+'</span></td>').appendTo(row);
-        $('<td><span class="tooltip-value">'+value[1]+'</span> <span class="tooltip-units">'+value[2]+'</span></td>').appendTo(row);
-    }
-
-    tooltip
-        .css({
-            left: x,
-            top: y
-        })
-        .show();
-}
-
-function hide_tooltip() {
-    $('#tooltip').hide();
-}
-
 $(function() {
     $(document).on('window.resized hidden.sidebar.collapse shown.sidebar.collapse', function(){
         resize()
     })
 })
-
-// Remove null gaps shorter than 15 minutes by forward-filling from the last
-// known good value. Longer gaps are left as null so the graph shows a break.
-function remove_null_values(data, interval) {
-    let last_valid_pos = 0;
-    for (let pos = 0; pos < data.length; pos++) {
-        if (data[pos][1] != null) {
-            let null_duration_s = (pos - last_valid_pos) * interval;
-            if (null_duration_s < 900) {   // 900 seconds = 15 minutes
-                for (let x = last_valid_pos + 1; x < pos; x++) {
-                    data[x][1] = data[last_valid_pos][1];
-                }
-            }
-            last_valid_pos = pos;
-        }
-    }
-    return data;
-}
 
 // ----------------------------------------------------------------------
 // App log

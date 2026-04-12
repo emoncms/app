@@ -1,0 +1,278 @@
+function load_process_draw_power_graph() {
+    view.calc_interval(1500); // npoints = 1500;
+
+    var feeds = [
+        { key: "solar",       cond: available.solar,       avg: 1 },
+        { key: "use",         cond: available.use,         avg: 1 },
+        { key: "battery",     cond: available.battery,     avg: 1 },
+        { key: "grid",        cond: available.grid,        avg: 1 },
+        { key: "battery_soc", cond: battery_soc_available, avg: 0 },
+    ].filter(f => f.cond);
+
+    var feedids  = feeds.map(f => config.app[f.key].value);
+    var averages = feeds.map(f => f.avg);
+    var deltas   = feeds.map(() => 0);
+
+    feed.getdata(feedids, view.start, view.end, view.interval, averages.join(","), deltas.join(","), 0, 0, function (all_data) {
+        if (all_data.success === false) {
+            feeds.forEach(f => timeseries.load(f.key, []));
+        } else {
+            feeds.forEach((f, idx) => timeseries.load(f.key, remove_null_values(all_data[idx].data, view.interval)));
+            console.log("Data loaded for feeds: " + feeds.map(f => f.key).join(", "));
+        }
+        process_and_draw_power_graph();
+    }, false, "notime");
+}
+
+function process_and_draw_power_graph() {
+
+    // -------------------------------------------------------------------------------------------------------
+
+    // Determine which feed we use as the time axis reference (any loaded feed will do)
+    var ts_ref = ["use", "grid", "solar", "battery"].find(key => available[key]) || false;
+    console.log("Time reference feed: " + ts_ref);
+    
+    var solar_to_load_data = [];
+    var solar_to_grid_data = [];
+    var solar_to_battery_data = [];
+    var battery_to_load_data = [];
+    var battery_to_grid_data = [];
+    var grid_to_load_data = [];
+    var grid_to_battery_data = [];
+    var battery_soc_data = [];
+    
+    var total_solar_to_load_kwh = 0;
+    var total_solar_to_grid_kwh = 0;
+    var total_solar_to_battery_kwh = 0;
+    var total_battery_to_load_kwh = 0;
+    var total_battery_to_grid_kwh = 0;
+    var total_grid_to_load_kwh = 0;
+    var total_grid_to_battery_kwh = 0;
+
+    let battery_soc_now = null;
+
+    var datastart = timeseries.start_time(ts_ref);
+    var interval = view.interval;
+    var power_to_kwh = interval / 3600000.0;
+
+    var battery_soc_start = null;
+    var battery_soc_end = null;
+
+    for (var z=0; z<timeseries.length(ts_ref); z++) {
+        var time = datastart + (1000 * interval * z);
+        
+        var input = {
+            solar: available.solar ? timeseries.value("solar",z) : null,
+            use: available.use ? timeseries.value("use",z) : null,
+            battery: available.battery ? timeseries.value("battery",z) : null,
+            grid: available.grid ? timeseries.value("grid",z) : null
+        }
+
+        input = flow_derive_missing(input);
+
+        if (input.solar !== null || input.use !== null || input.battery !== null || input.grid !== null) {
+
+            var flow = flow_calculation(input);
+
+            // Accumulate kWh totals
+            total_solar_to_load_kwh += flow.solar_to_load * power_to_kwh;
+            total_solar_to_grid_kwh += flow.solar_to_grid * power_to_kwh;
+            total_solar_to_battery_kwh += flow.solar_to_battery * power_to_kwh;
+            total_battery_to_load_kwh += flow.battery_to_load * power_to_kwh;
+            total_battery_to_grid_kwh += flow.battery_to_grid * power_to_kwh;
+            total_grid_to_load_kwh += flow.grid_to_load * power_to_kwh;
+            total_grid_to_battery_kwh += flow.grid_to_battery * power_to_kwh;
+
+            solar_to_load_data.push([time, flow.solar_to_load]);
+            solar_to_grid_data.push([time, flow.solar_to_grid]);
+            solar_to_battery_data.push([time, flow.solar_to_battery]);
+            battery_to_load_data.push([time, flow.battery_to_load]);
+            battery_to_grid_data.push([time, flow.battery_to_grid]);
+            grid_to_load_data.push([time, flow.grid_to_load]);
+            grid_to_battery_data.push([time, flow.grid_to_battery]);
+
+        }
+
+        // SOC
+        if (battery_soc_available) {
+            battery_soc_now = timeseries.value("battery_soc",z);
+
+            if (battery_soc_start === null && battery_soc_now !== null) {
+                battery_soc_start = battery_soc_now;
+            }
+
+            if (battery_soc_now !== null) {
+                battery_soc_end = battery_soc_now;
+            }
+        }
+        battery_soc_data.push([time, battery_soc_now]);
+    }
+
+    // Update stats boxes with totals and ratios derived from the flow decomposition
+    updateStats({
+        solar_to_load:    total_solar_to_load_kwh,
+        solar_to_grid:    total_solar_to_grid_kwh,
+        solar_to_battery: total_solar_to_battery_kwh,
+        battery_to_load:  total_battery_to_load_kwh,
+        battery_to_grid:  total_battery_to_grid_kwh,
+        grid_to_load:     total_grid_to_load_kwh,
+        grid_to_battery:  total_grid_to_battery_kwh
+    });
+    
+    var soc_change = 0; 
+    if (battery_soc_available) {
+        soc_change = battery_soc_end-battery_soc_start;
+    }
+    var sign = ""; if (soc_change>=0) sign = "+";
+    $(".battery_soc_change").html(sign+soc_change.toFixed(1));
+    
+    powerseries = [];
+    powerseries.push({data: solar_to_load_data,    label: "Solar to Load",    color: flow_colors["solar_to_load"],    stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+    powerseries.push({data: solar_to_battery_data, label: "Solar to Battery", color: flow_colors["solar_to_battery"], stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+    powerseries.push({data: solar_to_grid_data,    label: "Solar to Grid",    color: flow_colors["solar_to_grid"],    stack: 1, lines: {lineWidth: 0, fill: 1.0}});
+    powerseries.push({data: battery_to_load_data,  label: "Battery to Load",  color: flow_colors["battery_to_load"],  stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+    powerseries.push({data: battery_to_grid_data,  label: "Battery to Grid",  color: flow_colors["battery_to_grid"],  stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+    powerseries.push({data: grid_to_load_data,     label: "Grid to Load",     color: flow_colors["grid_to_load"],     stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+    powerseries.push({data: grid_to_battery_data,  label: "Grid to Battery",  color: flow_colors["grid_to_battery"],  stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+
+    if (battery_soc_available) {
+        // only add if time period is less or equall to 1 month
+        if ((view.end - view.start) <= 3600000*24*32) {
+            powerseries.push({data:battery_soc_data, label: "SOC", yaxis:2, color: "#888"});
+        }
+    }
+
+    draw_powergraph();
+}
+
+function draw_powergraph() {
+
+    var options = {
+        lines: { fill: false },
+        xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end},
+        yaxes: [{ min: 0, reserveSpace: false },{ min: 0, max: 100, reserveSpace: false }],
+        grid: { hoverable: true, clickable: true, borderWidth: 0 },
+        selection: { mode: "x" },
+        legend: { show: false }
+    }
+    
+    options.xaxis.min = view.start;
+    options.xaxis.max = view.end;
+    $.plot($('#placeholder'),powerseries,options);
+    $(".ajax-loader").hide();
+}
+
+// Remove null gaps shorter than 15 minutes by forward-filling from the last
+// known good value. Longer gaps are left as null so the graph shows a break.
+function remove_null_values(data, interval) {
+    let last_valid_pos = 0;
+    for (let pos = 0; pos < data.length; pos++) {
+        if (data[pos][1] != null) {
+            let null_duration_s = (pos - last_valid_pos) * interval;
+            if (null_duration_s < 900) {   // 900 seconds = 15 minutes
+                for (let x = last_valid_pos + 1; x < pos; x++) {
+                    data[x][1] = data[last_valid_pos][1];
+                }
+            }
+            last_valid_pos = pos;
+        }
+    }
+    return data;
+}
+
+function powergraph_events() {
+    $(".visnav[time=1], .visnav[time=3], .visnav[time=6], .visnav[time=24]").show();
+            
+    $('#placeholder').unbind("plotclick");
+    $('#placeholder').unbind("plothover");
+    $('#placeholder').unbind("plotselected");
+
+    $('#placeholder').bind("plothover", function (event, pos, item)
+    {
+        if (item) {
+            // Show tooltip
+            var tooltip_items = [];
+
+            var date = new Date(item.datapoint[0]);
+            tooltip_items.push(["TIME", dateFormat(date, 'HH:MM'), ""]);
+
+            for (i = 0; i < powerseries.length; i++) {
+                var series = powerseries[i];
+                if (series.data[item.dataIndex]!=undefined && series.data[item.dataIndex][1]!=null) {
+                    if (series.label.toUpperCase()=="SOC") {
+                        tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "%", series.color]);
+                    } else {
+                        if (series.data[item.dataIndex][1] != 0) {
+                            if ( series.data[item.dataIndex][1] >= 1000) {
+                                tooltip_items.push([series.label.toUpperCase(), (series.data[item.dataIndex][1]/1000.0).toFixed(1) , "kW", series.color]);
+                            } else {
+                                tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W", series.color]);
+                            }
+                        }
+                    }
+                }
+            }
+            show_tooltip(pos.pageX+10, pos.pageY+5, tooltip_items);
+        } else {
+            // Hide tooltip
+            hide_tooltip();
+        }
+    });
+
+    $('#placeholder').bind("plotselected", function (event, ranges) {
+        view.start = ranges.xaxis.from;
+        view.end = ranges.xaxis.to;
+
+        autoupdate = false;
+        reload = true; 
+        
+        var now = +new Date();
+        if (Math.abs(view.end-now)<30000) {
+            autoupdate = true;
+            live_timerange = view.end - view.start;
+        }
+
+        draw(true);
+    });
+}
+
+// ------------------------------------------------------------------------------------------
+// TOOLTIP HANDLING
+// Show & hide the tooltip
+// ------------------------------------------------------------------------------------------
+function show_tooltip(x, y, values) {
+    var tooltip = $('#tooltip');
+    if (!tooltip[0]) {
+        tooltip = $('<div id="tooltip"></div>')
+            .css({
+                position: "absolute",
+                display: "none",
+                border: "1px solid #545454",
+                padding: "8px",
+                "background-color": "#333",
+            })
+            .appendTo("body");
+    }
+
+    tooltip.html('');
+    var table = $('<table/>').appendTo(tooltip);
+
+    for (i = 0; i < values.length; i++) {
+        var value = values[i];
+        var row = $('<tr class="tooltip-item"/>').appendTo(table);
+        var swatch = value[3] ? '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+value[3]+';margin-right:6px"></span>' : '';
+        $('<td style="padding-right: 8px">'+swatch+'<span class="tooltip-title">'+value[0]+'</span></td>').appendTo(row);
+        $('<td><span class="tooltip-value">'+value[1]+'</span> <span class="tooltip-units">'+value[2]+'</span></td>').appendTo(row);
+    }
+
+    tooltip
+        .css({
+            left: x,
+            top: y
+        })
+        .show();
+}
+
+function hide_tooltip() {
+    $('#tooltip').hide();
+}

@@ -217,5 +217,23 @@ config.db = <?php echo isset($config) ? json_encode($config) : 'null'; ?>;
 
 </script>
 
-<!-- load mysolarpvbattery.js -->
-<script src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.js?v=<?php echo $v; ?>"></script>
+<?php
+
+// Load app specific JS with auto versioning based on file modification time to prevent caching issues after updates
+load_js_auto_version("mysolarpvbattery_powergraph.js");
+load_js_auto_version("mysolarpvbattery_daily.js");
+load_js_auto_version("mysolarpvbattery.js");
+
+
+function load_js_auto_version($scriptname) {
+    global $path;
+    $script_path = "Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/".$scriptname;
+
+    $version_string = "";
+    if (file_exists($script_path)) {
+        $last_updated = filemtime($script_path);
+        $version_string = "?v=".$last_updated;
+    }
+    echo '<script src="'.$path.$script_path.$version_string.'"></script>';
+}
+?>
