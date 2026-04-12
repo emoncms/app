@@ -1,3 +1,10 @@
+// -------------------------------------------------------------------------------------------------------
+// MySolarPVBattery Power Graph: load, process, and draw the power flow graph
+// -------------------------------------------------------------------------------------------------------
+
+// Fetch raw feed data for the current view window. Only requests feeds that are
+// actually configured; any missing feeds will be derived later in processing.
+// On success, loads each feed into the timeseries store then triggers processing.
 function load_process_draw_power_graph() {
     view.calc_interval(1500); // npoints = 1500;
 
@@ -24,6 +31,9 @@ function load_process_draw_power_graph() {
     }, false, "notime");
 }
 
+// Iterates over the loaded timeseries data, derives any missing power flows using
+// flow_derive_missing / flow_calculation, accumulates kWh totals for the stats
+// panel, builds the flot series arrays, and then calls draw_powergraph().
 function process_and_draw_power_graph() {
 
     // -------------------------------------------------------------------------------------------------------
@@ -145,6 +155,8 @@ function process_and_draw_power_graph() {
     draw_powergraph();
 }
 
+// Renders the power-flow stacked area chart (and optional SOC line) using flot,
+// fitted to the current view.start / view.end time range.
 function draw_powergraph() {
 
     var options = {
@@ -164,6 +176,8 @@ function draw_powergraph() {
 
 // Remove null gaps shorter than 15 minutes by forward-filling from the last
 // known good value. Longer gaps are left as null so the graph shows a break.
+// Forward-fills null gaps that are shorter than 15 minutes so the graph
+// doesn't show false breaks for brief outages. Longer gaps remain null.
 function remove_null_values(data, interval) {
     let last_valid_pos = 0;
     for (let pos = 0; pos < data.length; pos++) {
@@ -180,6 +194,8 @@ function remove_null_values(data, interval) {
     return data;
 }
 
+// Binds flot interaction events (hover tooltip, drag-to-zoom selection) to the
+// chart placeholder. Safe to call on every redraw — unbinds before rebinding.
 function powergraph_events() {
     $(".visnav[time=1], .visnav[time=3], .visnav[time=6], .visnav[time=24]").show();
             
@@ -236,10 +252,8 @@ function powergraph_events() {
     });
 }
 
-// ------------------------------------------------------------------------------------------
-// TOOLTIP HANDLING
-// Show & hide the tooltip
-// ------------------------------------------------------------------------------------------
+// Builds and positions the hover tooltip. Each entry in `values` is
+// [label, value, units, swatchColor?]. Creates the tooltip element on first call.
 function show_tooltip(x, y, values) {
     var tooltip = $('#tooltip');
     if (!tooltip[0]) {
@@ -273,6 +287,7 @@ function show_tooltip(x, y, values) {
         .show();
 }
 
+// Hides the hover tooltip when the cursor moves off a data point.
 function hide_tooltip() {
     $('#tooltip').hide();
 }
