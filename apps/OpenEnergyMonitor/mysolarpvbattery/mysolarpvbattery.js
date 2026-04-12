@@ -595,8 +595,8 @@ function resize()
     //if (is_landscape) height = Math.min(height, width * 0.6);
 
     // min size to avoid flot errors
-    if (height < 100) height = 100;
-    if (width  < 100) width  = 100;
+    if (height < 200) height = 200;
+    if (width  < 200) width  = 200;
 
     placeholder.width(width);
     placeholder_bound.height(height);
