@@ -27,107 +27,11 @@ function load_process_draw_power_graph() {
             feeds.forEach((f, idx) => timeseries.load(f.key, remove_null_values(all_data[idx].data, view.interval)));
             console.log("Data loaded for feeds: " + feeds.map(f => f.key).join(", "));
         }
-        process_and_draw_power_graph();
+        process_and_draw_power_graph("power");
     }, false, "notime");
 }
 
-// Iterates over the loaded timeseries data, derives any missing power flows using
-// flow_derive_missing / flow_calculation, accumulates kWh totals for the stats
-// panel, builds the flot series arrays, and then calls draw_powergraph().
-function process_and_draw_power_graph() {
-
-    // Determine which feed we use as the time axis reference (any loaded feed will do)
-    var ts_ref = ["use", "grid", "solar", "battery"].find(key => available[key]) || false;
-    console.log("Time reference feed: " + ts_ref);
-    
-    var flows = ['solar_to_load', 'solar_to_grid', 'solar_to_battery', 'battery_to_load', 'battery_to_grid', 'grid_to_load', 'grid_to_battery'];
-
-    var totals = {};
-    var data = {};
-
-    for (var i=0; i<flows.length; i++) {
-        totals[flows[i]] = 0;
-        data[flows[i]] = [];
-    }
-
-    var datastart = timeseries.start_time(ts_ref);
-    var interval = view.interval;
-    var power_to_kwh = interval / 3600000.0; 
-
-    for (var z=0; z<timeseries.length(ts_ref); z++) {
-        var time = datastart + (1000 * interval * z);
-        
-        var input = {
-            solar: available.solar ? timeseries.value("solar",z) : null,
-            use: available.use ? timeseries.value("use",z) : null,
-            battery: available.battery ? timeseries.value("battery",z) : null,
-            grid: available.grid ? timeseries.value("grid",z) : null
-        }
-
-        input = flow_derive_missing(input);
-
-        if (input.solar !== null || input.use !== null || input.battery !== null || input.grid !== null) {
-
-            var flow = flow_calculation(input);
-
-            // Accumulate kWh totals and build graph data arrays
-            for (var i=0; i<flows.length; i++) {
-                totals[flows[i]] += flow[flows[i]] * power_to_kwh;
-                data[flows[i]].push([time, flow[flows[i]]]);
-            }
-
-        }
-    }
-
-    // Update stats boxes with totals and ratios derived from the flow decomposition
-    updateStats(totals);
-    
-    powerseries = [];
-    powerseries.push({data: data['solar_to_load'],    label: "Solar to Load",    color: flow_colors["solar_to_load"],    stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: data['solar_to_battery'], label: "Solar to Battery", color: flow_colors["solar_to_battery"], stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: data['solar_to_grid'],    label: "Solar to Grid",    color: flow_colors["solar_to_grid"],    stack: 1, lines: {lineWidth: 0, fill: 1.0}});
-    powerseries.push({data: data['battery_to_load'],  label: "Battery to Load",  color: flow_colors["battery_to_load"],  stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: data['battery_to_grid'],  label: "Battery to Grid",  color: flow_colors["battery_to_grid"],  stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: data['grid_to_load'],     label: "Grid to Load",     color: flow_colors["grid_to_load"],     stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: data['grid_to_battery'],  label: "Grid to Battery",  color: flow_colors["grid_to_battery"],  stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-
-
-    // Calculate battery SOC change over the period and display in stats box. 
-    // Add SOC line to graph (only if time range is <=1 month to avoid clutter).
-    let battery_soc_now = null;
-    var battery_soc_start = null;
-    var battery_soc_end = null;
-
-    if (battery_soc_available) {
-        var battery_soc_data = timeseries.data("battery_soc");
-        for (var z=0; z<battery_soc_data.length; z++) {
-            battery_soc_now = battery_soc_data[z][1];
-            if (battery_soc_start === null && battery_soc_now !== null) {
-                battery_soc_start = battery_soc_now;
-            }
-            if (battery_soc_now !== null) {
-                battery_soc_end = battery_soc_now;
-            }
-        }
-
-        var soc_change = battery_soc_end-battery_soc_start;
-        var sign = ""; if (soc_change>=0) sign = "+";
-        $(".battery_soc_change").html(sign+soc_change.toFixed(1));
-
-        // only add if time period is less or equall to 1 month
-        if ((view.end - view.start) <= 3600000*24*32) {
-            powerseries.push({data:battery_soc_data, label: "SOC", yaxis:2, color: "#888"});
-        }
-
-    } else {
-        $(".battery_soc_change").html("");
-    }
-
-    draw_powergraph();
-}
-
-
-function load_process_draw_power_graph_kwh_version() {
+function load_process_draw_power_graph2() {
     view.calc_interval(1500); // npoints = 1500;
 
     // min interval of 15 minutes to avoid excessive nulls and flot performance issues
@@ -183,32 +87,78 @@ function load_process_draw_power_graph_kwh_version() {
                 idx++;
             });
         }
-        process_and_draw_power_graph();
+        process_and_draw_power_graph("kwh");
     }, false, "notime");
 }
 
-function process_and_draw_power_graph_kwh_version() {
-    
-    // Update stats boxes with totals for each flow, Sum kWh data.and ratios derived from the flow decomposition
-    updateStats({
-        solar_to_load:    kwh_sum(kwh_data.solar_to_load),
-        solar_to_grid:    kwh_sum(kwh_data.solar_to_grid),
-        solar_to_battery: kwh_sum(kwh_data.solar_to_battery),
-        battery_to_load:  kwh_sum(kwh_data.battery_to_load),
-        battery_to_grid:  kwh_sum(kwh_data.battery_to_grid),
-        grid_to_load:     kwh_sum(kwh_data.grid_to_load),
-        grid_to_battery:  kwh_sum(kwh_data.grid_to_battery)
-    });
-    
-    powerseries = [];
-    powerseries.push({data: kwh_to_power(kwh_data.solar_to_load,    view.interval), label: "Solar to Load",    color: flow_colors["solar_to_load"],    stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: kwh_to_power(kwh_data.solar_to_battery, view.interval), label: "Solar to Battery", color: flow_colors["solar_to_battery"], stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: kwh_to_power(kwh_data.solar_to_grid,    view.interval), label: "Solar to Grid",    color: flow_colors["solar_to_grid"],    stack: 1, lines: {lineWidth: 0, fill: 1.0}});
-    powerseries.push({data: kwh_to_power(kwh_data.battery_to_load,  view.interval), label: "Battery to Load",  color: flow_colors["battery_to_load"],  stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: kwh_to_power(kwh_data.battery_to_grid,  view.interval), label: "Battery to Grid",  color: flow_colors["battery_to_grid"],  stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: kwh_to_power(kwh_data.grid_to_load,     view.interval), label: "Grid to Load",     color: flow_colors["grid_to_load"],     stack: 1, lines: {lineWidth: 0, fill: 0.8}});
-    powerseries.push({data: kwh_to_power(kwh_data.grid_to_battery,  view.interval), label: "Grid to Battery",  color: flow_colors["grid_to_battery"],  stack: 1, lines: {lineWidth: 0, fill: 0.8}});
+// Iterates over the loaded timeseries data, derives any missing power flows using
+// flow_derive_missing / flow_calculation, accumulates kWh totals for the stats
+// panel, builds the flot series arrays, and then calls draw_powergraph().
+function process_and_draw_power_graph(process_mode = "power") {
 
+    var flows = [
+        { key: "solar_to_load",    label: "Solar to Load",    fill: 0.8 },
+        { key: "solar_to_battery", label: "Solar to Battery", fill: 0.8 },
+        { key: "solar_to_grid",    label: "Solar to Grid",    fill: 1.0 },
+        { key: "battery_to_load",  label: "Battery to Load",  fill: 0.8 },
+        { key: "battery_to_grid",  label: "Battery to Grid",  fill: 0.8 },
+        { key: "grid_to_load",     label: "Grid to Load",     fill: 0.8 },
+        { key: "grid_to_battery",  label: "Grid to Battery",  fill: 0.8 }
+    ];
+
+    var totals = {};
+    var data = {};
+    flows.forEach(function(flow) {
+        totals[flow.key] = 0;
+        data[flow.key] = [];
+    });
+
+    if (process_mode == "power") {
+        // Determine which feed we use as the time axis reference (any loaded feed will do)
+        var ts_ref = ["use", "grid", "solar", "battery"].find(key => available[key]) || false;
+        console.log("Time reference feed: " + ts_ref);
+        var datastart = timeseries.start_time(ts_ref);
+        var interval = view.interval;
+        var power_to_kwh = interval / 3600000.0; 
+
+        for (var z=0; z<timeseries.length(ts_ref); z++) {
+            var time = datastart + (1000 * interval * z);
+            
+            var input = {
+                solar: available.solar ? timeseries.value("solar",z) : null,
+                use: available.use ? timeseries.value("use",z) : null,
+                battery: available.battery ? timeseries.value("battery",z) : null,
+                grid: available.grid ? timeseries.value("grid",z) : null
+            }
+
+            input = flow_derive_missing(input);
+
+            if (input.solar !== null || input.use !== null || input.battery !== null || input.grid !== null) {
+
+                var flow = flow_calculation(input);
+
+                // Accumulate kWh totals and build graph data arrays
+                flows.forEach(function(f) {
+                    totals[f.key] += flow[f.key] * power_to_kwh;
+                    data[f.key].push([time, flow[f.key]]);
+                });
+            }
+        }
+    } else if (process_mode == "kwh") {
+        // If we're processing pre-aggregated kWh data then we just need to sum totals and convert from kwh to power for the graph
+        flows.forEach(function(flow) {
+            totals[flow.key] = kwh_sum(kwh_data[flow.key]);
+            data[flow.key] = kwh_to_power(kwh_data[flow.key], view.interval);
+        });
+    }
+
+    // Update stats boxes with totals.
+    updateStats(totals);
+    // Build graph series in correct order.
+    powerseries = [];
+    flows.forEach(function(flow) {
+        powerseries.push({data: data[flow.key], label: flow.label, color: flow_colors[flow.key], stack: 1, lines: {lineWidth: 0, fill: flow.fill}});
+    });
 
     // Calculate battery SOC change over the period and display in stats box. 
     // Add SOC line to graph (only if time range is <=1 month to avoid clutter).
@@ -217,8 +167,15 @@ function process_and_draw_power_graph_kwh_version() {
     var battery_soc_end = null;
 
     if (battery_soc_available) {
-        for (var z=0; z<kwh_data.battery_soc.length; z++) {
-            battery_soc_now = kwh_data.battery_soc[z][1];
+
+        if (process_mode == "power") {
+            var battery_soc_data = timeseries.data("battery_soc");
+        } else if (process_mode == "kwh") {
+            var battery_soc_data = kwh_data.battery_soc;
+        }
+
+        for (var z=0; z<battery_soc_data.length; z++) {
+            battery_soc_now = battery_soc_data[z][1];
             if (battery_soc_start === null && battery_soc_now !== null) {
                 battery_soc_start = battery_soc_now;
             }
@@ -233,7 +190,7 @@ function process_and_draw_power_graph_kwh_version() {
 
         // only add if time period is less or equall to 1 month
         if ((view.end - view.start) <= 3600000*24*32) {
-            powerseries.push({data:kwh_data.battery_soc, label: "SOC", yaxis:2, color: "#888"});
+            powerseries.push({data:battery_soc_data, label: "SOC", yaxis:2, color: "#888"});
         }
 
     } else {
