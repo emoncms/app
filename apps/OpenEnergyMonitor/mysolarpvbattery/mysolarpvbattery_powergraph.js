@@ -4,7 +4,7 @@
 
 // Fetch raw feed data for the current view window. Only requests feeds that are
 // actually configured; any missing feeds will be derived later in processing.
-// On success, loads each feed into the timeseries store then triggers processing.
+// On success, loads each feed into the timeseries store     then triggers processing.
 function load_process_draw_power_graph() {
     view.calc_interval(1500); // npoints = 1500;
 
@@ -59,14 +59,9 @@ function process_and_draw_power_graph() {
     var total_grid_to_load_kwh = 0;
     var total_grid_to_battery_kwh = 0;
 
-    let battery_soc_now = null;
-
     var datastart = timeseries.start_time(ts_ref);
     var interval = view.interval;
-    var power_to_kwh = interval / 3600000.0;
-
-    var battery_soc_start = null;
-    var battery_soc_end = null;
+    var power_to_kwh = interval / 3600000.0; 
 
     for (var z=0; z<timeseries.length(ts_ref); z++) {
         var time = datastart + (1000 * interval * z);
@@ -102,20 +97,6 @@ function process_and_draw_power_graph() {
             grid_to_battery_data.push([time, flow.grid_to_battery]);
 
         }
-
-        // SOC
-        if (battery_soc_available) {
-            battery_soc_now = timeseries.value("battery_soc",z);
-
-            if (battery_soc_start === null && battery_soc_now !== null) {
-                battery_soc_start = battery_soc_now;
-            }
-
-            if (battery_soc_now !== null) {
-                battery_soc_end = battery_soc_now;
-            }
-        }
-        battery_soc_data.push([time, battery_soc_now]);
     }
 
     // Update stats boxes with totals and ratios derived from the flow decomposition
@@ -129,13 +110,6 @@ function process_and_draw_power_graph() {
         grid_to_battery:  total_grid_to_battery_kwh
     });
     
-    var soc_change = 0; 
-    if (battery_soc_available) {
-        soc_change = battery_soc_end-battery_soc_start;
-    }
-    var sign = ""; if (soc_change>=0) sign = "+";
-    $(".battery_soc_change").html(sign+soc_change.toFixed(1));
-    
     powerseries = [];
     powerseries.push({data: solar_to_load_data,    label: "Solar to Load",    color: flow_colors["solar_to_load"],    stack: 1, lines: {lineWidth: 0, fill: 0.8}});
     powerseries.push({data: solar_to_battery_data, label: "Solar to Battery", color: flow_colors["solar_to_battery"], stack: 1, lines: {lineWidth: 0, fill: 0.8}});
@@ -145,11 +119,36 @@ function process_and_draw_power_graph() {
     powerseries.push({data: grid_to_load_data,     label: "Grid to Load",     color: flow_colors["grid_to_load"],     stack: 1, lines: {lineWidth: 0, fill: 0.8}});
     powerseries.push({data: grid_to_battery_data,  label: "Grid to Battery",  color: flow_colors["grid_to_battery"],  stack: 1, lines: {lineWidth: 0, fill: 0.8}});
 
+
+    // Calculate battery SOC change over the period and display in stats box. 
+    // Add SOC line to graph (only if time range is <=1 month to avoid clutter).
+    let battery_soc_now = null;
+    var battery_soc_start = null;
+    var battery_soc_end = null;
+
     if (battery_soc_available) {
+        var battery_soc_data = timeseries.data("battery_soc");
+        for (var z=0; z<battery_soc_data.length; z++) {
+            battery_soc_now = battery_soc_data[z][1];
+            if (battery_soc_start === null && battery_soc_now !== null) {
+                battery_soc_start = battery_soc_now;
+            }
+            if (battery_soc_now !== null) {
+                battery_soc_end = battery_soc_now;
+            }
+        }
+
+        var soc_change = battery_soc_end-battery_soc_start;
+        var sign = ""; if (soc_change>=0) sign = "+";
+        $(".battery_soc_change").html(sign+soc_change.toFixed(1));
+
         // only add if time period is less or equall to 1 month
         if ((view.end - view.start) <= 3600000*24*32) {
             powerseries.push({data:battery_soc_data, label: "SOC", yaxis:2, color: "#888"});
         }
+
+    } else {
+        $(".battery_soc_change").html("");
     }
 
     draw_powergraph();
