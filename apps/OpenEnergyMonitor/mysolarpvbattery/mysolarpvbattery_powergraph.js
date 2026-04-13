@@ -9,8 +9,10 @@ var data_mode = "power"; // or "kwh" when processing pre-aggregated kWh data for
 function load_process_draw_power_graph() {
     view.calc_interval(1500); // npoints = 1500;
 
+    var mode = get_mode();
+
     // If timewindow is more than 7 days switch to kWh mode which uses pre-aggregated data to improve accuracy.
-    if ((view.end - view.start) > 3600000*24*7) {
+    if ((view.end - view.start) > 3600000*24*7 && check_history_feeds(mode)) {
         data_mode = "kwh";
     } else {
         data_mode = "power";
