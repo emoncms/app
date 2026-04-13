@@ -715,7 +715,7 @@ function livefn()
     $(".battery-now").html(battery);
 
     // Only redraw the graph if its the power graph and auto update is turned on
-    if (viewmode=="powergraph" && autoupdate) process_and_draw_power_graph("power");
+    if (viewmode=="powergraph" && autoupdate) process_and_draw_power_graph(data_mode);
 }
 
 function solar_battery_visibility() {

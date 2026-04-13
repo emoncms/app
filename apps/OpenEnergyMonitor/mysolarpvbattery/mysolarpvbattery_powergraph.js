@@ -1,6 +1,7 @@
 // -------------------------------------------------------------------------------------------------------
 // MySolarPVBattery Power Graph: load, process, and draw the power flow graph
 // -------------------------------------------------------------------------------------------------------
+var data_mode = "power"; // or "kwh" when processing pre-aggregated kWh data for the bar graph
 
 // Fetch raw feed data for the current view window. Only requests feeds that are
 // actually configured; any missing feeds will be derived later in processing.
@@ -8,52 +9,47 @@
 function load_process_draw_power_graph() {
     view.calc_interval(1500); // npoints = 1500;
 
-    var feeds = [
-        { key: "solar",       cond: available.solar,       avg: 1 },
-        { key: "use",         cond: available.use,         avg: 1 },
-        { key: "battery",     cond: available.battery,     avg: 1 },
-        { key: "grid",        cond: available.grid,        avg: 1 },
-        { key: "battery_soc", cond: battery_soc_available, avg: 0 },
-    ].filter(f => f.cond);
-
-    var feedids  = feeds.map(f => config.app[f.key].value);
-    var averages = feeds.map(f => f.avg);
-    var deltas   = feeds.map(() => 0);
-
-    feed.getdata(feedids, view.start, view.end, view.interval, averages.join(","), deltas.join(","), 0, 0, function (all_data) {
-        if (all_data.success === false) {
-            feeds.forEach(f => timeseries.load(f.key, []));
-        } else {
-            feeds.forEach((f, idx) => timeseries.load(f.key, remove_null_values(all_data[idx].data, view.interval)));
-            console.log("Data loaded for feeds: " + feeds.map(f => f.key).join(", "));
-        }
-        process_and_draw_power_graph("power");
-    }, false, "notime");
-}
-
-function load_process_draw_power_graph2() {
-    view.calc_interval(1500); // npoints = 1500;
-
-    // min interval of 15 minutes to avoid excessive nulls and flot performance issues
-    if (view.interval < 900) view.interval = 900;
-    // interval should be multiple of 900
-    if (view.interval % 900 !== 0) {
-        view.interval = Math.ceil(view.interval / 900) * 900;
+    // If timewindow is more than 7 days switch to kWh mode which uses pre-aggregated data to improve accuracy.
+    if ((view.end - view.start) > 3600000*24*7) {
+        data_mode = "kwh";
+    } else {
+        data_mode = "power";
     }
-    // Align view start and end to interval boundaries
-    view.start = Math.floor(view.start / (view.interval*1000)) * (view.interval*1000);
-    view.end = Math.ceil(view.end / (view.interval*1000)) * (view.interval*1000);
+    
+    if (data_mode == "power") {
+        var feeds = [
+            { key: "solar",            kwh: false, cond: available.solar,                      avg: 1, delta: 0 },
+            { key: "use",              kwh: false, cond: available.use,                        avg: 1, delta: 0 },
+            { key: "battery",          kwh: false, cond: available.battery,                    avg: 1, delta: 0 },
+            { key: "grid",             kwh: false, cond: available.grid,                       avg: 1, delta: 0 },
+            { key: "battery_soc",      kwh: false, cond: battery_soc_available,                avg: 0, delta: 0 },
+        ].filter(f => f.cond);
 
-    var feeds = [
-        { key: "grid_to_load",     cond: true,                                 delta: 1 },
-        { key: "solar_to_load",    cond: available.solar,                      delta: 1 },
-        { key: "solar_to_grid",    cond: available.solar,                      delta: 1 },
-        { key: "solar_to_battery", cond: available.solar && available.battery, delta: 1 },
-        { key: "battery_to_load",  cond: available.battery,                    delta: 1 },
-        { key: "battery_to_grid",  cond: available.battery,                    delta: 1 },
-        { key: "grid_to_battery",  cond: available.battery,                    delta: 1 },
-        { key: "battery_soc",      cond: battery_soc_available,                delta: 0 }
-    ].filter(f => f.cond);
+    } else if (data_mode == "kwh") {
+
+        // min interval of 15 minutes to avoid excessive nulls and flot performance issues
+        if (view.interval < 900) view.interval = 900;
+        // interval should be multiple of 900
+        if (view.interval % 900 !== 0) {
+            view.interval = Math.ceil(view.interval / 900) * 900;
+        }
+        // Align view start and end to interval boundaries
+        view.start = Math.floor(view.start / (view.interval*1000)) * (view.interval*1000);
+        view.end = Math.ceil(view.end / (view.interval*1000)) * (view.interval*1000);
+
+        var feeds = [
+            { key: "grid_to_load",     kwh: true,  cond: true,                                 avg:0, delta: 1 },
+            { key: "solar_to_load",    kwh: true,  cond: available.solar,                      avg:0, delta: 1 },
+            { key: "solar_to_grid",    kwh: true,  cond: available.solar,                      avg:0, delta: 1 },
+            { key: "solar_to_battery", kwh: true,  cond: available.solar && available.battery, avg:0, delta: 1 },
+            { key: "battery_to_load",  kwh: true,  cond: available.battery,                    avg:0, delta: 1 },
+            { key: "battery_to_grid",  kwh: true,  cond: available.battery,                    avg:0, delta: 1 },
+            { key: "grid_to_battery",  kwh: true,  cond: available.battery,                    avg:0, delta: 1 },
+            { key: "battery_soc",      kwh: false, cond: battery_soc_available,                avg:0, delta: 0 }
+        ].filter(f => f.cond);
+
+        kwh_data = {};
+    }
 
     var keys_to_load = [];
     var feedids  = [];
@@ -62,7 +58,7 @@ function load_process_draw_power_graph2() {
     
     feeds.forEach(function(d) {
         let key = d.key;
-        if (key != "battery_soc") key += "_kwh";
+        if (d.kwh) key += "_kwh";
 
         if (d.cond && config.app[key] && config.app[key].value) {
             keys_to_load.push(d.key);
@@ -72,22 +68,31 @@ function load_process_draw_power_graph2() {
         }
     });
 
-    kwh_data = {};
 
     feed.getdata(feedids, view.start, view.end, view.interval, averages.join(","), deltas.join(","), 0, 0, function (all_data) {
-        if (all_data.success === false) {
-            keys_to_load.forEach(function(key) {
-                kwh_data[key] = [];
-            });
-            
+
+        if (data_mode == "power") {
+            if (all_data.success === false) {
+                feeds.forEach(f => timeseries.load(f.key, []));
+            } else {
+                feeds.forEach((f, idx) => timeseries.load(f.key, remove_null_values(all_data[idx].data, view.interval)));
+            }
         } else {
-            var idx = 0;
-            keys_to_load.forEach(function(key) {
-                kwh_data[key] = all_data[idx].data;
-                idx++;
-            });
+            if (all_data.success === false) {
+                keys_to_load.forEach(function(key) {
+                    kwh_data[key] = [];
+                });
+                
+            } else {
+                var idx = 0;
+                keys_to_load.forEach(function(key) {
+                    kwh_data[key] = all_data[idx].data;
+                    idx++;
+                });
+            }
         }
-        process_and_draw_power_graph("kwh");
+        process_and_draw_power_graph(data_mode);
+
     }, false, "notime");
 }
 
