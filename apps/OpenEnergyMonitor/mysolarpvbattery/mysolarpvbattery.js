@@ -364,7 +364,7 @@ function init()
             history_end = view.end
             view.start = power_start
             view.end = power_end
-            draw_graph();
+            load_process_draw_graph();
         }
     });
 }

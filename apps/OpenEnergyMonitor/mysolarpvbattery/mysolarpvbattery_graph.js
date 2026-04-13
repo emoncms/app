@@ -366,6 +366,8 @@ function graph_events() {
             
             history_start = view.start;
             history_end = view.end;
+
+            if (kwh_data['grid_to_load'] == undefined) return;
             // Use whichever per-day data array has data
             var ref_day_data = kwh_data['grid_to_load'].length ? kwh_data['grid_to_load'] : kwh_data['solar_to_load'];
             view.start = ref_day_data[z][0];
