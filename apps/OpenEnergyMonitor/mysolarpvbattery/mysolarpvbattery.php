@@ -221,7 +221,7 @@ config.db = <?php echo isset($config) ? json_encode($config) : 'null'; ?>;
 <?php
 
 // Load app specific JS with auto versioning based on file modification time to prevent caching issues after updates
-load_js_auto_version("mysolarpvbattery_powergraph.js");
+load_js_auto_version("mysolarpvbattery_graph.js");
 load_js_auto_version("mysolarpvbattery.js");
 
 
