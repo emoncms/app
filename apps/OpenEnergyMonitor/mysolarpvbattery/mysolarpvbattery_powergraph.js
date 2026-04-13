@@ -25,6 +25,11 @@ function load_process_draw_power_graph() {
     } else {
         // Snap interval up to nearest 15-minute boundary (min 900s) to avoid excessive nulls
         view.interval = Math.ceil(Math.max(view.interval, 900) / 900) * 900;
+
+        if (viewmode == "bargraph") {
+            view.interval = 3600*24; // override to daily for bar graph
+        }
+
         // Align view start and end to interval boundaries
         view.start = Math.floor(view.start / (view.interval*1000)) * (view.interval*1000);
         view.end   = Math.ceil(view.end   / (view.interval*1000)) * (view.interval*1000);
@@ -126,17 +131,34 @@ function process_and_draw_power_graph(process_mode = "power") {
         // If we're processing pre-aggregated kWh data then we just need to sum totals and convert from kwh to power for the graph
         flows.forEach(flow => {
             totals[flow.key] = kwh_sum(kwh_data[flow.key]);
-            data[flow.key]   = kwh_to_power(kwh_data[flow.key], view.interval);
+            if (viewmode == "powergraph") {
+                data[flow.key]   = kwh_to_power(kwh_data[flow.key], view.interval);
+            } else {
+                data[flow.key]   = kwh_data[flow.key];
+            }
         });
     }
 
     // Update stats boxes with totals.
     updateStats(totals);
     // Build graph series in correct order.
-    powerseries = flows.map(flow => ({
-        data: data[flow.key], label: flow.label, color: flow_colors[flow.key],
-        stack: 1, lines: { lineWidth: 0, fill: flow.fill }
-    }));
+
+    // powerseries = flows.map(flow => ({
+    //     data: data[flow.key], label: flow.label, color: flow_colors[flow.key],
+    //     stack: 1, lines: { lineWidth: 0, fill: flow.fill }
+    // }));
+    powerseries = [];
+    for (var i=0; i<flows.length; i++) {
+        var series = {
+            data: data[flows[i].key], label: flows[i].label, color: flow_colors[flows[i].key],
+            stack: 1, lines: { lineWidth: 0, fill: flows[i].fill }
+        };
+        if (viewmode == "bargraph") {
+            series.lines = { show: false };
+            series.bars = { show: true, align: "center", barWidth: 0.8 * 3600 * 24 * 1000, fill: flows[i].fill, lineWidth: 0 };
+        }
+        powerseries.push(series);
+    }
 
     // Calculate battery SOC change over the period and display in stats box.
     // Add SOC line to graph (only if time range is <=1 month to avoid clutter).
@@ -187,6 +209,16 @@ function draw_powergraph() {
         selection: { mode: "x" },
         legend: { show: false }
     }
+
+    /*
+    var options = {
+        xaxis: { mode: "time", timezone: "browser", minTickSize: [1, "day"], font: { color: font_color } },
+        yaxis: { font: { color: font_color } },
+        grid: { hoverable: true, clickable: true, markings: markings, borderWidth: 0 },
+        selection: { mode: "x" },
+        legend: { show: false }
+    };*/
+
     
     options.xaxis.min = view.start;
     options.xaxis.max = view.end;
@@ -268,7 +300,11 @@ function powergraph_events() {
                             if ( series.data[item.dataIndex][1] >= 1000) {
                                 tooltip_items.push([series.label.toUpperCase(), (series.data[item.dataIndex][1]/1000.0).toFixed(1) , "kW", series.color]);
                             } else {
-                                tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W", series.color]);
+                                if (viewmode == "powergraph") {
+                                    tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W", series.color]);
+                                } else {
+                                    tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "kWh", series.color]);
+                                }
                             }
                         }
                     }
@@ -295,6 +331,35 @@ function powergraph_events() {
         }
 
         draw(true);
+    });
+
+    // Auto click through to power graph
+    $('#placeholder').bind("plotclick", function (event, pos, item)
+    {
+        if (viewmode == "powergraph") return; // disable click when already in powergraph mode
+
+        if (item && !panning) {
+            var z = item.dataIndex;
+            
+            history_start = view.start;
+            history_end = view.end;
+            // Use whichever per-day data array has data
+            var ref_day_data = kwh_data['grid_to_load'].length ? kwh_data['grid_to_load'] : kwh_data['solar_to_load'];
+            view.start = ref_day_data[z][0];
+            view.end = view.start + 86400*1000;
+
+            $(".viewhistory").toggleClass('active');
+            
+            reload = true; 
+            autoupdate = false;
+            viewmode = "powergraph";
+
+            // cache the daily kWh data
+            kwhd_cache = JSON.parse(JSON.stringify(kwh_data));
+            
+            draw(true);
+            // powergraph_events();
+        }
     });
 }
 
@@ -338,4 +403,13 @@ function show_tooltip(x, y, values) {
 // Hides the hover tooltip when the cursor moves off a data point.
 function hide_tooltip() {
     $('#tooltip').hide();
+}
+
+// Invert kWh/d data for export flows so they appear as negative bars on the graph
+function invert_kwhd_data(data) {
+    var neg_data = [];
+    for (var i = 0; i < data.length; i++) {
+        neg_data.push([data[i][0], -1 * data[i][1]]);
+    }
+    return neg_data;
 }

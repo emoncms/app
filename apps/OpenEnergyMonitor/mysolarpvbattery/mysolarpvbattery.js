@@ -219,8 +219,8 @@ var powerseries = [];
 var latest_start_time = 0;
 var panning = false;
 var bargraph_initialized = false;
-var bargraph_loaded = false;
 var kwhd_data = {};
+var kwhd_cache = {};
 
 
 // == Flow decomposition control variables ==
@@ -314,7 +314,7 @@ function init()
 
     // Show history bargraph button only when all required kWh flow feeds are available for the current mode
     var has_history = check_history_feeds(mode);
-    if (has_history) init_bargraph();
+    // if (has_history) init_bargraph();
     $(".viewhistory").toggle(has_history);
     
     // The buttons for these powergraph events are hidden when in historic mode 
@@ -349,13 +349,18 @@ function init()
             power_end = view.end
             view.start = history_start
             view.end = history_end
-            if (bargraph_loaded) {
-                draw(false); 
-            } else {
-                bargraph_loaded = true;
+            view.interval = 3600*24;
+            
+            if ($.isEmptyObject(kwhd_cache)) {
+                // empty cache, need to load from server
                 draw(true);
+            } else {
+                // retrieve from cache instead of reloading from server
+                kwh_data = JSON.parse(JSON.stringify(kwhd_cache));
+                process_and_draw_power_graph('kwh');
             }
-            bargraph_events();
+
+            powergraph_events();
         } else {
             history_start = view.start
             history_end = view.end
@@ -378,7 +383,7 @@ function show()
     solar_battery_visibility();
 
     if (check_history_feeds(mode)) {
-        if (!bargraph_initialized) init_bargraph();
+        //if (!bargraph_initialized) init_bargraph();
     }
     
     draw(true);
@@ -789,13 +794,14 @@ function battery_time_left({ capacity, soc, battery_power }) {
 }
 
 function draw(load) {
-    if (viewmode=="powergraph") {
+    //if (viewmode=="powergraph") {
         if (load) {
             load_process_draw_power_graph();
         } else {
             draw_powergraph();
         }
-    }
+    //}
+    /*
     if (viewmode=="bargraph") {
         if (load) {
             // draw called from load
@@ -804,7 +810,7 @@ function draw(load) {
             draw_bargraph();
         }
         
-    }
+    }*/
 }
 
 
