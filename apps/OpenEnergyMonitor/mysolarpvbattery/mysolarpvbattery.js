@@ -359,15 +359,12 @@ function init()
                 kwh_data = JSON.parse(JSON.stringify(kwhd_cache));
                 process_and_draw_power_graph('kwh');
             }
-
-            powergraph_events();
         } else {
             history_start = view.start
             history_end = view.end
             view.start = power_start
             view.end = power_end
             draw(false);
-            powergraph_events();
         }
     });
 }
@@ -387,7 +384,7 @@ function show()
     }
     
     draw(true);
-    powergraph_events();
+    graph_events();
     
     livefn();
     live = setInterval(livefn,5000);
@@ -794,23 +791,11 @@ function battery_time_left({ capacity, soc, battery_power }) {
 }
 
 function draw(load) {
-    //if (viewmode=="powergraph") {
-        if (load) {
-            load_process_draw_power_graph();
-        } else {
-            draw_powergraph();
-        }
-    //}
-    /*
-    if (viewmode=="bargraph") {
-        if (load) {
-            // draw called from load
-            load_bargraph();
-        } else {
-            draw_bargraph();
-        }
-        
-    }*/
+    if (load) {
+        load_process_draw_power_graph();
+    } else {
+        draw_powergraph();
+    }
 }
 
 

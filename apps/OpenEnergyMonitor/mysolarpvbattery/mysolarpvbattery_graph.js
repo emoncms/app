@@ -194,6 +194,8 @@ function process_and_draw_power_graph(process_mode = "power") {
 // fitted to the current view.start / view.end time range.
 function draw_powergraph() {
 
+    $(".visnav[time=1], .visnav[time=3], .visnav[time=6], .visnav[time=24]").toggle(viewmode !== "bargraph");
+
     var font_color = "#888";
     var options = {
         lines: { fill: false },
@@ -274,13 +276,7 @@ function kwh_to_power(data, interval) {
 
 // Binds flot interaction events (hover tooltip, drag-to-zoom selection) to the
 // chart placeholder. Safe to call on every redraw — unbinds before rebinding.
-function powergraph_events() {
-    $(".visnav[time=1], .visnav[time=3], .visnav[time=6], .visnav[time=24]").show();
-            
-    $('#placeholder').unbind("plotclick");
-    $('#placeholder').unbind("plothover");
-    $('#placeholder').unbind("plotselected");
-
+function graph_events() {
     $('#placeholder').bind("plothover", function (event, pos, item)
     {
         if (item) {
@@ -358,7 +354,6 @@ function powergraph_events() {
             kwhd_cache = JSON.parse(JSON.stringify(kwh_data));
             
             draw(true);
-            // powergraph_events();
         }
     });
 }
