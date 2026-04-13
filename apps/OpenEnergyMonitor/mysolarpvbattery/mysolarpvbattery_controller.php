@@ -43,7 +43,7 @@ function mysolarpvbattery_app_controller($route,$app,$appconfig,$apikey)
     // ----------------------------------------------------
     // Trigger post-processor route
     // ----------------------------------------------------
-    else if ($route->action == "process" && $session['write']) {
+    else if ($route->action == "process" && $session['read']) {
         $route->format = "json";
         $userid = $session['userid'];
 
