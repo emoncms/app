@@ -6,7 +6,7 @@ var data_mode = "power"; // or "kwh" when processing pre-aggregated kWh data for
 // Fetch raw feed data for the current view window. Only requests feeds that are
 // actually configured; any missing feeds will be derived later in processing.
 // On success, loads each feed into the timeseries store     then triggers processing.
-function load_process_draw_power_graph() {
+function load_process_draw_graph() {
     view.calc_interval(1500); // npoints = 1500;
 
     // If timewindow is more than 7 days switch to kWh mode which uses pre-aggregated data to improve accuracy.
@@ -73,15 +73,15 @@ function load_process_draw_power_graph() {
                 keys_to_load.forEach((key, idx) => { kwh_data[key] = all_data[idx].data; });
             }
         }
-        process_and_draw_power_graph(data_mode);
+        process_and_draw_graph(data_mode);
 
     }, false, "notime");
 }
 
 // Iterates over the loaded timeseries data, derives any missing power flows using
 // flow_derive_missing / flow_calculation, accumulates kWh totals for the stats
-// panel, builds the flot series arrays, and then calls draw_powergraph().
-function process_and_draw_power_graph(process_mode = "power") {
+// panel, builds the flot series arrays, and then calls draw_graph().
+function process_and_draw_graph(process_mode = "power") {
 
     var flows = [
         { key: "solar_to_load",    label: "Solar to Load",    fill: 0.8 },
@@ -187,12 +187,12 @@ function process_and_draw_power_graph(process_mode = "power") {
         $(".battery_soc_change").html("");
     }
 
-    draw_powergraph();
+    draw_graph();
 }
 
 // Renders the power-flow stacked area chart (and optional SOC line) using flot,
 // fitted to the current view.start / view.end time range.
-function draw_powergraph() {
+function draw_graph() {
 
     $(".visnav[time=1], .visnav[time=3], .visnav[time=6], .visnav[time=24]").toggle(viewmode !== "bargraph");
 

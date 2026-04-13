@@ -317,7 +317,7 @@ function init()
     // if (has_history) init_bargraph();
     $(".viewhistory").toggle(has_history);
     
-    // The buttons for these powergraph events are hidden when in historic mode 
+    // The buttons for these graph events are hidden when in historic mode 
     // The events are loaded at the start here and dont need to be unbinded and binded again.
     $("#zoomout").click(function () {view.zoomout(); autoupdate = false; draw(true);});
     $("#zoomin").click(function () {view.zoomin(); autoupdate = false; draw(true);});
@@ -357,7 +357,7 @@ function init()
             } else {
                 // retrieve from cache instead of reloading from server
                 kwh_data = JSON.parse(JSON.stringify(kwhd_cache));
-                process_and_draw_power_graph('kwh');
+                process_and_draw_graph('kwh');
             }
         } else {
             history_start = view.start
@@ -728,7 +728,7 @@ function livefn()
             // If the app was likely sleeping, do a full reload of the graph data to ensure its up to date
             draw(true);
         } else {
-            process_and_draw_power_graph(data_mode);
+            process_and_draw_graph(data_mode);
         }
     }
 }
@@ -792,9 +792,9 @@ function battery_time_left({ capacity, soc, battery_power }) {
 
 function draw(load) {
     if (load) {
-        load_process_draw_power_graph();
+        load_process_draw_graph();
     } else {
-        draw_powergraph();
+        draw_graph();
     }
 }
 
