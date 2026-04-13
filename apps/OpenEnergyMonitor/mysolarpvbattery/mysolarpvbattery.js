@@ -357,7 +357,8 @@ function init()
             } else {
                 // retrieve from cache instead of reloading from server
                 kwh_data = JSON.parse(JSON.stringify(kwhd_cache));
-                process_and_draw_graph('kwh');
+                data_mode = "kwh";
+                process_and_draw_graph();
             }
         } else {
             history_start = view.start
@@ -728,7 +729,7 @@ function livefn()
             // If the app was likely sleeping, do a full reload of the graph data to ensure its up to date
             load_process_draw_graph();
         } else {
-            process_and_draw_graph(data_mode);
+            process_and_draw_graph();
         }
     }
 }

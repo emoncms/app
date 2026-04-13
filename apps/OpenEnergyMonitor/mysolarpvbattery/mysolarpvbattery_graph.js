@@ -76,7 +76,7 @@ function load_process_draw_graph() {
                 keys_to_load.forEach((key, idx) => { kwh_data[key] = all_data[idx].data; });
             }
         }
-        process_and_draw_graph(data_mode);
+        process_and_draw_graph();
 
     }, false, "notime");
 }
@@ -84,22 +84,22 @@ function load_process_draw_graph() {
 // Iterates over the loaded timeseries data, derives any missing power flows using
 // flow_derive_missing / flow_calculation, accumulates kWh totals for the stats
 // panel, builds the flot series arrays, and then calls draw_graph().
-function process_and_draw_graph(process_mode = "power") {
+function process_and_draw_graph() {
 
     var flows = [
-        { key: "solar_to_load",    label: "Solar to Load",    fill: 0.8 },
-        { key: "solar_to_battery", label: "Solar to Battery", fill: 0.8 },
-        { key: "solar_to_grid",    label: "Solar to Grid",    fill: 1.0 },
-        { key: "battery_to_load",  label: "Battery to Load",  fill: 0.8 },
-        { key: "battery_to_grid",  label: "Battery to Grid",  fill: 0.8 },
-        { key: "grid_to_load",     label: "Grid to Load",     fill: 0.8 },
-        { key: "grid_to_battery",  label: "Grid to Battery",  fill: 0.8 }
+        { key: "solar_to_load",    label: "Solar to Load",    fill: 0.8, export: false },
+        { key: "solar_to_battery", label: "Solar to Battery", fill: 0.8, export: false },
+        { key: "solar_to_grid",    label: "Solar to Grid",    fill: 1.0, export: true  },
+        { key: "battery_to_load",  label: "Battery to Load",  fill: 0.8, export: false },
+        { key: "battery_to_grid",  label: "Battery to Grid",  fill: 0.8, export: true  },
+        { key: "grid_to_load",     label: "Grid to Load",     fill: 0.8, export: false },
+        { key: "grid_to_battery",  label: "Grid to Battery",  fill: 0.8, export: false }
     ];
 
     var totals = Object.fromEntries(flows.map(f => [f.key, 0]));
     var data   = Object.fromEntries(flows.map(f => [f.key, []]));
 
-    if (process_mode == "power") {
+    if (data_mode == "power") {
         // Determine which feed we use as the time axis reference (any loaded feed will do)
         var ts_ref = ["use", "grid", "solar", "battery"].find(key => available[key]) || false;
         console.log("Time reference feed: " + ts_ref);
@@ -130,7 +130,7 @@ function process_and_draw_graph(process_mode = "power") {
                 });
             }
         }
-    } else if (process_mode == "kwh") {
+    } else if (data_mode == "kwh") {
         // If we're processing pre-aggregated kWh data then we just need to sum totals and convert from kwh to power for the graph
         flows.forEach(flow => {
             totals[flow.key] = kwh_sum(kwh_data[flow.key]);
@@ -144,27 +144,21 @@ function process_and_draw_graph(process_mode = "power") {
 
     // Update stats boxes with totals.
     updateStats(totals);
-    // Build graph series in correct order.
 
-    // powerseries = flows.map(flow => ({
-    //     data: data[flow.key], label: flow.label, color: flow_colors[flow.key],
-    //     stack: 1, lines: { lineWidth: 0, fill: flow.fill }
-    // }));
+    // Build graph series in correct order.
     powerseries = [];
     for (var i=0; i<flows.length; i++) {
 
         let stack = 1;
-        if (viewmode == "bargraph") {
-            // invert solar to grid and battery to grid flows so they appear as negative bars on the graph
-            if (flows[i].key == "solar_to_grid" || flows[i].key == "battery_to_grid") {
-                data[flows[i].key] = invert_kwhd_data(data[flows[i].key]);
-                stack = 0; // don't stack these flows so they appear as negative bars rather than offset below the x-axis
-            }
+        if (viewmode == "bargraph" && flows[i].export) {
+            // invert export flows so they appear as negative bars on the graph
+            data[flows[i].key] = invert_kwhd_data(data[flows[i].key]);
+            stack = 0; // don't stack so they appear below the x-axis rather than offset
         }
 
         var series = {
             data: data[flows[i].key], label: flows[i].label, color: flow_colors[flows[i].key],
-            stack: stack, lines: { lineWidth: 0, fill: flows[i].fill }
+            stack: stack, lines: { lineWidth: 0, fill: flows[i].fill }, export: flows[i].export
         };
         if (viewmode == "bargraph") {
             series.lines = { show: false };
@@ -176,7 +170,7 @@ function process_and_draw_graph(process_mode = "power") {
     // Calculate battery SOC change over the period and display in stats box.
     // Add SOC line to graph (only if time range is <=1 month to avoid clutter).
     if (battery_soc_available && viewmode !== "bargraph") {
-        var battery_soc_data = process_mode == "power" ? timeseries.data("battery_soc") : kwh_data.battery_soc;
+        var battery_soc_data = data_mode == "power" ? timeseries.data("battery_soc") : kwh_data.battery_soc;
         var battery_soc_start = null;
         var battery_soc_end = null;
 
@@ -310,10 +304,8 @@ function graph_events() {
                 if (series.data[item.dataIndex]!=undefined && series.data[item.dataIndex][1]!=null) {
                     var value = series.data[item.dataIndex][1];
 
-                    if (viewmode == "bargraph") {
-                        if (series.label == "Solar to Grid" || series.label == "Battery to Grid") {
-                            value = -value; // invert back to positive for display in tooltip
-                        }
+                    if (viewmode == "bargraph" && series.export) {
+                        value = -value; // invert export flows back to positive for display in tooltip
                     }
 
                     if (series.label.toUpperCase()=="SOC") {
