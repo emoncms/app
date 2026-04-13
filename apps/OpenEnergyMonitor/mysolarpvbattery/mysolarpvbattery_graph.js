@@ -326,7 +326,7 @@ function graph_events() {
             live_timerange = view.end - view.start;
         }
 
-        draw(true);
+        load_process_draw_graph();
     });
 
     // Auto click through to power graph
@@ -353,7 +353,7 @@ function graph_events() {
             // cache the daily kWh data
             kwhd_cache = JSON.parse(JSON.stringify(kwh_data));
             
-            draw(true);
+            load_process_draw_graph();
         }
     });
 }

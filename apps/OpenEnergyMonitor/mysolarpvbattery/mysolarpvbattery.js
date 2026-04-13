@@ -319,10 +319,10 @@ function init()
     
     // The buttons for these graph events are hidden when in historic mode 
     // The events are loaded at the start here and dont need to be unbinded and binded again.
-    $("#zoomout").click(function () {view.zoomout(); autoupdate = false; draw(true);});
-    $("#zoomin").click(function () {view.zoomin(); autoupdate = false; draw(true);});
-    $('#right').click(function () {view.panright(); autoupdate = false; draw(true);});
-    $('#left').click(function () {view.panleft(); autoupdate = false; draw(true);});
+    $("#zoomout").click(function () {view.zoomout(); autoupdate = false; load_process_draw_graph();});
+    $("#zoomin").click(function () {view.zoomin(); autoupdate = false; load_process_draw_graph();});
+    $('#right').click(function () {view.panright(); autoupdate = false; load_process_draw_graph();});
+    $('#left').click(function () {view.panleft(); autoupdate = false; load_process_draw_graph();});
     
     $('.time').click(function () {
         view.timewindow($(this).attr("time")/24.0);
@@ -334,7 +334,7 @@ function init()
             autoupdate = false;
         }
 
-        draw(true);
+        load_process_draw_graph();
     });
     
     $(".viewhistory").click(function () {
@@ -353,7 +353,7 @@ function init()
             
             if ($.isEmptyObject(kwhd_cache)) {
                 // empty cache, need to load from server
-                draw(true);
+                load_process_draw_graph();
             } else {
                 // retrieve from cache instead of reloading from server
                 kwh_data = JSON.parse(JSON.stringify(kwhd_cache));
@@ -364,7 +364,7 @@ function init()
             history_end = view.end
             view.start = power_start
             view.end = power_end
-            draw(false);
+            draw_graph();
         }
     });
 }
@@ -383,7 +383,7 @@ function show()
         //if (!bargraph_initialized) init_bargraph();
     }
     
-    draw(true);
+    load_process_draw_graph();
     graph_events();
     
     livefn();
@@ -610,7 +610,7 @@ function resize()
     placeholder_bound.height(height);
     placeholder.height(height);
     
-    draw(false)
+    draw_graph()
 }
 
 function hide() 
@@ -726,7 +726,7 @@ function livefn()
     if (viewmode=="powergraph" && autoupdate) {
         if (reload) {
             // If the app was likely sleeping, do a full reload of the graph data to ensure its up to date
-            draw(true);
+            load_process_draw_graph();
         } else {
             process_and_draw_graph(data_mode);
         }
@@ -789,15 +789,6 @@ function battery_time_left({ capacity, soc, battery_power }) {
 
     return time_left_str.trim();
 }
-
-function draw(load) {
-    if (load) {
-        load_process_draw_graph();
-    } else {
-        draw_graph();
-    }
-}
-
 
 // ----------------------------------------------------------------------
 // updateStats: write all stats-box DOM values from a flat flow data object.
