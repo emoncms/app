@@ -75,6 +75,7 @@
             <button id='zoomout' class='visnav app-btn' >-</button>
             <button id='left' class='visnav app-btn' >&lt;</button>
             <button id='right' class='visnav app-btn' >&gt;</button>
+            <span id="data-mode-indicator" class="d-none d-md-inline ms-auto"></span>
         </div>
 
         <div id="placeholder_bound">

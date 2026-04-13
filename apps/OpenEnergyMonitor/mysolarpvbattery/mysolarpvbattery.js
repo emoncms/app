@@ -326,8 +326,14 @@ function init()
     
     $('.time').click(function () {
         view.timewindow($(this).attr("time")/24.0);
-        autoupdate = true;
         live_timerange = view.end - view.start;
+
+        if (live_timerange < (25*3600000)) {
+            autoupdate = true;
+        } else {
+            autoupdate = false;
+        }
+
         draw(true);
     });
     

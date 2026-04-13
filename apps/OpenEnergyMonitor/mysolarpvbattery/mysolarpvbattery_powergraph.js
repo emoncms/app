@@ -185,6 +185,14 @@ function draw_powergraph() {
     options.xaxis.max = view.end;
     $.plot($('#placeholder'),powerseries,options);
     $(".ajax-loader").hide();
+
+    var mode_label = data_mode === "kwh" ? "E" : "P";
+    var auto_label = (autoupdate) ? "AUTO | " : "";
+    $("#data-mode-indicator").text(auto_label + mode_label);
+    // set title
+    var indicator_title = (autoupdate) ? "Auto-updating " : "";
+    indicator_title += (data_mode === "kwh") ? "From energy data" : "From power data";
+    $("#data-mode-indicator").attr("title", indicator_title);
 }
 
 // Remove null gaps shorter than 15 minutes by forward-filling from the last

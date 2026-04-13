@@ -16,7 +16,7 @@ function mysolarpvbattery_app_controller($route,$app,$appconfig,$apikey)
 {
 
     global $path, $session, $settings, $mysqli, $redis, $user, $linked_modules_dir;
-    $v = 19; // version number for cache busting of js and css
+    $v = 20; // version number for cache busting of js and css
 
     // ----------------------------------------------------
     // Main app view route
