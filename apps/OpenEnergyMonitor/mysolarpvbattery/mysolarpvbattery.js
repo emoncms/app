@@ -14,7 +14,7 @@ $(window).ready(function(){
 });
 if (!sessionwrite) $(".openconfig").hide();
 
-var flow_colors_old = {
+var flow_colors = {
     "solar_to_load":    "#a4c341", // changed from #abddff
     "solar_to_battery": "#fba050", 
     "solar_to_grid":    "#dccc1f",
@@ -23,40 +23,6 @@ var flow_colors_old = {
     "grid_to_load":     "#82cbfc",
     "grid_to_battery":  "#fb7b50"
 };
-
-var flow_colors_tariff_app = {
-    "solar_to_load":    "#bec745", 
-    "solar_to_battery": "#a3d977", 
-    "solar_to_grid":    "#dccc1f",
-    "battery_to_load":  "#fbb450",
-    "battery_to_grid":  "#f0913a",
-    "grid_to_load":     "#44b3e2",
-    "grid_to_battery":  "#82cbfc"
-};
-
-var flow_colors_contrast = {
-    "solar_to_load":    "#F5C518", // bright amber   – direct solar use
-    "solar_to_battery": "#C8A000", // darker gold    – solar into storage
-    "solar_to_grid":    "#FFE066", // light yellow   – solar export
-    "battery_to_load":  "#4ADE80", // bright green   – battery discharge
-    "battery_to_grid":  "#86EFAC", // soft green     – battery export
-    "grid_to_load":     "#38BDF8", // sky blue       – grid import
-    "grid_to_battery":  "#7DD3FC"  // light blue     – grid charging battery
-};
-
-// flow_colors_blend: each flow is 66% source + 33% destination, blended from 4 base colors:
-//   Solar=#FFD700 (yellow), Battery=#FF7700 (orange), Grid=#E03030 (red), Home=#3399DD (blue)
-var flow_colors_blend = {
-    "solar_to_load":    "#B9C049", // 66% yellow + 33% blue
-    "solar_to_battery": "#FFB500", // 66% yellow + 33% orange
-    "solar_to_grid":    "#F29E10", // 66% yellow + 33% red
-    "battery_to_load":  "#B98149", // 66% orange + 33% blue
-    "battery_to_grid":  "#F25E10", // 66% orange + 33% red
-    "grid_to_load":     "#A55269", // 66% red    + 33% blue
-    "grid_to_battery":  "#E84720"  // 66% red    + 33% orange
-};
-
-var flow_colors = flow_colors_old;
 
 // ----------------------------------------------------------------------
 // Configuration
