@@ -11,6 +11,9 @@ function load_process_draw_graph() {
 
     // If timewindow is more than 7 days switch to kWh mode which uses pre-aggregated data to improve accuracy.
     data_mode = ((view.end - view.start) > 3600000*24*7 && check_history_feeds(get_mode())) ? "kwh" : "power";
+    if (viewmode == "bargraph") data_mode = "kwh"; // bar graph only works with pre-aggregated kWh data
+
+    let battery_soc_enabled = (battery_soc_available && viewmode !== "bargraph");
 
     var feeds;
     if (data_mode == "power") {
@@ -19,7 +22,7 @@ function load_process_draw_graph() {
             { key: "use",              kwh: false, cond: available.use,                        avg: 1, delta: 0 },
             { key: "battery",          kwh: false, cond: available.battery,                    avg: 1, delta: 0 },
             { key: "grid",             kwh: false, cond: available.grid,                       avg: 1, delta: 0 },
-            { key: "battery_soc",      kwh: false, cond: battery_soc_available,                avg: 0, delta: 0 },
+            { key: "battery_soc",      kwh: false, cond: battery_soc_enabled,                avg: 0, delta: 0 },
         ].filter(f => f.cond);
 
     } else {
@@ -42,7 +45,7 @@ function load_process_draw_graph() {
             { key: "battery_to_load",  kwh: true,  cond: available.battery,                    avg: 0, delta: 1 },
             { key: "battery_to_grid",  kwh: true,  cond: available.battery,                    avg: 0, delta: 1 },
             { key: "grid_to_battery",  kwh: true,  cond: available.battery,                    avg: 0, delta: 1 },
-            { key: "battery_soc",      kwh: false, cond: battery_soc_available,                avg: 0, delta: 0 }
+            { key: "battery_soc",      kwh: false, cond: battery_soc_enabled,                avg: 0, delta: 0 }
         ].filter(f => f.cond);
 
         kwh_data = {};
@@ -149,9 +152,19 @@ function process_and_draw_graph(process_mode = "power") {
     // }));
     powerseries = [];
     for (var i=0; i<flows.length; i++) {
+
+        let stack = 1;
+        if (viewmode == "bargraph") {
+            // invert solar to grid and battery to grid flows so they appear as negative bars on the graph
+            if (flows[i].key == "solar_to_grid" || flows[i].key == "battery_to_grid") {
+                data[flows[i].key] = invert_kwhd_data(data[flows[i].key]);
+                stack = 0; // don't stack these flows so they appear as negative bars rather than offset below the x-axis
+            }
+        }
+
         var series = {
             data: data[flows[i].key], label: flows[i].label, color: flow_colors[flows[i].key],
-            stack: 1, lines: { lineWidth: 0, fill: flows[i].fill }
+            stack: stack, lines: { lineWidth: 0, fill: flows[i].fill }
         };
         if (viewmode == "bargraph") {
             series.lines = { show: false };
@@ -162,7 +175,7 @@ function process_and_draw_graph(process_mode = "power") {
 
     // Calculate battery SOC change over the period and display in stats box.
     // Add SOC line to graph (only if time range is <=1 month to avoid clutter).
-    if (battery_soc_available) {
+    if (battery_soc_available && viewmode !== "bargraph") {
         var battery_soc_data = process_mode == "power" ? timeseries.data("battery_soc") : kwh_data.battery_soc;
         var battery_soc_start = null;
         var battery_soc_end = null;
@@ -203,28 +216,34 @@ function draw_graph() {
             mode: "time", timezone: "browser", min: view.start, max: view.end,
             font: { color: font_color }  // tick label text color
         },
-        yaxes: [
-            { min: 0, reserveSpace: false, font: { color: font_color } },
-            { min: 0, max: 100, reserveSpace: false, font: { color: font_color } }
-        ],
         grid: { hoverable: true, clickable: true, borderWidth: 0 },
         selection: { mode: "x" },
         legend: { show: false }
     }
 
-    /*
-    var options = {
-        xaxis: { mode: "time", timezone: "browser", minTickSize: [1, "day"], font: { color: font_color } },
-        yaxis: { font: { color: font_color } },
-        grid: { hoverable: true, clickable: true, markings: markings, borderWidth: 0 },
-        selection: { mode: "x" },
-        legend: { show: false }
-    };*/
+    if (viewmode == "powergraph") {
+        options.yaxes = [
+            { min: 0, reserveSpace: false, font: { color: font_color } },
+            { min: 0, max: 100, reserveSpace: false, font: { color: font_color } }
+        ];
+    } else {
+        options.yaxis = { font: { color: font_color } };
+    }
 
+    if (viewmode == "bargraph") {
+        options.xaxis.minTickSize = [1, "day"];
+        options.grid.markings = [{ color: "#ccc", lineWidth: 1, yaxis: { from: 0, to: 0 } }];
+    }
     
     options.xaxis.min = view.start;
     options.xaxis.max = view.end;
     $.plot($('#placeholder'),powerseries,options);
+
+    if (viewmode == "bargraph") {
+        $('#placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use &amp; Total Use</div>");
+        $('#placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> Total export (solar + battery to grid)</div>");
+    }
+
     $(".ajax-loader").hide();
 
     var mode_label = data_mode === "kwh" ? "E" : "P";
@@ -289,17 +308,25 @@ function graph_events() {
             for (i = 0; i < powerseries.length; i++) {
                 var series = powerseries[i];
                 if (series.data[item.dataIndex]!=undefined && series.data[item.dataIndex][1]!=null) {
+                    var value = series.data[item.dataIndex][1];
+
+                    if (viewmode == "bargraph") {
+                        if (series.label == "Solar to Grid" || series.label == "Battery to Grid") {
+                            value = -value; // invert back to positive for display in tooltip
+                        }
+                    }
+
                     if (series.label.toUpperCase()=="SOC") {
-                        tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "%", series.color]);
+                        tooltip_items.push([series.label.toUpperCase(), value.toFixed(1), "%", series.color]);
                     } else {
-                        if (series.data[item.dataIndex][1] != 0) {
-                            if ( series.data[item.dataIndex][1] >= 1000) {
-                                tooltip_items.push([series.label.toUpperCase(), (series.data[item.dataIndex][1]/1000.0).toFixed(1) , "kW", series.color]);
+                        if (value != 0) {
+                            if ( value >= 1000) {
+                                tooltip_items.push([series.label.toUpperCase(), (value/1000.0).toFixed(1) , "kW", series.color]);
                             } else {
                                 if (viewmode == "powergraph") {
-                                    tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(0), "W", series.color]);
+                                    tooltip_items.push([series.label.toUpperCase(), value.toFixed(0), "W", series.color]);
                                 } else {
-                                    tooltip_items.push([series.label.toUpperCase(), series.data[item.dataIndex][1].toFixed(1), "kWh", series.color]);
+                                    tooltip_items.push([series.label.toUpperCase(), value.toFixed(1), "kWh", series.color]);
                                 }
                             }
                         }
@@ -321,7 +348,7 @@ function graph_events() {
         reload = true; 
         
         var now = +new Date();
-        if (Math.abs(view.end-now)<30000) {
+        if (viewmode == "powergraph" && Math.abs(view.end-now)<30000) {
             autoupdate = true;
             live_timerange = view.end - view.start;
         }
