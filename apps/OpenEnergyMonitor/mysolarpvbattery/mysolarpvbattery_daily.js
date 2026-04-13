@@ -142,8 +142,10 @@ function draw_bargraph()
     var markings = [];
     markings.push({ color: "#ccc", lineWidth: 1, yaxis: { from: 0, to: 0 } });
     
+    var font_color = "#888";
     var options = {
-        xaxis: { mode: "time", timezone: "browser", minTickSize: [1, "day"] },
+        xaxis: { mode: "time", timezone: "browser", minTickSize: [1, "day"], font: { color: font_color } },
+        yaxis: { font: { color: font_color } },
         grid: { hoverable: true, clickable: true, markings: markings, borderWidth: 0 },
         selection: { mode: "x" },
         legend: { show: false }

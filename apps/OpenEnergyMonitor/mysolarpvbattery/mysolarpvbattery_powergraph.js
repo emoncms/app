@@ -172,10 +172,17 @@ function process_and_draw_power_graph(process_mode = "power") {
 // fitted to the current view.start / view.end time range.
 function draw_powergraph() {
 
+    var font_color = "#888";
     var options = {
         lines: { fill: false },
-        xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end},
-        yaxes: [{ min: 0, reserveSpace: false },{ min: 0, max: 100, reserveSpace: false }],
+        xaxis: { 
+            mode: "time", timezone: "browser", min: view.start, max: view.end,
+            font: { color: font_color }  // tick label text color
+        },
+        yaxes: [
+            { min: 0, reserveSpace: false, font: { color: font_color } },
+            { min: 0, max: 100, reserveSpace: false, font: { color: font_color } }
+        ],
         grid: { hoverable: true, clickable: true, borderWidth: 0 },
         selection: { mode: "x" },
         legend: { show: false }
@@ -318,12 +325,14 @@ function show_tooltip(x, y, values) {
         $('<td><span class="tooltip-value">'+value[1]+'</span> <span class="tooltip-units">'+value[2]+'</span></td>').appendTo(row);
     }
 
-    tooltip
-        .css({
-            left: x,
-            top: y
-        })
-        .show();
+    tooltip.css({ left: x, top: y }).show();
+
+    // Flip to the left of the cursor if the tooltip would overflow the chart's right edge
+    var placeholder = $('#placeholder');
+    var chartRight = placeholder.offset().left + placeholder.outerWidth();
+    if (x + tooltip.outerWidth() > chartRight) {
+        tooltip.css({ left: x - tooltip.outerWidth() - 20 });
+    }
 }
 
 // Hides the hover tooltip when the cursor moves off a data point.
