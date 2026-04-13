@@ -22,7 +22,6 @@ body {
     align-self: center;
     margin-left: 0.75rem;
     padding: 0.25rem 0.5rem;
-    cursor: pointer;
     background: rgba(6, 153, 250, 0.06);
     border-radius: 0.375rem;
 }

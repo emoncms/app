@@ -620,9 +620,9 @@ function livefn()
 {
     // Check if the updater ran in the last 60s if it did not the app was sleeping
     // and so the data needs a full reload.
-    // var reload = false;
+    var reload = false;
     var now = +new Date();
-    // if ((now-lastupdate)>60000) reload = true;
+    if ((now-lastupdate)>60000) reload = true;
     lastupdate = now;
     var powerUnit = config.app && config.app.kw && config.app.kw.value===true ? 'kW' : 'W';
 
@@ -721,7 +721,14 @@ function livefn()
     $(".battery-now").html(battery);
 
     // Only redraw the graph if its the power graph and auto update is turned on
-    if (viewmode=="powergraph" && autoupdate) process_and_draw_power_graph(data_mode);
+    if (viewmode=="powergraph" && autoupdate) {
+        if (reload) {
+            // If the app was likely sleeping, do a full reload of the graph data to ensure its up to date
+            draw(true);
+        } else {
+            process_and_draw_power_graph(data_mode);
+        }
+    }
 }
 
 function solar_battery_visibility() {
