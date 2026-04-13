@@ -15,7 +15,7 @@ $(window).ready(function(){
 if (!sessionwrite) $(".openconfig").hide();
 
 var flow_colors_old = {
-    "solar_to_load":    "#abddff", 
+    "solar_to_load":    "#a4c341", // changed from #abddff
     "solar_to_battery": "#fba050", 
     "solar_to_grid":    "#dccc1f",
     "battery_to_load":  "#ffd08e",
@@ -56,7 +56,7 @@ var flow_colors_blend = {
     "grid_to_battery":  "#E84720"  // 66% red    + 33% orange
 };
 
-var flow_colors = flow_colors_tariff_app;
+var flow_colors = flow_colors_old;
 
 // ----------------------------------------------------------------------
 // Configuration
