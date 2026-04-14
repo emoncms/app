@@ -133,6 +133,9 @@ function process_and_draw_graph() {
     } else if (data_mode == "kwh") {
         // If we're processing pre-aggregated kWh data then we just need to sum totals and convert from kwh to power for the graph
         flows.forEach(flow => {
+            if (kwh_data[flow.key] == undefined) {
+                kwh_data[flow.key] = [];
+            }
             totals[flow.key] = kwh_sum(kwh_data[flow.key]);
             if (viewmode == "powergraph") {
                 data[flow.key]   = kwh_to_power(kwh_data[flow.key], view.interval);
@@ -148,6 +151,9 @@ function process_and_draw_graph() {
     // Build graph series in correct order.
     powerseries = [];
     for (var i=0; i<flows.length; i++) {
+
+        // skip if data is empty
+        if (data[flows[i].key].length == 0) continue;
 
         let stack = 1;
         if (viewmode == "bargraph" && flows[i].export) {
