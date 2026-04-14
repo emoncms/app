@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------------------------
 // MySolarPVBattery Power Graph: load, process, and draw the power flow graph
 // -------------------------------------------------------------------------------------------------------
-var data_mode = "power"; // or "kwh" when processing pre-aggregated kWh data for the bar graph
+let data_mode = "power"; // or "kwh" when processing pre-aggregated kWh data for the bar graph
 
 // Fetch raw feed data for the current view window. Only requests feeds that are
 // actually configured; any missing feeds will be derived later in processing.
@@ -15,7 +15,7 @@ function load_process_draw_graph() {
 
     let battery_soc_enabled = (battery_soc_available && viewmode !== "bargraph");
 
-    var feeds;
+    let feeds;
     if (data_mode == "power") {
         feeds = [
             { key: "solar",            kwh: false, cond: available.solar,                      avg: 1, delta: 0 },
@@ -52,14 +52,14 @@ function load_process_draw_graph() {
     }
 
     // Build parallel arrays of feed request parameters from the filtered feed list
-    var loaded = feeds.filter(function(d) {
-        var cfgKey = d.kwh ? d.key + "_kwh" : d.key;
+    const loaded = feeds.filter(function(d) {
+        const cfgKey = d.kwh ? d.key + "_kwh" : d.key;
         return config.app[cfgKey] && config.app[cfgKey].value;
     });
-    var keys_to_load = loaded.map(d => d.key);
-    var feedids      = loaded.map(d => config.app[d.kwh ? d.key + "_kwh" : d.key].value);
-    var averages     = loaded.map(d => d.avg);
-    var deltas       = loaded.map(d => d.delta);
+    const keys_to_load = loaded.map(d => d.key);
+    const feedids      = loaded.map(d => config.app[d.kwh ? d.key + "_kwh" : d.key].value);
+    const averages     = loaded.map(d => d.avg);
+    const deltas       = loaded.map(d => d.delta);
 
     feed.getdata(feedids, view.start, view.end, view.interval, averages.join(","), deltas.join(","), 0, 0, function (all_data) {
 
@@ -86,7 +86,7 @@ function load_process_draw_graph() {
 // panel, builds the flot series arrays, and then calls draw_graph().
 function process_and_draw_graph() {
 
-    var flows = [
+    const flows = [
         { key: "solar_to_load",    label: "Solar to Load",    fill: 0.8, export: false },
         { key: "solar_to_battery", label: "Solar to Battery", fill: 0.8, export: false },
         { key: "solar_to_grid",    label: "Solar to Grid",    fill: 1.0, export: true  },
@@ -96,21 +96,21 @@ function process_and_draw_graph() {
         { key: "grid_to_battery",  label: "Grid to Battery",  fill: 0.8, export: false }
     ];
 
-    var totals = Object.fromEntries(flows.map(f => [f.key, 0]));
-    var data   = Object.fromEntries(flows.map(f => [f.key, []]));
+    const totals = Object.fromEntries(flows.map(f => [f.key, 0]));
+    const data   = Object.fromEntries(flows.map(f => [f.key, []]));
 
     if (data_mode == "power") {
         // Determine which feed we use as the time axis reference (any loaded feed will do)
-        var ts_ref = ["use", "grid", "solar", "battery"].find(key => available[key]) || false;
+        const ts_ref = ["use", "grid", "solar", "battery"].find(key => available[key]) || false;
         console.log("Time reference feed: " + ts_ref);
-        var datastart = timeseries.start_time(ts_ref);
-        var interval = view.interval;
-        var power_to_kwh = interval / 3600000.0; 
+        const datastart = timeseries.start_time(ts_ref);
+        const interval = view.interval;
+        const power_to_kwh = interval / 3600000.0; 
 
-        for (var z=0; z<timeseries.length(ts_ref); z++) {
-            var time = datastart + (1000 * interval * z);
+        for (let z=0; z<timeseries.length(ts_ref); z++) {
+            const time = datastart + (1000 * interval * z);
             
-            var input = {
+            let input = {
                 solar: available.solar ? timeseries.value("solar",z) : null,
                 use: available.use ? timeseries.value("use",z) : null,
                 battery: available.battery ? timeseries.value("battery",z) : null,
@@ -121,7 +121,7 @@ function process_and_draw_graph() {
 
             if (input.solar !== null || input.use !== null || input.battery !== null || input.grid !== null) {
 
-                var flow = flow_calculation(input);
+                const flow = flow_calculation(input);
 
                 // Accumulate kWh totals and build graph data arrays
                 flows.forEach(f => {
@@ -150,7 +150,7 @@ function process_and_draw_graph() {
 
     // Build graph series in correct order.
     powerseries = [];
-    for (var i=0; i<flows.length; i++) {
+    for (let i=0; i<flows.length; i++) {
 
         // skip if data is empty
         if (data[flows[i].key].length == 0) continue;
@@ -162,7 +162,7 @@ function process_and_draw_graph() {
             stack = 0; // don't stack so they appear below the x-axis rather than offset
         }
 
-        var series = {
+        const series = {
             data: data[flows[i].key], label: flows[i].label, color: flow_colors[flows[i].key],
             stack: stack, lines: { lineWidth: 0, fill: flows[i].fill }, export: flows[i].export
         };
@@ -176,19 +176,19 @@ function process_and_draw_graph() {
     // Calculate battery SOC change over the period and display in stats box.
     // Add SOC line to graph (only if time range is <=1 month to avoid clutter).
     if (battery_soc_available && viewmode !== "bargraph") {
-        var battery_soc_data = data_mode == "power" ? timeseries.data("battery_soc") : kwh_data.battery_soc;
-        var battery_soc_start = null;
-        var battery_soc_end = null;
+        const battery_soc_data = data_mode == "power" ? timeseries.data("battery_soc") : kwh_data.battery_soc;
+        let battery_soc_start = null;
+        let battery_soc_end = null;
 
-        for (var z = 0; z < battery_soc_data.length; z++) {
-            var v = battery_soc_data[z][1];
+        for (let z = 0; z < battery_soc_data.length; z++) {
+            const v = battery_soc_data[z][1];
             if (v !== null) {
                 if (battery_soc_start === null) battery_soc_start = v;
                 battery_soc_end = v;
             }
         }
 
-        var soc_change = battery_soc_end - battery_soc_start;
+        const soc_change = battery_soc_end - battery_soc_start;
         $(".battery_soc_change").html((soc_change >= 0 ? "+" : "") + soc_change.toFixed(1));
 
         // only add if time period is less or equal to 1 month
@@ -209,8 +209,8 @@ function draw_graph() {
 
     $(".visnav[time=1], .visnav[time=3], .visnav[time=6], .visnav[time=24]").toggle(viewmode !== "bargraph");
 
-    var font_color = "#888";
-    var options = {
+    const font_color = "#888";
+    const options = {
         lines: { fill: false },
         xaxis: { 
             mode: "time", timezone: "browser", min: view.start, max: view.end,
@@ -246,11 +246,11 @@ function draw_graph() {
 
     $(".ajax-loader").hide();
 
-    var mode_label = data_mode === "kwh" ? "E" : "P";
-    var auto_label = (autoupdate) ? "AUTO | " : "";
+    const mode_label = data_mode === "kwh" ? "E" : "P";
+    const auto_label = (autoupdate) ? "AUTO | " : "";
     $("#data-mode-indicator").text(auto_label + mode_label);
     // set title
-    var indicator_title = (autoupdate) ? "Auto-updating " : "";
+    let indicator_title = (autoupdate) ? "Auto-updating " : "";
     indicator_title += (data_mode === "kwh") ? "From energy data" : "From power data";
     $("#data-mode-indicator").attr("title", indicator_title);
 }
@@ -300,15 +300,15 @@ function graph_events() {
     {
         if (item) {
             // Show tooltip
-            var tooltip_items = [];
+            const tooltip_items = [];
 
-            var date = new Date(item.datapoint[0]);
+            const date = new Date(item.datapoint[0]);
             tooltip_items.push(["TIME", dateFormat(date, 'HH:MM'), ""]);
 
-            for (i = 0; i < powerseries.length; i++) {
-                var series = powerseries[i];
+            for (let i = 0; i < powerseries.length; i++) {
+                const series = powerseries[i];
                 if (series.data[item.dataIndex]!=undefined && series.data[item.dataIndex][1]!=null) {
-                    var value = series.data[item.dataIndex][1];
+                    let value = series.data[item.dataIndex][1];
 
                     if (viewmode == "bargraph" && series.export) {
                         value = -value; // invert export flows back to positive for display in tooltip
@@ -345,7 +345,7 @@ function graph_events() {
         autoupdate = false;
         reload = true; 
         
-        var now = +new Date();
+        const now = +new Date();
         if (viewmode == "powergraph" && Math.abs(view.end-now)<30000) {
             autoupdate = true;
             live_timerange = view.end - view.start;
@@ -360,14 +360,14 @@ function graph_events() {
         if (viewmode == "powergraph") return; // disable click when already in powergraph mode
 
         if (item && !panning) {
-            var z = item.dataIndex;
+            const z = item.dataIndex;
             
             history_start = view.start;
             history_end = view.end;
 
             if (kwh_data['grid_to_load'] == undefined) return;
             // Use whichever per-day data array has data
-            var ref_day_data = kwh_data['grid_to_load'].length ? kwh_data['grid_to_load'] : kwh_data['solar_to_load'];
+            const ref_day_data = kwh_data['grid_to_load'].length ? kwh_data['grid_to_load'] : kwh_data['solar_to_load'];
             view.start = ref_day_data[z][0];
             view.end = view.start + 86400*1000;
 
@@ -388,7 +388,7 @@ function graph_events() {
 // Builds and positions the hover tooltip. Each entry in `values` is
 // [label, value, units, swatchColor?]. Creates the tooltip element on first call.
 function show_tooltip(x, y, values) {
-    var tooltip = $('#tooltip');
+    let tooltip = $('#tooltip');
     if (!tooltip[0]) {
         tooltip = $('<div id="tooltip"></div>')
             .css({
@@ -402,12 +402,12 @@ function show_tooltip(x, y, values) {
     }
 
     tooltip.html('');
-    var table = $('<table/>').appendTo(tooltip);
+    const table = $('<table/>').appendTo(tooltip);
 
-    for (i = 0; i < values.length; i++) {
-        var value = values[i];
-        var row = $('<tr class="tooltip-item"/>').appendTo(table);
-        var swatch = value[3] ? '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+value[3]+';margin-right:6px"></span>' : '';
+    for (let i = 0; i < values.length; i++) {
+        const value = values[i];
+        const row = $('<tr class="tooltip-item"/>').appendTo(table);
+        const swatch = value[3] ? '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+value[3]+';margin-right:6px"></span>' : '';
         $('<td style="padding-right: 8px">'+swatch+'<span class="tooltip-title">'+value[0]+'</span></td>').appendTo(row);
         $('<td><span class="tooltip-value">'+value[1]+'</span> <span class="tooltip-units">'+value[2]+'</span></td>').appendTo(row);
     }
@@ -415,8 +415,8 @@ function show_tooltip(x, y, values) {
     tooltip.css({ left: x, top: y }).show();
 
     // Flip to the left of the cursor if the tooltip would overflow the chart's right edge
-    var placeholder = $('#placeholder');
-    var chartRight = placeholder.offset().left + placeholder.outerWidth();
+    const placeholder = $('#placeholder');
+    const chartRight = placeholder.offset().left + placeholder.outerWidth();
     if (x + tooltip.outerWidth() > chartRight) {
         tooltip.css({ left: x - tooltip.outerWidth() - 20 });
     }
@@ -429,8 +429,8 @@ function hide_tooltip() {
 
 // Invert kWh/d data for export flows so they appear as negative bars on the graph
 function invert_kwhd_data(data) {
-    var neg_data = [];
-    for (var i = 0; i < data.length; i++) {
+    const neg_data = [];
+    for (let i = 0; i < data.length; i++) {
         neg_data.push([data[i][0], -1 * data[i][1]]);
     }
     return neg_data;

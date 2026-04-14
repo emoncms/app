@@ -14,7 +14,7 @@ $(window).ready(function(){
 });
 if (!sessionwrite) $(".openconfig").hide();
 
-var flow_colors = {
+const flow_colors = {
     "solar_to_load":    "#a4c341", // changed from #abddff
     "solar_to_battery": "#fba050", 
     "solar_to_grid":    "#dccc1f",
@@ -88,8 +88,8 @@ config.app = {
 // ----------------------------------------------------------------------
 config.check = function() {
     // Read mode from db (persisted) or app default
-    var has_solar   = (config.db.has_solar   !== undefined) ? (config.db.has_solar   != 0) : (config.app.has_solar.default   != 0);
-    var has_battery = (config.db.has_battery !== undefined) ? (config.db.has_battery != 0) : (config.app.has_battery.default != 0);
+    const has_solar   = (config.db.has_solar   !== undefined) ? (config.db.has_solar   != 0) : (config.app.has_solar.default   != 0);
+    const has_battery = (config.db.has_battery !== undefined) ? (config.db.has_battery != 0) : (config.app.has_battery.default != 0);
 
     // Helper: is a feed key resolved (either auto-matched by name or explicitly set in db)?
     function feed_resolved(key) {
@@ -99,14 +99,14 @@ config.check = function() {
             return config.feedsbyid[config.db[key]] !== undefined;
         }
         // auto-match by name
-        var autoname = config.app[key] && config.app[key].autoname;
+        const autoname = config.app[key] && config.app[key].autoname;
         return autoname && config.feedsbyname[autoname] !== undefined;
     }
 
-    var use_ok   = feed_resolved("use");
-    var solar_ok = feed_resolved("solar");
-    var bat_ok   = feed_resolved("battery");
-    var grid_ok  = feed_resolved("grid");
+    const use_ok   = feed_resolved("use");
+    const solar_ok = feed_resolved("solar");
+    const bat_ok   = feed_resolved("battery");
+    const grid_ok  = feed_resolved("grid");
 
     if (has_solar && has_battery) {
         // Need at least 3 of the 4 feeds
@@ -125,7 +125,7 @@ config.check = function() {
 
 config.feeds = feed.list();
 
-var feeds_by_tag_name = feed.by_tag_and_name(config.feeds);
+const feeds_by_tag_name = feed.by_tag_and_name(config.feeds);
 
 config.autogen_node_prefix = "solar_battery_kwh_flows";
 config.autogen_feed_defaults = { datatype: 1, engine: 5, options: { interval: 1800 } };
@@ -139,14 +139,14 @@ config.hideapp = function(){hide()};
 // Config UI helpers: hide/show feeds based on the current mode
 // ----------------------------------------------------------------------
 function get_mode() {
-    var has_solar   = (config.db.has_solar   !== undefined) ? (config.db.has_solar   != 0) : (config.app.has_solar.default   != 0);
-    var has_battery = (config.db.has_battery !== undefined) ? (config.db.has_battery != 0) : (config.app.has_battery.default != 0);
+    const has_solar   = (config.db.has_solar   !== undefined) ? (config.db.has_solar   != 0) : (config.app.has_solar.default   != 0);
+    const has_battery = (config.db.has_battery !== undefined) ? (config.db.has_battery != 0) : (config.app.has_battery.default != 0);
     return { has_solar: has_solar, has_battery: has_battery };
 }
 
 // Called by appconf.js before rendering the config UI
 config.ui_before_render = function() {
-    var mode = get_mode();
+    const mode = get_mode();
 
     // solar feed: only relevant if has_solar is on
     config.app.solar.hidden         = !mode.has_solar;
@@ -174,38 +174,38 @@ config.ui_after_value_change = function(key) {
 // ----------------------------------------------------------------------
 // APPLICATION
 // ----------------------------------------------------------------------
-var feeds = {};
+let feeds = {};
 
-var live = false;
-var autoupdate = true;
-var lastupdate = +new Date;
-var viewmode = "powergraph";
-var historyseries = [];
-var powerseries = [];
-var latest_start_time = 0;
-var panning = false;
-var bargraph_initialized = false;
-var kwhd_data = {};
-var kwhd_cache = {};
+let live = false;
+let autoupdate = true;
+let lastupdate = +new Date;
+let viewmode = "powergraph";
+let historyseries = [];
+let powerseries = [];
+let latest_start_time = 0;
+let panning = false;
+let bargraph_initialized = false;
+let kwhd_data = {};
+let kwhd_cache = {};
 
 
 // == Flow decomposition control variables ==
 
 // Which feeds are actually available
-var available = {
+let available = {
     use: false,
     solar: false,
     battery: false,
     grid: false
 };
-var battery_soc_available = false;
+let battery_soc_available = false;
 
 // which feed to derive (if any) based on the config; false = no derivation needed
-var derive = false; 
+let derive = false; 
 
 // which feeds to assume zero
-var assume_zero_solar = false;
-var assume_zero_battery = false;
+let assume_zero_solar = false;
+let assume_zero_battery = false;
 
 // == End of flow decomposition control variables ==
 
@@ -230,18 +230,18 @@ function check_history_feeds(mode) {
 
 
 
-var timeWindow = (3600000*24.0*30);
-var history_end = +new Date;
-var history_start = history_end - timeWindow;
+let timeWindow = (3600000*24.0*30);
+let history_end = +new Date;
+let history_start = history_end - timeWindow;
 
 timeWindow = (3600000*6.0*1);
-var power_end = +new Date;
-var power_start = power_end - timeWindow;
+let power_end = +new Date;
+let power_start = power_end - timeWindow;
 
-var live_timerange = timeWindow;
+let live_timerange = timeWindow;
 
-var meta = {};
-var power_graph_end_time = 0;
+let meta = {};
+let power_graph_end_time = 0;
 
 config.init();
 
@@ -250,7 +250,7 @@ function init()
 {        
     app_log("INFO","solar & battery init");
 
-    var mode = get_mode();
+    const mode = get_mode();
 
     // Apply hidden flags (also used by autogen feed list and config UI)
     config.ui_before_render();
@@ -261,9 +261,9 @@ function init()
     view.start = power_start;
 
     // Load metadata from whatever feeds are actually configured to find data end time
-    var feeds_to_check = ["use", "solar", "battery", "grid"];
-    for (var i = 0; i < feeds_to_check.length; i++) {
-        var key = feeds_to_check[i];
+    const feeds_to_check = ["use", "solar", "battery", "grid"];
+    for (let i = 0; i < feeds_to_check.length; i++) {
+        const key = feeds_to_check[i];
         if (config.app[key].value) {
             meta[key] = feed.getmeta(config.app[key].value);
             if (meta[key].end_time > power_graph_end_time) power_graph_end_time = meta[key].end_time;
@@ -279,7 +279,7 @@ function init()
     live_timerange = timeWindow;
 
     // Show history bargraph button only when all required kWh flow feeds are available for the current mode
-    var has_history = check_history_feeds(mode);
+    const has_history = check_history_feeds(mode);
     // if (has_history) init_bargraph();
     $(".viewhistory").toggle(has_history);
     
@@ -339,21 +339,13 @@ function init()
 function show() 
 {
     app_log("INFO","solar & battery show");
-    
-    var mode = get_mode();
-
 
     flow_available();
     solar_battery_visibility();
-
-    if (check_history_feeds(mode)) {
-        //if (!bargraph_initialized) init_bargraph();
-    }
-    
     load_process_draw_graph();
     graph_events();
-    
     livefn();
+
     live = setInterval(livefn,5000);
 
     // Trigger process here
@@ -407,7 +399,7 @@ function flow_available() {
     if (config.app.has_battery.value && feedids['battery']) available.battery = true;
     if (feedids['grid']) available.grid = true;
 
-    var number_of_feeds = 0;
+    let number_of_feeds = 0;
     if (available.solar) number_of_feeds++;
     if (available.use) number_of_feeds++;
     if (available.battery) number_of_feeds++;
@@ -473,10 +465,10 @@ function flow_available() {
 }
 
 function flow_derive_missing(input) {
-    var solar = input.solar;
-    var use = input.use;
-    var battery = input.battery;
-    var grid = input.grid;
+    let solar = input.solar;
+    let use = input.use;
+    let battery = input.battery;
+    let grid = input.grid;
 
     if (solar<0) solar = 0;
     if (use<0) use = 0;
@@ -504,26 +496,26 @@ function flow_derive_missing(input) {
 
 function flow_calculation(input) {
 
-    var solar = input.solar;
-    var use = input.use;
-    var battery = input.battery;
-    var grid = input.grid;
+    const solar = input.solar;
+    const use = input.use;
+    const battery = input.battery;
+    const grid = input.grid;
 
     // Import/export split: positive grid = import, negative grid = export
-    var import_power = grid > 0 ? grid : 0;
+    const import_power = grid > 0 ? grid : 0;
 
     // SOLAR flows
-    var solar_to_load = Math.min(solar, use);
-    var solar_to_battery = 0;
+    const solar_to_load = Math.min(solar, use);
+    let solar_to_battery = 0;
     if (battery < 0) {
         // Battery is charging: solar to battery is the lesser of available solar and battery charge power
         solar_to_battery = Math.min(solar - solar_to_load, -battery);
     }
-    var solar_to_grid = solar - solar_to_load - solar_to_battery;
+    const solar_to_grid = solar - solar_to_load - solar_to_battery;
 
     // BATTERY flows
-    var battery_to_load = 0;
-    var battery_to_grid = 0;
+    let battery_to_load = 0;
+    let battery_to_grid = 0;
     if (battery > 0) {
         // Battery is discharging
         battery_to_load = Math.min(battery, use - solar_to_load);
@@ -531,8 +523,8 @@ function flow_calculation(input) {
     }
 
     // GRID flows
-    var grid_to_load = 0;
-    var grid_to_battery = 0;
+    let grid_to_load = 0;
+    let grid_to_battery = 0;
     if (import_power > 0) {
         grid_to_load = Math.min(import_power, use - solar_to_load - battery_to_load);
         grid_to_battery = Math.min(import_power - grid_to_load, battery < 0 ? -battery - solar_to_battery : 0);
@@ -554,20 +546,16 @@ function resize()
 {
     app_log("INFO","solar & battery resize");
     
-    var placeholder_bound = $('#placeholder_bound');
-    var placeholder = $('#placeholder');
+    const placeholder_bound = $('#placeholder_bound');
+    const placeholder = $('#placeholder');
 
-    var width = placeholder_bound.width();
+    let width = placeholder_bound.width();
 
     // Calculate height from the top of the chart to the bottom of the viewport,
     // leaving enough room for the stats table below to remain visible.
-    var bottom_margin = $('.statstable').outerHeight(true) + 64;
-    var offset_top = placeholder_bound.offset().top - $(window).scrollTop();
-    var height = $(window).height() - offset_top - bottom_margin;
-
-    // In landscape cap at 60% of window width to avoid an overly tall chart
-    //var is_landscape = $(window).height() < $(window).width();
-    //if (is_landscape) height = Math.min(height, width * 0.6);
+    const bottom_margin = $('.statstable').outerHeight(true) + 64;
+    const offset_top = placeholder_bound.offset().top - $(window).scrollTop();
+    let height = $(window).height() - offset_top - bottom_margin;
 
     // min size to avoid flot errors
     if (height < 200) height = 200;
@@ -589,16 +577,16 @@ function livefn()
 {
     // Check if the updater ran in the last 60s if it did not the app was sleeping
     // and so the data needs a full reload.
-    var reload = false;
-    var now = +new Date();
+    let reload = false;
+    const now = +new Date();
     if ((now-lastupdate)>60000) reload = true;
     lastupdate = now;
-    var powerUnit = config.app && config.app.kw && config.app.kw.value===true ? 'kW' : 'W';
+    const powerUnit = config.app && config.app.kw && config.app.kw.value===true ? 'kW' : 'W';
 
-    var feeds = feed.listbyid();
+    const feeds = feed.listbyid();
     if (feeds === null) { return; }
 
-    var input = {};
+    let input = {};
     for (const key in available) {
         // if feed is available use its value, otherwise null
         input[key] = available[key] && feeds[config.app[key].value]!=undefined ? parseFloat(feeds[config.app[key].value].value) : null;
@@ -606,14 +594,14 @@ function livefn()
 
     input = flow_derive_missing(input);
 
-    var battery_soc_now = "---";
+    let battery_soc_now = "---";
     if (battery_soc_available && feeds[config.app.battery_soc.value] != undefined) {
         battery_soc_now = parseInt(feeds[config.app.battery_soc.value].value);
     }
 
     if (autoupdate) {
 
-        var updatetime = false;
+        let updatetime = false;
 
         // Find and update time based on the first available.
         for (const key in available) {
@@ -701,19 +689,19 @@ function livefn()
 }
 
 function solar_battery_visibility() {
-    var s = available.solar;
-    var b = available.battery;
+    const s = available.solar;
+    const b = available.battery;
 
     $("#live-solar-title").toggleClass("text-light", s);
     $("#live-solar-value").toggleClass("text-warning", s);
 
-    var boxColors = {
+    const boxColors = {
         "#solar-box":   s ? "#dccc1f" : "#282828",
         "#battery-box": b ? "#fb7b50" : "#282828"
     };
-    for (var id in boxColors) $(id).css("background-color", boxColors[id]);
+    for (const id in boxColors) $(id).css("background-color", boxColors[id]);
 
-    var arrowColors = {
+    const arrowColors = {
         "#solar-to-grid-box":    s         ? flow_colors["solar_to_grid"]    : "#333",
         "#solar-to-load-box":    s         ? flow_colors["solar_to_load"]    : "#333",
         "#solar-to-battery-box": s && b    ? flow_colors["solar_to_battery"] : "#333",
@@ -722,7 +710,7 @@ function solar_battery_visibility() {
         "#grid-to-battery-box":  b         ? flow_colors["grid_to_battery"]  : "#333",
         "#grid-to-load-box":               flow_colors["grid_to_load"]
     };
-    for (var id in arrowColors) $(id).css("--statsbox-color", arrowColors[id]);
+    for (const id in arrowColors) $(id).css("--statsbox-color", arrowColors[id]);
 
     $(".prc-solar").toggle(s);
     $(".prc-battery").toggle(b);
@@ -764,18 +752,18 @@ function battery_time_left({ capacity, soc, battery_power }) {
 function updateStats(d) {
 
     // Reconstruct aggregate totals
-    var solar_kwh      = d.solar_to_load + d.solar_to_grid + d.solar_to_battery;
-    var use_kwh        = d.solar_to_load + d.battery_to_load + d.grid_to_load;
-    var import_kwh     = d.grid_to_load + d.grid_to_battery;
-    var export_kwh     = d.solar_to_grid + d.battery_to_grid;
-    var grid_balance_kwh   = import_kwh - export_kwh;
+    const solar_kwh      = d.solar_to_load + d.solar_to_grid + d.solar_to_battery;
+    const use_kwh        = d.solar_to_load + d.battery_to_load + d.grid_to_load;
+    const import_kwh     = d.grid_to_load + d.grid_to_battery;
+    const export_kwh     = d.solar_to_grid + d.battery_to_grid;
+    const grid_balance_kwh   = import_kwh - export_kwh;
 
-    var use_from_import_prc = use_kwh > 0 ? (100 * d.grid_to_load / use_kwh).toFixed(0) + "%" : "";
-    var solar_export_prc = solar_kwh > 0 ? (100 * d.solar_to_grid / solar_kwh).toFixed(0) + "%" : "";
-    var solar_to_load_prc = solar_kwh > 0 ? (100 * d.solar_to_load / solar_kwh).toFixed(0) + "%" : "";
-    var solar_to_battery_prc = solar_kwh > 0 ? (100 * d.solar_to_battery / solar_kwh).toFixed(0) + "%" : "";
-    var use_from_solar_prc = use_kwh > 0 ? (100 * d.solar_to_load / use_kwh).toFixed(0) + "%" : "";
-    var use_from_battery_prc = use_kwh > 0 ? (100 * d.battery_to_load / use_kwh).toFixed(0) + "%" : "";
+    const use_from_import_prc = use_kwh > 0 ? (100 * d.grid_to_load / use_kwh).toFixed(0) + "%" : "";
+    const solar_export_prc = solar_kwh > 0 ? (100 * d.solar_to_grid / solar_kwh).toFixed(0) + "%" : "";
+    const solar_to_load_prc = solar_kwh > 0 ? (100 * d.solar_to_load / solar_kwh).toFixed(0) + "%" : "";
+    const solar_to_battery_prc = solar_kwh > 0 ? (100 * d.solar_to_battery / solar_kwh).toFixed(0) + "%" : "";
+    const use_from_solar_prc = use_kwh > 0 ? (100 * d.solar_to_load / use_kwh).toFixed(0) + "%" : "";
+    const use_from_battery_prc = use_kwh > 0 ? (100 * d.battery_to_load / use_kwh).toFixed(0) + "%" : "";
 
     $(".total_solar_kwh").html(solar_kwh.toFixed(1));
     $(".total_use_kwh").html(use_kwh.toFixed(1));
