@@ -338,7 +338,13 @@ function show()
 {
     app_log("INFO","solar & battery show");
 
-    flow_available();
+    const state = flow_available();
+    available             = state.available;
+    derive                = state.derive;
+    assume_zero_solar     = state.assume_zero_solar;
+    assume_zero_battery   = state.assume_zero_battery;
+    battery_soc_available = state.battery_soc_available;
+
     solar_battery_visibility();
     load_process_draw_graph();
     graph_events();
@@ -369,12 +375,10 @@ function flow_available() {
     // 2 feeds (need at least use or grid, second can be solar or battery)
     // 1 feed (use or grid)
 
-
-    // Availability
-    let feedids = {};
-    let feeds_to_check = ["use", "solar", "battery", "grid"];
+    const feedids = {};
+    const feeds_to_check = ["use", "solar", "battery", "grid"];
     for (let i = 0; i < feeds_to_check.length; i++) {
-        let key = feeds_to_check[i];
+        const key = feeds_to_check[i];
         if (config.app[key].value != "disable" && config.app[key].value != "derive") {
             feedids[key] = config.app[key].value*1;
         } else {
@@ -382,16 +386,17 @@ function flow_available() {
         }
     }
 
-    available = {
+    const available = {
         use: false,
         solar: false,
         battery: false,
         grid: false
     };
 
-    derive = false;
+    let derive = false;
+    let assume_zero_solar = false;
+    let assume_zero_battery = false;
 
-    // Availability
     if (config.app.has_solar.value && feedids['solar']) available.solar = true;
     if (feedids['use']) available.use = true;
     if (config.app.has_battery.value && feedids['battery']) available.battery = true;
@@ -438,7 +443,7 @@ function flow_available() {
         }
     }
 
-    // 1 Feed (dervice use from grid or vice versa, assume zero solar and battery)
+    // 1 Feed (derive use from grid or vice versa, assume zero solar and battery)
     else if (number_of_feeds === 1) {
         if (available.use) derive = "grid";
         else if (available.grid) derive = "use";
@@ -446,10 +451,7 @@ function flow_available() {
         assume_zero_battery = true;
     }
 
-    // Battery state of charge feed availability
-    if ((available.battery || derive == "battery") && config.app.battery_soc.value) {
-        battery_soc_available = true;
-    }
+    const battery_soc_available = (available.battery || derive === "battery") && !!config.app.battery_soc.value;
 
     return {
         has_solar: config.app.has_solar.value,
@@ -458,8 +460,9 @@ function flow_available() {
         available: available,
         derive: derive,
         assume_zero_solar: assume_zero_solar,
-        assume_zero_battery: assume_zero_battery
-    }
+        assume_zero_battery: assume_zero_battery,
+        battery_soc_available: battery_soc_available
+    };
 }
 
 function flow_derive_missing(input) {
