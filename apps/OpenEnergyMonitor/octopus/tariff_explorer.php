@@ -21,33 +21,34 @@ global $path, $session;
 <div id="app-block" style="display:none">
 
     <div style="padding:5px; background-color: #262626; border-radius: 0.375rem; margin-bottom: 1rem;">
-        <div class="col1-inner">
 
-            <div class="block-bound">
-                <div class="bluenav config-open"><i class="icon-wrench icon-white"></i></div>
-                <div id="app-title" class="block-title">Time of use tariff explorer</div>
-            </div>
+        <nav class="app-top-bar d-flex justify-content-between">
+            <ul class="btn-list">
+                <li><span id="app-title" class="electric-title">Time of use tariff explorer</span></li>
+            </ul>
+            <ul class="btn-list">
+                <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button></li>
+                <li><button class="app-btn config-close d-none" title="<?php echo tr('Close') ?>"><svg class="icon"><use xlink:href="#icon-close"></use></svg></button></li>
+            </ul>
+        </nav>
 
-            <div style="color:#333; padding:10px;">
-                <div style="display:grid; grid-template-columns:2fr 3fr; align-items:center; text-align: center;">
-                    <div>
-                        <b id="import_export" style="color:#44b3e2">IMPORT NOW</b>
-                        <div class="power-value"><span id="power_now">0</span></div>
-                    </div>
-                    <div style="text-align:center" class="last_halfhour_stats">
-                        <b style="color:#44b3e2">CURRENT PRICE</b>
-                        <div class="power-value"><span id="unit_price"></span></div>
-                    </div>
+        <div style="padding:10px;">
+            <div style="display:grid; grid-template-columns:2fr 3fr; align-items:center; text-align: center;">
+                <div>
+                    <b id="import_export" style="color:#44b3e2">IMPORT NOW</b>
+                    <div class="power-value"><span id="power_now">0</span></div>
+                </div>
+                <div style="text-align:center" class="last_halfhour_stats">
+                    <b style="color:#44b3e2">CURRENT PRICE</b>
+                    <div class="power-value"><span id="unit_price"></span></div>
                 </div>
             </div>
-
         </div>
+
     </div>
 
     <div style="padding:5px; background-color: #262626; border-radius: 0.375rem; margin-bottom: 1rem;">
-        <div class="block-bound" style="min-height:36px">
-
-            <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
+        <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
                 <span class="visnav app-btn" id="zoomin">+</span>
                 <span class="visnav app-btn" id="zoomout">-</span>
                 <span class="visnav app-btn" id="left">&lt;</span>
@@ -68,7 +69,6 @@ global $path, $session;
                     <option value='T' selected>Today since midnight</option>
                     <option value='C'>Custom</option>
                 </select>
-            </div>
         </div>
 
         <div style="padding:10px;">
@@ -79,12 +79,10 @@ global $path, $session;
     </div>
 
     <div style="padding:5px; background-color: #262626; border-radius: 0.375rem; margin-bottom: 1rem;">
-        <div class="power-graph-footer" style="color:#aaa; display:none">
-            <div style="padding:20px;">
+        <div class="power-graph-footer" style="display:none">
+            <div class="footer-controls">
 
-
-
-                <table style="width:100%" class="tariff-table">
+                <table class="tariff-table">
                     <tr>
                         <th>Energy flow</th>
                         <th>Energy</th>
@@ -95,35 +93,43 @@ global $path, $session;
                     <tbody id="octopus_totals"></tbody>
                 </table>
 
-                <div class="input-prepend" style="padding-right:5px">
-                    <span class="add-on">Select Tariff</span>
-                    <select id="tariff" class="form-control" style="font-size:13px;"></select>
+                <div class="footer-inputs">
+                    <div class="ctrl-group">
+                        <span class="ctrl-label"><?php echo tr('Select Tariff') ?></span>
+                        <select id="tariff"></select>
+                    </div>
+
+                    <div class="ctrl-group">
+                        <span class="ctrl-label"><?php echo tr('Start') ?></span>
+                        <span id="datetimepicker1">
+                            <input id="request-start" data-format="dd/MM/yyyy hh:mm:ss" type="text" />
+                            <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
+                        </span>
+                    </div>
+
+                    <div class="ctrl-group">
+                        <span class="ctrl-label"><?php echo tr('End') ?></span>
+                        <span id="datetimepicker2">
+                            <input id="request-end" data-format="dd/MM/yyyy hh:mm:ss" type="text" />
+                            <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
+                        </span>
+                    </div>
+
+                    <div class="ctrl-actions">
+                        <button id="download-csv">Download CSV</button>
+                        <button class="hide" id="show_profile">Show Profile</button>
+                    </div>
                 </div>
 
-
-                <div class="input-prepend input-append" style="padding-right:5px">
-                    <span class="add-on" style="width:50px"><?php echo tr('Start') ?></span>
-                    <span id="datetimepicker1">
-                        <input id="request-start" data-format="dd/MM/yyyy hh:mm:ss" type="text" style="width:140px" />
-                        <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
-                    </span>
-                </div>
-
-                <div class="input-prepend input-append" style="padding-right:5px">
-                    <span class="add-on" style="width:50px"><?php echo tr('End') ?></span>
-                    <span id="datetimepicker2">
-                        <input id="request-end" data-format="dd/MM/yyyy hh:mm:ss" type="text" style="width:140px" />
-                        <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
-                    </span>
-                </div>
-
-                <button class="btn" style="float:right" id="download-csv">Download CSV</button>
-                <button class="btn hide" style="float:right" id="show_profile">Show Profile</button>
-                <div id="use_meter_kwh_hh_bound" class="hide"><input id="use_meter_kwh_hh" type="checkbox" checked /> <span style="font-size:12px">Show energy and costs based on Octopus smart meter data where available</span>
-                    <div id="meter_kwh_hh_comparison" style="font-size:12px; padding-left:22px"></div>
-                </div>
-                <div id="show_carbonintensity_bound"><input id="show_carbonintensity" type="checkbox" /> <span style="font-size:12px">Show grid carbon intensity</span>
-                    <div id="carbonintensity_result" style="font-size:12px; padding-left:22px"></div>
+                <div class="footer-options">
+                    <div id="use_meter_kwh_hh_bound" class="hide">
+                        <label class="ctrl-checkbox"><input id="use_meter_kwh_hh" type="checkbox" checked /> <?php echo tr('Show energy and costs based on Octopus smart meter data where available') ?></label>
+                        <div id="meter_kwh_hh_comparison" class="ctrl-note"></div>
+                    </div>
+                    <div id="show_carbonintensity_bound">
+                        <label class="ctrl-checkbox"><input id="show_carbonintensity" type="checkbox" /> <?php echo tr('Show grid carbon intensity') ?></label>
+                        <div id="carbonintensity_result" class="ctrl-note"></div>
+                    </div>
                 </div>
 
                 <!-- Monthly data table -->
@@ -132,8 +138,7 @@ global $path, $session;
                         <thead><tr></tr></thead>
                         <tbody id="monthly-data-body"></tbody>
                     </table>
-
-                    <button id="save-baseline" class="btn">Save baseline</button>
+                    <button id="save-baseline">Save baseline</button>
                 </div>
 
             </div>
