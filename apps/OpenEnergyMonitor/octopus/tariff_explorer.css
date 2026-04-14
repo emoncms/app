@@ -204,6 +204,7 @@ body {
 .ctrl-group {
     display: inline-flex;
     align-items: stretch;
+    height: 30px;
 }
 
 .ctrl-label {
@@ -214,7 +215,7 @@ body {
     border-radius: 0.375rem 0 0 0.375rem;
     padding: 4px 10px;
     font-size: 13px;
-    line-height: 1.5;
+    box-sizing: border-box;
     display: inline-flex;
     align-items: center;
     white-space: nowrap;
@@ -226,9 +227,10 @@ body {
     color: #ccc;
     border: 1px solid #444;
     border-radius: 0 0.375rem 0.375rem 0;
-    padding: 4px 8px;
+    padding: 0 8px;
     font-size: 13px;
-    line-height: 1.5;
+    height: 30px;
+    box-sizing: border-box;
     cursor: pointer;
     outline: none;
     -webkit-appearance: none;
@@ -251,9 +253,10 @@ body {
     color: #ccc;
     border: 1px solid #444;
     border-radius: 0;
-    padding: 4px 8px;
+    padding: 0 8px;
     font-size: 13px;
-    line-height: 1.5;
+    height: 30px;
+    box-sizing: border-box;
     width: 140px;
     outline: none;
     box-shadow: none;
@@ -270,9 +273,9 @@ body {
     border: 1px solid #444;
     border-left: none;
     border-radius: 0 0.375rem 0.375rem 0;
-    padding: 4px 8px;
+    padding: 0 8px;
     font-size: 13px;
-    line-height: 1.5;
+    box-sizing: border-box;
     display: inline-flex;
     align-items: center;
     cursor: pointer;
