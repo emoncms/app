@@ -72,8 +72,8 @@ global $path, $session;
         </div>
 
         <div style="padding:10px;">
-            <div id="placeholder_bound" style="width:100%; height:400px;">
-                <div id="placeholder" style="height:400px"></div>
+            <div id="placeholder_bound" style="width:100%">
+                <div id="placeholder" style="min-height:300px"></div>
             </div>
         </div>
     </div>

@@ -806,11 +806,11 @@ function draw_tables() {
 
         var value_color;
         if (value_label.indexOf("avoided") !== -1) {
-            value_color = "#888";
+            value_color = "#aaa";
         } else if (value_label.indexOf("earned") !== -1) {
-            value_color = "#4a9e4a";
+            value_color = "#29af29";
         } else {
-            value_color = "#c0392b";
+            value_color = "#d6311e";
         }
 
         var r = "<tr style='border-left:4px solid " + color + (rowStyle ? ";" + rowStyle : "") + "'>";
@@ -826,7 +826,7 @@ function draw_tables() {
             r += "<td>&mdash;</td>";
         }
 
-        r += "<td style='color:#888;font-size:12px'>" + value_label + "</td>";
+        r += "<td style='color:#aaa;font-size:12px'>" + value_label + "</td>";
         r += "</tr>";
         return r;
     }
@@ -847,7 +847,7 @@ function draw_tables() {
     var total_consumption_kwh = total.solar_to_load_kwh + total.battery_to_load_kwh + total.grid_to_load_kwh;
 
     // spacer row
-    out += flow_row("Net result", total_consumption_kwh, net_cost_gbp, "grid costs minus export earnings", "#000",
+    out += flow_row("Net result", total_consumption_kwh, net_cost_gbp, "grid costs minus export earnings", "#444",
         "font-weight:bold;background-color:#333");
 
     $("#show_profile").show();
