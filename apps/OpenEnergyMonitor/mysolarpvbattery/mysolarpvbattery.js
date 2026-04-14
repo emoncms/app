@@ -779,23 +779,23 @@ function calc_stats(d) {
 function updateStats(d) {
     const s = calc_stats(d);
 
-    $(".total_solar_kwh").html(s.solar_kwh.toFixed(1));
-    $(".total_use_kwh").html(s.use_kwh.toFixed(1));
-    $(".total_import_direct_kwh").html(d.grid_to_load.toFixed(1));
-    $(".total_grid_balance_kwh").html(s.grid_balance_kwh.toFixed(1));
+    $(".solar_kwh").html(s.solar_kwh.toFixed(1));
+    $(".use_kwh").html(s.use_kwh.toFixed(1));
+    $(".grid_to_load").html(d.grid_to_load.toFixed(1));
+    $(".grid_balance_kwh").html(s.grid_balance_kwh.toFixed(1));
     $(".use_from_import_prc").html(s.use_from_import_prc);
 
-    $(".total_solar_direct_kwh").html(d.solar_to_load.toFixed(1));
-    $(".total_solar_export_kwh").html(d.solar_to_grid.toFixed(1));
+    $(".solar_to_load").html(d.solar_to_load.toFixed(1));
+    $(".solar_to_grid").html(d.solar_to_grid.toFixed(1));
     $(".solar_export_prc").html(s.solar_export_prc);
     $(".solar_direct_prc").html(s.solar_to_load_prc);
     $(".solar_to_battery_prc").html(s.solar_to_battery_prc);
     $(".use_from_solar_prc").html(s.use_from_solar_prc);
 
-    $(".total_battery_charge_from_solar_kwh").html(d.solar_to_battery.toFixed(1));
-    $(".total_import_for_battery_kwh").html(d.grid_to_battery.toFixed(1));
-    $(".total_battery_discharge_kwh").html(d.battery_to_load.toFixed(1));
-    $(".total_battery_to_grid_kwh").html(d.battery_to_grid.toFixed(1));
+    $(".solar_to_battery").html(d.solar_to_battery.toFixed(1));
+    $(".grid_to_battery").html(d.grid_to_battery.toFixed(1));
+    $(".battery_to_load").html(d.battery_to_load.toFixed(1));
+    $(".battery_to_grid").html(d.battery_to_grid.toFixed(1));
     $(".use_from_battery_prc").html(s.use_from_battery_prc);
 
     toggleBatteryFlowVisibility(d.grid_to_battery, d.battery_to_grid);
@@ -825,11 +825,22 @@ function app_log (level, message) {
 }
 
 // ----------------------------------------------------------------------
+// Helper: return array of feeds that should be auto-generated
+// (delegates to config.autogen.get_feeds in appconf.js)
+// ----------------------------------------------------------------------
+function get_autogen_feeds() {
+    return config.autogen.get_feeds();
+}
+
+// ----------------------------------------------------------------------
 // Auto-generate feed list
 // (delegates to config.autogen.render_feed_list in appconf.js)
 // ----------------------------------------------------------------------
 function render_autogen_feed_list() {
     config.autogen.render_feed_list();
+
+    //let result = flow_available();
+    //vue_config.app_instructions = JSON.stringify(result, null, 2);
 }
 
 // ----------------------------------------------------------------------

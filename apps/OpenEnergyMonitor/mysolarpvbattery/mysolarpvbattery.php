@@ -91,12 +91,12 @@
                 <div class="statsbox-inner-unit">
                     <div id="statsbox-generation" class="statsbox-padded">
                         <div class="statsbox-title"><span class="generationtitle">SOLAR</span></div>
-                        <div><span class="statsbox-value total_solar_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                        <div><span class="statsbox-value solar_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                         <div class="prc-solar-to-battery">
                             <span class="statsbox-prc solar_to_battery_prc prc-solar-battery">0</span>
                         </div>
                         <div class="prc-solar-direct">
-                            <span class="statsbox-prc solar_direct_prc prc-solar">0</span>
+                            <span class="statsbox-prc solar_to_load_prc prc-solar">0</span>
                         </div>
                         <div class="prc-solar-export">
                             <span class="statsbox-prc solar_export_prc prc-solar">0</span>
@@ -107,14 +107,14 @@
             
             <td id="solar-to-grid-box" class="statsbox solar-section">
                 <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-right"><span class="statsbox-value total_solar_export_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                    <div class="statsbox-padded statsbox-arrow-right"><span class="statsbox-value solar_to_grid">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
 
             <td id="grid-box" class="statsbox">
                 <div class="statsbox-padded statsbox-inner-unit">
                     <div class="statsbox-title">GRID</div>
-                    <div><span class="statsbox-value total_grid_balance_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                    <div><span class="statsbox-value grid_balance_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
         </tr>
@@ -122,31 +122,31 @@
         <tr>
             <td id="solar-to-battery-box" class="statsbox">
                 <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_battery_charge_from_solar_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value solar_to_battery">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
 
             <td id="grid-to-battery-box" class="statsbox">
                 <div id="battery_import" class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-left"><div class="statsbox-flow-title">GRID CHARGE</div><span class="statsbox-value total_import_for_battery_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                    <div class="statsbox-padded statsbox-arrow-left"><div class="statsbox-flow-title">GRID CHARGE</div><span class="statsbox-value grid_to_battery">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
             
             <td id="solar-to-load-box" class="statsbox solar-section">
                 <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_solar_direct_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value solar_to_load">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
 
             <td id="battery-to-grid-box" class="statsbox">
                 <div id="battery_export" class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-right"><div class="statsbox-flow-title">BATTERY TO GRID</div><span class="statsbox-value total_battery_to_grid_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                    <div class="statsbox-padded statsbox-arrow-right"><div class="statsbox-flow-title">BATTERY TO GRID</div><span class="statsbox-value battery_to_grid">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
             
             <td id="grid-to-load-box" class="statsbox">
                 <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_import_direct_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value grid_to_load">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
         </tr>
@@ -161,7 +161,7 @@
 
             <td id="battery-to-load-box" class="statsbox">
                 <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-right"><span class="statsbox-value total_battery_discharge_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                    <div class="statsbox-padded statsbox-arrow-right"><span class="statsbox-value battery_to_load">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
 
@@ -169,7 +169,7 @@
                 <div class="statsbox-inner-unit">
                     <div class="statsbox-padded">
                         <div class="statsbox-title">HOUSE</div>
-                        <div><span class="statsbox-value total_use_kwh">0</span> <span class="statsbox-units">kWh</span></div>
+                        <div><span class="statsbox-value use_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                         <div class="prc-battery-to-house">
                             <span class="statsbox-prc use_from_battery_prc prc-battery">0</span>
                         </div>
