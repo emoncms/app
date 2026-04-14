@@ -296,10 +296,15 @@ function kwh_to_power(data, interval) {
 // Binds flot interaction events (hover tooltip, drag-to-zoom selection) to the
 // chart placeholder. Safe to call on every redraw — unbinds before rebinding.
 function graph_events() {
+    bind_hover_tooltip();
+    bind_zoom_selection();
+    bind_bar_click();
+}
+
+function bind_hover_tooltip() {
     $('#placeholder').bind("plothover", function (event, pos, item)
     {
         if (item) {
-            // Show tooltip
             const tooltip_items = [];
 
             const date = new Date(item.datapoint[0]);
@@ -333,11 +338,12 @@ function graph_events() {
             }
             show_tooltip(pos.pageX+10, pos.pageY+5, tooltip_items);
         } else {
-            // Hide tooltip
             hide_tooltip();
         }
     });
+}
 
+function bind_zoom_selection() {
     $('#placeholder').bind("plotselected", function (event, ranges) {
         view.start = ranges.xaxis.from;
         view.end = ranges.xaxis.to;
@@ -353,7 +359,9 @@ function graph_events() {
 
         load_process_draw_graph();
     });
+}
 
+function bind_bar_click() {
     // Auto click through to power graph
     $('#placeholder').bind("plotclick", function (event, pos, item)
     {
