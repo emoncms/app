@@ -944,7 +944,7 @@ function draw_tables() {
             }
 
             // Link icon to zoom to this month
-            monthly_out += "<td><i class='icon-eye-open zoom-to-month' timestamp='" + month + "' style='cursor:pointer'></i></td>";
+            monthly_out += "<td><i class='icon-eye-open icon-white zoom-to-month' timestamp='" + month + "' style='cursor:pointer'></i></td>";
             monthly_out += "</tr>";
 
             sum_consumption_kwh   += consumption;
@@ -960,7 +960,7 @@ function draw_tables() {
         // Totals row
         var total_unit_rate = sum_consumption_kwh > 0 ? (sum_net_cost_tariff / sum_consumption_kwh) * 100 : NaN;
 
-        monthly_out += "<tr style='font-weight:bold;background-color:#e8e8e8'>";
+        monthly_out += "<tr style='font-weight:bold;background-color:#333'>";
         monthly_out += "<td>Total</td>";
         monthly_out += "<td>" + sum_consumption_kwh.toFixed(1) + " kWh</td>";
         if (!isNaN(total_unit_rate)) {
@@ -1118,7 +1118,6 @@ function graph_draw() {
             // labelMargin:0,
             // axisMargin:0
             margin: {
-                top: 30
             }
         },
         selection: {
@@ -1162,28 +1161,6 @@ function resize() {
     placeholder.width(width);
     placeholder_bound.height(height);
     placeholder.height(height - top_offset);
-
-    if (width <= 500) {
-        $(".electric-title").css("font-size", "14px");
-        $(".power-value").css("font-size", "36px");
-        $(".halfhour-value").css("font-size", "26px");
-    } else if (width <= 724) {
-        $(".electric-title").css("font-size", "16px");
-        $(".power-value").css("font-size", "50px");
-        $(".halfhour-value").css("font-size", "40px");
-    } else {
-        $(".electric-title").css("font-size", "20px");
-        $(".power-value").css("font-size", "50px");
-        $(".halfhour-value").css("font-size", "40px");
-    }
-
-    if (width <= 500) {
-        $("#zoomout").hide();
-        $("#zoomin").hide();
-    } else {
-        $("#zoomout").show();
-        $("#zoomin").show();
-    }
 }
 
 $(function() {

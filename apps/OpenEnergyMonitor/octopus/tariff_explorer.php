@@ -20,11 +20,11 @@ global $path, $session;
 
 <div id="app-block" style="display:none">
 
-    <div style="padding:5px; background-color: #262626; border-radius: 0.375rem; margin-bottom: 1rem;">
+    <div style="padding:5px; background-color: #262626; border-radius: 0.375rem; margin-bottom: 1rem; margin-top: 1rem;">
 
         <nav class="app-top-bar d-flex justify-content-between">
             <ul class="btn-list">
-                <li><span id="app-title" class="electric-title">Time of use tariff explorer</span></li>
+                <li><span class="electric-title"><svg class="icon" style="margin-right:6px; vertical-align:-0.125em;"><use xlink:href="#icon-schedule"></use></svg><span id="app-title">Time of use tariff explorer</span></span></li>
             </ul>
             <ul class="btn-list">
                 <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button></li>
@@ -35,11 +35,11 @@ global $path, $session;
         <div style="padding:10px;">
             <div style="display:grid; grid-template-columns:2fr 3fr; align-items:center; text-align: center;">
                 <div>
-                    <b id="import_export" style="color:#44b3e2">IMPORT NOW</b>
+                    <div id="import_export" class="power-title">IMPORT NOW</div>
                     <div class="power-value"><span id="power_now">0</span></div>
                 </div>
                 <div style="text-align:center" class="last_halfhour_stats">
-                    <b style="color:#44b3e2">CURRENT PRICE</b>
+                    <div class="power-title">CURRENT PRICE</div>
                     <div class="power-value"><span id="unit_price"></span></div>
                 </div>
             </div>
@@ -48,7 +48,7 @@ global $path, $session;
     </div>
 
     <div style="padding:5px; background-color: #262626; border-radius: 0.375rem; margin-bottom: 1rem;">
-        <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
+        <div id="graph-nav" class="visnavblock d-flex justify-content-start">
                 <span class="visnav app-btn" id="zoomin">+</span>
                 <span class="visnav app-btn" id="zoomout">-</span>
                 <span class="visnav app-btn" id="left">&lt;</span>
@@ -56,7 +56,7 @@ global $path, $session;
                 <span class="visnav app-btn" id="fastleft">&lt;&lt;</span>
                 <span class="visnav app-btn" id="fastright">&gt;&gt;</span>
 
-                <select class="visnav time-select">
+                <select class="visnav time-select" style="height:32px">
                     <option value='8760'>Previous 365 days</option>
                     <option value='1440'>Previous 60 days</option>
                     <option value='720'>Previous 30 days</option>
@@ -134,7 +134,7 @@ global $path, $session;
 
                 <!-- Monthly data table -->
                 <div id="monthly-data" class="hide mt-3">
-                    <table class="tariff-table tariff-table-striped">
+                    <table class="tariff-table mb-3">
                         <thead><tr></tr></thead>
                         <tbody id="monthly-data-body"></tbody>
                     </table>
