@@ -349,7 +349,6 @@ function bind_zoom_selection() {
         view.end = ranges.xaxis.to;
 
         autoupdate = false;
-        reload = true; 
         
         const now = +new Date();
         if (viewmode == "powergraph" && Math.abs(view.end-now)<30000) {
@@ -381,7 +380,6 @@ function bind_bar_click() {
 
             $(".viewhistory").toggleClass('active');
             
-            reload = true; 
             autoupdate = false;
             viewmode = "powergraph";
 

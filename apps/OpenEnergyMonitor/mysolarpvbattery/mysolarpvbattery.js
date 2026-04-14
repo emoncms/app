@@ -7,12 +7,7 @@ feed.public_username = public_username;
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
-$("body").css('background-color','#222');
-$(window).ready(function(){
-    $("#footer").css('background-color','#181818');
-    $("#footer").css('color','#999');
-});
-if (!sessionwrite) $(".openconfig").hide();
+// (display setup deferred to init() below)
 
 const flow_colors = {
     "solar_to_load":    "#a4c341", // changed from #abddff
@@ -182,7 +177,6 @@ let historyseries = [];
 let powerseries = [];
 let latest_start_time = 0;
 let panning = false;
-let bargraph_initialized = false;
 let kwhd_data = {};
 let kwhd_cache = {};
 
@@ -248,6 +242,12 @@ function init()
 {        
     app_log("INFO","solar & battery init");
 
+    // Display setup
+    $("body").css('background-color','#222');
+    $("#footer").css('background-color','#181818');
+    $("#footer").css('color','#999');
+    if (!sessionwrite) $(".openconfig").hide();
+
     const mode = get_mode();
 
     // Apply hidden flags (also used by autogen feed list and config UI)
@@ -278,7 +278,6 @@ function init()
 
     // Show history bargraph button only when all required kWh flow feeds are available for the current mode
     const has_history = check_history_feeds(mode);
-    // if (has_history) init_bargraph();
     $(".viewhistory").toggle(has_history);
     
     // The buttons for these graph events are hidden when in historic mode 
@@ -701,7 +700,7 @@ function solar_battery_visibility() {
         "#solar-box":   s ? "#dccc1f" : "#282828",
         "#battery-box": b ? "#fb7b50" : "#282828"
     };
-    for (const id in boxColors) $(id).css("background-color", boxColors[id]);
+    for (const [id, color] of Object.entries(boxColors)) $(id).css("background-color", color);
 
     const arrowColors = {
         "#solar-to-grid-box":    s         ? flow_colors["solar_to_grid"]    : "#333",
@@ -712,7 +711,7 @@ function solar_battery_visibility() {
         "#grid-to-battery-box":  b         ? flow_colors["grid_to_battery"]  : "#333",
         "#grid-to-load-box":               flow_colors["grid_to_load"]
     };
-    for (const id in arrowColors) $(id).css("--statsbox-color", arrowColors[id]);
+    for (const [id, color] of Object.entries(arrowColors)) $(id).css("--statsbox-color", color);
 
     $(".prc-solar").toggle(s);
     $(".prc-battery").toggle(b);
@@ -826,22 +825,11 @@ function app_log (level, message) {
 }
 
 // ----------------------------------------------------------------------
-// Helper: return array of feeds that should be auto-generated
-// (delegates to config.autogen.get_feeds in appconf.js)
-// ----------------------------------------------------------------------
-function get_autogen_feeds() {
-    return config.autogen.get_feeds();
-}
-
-// ----------------------------------------------------------------------
 // Auto-generate feed list
 // (delegates to config.autogen.render_feed_list in appconf.js)
 // ----------------------------------------------------------------------
 function render_autogen_feed_list() {
     config.autogen.render_feed_list();
-
-    //let result = flow_available();
-    //vue_config.app_instructions = JSON.stringify(result, null, 2);
 }
 
 // ----------------------------------------------------------------------
