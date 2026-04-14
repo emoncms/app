@@ -16,7 +16,7 @@ function octopus_app_controller($route,$app,$appconfig,$apikey)
 {
 
     global $path, $session, $settings, $mysqli, $redis, $user, $linked_modules_dir;
-    $v = 4;
+    $v = time();
 
     // ----------------------------------------------------
     // Main app view route
@@ -24,12 +24,19 @@ function octopus_app_controller($route,$app,$appconfig,$apikey)
     if ($route->action == "view" || $route->action == "") {
         $route->format = "html";
         $result = "\n<!-- global app css and js -->";
-        $result .= "\n" . '<link href="' . $path . 'Modules/app/Views/css/app.css?v=' . $v . '" rel="stylesheet">';
         $result .= "\n" . '<script src="' . $path . 'Modules/app/Views/js/app.js?v=' . $v . '"></script>';
         $result .= "\n\n <!-- app specific view -->\n";
 
         $dir = $appconfig->get_app_dir($app->app);
-        $result .= view($dir."tariff_explorer.php",array("id"=>$app->id, "name"=>$app->name, "public"=>$app->public, "appdir"=>$dir, "config"=>$app->config, "apikey"=>$apikey));
+        $result .= view($dir."tariff_explorer.php",array(
+            "id"=>$app->id, 
+            "name"=>$app->name, 
+            "public"=>$app->public, 
+            "appdir"=>$dir, 
+            "config"=>$app->config, 
+            "apikey"=>$apikey,
+            "v"=>$v
+            ));
         return $result;
     }
 

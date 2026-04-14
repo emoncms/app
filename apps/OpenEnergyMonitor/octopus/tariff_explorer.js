@@ -10,20 +10,29 @@ var profile_mode = false;
 
 var show_carbonintensity = $("#show_carbonintensity")[0].checked;
 
-var flow_colors = {
-    "solar_to_load": "#bec745",
+var flow_colors_original = {
+    "solar_to_load":    "#bec745",
     "solar_to_battery": "#a3d977",
-    "solar_to_grid": "#dccc1f",
-    "battery_to_load": "#fbb450",
-    "battery_to_grid": "#f0913a",
-    "grid_to_load": "#44b3e2",
-    "grid_to_battery": "#82cbfc"
+    "solar_to_grid":    "#dccc1f",
+    "battery_to_load":  "#fbb450",
+    "battery_to_grid":  "#f0913a",
+    "grid_to_load":     "#44b3e2",
+    "grid_to_battery":  "#82cbfc"
+};
+
+const flow_colors = {
+    "solar_to_load":    "#a4c341", // changed from #abddff
+    "solar_to_battery": "#fba050", 
+    "solar_to_grid":    "#dccc1f",
+    "battery_to_load":  "#ffd08e",
+    "battery_to_grid":  "#fabb68",
+    "grid_to_load":     "#82cbfc",
+    "grid_to_battery":  "#fb7b50"
 };
 
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
-$("body").css('background-color', 'WhiteSmoke');
 $(window).ready(function() {
     //$("#footer").css('background-color','#181818');
     //$("#footer").css('color','#999');
@@ -310,6 +319,11 @@ config.init();
 
 function init() {
 
+    // Display setup
+    $("body").css('background-color','#222');
+    $("#footer").css('background-color','#181818');
+    $("#footer").css('color','#999');
+
     var mode = get_mode();
 
     // Apply hidden flags (also used by autogen feed list and config UI)
@@ -330,7 +344,6 @@ function init() {
 }
 
 function show() {
-    $("body").css('background-color', 'WhiteSmoke');
     $("#app-title").html(config.app.title.value);
 
     // Quick translation of feed ids
@@ -819,12 +832,12 @@ function draw_tables() {
     }
 
     out += flow_row("&#9728; Solar &rarr; Load",         total.solar_to_load_kwh,    total.tariff.solar_to_load_value * 1.05,    "avoided import cost", flow_colors.solar_to_load);
-    out += flow_row("&#9728; Solar &rarr; Battery",      total.solar_to_battery_kwh, total.tariff.solar_to_battery_value * 1.05, "avoided import cost", flow_colors.solar_to_battery);
     out += flow_row("&#9728; Solar &rarr; Grid (export)",total.solar_to_grid_kwh,    total.tariff.solar_to_grid_value * 1.05,    "earned at export tariff", flow_colors.solar_to_grid);
+    out += flow_row("&#9728; Solar &rarr; Battery",      total.solar_to_battery_kwh, total.tariff.solar_to_battery_value * 1.05, "avoided import cost", flow_colors.solar_to_battery);
     out += flow_row("&#x1F50B; Battery &rarr; Load",     total.battery_to_load_kwh,  total.tariff.battery_to_load_value * 1.05,  "avoided import cost", flow_colors.battery_to_load);
     out += flow_row("&#x1F50B; Battery &rarr; Grid (export)", total.battery_to_grid_kwh, total.tariff.battery_to_grid_value * 1.05, "earned at export tariff", flow_colors.battery_to_grid);
-    out += flow_row("&#x1F4A1; Grid &rarr; Load",        total.grid_to_load_kwh,     (total.tariff.grid_to_load_cost * 1.05),   "import cost", flow_colors.grid_to_load);
     out += flow_row("&#x1F4A1; Grid &rarr; Battery",     total.grid_to_battery_kwh,  (total.tariff.grid_to_battery_cost * 1.05),"import cost", flow_colors.grid_to_battery);
+    out += flow_row("&#x1F4A1; Grid &rarr; Load",        total.grid_to_load_kwh,     (total.tariff.grid_to_load_cost * 1.05),   "import cost", flow_colors.grid_to_load);
 
     // Summary row: net cost = grid costs - earnings, unit cost = net cost / total consumption
     var net_cost_gbp = (
@@ -835,7 +848,7 @@ function draw_tables() {
 
     // spacer row
     out += flow_row("Net result", total_consumption_kwh, net_cost_gbp, "grid costs minus export earnings", "#000",
-        "font-weight:bold;background-color:#e8e8e8");
+        "font-weight:bold;background-color:#333");
 
     $("#show_profile").show();
     $("#octopus_totals").html(out);
@@ -1074,7 +1087,7 @@ function graph_draw() {
             max: view.end,
             font: {
                 size: flot_font_size,
-                color: "#666"
+                color: "#888"
             },
             reserveSpace: false
         },
@@ -1082,7 +1095,7 @@ function graph_draw() {
                 position: 'left',
                 font: {
                     size: flot_font_size,
-                    color: "#666"
+                    color: "#888"
                 },
                 reserveSpace: false
             },
@@ -1091,7 +1104,7 @@ function graph_draw() {
                 alignTicksWithAxis: 1,
                 font: {
                     size: flot_font_size,
-                    color: "#666"
+                    color: "#888"
                 },
                 reserveSpace: false
             }
@@ -1112,7 +1125,7 @@ function graph_draw() {
             mode: "x"
         },
         legend: {
-            show: $('#placeholder').width() > 500,
+            show: false, // $('#placeholder').width() > 500,
             position: "NW",
             noColumns: 1
         }

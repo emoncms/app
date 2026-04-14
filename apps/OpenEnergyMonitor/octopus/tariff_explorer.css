@@ -1,3 +1,11 @@
+body {
+    background-color: #222;
+}
+
+.content-container {
+    max-width: 1150px;
+}
+
 .electric-title {
     font-weight: bold;
     font-size: 22px;
@@ -23,19 +31,80 @@
 }
 
 .block-bound {
-    background-color: rgb(68, 179, 226);
+
 }
 
-.bluenav-active {
-    background-color: rgba(255, 255, 255, 0.2);
+/* Rounded corners on first and last graph-nav buttons */
+#graph-nav .app-btn:first-child { border-radius: 0.375rem 0 0 0.375rem; }
+#graph-nav .app-btn:last-child  { border-radius: 0 0.375rem 0.375rem 0; }
+
+/* Faint dividing lines between buttons */
+#graph-nav .app-btn + .app-btn { border-left: 1px solid rgba(255,255,255,0.12); }
+
+/* app-btn: replaces Bootstrap btn + btn-large + btn-link + btn-inverse.
+   Explicitly resets Bootstrap properties so it is self-contained. */
+.app-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25em;
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+    white-space: nowrap;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    text-shadow: none;
+    color: #aaa;
+    opacity: .6;
+    transition: opacity .3s linear;
+    text-decoration: none;
+}
+.app-btn:hover,
+.app-btn:active {
+    opacity: 1;
+    text-decoration: none;
+}
+.app-btn.active {
+    color: white;
+    opacity: .8;
+    font-weight: bold;
+    text-decoration: underline;
+}
+.app-btn[disabled],
+.app-btn[disabled]:hover {
+    color: #616161;
+    opacity: .8;
+    background: rgba(6, 153, 250, 0.06);
+}
+
+/* Visnav */
+.visnavblock {
+    color: #0699fa;
+    font-size: 18px;
+}
+
+.visnav {
+    background-color: rgba(6,153,250,0.1);
+    flex-grow: 1;
+}
+
+.visnav:focus,
+.visnav:active,
+.visnav:hover {
+    color: #0699fa;
+    text-decoration: none!important;
 }
 
 .time-select {
     width: 165px;
     margin: 4px 5px 0px 0px;
     float: right;
-    background-color: #44b3e2;
-    color: #fff;
 }
 
 @media(max-width: 610px) {
@@ -55,4 +124,30 @@
 
 #tariff_B {
     margin-bottom: 0px;
+}
+
+.tariff-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tariff-table th,
+.tariff-table td {
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.tariff-table tr {
+    border-bottom: 1px solid rgba(68,179,226,0.1);
+}
+
+.tariff-table-striped tbody tr:nth-child(odd) {
+    background-color: rgba(255,255,255,0.05);
+}
+
+#footer {
+    margin: 0;
+    background-color: #181818;
+    color: #999;
 }
