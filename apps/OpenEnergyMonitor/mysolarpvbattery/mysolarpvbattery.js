@@ -87,9 +87,7 @@ config.app = {
 //   consumption only:        at least 1 of (use, grid) must be configured
 // ----------------------------------------------------------------------
 config.check = function() {
-    // Read mode from db (persisted) or app default
-    const has_solar   = (config.db.has_solar   !== undefined) ? (config.db.has_solar   != 0) : (config.app.has_solar.default   != 0);
-    const has_battery = (config.db.has_battery !== undefined) ? (config.db.has_battery != 0) : (config.app.has_battery.default != 0);
+    const { has_solar, has_battery } = get_mode();
 
     // Helper: is a feed key resolved (either auto-matched by name or explicitly set in db)?
     function feed_resolved(key) {
