@@ -101,6 +101,13 @@ function process_and_draw_graph() {
         { key: "grid_to_battery",  label: "Grid to Battery",  fill: 0.8, export: false }
     ];
 
+    // If battery first move order of battery_to_load from 4th to 2nd in line
+    if (strategy === BATTERY_FIRST) {
+        const battery_to_load_flow = flows.find(f => f.key === "battery_to_load");
+        flows.splice(flows.indexOf(battery_to_load_flow), 1);
+        flows.splice(1, 0, battery_to_load_flow);
+    }
+
     const totals = Object.fromEntries(flows.map(f => [f.key, 0]));
     const data   = Object.fromEntries(flows.map(f => [f.key, []]));
 
