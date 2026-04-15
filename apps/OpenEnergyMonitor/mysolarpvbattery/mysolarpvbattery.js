@@ -494,52 +494,72 @@ function flow_derive_missing(input) {
     }
 }
 
-function flow_calculation(input) {
-
+function flow_calculation(input, strategy = 'solar_first') {
     const solar = input.solar;
     const use = input.use;
     const battery = input.battery;
     const grid = input.grid;
-
-    // Import/export split: positive grid = import, negative grid = export
     const import_power = grid > 0 ? grid : 0;
 
-    // SOLAR flows
-    const solar_to_load = Math.min(solar, use);
-    let solar_to_battery = 0;
-    if (battery < 0) {
-        // Battery is charging: solar to battery is the lesser of available solar and battery charge power
-        solar_to_battery = Math.min(solar - solar_to_load, -battery);
-    }
-    const solar_to_grid = solar - solar_to_load - solar_to_battery;
+    let solar_to_load, solar_to_battery, solar_to_grid;
+    let battery_to_load = 0, battery_to_grid = 0;
+    let grid_to_load = 0, grid_to_battery = 0;
 
-    // BATTERY flows
-    let battery_to_load = 0;
-    let battery_to_grid = 0;
-    if (battery > 0) {
-        // Battery is discharging
-        battery_to_load = Math.min(battery, use - solar_to_load);
-        battery_to_grid = battery - battery_to_load;
+
+    if (strategy === 'solar_first') {
+        // Solar is first allocated to load
+        solar_to_load = Math.min(solar, use);
+
+        // Excess solar charges battery if charging
+        solar_to_battery = battery < 0
+            ? Math.min(solar - solar_to_load, -battery)
+            : 0;
+
+        // Any remaining solar exports
+        solar_to_grid = solar - solar_to_load - solar_to_battery;
+
+        // Battery discharge covers unmet load, excess exports
+        if (battery > 0) {
+            battery_to_load = Math.min(battery, use - solar_to_load);
+            battery_to_grid = battery - battery_to_load;
+        }
+
+    } else if (strategy === 'battery_first') {
+        // Battery discharge is first allocated to load
+        if (battery > 0) {
+            battery_to_load = Math.min(battery, use);
+            battery_to_grid = battery - battery_to_load;
+        }
+
+        // Solar covers any remaining load, surplus exports
+        solar_to_load = Math.min(solar, use - battery_to_load);
+
+        // Excess solar charges battery if charging
+        solar_to_battery = battery < 0
+            ? Math.min(solar - solar_to_load, -battery)
+            : 0;
+
+        solar_to_grid = solar - solar_to_load - solar_to_battery;
     }
 
-    // GRID flows
-    let grid_to_load = 0;
-    let grid_to_battery = 0;
+    // GRID flows are strategy-independent: 
+
+    // grid import makes up any shortfall in load or battery charging
     if (import_power > 0) {
         grid_to_load = Math.min(import_power, use - solar_to_load - battery_to_load);
         grid_to_battery = Math.min(import_power - grid_to_load, battery < 0 ? -battery - solar_to_battery : 0);
     }
 
     return {
-        solar_to_load: solar_to_load,
-        solar_to_battery: solar_to_battery,
-        solar_to_grid: solar_to_grid,
-        battery_to_load: battery_to_load,
-        battery_to_grid: battery_to_grid,
-        grid_to_load: grid_to_load,
-        grid_to_battery: grid_to_battery
-    }
-}
+        solar_to_load,
+        solar_to_battery,
+        solar_to_grid,
+        battery_to_load,
+        battery_to_grid,
+        grid_to_load,
+        grid_to_battery
+    };
+} 
 
 
 function resize() 
