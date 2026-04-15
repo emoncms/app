@@ -19,6 +19,9 @@ const flow_colors = {
     "grid_to_battery":  "#fb7b50"
 };
 
+const SOLAR_FIRST = 0;
+const BATTERY_FIRST = 1;
+
 // ----------------------------------------------------------------------
 // Configuration
 // ----------------------------------------------------------------------
@@ -69,7 +72,9 @@ config.app = {
 
     // Other options
     "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description": "Display power as kW"},
-    "battery_capacity_kwh":{"type":"value", "default":0, "name":"Battery Capacity", "description":"Battery capacity in kWh (used for time-remaining estimate; only used when has_battery is enabled)"}
+    "battery_capacity_kwh":{"type":"value", "default":0, "name":"Battery Capacity", "description":"Battery capacity in kWh (used for time-remaining estimate; only used when has_battery is enabled)"},
+
+    "strategy":{"type":"select", "default":"Solar first", "options":["Solar first", "Battery first"], "name":"Flow allocation strategy", "description":""}
 };
 
 // ----------------------------------------------------------------------
@@ -494,7 +499,7 @@ function flow_derive_missing(input) {
     }
 }
 
-function flow_calculation(input, strategy = 'solar_first') {
+function flow_calculation(input, strategy = SOLAR_FIRST) {
     const solar = input.solar;
     const use = input.use;
     const battery = input.battery;
@@ -506,7 +511,7 @@ function flow_calculation(input, strategy = 'solar_first') {
     let grid_to_load = 0, grid_to_battery = 0;
 
 
-    if (strategy === 'solar_first') {
+    if (strategy === SOLAR_FIRST) {
         // Solar is first allocated to load
         solar_to_load = Math.min(solar, use);
 
@@ -524,7 +529,7 @@ function flow_calculation(input, strategy = 'solar_first') {
             battery_to_grid = battery - battery_to_load;
         }
 
-    } else if (strategy === 'battery_first') {
+    } else if (strategy === BATTERY_FIRST) {
         // Battery discharge is first allocated to load
         if (battery > 0) {
             battery_to_load = Math.min(battery, use);

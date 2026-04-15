@@ -86,6 +86,11 @@ function load_process_draw_graph() {
 // panel, builds the flot series arrays, and then calls draw_graph().
 function process_and_draw_graph() {
 
+    let strategy = SOLAR_FIRST;
+    if (config.app.strategy != undefined && config.app.strategy.value == "Battery first") {
+        strategy = BATTERY_FIRST;
+    }
+
     const flows = [
         { key: "solar_to_load",    label: "Solar to Load",    fill: 0.8, export: false },
         { key: "solar_to_battery", label: "Solar to Battery", fill: 0.8, export: false },
@@ -121,7 +126,7 @@ function process_and_draw_graph() {
 
             if (input.solar !== null || input.use !== null || input.battery !== null || input.grid !== null) {
 
-                const flow = flow_calculation(input);
+                const flow = flow_calculation(input, strategy);
 
                 // Accumulate kWh totals and build graph data arrays
                 flows.forEach(f => {
