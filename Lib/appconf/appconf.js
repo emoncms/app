@@ -325,6 +325,7 @@ var config = {
 
         // Return the node tag string used for all auto-generated feeds
         node_name: function() {
+            if (!config.app || !config.app.autogenerate_nodename) return "";
             var node_name = config.app.autogenerate_nodename.default;
             if (config.app.autogenerate_nodename.value != undefined) {
                 node_name = config.app.autogenerate_nodename.value;
