@@ -509,9 +509,6 @@ function graph_load(time_window_changed = true) {
         datetimepicker2.setStartDate(new Date(view.start));
     }
 
-    data = {};
-
-
     if (time_window_changed) {
         // Load energy flow feeds (cumulative kWh, delta=1 returns half-hourly differences directly)
         flows.forEach(function(f) {
