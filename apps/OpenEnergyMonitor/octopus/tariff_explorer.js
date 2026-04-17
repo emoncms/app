@@ -779,212 +779,215 @@ function accumulate_flows(bucket, flows, outgoing_unit, unitcost_tariff) {
     }
 }
 
+// -------------------------------------------------------------------------------
+// CALCULATIONS
+// -------------------------------------------------------------------------------
+
+function calc_net_cost(tariff_data) {
+    return (
+        (tariff_data.grid_to_load_cost + tariff_data.grid_to_battery_cost) -
+        (tariff_data.solar_to_grid_value + tariff_data.battery_to_grid_value)
+    ) * 1.05;
+}
+
+function calc_total_consumption(bucket) {
+    return bucket.solar_to_load_kwh + bucket.battery_to_load_kwh + bucket.grid_to_load_kwh;
+}
+
+// Returns an array of per-month summary objects.
+// Also populates the global monthly_summary for use by the baseline save feature.
+function calc_monthly_summaries() {
+    monthly_summary = {};
+    var summaries = [];
+
+    for (var month in monthly_data) {
+        var md = monthly_data[month];
+        var net_cost   = calc_net_cost(md.tariff);
+        var consumption = calc_total_consumption(md);
+        var unit_rate  = consumption > 0 ? (net_cost / consumption) * 100 : NaN;
+
+        summaries.push({
+            timestamp:  month,
+            date:       new Date(parseInt(month)),
+            consumption: consumption,
+            net_cost:   net_cost,
+            unit_rate:  unit_rate,
+            baseline:   baseline_monthly_summary[month] || null
+        });
+
+        monthly_summary[month] = {
+            consumption_kwh:  consumption,
+            net_cost_tariff:  net_cost,
+            unit_rate_tariff: unit_rate
+        };
+    }
+
+    return summaries;
+}
+
+// -------------------------------------------------------------------------------
+// RENDERING HELPERS
+// -------------------------------------------------------------------------------
+
+// Renders a GBP cost + optional unit-rate into a single <td>.
+function render_cost_cell(net_cost, unit_rate) {
+    var text = (net_cost >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(net_cost).toFixed(2);
+    if (!isNaN(unit_rate)) {
+        text += " <span style='font-size:12px;color:#888'>" + unit_rate.toFixed(1) + " p/kWh</span>";
+    }
+    return "<td>" + text + "</td>";
+}
+
+// Renders a single energy-flow row for the totals table.
+function render_flow_row(label, kwh, value_gbp, value_label, color, rowStyle) {
+    if (kwh === 0) return "";
+
+    var value_color;
+    if (value_label.indexOf("avoided") !== -1) {
+        value_color = "#aaa";
+    } else if (value_label.indexOf("earned") !== -1) {
+        value_color = "#29af29";
+    } else {
+        value_color = "#d6311e";
+    }
+
+    var unit_price_cell = (value_gbp !== null && kwh > 0)
+        ? "<td style='color:" + value_color + "'>" + ((value_gbp / kwh) * 100).toFixed(1) + " p/kWh</td>"
+        : "<td>&mdash;</td>";
+
+    return "<tr style='border-left:4px solid " + color + (rowStyle ? ";" + rowStyle : "") + "'>"
+        + "<td>" + label + "</td>"
+        + "<td>" + kwh.toFixed(2) + " kWh</td>"
+        + "<td style='color:" + value_color + "'>"
+            + (value_gbp !== null ? (value_gbp >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(value_gbp).toFixed(2) : "&mdash;")
+            + "</td>"
+        + unit_price_cell
+        + "<td style='color:#aaa;font-size:12px'>" + value_label + "</td>"
+        + "</tr>";
+}
+
+// Builds the HTML for the flow totals table body.
+function render_flow_table() {
+    var vat = 1.05;
+    var net_cost_gbp          = calc_net_cost(total.tariff);
+    var total_consumption_kwh = calc_total_consumption(total);
+
+    var rows = "";
+    rows += render_flow_row("&#9728; Solar &rarr; Load",              total.solar_to_load_kwh,    total.tariff.solar_to_load_value    * vat, "avoided import cost",          flow_colors.solar_to_load);
+    rows += render_flow_row("&#9728; Solar &rarr; Grid (export)",     total.solar_to_grid_kwh,    total.tariff.solar_to_grid_value    * vat, "earned at export tariff",      flow_colors.solar_to_grid);
+    rows += render_flow_row("&#9728; Solar &rarr; Battery",           total.solar_to_battery_kwh, total.tariff.solar_to_battery_value * vat, "avoided import cost",          flow_colors.solar_to_battery);
+    rows += render_flow_row("&#x1F50B; Battery &rarr; Load",          total.battery_to_load_kwh,  total.tariff.battery_to_load_value  * vat, "avoided import cost",          flow_colors.battery_to_load);
+    rows += render_flow_row("&#x1F50B; Battery &rarr; Grid (export)", total.battery_to_grid_kwh,  total.tariff.battery_to_grid_value  * vat, "earned at export tariff",      flow_colors.battery_to_grid);
+    rows += render_flow_row("&#x1F4A1; Grid &rarr; Battery",          total.grid_to_battery_kwh,  total.tariff.grid_to_battery_cost   * vat, "import cost",                  flow_colors.grid_to_battery);
+    rows += render_flow_row("&#x1F4A1; Grid &rarr; Load",             total.grid_to_load_kwh,     total.tariff.grid_to_load_cost      * vat, "import cost",                  flow_colors.grid_to_load);
+    rows += render_flow_row("Net result", total_consumption_kwh, net_cost_gbp, "grid costs minus export earnings", "#444", "font-weight:bold;background-color:#333");
+
+    return rows;
+}
+
+// Builds the HTML for one monthly data row.
+function render_monthly_row(summary, has_baseline, month_names) {
+    var row = "<tr>";
+    row += "<td>" + summary.date.getFullYear() + " " + month_names[summary.date.getMonth()] + "</td>";
+    row += "<td>" + summary.consumption.toFixed(1) + " kWh</td>";
+    row += render_cost_cell(summary.net_cost, summary.unit_rate);
+
+    if (has_baseline && summary.baseline) {
+        row += render_cost_cell(summary.baseline.net_cost_tariff, summary.baseline.unit_rate_tariff);
+
+        if (!isNaN(summary.unit_rate) && !isNaN(summary.baseline.unit_rate_tariff)) {
+            if (summary.unit_rate < summary.baseline.unit_rate_tariff) {
+                row += "<td style='color:#1a6abf;font-weight:bold'>A</td>";
+            } else if (summary.baseline.unit_rate_tariff < summary.unit_rate) {
+                row += "<td style='color:#7c1a80;font-weight:bold'>B</td>";
+            } else {
+                row += "<td>=</td>";
+            }
+        } else {
+            row += "<td>&mdash;</td>";
+        }
+    }
+
+    row += "<td><i class='icon-eye-open icon-white zoom-to-month' timestamp='" + summary.timestamp + "' style='cursor:pointer'></i></td>";
+    row += "</tr>";
+    return row;
+}
+
+// Builds and injects the full monthly breakdown table.
+function render_monthly_table(summaries) {
+    var month_names  = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    var has_baseline = baseline_monthly_summary != undefined && Object.keys(baseline_monthly_summary).length > 0;
+    var tariff_label = config.app.tariff.value + (has_baseline ? " (A)" : "");
+
+    var heading = "<th>Month</th><th>Consumption (kWh)</th><th>" + tariff_label + "</th>";
+    if (has_baseline) {
+        heading += "<th>" + (baseline_tariff_name || "Baseline") + " (B)</th><th>Cheaper tariff</th>";
+    }
+    heading += "<th></th>";
+    $("#monthly-data thead tr").html(heading);
+
+    var sum_consumption_kwh  = 0;
+    var sum_net_cost_tariff  = 0;
+    var sum_net_cost_baseline = 0;
+    var rows = "";
+
+    for (var i = 0; i < summaries.length; i++) {
+        var s = summaries[i];
+        rows += render_monthly_row(s, has_baseline, month_names);
+        sum_consumption_kwh   += s.consumption;
+        sum_net_cost_tariff   += s.net_cost;
+        if (has_baseline && s.baseline) {
+            sum_net_cost_baseline += s.baseline.net_cost_tariff;
+        }
+    }
+
+    var total_unit_rate = sum_consumption_kwh > 0 ? (sum_net_cost_tariff / sum_consumption_kwh) * 100 : NaN;
+    var totals_row = "<tr style='font-weight:bold;background-color:#333'>"
+        + "<td>Total</td>"
+        + "<td>" + sum_consumption_kwh.toFixed(1) + " kWh</td>"
+        + render_cost_cell(sum_net_cost_tariff, total_unit_rate);
+
+    if (has_baseline) {
+        var baseline_total_unit_rate = sum_consumption_kwh > 0 ? (sum_net_cost_baseline / sum_consumption_kwh) * 100 : NaN;
+        totals_row += render_cost_cell(sum_net_cost_baseline, baseline_total_unit_rate);
+    }
+
+    totals_row += "<td></td></tr>";
+
+    $("#monthly-data-body").html(rows + totals_row);
+    $("#monthly-data").show();
+}
+
+// -------------------------------------------------------------------------------
+// draw_tables: orchestrates calculation then rendering
+// -------------------------------------------------------------------------------
 function draw_tables() {
 
-    // Populate standalone tariff selectors (built once, then just set value)
-    ["tariff"].forEach(function(id) {
-        var sel = $("#" + id);
-        if (sel.find("option").length === 0) {
-            for (var key in tariff_options) {
-                sel.append("<option>" + tariff_options[key] + "</option>");
-            }
+    // Populate tariff selector once, then sync its value
+    var sel = $("#tariff");
+    if (sel.find("option").length === 0) {
+        for (var key in tariff_options) {
+            sel.append("<option>" + tariff_options[key] + "</option>");
         }
-    });
-    $("#tariff").val(config.app.tariff.value);
+    }
+    sel.val(config.app.tariff.value);
 
-    var out = "";
-
+    // CO2 summary
     if (show_carbonintensity) {
-        var total_import_kwh = total.grid_to_load_kwh + total.grid_to_battery_kwh;
-        var window_co2_intensity = total_import_kwh > 0 ? 1000 * total.co2 / total_import_kwh : 0;
-        $("#carbonintensity_result").html("Total CO2: " + (total.co2).toFixed(1) + "kgCO2, Consumption intensity: " + window_co2_intensity.toFixed(0) + " gCO2/kWh")
+        var total_import_kwh      = total.grid_to_load_kwh + total.grid_to_battery_kwh;
+        var window_co2_intensity  = total_import_kwh > 0 ? 1000 * total.co2 / total_import_kwh : 0;
+        $("#carbonintensity_result").html(
+            "Total CO2: " + total.co2.toFixed(1) + "kgCO2, Consumption intensity: " + window_co2_intensity.toFixed(0) + " gCO2/kWh"
+        );
     }
 
-    // Helper: one table row per energy flow
-    function flow_row(label, kwh, value_gbp, value_label, color, rowStyle) {
-        if (kwh === 0) return ""; // skip zero rows for clarity
-
-        var value_color;
-        if (value_label.indexOf("avoided") !== -1) {
-            value_color = "#aaa";
-        } else if (value_label.indexOf("earned") !== -1) {
-            value_color = "#29af29";
-        } else {
-            value_color = "#d6311e";
-        }
-
-        var r = "<tr style='border-left:4px solid " + color + (rowStyle ? ";" + rowStyle : "") + "'>";
-        r += "<td>" + label + "</td>";
-        r += "<td>" + kwh.toFixed(2) + " kWh</td>";
-        r += "<td style='color:" + value_color + "'>" + (value_gbp !== null ? (value_gbp >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(value_gbp).toFixed(2) : "&mdash;") + "</td>";
-
-        // unit price value_gbp / kwh, only if kwh > 0 and value_gbp is not null
-        if (value_gbp !== null && kwh > 0) {
-            let unit_price = value_gbp / kwh;
-            r += "<td style='color:" + value_color + "'>" + (unit_price * 100).toFixed(1) + " p/kWh</td>";
-        } else {
-            r += "<td>&mdash;</td>";
-        }
-
-        r += "<td style='color:#aaa;font-size:12px'>" + value_label + "</td>";
-        r += "</tr>";
-        return r;
-    }
-
-    out += flow_row("&#9728; Solar &rarr; Load",         total.solar_to_load_kwh,    total.tariff.solar_to_load_value * 1.05,    "avoided import cost", flow_colors.solar_to_load);
-    out += flow_row("&#9728; Solar &rarr; Grid (export)",total.solar_to_grid_kwh,    total.tariff.solar_to_grid_value * 1.05,    "earned at export tariff", flow_colors.solar_to_grid);
-    out += flow_row("&#9728; Solar &rarr; Battery",      total.solar_to_battery_kwh, total.tariff.solar_to_battery_value * 1.05, "avoided import cost", flow_colors.solar_to_battery);
-    out += flow_row("&#x1F50B; Battery &rarr; Load",     total.battery_to_load_kwh,  total.tariff.battery_to_load_value * 1.05,  "avoided import cost", flow_colors.battery_to_load);
-    out += flow_row("&#x1F50B; Battery &rarr; Grid (export)", total.battery_to_grid_kwh, total.tariff.battery_to_grid_value * 1.05, "earned at export tariff", flow_colors.battery_to_grid);
-    out += flow_row("&#x1F4A1; Grid &rarr; Battery",     total.grid_to_battery_kwh,  (total.tariff.grid_to_battery_cost * 1.05),"import cost", flow_colors.grid_to_battery);
-    out += flow_row("&#x1F4A1; Grid &rarr; Load",        total.grid_to_load_kwh,     (total.tariff.grid_to_load_cost * 1.05),   "import cost", flow_colors.grid_to_load);
-
-    // Summary row: net cost = grid costs - earnings, unit cost = net cost / total consumption
-    var net_cost_gbp = (
-        (total.tariff.grid_to_load_cost + total.tariff.grid_to_battery_cost) -
-        (total.tariff.solar_to_grid_value + total.tariff.battery_to_grid_value)
-    ) * 1.05;
-    var total_consumption_kwh = total.solar_to_load_kwh + total.battery_to_load_kwh + total.grid_to_load_kwh;
-
-    // spacer row
-    out += flow_row("Net result", total_consumption_kwh, net_cost_gbp, "grid costs minus export earnings", "#444",
-        "font-weight:bold;background-color:#333");
-
+    // Flow totals table
     $("#show_profile").show();
-    $("#octopus_totals").html(out);
+    $("#octopus_totals").html(render_flow_table());
 
-    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-    // Populate monthly data table if more than one month of data
+    // Monthly breakdown table
     if (Object.keys(monthly_data).length > 1) {
-
-        // Update table headers with selected tariff names
-        var tariff_name = config.app.tariff.value;
-        var has_baseline = baseline_monthly_summary != undefined && Object.keys(baseline_monthly_summary).length > 0;
-
-        var tariff_label = tariff_name + (has_baseline ? " (A)" : "");
-        var baseline_label = (baseline_tariff_name || "Baseline") + " (B)";
-
-        var heading = "<th>Month</th>" +
-            "<th>Consumption (kWh)</th>" +
-            "<th>" + tariff_label + "</th>";
-
-        if (has_baseline) {
-            heading += "<th>" + baseline_label + "</th>" +
-                "<th>Cheaper tariff</th>";
-        }
-
-        heading += "<th></th>";
-
-
-        $("#monthly-data thead tr").html(heading);
-
-        var monthly_out = "";
-
-        var sum_consumption_kwh   = 0;
-        var sum_net_cost_tariff = 0;
-        var sum_net_cost_baseline = 0;
-
-        // Saves this monthly summary for use in base-line comparison.
-        monthly_summary = {};
-
-        for (var month in monthly_data) {
-            var md = monthly_data[month];
-            var d = new Date(parseInt(month));
-            var vat = 1.05;
-
-            // Net cost = grid import costs - export earnings, with VAT
-            var net_cost = (
-                (md.tariff.grid_to_load_cost + md.tariff.grid_to_battery_cost) -
-                (md.tariff.solar_to_grid_value + md.tariff.battery_to_grid_value)
-            ) * vat;
-
-            // Effective unit rate against total consumption
-            var consumption = md.solar_to_load_kwh + md.battery_to_load_kwh + md.grid_to_load_kwh;
-            var unit_rate = consumption > 0 ? (net_cost / consumption) * 100 : NaN;
-
-            monthly_out += "<tr>";
-            monthly_out += "<td>" + d.getFullYear() + " " + months[d.getMonth()] + "</td>";
-            monthly_out += "<td>" + consumption.toFixed(1) + " kWh</td>";
-
-            // Tariff A: cost + rate merged
-            if (!isNaN(unit_rate)) {
-                monthly_out += "<td>" + (net_cost >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(net_cost).toFixed(2) + " <span style='font-size:12px;color:#888'>" + unit_rate.toFixed(1) + " p/kWh</span></td>";
-            } else {
-                monthly_out += "<td>" + (net_cost >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(net_cost).toFixed(2) + "</td>";
-            }
-
-            // Baseline comparison if data exists
-            if (baseline_monthly_summary[month] != undefined) {
-                // index will match as monthly_summary is built in chronological order
-                var baseline_net_cost = baseline_monthly_summary[month].net_cost_tariff;
-                var baseline_unit_rate = baseline_monthly_summary[month].unit_rate_tariff;
-
-                // Baseline: cost + rate merged
-                if (!isNaN(baseline_unit_rate)) {
-                    monthly_out += "<td>" + (baseline_net_cost >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(baseline_net_cost).toFixed(2) + " <span style='font-size:12px;color:#888'>" + baseline_unit_rate.toFixed(1) + " p/kWh</span></td>";
-                } else {
-                    monthly_out += "<td>" + (baseline_net_cost >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(baseline_net_cost).toFixed(2) + "</td>";
-                }
-
-                // Which tariff is cheaper this month
-                if (!isNaN(unit_rate) && !isNaN(baseline_unit_rate)) {
-                    if (unit_rate < baseline_unit_rate) {
-                        monthly_out += "<td style='color:#1a6abf;font-weight:bold'>A</td>";
-                    } else if (baseline_unit_rate < unit_rate) {
-                        monthly_out += "<td style='color:#7c1a80;font-weight:bold'>B</td>";
-                    } else {
-                        monthly_out += "<td>=</td>";
-                    }
-                } else {
-                    monthly_out += "<td>&mdash;</td>";
-                }
-
-                sum_net_cost_baseline += baseline_net_cost;
-            }
-
-            // Link icon to zoom to this month
-            monthly_out += "<td><i class='icon-eye-open icon-white zoom-to-month' timestamp='" + month + "' style='cursor:pointer'></i></td>";
-            monthly_out += "</tr>";
-
-            sum_consumption_kwh   += consumption;
-            sum_net_cost_tariff += net_cost;
-
-            monthly_summary[month] = {
-                consumption_kwh: consumption,
-                net_cost_tariff: net_cost,
-                unit_rate_tariff: unit_rate
-            };
-        }
-
-        // Totals row
-        var total_unit_rate = sum_consumption_kwh > 0 ? (sum_net_cost_tariff / sum_consumption_kwh) * 100 : NaN;
-
-        monthly_out += "<tr style='font-weight:bold;background-color:#333'>";
-        monthly_out += "<td>Total</td>";
-        monthly_out += "<td>" + sum_consumption_kwh.toFixed(1) + " kWh</td>";
-        if (!isNaN(total_unit_rate)) {
-            monthly_out += "<td>" + (sum_net_cost_tariff >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(sum_net_cost_tariff).toFixed(2) + " <span style='font-size:12px;color:#888'>" + total_unit_rate.toFixed(1) + " p/kWh</span></td>";
-        } else {
-            monthly_out += "<td>" + (sum_net_cost_tariff >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(sum_net_cost_tariff).toFixed(2) + "</td>";
-        }
-
-        if (baseline_monthly_summary != undefined && Object.keys(baseline_monthly_summary).length > 0) {
-            var baseline_total_unit_rate = sum_consumption_kwh > 0 ? (sum_net_cost_baseline / sum_consumption_kwh) * 100 : NaN;
-            if (!isNaN(baseline_total_unit_rate)) {
-                monthly_out += "<td>" + (sum_net_cost_baseline >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(sum_net_cost_baseline).toFixed(2) + " <span style='font-size:12px;color:#888'>" + baseline_total_unit_rate.toFixed(1) + " p/kWh</span></td>";
-            } else {
-                monthly_out += "<td>" + (sum_net_cost_baseline >= 0 ? "\u00a3" : "-\u00a3") + Math.abs(sum_net_cost_baseline).toFixed(2) + "</td>";
-            }
-        }
-
-
-            
-        monthly_out += "<td></td>";
-        monthly_out += "</tr>";
-
-        $("#monthly-data-body").html(monthly_out);
-        $("#monthly-data").show();
+        render_monthly_table(calc_monthly_summaries());
     } else {
         $("#monthly-data").hide();
     }
