@@ -30,6 +30,16 @@ const flow_colors = {
     "grid_to_battery":  "#fb7b50"
 };
 
+var flows = [
+    { key: "solar_to_load",    str: "&#9728; Solar &rarr; Load",         rate: "tariff",   label: "saved"  },
+    { key: "solar_to_battery", str: "&#9728; Solar &rarr; Battery",      rate: "tariff",   label: "saved"  },
+    { key: "solar_to_grid",    str: "&#9728; Solar &rarr; Grid",         rate: "outgoing", label: "gained" },
+    { key: "battery_to_load",  str: "&#128267; Battery &rarr; Load",     rate: "tariff",   label: "saved"  },
+    { key: "battery_to_grid",  str: "&#128267; Battery &rarr; Grid",     rate: "outgoing", label: "gained" },
+    { key: "grid_to_load",     str: "&#9889; Grid &rarr; Load",          rate: "tariff",   label: "cost"   },
+    { key: "grid_to_battery",  str: "&#9889; Grid &rarr; Battery",       rate: "tariff",   label: "cost"   }
+];
+
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
@@ -1338,49 +1348,15 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
             let outgoing = get_data_value_at_index("outgoing", z);
             let carbonintensity = get_data_value_at_index("carbonintensity", z);
 
-            let solar_to_load_kwh    = get_data_value_at_index("solar_to_load", z);
-            let solar_to_grid_kwh    = get_data_value_at_index("solar_to_grid", z);
-            let solar_to_battery_kwh = get_data_value_at_index("solar_to_battery", z);
-            let battery_to_load_kwh  = get_data_value_at_index("battery_to_load", z);
-            let battery_to_grid_kwh  = get_data_value_at_index("battery_to_grid", z);
-            let grid_to_load_kwh     = get_data_value_at_index("grid_to_load", z);
-            let grid_to_battery_kwh  = get_data_value_at_index("grid_to_battery", z);
-
-            if (solar_to_load_kwh != null && solar_to_load_kwh > 0) {
-                text += "&#9728; Solar &rarr; Load: " + solar_to_load_kwh.toFixed(3) + " kWh";
-                if (tariff != null) text += " (" + (solar_to_load_kwh * tariff).toFixed(2) + "p saved)<br>";
-                else text += "<br>";
-            }
-            if (solar_to_battery_kwh != null && solar_to_battery_kwh > 0) {
-                text += "&#9728; Solar &rarr; Battery: " + solar_to_battery_kwh.toFixed(3) + " kWh";
-                if (tariff != null) text += " (" + (solar_to_battery_kwh * tariff).toFixed(2) + "p saved)<br>";
-                else text += "<br>";
-            }
-            if (solar_to_grid_kwh != null && solar_to_grid_kwh > 0) {
-                text += "&#9728; Solar &rarr; Grid: " + solar_to_grid_kwh.toFixed(3) + " kWh";
-                if (outgoing != null) text += " (" + (solar_to_grid_kwh * outgoing).toFixed(2) + "p gained)<br>";
-                else text += "<br>";
-            }
-            if (battery_to_load_kwh != null && battery_to_load_kwh > 0) {
-                text += "&#x1F50B; Battery &rarr; Load: " + battery_to_load_kwh.toFixed(3) + " kWh";
-                if (tariff != null) text += " (" + (battery_to_load_kwh * tariff).toFixed(2) + "p saved)<br>";
-                else text += "<br>";
-            }
-            if (battery_to_grid_kwh != null && battery_to_grid_kwh > 0) {
-                text += "&#x1F50B; Battery &rarr; Grid: " + battery_to_grid_kwh.toFixed(3) + " kWh";
-                if (outgoing != null) text += " (" + (battery_to_grid_kwh * outgoing).toFixed(2) + "p gained)<br>";
-                else text += "<br>";
-            }
-            if (grid_to_load_kwh != null && grid_to_load_kwh > 0) {
-                text += "&#x1F4A1; Grid &rarr; Load: " + grid_to_load_kwh.toFixed(3) + " kWh";
-                if (tariff != null) text += " (" + (grid_to_load_kwh * tariff).toFixed(2) + "p cost)<br>";
-                else text += "<br>";
-            }
-            if (grid_to_battery_kwh != null && grid_to_battery_kwh > 0) {
-                text += "&#x1F4A1; Grid &rarr; Battery: " + grid_to_battery_kwh.toFixed(3) + " kWh";
-                if (tariff != null) text += " (" + (grid_to_battery_kwh * tariff).toFixed(2) + "p cost)<br>";
-                else text += "<br>";
-            }
+            flows.forEach(function(f) {
+                let kwh = get_data_value_at_index(f.key, z);
+                if (kwh != null && kwh > 0) {
+                    text += f.str + ": " + kwh.toFixed(3) + " kWh";
+                    var rate_val = f.rate === "tariff" ? tariff : outgoing;
+                    if (rate_val != null) text += " (" + (kwh * rate_val).toFixed(2) + "p " + f.label + ")<br>";
+                    else text += "<br>";
+                }
+            });
 
             text += "<br>";
 
