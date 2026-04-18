@@ -551,42 +551,23 @@ function load_kwh_flow_data(interval, load_tariffs = true) {
     }, false, "notime");
 }
 
+// ---------------------------------------
+// Remote feeds (tariff, carbon intensity)
+// ---------------------------------------
 function load_tariff_data(interval) {
 
-    // ---------------------------------------
-    // Remote feeds (tariff, carbon intensity)
-    // ---------------------------------------
-
-    let remote_feeds = {
-        "import_tariff": { id: false },
-        "export_tariff": { id: false }
+    const region = config.app.region?.value;
+    const remote_feeds = {
+        import_tariff:    octopus_feed_list[config.app.tariff.value]?.[region] || false,
+        export_tariff:    regions_outgoing[region] || false,
+        ...(show_carbonintensity && { carbonintensity: 428391 })
     };
-
-    if (show_carbonintensity) {
-        remote_feeds["carbonintensity"] = { id: 428391 };
-    }
-
-    if (config.app.region != undefined) {
-        // Import tariff
-        if (octopus_feed_list[config.app.tariff.value] != undefined && octopus_feed_list[config.app.tariff.value][config.app.region.value] != undefined) {
-            remote_feeds["import_tariff"].id = octopus_feed_list[config.app.tariff.value][config.app.region.value];
-        }
-        // Export tariff
-        if (regions_outgoing[config.app.region.value] != undefined) {
-            remote_feeds["export_tariff"].id = regions_outgoing[config.app.region.value];
-        }
-    }
 
     let feedids = [];
     let keys_to_load = [];
-    for (var key in remote_feeds) {
-        let id = remote_feeds[key].id;
-        if (id) {
-            feedids.push(id);
-            keys_to_load.push(key);
-        } else {
-            data[key] = [];
-        }
+    for (const [key, id] of Object.entries(remote_feeds)) {
+        if (id) { feedids.push(id); keys_to_load.push(key); }
+        else data[key] = [];
     }
 
     feed.getdata(feedids, view.start, view.end, interval, 0, 0, 0, 0, function (all_data) {
