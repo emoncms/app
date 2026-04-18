@@ -509,7 +509,7 @@ function graph_load(load_flows = true, load_tariffs = true) {
     }
 
     // Clear baseline summary if data has changed (as this may affect the selected baseline period)
-    if (load_flows || load_tariffs) {
+    if (load_flows) {
         baseline_monthly_summary = {};
     }
 
