@@ -530,25 +530,42 @@ function graph_load(time_window_changed = true) {
         }
     }
 
-    data["tariff"] = []
-    data["outgoing"] = []
-    data["carbonintensity"] = []
+    // ---------------------------------------
+    // Remote feeds (tariff, carbon intensity)
+    // ---------------------------------------
 
-    // Tariff A
-    if (config.app.region != undefined && octopus_feed_list[config.app.tariff.value] != undefined && octopus_feed_list[config.app.tariff.value][config.app.region.value] != undefined) {
-        data["tariff"] = getdataremote(octopus_feed_list[config.app.tariff.value][config.app.region.value], view.start, view.end, interval);
-    }
+    let remote_feeds = {
+        "import_tariff": { id: false },
+        "export_tariff": { id: false }
+    };
 
-    // Outgoing (export tariff) - only needed in flow mode
-    if (config.app.region != undefined) {
-        data["outgoing"] = getdataremote(regions_outgoing[config.app.region.value], view.start, view.end, interval);
-        // Invert export tariff so it reads as a positive earning rate
-        for (var z in data["outgoing"]) data["outgoing"][z][1] *= -1;
-    }
-
-    // Carbon Intensity
     if (show_carbonintensity) {
-        data["carbonintensity"] = getdataremote(428391, view.start, view.end, interval);
+        remote_feeds["carbonintensity"] = { id: 428391 };
+    }
+
+    if (config.app.region != undefined) {
+        // Import tariff
+        if (octopus_feed_list[config.app.tariff.value] != undefined && octopus_feed_list[config.app.tariff.value][config.app.region.value] != undefined) {
+            remote_feeds["import_tariff"].id = octopus_feed_list[config.app.tariff.value][config.app.region.value];
+        }
+        // Export tariff
+        if (regions_outgoing[config.app.region.value] != undefined) {
+            remote_feeds["export_tariff"].id = regions_outgoing[config.app.region.value];
+        }
+    }
+
+    for (var key in remote_feeds) {
+        let id = remote_feeds[key].id;
+        if (id) {
+            data[key] = getdataremote(id, view.start, view.end, interval);
+        } else {
+            data[key] = [];
+        }
+    }
+
+    // Invert export tariff.
+    for (var z in data["export_tariff"]) {
+        data["export_tariff"][z][1] *= -1;
     }
 
     // Used to generate averaged profile
@@ -593,8 +610,8 @@ function graph_load(time_window_changed = true) {
         }
 
         // Read unit rates for this half-hour from tariff feeds
-        let import_unit_rate = get_value_at_index(data["tariff"], z, null);
-        let export_unit_rate = get_value_at_index(data["outgoing"], z, null);
+        let import_unit_rate = get_value_at_index(data["import_tariff"], z, null);
+        let export_unit_rate = get_value_at_index(data["export_tariff"], z, null);
 
         // Populate values, calculate totals
         let values = {};
@@ -627,7 +644,7 @@ function graph_load(time_window_changed = true) {
 
         // Carbon Intensity
         if (show_carbonintensity) {
-            let carbon_intensity = get_value_at_index(data["carbonintensity"], z, null);
+            let carbon_intensity = get_value_at_index(data["carbon_intensity"], z, null);
             if (carbon_intensity !== null) {
                 let co2_hh = kwh_import * (co2intensity * 0.001)
                 total.co2 += co2_hh
@@ -917,7 +934,7 @@ function graph_draw() {
     // price signals
     graph_series.push({
         label: config.app.tariff.value,
-        data: data["tariff"],
+        data: data["import_tariff"],
         yaxis: 2,
         color: "#fb1a80",
         lines: {
@@ -930,7 +947,7 @@ function graph_draw() {
 
     graph_series.push({
         label: "Outgoing",
-        data: data["outgoing"],
+        data: data["export_tariff"],
         yaxis: 2,
         color: "#941afb",
         lines: {
@@ -944,7 +961,7 @@ function graph_draw() {
     if (show_carbonintensity) {
         graph_series.push({
             label: "Carbon Intensity",
-            data: data["carbonintensity"],
+            data: data["carbon_intensity"],
             yaxis: 2,
             color: "#888",
             lines: {
