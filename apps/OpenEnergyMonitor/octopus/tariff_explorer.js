@@ -488,7 +488,7 @@ function get_data_value_at_index(key, index) {
 // FUNCTIONS
 // -------------------------------------------------------------------------------
 // - graph_load
-// - graph_draw
+// - draw_graph
 // - resize
 
 function graph_load(load_flows = true, load_tariffs = true) {
@@ -508,32 +508,55 @@ function graph_load(load_flows = true, load_tariffs = true) {
         datetimepicker2.setStartDate(new Date(view.start));
     }
 
-    if (load_flows) {
-        load_kwh_flow_data(interval);
-    }
-
-    if (load_tariffs) {
-        load_tariff_data(interval);
-    }
-    
-    process_data(interval);
-
     // Clear baseline summary if data has changed (as this may affect the selected baseline period)
     if (load_flows || load_tariffs) {
         baseline_monthly_summary = {};
     }
 
-    graph_draw();
+    if (load_flows) {
+        load_kwh_flow_data(interval, load_tariffs);
+    } else if (load_tariffs) {
+        load_tariff_data(interval);
+    } else {
+        process_data(interval);
+    }
 }
 
-function load_kwh_flow_data(interval) {
+function load_kwh_flow_data(interval, load_tariffs = true) {
     // Load energy flow feeds (cumulative kWh, delta=1 returns half-hourly differences directly)
+    // flows.forEach(function(f) {
+    //     data[f.key] = false;
+    //     if (feeds[f.key+"_kwh"]!=undefined) {
+    //         data[f.key]    = feed.getdata(feeds[f.key+"_kwh"].id,    view.start, view.end, interval, 0, 1);
+    //     }
+    // });
+
+
+    let keys_to_load = [];
+    let feedids = [];
     flows.forEach(function(f) {
         data[f.key] = false;
-        if (feeds[f.key+"_kwh"]!=undefined) {
-            data[f.key]    = feed.getdata(feeds[f.key+"_kwh"].id,    view.start, view.end, interval, 0, 1);
+        if (feeds[f.key + "_kwh"] != undefined) {
+            feedids.push(feeds[f.key + "_kwh"].id);
+            keys_to_load.push(f.key);
         }
     });
+
+    feed.getdata(feedids, view.start, view.end, interval, 0, 1, 0, 0, function (all_data) {
+        if (all_data.success === false) {
+            // Error loading flow data.. 
+        } else {
+            keys_to_load.forEach(function(key, index) {
+                data[key] = all_data[index].data;
+            });
+        }
+        // If we need to load tariffs, load tariffs will call process_data
+        if (load_tariffs) {
+            load_tariff_data(interval);
+        } else {
+            process_data(interval);
+        }
+    }, false, "notime");
 }
 
 function load_tariff_data(interval) {
@@ -575,6 +598,9 @@ function load_tariff_data(interval) {
     for (var z in data["export_tariff"]) {
         data["export_tariff"][z][1] *= -1;
     }
+
+    // If we've loaded tariff data, the next step is always to process.
+    process_data();
 }
 
 
@@ -683,6 +709,7 @@ function process_data() {
     }
 
     draw_tables();
+    draw_graph();
 }
 
 function get_value_at_index(data_array, index, default_value = null) {
@@ -903,7 +930,7 @@ function draw_tables() {
     }
 }
 
-function graph_draw() {
+function draw_graph() {
     profile_mode = false;
     $("#history-title").html("HISTORY");
 
@@ -1085,7 +1112,7 @@ $(function() {
 
         resize();
 
-        graph_draw();
+        draw_graph();
     })
 })
 
