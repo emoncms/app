@@ -679,7 +679,7 @@ function process_data() {
 
         // Carbon Intensity
         if (show_carbonintensity) {
-            let carbon_intensity = get_value_at_index(data["carbon_intensity"], z, null);
+            let carbon_intensity = get_value_at_index(data["carbonintensity"], z, null);
             if (carbon_intensity !== null) {
                 let co2_hh = kwh_import * (co2intensity * 0.001)
                 total.co2 += co2_hh
@@ -921,21 +921,10 @@ function draw_graph() {
 
     
     if (this_halfhour_index != -1) {
-        
-        // let kwh_grid_to_load    = get_data_value_at_index("grid_to_load",    this_halfhour_index);
-        // let kwh_grid_to_battery = get_data_value_at_index("grid_to_battery", this_halfhour_index);
-        // let kwh_last_halfhour = (kwh_grid_to_load != null ? kwh_grid_to_load : 0)
-        //                       + (kwh_grid_to_battery != null ? kwh_grid_to_battery : 0);
-
-        // $("#kwh_halfhour").html(kwh_last_halfhour.toFixed(2) + "<span class='units'>kWh</span>");
-
-        let tariff_unit = get_data_value_at_index("tariff", this_halfhour_index);
+        let tariff_unit = get_data_value_at_index("import_tariff", this_halfhour_index);
         if (tariff_unit != null) {
-            // let cost_last_halfhour = kwh_last_halfhour * tariff_unit;
-            // $("#cost_halfhour").html("(" + cost_last_halfhour.toFixed(2) + "<span class='units'>p</span>)");
-
-            let unit_price = tariff_unit * 1.05;
-            $("#unit_price").html(unit_price.toFixed(2) + "<span class='units'>p</span>");
+            let tariff_unit_inc_vat = tariff_unit * 1.05;
+            $("#unit_price").html(tariff_unit_inc_vat.toFixed(2) + "<span class='units'>p</span>");
         }
 
         $(".last_halfhour_stats").show();
@@ -992,7 +981,7 @@ function draw_graph() {
     if (show_carbonintensity) {
         graph_series.push({
             label: "Carbon Intensity",
-            data: data["carbon_intensity"],
+            data: data["carbonintensity"],
             yaxis: 2,
             color: "#888",
             lines: {
@@ -1193,15 +1182,15 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
                 }
             }
 
-            let tariff = get_data_value_at_index("tariff", z);
-            let outgoing = get_data_value_at_index("outgoing", z);
+            let import_tariff = get_data_value_at_index("import_tariff", z);
+            let export_tariff = get_data_value_at_index("export_tariff", z);
             let carbonintensity = get_data_value_at_index("carbonintensity", z);
 
             flows.forEach(function(f) {
                 let kwh = get_data_value_at_index(f.key, z);
                 if (kwh != null && kwh > 0) {
                     text += f.str + ": " + kwh.toFixed(3) + " kWh";
-                    var rate_val = f.rate === "tariff" ? tariff : outgoing;
+                    var rate_val = f.rate === "tariff" ? import_tariff : export_tariff;
                     if (rate_val != null) text += " (" + (kwh * rate_val).toFixed(2) + "p " + f.label + ")<br>";
                     else text += "<br>";
                 }
@@ -1209,12 +1198,12 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
 
             text += "<br>";
 
-            if (tariff != null) {
-                text += "<span style='color:#fb1a80'>&#x25CF;</span> Import Tariff: " + tariff.toFixed(2) + " p/kWh (inc VAT)<br>";
+            if (import_tariff != null) {
+                text += "<span style='color:#fb1a80'>&#x25CF;</span> Import Tariff: " + import_tariff.toFixed(2) + " p/kWh (inc VAT)<br>";
             }
 
-            if (outgoing != null) {
-                text += "<span style='color:#941afb'>&#x25CF;</span> Export Tariff: " + outgoing.toFixed(2) + " p/kWh (inc VAT)<br>";
+            if (export_tariff != null) {
+                text += "<span style='color:#941afb'>&#x25CF;</span> Export Tariff: " + export_tariff.toFixed(2) + " p/kWh (inc VAT)<br>";
             }
 
             if (show_carbonintensity && carbonintensity != null) {
