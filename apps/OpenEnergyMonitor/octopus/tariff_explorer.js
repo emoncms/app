@@ -1156,51 +1156,6 @@ function parseTimepickerTime(timestr) {
     return new Date(date[2], date[1] - 1, date[0], time[0], time[1], time[2], 0).getTime() / 1000;
 }
 
-function calibration_line_of_best_fit(import_kwh, meter_kwh_hh) 
-{
-    if (import_kwh.length != meter_kwh_hh.length) {
-        console.log("Calibration line of best fit: Data length mismatch");
-        return;
-    }
-
-    var sumX = 0
-    var sumY = 0
-    var sumXY = 0
-    var sumX2 = 0
-    var n = 0
-
-    for (var z = 0; z < import_kwh.length; z++) {
-        if (meter_kwh_hh[z] != undefined && import_kwh[z] != undefined) {
-            if (meter_kwh_hh[z][1] != null) {
-                // Calculate line of best fit variables
-                // Suggested calibration
-                var XY = 1.0 * import_kwh[z][1] * meter_kwh_hh[z][1];
-                var X2 = 1.0 * import_kwh[z][1] * import_kwh[z][1];
-                sumX += 1.0 * import_kwh[z][1];
-                sumY += 1.0 * meter_kwh_hh[z][1];
-                sumXY += XY;
-                sumX2 += X2;
-                n++;
-            }
-        }
-    }
-
-    if (n > 1) {
-        var slope = ((n * sumXY - (sumX * sumY)) / (n * sumX2 - (sumX * sumX)));
-        var intercept = (sumY - slope * sumX) / n;
-        console.log("Suggested calibration:\nslope:" + slope.toFixed(6) + " intercept:" + intercept.toFixed(6));
-        var prc_error = (1.0 - (sumY / sumX)) * 100;
-
-        if (prc_error > 0) {
-            console.log("Realtime feed is: " + prc_error.toFixed(2) + "% above meter data");
-            $("#meter_kwh_hh_comparison").html("Realtime feed is: " + prc_error.toFixed(2) + "% above meter data");
-        } else {
-            console.log("Realtime feed is: " + Math.abs(prc_error).toFixed(2) + "% below meter data")
-            $("#meter_kwh_hh_comparison").html("Realtime feed is: " + Math.abs(prc_error).toFixed(2) + "% below meter data");
-        }
-    }
-}
-
 // -------------------------------------------------------------------------------
 // EVENTS
 // -------------------------------------------------------------------------------
