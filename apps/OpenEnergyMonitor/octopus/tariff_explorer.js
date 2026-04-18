@@ -374,7 +374,6 @@ function show() {
     setPeriod('168');
     $(".time-select").val('168');
     graph_load();
-    graph_draw();
 
     updater();
     updaterinst = setInterval(updater, 5000);
@@ -492,7 +491,7 @@ function get_data_value_at_index(key, index) {
 // - graph_draw
 // - resize
 
-function graph_load(time_window_changed = true) {
+function graph_load(load_flows = true, load_tariffs = true) {
     $(".power-graph-footer").show();
 
     var interval = 1800;
@@ -509,26 +508,35 @@ function graph_load(time_window_changed = true) {
         datetimepicker2.setStartDate(new Date(view.start));
     }
 
-    if (time_window_changed) {
-        // Load energy flow feeds (cumulative kWh, delta=1 returns half-hourly differences directly)
-        flows.forEach(function(f) {
-            data[f.key] = false;
-            if (feeds[f.key+"_kwh"]!=undefined) {
-                data[f.key]    = feed.getdata(feeds[f.key+"_kwh"].id,    view.start, view.end, interval, 0, 1);
-            }
-        });
+    if (load_flows) {
+        load_kwh_flow_data(interval);
     }
 
-    // Detect current half-hour index for live stats (use grid_to_load feed or meter as reference)
-    this_halfhour_index = -1;
-    var ref_data = data["grid_to_load"];
-    var this_halfhour = Math.floor((new Date()).getTime() / 1800000) * 1800000;
-    for (var z = 0; z < ref_data.length; z++) {
-        if (ref_data[z][0] == this_halfhour) {
-            this_halfhour_index = z;
-            break;
-        }
+    if (load_tariffs) {
+        load_tariff_data(interval);
     }
+    
+    process_data(interval);
+
+    // Clear baseline summary if data has changed (as this may affect the selected baseline period)
+    if (load_flows || load_tariffs) {
+        baseline_monthly_summary = {};
+    }
+
+    graph_draw();
+}
+
+function load_kwh_flow_data(interval) {
+    // Load energy flow feeds (cumulative kWh, delta=1 returns half-hourly differences directly)
+    flows.forEach(function(f) {
+        data[f.key] = false;
+        if (feeds[f.key+"_kwh"]!=undefined) {
+            data[f.key]    = feed.getdata(feeds[f.key+"_kwh"].id,    view.start, view.end, interval, 0, 1);
+        }
+    });
+}
+
+function load_tariff_data(interval) {
 
     // ---------------------------------------
     // Remote feeds (tariff, carbon intensity)
@@ -566,6 +574,22 @@ function graph_load(time_window_changed = true) {
     // Invert export tariff.
     for (var z in data["export_tariff"]) {
         data["export_tariff"][z][1] *= -1;
+    }
+}
+
+
+
+function process_data() {
+
+    // Detect current half-hour index for live stats (use grid_to_load feed or meter as reference)
+    this_halfhour_index = -1;
+    var ref_data = data["grid_to_load"];
+    var this_halfhour = Math.floor((new Date()).getTime() / 1800000) * 1800000;
+    for (var z = 0; z < ref_data.length; z++) {
+        if (ref_data[z][0] == this_halfhour) {
+            this_halfhour_index = z;
+            break;
+        }
     }
 
     // Used to generate averaged profile
@@ -656,11 +680,6 @@ function graph_load(time_window_changed = true) {
     time_to_index_map = {};
     for (var z = 0; z < data["grid_to_load"].length; z++) {
         time_to_index_map[data["grid_to_load"][z][0]] = z;
-    }
-
-    // Clear baseline summary if time window changed (as this may affect the selected baseline period)
-    if (time_window_changed) {
-        baseline_monthly_summary = {};
     }
 
     draw_tables();
@@ -1264,43 +1283,36 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
 $("#zoomout").click(function() {
     view.zoomout();
     graph_load();
-    graph_draw();
 });
 $("#zoomin").click(function() {
     view.zoomin();
     graph_load();
-    graph_draw();
 });
 $('#right').click(function() {
     view.pan_speed = 0.5;
     view.panright();
     graph_load();
-    graph_draw();
 });
 $('#left').click(function() {
     view.pan_speed = 0.5;
     view.panleft();
     graph_load();
-    graph_draw();
 });
 $('#fastright').click(function() {
     view.pan_speed = 1.0;
     view.panright();
     graph_load();
-    graph_draw();
 });
 $('#fastleft').click(function() {
     view.pan_speed = 1.0;
     view.panleft();
     graph_load();
-    graph_draw();
 });
 
 $('.time').click(function() {
     setPeriod($(this).attr("time"));
     // view.timewindow(period);
     graph_load();
-    graph_draw();
 });
 
 $('.time-select').change(function() {
@@ -1312,7 +1324,6 @@ $('.time-select').change(function() {
         setPeriod(val);
         // view.timewindow(period);
         graph_load();
-        graph_draw();
     }
 });
 
@@ -1324,7 +1335,6 @@ $('#placeholder').bind("plotselected", function(event, ranges) {
     view.start = start;
     view.end = end;
     graph_load();
-    graph_draw();
 
     $(".time-select").val("C");
 
@@ -1348,7 +1358,6 @@ $("#monthly-data").on("click", ".zoom-to-month", function() {
     
 
     graph_load();
-    graph_draw();
 
     // set period to custom
     $(".time-select").val("C");
@@ -1359,23 +1368,13 @@ $("#monthly-data").on("click", ".zoom-to-month", function() {
 $("#tariff").on("change", function() {
     config.app.tariff.value = $("#tariff").val();
     config.db.tariff = config.app.tariff.value;
-
     config.set();
-
-    graph_load(false);
-    graph_draw();
-});
-
-$("#use_meter_kwh_hh").click(function() {
-    use_meter_kwh_hh = $(this)[0].checked;
-    graph_load(false);
-    graph_draw();
+    graph_load(false, true);
 });
 
 $("#show_carbonintensity").click(function() {
     show_carbonintensity = $(this)[0].checked;
-    graph_load(false);
-    graph_draw();
+    graph_load(false, true);
     if (!show_carbonintensity) $("#carbonintensity_result").html("");
 });
 
@@ -1422,7 +1421,6 @@ $('#datetimepicker1').on("changeDate", function(e) {
 
     view.start = timewindowStart * 1000;
     graph_load();
-    graph_draw();
     $(".time-select").val("C");
 });
 
@@ -1439,7 +1437,6 @@ $('#datetimepicker2').on("changeDate", function(e) {
 
     view.end = timewindowEnd * 1000;
     graph_load();
-    graph_draw();
     $(".time-select").val("C");
 });
 
