@@ -577,25 +577,37 @@ function load_tariff_data(interval) {
         }
     }
 
+    let feedids = [];
+    let keys_to_load = [];
     for (var key in remote_feeds) {
         let id = remote_feeds[key].id;
         if (id) {
-            data[key] = getdataremote(id, view.start, view.end, interval);
+            feedids.push(id);
+            keys_to_load.push(key);
         } else {
             data[key] = [];
         }
     }
 
-    // Invert export tariff.
-    for (var z in data["export_tariff"]) {
-        data["export_tariff"][z][1] *= -1;
-    }
+    feed.getdata(feedids, view.start, view.end, interval, 0, 0, 0, 0, function (all_data) {
+        if (all_data.success === false) {
+            // Error loading flow data.. 
+        } else {
+            keys_to_load.forEach(function(key, index) {
+                data[key] = all_data[index].data;
+            });
+        }
 
-    // If we've loaded tariff data, the next step is always to process.
-    process_data();
+        // Invert export tariff.
+        for (var z in data["export_tariff"]) {
+            data["export_tariff"][z][1] *= -1;
+        }
+
+        // If we've loaded tariff data, the next step is always to process.
+        process_data();
+
+    }, false, "notime", "app/dataremote.json");
 }
-
-
 
 function process_data() {
 
@@ -1161,24 +1173,6 @@ function parseTimepickerTime(timestr) {
     if (time.length != 3) return false;
 
     return new Date(date[2], date[1] - 1, date[0], time[0], time[1], time[2], 0).getTime() / 1000;
-}
-
-function getdataremote(id, start, end, interval) {
-    var data = [];
-    $.ajax({
-        url: path + "app/dataremote",
-        data: "id=" + id + "&start=" + start + "&end=" + end + "&interval=" + interval + "&skipmissing=0&limitinterval=0",
-        dataType: 'json',
-        async: false,
-        success: function(result) {
-            if (!result || result === null || result === "" || result.constructor != Array) {
-                console.log("ERROR", "getdataremote invalid response: " + result);
-                result = [];
-            }
-            data = result;
-        }
-    });
-    return data;
 }
 
 function calibration_line_of_best_fit(import_kwh, meter_kwh_hh) 
