@@ -524,14 +524,6 @@ function graph_load(load_flows = true, load_tariffs = true) {
 
 function load_kwh_flow_data(interval, load_tariffs = true) {
     // Load energy flow feeds (cumulative kWh, delta=1 returns half-hourly differences directly)
-    // flows.forEach(function(f) {
-    //     data[f.key] = false;
-    //     if (feeds[f.key+"_kwh"]!=undefined) {
-    //         data[f.key]    = feed.getdata(feeds[f.key+"_kwh"].id,    view.start, view.end, interval, 0, 1);
-    //     }
-    // });
-
-
     let keys_to_load = [];
     let feedids = [];
     flows.forEach(function(f) {
