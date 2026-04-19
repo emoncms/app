@@ -179,7 +179,10 @@ config.app = {
         "name": "Select tariff:",
         "default": "AGILE-23-12-06",
         "options": tariff_options
-    }
+    },
+
+    "strategy":{"type":"select", "default":"Solar first", "options":["Solar first", "Battery first"], "name":"Flow allocation strategy", "description":""}
+
 };
 
 
