@@ -701,6 +701,7 @@ function process_data() {
 }
 
 function get_value_at_index(data_array, index, default_value = null) {
+    if (data_array == undefined) return default_value;
     if (data_array[index] != undefined && data_array[index][1] != null) {
         return data_array[index][1];
     }
