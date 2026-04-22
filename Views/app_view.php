@@ -1,11 +1,33 @@
 <?php global $path; ?>
+<script src="<?php echo $path; ?>Lib/vue.min.js"></script>
 
 <div style="padding:20px">
 
   <h2>Available Apps</h2>
   <p>Create a new instance of an app by clicking on one of the apps below.</p>
 
-  <div id="available-apps"></div>
+  <div id="available-apps">
+
+    <p><b>Featured apps:</b></p>
+
+    <div class="app-group">
+      <div class="app-item" v-for="(app, index) in apps" :key="index" :app="index" v-if="app.primary">
+        <div class="app-item-title">{{ app.title }}</div>
+        <div class="app-item-description">{{ app.description || "no description..." }}</div>
+      </div>
+    </div>
+    <br>
+
+    <p><b>All apps:</b></p>
+
+    <div class="app-group">
+      <div class="app-item" v-for="(app, index) in apps" :key="index" :app="index" v-if="!app.primary">
+        <div class="app-item-title">{{ app.title }}</div>
+        <div class="app-item-description">{{ app.description || "no description..." }}</div>
+      </div>
+    </div>
+
+  </div>
 
 </div>
 
@@ -36,18 +58,17 @@ var available_apps = JSON.parse('<?php echo json_encode($apps); ?>');
 var selected_app = "";
 var app_new_enable = true;
 
-var out = "";
-for (var z in available_apps) {
-    if (available_apps[z].description=="") 
-        available_apps[z].description = "no description...";
-    out += '<div class="app-item" app="'+z+'">';
-    out += '<div class="app-item-title">'+available_apps[z].title+'</div>';
-    out += '<div class="app-item-description">'+available_apps[z].description+'</div>';
-    out += '</div>';
-}
+
+var app_list = new Vue({
+    el: '#available-apps',
+    data: {
+        apps: available_apps
+    }
+});
+
+
 $(function() {
-    $("#available-apps").html(out);
-    $(".app-item").first().css("border-top","1px solid #ccc");
+    $(".app-group").each(function() { $(this).find(".app-item").first().css("border-top","1px solid #ccc"); });
 
     $(".app-item").click(function(){
         if (app_new_enable) {

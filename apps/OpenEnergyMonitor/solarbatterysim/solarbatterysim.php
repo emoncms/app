@@ -2,10 +2,8 @@
     defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
@@ -238,15 +236,10 @@ textarea {
   
 </div>    
 
-<div id="app-setup" style="display:none; padding-top:50px" class="block">
-    <h2 class="app-config-title">Solar & Battery Simulator</h2>
-    <div class="app-config-description">
-        <div class="app-config-description-inner">
-            Explore impact and savings of installing solar and battery storage
-        </div>
-    </div>
-    <div class="app-config"></div>
+<div id="appconf-description" style="display:none">
+    <p class="lead">Explore impact and savings of installing solar and battery storage.</p>
 </div>
+<?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
 
@@ -284,9 +277,9 @@ config.app = {
     "solar":{"type":"feed", "autoname":"solar_kwh","optional":true}, 
     "solar_capacity":{"type":"value", "name": "Solar capacity (W)", "default": 1250, "optional":true, "description":"Enter solar capacity"},
     "public_solar_feed":{"type":"value", "name": "Public solar feed id", "default": 462987, "optional":true, "description":"Hosted on emoncms.org"},
-    "public_solar_capacity":{"type":"value", "name": "Public solar feed id", "default": 1250, "optional":true, "description":"Solar capacity of public dataset"},
-    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
+    "public_solar_capacity":{"type":"value", "name": "Public solar feed id", "default": 1250, "optional":true, "description":"Solar capacity of public dataset"}
 };
+config.app_name = "Solar & Battery Simulator";
 config.id = <?php echo $id; ?>;
 config.name = "<?php echo $name; ?>";
 config.public = <?php echo $public; ?>;

@@ -3,10 +3,7 @@
     global $path, $session, $v;
 ?>
 
-<link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
-
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
@@ -296,28 +293,13 @@
     </table>
 </section>
 
-
-<section id="app-setup" class="hide pb-3">
-    <!-- instructions and settings -->
-    <div class="px-3">
-        <div class="row-fluid">
-            <div class="span7 xapp-config-description">
-                <div class="xapp-config-description-inner text-light">
-                    <h2 class="app-config-title text-warning"><?php echo tr('My Solar Divert'); ?></h2>
-                    <p class="lead">
-                    The My Solar with Divert app can be used to explore onsite solar (and optionally wind) generation, self consumption, export and building consumption.</p>
-                    <p>It is designed for users who divert some or all of their excess generated power to something. For example an immersion heater or electric car. It shows all of this both in realtime with a moving power graph view and historically with a daily and monthly bargraph.
-                    </p>
-                    <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-                    <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
-                    <img src="../Modules/app/images/mysolar_app.png" class="d-none d-sm-inline-block">
-                </div>
-            </div>
-            <div class="span5 app-config pt-3"></div>
-        </div>
-    </div>
-</section>
-
+<div id="appconf-description" style="display:none">
+<p class="lead">
+The My Solar with Divert app can be used to explore onsite solar (and optionally wind) generation, self consumption, export and building consumption.</p>
+<p>It is designed for users who divert some or all of their excess generated power to something. For example an immersion heater or electric car. It shows all of this both in realtime with a moving power graph view and historically with a daily and monthly bargraph.
+</p>
+</div>
+<?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
 
@@ -363,10 +345,12 @@ config.app = {
     "wind_kwh":{"optional":true, "type":"feed", "autoname":"wind_kwh", "description":"Cumulative wind generation in kWh"},
     "divert_kwh":{"optional":true, "type":"feed", "autoname":"divert_kwh", "description":"Cumulative divert energy in kWh"},
     "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "description":"Cumulative grid import in kWh"},
-    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":tr("Display power as kW")},
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":tr("Display power as kW")}
     //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
-    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
 }
+
+config.app_name = "My Solar PV Divert";
+config.app_name_color = "#dccc1f";
 
 config.id = <?php echo $id; ?>;
 config.name = "<?php echo $name; ?>";

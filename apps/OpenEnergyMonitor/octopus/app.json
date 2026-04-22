@@ -1,5 +1,6 @@
 {
-    "title"          : "Octopus Agile",
-    "description"    : "Explore Octopus Agile tariff energy costs",
-    "order"         : 8
+    "title"          : "Tariff Explorer",
+    "description"    : "Explore time of use tariff energy costs",
+    "order"         : 3,
+    "primary"       : true
 }

@@ -1,47 +1,194 @@
+body {
+    background-color: #222;
+}
+
+select {
+    margin: 0;
+}
+
+.content-container {
+    max-width: 1150px;
+}
+
 .electric-title {
     font-weight: bold;
-    font-size: 22px;
-    color: #44b3e2;
+    font-size: 14px;
+    color: #aaa;
+    align-self: center;
+}
+
+.power-title {
+    font-weight: bold;
+    font-size: 14px;
+    color: #aaa;
+    align-self: center;
 }
 
 .power-value {
     font-weight: bold;
-    font-size: 52px;
+    font-size: 36px;
     color: #44b3e2;
     line-height: 1.1;
 }
 
 .halfhour-value {
     font-weight: bold;
-    font-size: 42px;
+    font-size: 26px;
     color: #44b3e2;
     line-height: 1.1;
+}
+
+@media (min-width: 501px) {
+    .electric-title { font-size: 14px; }
+    .power-value    { font-size: 50px; }
+    .halfhour-value { font-size: 40px; }
+}
+
+@media (min-width: 725px) {
+    .electric-title { font-size: 16px; }
+    .power-value    { font-size: 50px; }
+    .halfhour-value { font-size: 40px; }
 }
 
 .units {
     font-size: 75%;
 }
 
-.block-bound {
-    background-color: rgb(68, 179, 226);
+#app-block {
+    padding: 0;
 }
 
-.bluenav-active {
-    background-color: rgba(255, 255, 255, 0.2);
+.app-top-bar {
+    padding: .5rem .5rem;
+    border-bottom: 1px solid #333;
+    margin-bottom: .4rem;
+}
+
+/* btn-list: replaces Bootstrap .nav .nav-pills */
+.btn-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.ajax-loader {
+    background: #222
+        url(../../../images/ajax-loader.gif)
+        center
+        no-repeat;
+}
+
+/* Rounded corners on first and last graph-nav buttons */
+#graph-nav .app-btn:first-child { border-radius: 0.375rem 0 0 0.375rem; }
+#graph-nav .app-btn:last-child  { border-radius: 0 0.375rem 0.375rem 0; }
+
+/* Faint dividing lines between buttons */
+#graph-nav .app-btn + .app-btn { border-left: 1px solid rgba(255,255,255,0.12); }
+
+/* app-btn: replaces Bootstrap btn + btn-large + btn-link + btn-inverse.
+   Explicitly resets Bootstrap properties so it is self-contained. */
+.app-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25em;
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+    white-space: nowrap;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    text-shadow: none;
+    color: #aaa;
+    opacity: .6;
+    transition: opacity .3s linear;
+    text-decoration: none;
+}
+.app-btn:hover,
+.app-btn:active {
+    opacity: 1;
+    text-decoration: none;
+}
+.app-btn.active {
+    color: white;
+    opacity: .8;
+    font-weight: bold;
+    text-decoration: underline;
+}
+.app-btn[disabled],
+.app-btn[disabled]:hover {
+    color: #616161;
+    opacity: .8;
+    background: rgba(6, 153, 250, 0.06);
+}
+
+/* Visnav */
+.visnavblock {
+    color: #0699fa;
+    font-size: 18px;
+    align-items: center;
+    padding: 4px 4px;
+    gap: 0;
+}
+
+.visnav {
+    background-color: rgba(6,153,250,0.1);
+    flex-grow: 1;
+}
+
+.visnav:focus,
+.visnav:active,
+.visnav:hover {
+    color: #0699fa;
+    text-decoration: none!important;
+}
+
+@media (min-width: 576px) {
+    .visnav {
+        flex-grow: 0;
+        min-width: 2.0em;
+    }
 }
 
 .time-select {
-    width: 165px;
-    margin: 4px 5px 0px 0px;
-    float: right;
-    background-color: #44b3e2;
-    color: #fff;
+    margin-left: auto;
+    background-color: #2e2e2e;
+    color: #ccc;
+    border: 1px solid #444;
+    border-radius: 0.375rem;
+    padding: 0 8px;
+    font-size: 13px;
+    height: 30px;
+    box-sizing: border-box;
+    cursor: pointer;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23aaa'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 24px;
+}
+
+.time-select:focus {
+    border-color: #0699fa;
+}
+
+.time-select:hover {
+    border-color: #666;
 }
 
 @media(max-width: 610px) {
     .time-select {
-        margin: 4px 0px 0px 5px;
-        float: none;
+        margin-left: 0;
+        width: 100%;
     }
 
     #history-title {
@@ -55,4 +202,196 @@
 
 #tariff_B {
     margin-bottom: 0px;
+}
+
+.tariff-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tariff-table th,
+.tariff-table td {
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.tariff-table tr {
+    border-bottom: 1px solid rgba(68,179,226,0.1);
+}
+
+.tariff-table-striped tbody tr:nth-child(odd) {
+    background-color: rgba(255,255,255,0.05);
+}
+
+@media (max-width: 500px) {
+    #zoomin,
+    #zoomout { display: none !important; }
+}
+
+#footer {
+    margin: 0;
+    background-color: #181818;
+    color: #999;
+}
+
+/* =====================================================================
+   Footer controls panel
+   ===================================================================== */
+
+.footer-controls {
+    padding: 15px 20px;
+    color: #aaa;
+}
+
+/* Row of inputs + actions */
+.footer-inputs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    margin: 1rem 0;
+}
+
+/* A label + input/select pairing */
+.ctrl-group {
+    display: inline-flex;
+    align-items: stretch;
+    height: 30px;
+}
+
+.ctrl-label {
+    background-color: #2e2e2e;
+    color: #aaa;
+    border: 1px solid #444;
+    border-right: none;
+    border-radius: 0.375rem 0 0 0.375rem;
+    padding: 4px 10px;
+    font-size: 13px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+/* select inside ctrl-group */
+.ctrl-group select {
+    background-color: #2e2e2e;
+    color: #ccc;
+    border: 1px solid #444;
+    border-radius: 0 0.375rem 0.375rem 0;
+    padding: 0 8px;
+    font-size: 13px;
+    height: 30px;
+    box-sizing: border-box;
+    cursor: pointer;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.ctrl-group select:focus {
+    border-color: #44b3e2;
+}
+
+/* datetimepicker wrapper span — stretch to fill */
+.ctrl-group > span {
+    display: inline-flex;
+    align-items: stretch;
+}
+
+/* text input inside ctrl-group (datetimepicker) */
+.ctrl-group input[type="text"] {
+    background-color: #2e2e2e;
+    color: #ccc;
+    border: 1px solid #444;
+    border-radius: 0;
+    padding: 0 8px;
+    font-size: 13px;
+    height: 30px;
+    box-sizing: border-box;
+    width: 140px;
+    outline: none;
+    box-shadow: none;
+}
+
+.ctrl-group input[type="text"]:focus {
+    border-color: #44b3e2;
+}
+
+/* Datetimepicker calendar icon toggle (.add-on must keep this class for the plugin) */
+.ctrl-group .add-on {
+    background-color: #2e2e2e;
+    color: #aaa;
+    border: 1px solid #444;
+    border-left: none;
+    border-radius: 0 0.375rem 0.375rem 0;
+    padding: 0 8px;
+    font-size: 13px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.ctrl-group .add-on:hover {
+    color: #44b3e2;
+    background-color: #3a3a3a;
+}
+
+/* Action buttons row */
+.ctrl-actions {
+    display: inline-flex;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+/* Themed action button (replaces .btn) */
+.ctrl-actions button,
+#save-baseline {
+    display: inline-flex;
+    align-items: center;
+    background-color: rgba(68,179,226,0.12);
+    color: #44b3e2;
+    border: 1px solid rgba(68,179,226,0.35);
+    border-radius: 0.375rem;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.ctrl-actions button:hover,
+.ctrl-actions button:focus,
+#save-baseline:hover,
+#save-baseline:focus {
+    background-color: rgba(68,179,226,0.25);
+    color: #fff;
+    outline: none;
+}
+
+/* Options (checkboxes) row */
+.footer-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+}
+
+.ctrl-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 12px;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.ctrl-note {
+    font-size: 12px;
+    padding-left: 22px;
+    color: #888;
 }

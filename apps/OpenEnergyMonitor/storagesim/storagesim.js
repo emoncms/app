@@ -17,13 +17,6 @@ config.app = {
         "type": "feed",
         "autoname": "solar",
         "optional": true
-    },
-    "public": {
-        "type": "checkbox",
-        "name": "Public",
-        "default": 0,
-        "optional": true,
-        "description": "Make app public"
     }
 };
 

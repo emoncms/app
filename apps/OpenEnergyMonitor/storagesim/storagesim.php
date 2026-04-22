@@ -3,10 +3,7 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 ?>
 
-<link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=1" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
-
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script>
@@ -291,15 +288,10 @@ global $path, $session, $v;
     </div>
 </div>
 
-<div id="app-setup" style="display:none; padding-top:50px" class="block">
-    <h2 class="app-config-title">Storage Simulator</h2>
-    <div class="app-config-description">
-        <div class="app-config-description-inner">
-            Explore adding energy storage to increase supply and demand matching.
-        </div>
-    </div>
-    <div class="app-config"></div>
+<div id="appconf-description" style="display:none">
+    <p class="lead">Explore adding energy storage to increase supply and demand matching.</p>
 </div>
+<?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
 
@@ -307,6 +299,7 @@ global $path, $session, $v;
     var apikey = "<?php print $apikey; ?>";
     var sessionwrite = <?php echo $session['write']; ?>;
 
+    config.app_name = "Storage Simulator";
     config.id = <?php echo $id; ?>;
     config.name = "<?php echo $name; ?>";
     config.public = <?php echo $public; ?>;

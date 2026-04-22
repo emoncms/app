@@ -5,10 +5,7 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 ?>
 
-<link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
-
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
@@ -100,20 +97,10 @@ global $path, $session, $v;
     </p>
 </div>
 
-<!-- App configuration -->
-<section id="app-setup" class="hide pb-3">
-    <div class="px-3">
-        <div class="row-fluid">
-            <div class="span7 xapp-config-description">
-                <div class="xapp-config-description-inner text-light">
-                    <h2 class="app-config-title text-primary"><?php echo tr('UK Grid Visualisation'); ?></h2>
-                    <p class="lead">Explore the UK grid fuel mix and wind and solar forecast.</p>
-                </div>
-            </div>
-            <div class="span5 app-config pt-3"></div>
-        </div>
-    </div>
-</section>
+<div id="appconf-description" style="display:none">
+    <p class="lead">Explore the UK grid fuel mix and wind and solar forecast.</p>
+</div>
+<?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
 
@@ -132,15 +119,8 @@ global $path, $session, $v;
     // ----------------------------------------------------------------------
     // Configuration
     // ----------------------------------------------------------------------
-    config.app = {
-        "public": {
-            "type": "checkbox",
-            "name": "Public",
-            "default": 0,
-            "optional": true,
-            "description": "Make app public"
-        }
-    };
+    config.app = {};
+    config.app_name = "UK Grid Visualisation";
     config.id = <?php echo $id; ?>;
     config.name = "<?php echo $name; ?>";
     config.public = <?php echo $public; ?>;

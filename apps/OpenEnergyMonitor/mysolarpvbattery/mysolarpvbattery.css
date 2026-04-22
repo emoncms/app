@@ -1,0 +1,382 @@
+/* =====================================================================
+   Dark theme
+   (previously in Modules/app/Views/css/dark.css)
+   ===================================================================== */
+
+body {
+    background-color: #222;
+}
+
+.content-container {
+    max-width: 1150px;
+}
+
+#app-block {
+    padding: 0;
+}
+
+#data-mode-indicator {
+    font-size: 0.8rem;
+    color: #4a8fb5 !important;
+    letter-spacing: 0.04em;
+    align-self: center;
+    margin-left: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(6, 153, 250, 0.06);
+    border-radius: 0.375rem;
+}
+
+.app-top-bar {
+    padding: .5rem 0;
+    border-bottom: 1px solid #333;
+    margin-bottom: .4rem;
+}
+
+/* btn-list: replaces Bootstrap .nav .nav-pills */
+.btn-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* app-btn: replaces Bootstrap btn + btn-large + btn-link + btn-inverse.
+   Explicitly resets Bootstrap properties so it is self-contained. */
+.app-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25em;
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+    white-space: nowrap;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    text-shadow: none;
+    color: #aaa;
+    opacity: .6;
+    transition: opacity .3s linear;
+    text-decoration: none;
+}
+.app-btn:hover,
+.app-btn:active {
+    opacity: 1;
+    text-decoration: none;
+}
+.app-btn.active {
+    color: white;
+    opacity: .8;
+    font-weight: bold;
+    text-decoration: underline;
+}
+.app-btn[disabled],
+.app-btn[disabled]:hover {
+    color: #616161;
+    opacity: .8;
+    background: rgba(6, 153, 250, 0.06);
+}
+
+/* Display utilities */
+.d-none    { display: none !important; }
+.d-inline  { display: inline !important; }
+.d-block   { display: block !important; }
+@media (min-width: 576px) {
+    .d-sm-none   { display: none !important; }
+    .d-sm-inline { display: inline !important; }
+    .d-sm-block  { display: block !important; }
+}
+@media (min-width: 768px) {
+    .d-md-none   { display: none !important; }
+    .d-md-inline { display: inline !important; }
+    .d-md-block  { display: block !important; }
+}
+
+.visnavblock {
+    color: #0699fa;
+    font-size: 18px;
+}
+
+.visnav {
+    background-color: rgba(6,153,250,0.1);
+    flex-grow: 1;
+}
+
+.visnav:focus,
+.visnav:active,
+.visnav:hover {
+    color: #0699fa;
+    text-decoration: none!important;
+}
+
+#footer {
+    margin: 0;
+    background-color: #181818;
+    color: #999;
+}
+
+.ajax-loader {
+    background: #222
+        url(../../../images/ajax-loader.gif)
+        center
+        no-repeat;
+}
+
+@media (min-width: 576px) {
+    .visnav {
+        flex-grow: 0;
+        min-width: 3em;
+    }
+}
+
+
+/* =====================================================================
+   Power display
+   ===================================================================== */
+
+.power-title {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+.power-value {
+    margin: 0;
+    line-height: 1.6;
+    font-size: 1.7rem;
+}
+
+.power-unit {
+    /*font-weight: normal;*/
+}
+
+@media (min-width: 768px) {
+    .power-title { font-size: 1.0rem; }
+    .power-value    { font-size: 2.5rem; }
+}
+
+@media (min-width: 992px) {
+    .power-title { font-size: 1.2rem; }
+    .power-value    { font-size: 3.5rem; }
+}
+
+/* =====================================================================
+   Stats table
+   ===================================================================== */
+
+.statstable {
+    width: 100%;
+    border-spacing: 10px;
+    border-collapse: separate;
+}
+
+.statsbox {
+    width: 20%;
+    text-align: center;
+    vertical-align: middle;
+    background: #282828;
+    --statsbox-color: #333;
+}
+
+.statsbox-inner-unit,
+.statsbox-inner-arrow {
+    color: var(--statsbox-color);
+}
+
+.statsbox-padded {
+    padding: 10px;
+}
+
+.statsbox-title {
+    font-weight: bold;
+    font-size: 20px;
+    padding-bottom: 15px;
+}
+
+.statsbox-flow-title {
+    font-size: 16px;
+}
+
+.statsbox-value {
+    font-weight: bold;
+    font-size: 36px;
+    color: var(--statsbox-color);
+}
+
+.statsbox-units {
+    font-weight: bold;
+    font-size: 16px;
+    color: var(--statsbox-color);
+}
+
+.statsbox-prc {
+    font-weight: normal;
+    font-size: 16px;
+}
+
+.statsbox-arrow-down {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.statsbox-arrow-down:after {
+    top: 100%;
+    left: 50%;
+    border: solid transparent;
+    content: " ";
+    width: 0; 
+    height: 0; 
+    position: absolute;
+    pointer-events: none;
+    border-top-color: var(--statsbox-color);
+    border-width: 16px;
+    margin-left: -16px;
+}
+
+.statsbox-arrow-right {
+    position: relative;
+    margin-right: 16px;
+}
+
+.statsbox-arrow-right:after {
+    left: 100%;
+    top: 50%;
+    border: solid transparent;
+    content: " ";
+    width: 0;
+    height: 0;
+    position: absolute;
+    pointer-events: none;
+    border-left-color: var(--statsbox-color);
+    border-width: 16px;
+    margin-top: -16px;
+}
+
+.statsbox-arrow-left {
+    position: relative;
+    margin-left: 16px;
+}
+
+.statsbox-arrow-left:before {
+    right: 100%;
+    top: 60%;
+    border: solid transparent;
+    content: " ";
+    width: 0;
+    height: 0;
+    position: absolute;
+    pointer-events: none;
+    border-right-color: var(--statsbox-color);
+    border-width: 16px;
+    margin-top: -16px;
+}
+
+.tooltip-title {
+  color: #aaa;
+  font-weight:bold;
+  font-size:12px;
+}
+
+.tooltip-value {
+  color: #fff;
+  font-weight:bold;
+  font-size:14px;
+}
+
+.tooltip-units {
+  color: #fff;
+  font-weight:bold;
+  font-size:10px;
+}
+
+/* Box background colours (solar/battery overridden by JS when feeds unavailable) */
+#solar-box   { background: #dccc1f; }
+#grid-box    { background: #d52e2e; }
+#battery-box { background: #fb7b50; }
+#house-box   { background: #82cbfc; }
+
+/* Text alignment for battery flow label boxes */
+#grid-to-battery-box { text-align: left; }
+#battery-to-grid-box { text-align: right; }
+
+/* Battery flow label boxes: padding adjusted to leave room for the arrow */
+#battery_import .statsbox-arrow-left  { padding: 10px 0 0 10px; }
+#battery_export .statsbox-arrow-right { padding: 10px 10px 0 0; }
+
+/* Value font size in battery flow label boxes */
+#grid-to-battery-box .statsbox-value,
+#battery-to-grid-box .statsbox-value { font-size: 22px; }
+
+/* Rounded corners on first and last graph-nav buttons */
+#graph-nav .app-btn:first-child { border-radius: 0.375rem 0 0 0.375rem; }
+#graph-nav .app-btn:last-child  { border-radius: 0 0.375rem 0.375rem 0; }
+
+/* Faint dividing lines between buttons */
+#graph-nav .app-btn + .app-btn { border-left: 1px solid rgba(255,255,255,0.12); }
+
+/* Graph placeholder */
+#placeholder_bound { width: 100%;}
+#placeholder { height:100px; }
+
+/* Solar generation box: percentage overlays */
+#statsbox-generation { position: relative; }
+.prc-solar-to-battery { position: absolute; width: 33.3%; left: 0;      bottom: 0; }
+.prc-solar-direct     { position: absolute; width: 33.3%; left: 66.66%;    bottom: 0; }
+.prc-solar-export     { position: absolute; height: 100%; right: 0; top: 0;
+                        display: flex; align-items: center; }
+
+/* House box: percentage overlays */
+#house-box .statsbox-padded { position: relative; }
+.prc-battery-to-house { position: absolute; width: 0;         left: 3px;        top: 40%; }
+.prc-solar-to-house   { position: absolute; width: 33.33333%; left: 0;          top: 0; }
+.prc-grid-to-house    { position: absolute; width: 33.33333%; left: 66.66667%;  top: 0; }
+
+/* Mobile (max 768px): */
+@media (max-width: 768px) {
+  #app-block { padding: 0; }
+  .statstable { border-spacing: 4px; }
+  .statsbox-padded { padding: 4px; }
+  .statsbox-title { font-size: 16px; padding-bottom: 4px; } /* 20px */
+  .statsbox-flow-title { font-size: 12px; padding-bottom: 2px; line-height:12px; } /* 20px */
+
+  .statsbox-value { font-size: 20px; } /* 36px */
+  .statsbox-prc { font-size: 12px; } /* 16px */
+  .statsbox-arrow-down:after {
+    border-width: 8px;
+    margin-left: -8px;
+  }
+  .statsbox-arrow-right:after {
+    border-width: 8px;
+    margin-top: -8px;
+  }
+  .statsbox-arrow-left:before {
+    border-width: 8px;
+    margin-top: -8px;
+  }
+}
+
+/* Mobile (max 576px) */
+@media (max-width: 576px) {
+  .statsbox-title { font-size: 12px; padding-bottom: 4px; } /* 20px */
+  .statsbox-units { display: none; } /* hide units */
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto;
+    gap: 0.5rem 1rem;
+    padding: 0.5rem 0;
+}
+
+.stats-grid > div {
+    text-align: center;
+    min-width: 0;
+}
+

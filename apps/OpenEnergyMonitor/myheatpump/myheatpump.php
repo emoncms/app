@@ -2,11 +2,10 @@
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf.js?v=<?php echo $v; ?>"></script>
+
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=102"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
@@ -373,43 +372,29 @@ global $path, $session, $v;
   </div>
 </div>
 
-<section id="app-setup" class="hide pb-3">
-  <!-- instructions and settings -->
-  <div class="px-3">
-    <div class="row-fluid">
-      <div class="span7 xapp-config-description">
-        <div class="xapp-config-description-inner text-light">
-          <h2 class="app-config-title text-primary"><?php echo tr('My Heatpump'); ?></h2>
-          <p class="lead">The My Heatpump app can be used to explore the performance of a heatpump including, electricity consumption, heat output, COP and system temperatures.</p>
-          <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-          <p><strong class="text-white">Cumulative kWh</strong> feeds can be created from power feeds using the power_to_kwh input processor, which converts power data (measured in watts) into energy consumption data (measured in kWh).</p>
-          <p><strong class="text-white">Share publicly:</strong> Check the "public" check box if you want to share your dashboard publicly, and ensure that the associated feeds are also made public by adjusting their settings on the feeds page.</p>
-          <p><strong class="text-white">Start date:</strong> To modify the start date for cumulative total electricity consumption, heat output and SCOP, input a unix timestamp corresponding to your desired starting date and time.</p>
-
-
-          <button class="btn btn-danger mt-3" id="clear-daily-data" style="display:none">Reload daily data</button>
-
-
-        </div>
-      </div>
-      <div class="span5 app-config pt-3"></div>
-    </div>
-  </div>
-</section>
-
+<div id="appconf-description" style="display:none">
+  <p class="lead">The My Heatpump app can be used to explore the performance of a heatpump including, electricity consumption, heat output, COP and system temperatures.</p>
+  <p><strong class="text-white">Share publicly:</strong> Check the "public" check box if you want to share your dashboard publicly, and ensure that the associated feeds are also made public by adjusting their settings on the feeds page.</p>
+  <p><strong class="text-white">Start date:</strong> To modify the start date for cumulative total electricity consumption, heat output and SCOP, input a unix timestamp corresponding to your desired starting date and time.</p>
+</div>
+<?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
 
 <script>
   var apikey = "<?php print $apikey; ?>";
   var session_write = <?php echo $session['write']; ?>;
+
+  config.app_name = "My Heatpump";
+  config.app_name_color = "#fba050";
+
   config.id = <?php echo $id; ?>;
   config.name = "<?php echo $name; ?>";
   config.public = <?php echo $public; ?>;
   config.db = <?php echo json_encode($config); ?>;
 </script>
 
-<?php $v=196; ?>
+<?php $v=197; ?>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_powergraph.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_bargraph.js?v=<?php echo $v; ?>"></script>

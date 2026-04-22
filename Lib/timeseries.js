@@ -19,7 +19,7 @@ var timeseries = {
         datastore[name].interval = (datastore[name].data[1][0] - datastore[name].data[0][0])*0.001;
     },
     
-    append: function (name,time,value)
+    append: function (name,time,value,join=false)
     {
         if (datastore[name]==undefined) {
             app_log("ERROR","timeseries.append datastore["+name+"] is undefined");
@@ -35,6 +35,31 @@ var timeseries = {
         var pos = (time - start) / interval;
         // 3. get last position from data length
         var last_pos = datastore[name].data.length - 1;
+
+        var padd_value = null;
+
+        if (join) {
+            let last_value_position = false;
+            // Itterate through the data points in reverse order to find the last non-null value for padding (limit lookup to 5 minutes)
+            var lookback = Math.ceil(300 / interval);
+            var min_i = Math.max(0, datastore[name].data.length - 1 - lookback);
+            for (var i = datastore[name].data.length - 1; i >= min_i; i--) {
+                if (datastore[name].data[i][1] !== null) {
+                    padd_value = datastore[name].data[i][1];
+                    last_value_position = i;
+                    break;
+                }
+            }
+
+            // Fill null values in existing data after last known good value up to the new time
+            if (padd_value !== null) {
+                for (var j = last_value_position + 1; j < datastore[name].data.length; j++) {
+                    if (datastore[name].data[j][1] === null) {
+                        datastore[name].data[j][1] = padd_value;
+                    }
+                }
+            }
+        }
         
         // if the datapoint is newer than the last:
         if (pos > last_pos)
@@ -42,11 +67,11 @@ var timeseries = {
             var npadding = (pos - last_pos)-1;
             
             // padding
-            if (npadding>0 && npadding<12) {
+            if (npadding>0 && npadding<1000000) {
                 for (var padd = 0; padd<npadding; padd++)
                 {
                     var padd_time = start + ((last_pos+padd+1) * interval);
-                    datastore[name].data.push([padd_time*1000,null]);
+                    datastore[name].data.push([padd_time*1000,padd_value]);
                 }
             }
             
@@ -84,12 +109,12 @@ var timeseries = {
     value: function (name, index)
     {
         if (datastore[name]==undefined) {
-            app_log("ERROR","timeseries.value datastore["+name+"] is undefined");
+            // app_log("ERROR","timeseries.value datastore["+name+"] is undefined");
             return false;
         }
         
         if (datastore[name].data[index]==undefined) {
-            app_log("ERROR","timeseries.value datastore["+name+"].data["+index+"] is undefined, data length: "+datastore[name].data.length);
+            // app_log("ERROR","timeseries.value datastore["+name+"].data["+index+"] is undefined, data length: "+datastore[name].data.length);
             return null;
         } else {
             return datastore[name].data[index][1];

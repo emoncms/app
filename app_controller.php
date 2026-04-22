@@ -16,7 +16,7 @@ function app_controller()
 {
     global $mysqli,$redis,$path,$session,$route,$user,$settings,$v;
     // Force cache reload of css and javascript
-    $v = 39;
+    $v = 43;
 
     $result = false;
 
@@ -42,8 +42,12 @@ function app_controller()
     // --------------------------------------------------------------
 
     if ($route->action == "list" && $session['read']) {
-        $route->format = "json";
-        return $appconfig->get_list($session['userid']);
+        if ($route->format == "html") {
+            return view("Modules/app/Views/app_list.php");
+        } else {
+            $route->format = "json";
+            return $appconfig->get_list($session['userid']);
+        }
     }
 
     // List of available apps json

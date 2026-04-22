@@ -35,7 +35,7 @@ function profile_draw() {
     });
 
     graph_series.push({
-        label: config.app.tariff_A.value,
+        label: config.app.tariff.value,
         data: profile_unitprice,
         yaxis: 2,
         color: "#fb1a80",

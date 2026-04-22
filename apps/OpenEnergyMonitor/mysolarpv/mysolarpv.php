@@ -2,7 +2,6 @@
     defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 <style>
 /* mobile version offset is default */
@@ -47,7 +46,6 @@
     min-height:180px;
 }
 </style>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
@@ -57,30 +55,32 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
 
-<nav id="buttons" class="d-flex justify-content-between">
-    <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="viewpower active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo tr('Power View') ?>">
-            <span class="d-xs-none"><?php echo tr("Pwr") ?></span>
-            <span class="d-none d-xs-inline-block"><?php echo tr("Power") ?></span>
-        </button></li>
-        <li><button class="viewhistory btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo tr('View History') ?>">
-            <span class="d-xs-none"><?php echo tr("Hist") ?></span>
-            <span class="d-none d-xs-inline-block"><?php echo tr("History") ?></span>
-        </button></li>
-        <li><button class="balanceline btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo tr('Show Balance') ?>">
-            <span class="d-xs-none"><?php echo tr("Bal") ?></span>
-            <span class="d-none d-xs-inline-block"><?php echo tr("Balance") ?></span>
-        </button></li>
-        <li><button id='show-all' class="hide bargraph-viewall btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo tr('Show All') ?>">
-            <span class="d-xs-none"><?php echo tr("All") ?></span>
-            <span class="d-none d-xs-inline-block"><?php echo tr("Show All") ?></span>
-        </button></li>
-    </ul>
-    <?php include(dirname(__DIR__).'/config-nav.php'); ?>
-</nav>
-
-
 <section id="app-block" style="display:none" class="block">
+
+    <nav id="buttons" class="d-flex justify-content-between">
+        <ul id="tabs" class="nav nav-pills mb-0">
+            <li><button class="viewpower active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo tr('Power View') ?>">
+                <span class="d-xs-none"><?php echo tr("Pwr") ?></span>
+                <span class="d-none d-xs-inline-block"><?php echo tr("Power") ?></span>
+            </button></li>
+            <li><button class="viewhistory btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo tr('View History') ?>">
+                <span class="d-xs-none"><?php echo tr("Hist") ?></span>
+                <span class="d-none d-xs-inline-block"><?php echo tr("History") ?></span>
+            </button></li>
+            <li><button class="balanceline btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo tr('Show Balance') ?>">
+                <span class="d-xs-none"><?php echo tr("Bal") ?></span>
+                <span class="d-none d-xs-inline-block"><?php echo tr("Balance") ?></span>
+            </button></li>
+            <li><button id='show-all' class="hide bargraph-viewall btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo tr('Show All') ?>">
+                <span class="d-xs-none"><?php echo tr("All") ?></span>
+                <span class="d-none d-xs-inline-block"><?php echo tr("Show All") ?></span>
+            </button></li>
+        </ul>
+        <?php include(dirname(__DIR__).'/config-nav.php'); ?>
+    </nav>
+
+
+
     <div class="d-flex justify-content-between">
         <div>
             <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('USE NOW') ?></h5>
@@ -144,25 +144,10 @@
     </div>
 </section>
 
-
-
-<section id="app-setup" class="hide pb-3">
-    <!-- instructions and settings -->
-    <div class="px-3">
-        <div class="row-fluid">
-            <div class="span7 xapp-config-description">
-                <div class="xapp-config-description-inner text-light">
-                    <h2 class="app-config-title text-warning"><?php echo tr('My Solar'); ?></h2>
-                    <p class="lead">The My Solar app can be used to explore onsite solar generation, self consumption, export and building consumption both in realtime with a moving power graph view and historically with a daily and monthly bargraph.</p>
-                    <p><strong class="text-white">Auto configure:</strong> This app can auto-configure connecting to emoncms feeds with the names shown on the right, alternatively feeds can be selected by clicking on the edit button.</p>
-                    <p><strong class="text-white">Cumulative kWh</strong> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
-                    <img src="../Modules/app/images/mysolar_app.png" class="d-none d-sm-inline-block">
-                </div>
-            </div>
-            <div class="span5 app-config pt-3"></div>
-        </div>
-    </div>
-</section>
+<div id="appconf-description" class="hide">
+    <p class="lead">The My Solar app can be used to explore onsite solar generation, self consumption, export and building consumption both in realtime with a moving power graph view and historically with a daily and monthly bargraph.</p>
+</div>
+<?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
 <script src="<?php echo $path; ?>Lib/misc/gettext.js?v=<?php echo $v; ?>"></script> 
@@ -217,6 +202,9 @@ config.app = {
     "solar_disp_min":{"type":"value", "default":10, "name": "Solar Threshold", "description":tr("Display solar power as 0 below this threshold in w")}
     //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
 };
+
+config.app_name = "My Solar PV";
+config.app_name_color = "#dccc1f";
 
 config.id = "<?php echo $id; ?>";
 config.name = "<?php echo $name; ?>";

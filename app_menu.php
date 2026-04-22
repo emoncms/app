@@ -72,6 +72,13 @@ if ($session["read"] || $session["public_userid"]) {
                 "icon"=>"plus", 
                 "order"=>$_i
             );
+
+            $l2['list'] = array(
+                "name"=>tr('List'),
+                "href"=>"app/list", 
+                "icon"=>"format_list_bulleted", 
+                "order"=>$_i+1
+            );
         }
     }
     

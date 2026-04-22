@@ -2,10 +2,7 @@
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=1" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
-
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
@@ -165,21 +162,10 @@ global $path, $session, $v;
 
 </div>
 
-<!-- App configuration -->
-<section id="app-setup" class="hide pb-3">
-    <div class="px-3">
-        <div class="row-fluid">
-            <div class="span7 xapp-config-description">
-                <div class="xapp-config-description-inner text-light">
-                    <h2 class="app-config-title text-primary"><?php echo tr('CO2 Monitor'); ?></h2>
-                    <p class="lead">Calculate room air change rates form CO2 decay curves.</p>
-                    <img src="<?php echo $path; ?><?php echo $appdir; ?>preview.png" class="img-rounded">
-                </div>
-            </div>
-            <div class="span5 app-config pt-3"></div>
-        </div>
-    </div>
-</section>
+<div id="appconf-description" style="display:none">
+    <p class="lead">Calculate room air change rates form CO2 decay curves.</p>
+</div>
+<?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
 
@@ -188,6 +174,7 @@ global $path, $session, $v;
     var apikey = "<?php print $apikey; ?>";
     var sessionwrite = <?php echo $session['write']; ?>;
 
+    config.app_name = "CO2 Monitor";
     config.id = <?php echo $id; ?>;
     config.name = "<?php echo $name; ?>";
     config.public = <?php echo $public; ?>;

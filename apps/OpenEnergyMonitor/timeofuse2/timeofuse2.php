@@ -2,11 +2,10 @@
     defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />    
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf.js?v=<?php echo $v; ?>"></script>
+
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
@@ -160,67 +159,59 @@
 </div>
 
 
+<div id="appconf-description" style="display:none">
+<p class="lead">The "Time of Use - flexible" app is a simple home energy monitoring app for exploring home or building electricity consumption and cost over time. It allows you to track multiple electricity tariffs as used in Australia.</p>
+<h3 class="text-white">Cumulative kWh</h3> 
+<p> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
+<p><img src="<?php echo $path; ?>Modules/app/images/timeofuse_app.png" style="width:600px" class="img-rounded"></p>
+<p>As the number of configuration options for this are quite large, a shorthand has been used to specify
+the tiers, days and times they apply and the respective costs.</p>
 
-<section id="app-setup" class="hide pb-3 px-3">
-    <!-- instructions and settings -->
-    <div class="row-fluid">
-        <div class="span7 app-config-description">
-            <div class="app-config-description-inner text-light">
-                <h2 class="app-config-title text-primary"><?php echo tr('Time of Use - flexible'); ?></h2>
-                <p class="lead">The "Time of Use - flexible" app is a simple home energy monitoring app for exploring home or building electricity consumption and cost over time. It allows you to track multiple electricity tariffs as used in Australia.</p>
-                <h3 class="text-white">Cumulative kWh</h3> 
-                <p> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
-                <p><img src="<?php echo $path; ?>Modules/app/images/timeofuse_app.png" style="width:600px" class="img-rounded"></p>
-                <p>As the number of configuration options for this are quite large, a shorthand has been used to specify
-                the tiers, days and times they apply and the respective costs.</p>
-                
-                <h3 class="text-white">Assumptions</h3>
-                <ul>
-                    <li>Any number of tariffs can be defined, but they must be consistent across weekdays or weekends.</li>
-                    <li>One cost must be defined per tariff tier.</li>
-                    <li>Each weekday (Monday to Friday) has the same tiers and times for each tier.</li>
-                    <li>Each weekend day (Saturday and Sunday) has the same tiers and times for each tier.</li>
-                    <li>Public Holidays are treated the same as a weekend day.</li>
-                </ul>
-                
-                <h3 class="text-white">Shorthand</h3>
-                <p>Tier names and tariffs are specified as a comma separated, colon separated list. If there are three
-                tariffs, <strong class="text-white">Off Peak</strong>, <strong class="text-white">Shoulder</strong> and <strong class="text-white">Peak</strong>, costing <strong class="text-white">16.5c/kWh</strong>, <strong class="text-white">25.3c/kWh</strong> and <strong class="text-white">59.4c/kWh</strong> respectively, they
-                are specified as:</p>
-                <p><code>OffPeak:0.165,Shoulder:0.253,Peak:0.594</code></p>
-                <p>Tier start times are split into two definitions, weekday and weekend. They both use the same format,
-                <code>&lt;start hour&gt;:&lt;tier&gt;,&lt;start hour&gt;:&lt;tier&gt;,...
-                &lt;tier&gt;</code>
-                is the tier number defined above, numbered from 0</p>
+<h3 class="text-white">Assumptions</h3>
+<ul>
+    <li>Any number of tariffs can be defined, but they must be consistent across weekdays or weekends.</li>
+    <li>One cost must be defined per tariff tier.</li>
+    <li>Each weekday (Monday to Friday) has the same tiers and times for each tier.</li>
+    <li>Each weekend day (Saturday and Sunday) has the same tiers and times for each tier.</li>
+    <li>Public Holidays are treated the same as a weekend day.</li>
+</ul>
 
-                <hr>
-                <h4 class="text-white">Example:</h4> 
-                <p>A weekday with the following tariff times:</p>
-                <blockquote><em>
-                OffPeak: 00:00 - 06:59, 
-                Shoulder: 07:00 - 13:59,
-                Peak: 14:00 - 19:59, 
-                Shoulder: 20:00 - 21:59, 
-                OffPeak: 22:00 - 23:59
-                </em></blockquote>
-                <p>would be defined as:
-                <code>0:0,7:1,14:2,20:1,22:0</code></p>
+<h3 class="text-white">Shorthand</h3>
+<p>Tier names and tariffs are specified as a comma separated, colon separated list. If there are three
+tariffs, <strong class="text-white">Off Peak</strong>, <strong class="text-white">Shoulder</strong> and <strong class="text-white">Peak</strong>, costing <strong class="text-white">16.5c/kWh</strong>, <strong class="text-white">25.3c/kWh</strong> and <strong class="text-white">59.4c/kWh</strong> respectively, they
+are specified as:</p>
+<p><code>OffPeak:0.165,Shoulder:0.253,Peak:0.594</code></p>
+<p>Tier start times are split into two definitions, weekday and weekend. They both use the same format,
+<code>&lt;start hour&gt;:&lt;tier&gt;,&lt;start hour&gt;:&lt;tier&gt;,...
+&lt;tier&gt;</code>
+is the tier number defined above, numbered from 0</p>
 
-                <p>To specify the public holidays that should be treated the same as weekends, specify a comma separated
-                list of days of the year (from 1-365/366) per year.
-                
-                <hr>
-                <h4 class="text-white">Example:</h4>
-                <p>for public holiays 2017: Jan 2, Apr 14, Apr 17, Apr 25, Jun 12, Oct 2, Dec 25, Dec 26; and 2018: Jan 1 you would specify:</p>
-                <code>
-                2017:2,104,107,115,163,275,359,360;2018:1
-                </code>
-                <p><a href="https://www.epochconverter.com/days" class="text-light">https://www.epochconverter.com/days</a> provides an easy reference.</p>
-            </div>
-        </div>
-        <div class="span5 app-config pt-3"></div>
-    </div>
-</section>
+<hr>
+<h4 class="text-white">Example:</h4> 
+<p>A weekday with the following tariff times:</p>
+<blockquote><em>
+OffPeak: 00:00 - 06:59, 
+Shoulder: 07:00 - 13:59,
+Peak: 14:00 - 19:59, 
+Shoulder: 20:00 - 21:59, 
+OffPeak: 22:00 - 23:59
+</em></blockquote>
+<p>would be defined as:
+<code>0:0,7:1,14:2,20:1,22:0</code></p>
+
+<p>To specify the public holidays that should be treated the same as weekends, specify a comma separated
+list of days of the year (from 1-365/366) per year.
+
+<hr>
+<h4 class="text-white">Example:</h4>
+<p>for public holiays 2017: Jan 2, Apr 14, Apr 17, Apr 25, Jun 12, Oct 2, Dec 25, Dec 26; and 2018: Jan 1 you would specify:</p>
+<code>
+2017:2,104,107,115,163,275,359,360;2018:1
+</code>
+<p><a href="https://www.epochconverter.com/days" class="text-light">https://www.epochconverter.com/days</a> provides an easy reference.</p>
+</div>
+<?php include('Modules/app/Lib/appconf/appconf.php'); ?>
+
 
 <div class="ajax-loader"></div>
 
@@ -263,11 +254,10 @@ config.app = {
         "description":"List of weekend tier start times. See description on the left for details"},
     "ph_days":{"type":"value", "default":"2017:2,104,107,115,163,275,359,360;2018:1",
         "name":"Public Holiday days",
-        "description":"List of public holidays. See description on the left for details"},
-        
-    "public":{"type":"checkbox", "name": "Public", "default": 0, "optional":true, "description":"Make app public"}
+        "description":"List of public holidays. See description on the left for details"}
 };
 
+config.app_name = "Time of Use - flexible";
 config.id = <?php echo $id; ?>;
 config.name = "<?php echo $name; ?>";
 config.public = <?php echo $public; ?>;
