@@ -767,8 +767,11 @@ function load_bargraph(start,end) {
     
     // Load kWh data
     var solar_kwh_data = feed.getdata(config.app.solar_kwh.value,start,end,"daily",0,1);
+    if (!solar_kwh_data) return;
     var use_kwh_data = feed.getdata(config.app.use_kwh.value,start,end,"daily",0,1);
+    if (!use_kwh_data) return;
     var import_kwh_data = feed.getdata(config.app.import_kwh.value,start,end,"daily",0,1);
+    if (!import_kwh_data) return;
     
     
     solarused_kwhd_data = [];

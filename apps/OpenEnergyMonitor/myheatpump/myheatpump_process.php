@@ -181,7 +181,7 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power,$timezone = '
     // --------------------------------------------------------------------------------------------------------------    
     $data = array();
     
-    $feeds = array("heatpump_elec","heatpump_flowT","heatpump_returnT","heatpump_outsideT","heatpump_roomT","heatpump_heat","heatpump_dhw","heatpump_error","heatpump_cooling","immersion_elec");
+    $feeds = array("heatpump_elec","heatpump_flowT","heatpump_returnT","heatpump_outsideT","heatpump_roomT","heatpump_heat","heatpump_dhw","heatpump_error","heatpump_cooling","immersion_elec","boiler_heat");
     
     foreach ($feeds as $key) {
         $data[$key] = false;
@@ -198,6 +198,7 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power,$timezone = '
     }
 
     $immersion_kwh = process_aux($data, $interval);
+    $boiler_kwh = process_boiler($data, $interval);
     
     $cop_stats = calculate_window_cops($data, $interval, $starting_power);
     
@@ -269,7 +270,8 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power,$timezone = '
         "roomT"=>get_quality($data["heatpump_roomT"])
       ],
       "errors" => $errors,
-      "immersion_kwh" => $immersion_kwh
+      "immersion_kwh" => $immersion_kwh,
+      "boiler_kwh" => $boiler_kwh
     ];
     
     return $result;
@@ -601,6 +603,11 @@ function carnot_simulator($data, $starting_power) {
     if (isset($data["heatpump_dhw"]) && $data["heatpump_dhw"] != false) {
         $dhw_enable = true;
     }
+    
+    $cooling_enable = false;
+    if (isset($data["heatpump_cooling"]) && $data["heatpump_cooling"] != false) {
+        $cooling_enable = true;
+    }
 
     $condensing_offset = 2;
     $evaporator_offset = -6;
@@ -628,10 +635,21 @@ function carnot_simulator($data, $starting_power) {
         if (isset($data["heatpump_outsideT"][$z]) && $data["heatpump_outsideT"][$z] !== null) {
             $ambientT = $data["heatpump_outsideT"][$z];
         }
+        
+        $cool = false;
+        if ($cooling_enable && isset($data["heatpump_cooling"][$z])) {
+            $cool = $data["heatpump_cooling"][$z];
+        }
 
         // if any of the values are null, skip this iteration
         if ($elec === null || $heat === null || $flowT === null || $returnT === null || $ambientT === null) {
             continue;
+        }
+        
+        if ($cool) {
+            // cooling is negative heat
+            // invert here so we can sum it with the heat
+            $heat = -1 * $heat;
         }
         
         $dhw = false;
@@ -657,7 +675,7 @@ function carnot_simulator($data, $starting_power) {
 
             $DT = $flowT - $returnT;
 
-            if ($DT<-0.2) {
+            if ($DT<-0.2 && $cool === false) {
                 $ideal_carnot_heat *= -1;
             }
         
@@ -816,6 +834,21 @@ function process_aux($data, $interval) {
     return number_format($immersion_kwh,3,'.','')*1;
 }
 
+// Calculate kWh boiler
+function process_boiler($data, $interval) {
+    $boiler_kwh = 0;
+    if (isset($data["boiler_heat"]) && is_array($data["boiler_heat"])) {
+        $power_to_kwh = 1.0 * $interval / 3600000.0;
+        foreach ($data["boiler_heat"] as $heat) {
+            // Only include positive values less than 500kW
+            if ($heat !== null && $heat >= 0 && $heat < 500000) {
+                $boiler_kwh += $heat * $power_to_kwh;
+            }
+        }
+    }
+    return number_format($boiler_kwh,3,'.','')*1;
+}
+
 // Weighted average calculation
 function process_weighted_average($data, $interval) {
     if (!isset($data["heatpump_elec"])) return false;
@@ -829,6 +862,11 @@ function process_weighted_average($data, $interval) {
     if ($data["heatpump_flowT"]==false) return false;
     if ($data["heatpump_returnT"]==false) return false;
     if ($data["heatpump_outsideT"]==false) return false;
+    
+    $cooling_enable = false;
+    if (isset($data["heatpump_cooling"]) && $data["heatpump_cooling"] != false) {
+        $cooling_enable = true;
+    }
     
     $flowT_weighted_sum = 0;
     $elec_weighted_sum = 0;
@@ -863,6 +901,11 @@ function process_weighted_average($data, $interval) {
         $returnT = $data["heatpump_returnT"][$z];
         $outsideT = null;
 
+        $cool = false;
+        if ($cooling_enable && isset($data["heatpump_cooling"][$z])) {
+            $cool = $data["heatpump_cooling"][$z];
+        }
+
         if ($outsideT_available) {
             if (isset($data["heatpump_outsideT"][$z])) {
                 $outsideT = $data["heatpump_outsideT"][$z];
@@ -871,6 +914,17 @@ function process_weighted_average($data, $interval) {
 
         // if any of the values are null, skip this iteration
         if ($elec === null || $heat === null || $flowT === null || $returnT === null || $outsideT === null) {
+            continue;
+        }
+
+        if ($cool) {
+            // cooling is negative heat
+            // invert here so we can sum it with the heat
+            $heat = -1 * $heat;
+        }
+        
+        // If heat is still below zero, these are defrosts or blips where that break down weighted average calculations
+        if ($heat<0) {
             continue;
         }
 

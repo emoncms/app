@@ -336,91 +336,34 @@ global $path, $session, $v;
         </div>
 
         <div style="background-color:#fff; padding:10px;">
-          <table style="width:100%; color:#333;">
+          <table style="width:100%; color:#333; table-layout:fixed;">
             <tr>
-              <td style="width:33.3%; text-align:center" valign="top">
+              <td style="text-align:center" valign="top">
                 <div class="title1">Total Electricity input</div>
                 <div class="value1"><span id="total_elec"></span>
                   <div class="units1">kWh</div>
                 </div>
               </td>
 
-              <td style="width:33.3%; text-align:center" valign="top">
+              <td style="text-align:center" valign="top">
                 <div class="title1">Total Heat output</div>
                 <div class="value1"><span id="total_heat"></span>
                   <div class="units1">kWh</div>
                 </div>
               </td>
 
-              <td style="width:33.3%; text-align:center" valign="top">
+              <td style="text-align:center" valign="top">
                 <div class="title1">SCOP</div>
                 <div class="value1"><span id="total_cop"></span></div>
               </td>
-            </tr>
 
-            <!-- 
-            <tr>
-              <td style="width:33.3%; text-align:center" valign="top">
-                <div class="title1">When running electric</div>
-                <div class="value1"><span id="running_elec"></span>
+              <td id="boiler_total_bound" style="text-align:center; display:none" valign="top">
+                <div class="title1">Boiler Heat</div>
+                <div class="value1"><span id="total_boiler"></span>
                   <div class="units1">kWh</div>
                 </div>
-              </td>
-
-              <td style="width:33.3%; text-align:center" valign="top">
-                <div class="title1">When running heat</div>
-                <div class="value1"><span id="running_heat"></span>
-                  <div class="units1">kWh</div>
-                </div>
-              </td>
-
-              <td style="width:33.3%; text-align:center" valign="top">
-                <div class="title1">When running SCOP</div>
-                <div class="value1"><span id="running_cop"></span></div>
               </td>
             </tr>
-
-            <tr>
-              <td style="width:33.3%; text-align:center" valign="top">
-                <div class="title1">Space heating electric</div>
-                <div class="value1"><span id="space_elec"></span>
-                  <div class="units1">kWh</div>
-                </div>
-              </td>
-
-              <td style="width:33.3%; text-align:center" valign="top">
-                <div class="title1">Space heating heat</div>
-                <div class="value1"><span id="space_heat"></span>
-                  <div class="units1">kWh</div>
-                </div>
-              </td>
-
-              <td style="width:33.3%; text-align:center" valign="top">
-                <div class="title1">Space heating SCOP</div>
-                <div class="value1"><span id="space_cop"></span></div>
-              </td>
-            </tr>
-            <tr>
-              <td style="width:33.3%; text-align:center" valign="top">
-                <div class="title1">Water heating electric</div>
-                <div class="value1"><span id="water_elec"></span>
-                  <div class="units1">kWh</div>
-                </div>
-              </td>
-
-              <td style="width:33.3%; text-align:center" valign="top">
-                <div class="title1">Water heating heat</div>
-                <div class="value1"><span id="water_heat"></span>
-                  <div class="units1">kWh</div>
-                </div>
-              </td>
-
-              <td style="width:33.3%; text-align:center" valign="top">
-                <div class="title1">Water heating SCOP</div>
-                <div class="value1"><span id="water_cop"></span></div>
-              </td>
-            </tr>
-            -->
           </table>
         </div>
 
@@ -466,7 +409,7 @@ global $path, $session, $v;
   config.db = <?php echo json_encode($config); ?>;
 </script>
 
-<?php $v=192; ?>
+<?php $v=196; ?>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_powergraph.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_bargraph.js?v=<?php echo $v; ?>"></script>

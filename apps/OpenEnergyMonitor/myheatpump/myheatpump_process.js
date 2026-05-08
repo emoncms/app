@@ -193,6 +193,7 @@ function process_stats() {
         "heatpump_elec": { name: "HP electric consumption", unit: "W", dp: 0 },
         "heatpump_heat": { name: "HP heat output", unit: "W", dp: 0 },
         "immersion_elec": { name: "Immersion/backup", unit: "W", dp: 0 },
+        "boiler_heat": { name: "Boiler heat output", unit: "W", dp: 0 },
         "heatpump_heat_carnot": { name: "Simulated heat output", unit: "W", dp: 0 },
         "heatpump_flowT": { name: "Flow temperature", unit: "°C", dp: 1 },
         "heatpump_returnT": { name: "Return temperature", unit: "°C", dp: 1 },
@@ -237,11 +238,14 @@ function process_stats() {
         let power = data["heatpump_elec"][z][1];
 
         let dhw = false;
-        if (dhw_enable) dhw = data["heatpump_dhw"][z][1];
+        if (dhw_enable && data["heatpump_dhw"][z] != undefined) {
+            dhw = data["heatpump_dhw"][z][1];
+        }
 
         let cool = false;
-        if (cooling_enable && data["heatpump_cooling"][z] != undefined) cool = data["heatpump_cooling"][z][1];
-
+        if (cooling_enable && data["heatpump_cooling"][z] != undefined) {
+            cool = data["heatpump_cooling"][z][1];
+        }
 
         // let ch = false;
         // if (data["heatpump_ch"]!=undefined) ch = data["heatpump_ch"][z][1];
@@ -421,8 +425,13 @@ function calculate_window_cops() {
             let dhw = false;
             let cool = false;
 
-            if (dhw_enable) dhw = data["heatpump_dhw"][z][1];
-            if (cooling_enable && data["heatpump_cooling"][z] != undefined) cool = data["heatpump_cooling"][z][1];
+            if (dhw_enable && data["heatpump_dhw"][z] != undefined) {
+                dhw = data["heatpump_dhw"][z][1];
+            }
+
+            if (cooling_enable && data["heatpump_cooling"][z] != undefined) {
+                cool = data["heatpump_cooling"][z][1];
+            }
             
             if (elec != null && heat !=null) {
 
