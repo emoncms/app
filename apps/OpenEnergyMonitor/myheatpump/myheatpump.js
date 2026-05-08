@@ -304,7 +304,12 @@ function show() {
                 if (result.combined_elec_kwh != undefined) {
                     $("#total_elec").html(Math.round(result.combined_elec_kwh));
                     $("#total_heat").html(Math.round(result.combined_heat_kwh));
-                    $("#total_cop").html(result.combined_cop.toFixed(2));
+                    if (result.combined_cop != undefined && result.combined_cop != null) {
+                        $("#total_cop").html(result.combined_cop.toFixed(2));
+                    } else {
+                        $("#total_cop").html("-");
+                    }
+                    
                 }
 
                 // if result includes boiler show this
@@ -548,6 +553,13 @@ $('#placeholder').bind("plotclick", function (event, pos, item) {
         last_bargraph_end = bargraph_end;
 
         var z = item.dataIndex;
+        var itemTime = item.datapoint[0];
+
+        // if timestamp map available, use it to find correct index in daily data arrays
+        if (daily_data_timestamp_map != undefined && daily_data_timestamp_map[itemTime] != undefined) {
+            z = daily_data_timestamp_map[itemTime];
+        }
+
         view.start = data["heatpump_elec_kwhd"][z][0];
         view.end = view.start + DAY;
         viewmode = "powergraph";
