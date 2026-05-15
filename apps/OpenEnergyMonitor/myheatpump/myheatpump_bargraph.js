@@ -447,7 +447,7 @@ function bargraph_draw() {
         }, {
             show: false
         }],
-        selection: { mode: "x" },
+        selection: { mode: 'x', color: '#e8cfac', visualization: 'fill' },
         grid: {
             show: true,
             color: "#aaa",

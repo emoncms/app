@@ -708,7 +708,7 @@ function powergraph_draw() {
             // axisMargin:0
             margin: { top: 30 }
         },
-        selection: { mode: "x" },
+        selection: { mode: 'x', color: '#e8cfac', visualization: 'fill' },
         legend: { position: "NW", noColumns: 13 }
     }
 
