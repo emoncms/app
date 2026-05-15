@@ -238,14 +238,14 @@ function bargraph_draw() {
 
         data["heatpump_heat_kwhd"] = daily_data[bargraph_mode+"_heat_kwh"];
 
-        let color = 0;
+        let color = "#edc240";
         if (bargraph_mode == "cooling") {
             color = "#66b0ff";
         }
         
         bargraph_series.push({
             data: data["heatpump_heat_kwhd"], color: color,
-            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 },
+            bars: { show: true, align: "center", barWidth: 0.75, fill: 1.0, lineWidth: 0 },
             stack: true
         });
 
@@ -260,7 +260,7 @@ function bargraph_draw() {
             data["cooling_heat_kwhd"] = daily_data["cooling_heat_kwh"];
             bargraph_series.push({
                 data: data["cooling_heat_kwhd"], color: "#66b0ff",
-                bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 }
+                bars: { show: true, align: "center", barWidth: 0.75, fill: 1.0, lineWidth: 0 }
             });
         }
     }
@@ -270,8 +270,8 @@ function bargraph_draw() {
         data["heatpump_elec_kwhd"] = daily_data[bargraph_mode+"_elec_kwh"];
 
         bargraph_series.push({
-            data: data["heatpump_elec_kwhd"], color: 1,
-            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 },
+            data: data["heatpump_elec_kwhd"], color: "#afd8f8",
+            bars: { show: true, align: "center", barWidth: 0.75, fill: 1.0, lineWidth: 0 },
             stack: false
         });
 
@@ -354,7 +354,7 @@ function bargraph_draw() {
         data["immersion_kwhd"] = daily_data["immersion_kwh"];
         bargraph_series.push({
             data: data["immersion_kwhd"], color: 4,
-            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 0.8, lineWidth: 0 },
+            bars: { show: true, align: "center", barWidth: 0.75, fill: 0.8, lineWidth: 0 },
             stack: true
         });
 
@@ -369,7 +369,7 @@ function bargraph_draw() {
         data["boiler_kwhd"] = daily_data["boiler_kwh"];
         bargraph_series.push({
             data: data["boiler_kwhd"], color: "#ff9e80",
-            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 0.8, lineWidth: 0 },
+            bars: { show: true, align: "center", barWidth: 0.75, fill: 0.8, lineWidth: 0 },
             stack: true
         });
 
@@ -457,7 +457,8 @@ function bargraph_draw() {
         }
     }
     if ($('#placeholder').width()) {
-        var plot = $.plot($('#placeholder'), bargraph_series, options);
+        if (!window.Flot || typeof window.Flot.plot !== 'function') return;
+        var plot = window.Flot.plot($('#placeholder')[0], bargraph_series, options);
         $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'></div>");
     }
 }

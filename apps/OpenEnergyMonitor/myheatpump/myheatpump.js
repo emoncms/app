@@ -1,3 +1,5 @@
+var urlParams = Object.fromEntries(new URLSearchParams(window.location.search));
+
 feed.apikey = apikey;
 feed.public_userid = public_userid;
 feed.public_username = public_username;
@@ -523,13 +525,14 @@ $(".viewhistory").click(function () {
     $("#advanced-block").hide();
 });
 
-$('#placeholder').bind("plothover", function (event, pos, item) {
+document.getElementById('placeholder')?.addEventListener('plothover', function (event) {
+    const item = event.detail?.[1];
     if (item) {
         if (previousPoint != item.datapoint) {
             previousPoint = item.datapoint;
 
             $("#tooltip").remove();
-            if (viewmode == "bargraph") {           
+            if (viewmode == "bargraph") {
                 bargraph_tooltip(item);
             } else if (viewmode == "powergraph") {
                 powergraph_tooltip(item);
@@ -539,7 +542,8 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
 });
 
 // Auto click through to power graph
-$('#placeholder').bind("plotclick", function (event, pos, item) {
+document.getElementById('placeholder')?.addEventListener('plotclick', function (event) {
+    const item = event.detail?.[1];
     if (item && !panning && viewmode == "bargraph") {
 
         last_bargraph_start = bargraph_start;
@@ -562,7 +566,9 @@ $('#placeholder').bind("plotclick", function (event, pos, item) {
     }
 });
 
-$('#placeholder').bind("plotselected", function (event, ranges) {
+document.getElementById('placeholder')?.addEventListener('plotselected', function (event) {
+    const ranges = event.detail?.[0];
+    if (!ranges?.xaxis) return;
     var start = ranges.xaxis.from;
     var end = ranges.xaxis.to;
     panning = true;

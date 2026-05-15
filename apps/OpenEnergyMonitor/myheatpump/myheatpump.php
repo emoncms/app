@@ -8,12 +8,8 @@ global $path, $session, $v;
 
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=102"></script>
 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
+<?php load_js("Lib/js/flot-5.1.0.min.js"); ?>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/js/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/misc/clipboard.js?v=<?php echo $v; ?>"></script>
 <link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=49>" rel="stylesheet">
 
@@ -394,8 +390,9 @@ global $path, $session, $v;
   config.db = <?php echo json_encode($config); ?>;
 </script>
 
-<?php $v=197; ?>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_powergraph.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_bargraph.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=<?php echo $v; ?>"></script>
+<?php
+load_js("Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js");
+load_js("Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_powergraph.js");
+load_js("Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_bargraph.js");
+load_js("Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js");
+?>
