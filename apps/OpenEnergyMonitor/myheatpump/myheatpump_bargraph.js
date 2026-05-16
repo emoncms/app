@@ -430,6 +430,7 @@ function bargraph_draw() {
             max: bargraph_end
         },
         yaxes: [{
+            autoScale: "none",
             font: { size: flot_font_size, color: "#666" },
             // labelWidth:-5
             reserveSpace: false,
@@ -440,6 +441,7 @@ function bargraph_draw() {
             reserveSpace: false,
             // max:40
         }, {
+            autoScale: "none",
             font: { size: flot_font_size, color: "#44b3e2" },
             reserveSpace: false,
             min: 1,
