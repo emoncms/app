@@ -18,7 +18,7 @@ function profile_draw() {
     var bars = {
         show: true,
         align: "left",
-        barWidth: 0.9 * 1800 * 1000,
+        barWidth: 0.9,
         fill: 1.0,
         lineWidth: 0
     };
@@ -50,6 +50,7 @@ function profile_draw() {
         xaxis: {
             mode: "time",
             timezone: "browser",
+            timeBase: "milliseconds",
             // min: start, max: end, 
             font: {
                 size: flot_font_size,
@@ -88,12 +89,15 @@ function profile_draw() {
             }
         },
         selection: {
-            mode: "x"
+            mode: 'x',
+            color: '#e8cfac',
+            visualization: 'fill'
         },
         legend: {
             position: "NW",
             noColumns: 5
         }
     }
-    $.plot($('#placeholder'), graph_series, options);
+    if (!window.Flot || typeof window.Flot.plot !== 'function') return;
+    Flot.plot($('#placeholder')[0], graph_series, options);
 }

@@ -337,6 +337,8 @@ function init() {
 
     render_autogen_feed_list();
 
+    view.timeBaseScale = 1000;
+
     $("#datetimepicker1").datetimepicker({
         language: 'en-EN'
     });
@@ -537,6 +539,7 @@ function load_kwh_flow_data(interval, load_tariffs = true) {
         }
     });
 
+    feed.timeBaseScale = 1000;
     feed.getdata(feedids, view.start, view.end, interval, 0, 1, 0, 0, function (all_data) {
         if (all_data.success === false) {
             // Error loading flow data.. 
@@ -573,6 +576,7 @@ function load_tariff_data(interval) {
         else data[key] = [];
     }
 
+    feed.timeBaseScale = 1000;
     feed.getdata(feedids, view.start, view.end, interval, 0, 0, 0, 0, function (all_data) {
         if (all_data.success === false) {
             // Error loading flow data.. 
@@ -939,7 +943,7 @@ function draw_graph() {
     var bars = {
         show: true,
         align: "left",
-        barWidth: 0.9 * 1800 * 1000,
+        barWidth: 0.9,
         fill: 1.0,
         lineWidth: 0
     };
@@ -1001,6 +1005,7 @@ function draw_graph() {
         xaxis: {
             mode: "time",
             timezone: "browser",
+            timeBase: "milliseconds",
             min: view.start,
             max: view.end,
             font: {
@@ -1039,7 +1044,9 @@ function draw_graph() {
             }
         },
         selection: {
-            mode: "x"
+            mode: 'x',
+            color: '#e8cfac',
+            visualization: 'fill'
         },
         legend: {
             show: false, // $('#placeholder').width() > 500,
@@ -1047,7 +1054,8 @@ function draw_graph() {
             noColumns: 1
         }
     }
-    $.plot($('#placeholder'), graph_series, options);
+    if (!window.Flot || typeof window.Flot.plot !== 'function') return;
+    Flot.plot($('#placeholder')[0], graph_series, options);
 }
 
 
@@ -1152,7 +1160,9 @@ function parseTimepickerTime(timestr) {
 // -------------------------------------------------------------------------------
 // EVENTS
 // -------------------------------------------------------------------------------
-$('#placeholder').bind("plothover", function(event, pos, item) {
+document.getElementById('placeholder')?.addEventListener("plothover", function(event) {
+    var pos = event.detail?.[0];
+    var item = event.detail?.[1];
     if (item) {
 
         if (previousPoint != item.datapoint) {
@@ -1216,7 +1226,7 @@ $('#placeholder').bind("plothover", function(event, pos, item) {
 
 
 
-            tooltip(item.pageX, item.pageY, text, "#fff", "#000");
+            tooltip(pos.pageX, pos.pageY, text, "#fff", "#000");
         }
     } else $("#tooltip").remove();
 });
@@ -1269,7 +1279,10 @@ $('.time-select').change(function() {
     }
 });
 
-$('#placeholder').bind("plotselected", function(event, ranges) {
+document.getElementById('placeholder')?.addEventListener("plotselected", function(event) {
+    var ranges = event.detail?.[0];
+    if (!ranges?.xaxis) return;
+
     var start = ranges.xaxis.from;
     var end = ranges.xaxis.to;
     panning = true;
