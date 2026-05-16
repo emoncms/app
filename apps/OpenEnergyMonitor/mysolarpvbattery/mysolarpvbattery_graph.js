@@ -61,6 +61,7 @@ function load_process_draw_graph() {
     const averages     = loaded.map(d => d.avg);
     const deltas       = loaded.map(d => d.delta);
 
+    feed.timeBaseScale = 1000;
     feed.getdata(feedids, view.start, view.end, view.interval, averages.join(","), deltas.join(","), 0, 0, function (all_data) {
 
         if (data_mode == "power") {
@@ -180,7 +181,7 @@ function process_and_draw_graph() {
         };
         if (viewmode == "bargraph") {
             series.lines = { show: false };
-            series.bars = { show: true, align: "center", barWidth: 0.8 * 3600 * 24 * 1000, fill: flows[i].fill, lineWidth: 0 };
+            series.bars = { show: true, align: "center", barWidth: 0.8, fill: flows[i].fill, lineWidth: 0 };
         }
         powerseries.push(series);
     }
@@ -225,11 +226,15 @@ function draw_graph() {
     const options = {
         lines: { fill: false },
         xaxis: { 
-            mode: "time", timezone: "browser", min: view.start, max: view.end,
+            mode: "time", 
+            timezone: "browser", 
+            min: view.start, 
+            max: view.end,
+            timeBase: "milliseconds",
             font: { color: font_color }  // tick label text color
         },
         grid: { hoverable: true, clickable: true, borderWidth: 0 },
-        selection: { mode: "x" },
+        selection: { mode: 'x', color: '#e8cfac', visualization: 'fill' },
         legend: { show: false }
     }
 
@@ -249,7 +254,7 @@ function draw_graph() {
     
     options.xaxis.min = view.start;
     options.xaxis.max = view.end;
-    $.plot($('#placeholder'),powerseries,options);
+    Flot.plot($('#placeholder')[0], powerseries, options);
 
     if (viewmode == "bargraph") {
         $('#placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use &amp; Total Use</div>");
@@ -314,13 +319,15 @@ function graph_events() {
 }
 
 function bind_hover_tooltip() {
-    $('#placeholder').bind("plothover", function (event, pos, item)
+    document.getElementById('placeholder').addEventListener("plothover", function (event)
     {
+        const item = event.detail?.[1];
+        const pos = event.detail?.[0];
         if (item) {
             const tooltip_items = [];
 
             const date = new Date(item.datapoint[0]);
-            tooltip_items.push(["TIME", dateFormat(date, 'HH:MM'), ""]);
+            tooltip_items.push(["TIME", `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`, ""]);
 
             for (let i = 0; i < powerseries.length; i++) {
                 const series = powerseries[i];
@@ -356,7 +363,10 @@ function bind_hover_tooltip() {
 }
 
 function bind_zoom_selection() {
-    $('#placeholder').bind("plotselected", function (event, ranges) {
+    document.getElementById('placeholder').addEventListener("plotselected", function (event) {
+        const ranges = event.detail?.[0];
+        if (!ranges?.xaxis) return;
+
         view.start = ranges.xaxis.from;
         view.end = ranges.xaxis.to;
 
@@ -374,8 +384,8 @@ function bind_zoom_selection() {
 
 function bind_bar_click() {
     // Auto click through to power graph
-    $('#placeholder').bind("plotclick", function (event, pos, item)
-    {
+    document.getElementById('placeholder').addEventListener("plotclick", function (event) {
+        const item = event.detail?.[1];
         if (viewmode == "powergraph") return; // disable click when already in powergraph mode
 
         if (item && !panning) {
