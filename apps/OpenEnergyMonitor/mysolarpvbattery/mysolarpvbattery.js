@@ -260,6 +260,7 @@ function init()
 
     render_autogen_feed_list();
 
+    view.timeBaseScale = 1000;
     view.end = power_end;
     view.start = power_start;
 

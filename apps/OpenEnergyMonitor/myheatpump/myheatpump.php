@@ -6,16 +6,13 @@ global $path, $session, $v;
 
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />
 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=102"></script>
-
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/misc/clipboard.js?v=<?php echo $v; ?>"></script>
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=49>" rel="stylesheet">
+<?php 
+load_js("Modules/feed/feed.js");
+load_js("Lib/js/flot-5.1.0.js"); 
+load_js("Lib/js/vis.helper.js");
+load_js("Lib/misc/clipboard.js");
+load_css("Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css");
+?>
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
   <div id="app-block" style="display:none">
@@ -394,8 +391,9 @@ global $path, $session, $v;
   config.db = <?php echo json_encode($config); ?>;
 </script>
 
-<?php $v=197; ?>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_powergraph.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_bargraph.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=<?php echo $v; ?>"></script>
+<?php
+load_js("Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js");
+load_js("Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_powergraph.js");
+load_js("Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_bargraph.js");
+load_js("Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js");
+?>

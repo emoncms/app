@@ -2,21 +2,16 @@
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session;
 ?>
-<link href="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
-
-<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
-
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<script src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
-
+<?php
+load_js("Modules/feed/feed.js");
+load_js("Lib/js/flot-5.1.0.js");
+load_js("Lib/js/vis.helper.js");
+load_js("Lib/js/date_time.js");
+load_js("Lib/js/DateTimePicker.js");
+?>
 
 <?php $v += 8; ?>
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/octopus/tariff_explorer.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/apps/OpenEnergyMonitor/octopus/tariff_explorer.css"); ?>
 
 <div id="app-block" style="display:none">
 
@@ -99,20 +94,16 @@ global $path, $session;
                         <select id="tariff"></select>
                     </div>
 
-                    <div class="ctrl-group">
-                        <span class="ctrl-label"><?php echo tr('Start') ?></span>
-                        <span id="datetimepicker1">
-                            <input id="request-start" data-format="dd/MM/yyyy hh:mm:ss" type="text" />
-                            <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
-                        </span>
-                    </div>
+                    <div id="octopus-dtp-app" style="display:contents">
+                        <div class="ctrl-group">
+                            <span class="ctrl-label"><?php echo tr('Start') ?></span>
+                            <date-time-picker v-model="startValue" @change="onStartChange"></date-time-picker>
+                        </div>
 
-                    <div class="ctrl-group">
-                        <span class="ctrl-label"><?php echo tr('End') ?></span>
-                        <span id="datetimepicker2">
-                            <input id="request-end" data-format="dd/MM/yyyy hh:mm:ss" type="text" />
-                            <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
-                        </span>
+                        <div class="ctrl-group">
+                            <span class="ctrl-label"><?php echo tr('End') ?></span>
+                            <date-time-picker v-model="endValue" @change="onEndChange"></date-time-picker>
+                        </div>
                     </div>
 
                     <div class="ctrl-actions">

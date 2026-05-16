@@ -32,15 +32,15 @@ function powergraph_load() {
         "heatpump_ch": { label: "CH", yaxis: 4, color: "#FB6", lines: { lineWidth: 0, show: true, fill: 0.15 } },
         "heatpump_cooling": { label: "Cooling", yaxis: 4, color: "#66b0ff", lines: { lineWidth: 0, show: true, fill: 0.15 } },
         "heatpump_error": { label: "Error", yaxis: 4, color: "#F00", lines: { lineWidth: 0, show: true, fill: 0.15 } },
-        "heatpump_targetT": { label: "TargetT", yaxis: 2, color: "#ccc" },
-        "heatpump_flowT": { label: "FlowT", yaxis: 2, color: 2 },
-        "heatpump_returnT": { label: "ReturnT", yaxis: 2, color: 3 },
-        "heatpump_outsideT": { label: "OutsideT", yaxis: 2, color: "#c880ff" },
-        "heatpump_roomT": { label: "RoomT", yaxis: 2, color: "#000" },
-        "heatpump_flowrate": { label: "Flow rate", yaxis: 3, color: 6 },
+        "heatpump_targetT": { label: "TargetT", yaxis: 2, color: "#ccc", lines: { lineWidth: 1.8 } },
+        "heatpump_flowT": { label: "FlowT", yaxis: 2, color: "#cb4b4b", lines: { lineWidth: 1.8 } },
+        "heatpump_returnT": { label: "ReturnT", yaxis: 2, color: "#4da74d", lines: { lineWidth: 1.8 } },
+        "heatpump_outsideT": { label: "OutsideT", yaxis: 2, color: "#c880ff", lines: { lineWidth: 1.8 } },
+        "heatpump_roomT": { label: "RoomT", yaxis: 2, color: "#000", lines: { lineWidth: 1.8 } },
+        "heatpump_flowrate": { label: "Flow rate", yaxis: 3, color: "#afd8f8", lines: { lineWidth: 1.8 } },
         "boiler_heat": { label: "Boiler", yaxis: 1, color: "#FF5349", lines: { show: true, fill: 0.2, lineWidth: 0.5 } },
-        "heatpump_heat": { label: "Heat", yaxis: 1, color: 0, lines: { show: true, fill: 0.2, lineWidth: 0.5 } },
-        "heatpump_elec": { label: "Electric", yaxis: 1, color: 1, lines: { show: true, fill: 0.3, lineWidth: 0.5 } },
+        "heatpump_heat": { label: "Heat", yaxis: 1, color: "#edc240", lines: { show: true, fill: 0.2, lineWidth: 0.5 } },
+        "heatpump_elec": { label: "Electric", yaxis: 1, color: "#afd8f8", lines: { show: true, fill: 0.3, lineWidth: 0.5 } },
         "immersion_elec": { label: "Immersion", yaxis: 1, color: 4, lines: { show: true, fill: 0.3, lineWidth: 0.5 } },
         "heatpump_dhwT": { label: dhw_label, yaxis: dhw_axis, color: "#0080ff" },
         "heatpump_dhwTargetT": { label: dhw_target_label, yaxis: dhw_axis, color:"#99cbfc" },
@@ -693,10 +693,10 @@ function powergraph_draw() {
             reserveSpace: false
         },
         yaxes: [
-            { min: 0, font: style, reserveSpace: false },
+            { autoScale: "none", min: 0, font: style, reserveSpace: false },
             { font: style, reserveSpace: false },
-            { min: 0, font: { size: flot_font_size, color: "#44b3e2" }, reserveSpace: false },
-            { min: 0, max: 1, show: false, reserveSpace: false }
+            { autoScale: "none", min: 0, font: { size: flot_font_size, color: "#44b3e2" }, reserveSpace: false },
+            { autoScale: "none", min: 0, max: 1, show: false, reserveSpace: false }
         ],
         grid: {
             show: true,
@@ -708,7 +708,7 @@ function powergraph_draw() {
             // axisMargin:0
             margin: { top: 30 }
         },
-        selection: { mode: "x" },
+        selection: { mode: 'x', color: '#e8cfac', visualization: 'fill' },
         legend: { position: "NW", noColumns: 13 }
     }
 
@@ -717,6 +717,7 @@ function powergraph_draw() {
     }
 
     if ($('#placeholder').width()) {
+        if (!window.Flot || typeof window.Flot.plot !== 'function') return;
         // Remove keys
         var powergraph_series_without_key = [];
         for (var key in powergraph_series) {
@@ -727,7 +728,7 @@ function powergraph_draw() {
             if (key == 'heatpump_dhwTargetT' && !show_dhw_temp) show = false;
             if (show) powergraph_series_without_key.push(powergraph_series[key]);
         }
-        $.plot($('#placeholder'), powergraph_series_without_key, options);
+        window.Flot.plot($('#placeholder')[0], powergraph_series_without_key, options);
     }
 
     // show symbol when live scrolling is active
@@ -785,7 +786,8 @@ function draw_histogram(histogram) {
         legend: { position: "NW", noColumns: 6 }
     }
     if ($('#histogram').width() > 0) {
-        $.plot($('#histogram'), [{ data: sorted_histogram }], options);
+        if (!window.Flot || typeof window.Flot.plot !== 'function') return;
+        window.Flot.plot($('#histogram')[0], [{ data: sorted_histogram }], options);
     }
 }
 
@@ -1071,7 +1073,8 @@ $("#configure_standby").click(function () {
     }
 });
 
-$('#histogram').bind("plothover", function (event, pos, item) {
+document.getElementById('histogram')?.addEventListener('plothover', function (event) {
+    const item = event.detail?.[1];
     if (item) {
         var z = item.dataIndex;
         if (previousPoint != item.datapoint) {

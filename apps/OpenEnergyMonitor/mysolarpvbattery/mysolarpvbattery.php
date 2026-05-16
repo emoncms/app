@@ -1,21 +1,14 @@
 <?php
-    defined('EMONCMS_EXEC') or die('Restricted access');
-    global $path, $session;
+defined('EMONCMS_EXEC') or die('Restricted access');
+global $path, $session;
+
+load_js("Modules/feed/feed.js");
+load_js("Lib/js/flot-5.1.0.js"); 
+load_js("Lib/js/vis.helper.js");
+load_js("Modules/app/Lib/timeseries.js");
+load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.css");
+
 ?>
-
-<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
-
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
-
-<!-- load mysolarpvbattery.css -->
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.css?v=<?php echo $v; ?>" rel="stylesheet">
-
 
 
 <section id="app-block" style="display:none" class="block">
@@ -195,7 +188,7 @@
 
 <div class="ajax-loader"></div>
 
-<script src="<?php echo $path; ?>Lib/misc/gettext.js?v=<?php echo $v; ?>"></script> 
+<script src="<?php echo $path; ?>Lib/js/gettext.js?v=<?php echo $v; ?>"></script> 
 <script>
 // Function to get translations for JavaScript
 function getTranslations(){

@@ -52,9 +52,9 @@ function bargraph_load(start, end) {
 
     $("#data-error").hide();
 
-    var intervalms = DAY;
-    end = Math.ceil(end / intervalms) * intervalms;
-    start = Math.floor(start / intervalms) * intervalms;
+    var interval = DAY;
+    end = Math.ceil(end / interval) * interval;
+    start = Math.floor(start / interval) * interval;
 
     bargraph_start = start;
     bargraph_end = end;
@@ -67,7 +67,7 @@ function bargraph_load(start, end) {
         // format is csv
         $.ajax({
             url: path + "app/getdailydata",
-            data: { id: config.id, start: start*0.001, end: end*0.001, apikey: apikey },
+            data: { id: config.id, start: start, end: end, apikey: apikey },
             async: false,
             success: function (data) {
                 var rows = data.split("\n");
@@ -76,7 +76,7 @@ function bargraph_load(start, end) {
                 
                 for (var z = 1; z < rows.length; z++) {
                     var cols = rows[z].split(",");
-                    var timestamp = cols[1] * 1000;
+                    var timestamp = cols[1];
 
                     if (cols.length == fields.length) {
                         for (var i=2; i<fields.length; i++) {
@@ -238,14 +238,14 @@ function bargraph_draw() {
 
         data["heatpump_heat_kwhd"] = daily_data[bargraph_mode+"_heat_kwh"];
 
-        let color = 0;
+        let color = "#edc240";
         if (bargraph_mode == "cooling") {
             color = "#66b0ff";
         }
         
         bargraph_series.push({
             data: data["heatpump_heat_kwhd"], color: color,
-            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 },
+            bars: { show: true, align: "center", barWidth: 0.75, fill: 1.0, lineWidth: 0 },
             stack: true
         });
 
@@ -260,7 +260,7 @@ function bargraph_draw() {
             data["cooling_heat_kwhd"] = daily_data["cooling_heat_kwh"];
             bargraph_series.push({
                 data: data["cooling_heat_kwhd"], color: "#66b0ff",
-                bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 }
+                bars: { show: true, align: "center", barWidth: 0.75, fill: 1.0, lineWidth: 0 }
             });
         }
     }
@@ -270,8 +270,8 @@ function bargraph_draw() {
         data["heatpump_elec_kwhd"] = daily_data[bargraph_mode+"_elec_kwh"];
 
         bargraph_series.push({
-            data: data["heatpump_elec_kwhd"], color: 1,
-            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 },
+            data: data["heatpump_elec_kwhd"], color: "#afd8f8",
+            bars: { show: true, align: "center", barWidth: 0.75, fill: 1.0, lineWidth: 0 },
             stack: false
         });
 
@@ -287,7 +287,7 @@ function bargraph_draw() {
 
         bargraph_series.push({
             data: data["heatpump_outsideT_daily"], color: "#c880ff", yaxis: 2,
-            lines: { show: true, align: "center", fill: false }, points: { show: false }
+            lines: { show: true, align: "center", fill: false, lineWidth: 2 }, points: { show: false }
         });
     }
 
@@ -354,7 +354,7 @@ function bargraph_draw() {
         data["immersion_kwhd"] = daily_data["immersion_kwh"];
         bargraph_series.push({
             data: data["immersion_kwhd"], color: 4,
-            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 0.8, lineWidth: 0 },
+            bars: { show: true, align: "center", barWidth: 0.75, fill: 0.8, lineWidth: 0 },
             stack: true
         });
 
@@ -369,7 +369,7 @@ function bargraph_draw() {
         data["boiler_kwhd"] = daily_data["boiler_kwh"];
         bargraph_series.push({
             data: data["boiler_kwhd"], color: "#ff9e80",
-            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 0.8, lineWidth: 0 },
+            bars: { show: true, align: "center", barWidth: 0.75, fill: 0.8, lineWidth: 0 },
             stack: true
         });
 
@@ -430,6 +430,7 @@ function bargraph_draw() {
             max: bargraph_end
         },
         yaxes: [{
+            autoScale: "none",
             font: { size: flot_font_size, color: "#666" },
             // labelWidth:-5
             reserveSpace: false,
@@ -440,6 +441,7 @@ function bargraph_draw() {
             reserveSpace: false,
             // max:40
         }, {
+            autoScale: "none",
             font: { size: flot_font_size, color: "#44b3e2" },
             reserveSpace: false,
             min: 1,
@@ -447,7 +449,7 @@ function bargraph_draw() {
         }, {
             show: false
         }],
-        selection: { mode: "x" },
+        selection: { mode: 'x', color: '#e8cfac', visualization: 'fill' },
         grid: {
             show: true,
             color: "#aaa",
@@ -457,7 +459,8 @@ function bargraph_draw() {
         }
     }
     if ($('#placeholder').width()) {
-        var plot = $.plot($('#placeholder'), bargraph_series, options);
+        if (!window.Flot || typeof window.Flot.plot !== 'function') return;
+        var plot = window.Flot.plot($('#placeholder')[0], bargraph_series, options);
         $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'></div>");
     }
 }
@@ -485,7 +488,7 @@ function bargraph_tooltip(item)
     var COP = null;
     if (heat_kwh !== null && elec_kwh !== null) COP = heat_kwh / elec_kwh;
 
-    var d = new Date(itemTime);
+    var d = new Date(itemTime*1000);
     var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     var date = days[d.getDay()] + ", " + months[d.getMonth()] + " " + d.getDate();
 
@@ -607,16 +610,16 @@ $('.bargraph-day').click(function () {
 $('.bargraph-period').click(function () {
     var days = $(this).attr("days");
     var timeWindow = days * DAY;
-    var end = (new Date()).getTime();
+    var end = (new Date()).getTime() * 0.001;
     var start = end - timeWindow;
-    if (start < (start_time * 1000)) start = start_time * 1000;
+    if (start < start_time) start = start_time;
     bargraph_load(start, end);
     bargraph_draw();
 });
 
 $('.bargraph-alltime').click(function () {
-    var start = start_time * 1000;
-    var end = (new Date()).getTime();
+    var start = start_time;
+    var end = (new Date()).getTime() * 0.001;
     bargraph_load(start, end);
     bargraph_draw();
 });
