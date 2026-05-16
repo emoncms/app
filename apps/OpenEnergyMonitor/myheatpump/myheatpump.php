@@ -6,12 +6,13 @@ global $path, $session, $v;
 
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />
 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=102"></script>
-
-<?php load_js("Lib/js/flot-5.1.0.min.js"); ?>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/js/vis.helper.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/misc/clipboard.js?v=<?php echo $v; ?>"></script>
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=49>" rel="stylesheet">
+<?php 
+load_js("Modules/feed/feed.js");
+load_js("Lib/js/flot-5.1.0.js"); 
+load_js("Lib/js/vis.helper.js");
+load_js("Lib/misc/clipboard.js");
+load_css("Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css");
+?>
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
   <div id="app-block" style="display:none">

@@ -109,7 +109,7 @@ var realtime_cop_div_mode = "30min";
 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 // duration contants (milliseonds)
-const MINUTE = 60 * 1000;
+const MINUTE = 60;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
@@ -209,14 +209,14 @@ function show() {
     resize();
 
     var date = new Date();
-    var now = date.getTime();
+    var now = date.getTime() * 0.001;
 
-    end = end_time * 1000;
+    end = end_time;
 
     if (now - end > HOUR) {
         $("#last_updated").show();
         $("#live_table").hide();
-        date.setTime(end);
+        date.setTime(end*1000);
         let h = date.getHours();
         let m = date.getMinutes();
         if (h < 10) h = "0" + h;
@@ -250,13 +250,13 @@ function show() {
 
     // If this is a new dashboard there will be less than a days data 
     // show power graph directly in this case
-    var timeWindow = (end - start_time * 1000);
+    var timeWindow = (end - start_time);
     if (timeWindow < 3 * DAY || viewmode == "powergraph") {
         if (timeWindow > 3 * DAY) timeWindow = DAY;
         var start = end - timeWindow;
 
-        if (urlParams.start != undefined) start = urlParams.start * 1000;
-        if (urlParams.end != undefined) end = urlParams.end * 1000;
+        if (urlParams.start != undefined) start = urlParams.start;
+        if (urlParams.end != undefined) end = urlParams.end;
         if (urlParams.hours != undefined) start = end - urlParams.hours * HOUR;
 
         view.start = start;
@@ -269,10 +269,10 @@ function show() {
     } else {
         var timeWindow = 30 * DAY;
         var start = end - timeWindow;
-        if (start < (start_time * 1000)) start = start_time * 1000;
+        if (start < start_time) start = start_time;
 
-        if (urlParams.start != undefined) start = urlParams.start * 1000;
-        if (urlParams.end != undefined) end = urlParams.end * 1000;
+        if (urlParams.start != undefined) start = urlParams.start;
+        if (urlParams.end != undefined) end = urlParams.end;
         
         bargraph_load(start, end);
         bargraph_draw();
@@ -508,9 +508,9 @@ $(".viewhistory").click(function () {
     $(".powergraph-navigation").hide();
     var timeWindow = 30 * DAY;
     // var end = (new Date()).getTime();
-    var end = end_time * 1000;
+    var end = end_time;
     var start = end - timeWindow;
-    if (start < (start_time * 1000)) start = start_time * 1000;
+    if (start < start_time) start = start_time;
 
     if (last_bargraph_start && last_bargraph_end) {
         start = last_bargraph_start;
@@ -550,9 +550,10 @@ document.getElementById('placeholder')?.addEventListener('plotclick', function (
         last_bargraph_end = bargraph_end;
 
         var z = item.dataIndex;
-        view.start = data["heatpump_elec_kwhd"][z][0];
+        view.start = data["heatpump_elec_kwhd"][z][0]*1;
         view.end = view.start + DAY;
         viewmode = "powergraph";
+
         powergraph_load();
 
         $(".bargraph-navigation").hide();

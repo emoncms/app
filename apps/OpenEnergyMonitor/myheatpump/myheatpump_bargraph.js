@@ -52,9 +52,9 @@ function bargraph_load(start, end) {
 
     $("#data-error").hide();
 
-    var intervalms = DAY;
-    end = Math.ceil(end / intervalms) * intervalms;
-    start = Math.floor(start / intervalms) * intervalms;
+    var interval = DAY;
+    end = Math.ceil(end / interval) * interval;
+    start = Math.floor(start / interval) * interval;
 
     bargraph_start = start;
     bargraph_end = end;
@@ -67,7 +67,7 @@ function bargraph_load(start, end) {
         // format is csv
         $.ajax({
             url: path + "app/getdailydata",
-            data: { id: config.id, start: start*0.001, end: end*0.001, apikey: apikey },
+            data: { id: config.id, start: start, end: end, apikey: apikey },
             async: false,
             success: function (data) {
                 var rows = data.split("\n");
@@ -76,7 +76,7 @@ function bargraph_load(start, end) {
                 
                 for (var z = 1; z < rows.length; z++) {
                     var cols = rows[z].split(",");
-                    var timestamp = cols[1] * 1000;
+                    var timestamp = cols[1];
 
                     if (cols.length == fields.length) {
                         for (var i=2; i<fields.length; i++) {
@@ -287,7 +287,7 @@ function bargraph_draw() {
 
         bargraph_series.push({
             data: data["heatpump_outsideT_daily"], color: "#c880ff", yaxis: 2,
-            lines: { show: true, align: "center", fill: false }, points: { show: false }
+            lines: { show: true, align: "center", fill: false, lineWidth: 2 }, points: { show: false }
         });
     }
 
@@ -486,7 +486,7 @@ function bargraph_tooltip(item)
     var COP = null;
     if (heat_kwh !== null && elec_kwh !== null) COP = heat_kwh / elec_kwh;
 
-    var d = new Date(itemTime);
+    var d = new Date(itemTime*1000);
     var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     var date = days[d.getDay()] + ", " + months[d.getMonth()] + " " + d.getDate();
 
@@ -608,16 +608,16 @@ $('.bargraph-day').click(function () {
 $('.bargraph-period').click(function () {
     var days = $(this).attr("days");
     var timeWindow = days * DAY;
-    var end = (new Date()).getTime();
+    var end = (new Date()).getTime() * 0.001;
     var start = end - timeWindow;
-    if (start < (start_time * 1000)) start = start_time * 1000;
+    if (start < start_time) start = start_time;
     bargraph_load(start, end);
     bargraph_draw();
 });
 
 $('.bargraph-alltime').click(function () {
-    var start = start_time * 1000;
-    var end = (new Date()).getTime();
+    var start = start_time;
+    var end = (new Date()).getTime() * 0.001;
     bargraph_load(start, end);
     bargraph_draw();
 });
