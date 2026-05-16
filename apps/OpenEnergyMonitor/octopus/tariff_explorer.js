@@ -320,6 +320,33 @@ var profile_cost = {};
 var monthly_summary = {};
 var baseline_monthly_summary = {};
 var baseline_tariff_name = "";
+var octopusDatePickerApp = null;
+
+if (typeof Vue !== 'undefined' && typeof DateTimePicker !== 'undefined') {
+    var octopusPickerRoot = document.getElementById('octopus-dtp-app');
+    if (octopusPickerRoot) {
+        var octopusDatePickerRoot = Vue.createApp({
+            data: function() {
+                return {
+                    startValue: '',
+                    endValue: ''
+                };
+            },
+            methods: {
+                onStartChange: function(value) {
+                    handleStartDateChange(value);
+                },
+                onEndChange: function(value) {
+                    handleEndDateChange(value);
+                }
+            }
+        });
+
+        octopusDatePickerRoot.component('date-time-picker', DateTimePicker);
+        octopusDatePickerApp = octopusDatePickerRoot.mount('#octopus-dtp-app');
+        window.octopusDatePickerApp = octopusDatePickerApp;
+    }
+}
 
 config.init();
 
@@ -338,17 +365,6 @@ function init() {
     render_autogen_feed_list();
 
     view.timeBaseScale = 1000;
-
-    $("#datetimepicker1").datetimepicker({
-        language: 'en-EN'
-    });
-
-    $("#datetimepicker2").datetimepicker({
-        language: 'en-EN'
-    });
-
-    datetimepicker1 = $('#datetimepicker1').data('datetimepicker');
-    datetimepicker2 = $('#datetimepicker2').data('datetimepicker');
 }
 
 function show() {
@@ -504,14 +520,8 @@ function graph_load(load_flows = true, load_tariffs = true) {
     view.start = Math.ceil(view.start / intervalms) * intervalms;
     view.end = Math.ceil(view.end / intervalms) * intervalms;
 
-    if (datetimepicker1) {
-        datetimepicker1.setLocalDate(new Date(view.start));
-        datetimepicker1.setEndDate(new Date(view.end));
-    }
-    if (datetimepicker2) {
-        datetimepicker2.setLocalDate(new Date(view.end));
-        datetimepicker2.setStartDate(new Date(view.start));
-    }
+    setPickerDate(new Date(view.start), 'startValue');
+    setPickerDate(new Date(view.end), 'endValue');
 
     // Clear baseline summary if data has changed (as this may affect the selected baseline period)
     if (load_flows) {
@@ -1145,16 +1155,62 @@ function download_data(filename, data) {
 }
 
 function parseTimepickerTime(timestr) {
-    var tmp = timestr.split(" ");
-    if (tmp.length != 2) return false;
+    if (window.ecDateTime && typeof window.ecDateTime.toUnixSeconds === 'function') {
+        return window.ecDateTime.toUnixSeconds(timestr);
+    }
 
-    var date = tmp[0].split("/");
-    if (date.length != 3) return false;
+    var parsedDate = new Date(String(timestr || '').replace(' ', 'T'));
+    if (isNaN(parsedDate.getTime())) return false;
+    return Math.floor(parsedDate.getTime() / 1000);
+}
 
-    var time = tmp[1].split(":");
-    if (time.length != 3) return false;
+function setPickerDate(date, pickerKey) {
+    var value = '';
+    if (window.ecDateTime && typeof window.ecDateTime.formatYmdHms === 'function') {
+        value = window.ecDateTime.formatYmdHms(date);
+    } else if (date instanceof Date && !isNaN(date.getTime())) {
+        value = date.toISOString().replace('T', ' ').slice(0, 19);
+    }
 
-    return new Date(date[2], date[1] - 1, date[0], time[0], time[1], time[2], 0).getTime() / 1000;
+    if (octopusDatePickerApp && octopusDatePickerApp[pickerKey] !== value) {
+        octopusDatePickerApp[pickerKey] = value;
+    }
+}
+
+function handleStartDateChange(value) {
+    var timewindowStart = parseTimepickerTime(value);
+    if (!timewindowStart) {
+        alert("Please enter a valid start date.");
+        setPickerDate(new Date(view.start), 'startValue');
+        return false;
+    }
+    if (timewindowStart * 1000 >= view.end) {
+        alert("Start date must be further back in time than end date.");
+        setPickerDate(new Date(view.start), 'startValue');
+        return false;
+    }
+
+    view.start = timewindowStart * 1000;
+    graph_load();
+    $(".time-select").val("C");
+}
+
+function handleEndDateChange(value) {
+    var timewindowEnd = parseTimepickerTime(value);
+    if (!timewindowEnd) {
+        alert("Please enter a valid end date.");
+        setPickerDate(new Date(view.end), 'endValue');
+        return false;
+    }
+    if (view.start >= timewindowEnd * 1000) {
+        alert("Start date must be further back in time than end date.");
+        setPickerDate(new Date(view.end), 'endValue');
+        return false;
+    }
+
+    view.end = timewindowEnd * 1000;
+    graph_load();
+    $(".time-select").val("C");
 }
 
 // -------------------------------------------------------------------------------
@@ -1361,38 +1417,6 @@ $("#download-csv").click(function() {
     }
 
     download_data("tariff-data.csv", csv.join("\n"));
-});
-
-$('#datetimepicker1').on("changeDate", function(e) {
-    var timewindowStart = parseTimepickerTime($("#request-start").val());
-    if (!timewindowStart) {
-        alert("Please enter a valid start date.");
-        return false;
-    }
-    if (timewindowStart * 1000 >= view.end) {
-        alert("Start date must be further back in time than end date.");
-        return false;
-    }
-
-    view.start = timewindowStart * 1000;
-    graph_load();
-    $(".time-select").val("C");
-});
-
-$('#datetimepicker2').on("changeDate", function(e) {
-    var timewindowEnd = parseTimepickerTime($("#request-end").val());
-    if (!timewindowEnd) {
-        alert("Please enter a valid end date.");
-        return false;
-    }
-    if (view.start >= timewindowEnd * 1000) {
-        alert("Start date must be further back in time than end date.");
-        return false;
-    }
-
-    view.end = timewindowEnd * 1000;
-    graph_load();
-    $(".time-select").val("C");
 });
 
 // Save monthly data as baseline to be compared against tariff change
