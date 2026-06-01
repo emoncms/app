@@ -1,109 +1,134 @@
 <?php global $path; ?>
 <?php load_js("Lib/js/vue.global.prod-3.5.22.min.js"); ?>
 
-<div style="padding:20px">
+<div id="app-page" style="padding:20px">
 
-  <h2>Available Apps</h2>
-  <p>Create a new instance of an app by clicking on one of the apps below.</p>
+    <h2>Available Apps</h2>
+    <p>Create a new instance of an app by clicking on one of the apps below.</p>
 
-  <div id="available-apps">
+    <div id="available-apps">
 
-    <p><b>Featured apps:</b></p>
+        <p><b>Featured apps:</b></p>
 
-    <div class="app-group">
-      <div class="app-item" v-for="(app, index) in apps" :key="index" :app="index" v-if="app.primary">
-        <div class="app-item-title">{{ app.title }}</div>
-        <div class="app-item-description">{{ app.description || "no description..." }}</div>
-      </div>
+        <div class="app-group">
+            <div class="app-item" v-for="entry in featuredApps" :key="entry.id" @click="openCreateModal(entry.id)">
+                <div class="app-item-title">{{ entry.app.title }}</div>
+                <div class="app-item-description">{{ entry.app.description || "no description..." }}</div>
+            </div>
+        </div>
+        <br>
+
+        <p><b>All apps:</b></p>
+
+        <div class="app-group">
+            <div class="app-item" v-for="entry in otherApps" :key="entry.id" @click="openCreateModal(entry.id)">
+                <div class="app-item-title">{{ entry.app.title }}</div>
+                <div class="app-item-description">{{ entry.app.description || "no description..." }}</div>
+            </div>
+        </div>
+
     </div>
-    <br>
-
-    <p><b>All apps:</b></p>
-
-    <div class="app-group">
-      <div class="app-item" v-for="(app, index) in apps" :key="index" :app="index" v-if="!app.primary">
-        <div class="app-item-title">{{ app.title }}</div>
-        <div class="app-item-description">{{ app.description || "no description..." }}</div>
-      </div>
-    </div>
-
-  </div>
-
-</div>
 
 <!-------------------------------------------------------------------------------------------
   MODALS
 -------------------------------------------------------------------------------------------->
 <!-- GROUP CREATE -->
-<div id="app-new-modal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="app-new-modal-label" aria-hidden="true" data-backdrop="static">
+<div id="app-new-modal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="app-new-modal-label" aria-hidden="true" data-backdrop="static" style="width:620px;margin-left:-310px;">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="app-new-modal-label">Please enter name for app</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 id="app-new-modal-label">{{ modalTitle }}</h3>
     </div>
     <div class="modal-body">
 
-    <p>Enter a unique name for the app:<br>
-    <input id="app-new-name" type="text"></p>
+        <p>Enter a unique name for the app:<br>
+            <input id="app-new-name" type="text" v-model="appName"></p>
 
     </div>
     <div class="modal-footer">
-        <button id="app-new-cancel" class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-        <button id="app-new-action" class="btn btn-primary">Create</button>
+        <button id="app-new-cancel" class="btn" data-dismiss="modal" @click="cancelCreate">Cancel</button>
+        <button id="app-new-action" class="btn btn-primary" @click="createApp">Create</button>
     </div>
+</div>
+
 </div>
 
 <script>
 
 var available_apps = JSON.parse('<?php echo json_encode($apps); ?>');
-var selected_app = "";
-var app_new_enable = true;
-
-
 var app_list = Vue.createApp({
-  data() {
-    return {
-      apps: available_apps
-    };
-  }
-}).mount('#available-apps');
-
-
-$(function() {
-    $(".app-group").each(function() { $(this).find(".app-item").first().css("border-top","1px solid #ccc"); });
-
-    $(".app-item").click(function(){
-        if (app_new_enable) {
-            var app = $(this).attr("app");
-            selected_app = app;
-            $("#app-new-modal-label").html("Create app: "+available_apps[app].title);
-            $("#app-new-name").val(available_apps[app].title);
-            $('#app-new-modal').modal('show');
-        }
-    });
-
-    $("#app-new-action").click(function(){
-        app_new_enable = false;
-        setTimeout(function(){ app_new_enable = true; }, 500);
-        $('#app-new-modal').modal('hide');
-        
-        var app_name = $("#app-new-name").val();
-        app_name =  app_name.replace(/\W/g, '');
-        var nicename = escape(app_name).replace(/%20/g, "+");
-        $.ajax({                                      
-            url: path+"app/add?name="+nicename+"&app="+selected_app,
-            dataType: 'json',
-            async: true,
-            success: function(result) {
-                // console.log(result);
-                window.location = path+"app/view?name="+nicename;
+    data: function() {
+        return {
+            apps: available_apps,
+            selectedApp: "",
+            appName: "",
+            appNewEnable: true
+        };
+    },
+    computed: {
+        appEntries: function() {
+            var entries = [];
+            for (var id in this.apps) {
+                if (Object.prototype.hasOwnProperty.call(this.apps, id) && this.apps[id]) {
+                    entries.push({ id: id, app: this.apps[id] });
+                }
             }
-        });
-    });
+            return entries;
+        },
+        featuredApps: function() {
+            return this.appEntries.filter(function(entry) {
+                return !!entry.app.primary;
+            });
+        },
+        otherApps: function() {
+            return this.appEntries.filter(function(entry) {
+                return !entry.app.primary;
+            });
+        },
+        modalTitle: function() {
+            if (this.selectedApp === "") {
+                return "Please enter name for app";
+            }
+            return "Create app: " + (this.apps[this.selectedApp] ? this.apps[this.selectedApp].title : "");
+        }
+    },
+    methods: {
+        openCreateModal: function(index) {
+            if (!this.appNewEnable) return;
+            if (!this.apps[index]) return;
+            this.selectedApp = index;
+            this.appName = this.apps[index].title;
+            $('#app-new-modal').modal('show');
+        },
+        createApp: function() {
+            var self = this;
+            self.appNewEnable = false;
+            setTimeout(function() { self.appNewEnable = true; }, 500);
+            $('#app-new-modal').modal('hide');
 
-    $("#app-new-cancel").click(function(){
-        app_new_enable = false;
-        setTimeout(function(){ app_new_enable = true; }, 500);
-    });
-})
+            var app_name = self.appName;
+            app_name = app_name.replace(/\W/g, '');
+            var nicename = escape(app_name).replace(/%20/g, "+");
+            $.ajax({                                      
+                url: path + "app/add?name=" + nicename + "&app=" + self.selectedApp,
+                dataType: 'json',
+                async: true,
+                success: function(result) {
+                    // console.log(result);
+                    window.location = path + "app/view?name=" + nicename;
+                }
+            });
+        },
+        cancelCreate: function() {
+            var self = this;
+            self.appNewEnable = false;
+            setTimeout(function() { self.appNewEnable = true; }, 500);
+        }
+    },
+    mounted: function() {
+        $(".app-group").each(function() {
+            $(this).find(".app-item").first().css("border-top", "1px solid #ccc");
+        });
+    }
+}).mount('#app-page');
 
 </script>
