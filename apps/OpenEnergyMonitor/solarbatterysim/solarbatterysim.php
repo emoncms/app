@@ -13,7 +13,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script src="<?php echo $path;?>Lib/js/clipboard.js?v=<?php echo $v; ?>"></script>
-<script src="<?php echo $path; ?>Lib/vue.min.js"></script>
+<?php load_js("Lib/js/vue.global.prod-3.5.22.min.js"); ?>
 
 <style>
 .color-box {
@@ -197,40 +197,40 @@ textarea {
       </tr>
       <tr v-for="(month, index) in monthly">
         <td>{{ month.name }}</td>
-        <td>{{ month.total_consumption | toFixed(0) }} kWh</td>
-        <td>{{ month.total_generation | toFixed(0) }} kWh</td>
-        <td>{{ month.total_import | toFixed(0) }} kWh</td>
-        <td>{{ month.total_export | toFixed(0) }} kWh</td>
-        <td>{{ month.total_solar_direct | toFixed(0) }} kWh</td>
-        <td>{{ month.total_charge | toFixed(0) }} kWh</td>
-        <td>{{ month.total_discharge | toFixed(0) }} kWh</td>
-        <td>£{{ month.total_import_cost | toFixed(2) }}</td>
-        <td>£{{ month.total_export_value | toFixed(2) }}</td>
-        <td>£{{ month.total_reference_cost | toFixed(2) }}</td>
+        <td>{{ toFixed(month.total_consumption, 0) }} kWh</td>
+        <td>{{ toFixed(month.total_generation, 0) }} kWh</td>
+        <td>{{ toFixed(month.total_import, 0) }} kWh</td>
+        <td>{{ toFixed(month.total_export, 0) }} kWh</td>
+        <td>{{ toFixed(month.total_solar_direct, 0) }} kWh</td>
+        <td>{{ toFixed(month.total_charge, 0) }} kWh</td>
+        <td>{{ toFixed(month.total_discharge, 0) }} kWh</td>
+        <td>£{{ toFixed(month.total_import_cost, 2) }}</td>
+        <td>£{{ toFixed(month.total_export_value, 2) }}</td>
+        <td>£{{ toFixed(month.total_reference_cost, 2) }}</td>
       </tr>
       
       <tr>
         <th>TOTAL</th>
-        <th>{{ annual.total_consumption | toFixed(0) }} kWh</th>
-        <th>{{ annual.total_generation | toFixed(0) }} kWh</th>
-        <th>{{ annual.total_import | toFixed(0) }} kWh</th>
-        <th>{{ annual.total_export | toFixed(0) }} kWh</th>
-        <th>{{ annual.total_solar_direct | toFixed(0) }} kWh</th>
-        <th>{{ annual.total_charge | toFixed(0) }} kWh</th>
-        <th>{{ annual.total_discharge | toFixed(0) }} kWh</th>
-        <th>£{{ annual.total_import_cost | toFixed(2) }}</th>
-        <th>£{{ annual.total_export_value | toFixed(2) }}</th>
-        <th>£{{ annual.total_reference_cost | toFixed(2) }}</th>
+        <th>{{ toFixed(annual.total_consumption, 0) }} kWh</th>
+        <th>{{ toFixed(annual.total_generation, 0) }} kWh</th>
+        <th>{{ toFixed(annual.total_import, 0) }} kWh</th>
+        <th>{{ toFixed(annual.total_export, 0) }} kWh</th>
+        <th>{{ toFixed(annual.total_solar_direct, 0) }} kWh</th>
+        <th>{{ toFixed(annual.total_charge, 0) }} kWh</th>
+        <th>{{ toFixed(annual.total_discharge, 0) }} kWh</th>
+        <th>£{{ toFixed(annual.total_import_cost, 2) }}</th>
+        <th>£{{ toFixed(annual.total_export_value, 2) }}</th>
+        <th>£{{ toFixed(annual.total_reference_cost, 2) }}</th>
       </tr>
     </table>
     
     <h4>Savings and payback</h4>
     <table class="table table-striped">
-      <tr><td>Annual import saving</td><td>£{{ annual.import_saving | toFixed(2) }}</td></tr>
-      <tr><td>Simple payback (system cost / import saving)</td><td>{{ output.simple_payback | toFixed(1) }} years</td></tr>
-      <tr><td>Annual solar & battery system cost</td><td>£{{ annual.system_cost | toFixed(2) }}</td></tr>
-      <tr><td>Annual solar & battery system + import cost</td><td>£{{ annual.total_cost | toFixed(2) }}</td></tr>
-      <tr><td>Annual averaged unit price</td><td>{{ annual.unit_price*100 | toFixed(2) }} p/kWh</td></tr>
+      <tr><td>Annual import saving</td><td>£{{ toFixed(annual.import_saving, 2) }}</td></tr>
+      <tr><td>Simple payback (system cost / import saving)</td><td>{{ toFixed(output.simple_payback, 1) }} years</td></tr>
+      <tr><td>Annual solar & battery system cost</td><td>£{{ toFixed(annual.system_cost, 2) }}</td></tr>
+      <tr><td>Annual solar & battery system + import cost</td><td>£{{ toFixed(annual.total_cost, 2) }}</td></tr>
+      <tr><td>Annual averaged unit price</td><td>{{ toFixed(annual.unit_price*100, 2) }} p/kWh</td></tr>
     </table>
     
     
@@ -331,25 +331,22 @@ var discharge_data = [];
 var soc_prc_data = [];
 var grid_import_data = [];
 
-app = new Vue({
-    el: '#app',
-    data: {
+app = Vue.createApp({
+    data() { return {
         input: input,
         monthly: monthly,
         annual: annual,
         output: output
-    },
+    }; },
     methods: {
         run: function() {
           show();
-        }
-    },
-    filters: {
-        toFixed: function(value,dp) {
-            return value.toFixed(dp)
+        },
+        toFixed: function(value, dp) {
+            return value.toFixed(dp);
         }
     }
-});
+}).mount('#app');
 
 
 config.initapp = function(){init()};

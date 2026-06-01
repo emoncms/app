@@ -15,7 +15,7 @@ global $path, $session, $v;
 <script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/remotefeed.js?v=5"></script>
 
-<script src="<?php echo $path; ?>Lib/vue.min.js"></script>
+<?php load_js("Lib/js/vue.global.prod-3.5.22.min.js"); ?>
 
 <div id="app-block" style="display:none">
     <div class="col1">
@@ -55,7 +55,7 @@ global $path, $session, $v;
                                 <span class="add-on">kW</span>
                             </div>
                         </td>
-                        <td>{{ gen.kwh | toFixed(0) }} kWh ({{ 100*gen.capacity_factor | toFixed(1)}}%)</td>
+                        <td>{{ toFixed(gen.kwh, 0) }} kWh ({{ toFixed(100*gen.capacity_factor, 1) }}%)</td>
                     </tr>
                     <tr>
                         <td>Nuclear / geothermal<br>(non load following)</td>
@@ -64,7 +64,7 @@ global $path, $session, $v;
                                 <input type="text" v-model="nuclear.output" style="width:50px" @change="update">
                                 <span class="add-on">kW</span>
                             </td>
-                        <td>{{ nuclear.kwh | toFixed(0) }} kWh ({{ 100*nuclear.capacity_factor | toFixed(1)}}%)</td>
+                        <td>{{ toFixed(nuclear.kwh, 0) }} kWh ({{ toFixed(100*nuclear.capacity_factor, 1) }}%)</td>
                     </tr>
                     <tr>
                         <td>Home solar feed</td>
@@ -73,17 +73,17 @@ global $path, $session, $v;
                                 <input type="text" v-model="home_solar.scale" style="width:50px" @change="update">
                                 <span class="add-on">%</span>
                             </td>
-                        <td>{{ home_solar.kwh | toFixed(0) }} kWh ({{ 100*home_solar.capacity_factor | toFixed(1)}}%)</td>
+                        <td>{{ toFixed(home_solar.kwh, 0) }} kWh ({{ toFixed(100*home_solar.capacity_factor, 1) }}%)</td>
                     </tr>
                     <tr>
                         <td>Total supply</td>
                         <td></td>
-                        <td>{{ supply.kwh | toFixed(0) }} kWh</td>
+                        <td>{{ toFixed(supply.kwh, 0) }} kWh</td>
                     </tr>
                     <tr>
                         <td>Consumption</td>
                         <td></td>
-                        <td>{{ consumption.kwh | toFixed(0) }} kWh</td>
+                        <td>{{ toFixed(consumption.kwh, 0) }} kWh</td>
                     </tr>
                     <tr>
                         <td>Direct e-fuel demand (e.g industry, shipping or aviation)</td>
@@ -98,23 +98,23 @@ global $path, $session, $v;
                     <tr>
                         <td>Primary energy factor</td>
                         <td></td>
-                        <td>{{ 100*supply.kwh/consumption.kwh | toFixed(0) }}%</td>
+                        <td>{{ toFixed(100*supply.kwh/consumption.kwh, 0) }}%</td>
                     </tr>
                     <tr>
                         <td>Balance before battery storage</td>
                         <td></td>
-                        <td>{{ 100*balance.before_store1 | toFixed(0) }}%</td>
+                        <td>{{ toFixed(100*balance.before_store1, 0) }}%</td>
                     </tr>
 
                     <tr>
                         <td>Surplus</td>
                         <td></td>
-                        <td>{{ balance.surplus | toFixed(1) }} kWh</td>
+                        <td>{{ toFixed(balance.surplus, 1) }} kWh</td>
                     </tr>
                     <tr>
                         <td>Unmet</td>
                         <td></td>
-                        <td>{{ balance.unmet | toFixed(1) }} kWh</td>
+                        <td>{{ toFixed(balance.unmet, 1) }} kWh</td>
                     </tr>
                     <tr>
                         <td>Peak shaving storage requirement</td>
@@ -126,7 +126,7 @@ global $path, $session, $v;
                                 </span>
                             </div>
                         </td>
-                        <td>{{ max_peak_shaving_deficit | toFixed(1) }} kWh</td>
+                        <td>{{ toFixed(max_peak_shaving_deficit, 1) }} kWh</td>
                     </tr>                  
                 </table>
             </div>
@@ -190,19 +190,19 @@ global $path, $session, $v;
                     </tr>
                     <tr>
                         <td>Total charge</td>
-                        <td>{{ store1.charge_kwh | toFixed(1) }} kWh ({{ 100*store1.charge_CF | toFixed(1)}}%)</td>
+                        <td>{{ toFixed(store1.charge_kwh, 1) }} kWh ({{ toFixed(100*store1.charge_CF, 1) }}%)</td>
                     </tr>
                     <tr>
                         <td>Total discharge</td>
-                        <td>{{ store1.discharge_kwh | toFixed(1) }} kWh ({{ 100*store1.discharge_CF | toFixed(1)}}%)</td>
+                        <td>{{ toFixed(store1.discharge_kwh, 1) }} kWh ({{ toFixed(100*store1.discharge_CF, 1) }}%)</td>
                     </tr>
                     <tr>
                         <td>Cycles</td>
-                        <td>{{ store1.cycles | toFixed(1) }} cycles</td>
+                        <td>{{ toFixed(store1.cycles, 1) }} cycles</td>
                     </tr>
                     <tr>
                         <td>Balance after store 1</td>
-                        <td>{{ 100*balance.after_store1 | toFixed(0) }}%</td>
+                        <td>{{ toFixed(100*balance.after_store1, 0) }}%</td>
                     </tr>
                 </table>
 
@@ -268,19 +268,19 @@ global $path, $session, $v;
                     </tr>
                     <tr>
                         <td>Total charge</td>
-                        <td>{{ store2.charge_kwh | toFixed(1) }} kWh ({{ 100*store2.charge_CF | toFixed(1)}}%)</td>
+                        <td>{{ toFixed(store2.charge_kwh, 1) }} kWh ({{ toFixed(100*store2.charge_CF, 1) }}%)</td>
                     </tr>
                     <tr>
                         <td>Total discharge</td>
-                        <td>{{ store2.discharge_kwh | toFixed(1) }} kWh ({{ 100*store2.discharge_CF | toFixed(1)}}%)</td>
+                        <td>{{ toFixed(store2.discharge_kwh, 1) }} kWh ({{ toFixed(100*store2.discharge_CF, 1) }}%)</td>
                     </tr>
                     <tr>
                         <td>Cycles</td>
-                        <td>{{ store2.cycles | toFixed(1) }} cycles</td>
+                        <td>{{ toFixed(store2.cycles, 1) }} cycles</td>
                     </tr>
                     <tr>
                         <td>Balance after store 2</td>
-                        <td>{{ 100*balance.after_store2 | toFixed(0) }}%</td>
+                        <td>{{ toFixed(100*balance.after_store2, 0) }}%</td>
                     </tr>
                 </table>
 
