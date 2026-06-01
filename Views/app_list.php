@@ -5,6 +5,16 @@ global $path;
 <style>
   .content-container { max-width: 1150px; }
 </style>
+<style>
+/* Ensure icon wrappers in col-chip have no chip background/border */
+.col-chip > span[style][v-if],
+.col-chip > span[style][v-else-if] {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    color: inherit;
+}
+</style>
 <div id="app">
 
     <div class="page-header">
@@ -71,7 +81,17 @@ global $path;
                             <button class="app-btn app-btn-sm" @click.stop="saveApp(app)"><i class="icon-check"></i></button>
                         </div>
                     </td>
-                    <td class="col-chip">{{ app.app }}</td>
+                    <td class="col-chip">
+                                                <span v-if="app.app === 'mysolarpvbattery'" style="margin-right:0.4em; color: #FFD600; background: transparent; border: none; padding: 0;">
+                                                    <span class="icon icon-sun" title="Solar PV Battery"></span>
+                                                </span>
+                                                <span v-else-if="app.app === 'myheatpump'" style="margin-right:0.4em; color: #2196F3; background: transparent; border: none; padding: 0;">
+                                                    <span class="icon icon-home" title="Heat Pump"></span>
+                                                </span>
+                                                <span v-else-if="app.app === 'octopus'" style="margin-right:0.4em; color: #E040FB; background: transparent; border: none; padding: 0;">
+                                                    <span class="icon icon-smartplug" title="Octopus Tariff"></span>
+                                                </span>
+                    </td>
 
 
                     <td class="col-secondary" v-if="!app.editing">
@@ -95,7 +115,7 @@ global $path;
             <i class="icon-trash"></i>
             <?php echo _("Delete selected"); ?> ({{ selectedAppIds.length }})
         </button>
-        <a class="app-btn" href="<?php echo $path; ?>app/new"><i class="icon-plus-sign"></i> <?php echo _("New app"); ?></a>
+        <a class="btn btn-primary" href="<?php echo $path; ?>app/new"><i class="icon-plus-sign"></i> <?php echo _("New app"); ?></a>
     </div>
 
 </div>

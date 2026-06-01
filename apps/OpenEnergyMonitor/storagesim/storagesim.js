@@ -78,9 +78,8 @@ view.start = time_now - 365*24*3600000;
 view.limit_x = false;
 
 // Vue app
-var app = new Vue({
-    el: '#app',
-    data: {
+var app = Vue.createApp({
+    data() { return {
         generation: {
             wind: {
                 name: "UK Wind (normalised)",
@@ -154,7 +153,7 @@ var app = new Vue({
         auto_optimise: false,
         show_peak_shaving_balance: false,
         max_peak_shaving_deficit: 0
-    },
+    }; },
     methods: {
         update: function() {
             model();
@@ -164,15 +163,12 @@ var app = new Vue({
             model();
             this.auto_optimise = false;
             model();
+        },
+        toFixed: function(value, dp) {
+            return value.toFixed(dp);
         }
-    },
-    filters: {
-        toFixed: function (value,dp) {
-            // if (!value) return ''
-            return value.toFixed(dp)
-        }   
     }
-});
+}).mount('#app');
 
 config.init();
 
