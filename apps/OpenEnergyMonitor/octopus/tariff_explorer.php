@@ -10,7 +10,7 @@ global $path, $session;
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
 
@@ -24,11 +24,11 @@ global $path, $session;
 
         <nav class="app-top-bar d-flex justify-content-between">
             <ul class="btn-list">
-                <li><span class="electric-title"><svg class="icon" style="margin-right:6px; vertical-align:-0.125em;"><use xlink:href="#icon-schedule"></use></svg><span id="app-title">Time of use tariff explorer</span></span></li>
+                <li><span class="electric-title"><i class="svg-icon-schedule mr-2" title="Configure app"></i><span id="app-title">Time of use tariff explorer</span></span></li>
             </ul>
             <ul class="btn-list">
-                <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><svg class="icon"><use xlink:href="#icon-wrench"></use></svg></button></li>
-                <li><button class="app-btn config-close d-none" title="<?php echo tr('Close') ?>"><svg class="icon"><use xlink:href="#icon-close"></use></svg></button></li>
+                <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><i class="icon-wrench icon-white" title="Configure app"></i></button></li>
+                <li><button class="app-btn config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close icon-white"></i></button></li>
             </ul>
         </nav>
 
