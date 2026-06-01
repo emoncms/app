@@ -16,7 +16,7 @@ global $path, $session;
 
 
 <?php $v += 8; ?>
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/octopus/tariff_explorer.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/apps/OpenEnergyMonitor/octopus/tariff_explorer.css"); ?>
 
 <div id="app-block" style="display:none">
 
