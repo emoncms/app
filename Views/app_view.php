@@ -1,5 +1,5 @@
 <?php global $path; ?>
-<script src="<?php echo $path; ?>Lib/vue.min.js"></script>
+<?php load_js("Lib/js/vue.global.prod-3.5.22.min.js"); ?>
 
 <div style="padding:20px">
 
@@ -59,12 +59,13 @@ var selected_app = "";
 var app_new_enable = true;
 
 
-var app_list = new Vue({
-    el: '#available-apps',
-    data: {
-        apps: available_apps
-    }
-});
+var app_list = Vue.createApp({
+  data() {
+    return {
+      apps: available_apps
+    };
+  }
+}).mount('#available-apps');
 
 
 $(function() {

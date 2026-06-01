@@ -5,8 +5,7 @@
     $app_conf_version = time(); // Use timestamp for cache busting during development, replace with static version for production
 ?>
 
-<script src="<?php echo $path; ?>Lib/vue.min.js"></script>
-
+<?php load_js("Lib/js/vue.global.prod-3.5.22.min.js"); ?>
 
 <link href="<?php echo $app_conf_path; ?>appconf.css?v=<?php echo $app_conf_version; ?>" rel="stylesheet">
 
@@ -149,4 +148,4 @@
 </div>
 </div>
 
-<script type="text/javascript" src="<?php echo $app_conf_path; ?>appconf.js?v=<?php echo $app_conf_version; ?>"></script>
+<?php load_js('Modules/app/Lib/appconf/appconf.js'); ?>

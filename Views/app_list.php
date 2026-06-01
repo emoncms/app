@@ -2,7 +2,7 @@
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path;
 ?>
-<script src="<?php echo $path; ?>Lib/vue.min.js"></script>
+<?php load_js("Lib/js/vue.global.prod-3.5.22.min.js"); ?>
 
 <div id="app" style="padding:20px">
     <h2><?php echo _("My Apps"); ?></h2>
@@ -61,10 +61,11 @@ global $path;
 
 </div>
 <script>
-var app = new Vue({
-    el: '#app',
-    data: {
-        apps: []
+var app = Vue.createApp({
+    data() {
+        return {
+            apps: []
+        };
     },
     mounted() {
         this.getApps();
@@ -142,5 +143,5 @@ var app = new Vue({
             }
         }
     }
-});
+}).mount('#app');
 </script>

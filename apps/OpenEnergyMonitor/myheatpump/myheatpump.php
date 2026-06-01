@@ -12,9 +12,9 @@ global $path, $session, $v;
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.min.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/misc/clipboard.js?v=<?php echo $v; ?>"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/js/clipboard.js?v=<?php echo $v; ?>"></script>
 <link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=49>" rel="stylesheet">
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
@@ -78,10 +78,10 @@ global $path, $session, $v;
 
           <div class="bargraph-navigation">
             <div class="bluenav bargraph_mode" mode="combined" title="Combined" style="float:left">ALL</div>
-            <div class="bluenav bargraph_mode" mode="running" title="When running" style="float:left;padding: 12px 8px 0px 7px; height: 30px; font-size:20px"><svg class="icon"><use xlink:href="#icon-play"></use></svg></div>
-            <div class="bluenav bargraph_mode" mode="space" title="Space heating" style="float:left;padding: 8px 8px 0px 7px;height: 35px; font-size:28px"><svg class="icon"><use xlink:href="#icon-radiator"></use></svg></div>
-            <div class="bluenav bargraph_mode" mode="water" title="Water heating" style="float:left;padding: 12px 8px 0px 7px;height: 30px; font-size:20px"><svg class="icon"><use xlink:href="#icon-shower"></use></svg></div>
-            <div class="bluenav bargraph_mode" mode="cooling" title="Cooling" style="float:left;padding: 12px 8px 0px 7px;height: 30px; font-size:20px"><svg class="icon"><use xlink:href="#icon-snowflake"></use></svg></div>
+            <div class="bluenav bargraph_mode" mode="running" title="When running" style="float:left;padding: 12px 8px 0px 7px; height: 30px; font-size:20px"><span class="svg-icon-play"></span></div>
+            <div class="bluenav bargraph_mode" mode="space" title="Space heating" style="float:left;padding: 8px 8px 0px 7px;height: 35px; font-size:28px"><span class="svg-icon-radiator"></span></div>
+            <div class="bluenav bargraph_mode" mode="water" title="Water heating" style="float:left;padding: 12px 8px 0px 7px;height: 30px; font-size:20px"><span class="svg-icon-shower"></span></div>
+            <div class="bluenav bargraph_mode" mode="cooling" title="Cooling" style="float:left;padding: 12px 8px 0px 7px;height: 30px; font-size:20px"><span class="svg-icon-snowflake"></span></div>
 
             <div class="bluenav bargraph-alltime">ALL</div>
             <div class="bluenav bargraph-period" days=365>YEAR</div>
@@ -394,8 +394,9 @@ global $path, $session, $v;
   config.db = <?php echo json_encode($config); ?>;
 </script>
 
-<?php $v=197; ?>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_powergraph.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_bargraph.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js?v=<?php echo $v; ?>"></script>
+<?php
+load_js("Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_process.js");
+load_js("Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_powergraph.js");
+load_js("Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump_bargraph.js");
+load_js("Modules/app/apps/OpenEnergyMonitor/myheatpump/myheatpump.js");
+?>

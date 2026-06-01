@@ -61,6 +61,9 @@ function bargraph_load(start, end) {
 
     daily_data = {};
 
+    // map timestamp to index
+    daily_data_timestamp_map = {};
+
     if (config.app.enable_process_daily.value) {
         // Fetch daily data e.g http://localhost/emoncms/app/getdailydata?name=MyHeatpump&apikey=APIKEY
         // Ajax jquery syncronous request
@@ -72,11 +75,12 @@ function bargraph_load(start, end) {
             success: function (data) {
                 var rows = data.split("\n");
                 var fields = rows[0].split(",");
-
                 
                 for (var z = 1; z < rows.length; z++) {
                     var cols = rows[z].split(",");
                     var timestamp = cols[1] * 1000;
+
+                    daily_data_timestamp_map[timestamp] = z-1;
 
                     if (cols.length == fields.length) {
                         for (var i=2; i<fields.length; i++) {
@@ -467,6 +471,11 @@ function bargraph_tooltip(item)
     var itemTime = item.datapoint[0];
     var z = item.dataIndex;
 
+    // if timestamp map available, use it to find correct index in daily data arrays
+    if (daily_data_timestamp_map != undefined && daily_data_timestamp_map[itemTime] != undefined) {
+        z = daily_data_timestamp_map[itemTime];
+    }
+
     var elec_kwh = null;
     var heat_kwh = null;
     if (elec_enabled && data["heatpump_elec_kwhd"].length && data["heatpump_elec_kwhd"][z] != undefined) elec_kwh = data["heatpump_elec_kwhd"][z][1];
@@ -485,7 +494,7 @@ function bargraph_tooltip(item)
     var COP = null;
     if (heat_kwh !== null && elec_kwh !== null) COP = heat_kwh / elec_kwh;
 
-    var d = new Date(itemTime);
+    var d = new Date(itemTime);data["boiler_kwhd"]
     var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     var date = days[d.getDay()] + ", " + months[d.getMonth()] + " " + d.getDate();
 
@@ -540,7 +549,9 @@ function bargraph_tooltip(item)
     var boiler_str = "";
     if (show_daily_boiler) {
         var boiler_kwh = null;
-        if (data["boiler_kwhd"].length && data["boiler_kwhd"][z] != undefined) boiler_kwh = data["boiler_kwhd"][z][1];
+        if (data["boiler_kwhd"].length && data["boiler_kwhd"][z] != undefined) {
+            boiler_kwh = data["boiler_kwhd"][z][1];
+        }
         if (boiler_kwh !== null) {
             boiler_str = "<br>Boiler heat: " + boiler_kwh.toFixed(1) + " kWh";
         }

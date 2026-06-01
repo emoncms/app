@@ -576,25 +576,26 @@ var config = {
 }
 
 
-var vue_config = new Vue({
-    el: '#vue-config',
-    data: {
-        app_name: "App Name",
-        app_name_color: "#44b3e2",
-        app_description: "",
-        app_instructions: "",
-        config_name: "",
-        config_public: false,
-        config_items: [],
-        config_valid: false,
-        autogen_node: "",
-        autogen_feeds: [],
-        autogen_all_present: false,
-        autogen_status: "",
-        autogen_status_color: "#aaa",
+var vue_config_app = Vue.createApp({
+    data: function() {
+        return {
+            app_name: "App Name",
+            app_name_color: "#44b3e2",
+            app_description: "",
+            app_instructions: "",
+            config_name: "",
+            config_public: false,
+            config_items: [],
+            config_valid: false,
+            autogen_node: "",
+            autogen_feeds: [],
+            autogen_all_present: false,
+            autogen_status: "",
+            autogen_status_color: "#aaa",
 
-        // Button only currently used by myheatpump app.
-        enable_process_daily: false
+            // Button only currently used by myheatpump app.
+            enable_process_daily: false
+        };
     },
     methods: {
 
@@ -834,3 +835,5 @@ var vue_config = new Vue({
         }
     }
 });
+
+var vue_config = vue_config_app.mount('#vue-config');

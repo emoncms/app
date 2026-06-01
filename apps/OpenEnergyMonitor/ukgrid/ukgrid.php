@@ -14,7 +14,7 @@ global $path, $session, $v;
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<script src="<?php echo $path; ?>Lib/misc/clipboard.js?v=<?php echo $v; ?>"></script>
+<script src="<?php echo $path; ?>Lib/js/clipboard.js?v=<?php echo $v; ?>"></script>
 
 <style>
     /* Dynamic height chart placeholder */
@@ -66,12 +66,8 @@ global $path, $session, $v;
             </button></li>
         </ul>
     <ul class="text-right nav nav-pills mb-0">
-        <li><button class="btn btn-large btn-link btn-inverse config-open" title="<?php echo tr('Edit') ?>"><svg class="icon">
-                    <use xlink:href="#icon-wrench"></use>
-                </svg></button></li>
-        <li><button class="btn btn-large btn-link btn-inverse config-close hide" title="<?php echo tr('Close') ?>"><svg class="icon">
-                    <use xlink:href="#icon-close"></use>
-                </svg></button></li>
+        <li><button class="btn btn-large btn-link btn-inverse config-open" title="<?php echo tr('Edit') ?>"><span class="svg-icon-wrench"></span></button></li>
+        <li><button class="btn btn-large btn-link btn-inverse config-close hide" title="<?php echo tr('Close') ?>"><span class="svg-icon-close"></span></button></li>
     </ul>
 </nav>
 
