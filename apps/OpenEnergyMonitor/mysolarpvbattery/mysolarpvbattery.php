@@ -255,7 +255,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
 </section>
 
 <div id="appconf-description" style="display:none">
-    <p class="lead">This app can be used to explore onsite solar generation, self consumption, battery integration, export and building consumption.</p>
+    <p class="lead">Visualise the flow of electricity through your home &mdash; solar generation, self-consumption, battery charge and discharge, grid import and export, and household consumption &mdash; and explore time-of-use tariff costs over time.</p>
     <p><b style="color:#fff">Derive missing feed:</b> If you do not have one out of the selectable power feeds, this app can derive this data from the others using conservation of energy.</p>
 </div>
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
@@ -276,8 +276,8 @@ function getTranslations(){
 var apikey = "<?php echo isset($apikey) ? $apikey : ''; ?>";
 var sessionwrite = <?php echo isset($session['write']) ? intval($session['write']) : 0; ?>;
 
-config.app_name = "My Solar PV Battery";
-config.app_name_color = "#dccc1f";
+config.app_name = "My Electric Flow";
+config.app_name_color = "#44b3e2";
 config.id = <?php echo isset($id) ? intval($id) : 0; ?>;
 config.name = "<?php echo isset($name) ? addslashes($name) : ''; ?>";
 config.public = <?php echo isset($public) ? intval($public) : 0; ?>;
