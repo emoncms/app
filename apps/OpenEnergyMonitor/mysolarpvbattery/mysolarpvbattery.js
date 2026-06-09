@@ -392,6 +392,10 @@ function init()
         $("#flow-block-view").toggleClass("d-none", tariff_view_active);
         $("#cost-view").toggleClass("d-none", !tariff_view_active);
 
+        // Top live panel: 6-box power grid in flow mode, 2-column import/export + tariff in cost mode.
+        $("#live-power-view").toggleClass("d-none", tariff_view_active);
+        $("#live-cost-view").toggleClass("d-none", !tariff_view_active);
+
         // Clear any lingering hover tooltip from the other mode.
         $("#tooltip").remove();
         tariff_tooltip_prev = false;
@@ -406,6 +410,8 @@ function init()
         } else {
             load_process_draw_graph();     // restore the power/bar chart
         }
+
+        livefn(); // ensure the top live panel is updated to match the current mode's chart
     });
 
     // -------------------------------------------------------------------
@@ -852,6 +858,39 @@ function update_live_display(input, battery_soc_now, powerUnit) {
         $(".battery_now_title").html("POWER");
     }
     $(".battery-now").html(battery);
+
+    if (tariff_view_active) update_live_cost_display(input.grid, scale, dp, powerUnit);
+}
+
+// Cost-mode top panel: importing/exporting live power (left) and the current
+// import/export tariff price (right). Tariff direction follows the live grid sign,
+// defaulting to the import price when balanced.
+function update_live_cost_display(grid_power, scale, dp, powerUnit) {
+
+    // Right: current tariff price. Exporting -> export price (purple); otherwise import
+    // price inc VAT (pink). Show "--" if no current half-hour rate is loaded.
+    let price, label, color;
+    if (grid_power < 0) {
+        const rate = get_current_tariff_rate("export_tariff"); // stored inverted (negative)
+        price = rate === null ? null : (rate * -1);
+        label = "EXPORT PRICE";
+        color = "#941afb";
+    } else {
+        const rate = get_current_tariff_rate("import_tariff");
+        price = rate === null ? null : (rate * 1.05); // inc VAT
+        label = "IMPORT PRICE";
+        color = "#fb1a80";
+    }
+
+    $(".live-cost-tariff-label").html(label);
+    $(".live-cost-tariff-now").parent().css("color", color);
+    if (price === null) {
+        $(".live-cost-tariff-now").html("--");
+        $(".live-cost-tariff-unit").hide();
+    } else {
+        $(".live-cost-tariff-now").html(price.toFixed(2));
+        $(".live-cost-tariff-unit").show();
+    }
 }
 
 function solar_battery_visibility() {

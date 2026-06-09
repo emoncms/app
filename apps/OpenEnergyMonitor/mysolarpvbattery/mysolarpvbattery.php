@@ -31,7 +31,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
 
     <div style="padding:5px; background-color: #262626; border-radius: 0.375rem; margin-bottom: 1rem;">
 
-    <div class="stats-grid">
+    <div id="live-power-view" class="stats-grid">
         <div>
             <h5 class="power-title text-light"><?php echo tr('USE') ?></h5>
             <h2 class="power-value text-primary"><span class="use-now"></span><span class="power-unit"></span></h2>
@@ -55,6 +55,17 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
         <div class="battery-section">
             <h5 class="power-title text-light"><span class="d-inline d-sm-none"><?php echo tr('SOC') ?></span><span class="d-none d-sm-inline"><?php echo tr('STATE OF CHARGE') ?></span></h5>
             <h2 class="power-value text-quaternary"><span class="battery_soc">-</span>%</h2>
+        </div>
+    </div>
+
+    <div id="live-cost-view" class="live-cost-grid d-none">
+        <div>
+            <h5 class="power-title text-light"><span class="balance-label">-</span></h5>
+            <h2 class="power-value"><span class="grid-now">0</span><span class="power-unit">W</span></h2>
+        </div>
+        <div>
+            <h5 class="power-title text-light"><span class="live-cost-tariff-label"><?php echo tr('IMPORT PRICE') ?></span></h5>
+            <h2 class="power-value"><span class="live-cost-tariff-now">--</span><span class="live-cost-tariff-unit" style="font-size:1.2rem"> p/kWh</span></h2>
         </div>
     </div>
     </div>

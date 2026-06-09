@@ -385,6 +385,19 @@ body {
     min-width: 0;
 }
 
+/* Cost-mode top panel: import/export power + current tariff price */
+.live-cost-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem 1rem;
+    padding: 0.5rem 0;
+}
+
+.live-cost-grid > div {
+    text-align: center;
+    min-width: 0;
+}
+
 /* Tariff cost breakdown table (Costs view) */
 .tariff-table {
     width: 100%;

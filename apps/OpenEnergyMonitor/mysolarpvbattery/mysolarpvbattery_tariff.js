@@ -226,6 +226,19 @@ function get_value_at_index(data_array, index, default_value = null) {
     return default_value;
 }
 
+// Tariff rate (p/kWh) for the current half-hour from the loaded tariff_data, or null
+// if not loaded / the current half-hour is outside the loaded window. Mirrors the
+// Tariff Explorer's this_halfhour lookup. Note: export_tariff is stored inverted.
+function get_current_tariff_rate(key) {
+    var arr = tariff_data[key];
+    if (!arr || !arr.length) return null;
+    var this_halfhour = Math.floor(Date.now() / 1800000) * 1800000;
+    for (var z = arr.length - 1; z >= 0; z--) {
+        if (arr[z][0] === this_halfhour) return arr[z][1];
+    }
+    return null;
+}
+
 // -------------------------------------------------------------------------------
 // CALCULATIONS
 // -------------------------------------------------------------------------------
