@@ -271,7 +271,7 @@ let timeWindow = (3600000*24.0*30);
 let history_end = +new Date;
 let history_start = history_end - timeWindow;
 
-timeWindow = (3600000*6.0*1);
+timeWindow = (3600000*24.0*1);
 let power_end = +new Date;
 let power_start = power_end - timeWindow;
 

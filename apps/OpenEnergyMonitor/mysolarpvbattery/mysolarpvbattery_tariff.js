@@ -473,7 +473,7 @@ function draw_tariff_graph() {
                  font: { color: font_color }, reserveSpace: false },
         yaxes: [
             { position: 'left',  font: { color: font_color }, reserveSpace: false },
-            { position: 'right', alignTicksWithAxis: 1, font: { color: font_color }, reserveSpace: false }
+            { position: 'left', alignTicksWithAxis: 1, font: { color: font_color }, reserveSpace: false }
         ],
         grid: { show: true, color: "#aaa", borderWidth: 0, hoverable: true, clickable: true },
         selection: { mode: "x" },
