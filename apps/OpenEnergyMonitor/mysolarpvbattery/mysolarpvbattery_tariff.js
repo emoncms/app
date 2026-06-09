@@ -58,6 +58,10 @@ let monthly_summary = {};
 let baseline_monthly_summary = {};
 let baseline_tariff_name = "";
 
+// Grid carbon intensity overlay (optional). Remote feed id on emoncms.org.
+let show_carbonintensity = false;
+const carbonintensity_feedid = 428391;
+
 // ----------------------------------------------------------------------
 // Fetch the list of remote Octopus tariff feeds (import tariffs by region).
 // Called once from show().
@@ -144,7 +148,8 @@ function load_tariff_rates(ts, te, interval) {
 
     const remote_feeds = {
         import_tariff: (region && tariff && octopus_feed_list[tariff]) ? octopus_feed_list[tariff][region] : false,
-        export_tariff: region ? (regions_outgoing[region] || false) : false
+        export_tariff: region ? (regions_outgoing[region] || false) : false,
+        carbonintensity: show_carbonintensity ? carbonintensity_feedid : false
     };
 
     let feedids = [];
@@ -185,6 +190,7 @@ function process_tariff_data() {
     });
 
     total_tariff = JSON.parse(JSON.stringify(total_template));
+    total_tariff.co2 = 0;
     monthly_data = {};
     time_to_index_map = {};
 
@@ -215,6 +221,16 @@ function process_tariff_data() {
                 total_tariff[f.key].kwh  += kwh;
             }
         });
+
+        // Grid carbon emissions: imported kWh * intensity (gCO2/kWh) -> kgCO2.
+        if (show_carbonintensity) {
+            let carbon_intensity = get_value_at_index(tariff_data["carbonintensity"], z, null);
+            if (carbon_intensity !== null) {
+                let kwh_import = Math.max(0, get_value_at_index(tariff_data["grid_to_load"], z, 0))
+                              + Math.max(0, get_value_at_index(tariff_data["grid_to_battery"], z, 0));
+                total_tariff.co2 += kwh_import * carbon_intensity * 0.001;
+            }
+        }
     }
 }
 
@@ -439,7 +455,22 @@ function render_cost_breakdown() {
         $("#monthly-data").addClass("d-none");
     }
 
+    render_carbon_summary();
     draw_tariff_graph();
+}
+
+// Window CO2 summary: total kgCO2 and the average consumption intensity (gCO2/kWh).
+function render_carbon_summary() {
+    if (!show_carbonintensity) {
+        $("#carbonintensity_result").html("");
+        return;
+    }
+    var total_import_kwh = total_tariff.grid_to_load.kwh + total_tariff.grid_to_battery.kwh;
+    var window_co2_intensity = total_import_kwh > 0 ? 1000 * total_tariff.co2 / total_import_kwh : 0;
+    $("#carbonintensity_result").html(
+        "Total CO2: " + (total_tariff.co2 || 0).toFixed(1) + " kgCO2, " +
+        "Consumption intensity: " + window_co2_intensity.toFixed(0) + " gCO2/kWh"
+    );
 }
 
 // -------------------------------------------------------------------------------
@@ -479,6 +510,12 @@ function draw_tariff_graph() {
             color: "#941afb", lines: { show: true, steps: true, align: "center", lineWidth: 1 }
         });
     }
+    if (show_carbonintensity && tariff_data["carbonintensity"] && tariff_data["carbonintensity"].length) {
+        graph_series.push({
+            label: "Carbon Intensity", data: tariff_data["carbonintensity"], yaxis: 2,
+            color: "#888", lines: { show: true, steps: true, align: "left", lineWidth: 1 }
+        });
+    }
 
     var font_color = "#888";
     var options = {
@@ -513,6 +550,7 @@ function tariff_tooltip(item) {
 
     var import_tariff = get_value_at_index(tariff_data["import_tariff"], z);
     var export_tariff = get_value_at_index(tariff_data["export_tariff"], z);
+    var carbonintensity = get_value_at_index(tariff_data["carbonintensity"], z);
 
     tariff_flows.forEach(function(f) {
         var kwh = get_value_at_index(tariff_data[f.key], z);
@@ -532,6 +570,9 @@ function tariff_tooltip(item) {
     if (export_tariff != null) {
         // export_tariff is stored inverted; present a positive rate.
         text += "<span style='color:#941afb'>&#x25CF;</span> Export: " + (export_tariff * -1).toFixed(2) + " p/kWh (inc VAT)<br>";
+    }
+    if (show_carbonintensity && carbonintensity != null) {
+        text += "&#x1F331; Carbon Intensity: " + carbonintensity.toFixed(0) + " gCO2/kWh<br>";
     }
 
     tooltip(item.pageX, item.pageY, text, "#fff", "#000");
@@ -572,6 +613,7 @@ function download_tariff_csv() {
 
     var flow_keys = tariff_flows.map(function(f) { return f.key; });
     var header = ["time"].concat(flow_keys, ["import_tariff_p_kwh", "export_tariff_p_kwh"]);
+    if (show_carbonintensity) header.push("carbon_intensity_gco2_kwh");
 
     var csv = [header.join(",")];
 
@@ -588,6 +630,11 @@ function download_tariff_csv() {
         line.push(import_rate === null ? "" : import_rate.toFixed(3));
         // export_tariff is stored inverted; re-negate to present a positive p/kWh rate.
         line.push(export_rate === null ? "" : (export_rate * -1).toFixed(3));
+
+        if (show_carbonintensity) {
+            var ci = get_value_at_index(tariff_data["carbonintensity"], z, null);
+            line.push(ci === null ? "" : ci.toFixed(0));
+        }
 
         csv.push(line.join(","));
     }
@@ -617,6 +664,12 @@ $("#save-baseline").on("click", function() {
 // Download half-hourly data as CSV.
 $("#download-csv").on("click", function() {
     download_tariff_csv();
+});
+
+// Toggle the grid carbon intensity overlay; reload the remote rate feeds (incl. carbon) only.
+$("#show_carbonintensity").on("change", function() {
+    show_carbonintensity = this.checked;
+    load_tariff_analysis(false, true);
 });
 
 // Zoom the whole view (chart + cost table) to a single month.

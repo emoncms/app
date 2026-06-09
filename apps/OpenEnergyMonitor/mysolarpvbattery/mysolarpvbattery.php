@@ -137,6 +137,11 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
             <button id="download-csv" class="cost-btn"><?php echo tr('Download CSV') ?></button>
         </div>
 
+        <div class="cost-options">
+            <label class="ctrl-checkbox"><input id="show_carbonintensity" type="checkbox" /> <?php echo tr('Show grid carbon intensity') ?></label>
+            <div id="carbonintensity_result" class="ctrl-note"></div>
+        </div>
+
         <div id="monthly-data" class="d-none mt-3">
             <table class="tariff-table mb-3">
                 <thead><tr></tr></thead>
