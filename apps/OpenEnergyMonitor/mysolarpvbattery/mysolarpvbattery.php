@@ -18,18 +18,18 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
 
 <section id="app-block" style="display:none" class="block">
 
+    <div style="padding:5px; background-color: #262626; border-radius: 0.375rem; margin-bottom: 1rem; margin-top: 1rem;">
+
     <nav class="app-top-bar d-flex justify-content-between">
         <ul id="tabs" class="btn-list">
-            <li><button class="app-btn view-toggle-btn active" data-view="flows"><?php echo tr('Electric flow') ?></button></li>
-            <li><button class="app-btn view-toggle-btn d-none" data-view="costs"><?php echo tr('Tariff explorer') ?></button></li>
+            <li><button class="app-btn view-toggle-btn active" data-view="flows"><i class="svg-icon-shuffle"></i><span><?php echo tr('Electric flow') ?></span></button></li>
+            <li><button class="app-btn view-toggle-btn d-none" data-view="costs"><i class="svg-icon-schedule"></i><span><?php echo tr('Tariff explorer') ?></span></button></li>
         </ul>
         <ul class="btn-list">
             <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><i class="icon-wrench icon-white" title="Configure app"></i></button></li>
             <li><button class="app-btn config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close icon-white"></i></button></li>
         </ul>
     </nav>
-
-    <div style="padding:5px; background-color: #262626; border-radius: 0.375rem; margin-bottom: 1rem;">
 
     <div id="live-power-view" class="stats-grid">
         <div>

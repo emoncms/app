@@ -32,6 +32,27 @@ body {
     margin-bottom: .4rem;
 }
 
+/* Header tabs: Electric flow | Tariff explorer (icon + label) */
+#tabs .view-toggle-btn {
+    gap: 0.45em;
+    font-weight: bold;
+    border-radius: 0;
+    border-bottom: 2px solid transparent;
+    padding: 0.25rem 0.6rem 0.4rem;
+}
+
+#tabs .view-toggle-btn [class^="svg-icon-"] {
+    font-size: 1.1em;
+}
+
+/* Active tab: accent underline indicator instead of the default text underline */
+#tabs .view-toggle-btn.active {
+    text-decoration: none;
+    color: #fff;
+    opacity: 1;
+    border-bottom-color: #44b3e2;
+}
+
 /* btn-list: replaces Bootstrap .nav .nav-pills */
 .btn-list {
     list-style: none;
