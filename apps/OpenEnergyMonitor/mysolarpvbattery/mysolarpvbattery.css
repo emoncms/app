@@ -526,6 +526,13 @@ body {
     outline: none;
 }
 
+.cost-btn.active {
+    background-color: rgba(68,179,226,0.35);
+    color: #fff;
+    border-color: rgba(68,179,226,0.6);
+    font-weight: bold;
+}
+
 /* Cost-view option toggles (e.g. carbon intensity) */
 .cost-options {
     display: flex;

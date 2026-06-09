@@ -134,6 +134,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
                 <span class="ctrl-label"><?php echo tr('Tariff') ?></span>
                 <select id="tariff"></select>
             </div>
+            <button id="show_profile" class="cost-btn"><?php echo tr('Profile') ?></button>
             <button id="download-csv" class="cost-btn"><?php echo tr('Download CSV') ?></button>
         </div>
 

@@ -62,6 +62,11 @@ let baseline_tariff_name = "";
 let show_carbonintensity = false;
 const carbonintensity_feedid = 428391;
 
+// Averaged daily import profile (48 half-hour-of-day buckets) and its display sub-mode.
+let profile_mode = false;
+let profile_kwh = [];
+let profile_cost = [];
+
 // ----------------------------------------------------------------------
 // Fetch the list of remote Octopus tariff feeds (import tariffs by region).
 // Called once from show().
@@ -194,6 +199,16 @@ function process_tariff_data() {
     monthly_data = {};
     time_to_index_map = {};
 
+    // Averaged daily import profile: 48 half-hour-of-day buckets (today's date as the time axis).
+    profile_kwh = [];
+    profile_cost = [];
+    var profile_start = new Date(); profile_start.setHours(0, 0, 0, 0);
+    for (var pi = 0; pi < 48; pi++) {
+        var pt = profile_start.getTime() + pi * 1800 * 1000;
+        profile_kwh[pi]  = [pt, 0.0];
+        profile_cost[pi] = [pt, 0.0];
+    }
+
     const ref_data = tariff_data["grid_to_load"];
     if (!ref_data || !ref_data.length) return;
 
@@ -222,12 +237,21 @@ function process_tariff_data() {
             }
         });
 
+        // Imported energy this half-hour (grid -> load + grid -> battery).
+        let kwh_import = Math.max(0, get_value_at_index(tariff_data["grid_to_load"], z, 0))
+                       + Math.max(0, get_value_at_index(tariff_data["grid_to_battery"], z, 0));
+
+        // Averaged daily import profile, bucketed by half-hour of day.
+        let hh = d.getHours() * 2 + Math.floor(d.getMinutes() / 30);
+        if (import_unit_rate !== null && profile_kwh[hh]) {
+            profile_kwh[hh][1]  += kwh_import;
+            profile_cost[hh][1] += kwh_import * import_unit_rate * 0.01;
+        }
+
         // Grid carbon emissions: imported kWh * intensity (gCO2/kWh) -> kgCO2.
         if (show_carbonintensity) {
             let carbon_intensity = get_value_at_index(tariff_data["carbonintensity"], z, null);
             if (carbon_intensity !== null) {
-                let kwh_import = Math.max(0, get_value_at_index(tariff_data["grid_to_load"], z, 0))
-                              + Math.max(0, get_value_at_index(tariff_data["grid_to_battery"], z, 0));
                 total_tariff.co2 += kwh_import * carbon_intensity * 0.001;
             }
         }
@@ -456,7 +480,14 @@ function render_cost_breakdown() {
     }
 
     render_carbon_summary();
-    draw_tariff_graph();
+    redraw_tariff_chart();
+}
+
+// Draws whichever Costs-mode chart is active: the time-series tariff chart, or the
+// averaged daily import profile.
+function redraw_tariff_chart() {
+    if (profile_mode) profile_draw();
+    else draw_tariff_graph();
 }
 
 // Window CO2 summary: total kgCO2 and the average consumption intensity (gCO2/kWh).
@@ -534,9 +565,66 @@ function draw_tariff_graph() {
     $(".ajax-loader").hide();
 }
 
+// Averaged daily import profile: total imported kWh per half-hour of day (bars) and the
+// average import unit price (line). A sub-mode of the Costs chart.
+function profile_draw() {
+    profile_mode = true;
+
+    var profile_unitprice = [];
+    for (var z = 0; z < 48; z++) {
+        var time = profile_kwh[z][0];
+        var value = profile_kwh[z][1] > 0 ? 100 * profile_cost[z][1] / profile_kwh[z][1] : 0;
+        // Two points per half-hour so the price reads as a flat step across the bar.
+        profile_unitprice[z * 2]     = [time, value];
+        profile_unitprice[z * 2 + 1] = [time + 1800000, value];
+    }
+
+    var bars = { show: true, align: "left", barWidth: 0.9 * 1800 * 1000, fill: 1.0, lineWidth: 0 };
+
+    var graph_series = [];
+    graph_series.push({ label: "Import", data: profile_kwh, yaxis: 1, color: "#44b3e2", stack: true, bars: bars });
+    graph_series.push({
+        label: config.app.tariff.value, data: profile_unitprice, yaxis: 2,
+        color: "#fb1a80", lines: { show: true, align: "left", lineWidth: 1 }
+    });
+
+    var font_color = "#888";
+    var options = {
+        xaxis: { mode: "time", timezone: "browser", font: { color: font_color }, reserveSpace: false },
+        yaxes: [
+            { position: 'left',  font: { color: font_color }, reserveSpace: false },
+            { position: 'left', alignTicksWithAxis: 1, font: { color: font_color }, reserveSpace: false }
+        ],
+        grid: { show: true, color: "#aaa", borderWidth: 0, hoverable: true, clickable: true },
+        selection: { mode: "x" },
+        legend: { show: false }
+    };
+
+    $.plot($('#placeholder'), graph_series, options);
+    $(".ajax-loader").hide();
+}
+
+// Hover tooltip for the profile chart: time of day, window-total import, average price.
+function profile_tooltip(item) {
+    var d = new Date(item.datapoint[0]);
+    var hh = d.getHours() * 2 + Math.floor(d.getMinutes() / 30);
+    var hours = d.getHours();   if (hours < 10) hours = "0" + hours;
+    var minutes = d.getMinutes(); if (minutes < 10) minutes = "0" + minutes;
+
+    var text = "Time of day: " + hours + ":" + minutes + "<br>";
+    var kwh  = profile_kwh[hh]  ? profile_kwh[hh][1]  : null;
+    var cost = profile_cost[hh] ? profile_cost[hh][1] : null;
+    if (kwh != null) text += "Import (window total): " + kwh.toFixed(2) + " kWh<br>";
+    if (kwh && cost != null) text += "Average price: " + (100 * cost / kwh).toFixed(2) + " p/kWh<br>";
+
+    tooltip(item.pageX, item.pageY, text, "#fff", "#000");
+}
+
 // Hover tooltip for the Costs-mode chart: per-flow kWh + priced value, and the
 // import/export p/kWh for the hovered half-hour. Uses tooltip() from vis.helper.js.
 function tariff_tooltip(item) {
+    if (profile_mode) { profile_tooltip(item); return; }
+
     var itemTime = item.datapoint[0];
     var z = time_to_index_map[itemTime];
 
@@ -670,6 +758,13 @@ $("#download-csv").on("click", function() {
 $("#show_carbonintensity").on("change", function() {
     show_carbonintensity = this.checked;
     load_tariff_analysis(false, true);
+});
+
+// Toggle the averaged daily import profile chart against the time-series tariff chart.
+$("#show_profile").on("click", function() {
+    profile_mode = !profile_mode;
+    $(this).toggleClass("active", profile_mode);
+    redraw_tariff_chart();
 });
 
 // Zoom the whole view (chart + cost table) to a single month.

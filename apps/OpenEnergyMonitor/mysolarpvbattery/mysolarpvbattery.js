@@ -400,6 +400,12 @@ function init()
         $("#tooltip").remove();
         tariff_tooltip_prev = false;
 
+        // Leaving Costs mode resets the profile sub-mode back to the time-series chart.
+        if (!tariff_view_active) {
+            profile_mode = false;
+            $("#show_profile").removeClass("active");
+        }
+
         // The shared chart switches style by mode: hide power/bar-specific chrome in Costs mode.
         // (The Costs toggle is only available when has_history, so the Daily button is restorable.)
         $(".viewhistory").toggle(!tariff_view_active);
@@ -733,7 +739,7 @@ function resize()
     placeholder_bound.height(height);
     placeholder.height(height);
 
-    if (tariff_view_active) draw_tariff_graph(); else draw_graph();
+    if (tariff_view_active) redraw_tariff_chart(); else draw_graph();
 }
 
 function hide() 
