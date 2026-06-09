@@ -79,6 +79,10 @@ function load_process_draw_graph() {
         process_and_draw_graph();
 
     }, false, "notime");
+
+    // Keep the tariff cost breakdown in sync with the chart window when that view is active.
+    // load_tariff_analysis reads view.start/end itself and runs its own fixed-1800s load.
+    if (tariff_view_active) load_tariff_analysis();
 }
 
 // Iterates over the loaded timeseries data, derives any missing power flows using

@@ -148,7 +148,7 @@ body {
 
 .power-value {
     margin: 0;
-    line-height: 1.6;
+    line-height: 1.3;
     font-size: 1.7rem;
 }
 
@@ -378,5 +378,23 @@ body {
 .stats-grid > div {
     text-align: center;
     min-width: 0;
+}
+
+/* Tariff cost breakdown table (Costs view) */
+.tariff-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #aaa;
+}
+
+.tariff-table th,
+.tariff-table td {
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.tariff-table tr {
+    border-bottom: 1px solid rgba(68,179,226,0.1);
 }
 

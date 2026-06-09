@@ -2,7 +2,7 @@
     defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session;
 ?>
-
+<!--
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
@@ -13,9 +13,22 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
 
-<!-- load mysolarpvbattery.css -->
 <link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.css?v=<?php echo $v; ?>" rel="stylesheet">
+-->
 
+<?php
+
+load_js("Modules/feed/feed.js");
+load_js("Lib/flot/jquery.flot.min.js");
+load_js("Lib/flot/jquery.flot.time.min.js");
+load_js("Lib/flot/jquery.flot.selection.min.js");
+load_js("Lib/flot/jquery.flot.stack.min.js");
+load_js("Lib/flot/date.format.min.js");
+load_js("Lib/vis.helper.js");
+load_js("Modules/app/Lib/timeseries.js");
+load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.css");
+
+?>
 
 
 <section id="app-block" style="display:none" class="block">
@@ -85,7 +98,25 @@
         
     <div style="padding:5px; background-color: #262626; border-radius: 0.375rem; margin-bottom: 1rem;">
 
-    <table class="statstable">
+    <nav class="view-toggle btn-list mb-2">
+        <button class="app-btn view-toggle-btn active" data-view="flows"><?php echo tr('Energy flows') ?></button>
+        <button class="app-btn view-toggle-btn d-none" data-view="costs"><?php echo tr('Costs') ?></button>
+    </nav>
+
+    <div id="cost-view" class="d-none">
+        <table class="tariff-table">
+            <tr>
+                <th><?php echo tr('Energy flow') ?></th>
+                <th><?php echo tr('Energy') ?></th>
+                <th><?php echo tr('Value / Cost') ?></th>
+                <th><?php echo tr('Unit price') ?></th>
+                <th></th>
+            </tr>
+            <tbody id="cost_breakdown_body"></tbody>
+        </table>
+    </div>
+
+    <table id="flow-block-view" class="statstable">
         <tr>
             <td id="solar-box" class="statsbox solar-section" colspan="3">
                 <div class="statsbox-inner-unit">
@@ -221,19 +252,8 @@ config.db = <?php echo isset($config) ? json_encode($config) : 'null'; ?>;
 <?php
 
 // Load app specific JS with auto versioning based on file modification time to prevent caching issues after updates
-load_js_auto_version("mysolarpvbattery_graph.js");
-load_js_auto_version("mysolarpvbattery.js");
+load_js("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery_graph.js");
+load_js("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery_tariff.js");
+load_js("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.js");
 
-
-function load_js_auto_version($scriptname) {
-    global $path;
-    $script_path = "Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/".$scriptname;
-
-    $version_string = "";
-    if (file_exists($script_path)) {
-        $last_updated = filemtime($script_path);
-        $version_string = "?v=".$last_updated;
-    }
-    echo '<script src="'.$path.$script_path.$version_string.'"></script>';
-}
 ?>

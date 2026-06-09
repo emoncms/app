@@ -22,6 +22,23 @@ const flow_colors = {
 const SOLAR_FIRST = 0;
 const BATTERY_FIRST = 1;
 
+// Available Octopus tariffs for the integrated cost breakdown (see mysolarpvbattery_tariff.js)
+const tariff_options = [
+    "AGILE-18-02-21",
+    "AGILE-22-07-22",
+    "AGILE-22-08-31",
+    "AGILE-23-12-06",
+    "AGILE-24-10-01",
+    "GO-VAR-22-10-14",
+    "INTELLI-FLUX-IMPORT-23-07-14",
+    "INTELLI-VAR-22-10-14",
+    "INTELLI-VAR-24-10-29",
+    "INTELLI-VAR-OEV-24-07-17",
+    "SNUG-24-11-07",
+    "COSY-22-12-08",
+    "FLUX-IMPORT-23-02-14"
+];
+
 // ----------------------------------------------------------------------
 // Configuration
 // ----------------------------------------------------------------------
@@ -74,7 +91,23 @@ config.app = {
     "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description": "Display power as kW"},
     "battery_capacity_kwh":{"type":"value", "default":0, "name":"Battery Capacity", "description":"Battery capacity in kWh (used for time-remaining estimate; only used when has_battery is enabled)"},
 
-    "strategy":{"type":"select", "default":"Solar first", "options":["Solar first", "Battery first"], "name":"Flow allocation strategy", "description":""}
+    "strategy":{"type":"select", "default":"Solar first", "options":["Solar first", "Battery first"], "name":"Flow allocation strategy", "description":""},
+
+    // == Tariff cost breakdown (Octopus) ==
+    // Region + tariff used by the integrated cost breakdown view (mysolarpvbattery_tariff.js).
+    "region": {
+        "type": "select",
+        "name": "Select region:",
+        "default": "D_Merseyside_and_Northern_Wales",
+        "options": ["A_Eastern_England", "B_East_Midlands", "C_London", "E_West_Midlands", "D_Merseyside_and_Northern_Wales", "F_North_Eastern_England", "G_North_Western_England", "H_Southern_England", "J_South_Eastern_England", "K_Southern_Wales", "L_South_Western_England", "M_Yorkshire", "N_Southern_Scotland", "P_Northern_Scotland"]
+    },
+
+    "tariff": {
+        "type": "select",
+        "name": "Select tariff:",
+        "default": "AGILE-23-12-06",
+        "options": tariff_options
+    }
 };
 
 // ----------------------------------------------------------------------
@@ -185,6 +218,9 @@ let panning = false;
 let kwhd_data = {};
 let kwhd_cache = {};
 
+// Lower-panel view toggle: false = energy-flow block, true = tariff cost breakdown
+let tariff_view_active = false;
+
 
 // == Flow decomposition control variables ==
 
@@ -284,6 +320,10 @@ function init()
     // Show history bargraph button only when all required kWh flow feeds are available for the current mode
     const has_history = check_history_feeds(mode);
     $(".viewhistory").toggle(has_history);
+
+    // The tariff cost breakdown also needs the half-hourly kWh flow feeds, so gate its toggle
+    // button on the same condition.
+    $(".view-toggle-btn[data-view=costs]").toggleClass("d-none", !has_history);
     
     // The buttons for these graph events are hidden when in historic mode 
     // The events are loaded at the start here and dont need to be unbinded and binded again.
@@ -336,6 +376,20 @@ function init()
             load_process_draw_graph();
         }
     });
+
+    // Lower-panel view toggle: switch between the energy-flow block and the tariff cost breakdown.
+    $(".view-toggle-btn").click(function () {
+        const target = $(this).attr("data-view");
+        tariff_view_active = (target === "costs");
+
+        $(".view-toggle-btn").removeClass("active");
+        $(this).addClass("active");
+
+        $("#flow-block-view").toggleClass("d-none", tariff_view_active);
+        $("#cost-view").toggleClass("d-none", !tariff_view_active);
+
+        if (tariff_view_active) load_tariff_analysis();
+    });
 }
 
 function show() 
@@ -348,6 +402,9 @@ function show()
     assume_zero_solar     = state.assume_zero_solar;
     assume_zero_battery   = state.assume_zero_battery;
     battery_soc_available = state.battery_soc_available;
+
+    // Fetch the remote Octopus tariff feed list (import tariffs by region) for the cost breakdown.
+    fetch_octopus_feed_list();
 
     solar_battery_visibility();
     load_process_draw_graph();
