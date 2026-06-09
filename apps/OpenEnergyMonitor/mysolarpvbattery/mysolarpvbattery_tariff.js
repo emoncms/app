@@ -5,7 +5,8 @@
 // dedicated half-hourly (1800s) data load over the current view window, completely independent of the
 // power/bar chart's variable interval, so tariff costs are always computed on half-hourly buckets.
 //
-// Relies on globals defined elsewhere in the app: feed, config, view, path, flow_colors.
+// Relies on globals defined elsewhere in the app: feed, config, view, path, flow_colors,
+// tariff_options, load_process_draw_graph().
 // -------------------------------------------------------------------------------------------------------
 
 // Per-flow rate metadata: which tariff feed (import vs export) prices each energy flow.
@@ -44,6 +45,12 @@ let octopus_feed_list = {};
 let tariff_data = {};
 let total_tariff = {};
 
+// Per-month buckets + summaries, and the saved baseline for tariff comparison.
+let monthly_data = {};
+let monthly_summary = {};
+let baseline_monthly_summary = {};
+let baseline_tariff_name = "";
+
 // ----------------------------------------------------------------------
 // Fetch the list of remote Octopus tariff feeds (import tariffs by region).
 // Called once from show().
@@ -64,18 +71,35 @@ function fetch_octopus_feed_list() {
 }
 
 // ----------------------------------------------------------------------
-// load_tariff_analysis: dedicated 1800s load for the cost breakdown.
-// Reads the current view window, aligns to half-hour boundaries locally
-// (without mutating view, so the chart is undisturbed), loads the kWh flow
-// feeds (delta=1) and the remote tariff feeds, then processes and renders.
+// load_tariff_analysis: dedicated 1800s analysis for the cost breakdown.
+// Mirrors the Tariff Explorer graph_load(): reads the current view window,
+// aligns to half-hour boundaries locally (without mutating view, so the
+// chart is undisturbed), and supports partial reloads:
+//   load_flows + load_tariffs : reload flow feeds, then rate feeds, process
+//   load_tariffs only         : reload rate feeds only (quick tariff switch)
+//   neither                   : reprocess existing data
 // ----------------------------------------------------------------------
-function load_tariff_analysis() {
+function load_tariff_analysis(load_flows = true, load_tariffs = true) {
     const interval = 1800;
     const intervalms = interval * 1000;
     const ts = Math.ceil(view.start / intervalms) * intervalms;
     const te = Math.ceil(view.end / intervalms) * intervalms;
 
-    // 1) Load the seven cumulative kWh flow feeds (delta=1 -> per half-hour energy)
+    // A changed window / reloaded flows invalidates the saved baseline period.
+    if (load_flows) baseline_monthly_summary = {};
+
+    if (load_flows) {
+        load_flow_data(ts, te, interval, load_tariffs);
+    } else if (load_tariffs) {
+        load_tariff_rates(ts, te, interval);
+    } else {
+        process_tariff_data();
+        render_cost_breakdown();
+    }
+}
+
+// Load the seven cumulative kWh flow feeds (delta=1 -> per half-hour energy).
+function load_flow_data(ts, te, interval, load_tariffs) {
     let keys_to_load = [];
     let feedids = [];
     tariff_flows.forEach(function(f) {
@@ -94,7 +118,12 @@ function load_tariff_analysis() {
                 tariff_data[key] = all_data[index].data;
             });
         }
-        load_tariff_rates(ts, te, interval);
+        if (load_tariffs) {
+            load_tariff_rates(ts, te, interval);
+        } else {
+            process_tariff_data();
+            render_cost_breakdown();
+        }
     }, false, "notime");
 }
 
@@ -138,19 +167,32 @@ function load_tariff_rates(ts, te, interval) {
 }
 
 // ----------------------------------------------------------------------
-// process_tariff_data: accumulate per-flow kWh and cost over the window.
-// Cost = sum over half-hours of (flow kWh * unit rate in p/kWh * 0.01).
+// process_tariff_data: accumulate per-flow kWh and cost over the window,
+// plus per-month buckets. Cost = sum over half-hours of
+// (flow kWh * unit rate in p/kWh * 0.01).
 // ----------------------------------------------------------------------
 function process_tariff_data() {
-    total_tariff = {};
+    var total_template = {};
     tariff_flows.forEach(function(f) {
-        total_tariff[f.key] = { kwh: 0, cost: 0 };
+        total_template[f.key] = { kwh: 0, cost: 0 };
     });
+
+    total_tariff = JSON.parse(JSON.stringify(total_template));
+    monthly_data = {};
 
     const ref_data = tariff_data["grid_to_load"];
     if (!ref_data || !ref_data.length) return;
 
+    var d = new Date();
     for (var z = 0; z < ref_data.length; z++) {
+        let time = ref_data[z][0];
+        d.setTime(time);
+        let startOfMonth = new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+
+        if (monthly_data[startOfMonth] == undefined) {
+            monthly_data[startOfMonth] = JSON.parse(JSON.stringify(total_template));
+        }
+
         let import_unit_rate = get_value_at_index(tariff_data["import_tariff"], z, null);
         let export_unit_rate = get_value_at_index(tariff_data["export_tariff"], z, null);
 
@@ -158,6 +200,8 @@ function process_tariff_data() {
             let kwh = Math.max(0, get_value_at_index(tariff_data[f.key], z, 0));
             let unit_rate = (f.rate === "outgoing") ? (export_unit_rate === null ? null : export_unit_rate * -1) : import_unit_rate;
             if (unit_rate !== null) {
+                monthly_data[startOfMonth][f.key].cost += kwh * unit_rate * 0.01;
+                monthly_data[startOfMonth][f.key].kwh  += kwh;
                 total_tariff[f.key].cost += kwh * unit_rate * 0.01;
                 total_tariff[f.key].kwh  += kwh;
             }
@@ -184,9 +228,49 @@ function calc_total_consumption(bucket) {
     return bucket.solar_to_load.kwh + bucket.battery_to_load.kwh + bucket.grid_to_load.kwh;
 }
 
+// Returns an array of per-month summary objects, and populates the global
+// monthly_summary for use by the baseline save feature.
+function calc_monthly_summaries() {
+    monthly_summary = {};
+    var summaries = [];
+
+    for (var month in monthly_data) {
+        var md = monthly_data[month];
+        var net_cost    = calc_net_cost(md);
+        var consumption = calc_total_consumption(md);
+        var unit_rate   = consumption > 0 ? (net_cost / consumption) * 100 : NaN;
+
+        summaries.push({
+            timestamp:   month,
+            date:        new Date(parseInt(month)),
+            consumption: consumption,
+            net_cost:    net_cost,
+            unit_rate:   unit_rate,
+            baseline:    baseline_monthly_summary[month] || null
+        });
+
+        monthly_summary[month] = {
+            consumption_kwh:  consumption,
+            net_cost_tariff:  net_cost,
+            unit_rate_tariff: unit_rate
+        };
+    }
+
+    return summaries;
+}
+
 // -------------------------------------------------------------------------------
 // RENDERING
 // -------------------------------------------------------------------------------
+
+// Renders a GBP cost + optional unit-rate into a single <td>.
+function render_cost_cell(net_cost, unit_rate) {
+    var text = (net_cost >= 0 ? "£" : "-£") + Math.abs(net_cost).toFixed(2);
+    if (!isNaN(unit_rate)) {
+        text += " <span style='font-size:12px;color:#888'>" + unit_rate.toFixed(1) + " p/kWh</span>";
+    }
+    return "<td>" + text + "</td>";
+}
 
 // Renders a single energy-flow row for the cost breakdown table.
 function render_flow_row(label, kwh, value_gbp, value_label, color, rowStyle) {
@@ -235,7 +319,198 @@ function render_flow_table() {
     return rows;
 }
 
-// Injects the cost breakdown table into the cost view.
-function render_cost_breakdown() {
-    $("#cost_breakdown_body").html(render_flow_table());
+// Builds the HTML for one monthly data row.
+function render_monthly_row(summary, has_baseline, month_names) {
+    var row = "<tr>";
+    row += "<td>" + summary.date.getFullYear() + " " + month_names[summary.date.getMonth()] + "</td>";
+    row += "<td>" + summary.consumption.toFixed(1) + " kWh</td>";
+    row += render_cost_cell(summary.net_cost, summary.unit_rate);
+
+    if (has_baseline && summary.baseline) {
+        row += render_cost_cell(summary.baseline.net_cost_tariff, summary.baseline.unit_rate_tariff);
+
+        if (!isNaN(summary.unit_rate) && !isNaN(summary.baseline.unit_rate_tariff)) {
+            if (summary.unit_rate < summary.baseline.unit_rate_tariff) {
+                row += "<td style='color:#1a6abf;font-weight:bold'>A</td>";
+            } else if (summary.baseline.unit_rate_tariff < summary.unit_rate) {
+                row += "<td style='color:#7c1a80;font-weight:bold'>B</td>";
+            } else {
+                row += "<td>=</td>";
+            }
+        } else {
+            row += "<td>&mdash;</td>";
+        }
+    }
+
+    row += "<td><i class='icon-eye-open icon-white zoom-to-month' timestamp='" + summary.timestamp + "' style='cursor:pointer'></i></td>";
+    row += "</tr>";
+    return row;
 }
+
+// Builds and injects the full monthly breakdown table.
+function render_monthly_table(summaries) {
+    var month_names  = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    var has_baseline = baseline_monthly_summary != undefined && Object.keys(baseline_monthly_summary).length > 0;
+    var tariff_label = config.app.tariff.value + (has_baseline ? " (A)" : "");
+
+    var heading = "<th>Month</th><th>Consumption (kWh)</th><th>" + tariff_label + "</th>";
+    if (has_baseline) {
+        heading += "<th>" + (baseline_tariff_name || "Baseline") + " (B)</th><th>Cheaper tariff</th>";
+    }
+    heading += "<th></th>";
+    $("#monthly-data thead tr").html(heading);
+
+    var sum_consumption_kwh   = 0;
+    var sum_net_cost_tariff   = 0;
+    var sum_net_cost_baseline = 0;
+    var rows = "";
+
+    for (var i = 0; i < summaries.length; i++) {
+        var s = summaries[i];
+        rows += render_monthly_row(s, has_baseline, month_names);
+        sum_consumption_kwh += s.consumption;
+        sum_net_cost_tariff += s.net_cost;
+        if (has_baseline && s.baseline) {
+            sum_net_cost_baseline += s.baseline.net_cost_tariff;
+        }
+    }
+
+    var total_unit_rate = sum_consumption_kwh > 0 ? (sum_net_cost_tariff / sum_consumption_kwh) * 100 : NaN;
+    var totals_row = "<tr style='font-weight:bold;background-color:#333'>"
+        + "<td>Total</td>"
+        + "<td>" + sum_consumption_kwh.toFixed(1) + " kWh</td>"
+        + render_cost_cell(sum_net_cost_tariff, total_unit_rate);
+
+    if (has_baseline) {
+        var baseline_total_unit_rate = sum_consumption_kwh > 0 ? (sum_net_cost_baseline / sum_consumption_kwh) * 100 : NaN;
+        totals_row += render_cost_cell(sum_net_cost_baseline, baseline_total_unit_rate);
+        totals_row += "<td></td>";
+    }
+
+    totals_row += "<td></td></tr>";
+
+    $("#monthly-data-body").html(rows + totals_row);
+    $("#monthly-data").removeClass("d-none");
+}
+
+// Populate the quick tariff selector once, then sync its value.
+function populate_quick_tariff() {
+    var sel = $("#tariff");
+    if (sel.find("option").length === 0) {
+        for (var i = 0; i < tariff_options.length; i++) {
+            sel.append("<option>" + tariff_options[i] + "</option>");
+        }
+    }
+    sel.val(config.app.tariff.value);
+}
+
+// Injects the cost breakdown table + monthly table into the cost view.
+function render_cost_breakdown() {
+    populate_quick_tariff();
+
+    $("#cost_breakdown_body").html(render_flow_table());
+
+    if (Object.keys(monthly_data).length > 1) {
+        render_monthly_table(calc_monthly_summaries());
+    } else {
+        $("#monthly-data").addClass("d-none");
+    }
+}
+
+// -------------------------------------------------------------------------------
+// CSV EXPORT
+// -------------------------------------------------------------------------------
+function datetime_string(time) {
+    var t = new Date(time);
+    var year = t.getFullYear();
+    var month = t.getMonth() + 1; if (month < 10) month = "0" + month;
+    var day = t.getDate();        if (day < 10)   day = "0" + day;
+    var hours = t.getHours();     if (hours < 10) hours = "0" + hours;
+    var minutes = t.getMinutes(); if (minutes < 10) minutes = "0" + minutes;
+    var seconds = t.getSeconds(); if (seconds < 10) seconds = "0" + seconds;
+    return year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds;
+}
+
+function download_data(filename, data) {
+    var blob = new Blob([data], { type: 'text/csv' });
+    if (window.navigator.msSaveOrOpenBlob) {
+        window.navigator.msSaveBlob(blob, filename);
+    } else {
+        var elem = window.document.createElement('a');
+        elem.href = window.URL.createObjectURL(blob);
+        elem.download = filename;
+        document.body.appendChild(elem);
+        elem.click();
+        document.body.removeChild(elem);
+    }
+}
+
+// Export the half-hourly window: time + 7 flow kWh + import/export tariff rates (p/kWh inc VAT).
+function download_tariff_csv() {
+    var ref_data = tariff_data["grid_to_load"];
+    if (!ref_data || !ref_data.length) { alert("No data to export."); return; }
+
+    var flow_keys = tariff_flows.map(function(f) { return f.key; });
+    var header = ["time"].concat(flow_keys, ["import_tariff_p_kwh", "export_tariff_p_kwh"]);
+
+    var csv = [header.join(",")];
+
+    for (var z = 0; z < ref_data.length; z++) {
+        var line = [datetime_string(ref_data[z][0])];
+
+        flow_keys.forEach(function(key) {
+            var v = get_value_at_index(tariff_data[key], z, null);
+            line.push(v === null ? "" : v.toFixed(3));
+        });
+
+        var import_rate = get_value_at_index(tariff_data["import_tariff"], z, null);
+        var export_rate = get_value_at_index(tariff_data["export_tariff"], z, null);
+        line.push(import_rate === null ? "" : import_rate.toFixed(3));
+        // export_tariff is stored inverted; re-negate to present a positive p/kWh rate.
+        line.push(export_rate === null ? "" : (export_rate * -1).toFixed(3));
+
+        csv.push(line.join(","));
+    }
+
+    download_data("mysolarpvbattery-tariff-data.csv", csv.join("\n"));
+}
+
+// -------------------------------------------------------------------------------
+// EVENTS (cost-view controls)
+// -------------------------------------------------------------------------------
+
+// Quick tariff selector: persist the choice to config and reload rates only.
+$("#tariff").on("change", function() {
+    config.app.tariff.value = $("#tariff").val();
+    config.db.tariff = config.app.tariff.value;
+    config.set();
+    load_tariff_analysis(false, true);
+});
+
+// Save the current month-by-month costs as a baseline for tariff comparison.
+$("#save-baseline").on("click", function() {
+    baseline_monthly_summary = JSON.parse(JSON.stringify(monthly_summary));
+    baseline_tariff_name = config.app.tariff.value;
+    render_cost_breakdown();
+});
+
+// Download half-hourly data as CSV.
+$("#download-csv").on("click", function() {
+    download_tariff_csv();
+});
+
+// Zoom the whole view (chart + cost table) to a single month.
+$("#monthly-data").on("click", ".zoom-to-month", function() {
+    var timestamp = parseInt($(this).attr("timestamp"));
+    view.start = timestamp;
+
+    var d = new Date(timestamp);
+    d.setMonth(d.getMonth() + 1);
+    d.setDate(0);
+    d.setHours(23, 59, 59, 0);
+    view.end = d.getTime();
+
+    autoupdate = false;
+    load_process_draw_graph();
+    return false;
+});

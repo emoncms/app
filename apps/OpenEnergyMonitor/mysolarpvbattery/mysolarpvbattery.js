@@ -221,6 +221,10 @@ let kwhd_cache = {};
 // Lower-panel view toggle: false = energy-flow block, true = tariff cost breakdown
 let tariff_view_active = false;
 
+// Manual date-time range picker instances (bootstrap-datetimepicker)
+let datetimepicker1 = false;
+let datetimepicker2 = false;
+
 
 // == Flow decomposition control variables ==
 
@@ -390,6 +394,69 @@ function init()
 
         if (tariff_view_active) load_tariff_analysis();
     });
+
+    // -------------------------------------------------------------------
+    // Manual date-time range nav (mirrors the showTimeManual toggle in
+    // Modules/graph/view.php). The calendar button swaps the standard
+    // time-window buttons for Start/End date-time pickers.
+    // -------------------------------------------------------------------
+    $("#datetimepicker1").datetimepicker({ language: 'en-EN' });
+    $("#datetimepicker2").datetimepicker({ language: 'en-EN' });
+    datetimepicker1 = $('#datetimepicker1').data('datetimepicker');
+    datetimepicker2 = $('#datetimepicker2').data('datetimepicker');
+
+    $("#time-manual-open").click(function () {
+        update_time_pickers();
+        $("#graph-nav").addClass("d-none");
+        $("#graph-nav-manual").removeClass("d-none");
+    });
+    $("#time-manual-close").click(function () {
+        $("#graph-nav-manual").addClass("d-none");
+        $("#graph-nav").removeClass("d-none");
+    });
+
+    $('#datetimepicker1').on("changeDate", function () {
+        const t = parseTimepickerTime($("#request-start").val());
+        if (!t) { alert("Please enter a valid start date."); return false; }
+        if (t * 1000 >= view.end) { alert("Start date must be before the end date."); return false; }
+        view.start = t * 1000;
+        autoupdate = false;
+        load_process_draw_graph();
+    });
+    $('#datetimepicker2').on("changeDate", function () {
+        const t = parseTimepickerTime($("#request-end").val());
+        if (!t) { alert("Please enter a valid end date."); return false; }
+        if (view.start >= t * 1000) { alert("End date must be after the start date."); return false; }
+        view.end = t * 1000;
+        autoupdate = false;
+        load_process_draw_graph();
+    });
+}
+
+// Keep the manual date-time pickers in sync with the current view window.
+function update_time_pickers() {
+    if (datetimepicker1) {
+        datetimepicker1.setLocalDate(new Date(view.start));
+        datetimepicker1.setEndDate(new Date(view.end));
+    }
+    if (datetimepicker2) {
+        datetimepicker2.setLocalDate(new Date(view.end));
+        datetimepicker2.setStartDate(new Date(view.start));
+    }
+}
+
+// Parse a "dd/MM/yyyy hh:mm:ss" picker string to unix seconds; false if invalid.
+function parseTimepickerTime(timestr) {
+    const tmp = timestr.split(" ");
+    if (tmp.length != 2) return false;
+
+    const date = tmp[0].split("/");
+    if (date.length != 3) return false;
+
+    const time = tmp[1].split(":");
+    if (time.length != 3) return false;
+
+    return new Date(date[2], date[1] - 1, date[0], time[0], time[1], time[2], 0).getTime() / 1000;
 }
 
 function show() 

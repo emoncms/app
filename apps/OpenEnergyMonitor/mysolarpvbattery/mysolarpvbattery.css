@@ -398,3 +398,113 @@ body {
     border-bottom: 1px solid rgba(68,179,226,0.1);
 }
 
+/* Cost-view controls (quick tariff select, CSV, baseline) */
+.cost-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    margin: 1rem 0 0.25rem;
+}
+
+/* A label + input/select pairing (also used by the manual date-time nav) */
+.ctrl-group {
+    display: inline-flex;
+    align-items: stretch;
+    height: 30px;
+}
+
+.ctrl-label {
+    background-color: #2e2e2e;
+    color: #aaa;
+    border: 1px solid #444;
+    border-right: none;
+    border-radius: 0.375rem 0 0 0.375rem;
+    padding: 4px 10px;
+    font-size: 13px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.ctrl-group select {
+    background-color: #2e2e2e;
+    color: #ccc;
+    border: 1px solid #444;
+    border-radius: 0 0.375rem 0.375rem 0;
+    padding: 0 8px;
+    font-size: 13px;
+    height: 30px;
+    box-sizing: border-box;
+    cursor: pointer;
+    outline: none;
+}
+
+.ctrl-group select:focus { border-color: #44b3e2; }
+
+/* datetimepicker wrapper span + text input + calendar icon */
+.ctrl-group > span {
+    display: inline-flex;
+    align-items: stretch;
+}
+
+.ctrl-group input[type="text"] {
+    background-color: #2e2e2e;
+    color: #ccc;
+    border: 1px solid #444;
+    border-radius: 0;
+    padding: 0 8px;
+    font-size: 13px;
+    height: 30px;
+    box-sizing: border-box;
+    width: 150px;
+    outline: none;
+    box-shadow: none;
+    margin: 0;
+}
+
+.ctrl-group input[type="text"]:focus { border-color: #44b3e2; }
+
+.ctrl-group .add-on {
+    background-color: #2e2e2e;
+    color: #aaa;
+    border: 1px solid #444;
+    border-left: none;
+    border-radius: 0 0.375rem 0.375rem 0;
+    padding: 0 8px;
+    font-size: 13px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.ctrl-group .add-on:hover { color: #44b3e2; background-color: #3a3a3a; }
+
+/* Spacing between the two pickers in the manual nav row */
+#graph-nav-manual .ctrl-group + .ctrl-group { margin-left: 0.5rem; }
+
+/* Themed action button (CSV download, save baseline) */
+.cost-btn {
+    display: inline-flex;
+    align-items: center;
+    background-color: rgba(68,179,226,0.12);
+    color: #44b3e2;
+    border: 1px solid rgba(68,179,226,0.35);
+    border-radius: 0.375rem;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.cost-btn:hover,
+.cost-btn:focus {
+    background-color: rgba(68,179,226,0.25);
+    color: #fff;
+    outline: none;
+}
+

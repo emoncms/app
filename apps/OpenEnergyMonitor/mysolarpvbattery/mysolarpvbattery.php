@@ -26,6 +26,8 @@ load_js("Lib/flot/jquery.flot.stack.min.js");
 load_js("Lib/flot/date.format.min.js");
 load_js("Lib/vis.helper.js");
 load_js("Modules/app/Lib/timeseries.js");
+load_js("Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js");
+load_css("Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css");
 load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.css");
 
 ?>
@@ -88,7 +90,26 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
             <button id='zoomout' class='visnav app-btn' >-</button>
             <button id='left' class='visnav app-btn' >&lt;</button>
             <button id='right' class='visnav app-btn' >&gt;</button>
+            <button id='time-manual-open' class='visnav app-btn' title="<?php echo tr('Select time window') ?>"><i class="icon-calendar icon-white"></i></button>
             <span id="data-mode-indicator" class="d-none d-md-inline ms-auto"></span>
+        </div>
+
+        <div id="graph-nav-manual" class="visnavblock mb-2 d-flex justify-content-start align-items-center d-none">
+            <span class="ctrl-group">
+                <span class="ctrl-label"><?php echo tr('Start') ?></span>
+                <span id="datetimepicker1">
+                    <input id="request-start" data-format="dd/MM/yyyy hh:mm:ss" type="text" />
+                    <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
+                </span>
+            </span>
+            <span class="ctrl-group">
+                <span class="ctrl-label"><?php echo tr('End') ?></span>
+                <span id="datetimepicker2">
+                    <input id="request-end" data-format="dd/MM/yyyy hh:mm:ss" type="text" />
+                    <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
+                </span>
+            </span>
+            <button id='time-manual-close' class='visnav app-btn' title="<?php echo tr('Done') ?>"><i class="icon-ok icon-white"></i></button>
         </div>
 
         <div id="placeholder_bound">
@@ -114,6 +135,22 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
             </tr>
             <tbody id="cost_breakdown_body"></tbody>
         </table>
+
+        <div class="cost-controls">
+            <div class="ctrl-group">
+                <span class="ctrl-label"><?php echo tr('Tariff') ?></span>
+                <select id="tariff"></select>
+            </div>
+            <button id="download-csv" class="cost-btn"><?php echo tr('Download CSV') ?></button>
+        </div>
+
+        <div id="monthly-data" class="d-none mt-3">
+            <table class="tariff-table mb-3">
+                <thead><tr></tr></thead>
+                <tbody id="monthly-data-body"></tbody>
+            </table>
+            <button id="save-baseline" class="cost-btn"><?php echo tr('Save baseline') ?></button>
+        </div>
     </div>
 
     <table id="flow-block-view" class="statstable">
