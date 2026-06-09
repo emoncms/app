@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------------------------------------------
-// MySolarPVBattery Tariff cost breakdown
+// MyElectricFlow Tariff cost breakdown
 // -------------------------------------------------------------------------------------------------------
 // Self-contained cost analysis adapted from the Tariff Explorer (octopus) app. It runs its own
 // dedicated half-hourly (1800s) data load over the current view window, completely independent of the
@@ -727,7 +727,7 @@ function download_tariff_csv() {
         csv.push(line.join(","));
     }
 
-    download_data("mysolarpvbattery-tariff-data.csv", csv.join("\n"));
+    download_data("myelectricflow-tariff-data.csv", csv.join("\n"));
 }
 
 // -------------------------------------------------------------------------------

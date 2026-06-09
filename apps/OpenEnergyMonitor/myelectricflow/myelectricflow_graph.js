@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------------------------------------------
-// MySolarPVBattery Power Graph: load, process, and draw the power flow graph
+// MyElectricFlow Power Graph: load, process, and draw the power flow graph
 // -------------------------------------------------------------------------------------------------------
 let data_mode = "power"; // or "kwh" when processing pre-aggregated kWh data for the bar graph
 

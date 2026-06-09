@@ -12,7 +12,7 @@ load_js("Lib/vis.helper.js");
 load_js("Modules/app/Lib/timeseries.js");
 load_js("Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js");
 load_css("Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css");
-load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.css");
+load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css");
 ?>
 
 
@@ -255,7 +255,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
 </section>
 
 <div id="appconf-description" style="display:none">
-    <p class="lead">Visualise the flow of electricity through your home &mdash; solar generation, self-consumption, battery charge and discharge, grid import and export, and household consumption &mdash; and explore time-of-use tariff costs over time.</p>
+    <p class="lead">Visualise the flow of electricity through your home - solar generation, self-consumption, battery charge and discharge, grid import and export, and household consumption - and explore time-of-use tariff costs over time.</p>
     <p><b style="color:#fff">Derive missing feed:</b> If you do not have one out of the selectable power feeds, this app can derive this data from the others using conservation of energy.</p>
 </div>
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
@@ -272,7 +272,7 @@ function getTranslations(){
 }
 
 
-// Set up config object - used by mysolarpvbattery.js
+// Set up config object - used by myelectricflow.js
 var apikey = "<?php echo isset($apikey) ? $apikey : ''; ?>";
 var sessionwrite = <?php echo isset($session['write']) ? intval($session['write']) : 0; ?>;
 
@@ -288,8 +288,8 @@ config.db = <?php echo isset($config) ? json_encode($config) : 'null'; ?>;
 <?php
 
 // Load app specific JS with auto versioning based on file modification time to prevent caching issues after updates
-load_js("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery_graph.js");
-load_js("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery_tariff.js");
-load_js("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.js");
+load_js("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow_graph.js");
+load_js("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow_tariff.js");
+load_js("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.js");
 
 ?>

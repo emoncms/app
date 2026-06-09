@@ -1,0 +1,6 @@
+{
+    "title"          : "My Electric Flow",
+    "description"    : "Visualise the flow of electricity through your home - solar generation, self-consumption, battery charge and discharge, grid import and export, and household consumption - and explore time-of-use tariff costs over time.",
+    "order"         : 1,
+    "primary"       : true
+}

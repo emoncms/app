@@ -12,7 +12,7 @@
 // no direct access
 defined('EMONCMS_EXEC') or die('Restricted access');
 
-function mysolarpvbattery_app_controller($route,$app,$appconfig,$apikey)
+function myelectricflow_app_controller($route,$app,$appconfig,$apikey)
 {
 
     global $path, $session, $settings, $mysqli, $redis, $user, $linked_modules_dir;

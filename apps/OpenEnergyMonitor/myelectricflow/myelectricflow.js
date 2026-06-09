@@ -22,7 +22,7 @@ const flow_colors = {
 const SOLAR_FIRST = 0;
 const BATTERY_FIRST = 1;
 
-// Available Octopus tariffs for the integrated cost breakdown (see mysolarpvbattery_tariff.js)
+// Available Octopus tariffs for the integrated cost breakdown (see myelectricflow_tariff.js)
 const tariff_options = [
     "AGILE-18-02-21",
     "AGILE-22-07-22",
@@ -69,7 +69,7 @@ config.app = {
 
     // History feeds (energy flow breakdown from solarbatterykwh post-processor)
 
-    // Node name for auto-generated feeds, common with mysolarpvbattery app.
+    // Node name for auto-generated feeds, common with myelectricflow app.
     "autogenerate_nodename": {
         "hidden": true,
         "type": "value",
@@ -94,7 +94,7 @@ config.app = {
     "strategy":{"type":"select", "default":"Solar first", "options":["Solar first", "Battery first"], "name":"Flow allocation strategy", "description":""},
 
     // == Tariff cost breakdown (Octopus) ==
-    // Region + tariff used by the integrated cost breakdown view (mysolarpvbattery_tariff.js).
+    // Region + tariff used by the integrated cost breakdown view (myelectricflow_tariff.js).
     "region": {
         "type": "select",
         "name": "Select region:",
