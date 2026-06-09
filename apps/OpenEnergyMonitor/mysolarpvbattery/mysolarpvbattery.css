@@ -108,6 +108,11 @@ body {
     flex-grow: 1;
 }
 
+/* bootstrap4-utils.css shim lacks an auto-margin utility, so define it here */
+#graph-nav .ms-auto {
+    margin-left: auto;
+}
+
 .visnav:focus,
 .visnav:active,
 .visnav:hover {

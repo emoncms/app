@@ -1,22 +1,6 @@
 <?php
-    defined('EMONCMS_EXEC') or die('Restricted access');
-    global $path, $session;
-?>
-<!--
-<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
-
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
-
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.css?v=<?php echo $v; ?>" rel="stylesheet">
--->
-
-<?php
+defined('EMONCMS_EXEC') or die('Restricted access');
+global $path, $session;
 
 load_js("Modules/feed/feed.js");
 load_js("Lib/flot/jquery.flot.min.js");
@@ -29,7 +13,6 @@ load_js("Modules/app/Lib/timeseries.js");
 load_js("Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js");
 load_css("Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css");
 load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.css");
-
 ?>
 
 
@@ -37,9 +20,8 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
 
     <nav class="app-top-bar d-flex justify-content-between">
         <ul id="tabs" class="btn-list">
-            <li><button class="viewhistory app-btn" title="<?php echo tr('View History') ?>">
-                <span><?php echo tr("Daily") ?></span>
-            </button></li>
+            <li><button class="app-btn view-toggle-btn active" data-view="flows"><?php echo tr('Electric flow') ?></button></li>
+            <li><button class="app-btn view-toggle-btn d-none" data-view="costs"><?php echo tr('Tariff explorer') ?></button></li>
         </ul>
         <ul class="btn-list">
             <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><i class="icon-wrench icon-white" title="Configure app"></i></button></li>
@@ -91,7 +73,12 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
             <button id='left' class='visnav app-btn' >&lt;</button>
             <button id='right' class='visnav app-btn' >&gt;</button>
             <button id='time-manual-open' class='visnav app-btn' title="<?php echo tr('Select time window') ?>"><i class="icon-calendar icon-white"></i></button>
-            <span id="data-mode-indicator" class="d-none d-md-inline ms-auto"></span>
+            <div class="d-flex align-items-center">
+                <span id="data-mode-indicator" class="d-none d-md-inline"></span>
+            </div>
+
+            <button class="viewhistory app-btn ms-auto" title="<?php echo tr('View History') ?>"><span><?php echo tr("Daily") ?></span></button>
+
         </div>
 
         <div id="graph-nav-manual" class="visnavblock mb-2 d-flex justify-content-start align-items-center d-none">
@@ -118,11 +105,6 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
     </div>
         
     <div style="padding:5px; background-color: #262626; border-radius: 0.375rem; margin-bottom: 1rem;">
-
-    <nav class="view-toggle btn-list mb-2">
-        <button class="app-btn view-toggle-btn active" data-view="flows"><?php echo tr('Energy flows') ?></button>
-        <button class="app-btn view-toggle-btn d-none" data-view="costs"><?php echo tr('Costs') ?></button>
-    </nav>
 
     <div id="cost-view" class="d-none">
         <table class="tariff-table">
