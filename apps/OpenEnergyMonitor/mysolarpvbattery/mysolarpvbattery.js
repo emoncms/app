@@ -392,7 +392,20 @@ function init()
         $("#flow-block-view").toggleClass("d-none", tariff_view_active);
         $("#cost-view").toggleClass("d-none", !tariff_view_active);
 
-        if (tariff_view_active) load_tariff_analysis();
+        // Clear any lingering hover tooltip from the other mode.
+        $("#tooltip").remove();
+        tariff_tooltip_prev = false;
+
+        // The shared chart switches style by mode: hide power/bar-specific chrome in Costs mode.
+        // (The Costs toggle is only available when has_history, so the Daily button is restorable.)
+        $(".viewhistory").toggle(!tariff_view_active);
+        $("#data-mode-indicator").css("visibility", tariff_view_active ? "hidden" : "visible");
+
+        if (tariff_view_active) {
+            load_tariff_analysis();        // loads + draws the tariff chart and tables
+        } else {
+            load_process_draw_graph();     // restore the power/bar chart
+        }
     });
 
     // -------------------------------------------------------------------
@@ -713,8 +726,8 @@ function resize()
     placeholder.width(width);
     placeholder_bound.height(height);
     placeholder.height(height);
-    
-    draw_graph()
+
+    if (tariff_view_active) draw_tariff_graph(); else draw_graph();
 }
 
 function hide() 
@@ -783,8 +796,11 @@ function livefn()
 
     update_live_display(input, battery_soc_now, powerUnit);
 
-    // Only redraw the graph if its the power graph and auto update is turned on
-    if (viewmode=="powergraph" && autoupdate) {
+    // Costs mode owns the chart (half-hourly tariff view); never repaint the power chart over it.
+    // Only refresh the tariff view after a likely sleep so it doesn't go stale.
+    if (tariff_view_active) {
+        if (reload) load_tariff_analysis();
+    } else if (viewmode=="powergraph" && autoupdate) {
         if (reload) {
             // If the app was likely sleeping, do a full reload of the graph data to ensure its up to date
             load_process_draw_graph();

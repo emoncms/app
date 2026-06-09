@@ -9,15 +9,16 @@
 // tariff_options, load_process_draw_graph().
 // -------------------------------------------------------------------------------------------------------
 
-// Per-flow rate metadata: which tariff feed (import vs export) prices each energy flow.
+// Per-flow rate metadata: which tariff feed (import vs export) prices each energy flow,
+// a display label for tooltips, and the value verb shown alongside the priced amount.
 const tariff_flows = [
-    { key: "solar_to_load",    rate: "tariff"   },
-    { key: "solar_to_battery", rate: "tariff"   },
-    { key: "solar_to_grid",    rate: "outgoing" },
-    { key: "battery_to_load",  rate: "tariff"   },
-    { key: "battery_to_grid",  rate: "outgoing" },
-    { key: "grid_to_load",     rate: "tariff"   },
-    { key: "grid_to_battery",  rate: "tariff"   }
+    { key: "solar_to_load",    rate: "tariff",   str: "&#9728; Solar &rarr; Load",     label: "saved"  },
+    { key: "solar_to_battery", rate: "tariff",   str: "&#9728; Solar &rarr; Battery",  label: "saved"  },
+    { key: "solar_to_grid",    rate: "outgoing", str: "&#9728; Solar &rarr; Grid",     label: "gained" },
+    { key: "battery_to_load",  rate: "tariff",   str: "&#128267; Battery &rarr; Load",  label: "saved"  },
+    { key: "battery_to_grid",  rate: "outgoing", str: "&#128267; Battery &rarr; Grid",  label: "gained" },
+    { key: "grid_to_load",     rate: "tariff",   str: "&#9889; Grid &rarr; Load",       label: "cost"   },
+    { key: "grid_to_battery",  rate: "tariff",   str: "&#9889; Grid &rarr; Battery",    label: "cost"   }
 ];
 
 // Export (outgoing) tariff feed ids on emoncms.org, keyed by region.
@@ -44,6 +45,12 @@ let octopus_feed_list = {};
 // Loaded half-hourly data arrays (flow kWh + tariff rates) and accumulated totals.
 let tariff_data = {};
 let total_tariff = {};
+
+// Maps a half-hour timestamp -> its index in the data arrays (used by the chart hover).
+let time_to_index_map = {};
+
+// Last hovered datapoint, so the tariff tooltip is only rebuilt when it changes.
+let tariff_tooltip_prev = false;
 
 // Per-month buckets + summaries, and the saved baseline for tariff comparison.
 let monthly_data = {};
@@ -179,6 +186,7 @@ function process_tariff_data() {
 
     total_tariff = JSON.parse(JSON.stringify(total_template));
     monthly_data = {};
+    time_to_index_map = {};
 
     const ref_data = tariff_data["grid_to_load"];
     if (!ref_data || !ref_data.length) return;
@@ -186,6 +194,7 @@ function process_tariff_data() {
     var d = new Date();
     for (var z = 0; z < ref_data.length; z++) {
         let time = ref_data[z][0];
+        time_to_index_map[time] = z;
         d.setTime(time);
         let startOfMonth = new Date(d.getFullYear(), d.getMonth(), 1).getTime();
 
@@ -404,7 +413,8 @@ function populate_quick_tariff() {
     sel.val(config.app.tariff.value);
 }
 
-// Injects the cost breakdown table + monthly table into the cost view.
+// Injects the cost breakdown table + monthly table into the cost view, and
+// (re)draws the half-hourly kWh + tariff chart on the shared placeholder.
 function render_cost_breakdown() {
     populate_quick_tariff();
 
@@ -415,6 +425,103 @@ function render_cost_breakdown() {
     } else {
         $("#monthly-data").addClass("d-none");
     }
+
+    draw_tariff_graph();
+}
+
+// -------------------------------------------------------------------------------
+// CHART (Costs mode): half-hourly stacked kWh bars + import/export tariff lines
+// -------------------------------------------------------------------------------
+function draw_tariff_graph() {
+    var bars = {
+        show: true,
+        align: "left",
+        barWidth: 0.9 * 1800 * 1000,
+        fill: 1.0,
+        lineWidth: 0
+    };
+
+    var graph_series = [];
+
+    // The seven disaggregated flows, stacked as positive half-hourly bars.
+    tariff_flows.forEach(function(f) {
+        if (tariff_data[f.key] && tariff_data[f.key].length) {
+            graph_series.push({
+                label: f.key, data: tariff_data[f.key], yaxis: 1,
+                color: flow_colors[f.key], stack: true, bars: bars
+            });
+        }
+    });
+
+    // Import / export tariff price signals on the right-hand axis.
+    if (tariff_data["import_tariff"] && tariff_data["import_tariff"].length) {
+        graph_series.push({
+            label: config.app.tariff.value, data: tariff_data["import_tariff"], yaxis: 2,
+            color: "#fb1a80", lines: { show: true, steps: true, align: "left", lineWidth: 1 }
+        });
+    }
+    if (tariff_data["export_tariff"] && tariff_data["export_tariff"].length) {
+        graph_series.push({
+            label: "Export", data: tariff_data["export_tariff"], yaxis: 2,
+            color: "#941afb", lines: { show: true, steps: true, align: "center", lineWidth: 1 }
+        });
+    }
+
+    var font_color = "#888";
+    var options = {
+        xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end,
+                 font: { color: font_color }, reserveSpace: false },
+        yaxes: [
+            { position: 'left',  font: { color: font_color }, reserveSpace: false },
+            { position: 'right', alignTicksWithAxis: 1, font: { color: font_color }, reserveSpace: false }
+        ],
+        grid: { show: true, color: "#aaa", borderWidth: 0, hoverable: true, clickable: true },
+        selection: { mode: "x" },
+        legend: { show: false }
+    };
+
+    $.plot($('#placeholder'), graph_series, options);
+    $(".ajax-loader").hide();
+}
+
+// Hover tooltip for the Costs-mode chart: per-flow kWh + priced value, and the
+// import/export p/kWh for the hovered half-hour. Uses tooltip() from vis.helper.js.
+function tariff_tooltip(item) {
+    var itemTime = item.datapoint[0];
+    var z = time_to_index_map[itemTime];
+
+    var d = new Date(itemTime);
+    var days   = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    var hours = d.getHours();   if (hours < 10) hours = "0" + hours;
+    var minutes = d.getMinutes(); if (minutes < 10) minutes = "0" + minutes;
+
+    var text = hours + ":" + minutes + ", " + days[d.getDay()] + " " + months[d.getMonth()] + " " + d.getDate() + "<br>";
+
+    var import_tariff = get_value_at_index(tariff_data["import_tariff"], z);
+    var export_tariff = get_value_at_index(tariff_data["export_tariff"], z);
+
+    tariff_flows.forEach(function(f) {
+        var kwh = get_value_at_index(tariff_data[f.key], z);
+        if (kwh != null && kwh > 0) {
+            text += f.str + ": " + kwh.toFixed(3) + " kWh";
+            // export_tariff is stored inverted; negate so "gained" reads positive.
+            var rate_val = f.rate === "tariff" ? import_tariff : (export_tariff == null ? null : export_tariff * -1);
+            if (rate_val != null) text += " (" + (kwh * rate_val).toFixed(2) + "p " + f.label + ")<br>";
+            else text += "<br>";
+        }
+    });
+
+    text += "<br>";
+    if (import_tariff != null) {
+        text += "<span style='color:#fb1a80'>&#x25CF;</span> Import: " + import_tariff.toFixed(2) + " p/kWh (inc VAT)<br>";
+    }
+    if (export_tariff != null) {
+        // export_tariff is stored inverted; present a positive rate.
+        text += "<span style='color:#941afb'>&#x25CF;</span> Export: " + (export_tariff * -1).toFixed(2) + " p/kWh (inc VAT)<br>";
+    }
+
+    tooltip(item.pageX, item.pageY, text, "#fff", "#000");
 }
 
 // -------------------------------------------------------------------------------

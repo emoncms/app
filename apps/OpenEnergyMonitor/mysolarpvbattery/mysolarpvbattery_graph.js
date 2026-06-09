@@ -7,6 +7,15 @@ let data_mode = "power"; // or "kwh" when processing pre-aggregated kWh data for
 // actually configured; any missing feeds will be derived later in processing.
 // On success, loads each feed into the timeseries store     then triggers processing.
 function load_process_draw_graph() {
+
+    // In Costs mode the shared chart shows the half-hourly kWh + tariff view, which is
+    // loaded/drawn entirely by load_tariff_analysis. Skip the power load/draw path.
+    if (tariff_view_active) {
+        update_time_pickers();
+        load_tariff_analysis();
+        return;
+    }
+
     view.calc_interval(1500); // npoints = 1500;
 
     // If timewindow is more than 7 days switch to kWh mode which uses pre-aggregated data to improve accuracy.
@@ -82,10 +91,6 @@ function load_process_draw_graph() {
 
     // Keep the manual date-time range pickers in sync with the current window.
     update_time_pickers();
-
-    // Keep the tariff cost breakdown in sync with the chart window when that view is active.
-    // load_tariff_analysis reads view.start/end itself and runs its own fixed-1800s load.
-    if (tariff_view_active) load_tariff_analysis();
 }
 
 // Iterates over the loaded timeseries data, derives any missing power flows using
@@ -323,6 +328,23 @@ function graph_events() {
 function bind_hover_tooltip() {
     $('#placeholder').bind("plothover", function (event, pos, item)
     {
+        // In Costs mode the chart is the tariff view; use its dedicated tooltip.
+        // tooltip() in vis.helper.js appends a new #tooltip without clearing the old one,
+        // so only rebuild when the hovered point changes and remove the previous first.
+        if (tariff_view_active) {
+            if (item) {
+                if (tariff_tooltip_prev != item.datapoint) {
+                    tariff_tooltip_prev = item.datapoint;
+                    $("#tooltip").remove();
+                    tariff_tooltip(item);
+                }
+            } else {
+                tariff_tooltip_prev = false;
+                $("#tooltip").remove();
+            }
+            return;
+        }
+
         if (item) {
             const tooltip_items = [];
 
@@ -383,6 +405,7 @@ function bind_bar_click() {
     // Auto click through to power graph
     $('#placeholder').bind("plotclick", function (event, pos, item)
     {
+        if (tariff_view_active) return; // no bar->power drilldown in Costs mode
         if (viewmode == "powergraph") return; // disable click when already in powergraph mode
 
         if (item && !panning) {
