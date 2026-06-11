@@ -256,6 +256,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
 
 <div id="appconf-description" style="display:none">
     <p class="lead">Visualise the flow of electricity through your home - solar generation, self-consumption, battery charge and discharge, grid import and export, and household consumption - and explore time-of-use tariff costs over time.</p>
+    <p><b style="color:#fff">Fixed interval feeds: </b> This app only supports the fixed interval PHPFina feed engine for post processing effeciency.</p>
     <p><b style="color:#fff">Derive missing feed:</b> If you do not have one out of the selectable power feeds, this app can derive this data from the others using conservation of energy.</p>
 </div>
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>

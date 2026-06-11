@@ -59,13 +59,13 @@ config.app = {
     // All four feeds are optional at the config level; the custom check() below enforces the
     // correct minimum set depending on the has_solar / has_battery mode.
     // Any single missing feed will be derived from the other three (or two in solar/battery-only modes).
-    "use":{"optional":true, "type":"feed", "derivable":true, "autoname":"use", "description":"House or building use in watts"},
-    "solar":{"optional":true, "type":"feed", "derivable":true, "autoname":"solar", "description":"Solar generation in watts"},
-    "battery":{"optional":true, "type":"feed", "derivable":true, "autoname":"battery_power", "description":"Battery power in watts, positive for discharge, negative for charge (only shown when has_battery is enabled)"},
-    "grid":{"optional":true, "type":"feed", "derivable":true, "autoname":"grid", "description":"Grid power in watts (positive for import, negative for export)"},
+    "use":{"optional":true, "type":"feed", "engine":5, "derivable":true, "autoname":"use", "description":"House or building use in watts"},
+    "solar":{"optional":true, "type":"feed", "engine":5, "derivable":true, "autoname":"solar", "description":"Solar generation in watts"},
+    "battery":{"optional":true, "type":"feed", "engine":5, "derivable":true, "autoname":"battery_power", "description":"Battery power in watts, positive for discharge, negative for charge (only shown when has_battery is enabled)"},
+    "grid":{"optional":true, "type":"feed", "engine":5, "derivable":true, "autoname":"grid", "description":"Grid power in watts (positive for import, negative for export)"},
 
     // Battery state of charge feed (optional)
-    "battery_soc":{"optional":true, "type":"feed", "autoname":"battery_soc", "description":"Battery state of charge in % (only shown when has_battery is enabled)"},
+    "battery_soc":{"optional":true, "type":"feed", "engine":5, "autoname":"battery_soc", "description":"Battery state of charge in % (only shown when has_battery is enabled)"},
 
     // History feeds (energy flow breakdown from solarbatterykwh post-processor)
 
@@ -79,13 +79,13 @@ config.app = {
     },
 
     // Auto-generated cumulative kWh feeds 
-    "solar_to_load_kwh":{"autogenerate":true, "optional":true, "type":"feed", "autoname":"solar_to_load_kwh", "description":"Cumulative solar to load energy in kWh"},
-    "solar_to_grid_kwh":{"autogenerate":true, "optional":true, "type":"feed", "autoname":"solar_to_grid_kwh", "description":"Cumulative solar to grid (export) energy in kWh"},
-    "solar_to_battery_kwh":{"autogenerate":true, "optional":true, "type":"feed", "autoname":"solar_to_battery_kwh", "description":"Cumulative solar to battery energy in kWh"},
-    "battery_to_load_kwh":{"autogenerate":true, "optional":true, "type":"feed", "autoname":"battery_to_load_kwh", "description":"Cumulative battery to load energy in kWh"},
-    "battery_to_grid_kwh":{"autogenerate":true, "optional":true, "type":"feed", "autoname":"battery_to_grid_kwh", "description":"Cumulative battery to grid energy in kWh"},
-    "grid_to_load_kwh":{"autogenerate":true, "optional":true, "type":"feed", "autoname":"grid_to_load_kwh", "description":"Cumulative grid to load energy in kWh"},
-    "grid_to_battery_kwh":{"autogenerate":true, "optional":true, "type":"feed", "autoname":"grid_to_battery_kwh", "description":"Cumulative grid to battery energy in kWh"},
+    "solar_to_load_kwh":{"autogenerate":true, "optional":true, "type":"feed", "engine":5, "autoname":"solar_to_load_kwh", "description":"Cumulative solar to load energy in kWh"},
+    "solar_to_grid_kwh":{"autogenerate":true, "optional":true, "type":"feed", "engine":5, "autoname":"solar_to_grid_kwh", "description":"Cumulative solar to grid (export) energy in kWh"},
+    "solar_to_battery_kwh":{"autogenerate":true, "optional":true, "type":"feed", "engine":5, "autoname":"solar_to_battery_kwh", "description":"Cumulative solar to battery energy in kWh"},
+    "battery_to_load_kwh":{"autogenerate":true, "optional":true, "type":"feed", "engine":5, "autoname":"battery_to_load_kwh", "description":"Cumulative battery to load energy in kWh"},
+    "battery_to_grid_kwh":{"autogenerate":true, "optional":true, "type":"feed", "engine":5, "autoname":"battery_to_grid_kwh", "description":"Cumulative battery to grid energy in kWh"},
+    "grid_to_load_kwh":{"autogenerate":true, "optional":true, "type":"feed", "engine":5, "autoname":"grid_to_load_kwh", "description":"Cumulative grid to load energy in kWh"},
+    "grid_to_battery_kwh":{"autogenerate":true, "optional":true, "type":"feed", "engine":5, "autoname":"grid_to_battery_kwh", "description":"Cumulative grid to battery energy in kWh"},
 
     // Other options
     "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description": "Display power as kW"},
