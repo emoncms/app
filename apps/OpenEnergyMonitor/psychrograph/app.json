@@ -1,0 +1,5 @@
+{
+    "title"          : "Psychrometric Chart",
+    "description"    : "Plot indoor temperature and humidity on a psychrometric (psychrograph) diagram with comfort zones, iso-relative-humidity curves and optional Givoni building bioclimatic chart. Useful for assessing indoor air comfort and risk of condensation, mould or house dust mites.",
+    "order"          : 30
+}
