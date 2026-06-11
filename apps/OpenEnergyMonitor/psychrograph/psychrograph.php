@@ -6,6 +6,8 @@ load_js("Modules/feed/feed.js");
 load_js("Lib/flot/jquery.flot.min.js");
 load_js("Lib/flot/jquery.flot.time.min.js");
 load_js("Lib/flot/jquery.flot.selection.min.js");
+load_js("Lib/flot/jquery.flot.touch.min.js");
+load_js("Lib/flot/jquery.flot.togglelegend.min.js");
 load_js("Lib/vis.helper.js");
 load_js("Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js");
 load_css("Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css");

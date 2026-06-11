@@ -203,6 +203,15 @@ function feed_label(feedid) {
     return f.tag ? (f.tag + ": " + f.name) : f.name;
 }
 
+// Convert a #rrggbb colour to an rgba() string with the given alpha
+function fade(hex, alpha) {
+    var h = hex.replace("#", "");
+    var r = parseInt(h.substring(0, 2), 16);
+    var g = parseInt(h.substring(2, 4), 16);
+    var b = parseInt(h.substring(4, 6), 16);
+    return "rgba(" + r + "," + g + "," + b + "," + alpha + ")";
+}
+
 // ----------------------------------------------------------------------
 // Load data and draw
 // ----------------------------------------------------------------------
@@ -231,7 +240,11 @@ function load() {
         }
         feedXY[i] = xy;
 
-        contextseries.push({ label: pairs[i].label, data: tempdata, color: pairs[i].color, lines: { show: true } });
+        // Context strip: temperature on the left axis, humidity on the right axis.
+        // Humidity is drawn thinner so the two are distinguishable per zone colour.
+        var hum_unit = relative ? "%" : "g/kg";
+        contextseries.push({ label: pairs[i].label + " (°C)", data: tempdata, color: pairs[i].color, yaxis: 1, lines: { show: true, lineWidth: 1.5 } });
+        contextseries.push({ label: pairs[i].label + " (" + hum_unit + ")", data: humdata, color: fade(pairs[i].color, 0.45), yaxis: 2, lines: { show: true, lineWidth: 1 } });
     }
 
     draw_context();
@@ -245,9 +258,13 @@ function draw_context() {
         canvas: true,
         grid: { show: true, color: "#444", tickColor: "#2a2a2a", borderWidth: 0, hoverable: false },
         xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end, font: { color: "#888" } },
-        yaxis: { font: { color: "#888" } },
-        legend: { show: true, position: "nw", backgroundColor: "#1c1c1c", backgroundOpacity: 0.6 },
-        selection: { mode: "x", color: "#555" }
+        yaxes: [
+            { font: { color: "#888" } },                      // left: temperature
+            { position: "right", font: { color: "#888" } }    // right: humidity
+        ],
+        legend: { show: true, position: "nw", margin: [8, 8], backgroundColor: "#1c1c1c", backgroundOpacity: 0.75 },
+        selection: { mode: "x", color: "#555" },
+        touch: { pan: "x", scale: "x" }
     };
     $.plot($("#contextgraph"), contextseries, options);
 }
@@ -292,9 +309,12 @@ function draw_chart() {
     var options = {
         canvas: true,
         grid: { show: true, color: "#444", tickColor: "#2a2a2a", borderWidth: 0, hoverable: true },
-        legend: { show: true, position: "nw", backgroundColor: "#1c1c1c", backgroundOpacity: 0.7 },
+        // toggle: click a legend entry to show/hide that series (togglelegend plugin)
+        legend: { show: true, position: "nw", toggle: true, margin: [10, 10], backgroundColor: "#1c1c1c", backgroundOpacity: 0.85 },
         xaxis: { min: Tmin, max: Tmax, font: { color: "#888" } },
-        yaxis: { min: habs_min, max: habs_max, font: { color: "#888" } }
+        yaxis: { min: habs_min, max: habs_max, font: { color: "#888" } },
+        // touch: pinch-zoom / pan on touch devices (touch plugin)
+        touch: { pan: "xy", scale: "xy", delayTouchEnded: 0 }
     };
 
     if (current_view === "givoni" && config.app.givoni.value) {
