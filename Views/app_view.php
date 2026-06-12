@@ -1,6 +1,48 @@
 <?php global $path; ?>
 <?php load_js("Lib/js/vue.global.prod-3.5.22.min.js"); ?>
 
+<style>
+    .app-group-box {
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    .app-group-box.featured {
+        border-color: #e8b923;
+        border-left: 4px solid #e8b923;
+        background: #fffdf5;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .app-group-title {
+        margin: 0 0 4px 0;
+    }
+    .app-group-title i {
+        margin-right: 6px;
+    }
+    .app-group-box.featured .app-group-title i {
+        color: #e8b923;
+    }
+    .app-item-title i {
+        margin-right: 6px;
+        opacity: 0.7;
+    }
+    .app-group-toggle {
+        cursor: pointer;
+        margin: 0;
+        user-select: none;
+        display: flex;
+        align-items: center;
+    }
+    .app-group-toggle i {
+        margin-right: 6px;
+        opacity: 0.6;
+    }
+    .app-group-toggle:hover i {
+        opacity: 1;
+    }
+</style>
+
 <div id="app-page" style="padding:20px">
 
     <h2>Available Apps</h2>
@@ -8,22 +50,53 @@
 
     <div id="available-apps">
 
-        <p><b>Featured apps:</b></p>
+        <div class="app-group-box featured">
+            <p class="app-group-title"><i class="icon-star"></i><b>Featured apps</b></p>
 
-        <div class="app-group">
-            <div class="app-item" v-for="entry in featuredApps" :key="entry.id" @click="openCreateModal(entry.id)">
-                <div class="app-item-title">{{ entry.app.title }}</div>
-                <div class="app-item-description">{{ entry.app.description || "no description..." }}</div>
+            <div class="app-group">
+                <div class="app-item" v-for="entry in featuredApps" :key="entry.id" @click="openCreateModal(entry.id)">
+                    <div class="app-item-title"><i v-if="entry.app.icon" :class="entry.app.icon"></i>{{ entry.app.title }}</div>
+                    <div class="app-item-description">{{ entry.app.description || "no description..." }}</div>
+                </div>
             </div>
         </div>
-        <br>
 
-        <p><b>All apps:</b></p>
+        <div class="app-group-box">
+            <p><b>Other apps:</b></p>
 
-        <div class="app-group">
-            <div class="app-item" v-for="entry in otherApps" :key="entry.id" @click="openCreateModal(entry.id)">
-                <div class="app-item-title">{{ entry.app.title }}</div>
-                <div class="app-item-description">{{ entry.app.description || "no description..." }}</div>
+            <div class="app-group">
+                <div class="app-item" v-for="entry in otherApps" :key="entry.id" @click="openCreateModal(entry.id)">
+                    <div class="app-item-title"><i v-if="entry.app.icon" :class="entry.app.icon"></i>{{ entry.app.title }}</div>
+                    <div class="app-item-description">{{ entry.app.description || "no description..." }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="app-group-box">
+            <p class="app-group-toggle" @click="showArchived = !showArchived">
+                <i :class="showArchived ? 'icon-chevron-down' : 'icon-chevron-right'"></i>
+                <b>Archived apps</b> <span style="color:#999;margin-left:6px;">({{ archivedApps.length }})</span>
+            </p>
+
+            <div class="app-group" v-show="showArchived" style="margin-top:10px;">
+                <div class="app-item" v-for="entry in archivedApps" :key="entry.id" @click="openCreateModal(entry.id)">
+                    <div class="app-item-title"><i v-if="entry.app.icon" :class="entry.app.icon"></i>{{ entry.app.title }}</div>
+                    <div class="app-item-description">{{ entry.app.description || "no description..." }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="app-group-box">
+            <p class="app-group-toggle" @click="showDeveloper = !showDeveloper">
+                <i :class="showDeveloper ? 'icon-chevron-down' : 'icon-chevron-right'"></i>
+                <b>Developer apps</b> <span style="color:#999;margin-left:6px;">({{ developerApps.length }})</span>
+            </p>
+
+            <div class="app-group" v-show="showDeveloper" style="margin-top:10px;">
+                <div class="app-item" v-for="entry in developerApps" :key="entry.id" @click="openCreateModal(entry.id)">
+                    <div class="app-item-title"><i v-if="entry.app.icon" :class="entry.app.icon"></i>{{ entry.app.title }}</div>
+                    <div class="app-item-description">{{ entry.app.description || "no description..." }}</div>
+                </div>
             </div>
         </div>
 
@@ -61,7 +134,9 @@ var app_list = Vue.createApp({
             apps: available_apps,
             selectedApp: "",
             appName: "",
-            appNewEnable: true
+            appNewEnable: true,
+            showArchived: false,
+            showDeveloper: false
         };
     },
     computed: {
@@ -76,12 +151,22 @@ var app_list = Vue.createApp({
         },
         featuredApps: function() {
             return this.appEntries.filter(function(entry) {
-                return !!entry.app.primary;
+                return !!entry.app.primary && !entry.app.archived && !entry.app.developer;
             });
         },
         otherApps: function() {
             return this.appEntries.filter(function(entry) {
-                return !entry.app.primary;
+                return !entry.app.primary && !entry.app.archived && !entry.app.developer;
+            });
+        },
+        archivedApps: function() {
+            return this.appEntries.filter(function(entry) {
+                return !!entry.app.archived;
+            });
+        },
+        developerApps: function() {
+            return this.appEntries.filter(function(entry) {
+                return !!entry.app.developer;
             });
         },
         modalTitle: function() {

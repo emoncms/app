@@ -1,5 +1,6 @@
 {
     "title"          : "Example 1",
     "description"    : "A basic app example useful for developing new apps.",
-    "order"         : 19
+    "order"         : 19,
+    "developer"     : 1
 }

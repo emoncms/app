@@ -1,5 +1,6 @@
 {
     "title"          : "Time of use cost comparison",
     "description"    : "Energy provider cost comparison with time of use tariffs.",
-    "order"         : 13
+    "order"         : 13,
+    "archived"      : 1
 }

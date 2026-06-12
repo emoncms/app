@@ -1,6 +1,7 @@
 {
     "title"          : "My Heatpump",
     "description"    : "Explore heatpump performance: daily electricity consumption, heat output and COP. Zoom in for detailed temperature, power, heat graphs.",
+    "icon"           : "svg-icon-hpmon",
     "order"         : 2,
     "primary"       : true
 }

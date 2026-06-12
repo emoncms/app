@@ -1,5 +1,6 @@
 {
     "title"          : "My Solar",
     "description"    : "Explore solar generation compared to household consumption.",
-    "order"         : 3
+    "order"         : 3,
+    "archived"      : 1
 }
