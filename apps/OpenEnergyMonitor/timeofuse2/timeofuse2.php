@@ -876,19 +876,42 @@ function powergraph_load()
         data_tier[b] = [];
     }
     if (cl_enabled) data_tier[cl_idx] = [];
+
+    // Per-tariff energy (kWh) and cost over the displayed window, so the tariff
+    // table can show the totals for the power view rather than the daily view.
+    // Energy is integrated from the power feed and allocated to the tariff active
+    // in each interval (at that interval's price), mirroring the daily split.
+    var tier_energy = []; var tier_cost = [];
+    for (var b = 0; b < tier_names.length; b++) { tier_energy[b] = 0; tier_cost[b] = 0; }
+    var cl_energy = 0;
+
     for (var a = 0; a < data["use"].length; a++) {
         var time = data["use"][a][0];
         var pointval = data["use"][a][1];
         var p = tz_parts(time);
         var slot = p.hour*2 + (p.minute >= 30 ? 1 : 0);
-        var active = we_ph(p) ? weekend_tiers[slot] : weekday_tiers[slot];
+        var we = we_ph(p);
+        var active = we ? weekend_tiers[slot] : weekday_tiers[slot];
         for (var b = 0; b < tier_names.length; b++) {
             data_tier[b].push([time, (b == active) ? pointval : 0]);
+        }
+        // Integrate this interval's energy into the active tariff's totals
+        if (a < data["use"].length-1 && active != undefined) {
+            var dt = (data["use"][a+1][0] - time) * 0.001;
+            if (dt < 3600) {
+                var kwh = (((pointval != null) ? pointval : 0) * dt) / 3600000;
+                tier_energy[active] += kwh;
+                tier_cost[active]   += kwh * (we ? weekend_rates[slot] : weekday_rates[slot]);
+            }
         }
     }
     if (cl_enabled) {
         for (var a = 0; a < data["cl_use"].length; a++) {
             data_tier[cl_idx].push([data["cl_use"][a][0], data["cl_use"][a][1]]);
+            if (a < data["cl_use"].length-1) {
+                var dt = (data["cl_use"][a+1][0] - data["cl_use"][a][0]) * 0.001;
+                if (dt < 3600) cl_energy += (((data["cl_use"][a][1] != null) ? data["cl_use"][a][1] : 0) * dt) / 3600000;
+            }
         }
     }
 
@@ -936,7 +959,43 @@ function powergraph_load()
     }
     
     $("#window-kwh").html(kwh_in_window.toFixed(1));
-    
+
+    // Publish per-tariff totals/averages for the displayed window so the tariff
+    // table tracks the power view. Averages are per day over the window length.
+    var cost_mode = (viewcostenergy == "cost");
+    var show_supply = (cost_mode && supply > 0);
+    var ndays = (view.end - view.start) / (3600*24*1000);
+    if (ndays <= 0) ndays = 1;
+    var cur = config.app["currency"].value;
+    var avg = function(total){ return total / ndays; };
+
+    var grand_total = 0;
+    schedule_totals = {
+        mode: cost_mode ? "cost" : "energy",
+        currency: cur,
+        tier: {},
+        combined: null,
+        cl: null,
+        supply: null
+    };
+    for (var b = 0; b < tier_names.length; b++) {
+        var val = cost_mode ? tier_cost[b] : tier_energy[b];
+        grand_total += val;
+        schedule_totals.tier[tier_names[b]] = { total: val, average: avg(val) };
+    }
+    if (cl_enabled) {
+        var clval = cost_mode ? cl_energy * cl_rate : cl_energy;
+        grand_total += clval;
+        schedule_totals.cl = { total: clval, average: avg(clval) };
+    }
+    if (show_supply) {
+        var supply_total = supply * ndays;
+        grand_total += supply_total;
+        schedule_totals.supply = { total: supply_total, average: avg(supply_total) };
+    }
+    schedule_totals.combined = { total: grand_total, average: avg(grand_total) };
+    sched_render();
+
     var out = "";
     for (var z in feedstats) {
         out += "<tr>";
