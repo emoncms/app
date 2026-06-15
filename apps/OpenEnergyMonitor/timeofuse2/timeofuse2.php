@@ -1,6 +1,10 @@
 <?php
 defined('EMONCMS_EXEC') or die('Restricted access');
-global $path, $session, $v;
+global $path, $session, $v, $user;
+// The user's configured timezone (e.g. "Europe/London") is used to allocate
+// energy to days and tiers, so the split is correct regardless of the browser.
+$timezone = $user->get_timezone($session['userid']);
+if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 
@@ -225,6 +229,7 @@ list of days of the year (from 1-365/366) per year.
 // Globals
 // ----------------------------------------------------------------------
 var apikey = "<?php print $apikey; ?>";
+var user_timezone = "<?php echo $timezone; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 feed.apikey = apikey;
 feed.public_userid = public_userid;
@@ -316,8 +321,8 @@ var weekday_tiers = [,,,,,,,,,,,,,,,,,,,,,,,];
 var weekend_tiers = [,,,,,,,,,,,,,,,,,,,,,,,];
 
 // public holidays use the weekend rates.
-// list of javascript timestamps indicating the start of day for any defined public holidays
-var public_holidays = [];
+// map of "YYYY-MM-DD" day keys (in the configured timezone) for defined public holidays
+var public_holidays = {};
 
 // Show/hide the controlled load config fields based on the checkbox
 config.ui_before_render = function(){
@@ -361,6 +366,9 @@ function init()
         feeds["cl_use"] = config.feedsbyid[config.app["cl_use"].value];
         feeds["cl_kwh"] = config.feedsbyid[config.app["cl_kwh"].value];
         cl_rate = parseFloat(config.app["cl_cost"].value);
+        // Only treat the controlled load as enabled if both feeds resolve, so a
+        // half-configured (or unshared, in a public view) load degrades gracefully.
+        if (!feeds["cl_use"] || !feeds["cl_kwh"]) cl_enabled = false;
     }
     wd_times = config.app["wd_times"].value.split(",");
     hour = 23;
@@ -391,9 +399,11 @@ function init()
             if (dates[1]!=undefined) {
                 var days = dates[1].split(",");
                 for (var i in days) {
+                    // day-of-year -> calendar date, stored as a "YYYY-MM-DD" key
                     var d = (new Date(parseInt(dates[0]), 0, 0));
                     d.setDate(d.getDate() + parseInt(days[i]));
-                    public_holidays.push(d);
+                    var key = d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate());
+                    public_holidays[key] = true;
                 }
             }
         }
@@ -480,7 +490,6 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
     if (item) {
         var z = item.dataIndex;
         var total = 0;
-        var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
         var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
         
         if (previousPoint != item.datapoint) {
@@ -489,9 +498,9 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             $("#tooltip").remove();
             var itemTime = item.datapoint[0];
             var text = "";
-            var d = new Date(itemTime);
+            var p = tz_parts(itemTime);
             if (viewmode == "bargraph") {
-                var date = days[d.getDay()]+", "+months[d.getMonth()]+" "+d.getDate();
+                var date = p.weekday+", "+months[parseInt(p.daykey.substr(5,2),10)-1]+" "+parseInt(p.daykey.substr(8,2),10);
            
                 // Read each stacked segment back from its labelled series
                 var segs = [];
@@ -516,7 +525,7 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
                     }
                 }
             } else {
-                var date = days[d.getDay()]+", "+("0" + d.getHours()).slice(-2)+":"+("0" + d.getMinutes()).slice(-2);
+                var date = p.weekday+", "+pad2(p.hour)+":"+pad2(p.minute);
                 text = date + "<br>" + item.datapoint[1] + "W";
             }
             tooltip(item.pageX, item.pageY, text, "#fff", "#000");
@@ -622,22 +631,10 @@ function powergraph_load()
     for (var a = 0; a < data["use"].length; a++) {
         var time = data["use"][a][0];
         var pointval = data["use"][a][1];
-        var d = new Date(time);
-        var hr = d.getHours();
+        var p = tz_parts(time);
+        var active = we_ph(p) ? weekend_tiers[p.hour] : weekday_tiers[p.hour];
         for (var b = 0; b < tier_names.length; b++) {
-            if (we_ph(d)) {
-                if (b == weekend_tiers[hr]) {
-                    data_tier[b].push([time,pointval]);
-                } else {
-                    data_tier[b].push([time,0]);
-                }
-            } else {
-                if (b == weekday_tiers[hr]) {
-                    data_tier[b].push([time,pointval]);
-                } else {
-                    data_tier[b].push([time,0]);
-                }
-            }
+            data_tier[b].push([time, (b == active) ? pointval : 0]);
         }
     }
     if (cl_enabled) {
@@ -762,38 +759,35 @@ function bargraph_load(start,end)
     // falls entirely within a single tariff tier, determined by its time of day
     // and whether the day is a weekday or a weekend/public holiday.
     var day_list = [];    // ordered list of day-start timestamps (ms)
-    var day_index = {};   // day-start timestamp -> index into the arrays below
+    var day_index = {};   // "YYYY-MM-DD" day key -> index into the arrays below
     var daily_tier = [];  // daily_tier[d][tier] = kWh
     var daily_cl = [];    // daily_cl[d] = kWh
 
-    function day_bucket(time) {
-        var d = new Date(time);
-        d.setHours(0,0,0,0);
-        var dayts = d.getTime();
-        if (day_index[dayts] === undefined) {
-            day_index[dayts] = day_list.length;
-            day_list.push(dayts);
+    function day_bucket(ms, parts) {
+        if (day_index[parts.daykey] === undefined) {
+            day_index[parts.daykey] = day_list.length;
+            day_list.push(tz_day_start(ms, parts));
             var tiers = [];
             for (var a = 0; a < tier_names.length; a++) tiers[a] = 0;
             daily_tier.push(tiers);
             daily_cl.push(0);
         }
-        return day_index[dayts];
+        return day_index[parts.daykey];
     }
 
     for (var z = 0; z < use_data.length; z++) {
         var kwh = use_data[z][1];
         if (kwh == null) continue;
-        var d = new Date(use_data[z][0]);
-        var tier = we_ph(d) ? weekend_tiers[d.getHours()] : weekday_tiers[d.getHours()];
+        var p = tz_parts(use_data[z][0]);
+        var tier = we_ph(p) ? weekend_tiers[p.hour] : weekday_tiers[p.hour];
         if (tier == undefined) continue;
-        daily_tier[day_bucket(use_data[z][0])][tier] += kwh;
+        daily_tier[day_bucket(use_data[z][0], p)][tier] += kwh;
     }
     if (cl_enabled && cl_data) {
         for (var z = 0; z < cl_data.length; z++) {
             var kwh = cl_data[z][1];
             if (kwh == null) continue;
-            daily_cl[day_bucket(cl_data[z][0])] += kwh;
+            daily_cl[day_bucket(cl_data[z][0], tz_parts(cl_data[z][0]))] += kwh;
         }
     }
 
@@ -851,8 +845,7 @@ function bargraph_load(start,end)
 
     // Totals cover the whole window; averages are taken over complete days only
     // so the partial current day does not drag the daily average down.
-    var today = new Date(); today.setHours(0,0,0,0);
-    var today_idx = day_index[today.getTime()];
+    var today_idx = day_index[tz_parts((new Date()).getTime()).daykey];
     var today_present = (today_idx !== undefined);
     var n_complete = day_list.length - (today_present ? 1 : 0);
 
@@ -1006,19 +999,58 @@ $(function() {
 });
 
 // ----------------------------------------------------------------------
+// Timezone helpers
+// ----------------------------------------------------------------------
+// All day/tier allocation is done against the user's configured timezone
+// (user_timezone) rather than the browser's, so the daily split is correct
+// even when the two differ.
+function pad2(n) { return (n<10 ? "0" : "") + n; }
+
+// Built lazily on first use so it is always ready regardless of script
+// execution order, falling back to UTC if the configured timezone is invalid.
+var tz_format = null;
+function get_tz_format() {
+    if (!tz_format) {
+        var opts = {
+            timeZone: user_timezone, hourCycle: 'h23',
+            weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit'
+        };
+        try {
+            tz_format = new Intl.DateTimeFormat('en-GB', opts);
+        } catch (e) {
+            opts.timeZone = 'UTC';
+            tz_format = new Intl.DateTimeFormat('en-GB', opts);
+        }
+    }
+    return tz_format;
+}
+
+// Resolve a timestamp (ms) to its wall-clock parts in the configured timezone.
+function tz_parts(ms) {
+    var p = {};
+    var arr = get_tz_format().formatToParts(new Date(ms));
+    for (var i = 0; i < arr.length; i++) p[arr[i].type] = arr[i].value;
+    return {
+        daykey:  p.year+"-"+p.month+"-"+p.day, // "YYYY-MM-DD"
+        weekday: p.weekday,                    // "Mon".."Sun"
+        hour:    parseInt(p.hour,10),
+        minute:  parseInt(p.minute,10)
+    };
+}
+
+// Real timestamp (ms) of local midnight for the day containing ms. Half-hourly
+// points sit on whole/half-hour boundaries so this is exact in practice.
+function tz_day_start(ms, parts) {
+    return ms - (parts.hour*60 + parts.minute)*60*1000;
+}
+
+// ----------------------------------------------------------------------
 // Weekend or Public Holiday
 // ----------------------------------------------------------------------
-function we_ph (datetocheck) {
-    var dayofweek = datetocheck.getDay();
-    if ((dayofweek == 0) || (dayofweek == 6)) return true;
-    // Public holidays are stored as local midnight timestamps, so normalise the
-    // date being checked to its own midnight before comparing.
-    var midnight = new Date(datetocheck.getTime());
-    midnight.setHours(0,0,0,0);
-    for (var i in public_holidays) {
-        if (public_holidays[i].valueOf() == midnight.valueOf()) return true;
-    }
-    return false;
+function we_ph (parts) {
+    if (parts.weekday == "Sat" || parts.weekday == "Sun") return true;
+    return public_holidays[parts.daykey] === true;
 }
 
 // ----------------------------------------------------------------------
