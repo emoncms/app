@@ -1,0 +1,124 @@
+.electric-title {
+    font-weight:bold;
+    font-size:18px;
+    color:#44b3e2;
+}
+
+.power-value {
+    font-weight:bold;
+    font-size:28px;
+    color:#44b3e2;
+    line-height: 1.1;
+}
+
+.block-bound {
+  background-color:rgb(68,179,226);
+}
+
+/* ---- Schedule builder ---- */
+#schedule-builder .sched-tabs { margin-bottom:12px; border-bottom:1px solid #dfe6ea; }
+#schedule-builder .sched-tab {
+    display:inline-block; padding:8px 18px; cursor:pointer; font-weight:bold;
+    color:#888; border-bottom:3px solid transparent; margin-bottom:-1px;
+}
+#schedule-builder .sched-tab:hover { color:#44b3e2; }
+#schedule-builder .sched-tab.active { color:#44b3e2; border-bottom-color:#44b3e2; }
+
+#schedule-builder .sched-table { width:100%; border-collapse:collapse; }
+#schedule-builder .sched-table th {
+    text-align:left; font-size:13px; color:#888; font-weight:bold;
+    padding:4px 8px; border-bottom:1px solid #eee;
+}
+#schedule-builder .sched-table td { padding:6px 8px; border-bottom:1px solid #f2f2f2; vertical-align:middle; }
+#schedule-builder .sched-th-actions, #schedule-builder .sched-table td.sched-actions-cell { text-align:right; width:40px; }
+#schedule-builder .sched-th-time { width:120px; }
+#schedule-builder .schedule-table { margin-bottom:6px; }
+#schedule-builder .schedule-table .sched-th-name { width:auto; }
+
+/* Section heading inside each card: a clear uppercase label with an accent rule */
+#schedule-builder .sched-subhead {
+    margin:0 0 14px; padding-bottom:9px;
+    font-size:12px; font-weight:bold; letter-spacing:0.08em; text-transform:uppercase;
+    color:#44b3e2; border-bottom:1px solid #dfe6ea;
+}
+
+/* Responsive two-column layout: tariffs+totals on the left, timing on the right.
+   Each column is a distinct card; they grow equally and stack vertically once
+   there isn't room for both. */
+#schedule-builder .sched-cols { display:flex; flex-wrap:wrap; gap:18px; }
+#schedule-builder .sched-col {
+    flex:1 1 100%; min-width:0;  /* stacked full-width by default (mobile) */
+    background:#f7fafc; border:1px solid #e3e8ec; border-radius:8px;
+    padding:16px 18px; box-shadow:0 1px 2px rgba(0,0,0,0.03);
+}
+/* Laptop/desktop: tariffs take two thirds, schedule one third, side by side */
+@media (min-width:768px) {
+    #schedule-builder .sched-col-left  { flex:2 1 0; }
+    #schedule-builder .sched-col-right { flex:1 1 0; }
+}
+/* Inputs/selects read as white controls against the tinted card */
+#schedule-builder .sched-col .sched-table td { border-bottom-color:#e7edf1; }
+#schedule-builder .sched-col .sched-table th { border-bottom-color:#dfe6ea; }
+
+#schedule-builder .sched-table select,
+#schedule-builder .sched-table input {
+    height:34px; box-sizing:border-box; margin:0; padding:4px 8px;
+    border:1px solid #ccc; border-radius:4px; font-size:15px; background:#fff;
+}
+#schedule-builder .sched-table select.sched-time { width:110px; }
+#schedule-builder .sched-table select.sched-tariff { width:100%; max-width:240px; }
+#schedule-builder .sched-table input.tariff-name { width:100%; max-width:240px; }
+#schedule-builder .sched-table input.tariff-price { width:110px; text-align:right; }
+
+#schedule-builder .sched-swatch {
+    display:inline-block; width:12px; height:12px; border-radius:2px;
+    margin-right:6px; vertical-align:middle;
+}
+#schedule-builder .tariff-add, #schedule-builder .block-add,
+#schedule-builder .tariff-del, #schedule-builder .block-del {
+    cursor:pointer; color:#44b3e2; font-weight:bold; font-size:18px; line-height:1;
+    display:inline-block; padding:2px 6px;
+}
+#schedule-builder .tariff-del, #schedule-builder .block-del { color:#bbb; }
+#schedule-builder .tariff-del:hover, #schedule-builder .block-del:hover { color:#d9534f; }
+#schedule-builder .tariff-add:hover, #schedule-builder .block-add:hover { color:#2a90bd; }
+
+#schedule-builder .sched-ph-wrap { margin-top:18px; }
+#schedule-builder .sched-ph-label { display:block; font-weight:bold; font-size:14px; color:#555; margin-bottom:4px; }
+#schedule-builder .sched-muted { font-weight:normal; color:#999; }
+#schedule-builder #sched-ph { width:100%; box-sizing:border-box; border:1px solid #ccc; border-radius:4px; padding:6px 8px; font-family:monospace; font-size:13px; }
+#schedule-builder .sched-help { font-size:12px; color:#999; margin-top:4px; }
+#schedule-builder .sched-help code { background:#f2f2f2; color:#555; padding:1px 4px; border-radius:3px; }
+
+#schedule-builder .sched-actions { margin-top:18px; }
+#schedule-builder .sched-save-btn {
+    background:#44b3e2; color:#fff; border:0; border-radius:4px;
+    padding:9px 22px; font-weight:bold; font-size:14px; cursor:pointer;
+}
+#schedule-builder .sched-save-btn:hover { background:#2a90bd; }
+#schedule-builder .sched-save-btn:disabled { background:#bbb; cursor:default; }
+#schedule-builder .sched-status { margin-left:12px; font-size:13px; }
+#schedule-builder .sched-status.ok { color:#5cb85c; }
+#schedule-builder .sched-status.err { color:#d9534f; }
+
+/* Totals / averages columns + read-only cells */
+#schedule-builder .sched-th-total, #schedule-builder .sched-th-average { text-align:right; width:110px; }
+#schedule-builder td.sched-total, #schedule-builder td.sched-average { text-align:right; color:#555; white-space:nowrap; }
+#schedule-builder td.sched-ro-time { font-variant-numeric:tabular-nums; }
+#schedule-builder td.sched-ro-price { color:#555; }
+#schedule-builder #tariff-foot td { padding:8px; border-top:2px solid #dfe6ea; font-weight:bold; color:#333; }
+#schedule-builder #tariff-foot .sched-foot-label { text-align:right; color:#888; }
+
+/* Configure (wrench) toggle in the header */
+#schedule-builder .sched-configure { cursor:pointer; }
+#schedule-builder.editing .sched-configure { background-color:rgba(255,255,255,0.25); }
+
+/* Edit-only controls are hidden in the default read-only view */
+#schedule-builder .sched-th-actions,
+#schedule-builder .sched-actions-cell { display:none; }
+#schedule-builder .sched-ph-wrap,
+#schedule-builder .sched-actions { display:none; }
+#schedule-builder.editing .sched-th-actions,
+#schedule-builder.editing .sched-actions-cell { display:table-cell; }
+#schedule-builder.editing .sched-ph-wrap { display:block; }
+#schedule-builder.editing .sched-actions { display:block; }
