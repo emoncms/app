@@ -91,10 +91,10 @@ var weekend_tiers = []; var weekend_rates = [];
 // tariff names, prices and colours; the schedule blocks reference these by name.
 var tariffs = [];
 // Schedule builder state: ordered blocks { start:"HH:MM", name } per profile.
+// These globals are the canonical schedule the chart calculations use; init()
+// rebuilds them from config and syncs them into the Vue builder (tou_builder),
+// which owns the editable copy + the editing/tab/totals UI state.
 var schedule = { weekday: [], weekend: [] };
-var sched_tab = "weekday";
-var sched_editing = false;        // read-only by default; toggled by the configure icon
-var schedule_totals = null;       // per-tariff totals/averages for the current window
 
 // public holidays use the weekend rates.
 // map of "YYYY-MM-DD" day keys (in the configured timezone) for defined public holidays
@@ -110,6 +110,219 @@ config.ui_before_render = function(){
 config.ui_after_value_change = function(key){
     if (key === "enable_cl") vue_config.renderUI();
 };
+
+// ----------------------------------------------------------------------
+// Tariffs & schedule builder (Vue) — template lives in timeofuse2.php
+// ----------------------------------------------------------------------
+// Owns the editable copy of the tariffs/schedule and the editing/tab/totals UI
+// state. The chart calculations work from the global tariffs/schedule (rebuilt
+// by init()); builder_sync() copies those into here, and save() writes the
+// edited copy back out to config and re-runs init()/show(). Mounted before
+// config.init() so it is ready when init()/show() first publish into it.
+var tou_builder = Vue.createApp({
+    data: function() {
+        return {
+            visible: false,
+            sessionwrite: !!sessionwrite,
+            editing: false,                       // read-only by default
+            tab: "weekday",
+            tariffs: [],                          // [{ name, price }]
+            schedule: { weekday: [], weekend: [] }, // ordered blocks { start, name }
+            phDays: "",
+            currency: "",
+            totals: null,                         // per-tariff totals/averages for the window
+            saving: false,
+            status: { cls: "", text: "" }
+        };
+    },
+    computed: {
+        // Half-hour start times "00:00".."23:30" for the schedule time dropdowns
+        timeOptions: function() {
+            var opts = [];
+            for (var s = 0; s < 48; s++) opts.push(slot_to_time(s));
+            return opts;
+        }
+    },
+    methods: {
+        // Tariff colour by list position (chart index), cycling the palette
+        tariffColour: function(i) { return tier_colour(i); },
+        tariffIdx: function(name) {
+            for (var i = 0; i < this.tariffs.length; i++) if (this.tariffs[i].name == name) return i;
+            return 0;
+        },
+        tariffColourByName: function(name) { return tier_colour(this.tariffIdx(name)); },
+
+        // Tariff dropdown options; include the current value even if it is no
+        // longer a defined tariff so the reference isn't silently lost.
+        tariffOptions: function(selected) {
+            var opts = this.tariffs.map(function(t){ return t.name; });
+            if (selected && opts.indexOf(selected) === -1) opts = [selected].concat(opts);
+            return opts;
+        },
+
+        // Format a totals/averages figure for the currently displayed mode.
+        fmt: function(v, perday) {
+            if (!this.totals) return "";
+            v = v || 0;
+            if (this.totals.mode == "cost") {
+                return this.totals.currency + v.toFixed(2) + (perday ? "/day" : "");
+            }
+            return v.toFixed(1) + (perday ? " kWh/d" : " kWh");
+        },
+        tierTotal: function(name) {
+            var t = this.totals && this.totals.tier[name];
+            return t ? this.fmt(t.total, false) : "";
+        },
+        tierAverage: function(name) {
+            var t = this.totals && this.totals.tier[name];
+            return t ? this.fmt(t.average, true) : "";
+        },
+
+        // Make a tariff name unique against the others (ignore_index is excluded).
+        uniqueTariffName: function(base, ignore_index) {
+            var self = this, name = base, n = 2;
+            var taken = function(nm){
+                for (var i = 0; i < self.tariffs.length; i++) if (i !== ignore_index && self.tariffs[i].name == nm) return true;
+                return false;
+            };
+            while (taken(name)) { name = base + " " + n; n++; }
+            return name;
+        },
+
+        flash: function(cls, text) {
+            var self = this;
+            this.status = { cls: cls, text: text };
+            setTimeout(function(){ self.status = { cls: "", text: "" }; }, 4000);
+        },
+
+        // ---- Tariffs (stage 1) editing ----
+        addTariff: function() {
+            this.tariffs.push({ name: this.uniqueTariffName("New tariff", -1), price: 0 });
+        },
+        delTariff: function(i) {
+            var name = this.tariffs[i] ? this.tariffs[i].name : "";
+            var used = false;
+            var check = function(blocks){ blocks.forEach(function(b){ if (b.name == name) used = true; }); };
+            check(this.schedule.weekday); check(this.schedule.weekend);
+            if (used) {
+                this.flash("err", '"'+name+'" is used in the schedule — remove those blocks first');
+                return;
+            }
+            this.tariffs.splice(i, 1);
+            if (this.tariffs.length == 0) this.tariffs.push({ name: "Tariff", price: 0 });
+        },
+        renameTariff: function(i, raw) {
+            var oldName = this.tariffs[i].name;
+            var newName = this.uniqueTariffName(((raw||"").replace(/[:,]/g,"").trim()) || "Tariff", i);
+            if (newName != oldName) {
+                // propagate the rename to schedule blocks that reference it
+                var rename = function(blocks){ blocks.forEach(function(b){ if (b.name == oldName) b.name = newName; }); };
+                rename(this.schedule.weekday); rename(this.schedule.weekend);
+            }
+            this.tariffs[i].name = newName;
+        },
+
+        // ---- Schedule (stage 2) editing ----
+        setTab: function(tab) { this.tab = tab; this.sortBlocks(); },
+        sortBlocks: function() {
+            this.schedule[this.tab].sort(function(a,b){ return time_to_slot(a.start) - time_to_slot(b.start); });
+        },
+        onBlockTimeChange: function() { this.sortBlocks(); }, // keep rows time-ordered
+        addBlock: function() {
+            var blocks = this.schedule[this.tab];
+            var used = {};
+            for (var i = 0; i < blocks.length; i++) used[time_to_slot(blocks[i].start)] = true;
+            var slot = 0; while (slot < 48 && used[slot]) slot++;
+            if (slot >= 48) slot = 47;
+            var name = blocks.length ? blocks[blocks.length-1].name : (this.tariffs[0] ? this.tariffs[0].name : "Tariff");
+            blocks.push({ start: slot_to_time(slot), name: name });
+            this.sortBlocks();
+        },
+        delBlock: function(i) {
+            var blocks = this.schedule[this.tab];
+            blocks.splice(i, 1);
+            if (blocks.length == 0) blocks.push({ start: "00:00", name: (this.tariffs[0] ? this.tariffs[0].name : "Tariff") });
+        },
+
+        // Configure (wrench) toggles edit mode. Leaving edit mode without saving
+        // discards unsaved changes by reloading from config (init -> builder_sync).
+        toggleConfigure: function() {
+            if (!this.sessionwrite) return;
+            if (this.editing) {
+                this.editing = false;
+                init();              // re-sync the builder from the last saved config
+            } else {
+                this.editing = true;
+            }
+        },
+
+        save: function() {
+            // Stage 1: normalise tariffs. Names must avoid the separators used by
+            // the stored formats (":" "," "=") and quotes/backslashes, and be unique.
+            var seen = {}, clean_tariffs = [];
+            for (var i = 0; i < this.tariffs.length; i++) {
+                var n = ("" + this.tariffs[i].name).replace(/[:,="\\]/g,"").trim() || "Tariff";
+                if (seen[n]) continue; // drop duplicate names
+                seen[n] = true;
+                clean_tariffs.push({ name: n, price: parseFloat(this.tariffs[i].price) || 0 });
+            }
+            if (clean_tariffs.length == 0) clean_tariffs.push({ name: "Tariff", price: 0 });
+            var valid = {};
+            for (var i = 0; i < clean_tariffs.length; i++) valid[clean_tariffs[i].name] = true;
+            var fallback = clean_tariffs[0].name;
+
+            // Stage 2: normalise blocks (snap to half hour, keep only valid tariff names).
+            var clean = function(blocks) {
+                var out = [];
+                for (var i = 0; i < blocks.length; i++) {
+                    var nm = ("" + blocks[i].name).trim();
+                    out.push({ start: norm_time(blocks[i].start), name: valid[nm] ? nm : fallback });
+                }
+                out.sort(function(a,b){ return time_to_slot(a.start) - time_to_slot(b.start); });
+                if (out.length == 0) out.push({ start: "00:00", name: fallback });
+                return out;
+            };
+            var wd = clean(this.schedule.weekday);
+            var we = clean(this.schedule.weekend);
+
+            // Serialise to compact, quote-free strings (see parse_blocks)
+            var serialise = function(blocks){ return blocks.map(function(b){ return b.start + "=" + b.name; }).join(","); };
+            config.db["tier_cost"] = clean_tariffs.map(function(t){ return t.name + ":" + t.price; }).join(",");
+            config.db["wd_times"]  = serialise(wd);
+            config.db["we_times"]  = serialise(we);
+            config.db["ph_days"]   = ("" + this.phDays).trim();
+
+            this.status = { cls: "", text: "" };
+            this.saving = true;
+            var res = config_save_db();      // persist + sync config.app values
+            this.editing = false;            // return to the read-only view
+            init();                          // rebuild tariffs + profiles, re-sync the builder
+            clearInterval(updaterinst);
+            show();                          // recalculate totals, redraw chart, panels and the builder
+            if (res.ok) {
+                this.flash("ok", "Saved");
+            } else {
+                this.flash("err", "Could not save: " + res.message);
+                app_log("ERROR", "Schedule save failed: " + res.message);
+            }
+            this.saving = false;
+        }
+    }
+}).mount('#schedule-builder-app');
+
+// Copy the canonical (last-saved) globals into the Vue builder. Skipped while
+// editing so re-renders triggered by the chart (e.g. cost/energy toggle) don't
+// discard in-progress edits; save()/cancel clear editing first so the refresh
+// runs.
+function builder_sync() {
+    if (!tou_builder || tou_builder.editing) return;
+    var by_time = function(a,b){ return time_to_slot(a.start) - time_to_slot(b.start); };
+    var copy = function(blocks){ return blocks.map(function(b){ return { start: b.start, name: b.name }; }).sort(by_time); };
+    tou_builder.tariffs = tariffs.map(function(t){ return { name: t.name, price: t.price }; });
+    tou_builder.schedule = { weekday: copy(schedule.weekday), weekend: copy(schedule.weekend) };
+    tou_builder.phDays = "" + (config.app["ph_days"].value || "");
+    tou_builder.currency = config.app["currency"].value || "";
+}
 
 config.init();
 
@@ -196,6 +409,9 @@ function init()
             }
         }
     }
+
+    // Reflect the freshly-parsed tariffs/schedule in the Vue builder
+    builder_sync();
 }
 
 // ----------------------------------------------------------------------
@@ -500,11 +716,12 @@ function integrate_kwh(series) {
     return kwh;
 }
 
-// Assemble schedule_totals from precomputed per-tariff / cl / supply / combined
-// entries ({ total, average }) and refresh the tariff table. cl and supply may be
-// null when not applicable. tiers is aligned with tier_names.
+// Assemble the totals object from precomputed per-tariff / cl / supply / combined
+// entries ({ total, average }) and publish it to the Vue builder, which renders
+// the tariff table. cl and supply may be null when not applicable. tiers is
+// aligned with tier_names.
 function publish_totals(cost_mode, tiers, cl, supply, combined) {
-    schedule_totals = {
+    var totals = {
         mode: cost_mode ? "cost" : "energy",
         currency: config.app["currency"].value,
         tier: {},
@@ -513,9 +730,9 @@ function publish_totals(cost_mode, tiers, cl, supply, combined) {
         supply: supply
     };
     for (var b = 0; b < tier_names.length; b++) {
-        schedule_totals.tier[tier_names[b]] = tiers[b];
+        totals.tier[tier_names[b]] = tiers[b];
     }
-    sched_render();
+    if (tou_builder) tou_builder.totals = totals;
 }
 
 function powergraph_load()
@@ -971,145 +1188,14 @@ function we_ph (parts) {
 // ----------------------------------------------------------------------
 // Schedule builder
 // ----------------------------------------------------------------------
-// Shown below the chart for users with write access; reads/writes the same
-// config values the calculations use (wd_times, we_times, ph_days).
-
-function sched_attr(s) { return ("" + s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
-
-// Run fn against each schedule profile's block array (weekday then weekend).
-function for_each_profile(fn) { fn(schedule.weekday); fn(schedule.weekend); }
-
-// Index of a tariff by name (position in the tariffs list = colour + chart index)
-function tariff_idx(name) {
-    for (var i = 0; i < tariffs.length; i++) if (tariffs[i].name == name) return i;
-    return 0;
-}
-
-// Make a tariff name unique against the other tariffs (ignore_index is excluded).
-function unique_tariff_name(base, ignore_index) {
-    var name = base, n = 2;
-    var taken = function(nm){
-        for (var i = 0; i < tariffs.length; i++) if (i !== ignore_index && tariffs[i].name == nm) return true;
-        return false;
-    };
-    while (taken(name)) { name = base + " " + n; n++; }
-    return name;
-}
-
-function sched_time_options(selected) {
-    var html = "";
-    for (var s = 0; s < 48; s++) {
-        var t = slot_to_time(s);
-        html += '<option value="'+t+'"'+(t==selected ? ' selected' : '')+'>'+t+'</option>';
-    }
-    return html;
-}
-
-// Tariff dropdown for a schedule block; includes the current value even if it is
-// no longer a defined tariff so the reference isn't silently lost.
-function tariff_options(selected) {
-    var html = "", found = false;
-    for (var i = 0; i < tariffs.length; i++) {
-        var n = tariffs[i].name;
-        if (n == selected) found = true;
-        html += '<option value="'+sched_attr(n)+'"'+(n == selected ? ' selected' : '')+'>'+sched_attr(n)+'</option>';
-    }
-    if (!found && selected) html = '<option value="'+sched_attr(selected)+'" selected>'+sched_attr(selected)+'</option>' + html;
-    return html;
-}
-
-// Format a totals/averages figure for the currently displayed mode.
-function sched_fmt(v, perday) {
-    if (!schedule_totals) return "";
-    v = v || 0;
-    if (schedule_totals.mode == "cost") {
-        return schedule_totals.currency + v.toFixed(2) + (perday ? "/day" : "");
-    }
-    return v.toFixed(1) + (perday ? " kWh/d" : " kWh");
-}
-
-// Stage 1: tariff definitions, with per-tariff totals/averages against the names.
-function tariffs_render() {
-    var totals = schedule_totals ? schedule_totals.tier : {};
-    var html = "";
-    for (var i = 0; i < tariffs.length; i++) {
-        var t = tariffs[i];
-        var swatch = '<span class="sched-swatch" style="background:'+tier_colour(i)+'"></span>';
-        var tot = "", avgv = "";
-        if (totals[t.name]) { tot = sched_fmt(totals[t.name].total, false); avgv = sched_fmt(totals[t.name].average, true); }
-
-        html += '<tr data-index="'+i+'">';
-        if (sched_editing) {
-            html += '<td><div style="display:flex; align-items:center;">'+swatch
-                  +   '<input type="text" class="tariff-name" style="flex:1" data-oldname="'+sched_attr(t.name)+'" value="'+sched_attr(t.name)+'" placeholder="Tariff name"></div></td>'
-                  + '<td><input type="number" step="0.001" min="0" class="tariff-price" value="'+t.price+'"></td>';
-        } else {
-            html += '<td>'+swatch+sched_attr(t.name)+'</td>'
-                  + '<td class="sched-ro-price">'+t.price+'</td>';
-        }
-        html += '<td class="sched-total">'+tot+'</td>'
-              + '<td class="sched-average">'+avgv+'</td>'
-              + '<td class="sched-actions-cell"><span class="tariff-del" title="Remove tariff">&#10005;</span></td>'
-              + '</tr>';
-    }
-    $("#tariff-rows").html(html);
-
-    // Footer: combined total, plus controlled load / supply where applicable
-    var foot = "";
-    var foot_row = function(label, t) {
-        var r = '<tr><td class="sched-foot-label" colspan="2">'+label+'</td>'
-              + '<td class="sched-total">'+sched_fmt(t.total,false)+'</td>'
-              + '<td class="sched-average">'+sched_fmt(t.average,true)+'</td>';
-        if (sched_editing) r += '<td class="sched-actions-cell"></td>';
-        return r + '</tr>';
-    };
-    if (schedule_totals) {
-        foot += foot_row("Combined", schedule_totals.combined);
-        if (schedule_totals.cl) foot += foot_row("Controlled load", schedule_totals.cl);
-        if (schedule_totals.supply) foot += foot_row("Supply", schedule_totals.supply);
-    }
-    $("#tariff-foot").html(foot);
-}
-
-// Stage 2: when each tariff applies (weekday / weekend), no prices or totals here.
-function schedule_render() {
-    $(".sched-tab").removeClass("active");
-    $('.sched-tab[data-tab="'+sched_tab+'"]').addClass("active");
-
-    var blocks = schedule[sched_tab];
-    blocks.sort(function(a,b){ return time_to_slot(a.start) - time_to_slot(b.start); });
-
-    var html = "";
-    for (var i = 0; i < blocks.length; i++) {
-        var b = blocks[i];
-        var swatch = '<span class="sched-swatch" style="background:'+tier_colour(tariff_idx(b.name))+'"></span>';
-        html += '<tr data-index="'+i+'">';
-        if (sched_editing) {
-            html += '<td><select class="sched-time">'+sched_time_options(b.start)+'</select></td>'
-                  + '<td><div style="display:flex; align-items:center;">'+swatch
-                  +   '<select class="sched-tariff">'+tariff_options(b.name)+'</select></div></td>';
-        } else {
-            html += '<td class="sched-ro-time">'+b.start+'</td>'
-                  + '<td>'+swatch+sched_attr(b.name)+'</td>';
-        }
-        html += '<td class="sched-actions-cell"><span class="block-del" title="Remove this block">&#10005;</span></td>'
-              + '</tr>';
-    }
-    $("#sched-rows").html(html);
-}
-
-function sched_render() {
-    $("#schedule-builder").toggleClass("editing", sched_editing);
-    tariffs_render();
-    schedule_render();
-}
-
+// The builder UI is the Vue app (tou_builder) defined near the top of this
+// file; its template lives in timeofuse2.php. Rendering, tab switching and all
+// editing are handled reactively there. The only entry point left here reveals
+// the builder and pushes the current config into it on show().
 function schedule_show() {
-    $(".sched-cur").text(config.app["currency"].value || "");
-    $("#sched-ph").val(config.app["ph_days"].value || "");
-    $(".sched-configure").toggle(!!sessionwrite); // configure only with write access
-    sched_render();
-    $("#schedule-builder").show();
+    tou_builder.sessionwrite = !!sessionwrite; // configure only with write access
+    builder_sync();                            // currency, public holidays, tariffs, schedule
+    tou_builder.visible = true;
 }
 
 // Persist config.db to the server, properly URL-encoded, and sync config.app
@@ -1143,156 +1229,6 @@ function config_save_db() {
     }
     return result;
 }
-
-function sched_save() {
-    // Stage 1: normalise tariffs. Names must avoid the separators used by the
-    // stored formats (":" "," "=") and quotes/backslashes, and be unique.
-    var seen = {}, clean_tariffs = [];
-    for (var i = 0; i < tariffs.length; i++) {
-        var n = ("" + tariffs[i].name).replace(/[:,="\\]/g,"").trim() || "Tariff";
-        if (seen[n]) continue; // drop duplicate names
-        seen[n] = true;
-        clean_tariffs.push({ name: n, price: parseFloat(tariffs[i].price) || 0 });
-    }
-    if (clean_tariffs.length == 0) clean_tariffs.push({ name:"Tariff", price:0 });
-    tariffs = clean_tariffs;
-    var valid = {};
-    for (var i = 0; i < tariffs.length; i++) valid[tariffs[i].name] = true;
-    var fallback = tariffs[0].name;
-
-    // Stage 2: normalise blocks (snap to half hour, keep only valid tariff names).
-    var clean = function(blocks) {
-        var out = [];
-        for (var i = 0; i < blocks.length; i++) {
-            var nm = ("" + blocks[i].name).trim();
-            out.push({ start: norm_time(blocks[i].start), name: valid[nm] ? nm : fallback });
-        }
-        out.sort(function(a,b){ return time_to_slot(a.start) - time_to_slot(b.start); });
-        if (out.length == 0) out.push({ start:"00:00", name: fallback });
-        return out;
-    };
-    schedule.weekday = clean(schedule.weekday);
-    schedule.weekend = clean(schedule.weekend);
-
-    // Serialise to compact, quote-free strings (see parse_blocks)
-    var serialise = function(blocks){ return blocks.map(function(b){ return b.start + "=" + b.name; }).join(","); };
-    config.db["tier_cost"] = tariffs.map(function(t){ return t.name + ":" + t.price; }).join(",");
-    config.db["wd_times"]  = serialise(schedule.weekday);
-    config.db["we_times"]  = serialise(schedule.weekend);
-    config.db["ph_days"]   = $("#sched-ph").val().trim();
-
-    var status = $("#sched-status").removeClass("ok err");
-    $("#sched-save").prop("disabled", true);
-    var res = config_save_db();      // persist + sync config.app values
-    init();                          // rebuild tariffs + half-hourly profiles
-    sched_editing = false;           // return to the read-only view
-    clearInterval(updaterinst);
-    show();                          // recalculate totals, redraw chart, panels and the builder
-    if (res.ok) {
-        status.addClass("ok").text("Saved");
-    } else {
-        status.addClass("err").text("Could not save: " + res.message);
-        app_log("ERROR", "Schedule save failed: " + res.message);
-    }
-    $("#sched-save").prop("disabled", false);
-    setTimeout(function(){ $("#sched-status").removeClass("ok err").text(""); }, 4000);
-}
-
-// Configure (wrench) toggles between the read-only view and edit mode. Leaving
-// edit mode without saving discards unsaved changes by reloading from config.
-$("#schedule-builder").on("click", ".sched-configure", function(){
-    if (!sessionwrite) return;
-    if (sched_editing) {
-        init();
-        sched_editing = false;
-    } else {
-        sched_editing = true;
-        $(".sched-cur").text(config.app["currency"].value || "");
-        $("#sched-ph").val(config.app["ph_days"].value || "");
-    }
-    sched_render();
-});
-
-$("#schedule-builder").on("click", ".sched-tab", function(){
-    sched_tab = $(this).attr("data-tab");
-    schedule_render();
-});
-
-// ---- Tariffs (stage 1) editing ----
-$("#schedule-builder").on("click", ".tariff-add", function(){
-    tariffs.push({ name: unique_tariff_name("New tariff", -1), price: 0 });
-    sched_render();
-});
-
-$("#schedule-builder").on("click", ".tariff-del", function(){
-    var i = $(this).closest("tr").attr("data-index")*1;
-    var name = tariffs[i] ? tariffs[i].name : "";
-    var used = false;
-    for_each_profile(function(blocks){
-        blocks.forEach(function(b){ if (b.name == name) used = true; });
-    });
-    if (used) {
-        $("#sched-status").removeClass("ok").addClass("err")
-            .text('"'+name+'" is used in the schedule — remove those blocks first');
-        setTimeout(function(){ $("#sched-status").removeClass("err").text(""); }, 4000);
-        return;
-    }
-    tariffs.splice(i, 1);
-    if (tariffs.length == 0) tariffs.push({ name:"Tariff", price:0 });
-    sched_render();
-});
-
-$("#schedule-builder").on("change", ".tariff-name", function(){
-    var i = $(this).closest("tr").attr("data-index")*1;
-    var oldName = $(this).attr("data-oldname");
-    var newName = unique_tariff_name((($(this).val()||"").replace(/[:,]/g,"").trim()) || "Tariff", i);
-    if (newName != oldName) {
-        // propagate the rename to schedule blocks that reference it
-        for_each_profile(function(blocks){
-            blocks.forEach(function(b){ if (b.name == oldName) b.name = newName; });
-        });
-    }
-    tariffs[i].name = newName;
-    sched_render();
-});
-
-$("#schedule-builder").on("input", ".tariff-price", function(){
-    var i = $(this).closest("tr").attr("data-index")*1;
-    tariffs[i].price = parseFloat($(this).val()) || 0;
-});
-
-// ---- Schedule (stage 2) editing ----
-$("#schedule-builder").on("click", ".block-add", function(){
-    var blocks = schedule[sched_tab];
-    var used = {};
-    for (var i = 0; i < blocks.length; i++) used[time_to_slot(blocks[i].start)] = true;
-    var slot = 0; while (slot < 48 && used[slot]) slot++;
-    if (slot >= 48) slot = 47;
-    var name = blocks.length ? blocks[blocks.length-1].name : (tariffs[0] ? tariffs[0].name : "Tariff");
-    blocks.push({ start: slot_to_time(slot), name: name });
-    schedule_render();
-});
-
-$("#schedule-builder").on("click", ".block-del", function(){
-    var i = $(this).closest("tr").attr("data-index");
-    schedule[sched_tab].splice(i, 1);
-    if (schedule[sched_tab].length == 0) schedule[sched_tab].push({ start:"00:00", name: (tariffs[0] ? tariffs[0].name : "Tariff") });
-    schedule_render();
-});
-
-$("#schedule-builder").on("change", ".sched-time", function(){
-    var i = $(this).closest("tr").attr("data-index");
-    schedule[sched_tab][i].start = $(this).val();
-    schedule_render(); // keep rows time-ordered
-});
-
-$("#schedule-builder").on("change", ".sched-tariff", function(){
-    var i = $(this).closest("tr").attr("data-index");
-    schedule[sched_tab][i].name = $(this).val();
-    schedule_render(); // refresh the colour swatch
-});
-
-$("#sched-save").click(function(){ sched_save(); });
 
 // ----------------------------------------------------------------------
 // App log

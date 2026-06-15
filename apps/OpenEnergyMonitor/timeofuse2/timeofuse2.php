@@ -110,9 +110,13 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
 
   <div style="clear:both"></div>
 
-  <div id="schedule-builder" class="col1" style="display:none; width:100%;"><div class="col1-inner">
+  <!-- Tariffs & schedule builder (Vue app, mounted on #schedule-builder-app).
+       Note: directives must live on a child of the mount root, so #schedule-builder
+       itself carries v-show / :class rather than the wrapper. -->
+  <div id="schedule-builder-app">
+  <div id="schedule-builder" class="col1" style="width:100%;" v-show="visible" :class="{editing: editing}"><div class="col1-inner">
     <div class="block-bound">
-      <div class="bluenav sched-configure" title="Configure tariffs &amp; schedule"><i class="icon-wrench icon-white"></i></div>
+      <div class="bluenav sched-configure" v-show="sessionwrite" title="Configure tariffs &amp; schedule" @click="toggleConfigure"><i class="icon-wrench icon-white"></i></div>
       <div class="block-title">TARIFFS &amp; SCHEDULE</div>
     </div>
     <div style="background-color:#fff; color:#333; padding:15px;">
@@ -126,14 +130,52 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
             <thead>
               <tr>
                 <th class="sched-th-name">Tariff</th>
-                <th class="sched-th-price">Price (<span class="sched-cur">$</span>/kWh)</th>
+                <th class="sched-th-price">Price (<span class="sched-cur">{{ currency }}</span>/kWh)</th>
                 <th class="sched-th-total">Total</th>
                 <th class="sched-th-average">Average</th>
-                <th class="sched-th-actions"><span class="tariff-add" title="Add a tariff">+</span></th>
+                <th class="sched-th-actions"><span class="tariff-add" title="Add a tariff" @click="addTariff">+</span></th>
               </tr>
             </thead>
-            <tbody id="tariff-rows"></tbody>
-            <tfoot id="tariff-foot"></tfoot>
+            <tbody>
+              <tr v-for="(t, i) in tariffs" :key="i">
+                <template v-if="editing">
+                  <td>
+                    <div style="display:flex; align-items:center;">
+                      <span class="sched-swatch" :style="{background: tariffColour(i)}"></span>
+                      <input type="text" class="tariff-name" style="flex:1" :value="t.name" @change="renameTariff(i, $event.target.value)" placeholder="Tariff name">
+                    </div>
+                  </td>
+                  <td><input type="number" step="0.001" min="0" class="tariff-price" v-model.number="t.price"></td>
+                </template>
+                <template v-else>
+                  <td><span class="sched-swatch" :style="{background: tariffColour(i)}"></span>{{ t.name }}</td>
+                  <td class="sched-ro-price">{{ t.price }}</td>
+                </template>
+                <td class="sched-total">{{ tierTotal(t.name) }}</td>
+                <td class="sched-average">{{ tierAverage(t.name) }}</td>
+                <td class="sched-actions-cell"><span class="tariff-del" title="Remove tariff" @click="delTariff(i)">&#10005;</span></td>
+              </tr>
+            </tbody>
+            <tfoot id="tariff-foot" v-if="totals">
+              <tr>
+                <td class="sched-foot-label" colspan="2">Combined</td>
+                <td class="sched-total">{{ fmt(totals.combined.total, false) }}</td>
+                <td class="sched-average">{{ fmt(totals.combined.average, true) }}</td>
+                <td class="sched-actions-cell"></td>
+              </tr>
+              <tr v-if="totals.cl">
+                <td class="sched-foot-label" colspan="2">Controlled load</td>
+                <td class="sched-total">{{ fmt(totals.cl.total, false) }}</td>
+                <td class="sched-average">{{ fmt(totals.cl.average, true) }}</td>
+                <td class="sched-actions-cell"></td>
+              </tr>
+              <tr v-if="totals.supply">
+                <td class="sched-foot-label" colspan="2">Supply</td>
+                <td class="sched-total">{{ fmt(totals.supply.total, false) }}</td>
+                <td class="sched-average">{{ fmt(totals.supply.average, true) }}</td>
+                <td class="sched-actions-cell"></td>
+              </tr>
+            </tfoot>
           </table>
         </div>
 
@@ -141,23 +183,46 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
         <div class="sched-col sched-col-right">
           <div class="sched-subhead">Schedule</div>
           <div class="sched-tabs">
-            <span class="sched-tab active" data-tab="weekday">Weekday</span>
-            <span class="sched-tab" data-tab="weekend">Weekend</span>
+            <span class="sched-tab" :class="{active: tab=='weekday'}" @click="setTab('weekday')">Weekday</span>
+            <span class="sched-tab" :class="{active: tab=='weekend'}" @click="setTab('weekend')">Weekend</span>
           </div>
           <table class="sched-table schedule-table">
             <thead>
               <tr>
                 <th class="sched-th-time">Time</th>
                 <th class="sched-th-name">Tariff</th>
-                <th class="sched-th-actions"><span class="block-add" title="Add a time block">+</span></th>
+                <th class="sched-th-actions"><span class="block-add" title="Add a time block" @click="addBlock">+</span></th>
               </tr>
             </thead>
-            <tbody id="sched-rows"></tbody>
+            <tbody>
+              <tr v-for="(b, i) in schedule[tab]" :key="i">
+                <template v-if="editing">
+                  <td>
+                    <select class="sched-time" v-model="b.start" @change="onBlockTimeChange">
+                      <option v-for="t in timeOptions" :key="t" :value="t">{{ t }}</option>
+                    </select>
+                  </td>
+                  <td>
+                    <div style="display:flex; align-items:center;">
+                      <span class="sched-swatch" :style="{background: tariffColourByName(b.name)}"></span>
+                      <select class="sched-tariff" v-model="b.name">
+                        <option v-for="n in tariffOptions(b.name)" :key="n" :value="n">{{ n }}</option>
+                      </select>
+                    </div>
+                  </td>
+                </template>
+                <template v-else>
+                  <td class="sched-ro-time">{{ b.start }}</td>
+                  <td><span class="sched-swatch" :style="{background: tariffColourByName(b.name)}"></span>{{ b.name }}</td>
+                </template>
+                <td class="sched-actions-cell"><span class="block-del" title="Remove this block" @click="delBlock(i)">&#10005;</span></td>
+              </tr>
+            </tbody>
           </table>
 
           <div class="sched-ph-wrap">
             <label class="sched-ph-label">Public holidays <span class="sched-muted">(treated as a weekend day)</span></label>
-            <textarea id="sched-ph" rows="2" placeholder="2026:1,104,359;2027:1"></textarea>
+            <textarea id="sched-ph" rows="2" v-model="phDays" placeholder="2026:1,104,359;2027:1"></textarea>
             <div class="sched-help">Format: <code>year:day-of-year,day-of-year;year:...</code> &mdash; e.g. <code>2026:1,104,359,360</code>. <a href="https://www.epochconverter.com/days" target="_blank" rel="noopener">day-of-year reference</a></div>
           </div>
         </div>
@@ -165,12 +230,13 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
       </div>
 
       <div class="sched-actions">
-        <button type="button" id="sched-save" class="sched-save-btn">Save</button>
-        <span id="sched-status" class="sched-status"></span>
+        <button type="button" id="sched-save" class="sched-save-btn" :disabled="saving" @click="save">Save</button>
+        <span id="sched-status" class="sched-status" :class="status.cls">{{ status.text }}</span>
       </div>
 
     </div>
   </div></div>
+  </div>
 
 </div>
 </div>
