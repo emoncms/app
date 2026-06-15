@@ -1,11 +1,10 @@
 <?php
-    defined('EMONCMS_EXEC') or die('Restricted access');
-    global $path, $session, $v;
+defined('EMONCMS_EXEC') or die('Restricted access');
+global $path, $session, $v;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat&amp;lang=en" />    
-
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
 
 <script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
@@ -19,13 +18,13 @@
 
 .electric-title {
     font-weight:bold;
-    font-size:22px;
+    font-size:18px;
     color:#44b3e2;
 }
 
 .power-value {
     font-weight:bold; 
-    font-size:42px; 
+    font-size:28px; 
     color:#44b3e2;
     line-height: 1.1;
 }
@@ -158,10 +157,9 @@
 </div>    
 </div>
 
-
 <div id="appconf-description" style="display:none">
-<p class="lead">The "Time of Use - flexible" app is a simple home energy monitoring app for exploring home or building electricity consumption and cost over time. It allows you to track multiple electricity tariffs as used in Australia.</p>
-<h3 class="text-white">Cumulative kWh</h3> 
+<p class="lead">The "Time of Use - flexible" app is a simple home energy monitoring app for exploring home or building electricity consumption and cost over time. It allows you to track multiple electricity tariffs as used in Australia, an optional daily supply charge, and an optional separately-monitored controlled load.</p>
+<h3 class="text-white">Cumulative kWh</h3>
 <p> feeds can be generated from power feeds with the power_to_kwh input processor.</p>
 <p><img src="<?php echo $path; ?>Modules/app/images/timeofuse_app.png" style="width:600px" class="img-rounded"></p>
 <p>As the number of configuration options for this are quite large, a shorthand has been used to specify
@@ -209,9 +207,15 @@ list of days of the year (from 1-365/366) per year.
 2017:2,104,107,115,163,275,359,360;2018:1
 </code>
 <p><a href="https://www.epochconverter.com/days" class="text-light">https://www.epochconverter.com/days</a> provides an easy reference.</p>
+
+<hr>
+<h3 class="text-white">Supply charge</h3>
+<p>Set a fixed <strong class="text-white">daily supply charge</strong> in your chosen currency in the configuration on the right. It is added to each day in cost mode and is only shown when greater than zero.</p>
+
+<h3 class="text-white">Controlled load (optional)</h3>
+<p>Tick <strong class="text-white">"Controlled load"</strong> in the configuration on the right to monitor a separate load on its own tariff, such as off-peak hot water. Enabling it reveals the <code>cl_use</code> power feed, the <code>cl_kwh</code> accumulated kWh feed, and the controlled load cost (currency/kWh). The controlled load is shown as an additional stacked series on the graphs and as its own line in the totals and averages.</p>
 </div>
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
-
 
 <div class="ajax-loader"></div>
 
@@ -254,7 +258,15 @@ config.app = {
         "description":"List of weekend tier start times. See description on the left for details"},
     "ph_days":{"type":"value", "default":"2017:2,104,107,115,163,275,359,360;2018:1",
         "name":"Public Holiday days",
-        "description":"List of public holidays. See description on the left for details"}
+        "description":"List of public holidays. See description on the left for details"},
+    "supply":{"type":"value", "default":"0", "name":"Supply Charge",
+        "description":"Daily supply charge in the specified currency (set to 0 to disable)."},
+    "enable_cl":{"type":"checkbox", "default":false, "name":"Controlled load",
+        "description":"Enable a separately-monitored controlled load (e.g. off-peak hot water)."},
+    "cl_use":{"type":"feed", "autoname":"cl_use", "optional":true, "description":"Controlled Load power feed (W)"},
+    "cl_kwh":{"type":"feed", "autoname":"cl_kwh", "optional":true, "description":"Controlled Load accumulated kWh"},
+    "cl_cost":{"type":"value", "default":"0.17", "name":"Controlled Load Cost",
+        "description":"Cost of the controlled load, currency/kWh."}
 };
 
 config.app_name = "Time of Use - flexible";
@@ -282,7 +294,6 @@ var viewmode = "bargraph";
 var viewcostenergy = "energy";
 var panning = false;
 var period_text = "month";
-var period_average = 0;
 var comparison_heating = false;
 var comparison_transport = false;
 var flot_font_size = 12;
@@ -294,6 +305,12 @@ var use_start = 0;
 var tier_names = [];
 var tier_rates = [];
 
+// Optional controlled load + supply charge
+var cl_enabled = false;
+var cl_rate = 0;
+var supply = 0;
+var cl_idx = 0; // The data index of the controlled load "tier"
+
 // Array of hours that will contain the tier for each hour
 var weekday_tiers = [,,,,,,,,,,,,,,,,,,,,,,,]; 
 var weekend_tiers = [,,,,,,,,,,,,,,,,,,,,,,,];
@@ -301,6 +318,17 @@ var weekend_tiers = [,,,,,,,,,,,,,,,,,,,,,,,];
 // public holidays use the weekend rates.
 // list of javascript timestamps indicating the start of day for any defined public holidays
 var public_holidays = [];
+
+// Show/hide the controlled load config fields based on the checkbox
+config.ui_before_render = function(){
+    var on = !!(config.db["enable_cl"]);
+    config.app["cl_use"].hidden  = !on;
+    config.app["cl_kwh"].hidden  = !on;
+    config.app["cl_cost"].hidden = !on;
+};
+config.ui_after_value_change = function(key){
+    if (key === "enable_cl") vue_config.renderUI();
+};
 
 config.init();
 
@@ -323,6 +351,16 @@ function init()
         props = tiers[a].split(":");
         tier_names[a] = props[0];
         tier_rates[a] = parseFloat(props[1]);
+    }
+    // Daily supply charge (applies in cost mode whenever > 0, independent of controlled load)
+    supply = parseFloat(config.app["supply"].value);
+    // Optional separately-monitored controlled load
+    cl_enabled = !!config.app["enable_cl"].value;
+    cl_idx = tier_names.length; // The controlled load occupies the tier after the last tariff tier
+    if (cl_enabled) {
+        feeds["cl_use"] = config.feedsbyid[config.app["cl_use"].value];
+        feeds["cl_kwh"] = config.feedsbyid[config.app["cl_kwh"].value];
+        cl_rate = parseFloat(config.app["cl_cost"].value);
     }
     wd_times = config.app["wd_times"].value.split(",");
     hour = 23;
@@ -394,7 +432,9 @@ function updater()
         for (var key in config.app) {
             if (config.app[key].value) feeds[key] = result[config.app[key].value];
         }
-        $("#power_now").html(Math.round(feeds["use"].value)+"W");
+        var power_now = feeds["use"].value;
+        if (cl_enabled && feeds["cl_use"]) power_now += feeds["cl_use"].value;
+        $("#power_now").html(Math.round(power_now)+"W");
     });
 }
 
@@ -439,8 +479,6 @@ $("#advanced-toggle").click(function () {
 $('#placeholder').bind("plothover", function (event, pos, item) {
     if (item) {
         var z = item.dataIndex;
-        var seriesIndex = item.seriesIndex;
-        var tier_vals = [];
         var total = 0;
         var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
         var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -455,22 +493,26 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
             if (viewmode == "bargraph") {
                 var date = days[d.getDay()]+", "+months[d.getMonth()]+" "+d.getDate();
            
-                for (var a = 0; a < tier_names.length; a++) {
-                    tier_vals[a] = bargraph_series[a].data[z][1];
-                    total += tier_vals[a];
+                // Read each stacked segment back from its labelled series
+                var segs = [];
+                for (var a = 0; a < bargraph_series.length; a++) {
+                    if (bargraph_series[a].data[z] == undefined) continue;
+                    var val = bargraph_series[a].data[z][1];
+                    segs.push({ label: bargraph_series[a].label, value: val });
+                    total += val;
                 }
-            
+
                 if (viewcostenergy=="energy") {
                     text = date + "<br>Total: " + total.toFixed(1) + " kWh";
-                    for (var a = tier_names.length - 1; a >= 0; a--) {
-                        if (tier_vals[a] == 0) continue;
-                        text += "<br>" + tier_names[a] + ": " + (tier_vals[a]).toFixed(1) + " kWh";
+                    for (var a = segs.length - 1; a >= 0; a--) {
+                        if (segs[a].value == 0) continue;
+                        text += "<br>" + segs[a].label + ": " + segs[a].value.toFixed(1) + " kWh";
                     }
                 } else {
                     text = date + "<br>Total: "+ config.app["currency"].value + total.toFixed(2);
-                    for (var a = tier_names.length - 1; a >= 0; a--) {
-                        if (tier_vals[a] == 0) continue;
-                        text += "<br>" + tier_names[a] + ": " + config.app["currency"].value + (tier_vals[a]).toFixed(2);
+                    for (var a = segs.length - 1; a >= 0; a--) {
+                        if (segs[a].value == 0) continue;
+                        text += "<br>" + segs[a].label + ": " + config.app["currency"].value + segs[a].value.toFixed(2);
                     }
                 }
             } else {
@@ -572,10 +614,11 @@ function powergraph_load()
     view.calc_interval(1200); // npoints = 1200
 
     data["use"] = feed.getdata(feeds["use"].id,view.start,view.end,view.interval,0,0,1,1);
+    if (cl_enabled) data["cl_use"] = feed.getdata(feeds["cl_use"].id,view.start,view.end,view.interval,0,0,1,1);
     for (var b = 0; b < tier_names.length; b++) {
         data_tier[b] = [];
     }
-    console.log(data_tier);
+    if (cl_enabled) data_tier[cl_idx] = [];
     for (var a = 0; a < data["use"].length; a++) {
         var time = data["use"][a][0];
         var pointval = data["use"][a][1];
@@ -597,23 +640,45 @@ function powergraph_load()
             }
         }
     }
-        
+    if (cl_enabled) {
+        for (var a = 0; a < data["cl_use"].length; a++) {
+            data_tier[cl_idx].push([data["cl_use"][a][0], data["cl_use"][a][1]]);
+        }
+    }
+
     powergraph_series = [];
     for (var a = 0; a < tier_names.length; a++) {
         powergraph_series.push({
             data:data_tier[a],
             yaxis:1,
+            stack: cl_enabled ? 0 : false,
             color:series_tier_colours[a],
             lines:{show:true, fill:0.8, lineWidth:0}
         });
     }
-    
+    // Stack the controlled load power on top of the tariff tiers
+    if (cl_enabled) {
+        powergraph_series.push({
+            data:data_tier[cl_idx],
+            yaxis:1,
+            stack:1,
+            color:series_tier_colours[cl_idx],
+            lines:{show:true, fill:0.8, lineWidth:0}
+        });
+    }
+
     var feedstats = {};
     feedstats["use"] = stats(data["use"]);
-    
-    var time_elapsed = (data["use"][data["use"].length-1][0] - data["use"][0][0])*0.001;
-    var kwh_in_window = 0.0; // (feedstats["use"].mean * time_elapsed) / 3600000;
-    
+    if (cl_enabled) feedstats["cl_use"] = stats(data["cl_use"]);
+
+    var kwh_in_window = 0.0;
+    // Start with the controlled load total
+    if (cl_enabled) {
+        var cl_elapsed = (data["cl_use"][data["cl_use"].length-1][0] - data["cl_use"][0][0])*0.001;
+        kwh_in_window = (feedstats["cl_use"].mean * cl_elapsed) / 3600000;
+    }
+
+    // then add each of the tiers
     for (var z=0; z<data["use"].length-1; z++) {
         var power = 0;
         if (data["use"][z][1]!=null) power = data["use"][z][1];
@@ -670,162 +735,172 @@ function powergraph_draw()
     $.plot($('#placeholder'),powergraph_series,options);
 }
 
-function bargraph_load(start,end) 
-{   
+function bargraph_load(start,end)
+{
     $("#power-graph-footer").hide();
     $("#advanced-toggle").html("SHOW DETAIL");
     $("#advanced-block").hide();
-        
-    var interval = 3600*24;
-    var intervalms = interval * 1000;
-    end = Math.ceil(end/intervalms)*intervalms;
-    start = Math.floor(start/intervalms)*intervalms;
 
-    var hourly = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
-    
-    //console.log(JSON.stringify(hourly));
-    var elec_result = feed.getdataDMY_time_of_use(feeds["use_kwh"].id,start,end,"daily",JSON.stringify(hourly));
+    // Align the requested window to whole local days.
+    var dayms = 3600*24*1000;
+    end = Math.ceil(end/dayms)*dayms;
+    start = Math.floor(start/dayms)*dayms;
 
-    var cur_use = feeds["use_kwh"].value;
-    
-    //console.log(start, end, cur_use);
+    // Fetch the accumulated kWh feeds as half-hourly energy deltas using the
+    // standard fixed interval getdata API in delta mode. Delta mode returns the
+    // kWh consumed within each half-hour interval and automatically fills the
+    // current (incomplete) interval with the live feed value, so today's partial
+    // usage is included without any special casing. The controlled load is
+    // fetched in exactly the same way for consistency.
+    // getdata(id, start, end, interval, average, delta, skipmissing, limitinterval)
+    var halfhour = 1800; // seconds
+    var use_data = feed.getdata(feeds["use_kwh"].id, start, end, halfhour, 0, 1, 0, 0);
+    var cl_data = false;
+    if (cl_enabled) cl_data = feed.getdata(feeds["cl_kwh"].id, start, end, halfhour, 0, 1, 0, 0);
 
-    var elec_data = [];
-    
-    var today = new Date();
-    today.setHours(0,0,0,0);
-        
-    // strip nan values.
-    for (var z in elec_result) {
-        var include = false;
-        if (elec_result[z][0] >= today.getTime()) {
-            // this is today or tomorrow set all null values to the current feed value.
-            for (var y in elec_result[z][1]) {
-        if (elec_result[z][1][y] == null) {
-                    elec_result[z][1][y] = feeds["use_kwh"].value;
-                }
-            }
-            include = true;
-        } else {
-            for (var y in elec_result[z][1]) {
-                if (elec_result[z][1][y] == null) {
-                    elec_result[z][1][y] = 0;
-                } else {
-                    include = true;
-                }
-            }
+    // Group the half-hourly energy into per-day, per-tier buckets. Each half hour
+    // falls entirely within a single tariff tier, determined by its time of day
+    // and whether the day is a weekday or a weekend/public holiday.
+    var day_list = [];    // ordered list of day-start timestamps (ms)
+    var day_index = {};   // day-start timestamp -> index into the arrays below
+    var daily_tier = [];  // daily_tier[d][tier] = kWh
+    var daily_cl = [];    // daily_cl[d] = kWh
+
+    function day_bucket(time) {
+        var d = new Date(time);
+        d.setHours(0,0,0,0);
+        var dayts = d.getTime();
+        if (day_index[dayts] === undefined) {
+            day_index[dayts] = day_list.length;
+            day_list.push(dayts);
+            var tiers = [];
+            for (var a = 0; a < tier_names.length; a++) tiers[a] = 0;
+            daily_tier.push(tiers);
+            daily_cl.push(0);
         }
-        if (include) elec_data.push(elec_result[z]);
-
+        return day_index[dayts];
     }
 
-    //console.log(elec_data);
-    
-    for (var a = 0; a < tier_names.length; a++) {
-        data[tier_names[a]] = [];
+    for (var z = 0; z < use_data.length; z++) {
+        var kwh = use_data[z][1];
+        if (kwh == null) continue;
+        var d = new Date(use_data[z][0]);
+        var tier = we_ph(d) ? weekend_tiers[d.getHours()] : weekday_tiers[d.getHours()];
+        if (tier == undefined) continue;
+        daily_tier[day_bucket(use_data[z][0])][tier] += kwh;
     }
-    
-    if (elec_data.length>0) {
-        var tier_total_kwh = [];
-        var total_kwh = 0; 
-        var n = 0;
-        var tier_kwh = []; 
+    if (cl_enabled && cl_data) {
+        for (var z = 0; z < cl_data.length; z++) {
+            var kwh = cl_data[z][1];
+            if (kwh == null) continue;
+            daily_cl[day_bucket(cl_data[z][0])] += kwh;
+        }
+    }
 
+    // Build the display series and running totals. Cost mode multiplies each
+    // tier's energy by its rate; the daily supply charge is added in cost mode
+    // when configured.
+    var cost_mode = (viewcostenergy == "cost");
+    var show_supply = (cost_mode && supply > 0);
+
+    for (var a = 0; a < tier_names.length; a++) data[tier_names[a]] = [];
+    if (cl_enabled) data["cl"] = [];
+    if (show_supply) data["sc"] = [];
+
+    var tier_total = [];
+    for (var a = 0; a < tier_names.length; a++) tier_total[a] = 0;
+    var cl_total = 0;
+    var supply_total = 0;
+    var grand_total = 0;
+
+    for (var i = 0; i < day_list.length; i++) {
+        var dayts = day_list[i];
         for (var a = 0; a < tier_names.length; a++) {
-            tier_total_kwh[a] = 0;
+            var val = cost_mode ? daily_tier[i][a] * tier_rates[a] : daily_tier[i][a];
+            data[tier_names[a]].push([dayts, val]);
+            tier_total[a] += val;
+            grand_total += val;
         }
-        // Calculate the daily totals by subtracting each day from the day before
-        for (var z = 0; z < elec_data.length; z++)
-        {
-            var time = elec_data[z][0];
-            var d = new Date(time);
-            var day = d.getDay();
-
-            for (var a = 0; a < tier_names.length; a++) {
-                tier_kwh[a] = 0;
-            }
-
-            // ignore tomorrow. We just use it to calculate the value from the last split value to now.
-            if (d > today) continue;
-
-            for (var y = 0; y < 23; y++) {
-                // y should be the hourly accumulate kWh
-                if (we_ph(d)) { // weekend
-                    tier_kwh[weekend_tiers[y]] += (elec_data[z][1][y+1] - elec_data[z][1][y]);
-                } else {
-                    tier_kwh[weekday_tiers[y]] += (elec_data[z][1][y+1] - elec_data[z][1][y]);
-                }
-            }
-        // last period ends with the next days first value
-            if (we_ph(d)) { // weekend
-                if ((z+1)<elec_data.length) tier_kwh[weekend_tiers[23]] += elec_data[z+1][1][0] - elec_data[z][1][23];
-            } else {
-                if ((z+1)<elec_data.length) tier_kwh[weekday_tiers[23]] += elec_data[z+1][1][0] - elec_data[z][1][23];
-            }
-
-            for (var a = 0; a < tier_names.length; a++) {
-                if (viewcostenergy=="energy") {
-                    data[tier_names[a]].push([time,tier_kwh[a]]);
-                    tier_total_kwh[a] += tier_kwh[a];
-                    total_kwh += tier_kwh[a];
-                } else {
-                    data[tier_names[a]].push([time,tier_kwh[a]*tier_rates[a]]);
-                    tier_total_kwh[a] += tier_kwh[a] * tier_rates[a];
-                    total_kwh += tier_kwh[a] * tier_rates[a];
-                }
-            }
-            n++;
+        if (cl_enabled) {
+            var clval = cost_mode ? daily_cl[i] * cl_rate : daily_cl[i];
+            data["cl"].push([dayts, clval]);
+            cl_total += clval;
+            grand_total += clval;
         }
-        period_average = total_kwh / n;
+        if (show_supply) {
+            data["sc"].push([dayts, supply]);
+            supply_total += supply;
+            grand_total += supply;
+        }
     }
 
+    // Assemble the stacked bar series in display order, attaching a label to each
+    // so the tooltip can read values back without fragile index arithmetic.
+    var bar = { show: true, align: "left", barWidth: 0.8*3600*24*1000, fill: 1.0, lineWidth:0 };
     bargraph_series = [];
-    
-    for (var a = 0; a < tier_names.length; a++) {
-        bargraph_series.push({
-            stack: true,
-            data: data[tier_names[a]], color: series_tier_colours[a],
-            bars: { show: true, align: "left", barWidth: 0.8*3600*24*1000, fill: 1.0, lineWidth:0}
-        });
+
+    if (show_supply) {
+        bargraph_series.push({ stack: true, label: "Supply", data: data["sc"], color: "#aa4466", bars: bar });
     }
-    
-    if (viewcostenergy=="energy") {
-        var totals_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
-            total_kwh.toFixed(1) + ' kWh</div><br>';
-        var averages_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
-           (total_kwh/n).toFixed(1) + ' kWh/d</div><br>';
-        for (var a = 0; a < tier_names.length; a++) {
-            totals_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="power-value">' + tier_total_kwh[a].toFixed(1) + ' kWh</div><br>';
-            averages_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="power-value">' + (tier_total_kwh[a]/n).toFixed(1) + ' kWh/d</div><br>';
-        }
-        $("#totals").html(totals_str);
-        $("#averages").html(averages_str);
-    } else {
-        var totals_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
-            config.app["currency"].value + total_kwh.toFixed(2) + '</div><br>';
-        var averages_str = '<div class="electric-title">COMBINED</div><div class="power-value">' +
-           config.app["currency"].value + (total_kwh/n).toFixed(2) + '/day</div><br>';
-        for (var a = 0; a < tier_names.length; a++) {
-            totals_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="power-value">' + config.app["currency"].value +
-               tier_total_kwh[a].toFixed(2) + '</div><br>';
-            averages_str += '<div class="electric-title">' + tier_names[a].toUpperCase() +
-               '</div><div class="power-value">' + config.app["currency"].value +
-               (tier_total_kwh[a]/n).toFixed(2) + '/day</div><br>';
-        }
-        $("#totals").html(totals_str);
-        $("#averages").html(averages_str);
+    for (var a = 0; a < tier_names.length; a++) {
+        bargraph_series.push({ stack: true, label: tier_names[a], data: data[tier_names[a]], color: series_tier_colours[a], bars: bar });
+    }
+    if (cl_enabled) {
+        bargraph_series.push({ stack: true, label: "Controlled Load", data: data["cl"], color: series_tier_colours[cl_idx], bars: bar });
     }
 
-    var kwh_today = 0;
-    for (var a = 0; a < tier_names.length; a++) kwh_today += data[tier_names[a]][data[tier_names[a]].length - 1][1];
-    
-    if (viewcostenergy=="energy") {
-        $("#kwh_today").html(kwh_today.toFixed(1)+" kWh");
+    // Totals cover the whole window; averages are taken over complete days only
+    // so the partial current day does not drag the daily average down.
+    var today = new Date(); today.setHours(0,0,0,0);
+    var today_idx = day_index[today.getTime()];
+    var today_present = (today_idx !== undefined);
+    var n_complete = day_list.length - (today_present ? 1 : 0);
+
+    var today_tier = [];
+    for (var a = 0; a < tier_names.length; a++) {
+        today_tier[a] = today_present ? data[tier_names[a]][today_idx][1] : 0;
+    }
+    var today_cl     = (cl_enabled  && today_present) ? data["cl"][today_idx][1] : 0;
+    var today_supply = (show_supply && today_present) ? data["sc"][today_idx][1] : 0;
+    var today_total  = today_cl + today_supply;
+    for (var a = 0; a < tier_names.length; a++) today_total += today_tier[a];
+
+    var avg = function(total, today_val) {
+        if (n_complete <= 0) return 0;
+        return (total - today_val) / n_complete;
+    };
+
+    var cur = config.app["currency"].value;
+    var fmt    = function(v){ return cost_mode ? cur + v.toFixed(2)       : v.toFixed(1)+' kWh';   };
+    var fmtAvg = function(v){ return cost_mode ? cur + v.toFixed(2)+'/day' : v.toFixed(1)+' kWh/d'; };
+    var row    = function(title,val){ return '<div class="electric-title">'+title+'</div><div class="power-value">'+val+'</div><br>'; };
+
+    var totals_str   = row('COMBINED', fmt(grand_total));
+    var averages_str = row('COMBINED', fmtAvg(avg(grand_total, today_total)));
+    for (var a = 0; a < tier_names.length; a++) {
+        totals_str   += row(tier_names[a].toUpperCase(), fmt(tier_total[a]));
+        averages_str += row(tier_names[a].toUpperCase(), fmtAvg(avg(tier_total[a], today_tier[a])));
+    }
+    if (cl_enabled) {
+        totals_str   += row('CONTROLLED LOAD', fmt(cl_total));
+        averages_str += row('CONTROLLED LOAD', fmtAvg(avg(cl_total, today_cl)));
+    }
+    if (show_supply) {
+        totals_str   += row('SUPPLY', fmt(supply_total));
+        averages_str += row('SUPPLY', fmtAvg(avg(supply_total, today_supply)));
+    }
+    $("#totals").html(totals_str);
+    $("#averages").html(averages_str);
+
+    // "Use today" headline: today's tariff tiers plus controlled load
+    // (the daily supply charge is excluded from this figure).
+    var use_today = today_cl;
+    for (var a = 0; a < tier_names.length; a++) use_today += today_tier[a];
+
+    if (cost_mode) {
+        $("#kwh_today").html(cur + use_today.toFixed(2));
     } else {
-        $("#kwh_today").html(config.app["currency"].value + kwh_today.toFixed(2));
+        $("#kwh_today").html(use_today.toFixed(1)+" kWh");
     }
 }
 
@@ -936,8 +1011,12 @@ $(function() {
 function we_ph (datetocheck) {
     var dayofweek = datetocheck.getDay();
     if ((dayofweek == 0) || (dayofweek == 6)) return true;
+    // Public holidays are stored as local midnight timestamps, so normalise the
+    // date being checked to its own midnight before comparing.
+    var midnight = new Date(datetocheck.getTime());
+    midnight.setHours(0,0,0,0);
     for (var i in public_holidays) {
-        if (public_holidays[i].valueOf() == datetocheck.valueOf()) return true;
+        if (public_holidays[i].valueOf() == midnight.valueOf()) return true;
     }
     return false;
 }
