@@ -998,7 +998,7 @@ function updateStats(d) {
     $(".solar_to_load").html(d.solar_to_load.toFixed(1));
     $(".solar_to_grid").html(d.solar_to_grid.toFixed(1));
     $(".solar_export_prc").html(s.solar_export_prc);
-    $(".solar_direct_prc").html(s.solar_to_load_prc);
+    $(".solar_to_load_prc").html(s.solar_to_load_prc);
     $(".solar_to_battery_prc").html(s.solar_to_battery_prc);
     $(".use_from_solar_prc").html(s.use_from_solar_prc);
 
