@@ -31,7 +31,7 @@ function load_process_draw_graph() {
             { key: "use",              kwh: false, cond: available.use,                        avg: 1, delta: 0 },
             { key: "battery",          kwh: false, cond: available.battery,                    avg: 1, delta: 0 },
             { key: "grid",             kwh: false, cond: available.grid,                       avg: 1, delta: 0 },
-            { key: "battery_soc",      kwh: false, cond: battery_soc_enabled,                avg: 0, delta: 0 },
+            { key: "battery_soc",      kwh: false, cond: battery_soc_enabled,                avg: 1, delta: 0 },
         ].filter(f => f.cond);
 
     } else {
@@ -54,7 +54,7 @@ function load_process_draw_graph() {
             { key: "battery_to_load",  kwh: true,  cond: available.battery,                    avg: 0, delta: 1 },
             { key: "battery_to_grid",  kwh: true,  cond: available.battery,                    avg: 0, delta: 1 },
             { key: "grid_to_battery",  kwh: true,  cond: available.battery,                    avg: 0, delta: 1 },
-            { key: "battery_soc",      kwh: false, cond: battery_soc_enabled,                avg: 0, delta: 0 }
+            { key: "battery_soc",      kwh: false, cond: battery_soc_enabled,                avg: 1, delta: 0 }
         ].filter(f => f.cond);
 
         kwh_data = {};
