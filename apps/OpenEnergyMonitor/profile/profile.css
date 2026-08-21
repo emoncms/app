@@ -1,0 +1,307 @@
+/* =====================================================================
+   Profile Explorer — refined dark theme
+   (component styles shared with myelectricflow.css)
+   ===================================================================== */
+
+body {
+    background-color: #222;
+}
+
+.content-container {
+    max-width: 1150px;
+}
+
+#app-block {
+    padding: 0;
+}
+
+/* Card panels */
+.app-card {
+    padding: 5px;
+    background-color: #262626;
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+}
+
+#app-block .app-card:first-of-type {
+    margin-top: 1rem;
+}
+
+/* Top bar. The card contributes 5px of its own padding above the bar, so
+   bottom padding is larger to leave an even gap to the divider line below. */
+.app-top-bar {
+    padding: 0.25rem 0.25rem 0.55rem;
+    border-bottom: 1px solid #333;
+    margin-bottom: 0.5rem;
+    align-items: center;
+}
+
+/* App title in the top bar (matches the active tab style in myelectricflow) */
+.app-heading {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    font-weight: bold;
+    color: #fff;
+    font-size: 1.1rem;
+    line-height: 1.2;
+    padding: 0 0.6rem;
+    margin: 0;
+}
+
+.app-heading [class^="svg-icon-"] {
+    font-size: 1.1em;
+    color: #44b3e2;
+}
+
+/* btn-list: replaces Bootstrap .nav .nav-pills */
+.btn-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Kill baseline/line-height artifacts from Bootstrap's li defaults so the
+   30px controls sit exactly centred in the bar */
+.btn-list > li {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+    line-height: 1;
+}
+
+/* app-btn: replaces Bootstrap btn + btn-large + btn-link + btn-inverse.
+   Explicitly resets Bootstrap properties so it is self-contained. */
+.app-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25em;
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+    white-space: nowrap;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    text-shadow: none;
+    color: #aaa;
+    opacity: .6;
+    transition: opacity .3s linear;
+    text-decoration: none;
+}
+.app-btn:hover,
+.app-btn:active {
+    opacity: 1;
+    text-decoration: none;
+}
+.app-btn.active {
+    color: white;
+    opacity: .8;
+    font-weight: bold;
+    text-decoration: underline;
+}
+.app-btn[disabled],
+.app-btn[disabled]:hover {
+    color: #616161;
+    opacity: .8;
+    background: rgba(6, 153, 250, 0.06);
+}
+
+/* Segmented mode toggle (Monthly | Annual) — sized to match .ctrl-group */
+.mode-toggle {
+    display: inline-flex;
+    align-items: stretch;
+    height: 30px;
+    background-color: #2e2e2e;
+    border: 1px solid #444;
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.mode-toggle-btn {
+    background: transparent;
+    border: none;
+    margin: 0;
+    color: #aaa;
+    font-size: 13px;
+    line-height: 1;
+    font-family: inherit;
+    padding: 0 12px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.mode-toggle-btn + .mode-toggle-btn {
+    border-left: 1px solid #444;
+}
+
+.mode-toggle-btn:hover,
+.mode-toggle-btn:focus {
+    color: #fff;
+    outline: none;
+}
+
+.mode-toggle-btn.active {
+    background-color: rgba(68,179,226,0.25);
+    color: #fff;
+    font-weight: bold;
+}
+
+/* A label + input/select pairing */
+.ctrl-group {
+    display: inline-flex;
+    align-items: stretch;
+    height: 30px;
+}
+
+.ctrl-label {
+    background-color: #2e2e2e;
+    color: #aaa;
+    border: 1px solid #444;
+    border-right: none;
+    border-radius: 0.375rem 0 0 0.375rem;
+    padding: 4px 10px;
+    font-size: 13px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.ctrl-group select {
+    background-color: #2e2e2e;
+    color: #ccc;
+    border: 1px solid #444;
+    border-radius: 0 0.375rem 0.375rem 0;
+    padding: 0 8px;
+    font-size: 13px;
+    height: 30px;
+    box-sizing: border-box;
+    cursor: pointer;
+    outline: none;
+    margin: 0;
+    width: auto;
+}
+
+.ctrl-group select:focus { border-color: #44b3e2; }
+
+/* Themed action button (CSV copy) */
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    background-color: rgba(68,179,226,0.12);
+    color: #44b3e2;
+    border: 1px solid rgba(68,179,226,0.35);
+    border-radius: 0.375rem;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.action-btn:hover,
+.action-btn:focus {
+    background-color: rgba(68,179,226,0.25);
+    color: #fff;
+    outline: none;
+}
+
+/* Monthly profile table (same style as the myelectricflow tariff table) */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #aaa;
+}
+
+.data-table th,
+.data-table td {
+    padding: 8px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.data-table th {
+    color: #ccc;
+}
+
+.data-table tr {
+    border-bottom: 1px solid rgba(68,179,226,0.1);
+}
+
+.data-table input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+/* Month colour swatch */
+.color-box {
+    height: 15px;
+    width: 15px;
+    border-radius: 3px;
+}
+
+/* Padded container around the flot placeholder (flot ignores padding on the
+   placeholder itself, so the spacing lives on a wrapper) */
+.graph-wrap {
+    padding: 0.5rem 0.75rem 0.75rem;
+}
+
+/* Flot chart legend */
+#graph .legend > div {
+    border-radius: 0.375rem;
+}
+
+#graph .legend table {
+    padding: 4px;
+}
+
+#graph .legend .legendLabel {
+    color: #ccc;
+    font-size: 12px;
+    padding: 1px 10px 1px 5px;
+}
+
+#graph .legend .legendColorBox {
+    padding-left: 8px;
+}
+
+#graph .legend .legendColorBox > div {
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+/* Graph hover tooltip */
+.tooltip-title {
+    color: #aaa;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.tooltip-value {
+    color: #fff;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.tooltip-units {
+    color: #fff;
+    font-weight: bold;
+    font-size: 10px;
+}
+
+textarea {
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: scroll;
+}
