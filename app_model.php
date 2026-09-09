@@ -26,8 +26,8 @@ class AppConfig
         
         $this->available = $this->load_available();
 
-        // Option to skip db check
-        if (isset($settings['db_check']) && $settings['db_check'] == 0) {
+        // Option to skip the schema check and migration
+        if (isset($settings['app']['auto_migrate']) && !$settings['app']['auto_migrate']) {
             return;
         }
         
