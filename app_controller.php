@@ -224,6 +224,20 @@ function app_controller()
         }
     }
 
+    // An app is meant to sit in an iframe on another site, so the page takes
+    // the embed frame policy. That includes a private one: the way an owner
+    // embeds it is to put a key in the iframe url, and a key in the url is not
+    // the ambient authority a session cookie is. The site doing the framing had
+    // to know the key to write the url, and knowing it already grants
+    // everything framing the page could reach. set_frame_policy in core.php
+    // holds the relaxation back for a page the session cookie authenticated,
+    // which is the clickjacking case.
+    //
+    // Reached only past the access check above, so the app is public or the
+    // requester owns it. Scoped to the page, since the json routes below are
+    // not framed and have no reason to relax.
+    if ($route->action == "view" || $route->action == "") allow_public_embed();
+
     // Check if the app has a specific controller
     // e.g. myheatpump/myheatpump_controller.php
     $app_controller_file = "Modules/app/apps/OpenEnergyMonitor/".$app->app."/".$app->app."_controller.php";
