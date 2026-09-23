@@ -3,12 +3,12 @@
     global $path, $session, $v;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
-<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
+<?php load_js("Modules/feed/feed.js"); ?>
 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/graph_bars.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/graph_lines.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script> 
+<?php load_js("Modules/app/Lib/graph_bars.js"); ?> 
+<?php load_js("Modules/app/Lib/graph_lines.js"); ?> 
+<?php load_js("Modules/app/Lib/timeseries.js"); ?> 
+<?php load_js("Modules/app/Lib/vis.helper.js"); ?> 
 
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
@@ -114,7 +114,7 @@
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
 
-<script src="<?php echo $path; ?>Lib/misc/gettext.js?v=<?php echo $v; ?>"></script> 
+<?php load_js("Lib/js/gettext.js"); ?> 
 <script>
 function getTranslations(){
     return {

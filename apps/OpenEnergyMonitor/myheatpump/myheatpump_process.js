@@ -620,7 +620,7 @@ function carnot_simulator() {
         var practical_carnot_heat_mean = practical_carnot_heat_sum / carnot_heat_n;
         var ideal_carnot_heat_mean = ideal_carnot_heat_sum / carnot_heat_n;
         if (simulate_heat_output && !show_as_prc_of_carnot) {
-            powergraph_series['carnot'] = { label: "Carnot Heat", data: data["heatpump_heat_carnot"], yaxis: 1, color: 7, lines: { show: true, fill: 0.05, lineWidth: 0.8 } };
+            powergraph_series['carnot'] = { label: "Carnot Heat", data: data["heatpump_heat_carnot"], yaxis: 1, color: flot_color(7), lines: { show: true, fill: 0.05, lineWidth: 0.8 } };
             // Uncomment to show simulated flow rate (experimental)
             // powergraph_series['sim_flow_rate'] = { label: "Simulated flow rate", data: data["sim_flow_rate"], yaxis: 3, color: "#000", lines: { show: true, fill: false, lineWidth: 1.0 } };
         }

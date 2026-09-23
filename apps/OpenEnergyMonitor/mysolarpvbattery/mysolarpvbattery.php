@@ -5,15 +5,11 @@
 
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
+<?php load_js("Modules/feed/feed.js"); ?>
 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
+<?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
+<?php load_js("Modules/app/Lib/vis.helper.js"); ?>
+<?php load_js("Modules/app/Lib/timeseries.js"); ?> 
 
 
 
@@ -325,7 +321,7 @@
 
 <div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
 
-<script src="<?php echo $path; ?>Lib/misc/gettext.js?v=<?php echo $v; ?>"></script> 
+<?php load_js("Lib/js/gettext.js"); ?> 
 <script>
 function getTranslations(){
     return {
@@ -870,41 +866,41 @@ function load_powergraph() {
 function draw_powergraph() {
 
     var options = {
-        lines: { fill: false },
-        xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end},
-        yaxes: [{ min: 0 },{ min: 0, max: 100 }],
+        series: { lines: { fill: false, lineWidth: 2 } },
+        xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none", min: view.start, max: view.end},
+        yaxes: [{ min: 0, autoScale: "none" },{ min: 0, max: 100, autoScale: "none" }],
         grid: { hoverable: true, clickable: true },
-        selection: { mode: "x" },
+        selection: { mode: "x", color: "#e8cfac", visualization: "fill" },
         legend: { show: false }
     }
     
     options.xaxis.min = view.start;
     options.xaxis.max = view.end;
-    $.plot($('#placeholder'),powerseries,options);
+    Flot.plot(document.getElementById('placeholder'),powerseries,options);
     $(".ajax-loader").hide();
 }
 
 // ------------------------------------------------------------------------------------------
 // POWER GRAPH EVENTS
 // ------------------------------------------------------------------------------------------
+
 function powergraph_events() {
     $(".visnav[time=1]").show();
     $(".visnav[time=3]").show();
     $(".visnav[time=6]").show();
     $(".visnav[time=24]").show();
             
-    $('#placeholder').unbind("plotclick");
-    $('#placeholder').unbind("plothover");
-    $('#placeholder').unbind("plotselected");
+    plot_unbind('placeholder');
 
-    $('#placeholder').bind("plothover", function (event, pos, item)
+    document.getElementById('placeholder').addEventListener("plothover", plot_handlers.plothover = function (event)
     {
+        var pos = event.detail[0], item = event.detail[1];
         if (item) {
             // Show tooltip
             var tooltip_items = [];
 
             var date = new Date(item.datapoint[0]);
-            tooltip_items.push(["TIME", dateFormat(date, 'HH:MM'), ""]);
+            tooltip_items.push(["TIME", tooltip_time(date), ""]);
 
             for (i = 0; i < powerseries.length; i++) {
                 var series = powerseries[i];
@@ -927,7 +923,8 @@ function powergraph_events() {
         }
     });
 
-    $('#placeholder').bind("plotselected", function (event, ranges) {
+    document.getElementById('placeholder').addEventListener("plotselected", plot_handlers.plotselected = function (event) {
+        var ranges = event.detail[0];
         view.start = ranges.xaxis.from;
         view.end = ranges.xaxis.to;
 
@@ -1033,28 +1030,28 @@ function load_bargraph() {
         data: use_kwhd_data,
         label: "Use",
         color: "#0699fa",
-        bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.9, lineWidth: 0 },
+        bars: { show: true, align: "center", barWidth: [0.8*3600*24*1000, true], fill: 0.9, lineWidth: 0 },
         stack: 2
     });
     series.push({
         data: solar_direct_kwhd_data,
         label: "Self-consumption",
         color: "#dccc1f",
-        bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.9, lineWidth: 0 },
+        bars: { show: true, align: "center", barWidth: [0.8*3600*24*1000, true], fill: 0.9, lineWidth: 0 },
         stack: 1
     });
     series.push({
         data: battery_discharge_kwhd_data,
         label: "Battery discharge",
         color: "#fbb450",
-        bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.9, lineWidth: 0 },
+        bars: { show: true, align: "center", barWidth: [0.8*3600*24*1000, true], fill: 0.9, lineWidth: 0 },
         stack: 1
     });
     series.push({
         data: export_kwhd_data,
         label: "Solar export",
         color: "#dccc1f",
-        bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 0.9, lineWidth: 0 },
+        bars: { show: true, align: "center", barWidth: [0.8*3600*24*1000, true], fill: 0.9, lineWidth: 0 },
         stack: 0
     });
     
@@ -1075,13 +1072,13 @@ function draw_bargraph()
     markings.push({ color: "#ccc", lineWidth: 1, yaxis: { from: 0, to: 0 } });
     
     var options = {
-        xaxis: { mode: "time", timezone: "browser", minTickSize: [1, "day"] },
+        xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", minTickSize: [1, "day"] },
         grid: { hoverable: true, clickable: true, markings: markings },
-        selection: { mode: "x" },
+        selection: { mode: "x", color: "#e8cfac", visualization: "fill" },
         legend: { show: false }
     };
     
-    var plot = $.plot($('#placeholder'),historyseries,options);
+    var plot = Flot.plot(document.getElementById('placeholder'),historyseries,options);
     
     $('#placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use & Total Use</div>");
     $('#placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> Exported solar</div>");
@@ -1098,15 +1095,14 @@ function bargraph_events() {
     $(".visnav[time=6]").hide();
     $(".visnav[time=24]").hide();
             
-    $('#placeholder').unbind("plotclick");
-    $('#placeholder').unbind("plothover");
-    $('#placeholder').unbind("plotselected");
+    plot_unbind('placeholder');
     $('.bargraph-viewall').unbind("click");
     
     // Show day's figures on the bottom of the page
     
-    $('#placeholder').bind("plothover", function (event, pos, item)
+    document.getElementById('placeholder').addEventListener("plothover", plot_handlers.plothover = function (event)
     {
+        var pos = event.detail[0], item = event.detail[1];
         if (item) {
             var z = item.dataIndex;
             
@@ -1158,8 +1154,9 @@ function bargraph_events() {
     });
 
     // Auto click through to power graph
-    $('#placeholder').bind("plotclick", function (event, pos, item)
+    document.getElementById('placeholder').addEventListener("plotclick", plot_handlers.plotclick = function (event)
     {
+        var pos = event.detail[0], item = event.detail[1];
         if (item && !panning) {
             var z = item.dataIndex;
             
@@ -1181,7 +1178,8 @@ function bargraph_events() {
     });
     
     
-    $('#placeholder').bind("plotselected", function (event, ranges) {
+    document.getElementById('placeholder').addEventListener("plotselected", plot_handlers.plotselected = function (event) {
+        var ranges = event.detail[0];
         view.start = ranges.xaxis.from;
         view.end = ranges.xaxis.to;
         draw(true);

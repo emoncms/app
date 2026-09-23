@@ -832,7 +832,7 @@ function graph_draw() {
     var bars = {
         show: true,
         align: "left",
-        barWidth: 0.9 * 1800 * 1000,
+        barWidth: [0.9 * 1800 * 1000, true],
         fill: 1.0,
         lineWidth: 0
     };
@@ -957,11 +957,14 @@ function graph_draw() {
         xaxis: {
             mode: "time",
             timezone: "browser",
+            timeBase: "milliseconds",
+            autoScale: "none",
             min: view.start,
             max: view.end,
             font: {
                 size: flot_font_size,
-                color: "#666"
+                color: "#666",
+                fill: "#666"
             },
             reserveSpace: false
         },
@@ -969,7 +972,8 @@ function graph_draw() {
                 position: 'left',
                 font: {
                     size: flot_font_size,
-                    color: "#666"
+                    color: "#666",
+                    fill: "#666"
                 },
                 reserveSpace: false
             },
@@ -978,7 +982,8 @@ function graph_draw() {
                 alignTicksWithAxis: 1,
                 font: {
                     size: flot_font_size,
-                    color: "#666"
+                    color: "#666",
+                    fill: "#666"
                 },
                 reserveSpace: false
             }
@@ -996,14 +1001,17 @@ function graph_draw() {
             }
         },
         selection: {
-            mode: "x"
+            mode: "x",
+            color: "#e8cfac",
+            visualization: "fill"
         },
         legend: {
-            position: "NW",
+            show: true,
+            position: "nw",
             noColumns: 6
         }
     }
-    $.plot($('#placeholder'), graph_series, options);
+    Flot.plot(document.getElementById('placeholder'), graph_series, options);
 }
 
 
@@ -1194,7 +1202,8 @@ function calibration_line_of_best_fit(import_kwh, meter_kwh_hh)
 // -------------------------------------------------------------------------------
 // EVENTS
 // -------------------------------------------------------------------------------
-$('#placeholder').bind("plothover", function(event, pos, item) {
+document.getElementById('placeholder').addEventListener("plothover", function(event) {
+    var pos = event.detail[0], item = event.detail[1];
     if (item) {
         var z = item.dataIndex;
 
@@ -1346,7 +1355,8 @@ $('.time-select').change(function() {
     }
 });
 
-$('#placeholder').bind("plotselected", function(event, ranges) {
+document.getElementById('placeholder').addEventListener("plotselected", function(event) {
+    var ranges = event.detail[0];
     var start = ranges.xaxis.from;
     var end = ranges.xaxis.to;
     panning = true;

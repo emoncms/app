@@ -535,7 +535,8 @@ $(".viewhistory").click(function () {
     $("#advanced-block").hide();
 });
 
-$('#placeholder').bind("plothover", function (event, pos, item) {
+document.getElementById('placeholder').addEventListener("plothover", function (event) {
+    var pos = event.detail[0], item = event.detail[1];
     if (item) {
         if (previousPoint != item.datapoint) {
             previousPoint = item.datapoint;
@@ -551,7 +552,8 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
 });
 
 // Auto click through to power graph
-$('#placeholder').bind("plotclick", function (event, pos, item) {
+document.getElementById('placeholder').addEventListener("plotclick", function (event) {
+    var pos = event.detail[0], item = event.detail[1];
     if (item && !panning && viewmode == "bargraph") {
 
         last_bargraph_start = bargraph_start;
@@ -581,7 +583,8 @@ $('#placeholder').bind("plotclick", function (event, pos, item) {
     }
 });
 
-$('#placeholder').bind("plotselected", function (event, ranges) {
+document.getElementById('placeholder').addEventListener("plotselected", function (event) {
+    var ranges = event.detail[0];
     var start = ranges.xaxis.from;
     var end = ranges.xaxis.to;
     panning = true;

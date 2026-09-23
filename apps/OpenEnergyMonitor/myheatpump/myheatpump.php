@@ -6,15 +6,11 @@ global $path, $session, $v;
 
 <link rel="stylesheet" href="<?php echo $path; ?>Lib/fonts/montserrat/montserrat.css?v=<?php echo $v; ?>" />
 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=102"></script>
+<?php load_js("Modules/feed/feed.js"); ?>
 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/js/clipboard.js?v=<?php echo $v; ?>"></script>
+<?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
+<?php load_js("Modules/app/Lib/vis.helper.js"); ?>
+<?php load_js("Lib/js/clipboard.js"); ?>
 <link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=49>" rel="stylesheet">
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">

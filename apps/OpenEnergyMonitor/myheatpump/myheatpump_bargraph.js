@@ -242,14 +242,14 @@ function bargraph_draw() {
 
         data["heatpump_heat_kwhd"] = daily_data[bargraph_mode+"_heat_kwh"];
 
-        let color = 0;
+        let color = flot_color(0);
         if (bargraph_mode == "cooling") {
             color = "#66b0ff";
         }
         
         bargraph_series.push({
             data: data["heatpump_heat_kwhd"], color: color,
-            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 },
+            bars: { show: true, align: "center", barWidth: [0.75 * DAY, true], fill: 1.0, lineWidth: 0 },
             stack: true
         });
 
@@ -264,7 +264,7 @@ function bargraph_draw() {
             data["cooling_heat_kwhd"] = daily_data["cooling_heat_kwh"];
             bargraph_series.push({
                 data: data["cooling_heat_kwhd"], color: "#66b0ff",
-                bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 }
+                bars: { show: true, align: "center", barWidth: [0.75 * DAY, true], fill: 1.0, lineWidth: 0 }
             });
         }
     }
@@ -274,8 +274,8 @@ function bargraph_draw() {
         data["heatpump_elec_kwhd"] = daily_data[bargraph_mode+"_elec_kwh"];
 
         bargraph_series.push({
-            data: data["heatpump_elec_kwhd"], color: 1,
-            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 },
+            data: data["heatpump_elec_kwhd"], color: flot_color(1),
+            bars: { show: true, align: "center", barWidth: [0.75 * DAY, true], fill: 1.0, lineWidth: 0 },
             stack: false
         });
 
@@ -357,8 +357,8 @@ function bargraph_draw() {
     if (show_daily_immersion && (bargraph_mode=="combined" || bargraph_mode=="water")) {
         data["immersion_kwhd"] = daily_data["immersion_kwh"];
         bargraph_series.push({
-            data: data["immersion_kwhd"], color: 4,
-            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 0.8, lineWidth: 0 },
+            data: data["immersion_kwhd"], color: flot_color(4),
+            bars: { show: true, align: "center", barWidth: [0.75 * DAY, true], fill: 0.8, lineWidth: 0 },
             stack: true
         });
 
@@ -373,7 +373,7 @@ function bargraph_draw() {
         data["boiler_kwhd"] = daily_data["boiler_kwh"];
         bargraph_series.push({
             data: data["boiler_kwhd"], color: "#ff9e80",
-            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 0.8, lineWidth: 0 },
+            bars: { show: true, align: "center", barWidth: [0.75 * DAY, true], fill: 0.8, lineWidth: 0 },
             stack: true
         });
 
@@ -424,34 +424,39 @@ function bargraph_draw() {
 
 
     var options = {
+        series: { lines: { lineWidth: 2 } },
         xaxis: {
             mode: "time",
             timezone: "browser",
-            font: { size: flot_font_size, color: "#666" },
+            timeBase: "milliseconds",
+            autoScale: "none",
+            font: { size: flot_font_size, color: "#666", fill: "#666" },
             // labelHeight:-5
             reserveSpace: false,
             min: bargraph_start, 
             max: bargraph_end
         },
         yaxes: [{
-            font: { size: flot_font_size, color: "#666" },
+            font: { size: flot_font_size, color: "#666", fill: "#666" },
             // labelWidth:-5
             reserveSpace: false,
-            min: 0
+            min: 0,
+            autoScale: "none"
         }, {
-            font: { size: flot_font_size, color: "#c880ff" },
+            font: { size: flot_font_size, color: "#c880ff", fill: "#c880ff" },
             // labelWidth:-5
             reserveSpace: false,
             // max:40
         }, {
-            font: { size: flot_font_size, color: "#44b3e2" },
+            font: { size: flot_font_size, color: "#44b3e2", fill: "#44b3e2" },
             reserveSpace: false,
             min: 1,
-            max: 8
+            max: 8,
+            autoScale: "none"
         }, {
             show: false
         }],
-        selection: { mode: "x" },
+        selection: { mode: "x", color: "#e8cfac", visualization: "fill" },
         grid: {
             show: true,
             color: "#aaa",
@@ -461,7 +466,7 @@ function bargraph_draw() {
         }
     }
     if ($('#placeholder').width()) {
-        var plot = $.plot($('#placeholder'), bargraph_series, options);
+        var plot = Flot.plot(document.getElementById('placeholder'), bargraph_series, options);
         $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'></div>");
     }
 }

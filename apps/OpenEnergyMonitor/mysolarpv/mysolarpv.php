@@ -46,14 +46,11 @@
     min-height:180px;
 }
 </style>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
+<?php load_js("Modules/feed/feed.js"); ?>
 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
+<?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
+<?php load_js("Modules/app/Lib/vis.helper.js"); ?>
+<?php load_js("Modules/app/Lib/timeseries.js"); ?> 
 
 <section id="app-block" style="display:none" class="block">
 
@@ -150,7 +147,7 @@
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
-<script src="<?php echo $path; ?>Lib/misc/gettext.js?v=<?php echo $v; ?>"></script> 
+<?php load_js("Lib/js/gettext.js"); ?> 
 <script>
 function getTranslations(){
     return {
@@ -338,7 +335,6 @@ function init()
 
 }
 
-
 // ------------------------------------------------------------------------------------------
 // TOOLTIP HANDLING
 // Show & hide the tooltip
@@ -500,16 +496,16 @@ function draw_powergraph() {
     var plotColour = 0;
     
     var options = {
-        lines: { fill: fill },
-        xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end},
-        yaxes: [{ min: 0 }],
+        series: { lines: { fill: fill, lineWidth: 2 } },
+        xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none", min: view.start, max: view.end},
+        yaxes: [{ min: 0, autoScale: "none" }],
         grid: {
             hoverable: true, 
             clickable: true,
             color: "#aaa",
             borderWidth: 0
         },
-        selection: { mode: "x" }
+        selection: { mode: "x", color: "#e8cfac", visualization: "fill" }
     }
     view.calc_interval(1500); // npoints = 1500
     // -------------------------------------------------------------------------------------------------------
@@ -637,7 +633,7 @@ function draw_powergraph() {
     if (show_balance_line) series.push({data:store_data, yaxis:2, name:'balance', color: 'green',xcolor: "#888"});
     
     powerseries = series;
-    $.plot($('#placeholder'),series,options);
+    Flot.plot(document.getElementById('placeholder'),series,options);
     $(".ajax-loader").hide();
 }
 
@@ -656,13 +652,13 @@ function get_kwh_between_two_timestamps(key,start,end) {
 // ------------------------------------------------------------------------------------------
 // POWER GRAPH EVENTS
 // ------------------------------------------------------------------------------------------
+
 function powergraph_events() {
 
-    $('#placeholder').unbind("plotclick");
-    $('#placeholder').unbind("plothover");
-    $('#placeholder').unbind("plotselected");
+    plot_unbind('placeholder');
 
-    $('#placeholder').bind("plotselected", function (event, ranges) {
+    document.getElementById('placeholder').addEventListener("plotselected", plot_handlers.plotselected = function (event) {
+        var ranges = event.detail[0];
         view.start = ranges.xaxis.from;
         view.end = ranges.xaxis.to;
 
@@ -682,14 +678,15 @@ function powergraph_events() {
     // position the tooltip and insert the correct value on hover
     // hide the tooltip on mouseout  
 
-    $('#placeholder').bind("plothover", function (event, pos, item)
+    document.getElementById('placeholder').addEventListener("plothover", plot_handlers.plothover = function (event)
     {
+        var pos = event.detail[0], item = event.detail[1];
         if (item) {
             // Show tooltip
             var tooltip_items = [];
             var date = new Date(item.datapoint[0]);
 
-            tooltip_items.push(["TIME", dateFormat(date, 'HH:MM'), ""]);
+            tooltip_items.push(["TIME", tooltip_time(date), ""]);
             if (powerseries) {
                 for (i = 0; i < powerseries.length; i++) {
                     var series = powerseries[i];
@@ -792,19 +789,19 @@ function load_bargraph(start,end) {
     series.push({
         data: use_kwhd_data,
         color: "#0699fa",
-        bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 0.8, lineWidth:0}
+        bars: { show: true, align: "center", barWidth: [0.75*3600*24*1000, true], fill: 0.8, lineWidth:0}
     });
     
     series.push({
         data: solarused_kwhd_data,
         color: "#dccc1f",
-        bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 0.6, lineWidth:0}
+        bars: { show: true, align: "center", barWidth: [0.75*3600*24*1000, true], fill: 0.6, lineWidth:0}
     });
     
     series.push({
         data: export_kwhd_data,
         color: "#dccc1f",
-        bars: { show: true, align: "center", barWidth: 0.75*3600*24*1000, fill: 0.8, lineWidth:0}
+        bars: { show: true, align: "center", barWidth: [0.75*3600*24*1000, true], fill: 0.8, lineWidth:0}
     });
     
     historyseries = series;
@@ -822,12 +819,12 @@ function draw_bargraph()
     markings.push({ color: "#ccc", lineWidth: 1, yaxis: { from: 0, to: 0 } });
     
     var options = {
-        xaxis: { mode: "time", timezone: "browser"},
+        xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds"},
         grid: {hoverable: true, clickable: true, markings:markings},
-        selection: { mode: "x" }
+        selection: { mode: "x", color: "#e8cfac", visualization: "fill" }
     }
 
-    var plot = $.plot($('#placeholder'),historyseries,options);
+    var plot = Flot.plot(document.getElementById('placeholder'),historyseries,options);
     
     $('#placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use & Total Use</div>");
     $('#placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> Exported solar</div>");
@@ -843,14 +840,13 @@ function draw_bargraph()
 // ------------------------------------------------------------------------------------------
 function bargraph_events(){
 
-    $('#placeholder').unbind("plotclick");
-    $('#placeholder').unbind("plothover");
-    $('#placeholder').unbind("plotselected");
+    plot_unbind('placeholder');
     $('.bargraph-viewall').unbind("click");
     
     // Show day's figures on the bottom of the page
-    $('#placeholder').bind("plothover", function (event, pos, item)
+    document.getElementById('placeholder').addEventListener("plothover", plot_handlers.plothover = function (event)
     {
+        var pos = event.detail[0], item = event.detail[1];
         if (item) {
             // console.log(item.datapoint[0]+" "+item.dataIndex);
             var z = item.dataIndex;
@@ -891,8 +887,9 @@ function bargraph_events(){
     });
 
     // Auto click through to power graph
-    $('#placeholder').bind("plotclick", function (event, pos, item)
+    document.getElementById('placeholder').addEventListener("plotclick", plot_handlers.plotclick = function (event)
     {
+        var pos = event.detail[0], item = event.detail[1];
         if (item && !panning) {
             // console.log(item.datapoint[0]+" "+item.dataIndex);
             var z = item.dataIndex;
@@ -916,7 +913,8 @@ function bargraph_events(){
         }
     });
     
-    $('#placeholder').bind("plotselected", function (event, ranges) {
+    document.getElementById('placeholder').addEventListener("plotselected", plot_handlers.plotselected = function (event) {
+        var ranges = event.detail[0];
         var start = ranges.xaxis.from;
         var end = ranges.xaxis.to;
         load_bargraph(start,end);
@@ -945,7 +943,6 @@ function bargraph_events(){
 $(function() {
     $(document).on('window.resized hidden.sidebar.collapse shown.sidebar.collapse', resize)
 })
-
 
 // ----------------------------------------------------------------------
 // App log

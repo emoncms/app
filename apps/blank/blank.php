@@ -5,8 +5,8 @@ global $path, $session, $v;
 <link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/appconf.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
+<?php load_js("Modules/app/Lib/appconf.js"); ?>
+<?php load_js("Modules/feed/feed.js"); ?>
 
 <div id="app-block" style="display:none">
   <div style="height:20px; border-bottom:1px solid #333; padding:8px;">

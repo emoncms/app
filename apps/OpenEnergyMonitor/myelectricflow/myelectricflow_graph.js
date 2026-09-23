@@ -192,7 +192,7 @@ function process_and_draw_graph() {
         };
         if (viewmode == "bargraph") {
             series.lines = { show: false };
-            series.bars = { show: true, align: "center", barWidth: 0.8 * 3600 * 24 * 1000, fill: flows[i].fill, lineWidth: 0 };
+            series.bars = { show: true, align: "center", barWidth: [0.8 * 3600 * 24 * 1000, true], fill: flows[i].fill, lineWidth: 0 };
         }
         powerseries.push(series);
     }
@@ -235,23 +235,23 @@ function draw_graph() {
 
     const font_color = "#888";
     const options = {
-        lines: { fill: false },
+        series: { lines: { fill: false, lineWidth: 2 } },
         xaxis: { 
-            mode: "time", timezone: "browser", min: view.start, max: view.end,
-            font: { color: font_color }  // tick label text color
+            mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none", min: view.start, max: view.end,
+            font: { color: font_color, fill: font_color }  // tick label text color
         },
         grid: { hoverable: true, clickable: true, borderWidth: 0 },
-        selection: { mode: "x" },
+        selection: { mode: "x", color: "#e8cfac", visualization: "fill" },
         legend: { show: false }
     }
 
     if (viewmode == "powergraph") {
         options.yaxes = [
-            { min: 0, reserveSpace: false, font: { color: font_color } },
-            { min: 0, max: 100, reserveSpace: false, font: { color: font_color } }
+            { min: 0, autoScale: "none", reserveSpace: false, font: { color: font_color, fill: font_color } },
+            { min: 0, max: 100, autoScale: "none", reserveSpace: false, font: { color: font_color, fill: font_color } }
         ];
     } else {
-        options.yaxis = { font: { color: font_color } };
+        options.yaxis = { font: { color: font_color, fill: font_color } };
     }
 
     if (viewmode == "bargraph") {
@@ -261,7 +261,7 @@ function draw_graph() {
     
     options.xaxis.min = view.start;
     options.xaxis.max = view.end;
-    $.plot($('#placeholder'),powerseries,options);
+    Flot.plot(document.getElementById('placeholder'),powerseries,options);
 
     if (viewmode == "bargraph") {
         $('#placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use &amp; Total Use</div>");
@@ -326,8 +326,9 @@ function graph_events() {
 }
 
 function bind_hover_tooltip() {
-    $('#placeholder').bind("plothover", function (event, pos, item)
+    document.getElementById('placeholder').addEventListener("plothover", function (event)
     {
+        var pos = event.detail[0], item = event.detail[1];
         // In Costs mode the chart is the tariff view; use its dedicated tooltip.
         // tooltip() in vis.helper.js appends a new #tooltip without clearing the old one,
         // so only rebuild when the hovered point changes and remove the previous first.
@@ -349,7 +350,7 @@ function bind_hover_tooltip() {
             const tooltip_items = [];
 
             const date = new Date(item.datapoint[0]);
-            tooltip_items.push(["TIME", dateFormat(date, 'HH:MM'), ""]);
+            tooltip_items.push(["TIME", tooltip_time(date), ""]);
 
             for (let i = 0; i < powerseries.length; i++) {
                 const series = powerseries[i];
@@ -385,7 +386,8 @@ function bind_hover_tooltip() {
 }
 
 function bind_zoom_selection() {
-    $('#placeholder').bind("plotselected", function (event, ranges) {
+    document.getElementById('placeholder').addEventListener("plotselected", function (event) {
+        var ranges = event.detail[0];
         view.start = ranges.xaxis.from;
         view.end = ranges.xaxis.to;
 
@@ -403,8 +405,9 @@ function bind_zoom_selection() {
 
 function bind_bar_click() {
     // Auto click through to power graph
-    $('#placeholder').bind("plotclick", function (event, pos, item)
+    document.getElementById('placeholder').addEventListener("plotclick", function (event)
     {
+        var pos = event.detail[0], item = event.detail[1];
         if (tariff_view_active) return; // no bar->power drilldown in Costs mode
         if (viewmode == "powergraph") return; // disable click when already in powergraph mode
 

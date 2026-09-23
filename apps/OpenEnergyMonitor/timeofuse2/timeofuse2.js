@@ -593,7 +593,8 @@ $("#advanced-toggle").click(function () {
     }
 });
 
-$('#placeholder').bind("plothover", function (event, pos, item) {
+document.getElementById('placeholder').addEventListener("plothover", function (event) {
+    var pos = event.detail[0], item = event.detail[1];
     if (item) {
         var z = item.dataIndex;
         var total = 0;
@@ -641,8 +642,9 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
 });
 
 // Auto click through to power graph
-$('#placeholder').bind("plotclick", function (event, pos, item)
+document.getElementById('placeholder').addEventListener("plotclick", function (event)
 {
+    var pos = event.detail[0], item = event.detail[1];
     if (item && !panning && viewmode=="bargraph") {
         var z = item.dataIndex;
         view.start = bargraph_series[0].data[z][0];
@@ -655,7 +657,8 @@ $('#placeholder').bind("plotclick", function (event, pos, item)
     }
 });
 
-$('#placeholder').bind("plotselected", function (event, ranges) {
+document.getElementById('placeholder').addEventListener("plotselected", function (event) {
+    var ranges = event.detail[0];
     var start = ranges.xaxis.from;
     var end = ranges.xaxis.to;
     panning = true;
@@ -863,16 +866,16 @@ function powergraph_load()
 function powergraph_draw()
 {
     var options = {
-        lines: { fill: false },
+        series: { lines: { fill: false, lineWidth: 2 } },
         xaxis: {
-            mode: "time", timezone: "browser",
+            mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none",
             min: view.start, max: view.end,
-            font: {size:flot_font_size, color:"#666"},
+            font: {size:flot_font_size, color:"#666", fill:"#666"},
             reserveSpace:false
         },
         yaxes: [
-            { min: 0,font: {size:flot_font_size, color:"#666"},reserveSpace:false},
-            {font: {size:flot_font_size, color:"#666"},reserveSpace:false}
+            { min: 0, autoScale: "none", font: {size:flot_font_size, color:"#666", fill:"#666"},reserveSpace:false},
+            {font: {size:flot_font_size, color:"#666", fill:"#666"},reserveSpace:false}
         ],
         grid: {
             show:true,
@@ -884,10 +887,10 @@ function powergraph_draw()
             // axisMargin:0
             margin:{top:30}
         },
-        selection: { mode: "x" },
-        legend:{position:"NW", noColumns:4}
+        selection: { mode: "x", color: "#e8cfac", visualization: "fill" },
+        legend:{position:"nw", noColumns:4}
     }
-    $.plot($('#placeholder'),powergraph_series,options);
+    Flot.plot(document.getElementById('placeholder'),powergraph_series,options);
 }
 
 function bargraph_load(start,end)
@@ -994,7 +997,7 @@ function bargraph_load(start,end)
 
     // Assemble the stacked bar series in display order, attaching a label to each
     // so the tooltip can read values back without fragile index arithmetic.
-    var bar = { show: true, align: "left", barWidth: 0.8*3600*24*1000, fill: 1.0, lineWidth:0 };
+    var bar = { show: true, align: "left", barWidth: [0.8*3600*24*1000, true], fill: 1.0, lineWidth:0 };
     bargraph_series = [];
 
     if (show_supply) {
@@ -1056,18 +1059,20 @@ function bargraph_draw()
         xaxis: {
             mode: "time",
             timezone: "browser",
+            timeBase: "milliseconds",
             minTickSize: [1, "day"],
-            font: {size:flot_font_size, color:"#666"},
+            font: {size:flot_font_size, color:"#666", fill:"#666"},
             // labelHeight:-5
             reserveSpace:false
         },
         yaxis: {
-            font: {size:flot_font_size, color:"#666"},
+            font: {size:flot_font_size, color:"#666", fill:"#666"},
             // labelWidth:-5
             reserveSpace:false,
-            min:0
+            min:0,
+            autoScale: "none"
         },
-        selection: { mode: "x" },
+        selection: { mode: "x", color: "#e8cfac", visualization: "fill" },
         grid: {
             show:true,
             color:"#aaa",
@@ -1077,7 +1082,7 @@ function bargraph_draw()
         }
     }
 
-    var plot = $.plot($('#placeholder'),bargraph_series,options);
+    var plot = Flot.plot(document.getElementById('placeholder'),bargraph_series,options);
     $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'></div>");
 }
 

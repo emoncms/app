@@ -24,7 +24,7 @@ function myelectricflow_app_controller($route,$app,$appconfig,$apikey)
     if ($route->action == "view" || $route->action == "") {
         $route->format = "html";
         $result = "\n<!-- global app js -->";
-        $result .= "\n" . '<script src="' . $path . 'Modules/app/Views/js/app.js?v=' . $v . '"></script>';
+        $result .= "\n" . '<script src="' . $path . 'Modules/app/Views/js/app.js?v=' . filemtime("Modules/app/Views/js/app.js") . '"></script>';
         $result .= "\n\n <!-- app specific view -->\n";
 
         $dir = $appconfig->get_app_dir($app->app);

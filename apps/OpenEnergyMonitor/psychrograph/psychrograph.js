@@ -255,18 +255,19 @@ function load() {
 // Compact temperature-over-time chart, used for drag-to-zoom time selection
 function draw_context() {
     var options = {
-        canvas: true,
         grid: { show: true, color: "#444", tickColor: "#2a2a2a", borderWidth: 0, hoverable: false },
-        xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end, font: { color: "#888" } },
+        xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none", min: view.start, max: view.end, font: { color: "#888", fill: "#888" }, axisPan: true, plotPan: true, axisZoom: true, plotZoom: true },
         yaxes: [
-            { font: { color: "#888" } },                      // left: temperature
-            { position: "right", font: { color: "#888" } }    // right: humidity
+            { font: { color: "#888", fill: "#888" }, axisPan: false, plotPan: false, axisZoom: false, plotZoom: false },                      // left: temperature
+            { position: "right", font: { color: "#888", fill: "#888" }, axisPan: false, plotPan: false, axisZoom: false, plotZoom: false }    // right: humidity
         ],
         legend: { show: true, position: "nw", margin: [8, 8], backgroundColor: "#1c1c1c", backgroundOpacity: 0.75 },
-        selection: { mode: "x", color: "#555" },
-        touch: { pan: "x", scale: "x" }
+        selection: { mode: is_touch_primary() ? null : "x", color: "#555", visualization: "fill" },
+        zoom: { interactive: is_touch_primary(), enableTouch: true, amount: 1.5 },
+        pan: { interactive: is_touch_primary(), enableTouch: true, touchMode: "smartLock", frameRate: 60 },
+        recenter: { interactive: is_touch_primary(), enableTouch: true }
     };
-    $.plot($("#contextgraph"), contextseries, options);
+    Flot.plot(document.getElementById("contextgraph"), contextseries, options);
 }
 
 // Build the flot series for the psychrometric (or Givoni) chart
@@ -307,20 +308,19 @@ function draw_chart() {
     var habs_max = parseFloat(config.app.habs_max.value);
 
     var options = {
-        canvas: true,
         grid: { show: true, color: "#444", tickColor: "#2a2a2a", borderWidth: 0, hoverable: true },
-        // toggle: click a legend entry to show/hide that series (togglelegend plugin)
-        legend: { show: true, position: "nw", toggle: true, margin: [10, 10], backgroundColor: "#1c1c1c", backgroundOpacity: 0.85 },
-        xaxis: { min: Tmin, max: Tmax, font: { color: "#888" } },
-        yaxis: { min: habs_min, max: habs_max, font: { color: "#888" } },
-        // touch: pinch-zoom / pan on touch devices (touch plugin)
-        touch: { pan: "xy", scale: "xy", delayTouchEnded: 0 }
+        legend: { show: true, position: "nw", margin: [10, 10], backgroundColor: "#1c1c1c", backgroundOpacity: 0.85 },
+        xaxis: { min: Tmin, max: Tmax, autoScale: "none", font: { color: "#888", fill: "#888" } },
+        yaxis: { min: habs_min, max: habs_max, autoScale: "none", font: { color: "#888", fill: "#888" } },
+        zoom: { interactive: is_touch_primary(), enableTouch: true, amount: 1.5 },
+        pan: { interactive: is_touch_primary(), enableTouch: true, touchMode: "smartLock", frameRate: 60 },
+        recenter: { interactive: is_touch_primary(), enableTouch: true }
     };
 
     if (current_view === "givoni" && config.app.givoni.value) {
-        $.plot($("#givonigraph"), build_plotdata(true), options);
+        Flot.plot(document.getElementById("givonigraph"), build_plotdata(true), options);
     } else {
-        $.plot($("#psychrograph"), build_plotdata(false), options);
+        Flot.plot(document.getElementById("psychrograph"), build_plotdata(false), options);
     }
 }
 
@@ -397,14 +397,16 @@ $('#left').click(function () { view.panleft(); load(); });
 $('.time').click(function () { view.timewindow($(this).attr("time") / 24.0); load(); });
 
 // Drag-to-select on the context chart sets the time window
-$("#contextgraph").bind("plotselected", function (event, ranges) {
+document.getElementById("contextgraph").addEventListener("plotselected", function (event) {
+    var ranges = event.detail[0];
     view.start = ranges.xaxis.from;
     view.end = ranges.xaxis.to;
     load();
 });
 
 // Hover tooltip on the psychrometric chart
-$("#psychrograph, #givonigraph").bind("plothover", function (event, pos, item) {
+$("#psychrograph, #givonigraph").each(function () { this.addEventListener("plothover", function (event) {
+    var pos = event.detail[0], item = event.detail[1];
     if (item && item.series && item.series.points && item.series.points.show) {
         if (previousPoint != item.datapoint) {
             previousPoint = item.datapoint;
@@ -417,7 +419,7 @@ $("#psychrograph, #givonigraph").bind("plothover", function (event, pos, item) {
         $("#tooltip").remove();
         previousPoint = null;
     }
-});
+}); });
 
 // ----------------------------------------------------------------------
 // Manual date-time range nav (mirrors My Electric Flow)

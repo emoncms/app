@@ -4,16 +4,10 @@
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link rel="stylesheet" href="<?php echo $path; ?>Lib/fonts/montserrat/montserrat.css?v=<?php echo $v; ?>" />
-<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script>
-<!--<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.symbol.min.js?v=<?php echo $v; ?>"></script>-->
-<!--<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.axislabels.min.js?v=<?php echo $v; ?>"></script>-->
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; echo $appdir; ?>rates.js?v=<?php echo $v; ?>"></script>
+<?php load_js("Modules/feed/feed.js"); ?>
+<?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
+<?php load_js("Modules/app/Lib/vis.helper.js"); ?>
+<?php load_js($appdir."rates.js"); ?>
 
 <style>
 .block-bound {
@@ -283,7 +277,8 @@ function oneweek() {
     loadAndDisplay(7);
 }
 
-$('#placeholder').bind("plotselected", function(event, ranges) {
+document.getElementById('placeholder').addEventListener("plotselected", function(event) {
+    var ranges = event.detail[0];
     selected_start = ranges.xaxis.from;
     selected_end = ranges.xaxis.to;   
     reloadExistingRange();    
@@ -357,7 +352,8 @@ function hide() {
     clearInterval(updaterinst);
 }
 
-$("#halfhour_placeholder").bind("plothover", function(event, pos, item) {
+document.getElementById("halfhour_placeholder").addEventListener("plothover", function(event) {
+    var pos = event.detail[0], item = event.detail[1];
     if (item) {
         var z = item.dataIndex;
         var seriesIndex = item.seriesIndex;
@@ -378,7 +374,8 @@ $("#halfhour_placeholder").bind("plothover", function(event, pos, item) {
 
 
 
-$("#placeholder").bind("plothover", function(event, pos, item) {
+document.getElementById("placeholder").addEventListener("plothover", function(event) {
+    var pos = event.detail[0], item = event.detail[1];
     if (item) {
         var z = item.dataIndex;
         var seriesIndex = item.seriesIndex;
@@ -530,7 +527,7 @@ function bargraph_load(start, end) {
             bars: {
                 show: true,
                 align: "center",
-                barWidth: 0.45 * 3600000,
+                barWidth: [0.45 * 3600000, true],
                 fill: 1.0,
                 lineWidth: 0
             },
@@ -598,7 +595,7 @@ function bargraph_load(start, end) {
             bars: {
                 show: true,
                 align: "center",
-                barWidth: 0.75 * 3600 * 24 * 1000,
+                barWidth: [0.75 * 3600 * 24 * 1000, true],
                 fill: 0.75,
                 lineWidth: 0
             },
@@ -613,25 +610,31 @@ function halfhour_usage_bargraph_draw() {
     var halfhour_options = {
         xaxis: {
             mode: "time",
+            timeBase: "milliseconds",
             font: {
                 size: flot_font_size,
-                color: "#666"
+                color: "#666",
+                fill: "#666"
             },
             minTickSize: [30, "minute"]
         },
         yaxes: [{
             min: 0,
+            autoScale: "none",
             tickFormatter: kWhFormatter,
             position: 'left',
             alignTicksWithAxis: null,
             font: {
                 size: flot_font_size,
-                color: "#666"
+                color: "#666",
+                fill: "#666"
             }
         }, ],
 
         selection: {
-            mode: "x"
+            mode: "x",
+            color: "#e8cfac",
+            visualization: "fill"
         },
         grid: {
             show: true,
@@ -643,7 +646,7 @@ function halfhour_usage_bargraph_draw() {
         },
         legend: {
             show: true,
-            container: $('#halfhour_legend'),
+            container: document.getElementById('halfhour_legend'),
             margin: 15,
             position: "nw",
             noColumns: 8,
@@ -651,7 +654,7 @@ function halfhour_usage_bargraph_draw() {
         }
     };
 
-    var halfhour_plot = $.plot($('#halfhour_placeholder'), halfhour_usage_series, halfhour_options);
+    var halfhour_plot = Flot.plot(document.getElementById('halfhour_placeholder'), halfhour_usage_series, halfhour_options);
 }
 
 
@@ -668,9 +671,11 @@ function bargraph_draw() {
         xaxis: {
             mode: "time",
             timezone: "browser",
+            timeBase: "milliseconds",
             font: {
                 size: flot_font_size,
-                color: "#666"
+                color: "#666",
+                fill: "#666"
             },
             reserveSpace: false,
             minTickSize: [1, "day"]
@@ -681,25 +686,29 @@ function bargraph_draw() {
 
         yaxes: [{
                 min: 0,
+                autoScale: "none",
                 tickFormatter: kWhFormatter,
                 position: 'left',
                 alignTicksWithAxis: null,
                 font: {
                     size: flot_font_size,
-                    color: "#666"
+                    color: "#666",
+                    fill: "#666"
                 }                
                 //,axisLabel: "Energy usage (kWh)"
                 //,axisLabelUseCanvas: true
             },
             {
                 min: 0, max: config.app.maximum_currency_amount.value,
+                autoScale: "none",
                 alignTicksWithAxis: 1,
                 position: 'right',
                 tickFormatter: currencyFormatter, 
                 tickDecimals:2,
                 font: {
                     size: flot_font_size,
-                    color: "#666"
+                    color: "#666",
+                    fill: "#666"
                 }
                 //,axisLabel: "Total energy cost"
                 //,axisLabelUseCanvas: true
@@ -707,7 +716,9 @@ function bargraph_draw() {
         ],
 
         selection: {
-            mode: "x"
+            mode: "x",
+            color: "#e8cfac",
+            visualization: "fill"
         },
         grid: {
             show: true,
@@ -717,7 +728,7 @@ function bargraph_draw() {
         },
         legend: {
             show: true,
-            container: $('#placeholder_legend'),
+            container: document.getElementById('placeholder_legend'),
             margin: 15,
             position: "nw",
             noColumns: 8,
@@ -725,7 +736,7 @@ function bargraph_draw() {
         }
     };
 
-    var plot = $.plot($('#placeholder'), bargraph_series, options);
+    var plot = Flot.plot(document.getElementById('placeholder'), bargraph_series, options);
 }
 
 // -------------------------------------------------------------------------------

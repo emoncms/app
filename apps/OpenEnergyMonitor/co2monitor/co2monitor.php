@@ -3,12 +3,10 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
-<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
+<?php load_js("Modules/feed/feed.js"); ?>
 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=2"></script>
+<?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
+<?php load_js("Modules/app/Lib/vis.helper.js"); ?>
 
 <style>
     /* Dynamic height chart placeholder */
@@ -177,4 +175,4 @@ global $path, $session, $v;
     config.db = <?php echo json_encode($config); ?>;
 
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/co2monitor/co2monitor.js?v=5"></script>
+<?php load_js("Modules/app/apps/OpenEnergyMonitor/co2monitor/co2monitor.js"); ?>

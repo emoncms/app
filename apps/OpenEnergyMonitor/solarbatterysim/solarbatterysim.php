@@ -4,13 +4,11 @@
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 
-<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
+<?php load_js("Modules/feed/feed.js"); ?>
 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<script src="<?php echo $path;?>Lib/js/clipboard.js?v=<?php echo $v; ?>"></script>
+<?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
+<?php load_js("Modules/app/Lib/vis.helper.js"); ?>
+<?php load_js("Lib/js/clipboard.js"); ?>
 <?php load_js("Lib/js/vue.global.prod-3.5.22.min.js"); ?>
 
 <style>
@@ -657,21 +655,24 @@ function show()
     data.push({label:"SOC", data: soc_prc_data, yaxis:2, color: "#000", lines:{lineWidth:1, fill:0.0}});
 
     options = {
-        canvas: true,
-        lines: { fill: true },
+        series: { lines: { fill: true, lineWidth: 2 } },
+        legend: { show: true },
         //bars: { show: true, align: "center", barWidth: 0.75*interval*1000, fill: false},
-        xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end },
+        xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none", min: view.start, max: view.end, axisPan: true, plotPan: true, axisZoom: true, plotZoom: true },
+        yaxis: { axisPan: false, plotPan: false, axisZoom: false, plotZoom: false },
         grid: {
             show:true, 
             hoverable: true, 
             clickable: true
         },
-        selection: { mode: "x" },
-        touch: { pan: "x", scale: "x" }
+        selection: { mode: is_touch_primary() ? null : "x", color: "#e8cfac", visualization: "fill" },
+        zoom: { interactive: is_touch_primary(), enableTouch: true, amount: 1.5 },
+        pan: { interactive: is_touch_primary(), enableTouch: true, touchMode: "smartLock", frameRate: 60 },
+        recenter: { interactive: is_touch_primary(), enableTouch: true }
     }
     
     // Draw graph
-    $.plot($('#graph'),data, options);
+    Flot.plot(document.getElementById('graph'),data, options);
     $(".ajax-loader").hide();
 }
    
@@ -685,14 +686,14 @@ function resize()
     updater();
     // Resize graph
     $("#graph").width($('#app-block').width());
-    $.plot($('#graph'),data, options);
+    Flot.plot(document.getElementById('graph'),data, options);
 }
 
 function draw() {
 
     options.xaxis.min = view.start;
     options.xaxis.max = view.end;
-    $.plot($('#graph'),data, options);
+    Flot.plot(document.getElementById('graph'),data, options);
 }
 
 function clear()
@@ -717,8 +718,9 @@ $('#right').click(function () {view.panright(); draw();});
 $('#left').click(function () {view.panleft(); draw();});
 $('.graph-time').click(function () {view.timewindow($(this).attr("time")); draw();});
 
-$("#graph").bind("plotselected", function (event, ranges)
+document.getElementById("graph").addEventListener("plotselected", function (event)
 {
+    var ranges = event.detail[0];
     view.start = ranges.xaxis.from;
     view.end = ranges.xaxis.to;
     draw();

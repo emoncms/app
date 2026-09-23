@@ -39,13 +39,17 @@ config.hideapp = function() {
 var series = [];
 var feed_data = {};
 var options = {
+    legend: { show: true },
     xaxis: {
         mode: "time",
-        timezone: "browser"
+        timezone: "browser",
+        timeBase: "milliseconds",
+        autoScale: "none"
     },
     selection: { 
         mode: "x", 
-        color:"#000" 
+        color:"#000",
+        visualization: "fill"
     },
     grid: {
         hoverable: true,
@@ -526,10 +530,11 @@ function model(){
 function draw() {
     options.xaxis.min = view.start;
     options.xaxis.max = view.end;
-    var plot = $.plot($("#graph"), series, options);
+    var plot = Flot.plot(document.getElementById("graph"), series, options);
 }
 
-$('#graph').bind("plotselected", function (event, ranges) {
+document.getElementById('graph').addEventListener("plotselected", function (event) {
+    var ranges = event.detail[0];
     view.start = ranges.xaxis.from;
     view.end = ranges.xaxis.to;
     draw();

@@ -511,7 +511,7 @@ function draw_tariff_graph() {
     var bars = {
         show: true,
         align: "left",
-        barWidth: 0.9 * 1800 * 1000,
+        barWidth: [0.9 * 1800 * 1000, true],
         fill: 1.0,
         lineWidth: 0
     };
@@ -550,18 +550,18 @@ function draw_tariff_graph() {
 
     var font_color = "#888";
     var options = {
-        xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end,
-                 font: { color: font_color }, reserveSpace: false },
+        xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none", min: view.start, max: view.end,
+                 font: { color: font_color, fill: font_color }, reserveSpace: false },
         yaxes: [
-            { position: 'left',  font: { color: font_color }, reserveSpace: false },
-            { position: 'left', alignTicksWithAxis: 1, font: { color: font_color }, reserveSpace: false }
+            { position: 'left',  font: { color: font_color, fill: font_color }, reserveSpace: false },
+            { position: 'left', alignTicksWithAxis: 1, font: { color: font_color, fill: font_color }, reserveSpace: false }
         ],
         grid: { show: true, color: "#aaa", borderWidth: 0, hoverable: true, clickable: true },
-        selection: { mode: "x" },
+        selection: { mode: "x", color: "#e8cfac", visualization: "fill" },
         legend: { show: false }
     };
 
-    $.plot($('#placeholder'), graph_series, options);
+    Flot.plot(document.getElementById('placeholder'), graph_series, options);
     $(".ajax-loader").hide();
 }
 
@@ -579,7 +579,7 @@ function profile_draw() {
         profile_unitprice[z * 2 + 1] = [time + 1800000, value];
     }
 
-    var bars = { show: true, align: "left", barWidth: 0.9 * 1800 * 1000, fill: 1.0, lineWidth: 0 };
+    var bars = { show: true, align: "left", barWidth: [0.9 * 1800 * 1000, true], fill: 1.0, lineWidth: 0 };
 
     var graph_series = [];
     graph_series.push({ label: "Import", data: profile_kwh, yaxis: 1, color: "#44b3e2", stack: true, bars: bars });
@@ -590,17 +590,17 @@ function profile_draw() {
 
     var font_color = "#888";
     var options = {
-        xaxis: { mode: "time", timezone: "browser", font: { color: font_color }, reserveSpace: false },
+        xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", font: { color: font_color, fill: font_color }, reserveSpace: false },
         yaxes: [
-            { position: 'left',  font: { color: font_color }, reserveSpace: false },
-            { position: 'left', alignTicksWithAxis: 1, font: { color: font_color }, reserveSpace: false }
+            { position: 'left',  font: { color: font_color, fill: font_color }, reserveSpace: false },
+            { position: 'left', alignTicksWithAxis: 1, font: { color: font_color, fill: font_color }, reserveSpace: false }
         ],
         grid: { show: true, color: "#aaa", borderWidth: 0, hoverable: true, clickable: true },
-        selection: { mode: "x" },
+        selection: { mode: "x", color: "#e8cfac", visualization: "fill" },
         legend: { show: false }
     };
 
-    $.plot($('#placeholder'), graph_series, options);
+    Flot.plot(document.getElementById('placeholder'), graph_series, options);
     $(".ajax-loader").hide();
 }
 

@@ -33,15 +33,15 @@ function powergraph_load() {
         "heatpump_cooling": { label: "Cooling", yaxis: 4, color: "#66b0ff", lines: { lineWidth: 0, show: true, fill: 0.15 } },
         "heatpump_error": { label: "Error", yaxis: 4, color: "#F00", lines: { lineWidth: 0, show: true, fill: 0.15 } },
         "heatpump_targetT": { label: "TargetT", yaxis: 2, color: "#ccc" },
-        "heatpump_flowT": { label: "FlowT", yaxis: 2, color: 2 },
-        "heatpump_returnT": { label: "ReturnT", yaxis: 2, color: 3 },
+        "heatpump_flowT": { label: "FlowT", yaxis: 2, color: flot_color(2) },
+        "heatpump_returnT": { label: "ReturnT", yaxis: 2, color: flot_color(3) },
         "heatpump_outsideT": { label: "OutsideT", yaxis: 2, color: "#c880ff" },
         "heatpump_roomT": { label: "RoomT", yaxis: 2, color: "#000" },
-        "heatpump_flowrate": { label: "Flow rate", yaxis: 3, color: 6 },
+        "heatpump_flowrate": { label: "Flow rate", yaxis: 3, color: flot_color(6) },
         "boiler_heat": { label: "Boiler", yaxis: 1, color: "#FF5349", lines: { show: true, fill: 0.2, lineWidth: 0.5 } },
-        "heatpump_heat": { label: "Heat", yaxis: 1, color: 0, lines: { show: true, fill: 0.2, lineWidth: 0.5 } },
-        "heatpump_elec": { label: "Electric", yaxis: 1, color: 1, lines: { show: true, fill: 0.3, lineWidth: 0.5 } },
-        "immersion_elec": { label: "Immersion", yaxis: 1, color: 4, lines: { show: true, fill: 0.3, lineWidth: 0.5 } },
+        "heatpump_heat": { label: "Heat", yaxis: 1, color: flot_color(0), lines: { show: true, fill: 0.2, lineWidth: 0.5 } },
+        "heatpump_elec": { label: "Electric", yaxis: 1, color: flot_color(1), lines: { show: true, fill: 0.3, lineWidth: 0.5 } },
+        "immersion_elec": { label: "Immersion", yaxis: 1, color: flot_color(4), lines: { show: true, fill: 0.3, lineWidth: 0.5 } },
         "heatpump_dhwT": { label: dhw_label, yaxis: dhw_axis, color: "#0080ff" },
         "heatpump_dhwTargetT": { label: dhw_target_label, yaxis: dhw_axis, color:"#99cbfc" },
         
@@ -683,20 +683,20 @@ function powergraph_draw() {
     
     set_url_view_params("power", view.start, view.end);
 
-    var style = { size: flot_font_size, color: "#666" }
+    var style = { size: flot_font_size, color: "#666", fill: "#666" }
     var options = {
-        lines: { fill: false },
+        series: { lines: { fill: false, lineWidth: 2 } },
         xaxis: {
-            mode: "time", timezone: "browser",
+            mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none",
             min: view.start, max: view.end,
             font: style,
             reserveSpace: false
         },
         yaxes: [
-            { min: 0, font: style, reserveSpace: false },
+            { min: 0, autoScale: "none", font: style, reserveSpace: false },
             { font: style, reserveSpace: false },
-            { min: 0, font: { size: flot_font_size, color: "#44b3e2" }, reserveSpace: false },
-            { min: 0, max: 1, show: false, reserveSpace: false }
+            { min: 0, autoScale: "none", font: { size: flot_font_size, color: "#44b3e2", fill: "#44b3e2" }, reserveSpace: false },
+            { min: 0, max: 1, autoScale: "none", show: false, reserveSpace: false }
         ],
         grid: {
             show: true,
@@ -708,8 +708,9 @@ function powergraph_draw() {
             // axisMargin:0
             margin: { top: 30 }
         },
-        selection: { mode: "x" },
-        legend: { position: "NW", noColumns: 13 }
+        selection: { mode: "x", color: "#e8cfac", visualization: "fill" },
+        // Placed in the top grid margin, above the plot, as flot 0.8 drew it
+        legend: { show: true, position: "nw", margin: [0, -30], noColumns: 13 }
     }
 
     if (show_defrost_and_loss || show_cooling) {
@@ -725,9 +726,12 @@ function powergraph_draw() {
             if (key == 'immersion_elec' && !show_immersion) show = false;
             if (key == 'heatpump_dhwT' && !show_dhw_temp) show = false;
             if (key == 'heatpump_dhwTargetT' && !show_dhw_temp) show = false;
+            // Empty placeholder, which flot 5 would list in the legend
+            if (Array.isArray(powergraph_series[key]) && !powergraph_series[key].length) show = false;
             if (show) powergraph_series_without_key.push(powergraph_series[key]);
         }
-        $.plot($('#placeholder'), powergraph_series_without_key, options);
+        var plot = Flot.plot(document.getElementById('placeholder'), powergraph_series_without_key, options);
+        plot_legend(plot, 0);
     }
 
     // show symbol when live scrolling is active
@@ -760,16 +764,17 @@ function draw_histogram(histogram) {
 
     var options = {
         // lines: { fill: true },
-        bars: { show: true, align: "center", barWidth: (1 / 200) * 0.8, fill: 1.0, lineWidth: 0 },
+        series: { bars: { show: true, align: "center", barWidth: [(1 / 200) * 0.8, true], fill: 1.0, lineWidth: 0 } },
         xaxis: {
             // mode: "time", timezone: "browser", 
+            autoScale: "none",
             min: 0.2, max: 0.8,
-            font: { size: flot_font_size, color: "#666" },
+            font: { size: flot_font_size, color: "#666", fill: "#666" },
             reserveSpace: false
         },
         yaxes: [
             //{ min: 0,font: {size:flot_font_size, color:"#666"},reserveSpace:false},
-            { font: { size: flot_font_size, color: "#666" }, reserveSpace: false }
+            { font: { size: flot_font_size, color: "#666", fill: "#666" }, reserveSpace: false }
         ],
         grid: {
             show: true,
@@ -782,10 +787,10 @@ function draw_histogram(histogram) {
             margin: { top: 30 }
         },
         //selection: { mode: "x" },
-        legend: { position: "NW", noColumns: 6 }
+        legend: { show: true, position: "nw", noColumns: 6 }
     }
     if ($('#histogram').width() > 0) {
-        $.plot($('#histogram'), [{ data: sorted_histogram }], options);
+        Flot.plot(document.getElementById('histogram'), [{ data: sorted_histogram }], options);
     }
 }
 
@@ -1071,7 +1076,8 @@ $("#configure_standby").click(function () {
     }
 });
 
-$('#histogram').bind("plothover", function (event, pos, item) {
+document.getElementById('histogram').addEventListener("plothover", function (event) {
+    var pos = event.detail[0], item = event.detail[1];
     if (item) {
         var z = item.dataIndex;
         if (previousPoint != item.datapoint) {

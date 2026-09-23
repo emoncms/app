@@ -4,15 +4,11 @@
 ?>
 
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
-<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
+<?php load_js("Modules/feed/feed.js"); ?>
 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.stack.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/Lib/timeseries.js?v=<?php echo $v; ?>"></script> 
+<?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
+<?php load_js("Modules/app/Lib/vis.helper.js"); ?>
+<?php load_js("Modules/app/Lib/timeseries.js"); ?> 
 
 
 
@@ -303,7 +299,7 @@ The My Solar with Divert app can be used to explore onsite solar (and optionally
 
 <div class="ajax-loader"></div>
 
-<script src="<?php echo $path; ?>Lib/misc/gettext.js?v=<?php echo $v; ?>"></script> 
+<?php load_js("Lib/js/gettext.js"); ?> 
 <script>
 function getTranslations(){
     return {
@@ -602,11 +598,11 @@ function draw_powergraph() {
     var plotColour = 0;
     
     var options = {
-        lines: { fill: fill },
-        xaxis: { mode: "time", timezone: "browser", min: view.start, max: view.end},
-        yaxes: [{ min: 0 }],
+        series: { lines: { fill: fill, lineWidth: 2 } },
+        xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none", min: view.start, max: view.end},
+        yaxes: [{ min: 0, autoScale: "none" }],
         grid: { hoverable: true, clickable: true },
-        selection: { mode: "x" },
+        selection: { mode: "x", color: "#e8cfac", visualization: "fill" },
         legend: { show: false }
     }
     
@@ -758,27 +754,27 @@ function draw_powergraph() {
 
     powerseries = series;
     
-    $.plot($('#placeholder'),powerseries,options);
+    Flot.plot(document.getElementById('placeholder'),powerseries,options);
     $(".ajax-loader").hide();
 }
 
 // ------------------------------------------------------------------------------------------
 // POWER GRAPH EVENTS
 // ------------------------------------------------------------------------------------------
+
 function powergraph_events() {
 
-    $('#placeholder').unbind("plotclick");
-    $('#placeholder').unbind("plothover");
-    $('#placeholder').unbind("plotselected");
+    plot_unbind('placeholder');
 
-    $('#placeholder').bind("plothover", function (event, pos, item)
+    document.getElementById('placeholder').addEventListener("plothover", plot_handlers.plothover = function (event)
     {
+        var pos = event.detail[0], item = event.detail[1];
         if (item) {
             // Show tooltip
             var tooltip_items = [];
 
             var date = new Date(item.datapoint[0]);
-            tooltip_items.push(["TIME", dateFormat(date, 'HH:MM'), ""]);
+            tooltip_items.push(["TIME", tooltip_time(date), ""]);
 
             for (i = 0; i < powerseries.length; i++) {
                 var series = powerseries[i];
@@ -801,7 +797,8 @@ function powergraph_events() {
         }
     });
 
-    $('#placeholder').bind("plotselected", function (event, ranges) {
+    document.getElementById('placeholder').addEventListener("plotselected", plot_handlers.plotselected = function (event) {
+        var ranges = event.detail[0];
         view.start = ranges.xaxis.from;
         view.end = ranges.xaxis.to;
 
@@ -917,7 +914,7 @@ function load_bargraph(start,end) {
         data: house_generated_kwhd_data,
         label: "House",
         color: "#82cbfc",
-        bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 1.0, lineWidth: 0 },
+        bars: { show: true, align: "center", barWidth: [0.8*3600*24*1000, true], fill: 1.0, lineWidth: 0 },
         stack: 1
     });
     
@@ -925,7 +922,7 @@ function load_bargraph(start,end) {
         data: divert_kwhd_data,
         label: "Divert",
         color: "#fb7b50",
-        bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 1.0, lineWidth: 0 },
+        bars: { show: true, align: "center", barWidth: [0.8*3600*24*1000, true], fill: 1.0, lineWidth: 0 },
         stack: 1
     });
     
@@ -933,7 +930,7 @@ function load_bargraph(start,end) {
         data: export_kwhd_data,
         label: "Export",
         color: "#2ed52e",
-        bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 1.0, lineWidth: 0 },
+        bars: { show: true, align: "center", barWidth: [0.8*3600*24*1000, true], fill: 1.0, lineWidth: 0 },
         stack: 1
     });
     
@@ -941,7 +938,7 @@ function load_bargraph(start,end) {
         data: house_kwhd_data,
         label: "Use",
         color: "#0598fa",
-        bars: { show: true, align: "center", barWidth: 0.8*3600*24*1000, fill: 1.0, lineWidth: 0 },
+        bars: { show: true, align: "center", barWidth: [0.8*3600*24*1000, true], fill: 1.0, lineWidth: 0 },
         stack: 2
     });
     
@@ -960,13 +957,13 @@ function draw_bargraph()
     markings.push({ color: "#ccc", lineWidth: 1, yaxis: { from: 0, to: 0 } });
     
     var options = {
-        xaxis: { mode: "time", timezone: "browser", minTickSize: [1, "day"] },
+        xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", minTickSize: [1, "day"] },
         grid: { hoverable: true, clickable: true, markings: markings },
-        selection: { mode: "x" },
+        selection: { mode: "x", color: "#e8cfac", visualization: "fill" },
         legend: { show: false }
     };
     
-    var plot = $.plot($('#placeholder'),historyseries,options);
+    var plot = Flot.plot(document.getElementById('placeholder'),historyseries,options);
     
     $('#placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Solar usage (house, diverted & exported)</div>");
     $('#placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> House usage</div>");
@@ -982,14 +979,13 @@ function draw_bargraph()
 // ------------------------------------------------------------------------------------------
 function bargraph_events() {
 
-    $('#placeholder').unbind("plotclick");
-    $('#placeholder').unbind("plothover");
-    $('#placeholder').unbind("plotselected");
+    plot_unbind('placeholder');
     $('.bargraph-viewall').unbind("click");
     
     // Show day's figures on the bottom of the page
-    $('#placeholder').bind("plothover", function (event, pos, item)
+    document.getElementById('placeholder').addEventListener("plothover", plot_handlers.plothover = function (event)
     {
+        var pos = event.detail[0], item = event.detail[1];
         if (item) {
             var z = item.dataIndex;
             
@@ -1034,8 +1030,9 @@ function bargraph_events() {
     });
 
     // Auto click through to power graph
-    $('#placeholder').bind("plotclick", function (event, pos, item)
+    document.getElementById('placeholder').addEventListener("plotclick", plot_handlers.plotclick = function (event)
     {
+        var pos = event.detail[0], item = event.detail[1];
         if (item && !panning) {
             var z = item.dataIndex;
             
@@ -1046,9 +1043,7 @@ function bargraph_events() {
             // $(".bargraph-navigation").hide();
             $(".powergraph-navigation").show();
             
-            $('#placeholder').unbind("plotclick");
-            $('#placeholder').unbind("plothover");
-            $('#placeholder').unbind("plotselected");
+            plot_unbind('placeholder');
             
             reload = true; 
             autoupdate = false;
@@ -1059,7 +1054,8 @@ function bargraph_events() {
         }
     });
     
-    $('#placeholder').bind("plotselected", function (event, ranges) {
+    document.getElementById('placeholder').addEventListener("plotselected", plot_handlers.plotselected = function (event) {
+        var ranges = event.detail[0];
         var start = ranges.xaxis.from;
         var end = ranges.xaxis.to;
         load_bargraph(start,end);

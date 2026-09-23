@@ -80,14 +80,15 @@ var powergraph_series = {};
 // Flot graph options
 // yaxis 1: power (W), yaxis 2: battery SOC (%)
 var options = {
-    canvas: true,
     xaxis: {
         mode: "time",
-        timezone: "browser"
+        timezone: "browser",
+        timeBase: "milliseconds",
+        autoScale: "none"
     },
     yaxes: [
-        { min: 0 },            // yaxis 1: power — never show negative
-        { min: 0, max: 100, position: "right" }  // yaxis 2: SOC %
+        { min: 0, autoScale: "none" },            // yaxis 1: power — never show negative
+        { min: 0, max: 100, autoScale: "none", position: "right" }  // yaxis 2: SOC %
     ],
     grid: {
         show: true,
@@ -100,7 +101,8 @@ var options = {
     },
     selection: {
         mode: "x",
-        color: "#555"
+        color: "#555",
+        visualization: "fill"
     }
 };
 
@@ -361,7 +363,7 @@ function draw() {
 
     // Flot requires a plain array (not a keyed object), so convert here
     let series_array = Object.values(powergraph_series);
-    $.plot($('#graph'), series_array, options);
+    Flot.plot(document.getElementById('graph'), series_array, options);
 }
 
 function updater() {
@@ -438,7 +440,8 @@ $('.time').click(function () {
 });
 
 // Tooltip: show the series label and value when hovering over the graph
-$('#graph').bind("plothover", function (event, pos, item) {
+document.getElementById('graph').addEventListener("plothover", function (event) {
+    var pos = event.detail[0], item = event.detail[1];
     if (item) {
         if (previousPoint != item.datapoint) {
             previousPoint = item.datapoint;
@@ -457,7 +460,8 @@ $('#graph').bind("plothover", function (event, pos, item) {
     }
 });
 
-$('#graph').bind("plotselected", function (event, ranges) {
+document.getElementById('graph').addEventListener("plotselected", function (event) {
+    var ranges = event.detail[0];
     view.start = ranges.xaxis.from;
     view.end = ranges.xaxis.to;
     load();

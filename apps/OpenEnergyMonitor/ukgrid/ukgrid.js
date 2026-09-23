@@ -2,11 +2,14 @@
 var options = {
   xaxis: {
       mode: "time", 
-      timezone: "browser"
+      timezone: "browser",
+      timeBase: "milliseconds",
+      autoScale: "none"
   },
   selection: { 
       mode: "x", 
-      color:"#000" 
+      color:"#000",
+      visualization: "fill"
   },
   legend: {
       show:false
@@ -198,7 +201,7 @@ function draw() {
     }
     options.xaxis.min = view.start;
     options.xaxis.max = view.end;  
-    $.plot("#placeholder",data, options);
+    Flot.plot(document.getElementById("placeholder"),data, options);
 }
 
 function resize(){
@@ -242,7 +245,8 @@ $("#visible-checkboxes").on("click",".legendcheckbox",function() {
     draw();
 });
 
-$('#placeholder').bind("plotselected", function (event, ranges) {
+document.getElementById('placeholder').addEventListener("plotselected", function (event) {
+    var ranges = event.detail[0];
     view.start = ranges.xaxis.from;
     view.end = ranges.xaxis.to;
     load();
@@ -255,7 +259,8 @@ $('#left').click(function () {view.panleft(); load();});
 $('.time').click(function () {view.timewindow($(this).attr("time")/24.0); load();});
 
 
-$('#placeholder').bind("plothover", function (event, pos, item) {
+document.getElementById('placeholder').addEventListener("plothover", function (event) {
+    var pos = event.detail[0], item = event.detail[1];
     if (item) {
         var i = item.dataIndex;
         

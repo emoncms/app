@@ -35,15 +35,18 @@ config.hideapp = function () {
 var series = [];
 
 var options = {
-    canvas: true,
-    lines: {
-        show: true,
-        fill: 0.75,
-        lineWidth: 0
+    series: {
+        lines: {
+            show: true,
+            fill: 0.75,
+            lineWidth: 0
+        }
     },
     xaxis: {
         mode: "time",
-        timezone: "browser"
+        timezone: "browser",
+        timeBase: "milliseconds",
+        autoScale: "none"
     },
     grid: {
         show: true,
@@ -56,7 +59,8 @@ var options = {
     },
     selection: { 
         mode: "x",
-        color: "#555"
+        color: "#555",
+        visualization: "fill"
     }
 };
 
@@ -117,7 +121,7 @@ function load() {
 }
 
 function draw() {
-    $.plot($('#graph'), series, options);
+    Flot.plot(document.getElementById('graph'), series, options);
 }
 
 function updater() {
@@ -148,7 +152,8 @@ $('.time').click(function () {
 });
 
 // Tooltip code
-$('#graph').bind("plothover", function (event, pos, item) {
+document.getElementById('graph').addEventListener("plothover", function (event) {
+    var pos = event.detail[0], item = event.detail[1];
     if (item) {
         var i = item.dataIndex;
 
@@ -165,7 +170,8 @@ $('#graph').bind("plothover", function (event, pos, item) {
     } else $("#tooltip").remove();
 });
 
-$('#graph').bind("plotselected", function (event, ranges) {
+document.getElementById('graph').addEventListener("plotselected", function (event) {
+    var ranges = event.detail[0];
     view.start = ranges.xaxis.from;
     view.end = ranges.xaxis.to;
     load();

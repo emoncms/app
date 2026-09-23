@@ -4,13 +4,11 @@
 ?>
 <link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
 <link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/profile/profile.css?v=4" rel="stylesheet">
-<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=<?php echo $v; ?>"></script>
+<?php load_js("Modules/feed/feed.js"); ?>
 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script> 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
-<script src="<?php echo $path;?>Lib/js/clipboard.js?v=<?php echo $v; ?>"></script>
+<?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
+<?php load_js("Modules/app/Lib/vis.helper.js"); ?>
+<?php load_js("Lib/js/clipboard.js"); ?>
 
 <div id="app-block" style="display:none">
   <div class="app-card">
@@ -265,11 +263,10 @@ function show()
     // Graph options
     var font_color = "#888";
     options = {
-        canvas: true,
-        lines: { fill: false },
+        series: { lines: { fill: false, lineWidth: 2 } },
         //bars: { show: true, align: "center", barWidth: 0.75*interval*1000, fill: false},
-        xaxis: { mode: "time", timezone: "browser", font: { color: font_color } },
-        yaxis: { font: { color: font_color } },
+        xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", font: { color: font_color, fill: font_color } },
+        yaxis: { font: { color: font_color, fill: font_color } },
         grid: {
             show:true,
             hoverable: true,
@@ -277,6 +274,7 @@ function show()
             borderWidth: 0
         },
         legend: {
+            show: true,
             position: "ne",
             noColumns: 2,
             backgroundColor: "#262626",
@@ -290,7 +288,7 @@ function show()
     visible = JSON.parse(JSON.stringify(data));
     
     // Draw graph
-    $.plot($('#graph'),visible, options);
+    Flot.plot(document.getElementById('graph'),visible, options);
     
     // Table
     var out = "";
@@ -335,7 +333,7 @@ function resize()
     updater();
     // Resize graph (fit the inner width of the containing card)
     $("#graph").width($('#graph').parent().width());
-    $.plot($('#graph'),visible, options);
+    Flot.plot(document.getElementById('graph'),visible, options);
 }
 
 function clear()
@@ -354,7 +352,7 @@ $("#table").on("click",".showhidemonth",function() {
           visible.push(data[$(this).attr('z')]);
       }
   });
-  $.plot($('#graph'),visible, options);
+  Flot.plot(document.getElementById('graph'),visible, options);
 });
 
 $("#resolution").change(function(){
@@ -371,7 +369,8 @@ $(".mode-toggle-btn").click(function(){
     show();
 });
 
-$('#graph').bind("plothover", function (event, pos, item) {
+document.getElementById('graph').addEventListener("plothover", function (event) {
+    var pos = event.detail[0], item = event.detail[1];
     if (item) {
         var z = item.dataIndex;
         

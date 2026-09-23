@@ -5,13 +5,10 @@ global $path, $session, $v;
 <link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
 
 <link rel="stylesheet" href="<?php echo $path; ?>Lib/fonts/montserrat/montserrat.css?v=<?php echo $v; ?>" />
-<script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=102"></script>
+<?php load_js("Modules/feed/feed.js"); ?>
 
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.time.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/jquery.flot.selection.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/flot/date.format.min.js?v=<?php echo $v; ?>"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/vis.helper.js?v=<?php echo $v; ?>"></script>
+<?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
+<?php load_js("Modules/app/Lib/vis.helper.js"); ?>
 <link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myboiler/style.css?v=38>" rel="stylesheet">
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
@@ -277,4 +274,4 @@ global $path, $session, $v;
   config.db = <?php echo json_encode($config); ?>;
 
 </script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myboiler/myboiler.js?v=10"></script>
+<?php load_js("Modules/app/apps/OpenEnergyMonitor/myboiler/myboiler.js"); ?>

@@ -141,3 +141,10 @@
         font-size: 4.5rem;
     }
 }
+
+/* -------------------------------------------------------------------
+   Flot 5 legend. Drawn as SVG, so the panel and label colour are set here.
+--------------------------------------------------------------------*/
+.legend { font-size: 13px; }
+.legendLayer rect.background { fill: rgba(255, 255, 255, 0.85); }
+.legendLayer text { fill: #333; }

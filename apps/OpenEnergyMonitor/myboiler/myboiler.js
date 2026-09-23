@@ -370,7 +370,8 @@ $("#advanced-toggle").click(function () {
     }
 });
 
-$('#placeholder').bind("plothover", function (event, pos, item) {
+document.getElementById('placeholder').addEventListener("plothover", function (event) {
+    var pos = event.detail[0], item = event.detail[1];
     if (item) {
         var z = item.dataIndex;
 
@@ -454,7 +455,8 @@ $('#placeholder').bind("plothover", function (event, pos, item) {
 });
 
 // Auto click through to power graph
-$('#placeholder').bind("plotclick", function (event, pos, item) {
+document.getElementById('placeholder').addEventListener("plotclick", function (event) {
+    var pos = event.detail[0], item = event.detail[1];
     if (item && !panning && viewmode == "bargraph") {
         var z = item.dataIndex;
         view.start = data["boiler_heat_kwhd"][z][0];
@@ -474,7 +476,8 @@ $('#placeholder').bind("plotclick", function (event, pos, item) {
     }
 });
 
-$('#placeholder').bind("plotselected", function (event, ranges) {
+document.getElementById('placeholder').addEventListener("plotselected", function (event) {
+    var ranges = event.detail[0];
     var start = ranges.xaxis.from;
     var end = ranges.xaxis.to;
     panning = true;
@@ -589,17 +592,17 @@ function powergraph_load() {
 
     // Index order is important here!
     var feeds_to_load = {
-        "boiler_fuel_kwh": { label: "Fuel", yaxis: 3, color: 6 },
+        "boiler_fuel_kwh": { label: "Fuel", yaxis: 3, color: flot_color(6) },
         "boiler_dhw": { label: "DHW", yaxis: 4, color: "#88F", lines: { lineWidth: 0, show: true, fill: 0.15 } },
         "boiler_ch": { label: "CH", yaxis: 4, color: "#FB6", lines: { lineWidth: 0, show: true, fill: 0.15 } },
         "boiler_targetT": { label: "TargetT", yaxis: 2, color: "#ccc" },
-        "boiler_flowT": { label: "FlowT", yaxis: 2, color: 2 },
-        "boiler_returnT": { label: "ReturnT", yaxis: 2, color: 3 },
-        "boiler_outsideT": { label: "OutsideT", yaxis: 2, color: 4 },
+        "boiler_flowT": { label: "FlowT", yaxis: 2, color: flot_color(2) },
+        "boiler_returnT": { label: "ReturnT", yaxis: 2, color: flot_color(3) },
+        "boiler_outsideT": { label: "OutsideT", yaxis: 2, color: flot_color(4) },
         "boiler_roomT": { label: "RoomT", yaxis: 2, color: "#000" },
-        "boiler_flowrate": { label: "Flow rate", yaxis: 3, color: 6 },
-        "boiler_heat": { label: "Heat", yaxis: 1, color: 0, lines: { show: true, fill: 0.2, lineWidth: 0.5 } },
-        "boiler_elec": { label: "Electric", yaxis: 1, color: 1, lines: { show: true, fill: 0.3, lineWidth: 0.5 } }
+        "boiler_flowrate": { label: "Flow rate", yaxis: 3, color: flot_color(6) },
+        "boiler_heat": { label: "Heat", yaxis: 1, color: flot_color(0), lines: { show: true, fill: 0.2, lineWidth: 0.5 } },
+        "boiler_elec": { label: "Electric", yaxis: 1, color: flot_color(1), lines: { show: true, fill: 0.3, lineWidth: 0.5 } }
     }
 
     // Compile list of feedids
@@ -925,20 +928,20 @@ function emitter_and_volume_calculator() {
 function powergraph_draw() {
     set_url_view_params("power", view.start, view.end);
 
-    var style = { size: flot_font_size, color: "#666" }
+    var style = { size: flot_font_size, color: "#666", fill: "#666" }
     var options = {
-        lines: { fill: false },
+        series: { lines: { fill: false, lineWidth: 2 } },
         xaxis: {
-            mode: "time", timezone: "browser",
+            mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none",
             min: view.start, max: view.end,
             font: style,
             reserveSpace: false
         },
         yaxes: [
-            { min: 0, font: style, reserveSpace: false },
+            { min: 0, autoScale: "none", font: style, reserveSpace: false },
             { font: style, reserveSpace: false },
-            { font: { size: flot_font_size, color: "#44b3e2" }, reserveSpace: false },
-            { min: 0, max: 1, show: false, reserveSpace: false }
+            { font: { size: flot_font_size, color: "#44b3e2", fill: "#44b3e2" }, reserveSpace: false },
+            { min: 0, max: 1, autoScale: "none", show: false, reserveSpace: false }
         ],
         grid: {
             show: true,
@@ -950,8 +953,9 @@ function powergraph_draw() {
             // axisMargin:0
             margin: { top: 30 }
         },
-        selection: { mode: "x" },
-        legend: { position: "NW", noColumns: 13 }
+        selection: { mode: "x", color: "#e8cfac", visualization: "fill" },
+        // Placed in the top grid margin, above the plot, as flot 0.8 drew it
+        legend: { show: true, position: "nw", margin: [0, -30], noColumns: 13 }
     }
 
     if (show_negative_heat) {
@@ -968,7 +972,8 @@ function powergraph_draw() {
             
             if (show) powergraph_series_without_key.push(powergraph_series[key]);
         }
-        $.plot($('#placeholder'), powergraph_series_without_key, options);
+        var plot = Flot.plot(document.getElementById('placeholder'), powergraph_series_without_key, options);
+        plot_legend(plot, 0);
     }
 
     // show symbol when live scrolling is active
@@ -1004,8 +1009,8 @@ function bargraph_load(start, end) {
     if (fuel_enabled) {
         data["boiler_fuel_kwhd"] = feed.getdata(feeds["boiler_fuel_kwh"].id, start, end, "daily", 0, 1)
         bargraph_series.push({
-            data: data["boiler_fuel_kwhd"], color: 5,
-            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 0.5, lineWidth: 0 }
+            data: data["boiler_fuel_kwhd"], color: flot_color(5),
+            bars: { show: true, align: "center", barWidth: [0.75 * DAY, true], fill: 0.5, lineWidth: 0 }
         });
 
         for (var z in data["boiler_fuel_kwhd"]) {
@@ -1017,8 +1022,8 @@ function bargraph_load(start, end) {
     if (heat_enabled) {
         data["boiler_heat_kwhd"] = feed.getdata(feeds["boiler_heat_kwh"].id, start, end, "daily", 0, 1)
         bargraph_series.push({
-            data: data["boiler_heat_kwhd"], color: 0,
-            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 }
+            data: data["boiler_heat_kwhd"], color: flot_color(0),
+            bars: { show: true, align: "center", barWidth: [0.75 * DAY, true], fill: 1.0, lineWidth: 0 }
         });
 
         for (var z in data["boiler_heat_kwhd"]) {
@@ -1030,8 +1035,8 @@ function bargraph_load(start, end) {
     if (elec_enabled) {
         data["boiler_elec_kwhd"] = feed.getdata(feeds["boiler_elec_kwh"].id, start, end, "daily", 0, 1);
         bargraph_series.push({
-            data: data["boiler_elec_kwhd"], color: 1,
-            bars: { show: true, align: "center", barWidth: 0.75 * DAY, fill: 1.0, lineWidth: 0 }
+            data: data["boiler_elec_kwhd"], color: flot_color(1),
+            bars: { show: true, align: "center", barWidth: [0.75 * DAY, true], fill: 1.0, lineWidth: 0 }
         });
 
         for (var z in data["boiler_elec_kwhd"]) {
@@ -1068,7 +1073,7 @@ function bargraph_load(start, end) {
         if ((end - start) < 120 * DAY) {
             data["boiler_outsideT_daily"] = feed.getdata(feeds["boiler_outsideT"].id, start, end, "daily", 1, 0);
             bargraph_series.push({
-                data: data["boiler_outsideT_daily"], color: 4, yaxis: 2,
+                data: data["boiler_outsideT_daily"], color: flot_color(4), yaxis: 2,
                 lines: { show: true, align: "center", fill: false }, points: { show: false }
             });
         }
@@ -1093,29 +1098,33 @@ function bargraph_load(start, end) {
 
 function bargraph_draw() {
     var options = {
+        series: { lines: { lineWidth: 2 } },
         xaxis: {
             mode: "time",
             timezone: "browser",
-            font: { size: flot_font_size, color: "#666" },
+            timeBase: "milliseconds",
+            font: { size: flot_font_size, color: "#666", fill: "#666" },
             // labelHeight:-5
             reserveSpace: false
         },
         yaxes: [{
-            font: { size: flot_font_size, color: "#666" },
+            font: { size: flot_font_size, color: "#666", fill: "#666" },
             // labelWidth:-5
             reserveSpace: false,
-            min: 0
+            min: 0,
+            autoScale: "none"
         }, {
-            font: { size: flot_font_size, color: "#9440ed" },
+            font: { size: flot_font_size, color: "#9440ed", fill: "#9440ed" },
             // labelWidth:-5
             reserveSpace: false,
             // max:40
         }, {
-            font: { size: flot_font_size, color: "#44b3e2" },
+            font: { size: flot_font_size, color: "#44b3e2", fill: "#44b3e2" },
             reserveSpace: false,
-            min: 0
+            min: 0,
+            autoScale: "none"
         }],
-        selection: { mode: "x" },
+        selection: { mode: "x", color: "#e8cfac", visualization: "fill" },
         grid: {
             show: true,
             color: "#aaa",
@@ -1125,7 +1134,7 @@ function bargraph_draw() {
         }
     }
     if ($('#placeholder').width()) {
-        var plot = $.plot($('#placeholder'), bargraph_series, options);
+        var plot = Flot.plot(document.getElementById('placeholder'), bargraph_series, options);
         $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'></div>");
     }
 }
@@ -1219,16 +1228,16 @@ function draw_histogram(histogram) {
 
     var options = {
         // lines: { fill: true },
-        bars: { show: true, align: "center", barWidth: (1 / 200) * 0.8, fill: 1.0, lineWidth: 0 },
+        series: { bars: { show: true, align: "center", barWidth: [(1 / 200) * 0.8, true], fill: 1.0, lineWidth: 0 } },
         xaxis: {
             // mode: "time", timezone: "browser", 
-            min: 0.2, max: 0.8,
-            font: { size: flot_font_size, color: "#666" },
+            min: 0.2, max: 0.8, autoScale: "none",
+            font: { size: flot_font_size, color: "#666", fill: "#666" },
             reserveSpace: false
         },
         yaxes: [
             //{ min: 0,font: {size:flot_font_size, color:"#666"},reserveSpace:false},
-            { font: { size: flot_font_size, color: "#666" }, reserveSpace: false }
+            { font: { size: flot_font_size, color: "#666", fill: "#666" }, reserveSpace: false }
         ],
         grid: {
             show: true,
@@ -1241,14 +1250,15 @@ function draw_histogram(histogram) {
             margin: { top: 30 }
         },
         //selection: { mode: "x" },
-        legend: { position: "NW", noColumns: 6 }
+        legend: { show: true, position: "nw", noColumns: 6 }
     }
     if ($('#histogram').width() > 0) {
-        $.plot($('#histogram'), [{ data: sorted_histogram }], options);
+        Flot.plot(document.getElementById('histogram'), [{ data: sorted_histogram }], options);
     }
 }
 
-$('#histogram').bind("plothover", function (event, pos, item) {
+if (document.getElementById('histogram')) document.getElementById('histogram').addEventListener("plothover", function (event) {
+    var pos = event.detail[0], item = event.detail[1];
     if (item) {
         var z = item.dataIndex;
 

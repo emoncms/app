@@ -3,12 +3,8 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 
 load_js("Modules/feed/feed.js");
-load_js("Lib/flot/jquery.flot.min.js");
-load_js("Lib/flot/jquery.flot.time.min.js");
-load_js("Lib/flot/jquery.flot.selection.min.js");
-load_js("Lib/flot/jquery.flot.touch.min.js");
-load_js("Lib/flot/jquery.flot.togglelegend.min.js");
-load_js("Lib/vis.helper.js");
+load_js("Lib/js/flot-5.1.0.mod.min.js");
+load_js("Modules/app/Lib/vis.helper.js");
 load_js("Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js");
 load_css("Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css");
 load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css");

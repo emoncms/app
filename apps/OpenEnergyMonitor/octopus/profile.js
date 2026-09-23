@@ -18,7 +18,7 @@ function profile_draw() {
     var bars = {
         show: true,
         align: "left",
-        barWidth: 0.9 * 1800 * 1000,
+        barWidth: [0.9 * 1800 * 1000, true],
         fill: 1.0,
         lineWidth: 0
     };
@@ -50,10 +50,12 @@ function profile_draw() {
         xaxis: {
             mode: "time",
             timezone: "browser",
+            timeBase: "milliseconds",
             // min: start, max: end, 
             font: {
                 size: flot_font_size,
-                color: "#666"
+                color: "#666",
+                fill: "#666"
             },
             reserveSpace: false
         },
@@ -61,7 +63,8 @@ function profile_draw() {
                 position: 'left',
                 font: {
                     size: flot_font_size,
-                    color: "#666"
+                    color: "#666",
+                    fill: "#666"
                 },
                 reserveSpace: false
             },
@@ -70,7 +73,8 @@ function profile_draw() {
                 alignTicksWithAxis: 1,
                 font: {
                     size: flot_font_size,
-                    color: "#666"
+                    color: "#666",
+                    fill: "#666"
                 },
                 reserveSpace: false
             }
@@ -88,12 +92,15 @@ function profile_draw() {
             }
         },
         selection: {
-            mode: "x"
+            mode: "x",
+            color: "#e8cfac",
+            visualization: "fill"
         },
         legend: {
-            position: "NW",
+            show: true,
+            position: "nw",
             noColumns: 5
         }
     }
-    $.plot($('#placeholder'), graph_series, options);
+    Flot.plot(document.getElementById('placeholder'), graph_series, options);
 }

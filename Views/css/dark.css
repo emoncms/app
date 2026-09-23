@@ -197,3 +197,7 @@ body.app .container-fluid {
         max-width: 34rem;
     }
 }
+
+/* Flot 5 legend on a dark background */
+.legendLayer rect.background { fill: rgba(34, 34, 34, 0.85); }
+.legendLayer text { fill: #ddd; }
