@@ -218,7 +218,7 @@ function show() {
         }
     });
 
-    setPeriod('168');
+    setPeriod('T');
     graph_load();
     graph_draw();
 
