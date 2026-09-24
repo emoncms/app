@@ -41,7 +41,8 @@ var tariff_options = [
     "SNUG-24-11-07",
     "COSY-22-12-08",
     "FLUX-IMPORT-23-02-14",
-    "BUS-12M-FIXED-SHAPE-SHIFTER-25-05-23"
+    "BUS-12M-FIXED-SHAPE-SHIFTER-25-05-23",
+    "AGILE-BUS-25-02-05"
     // Custom opens tariff builder
     // "CUSTOM"
 ];
