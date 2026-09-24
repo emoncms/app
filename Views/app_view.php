@@ -106,20 +106,22 @@
   MODALS
 -------------------------------------------------------------------------------------------->
 <!-- GROUP CREATE -->
-<div id="app-new-modal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="app-new-modal-label" aria-hidden="true" data-backdrop="static" style="width:620px;margin-left:-310px;">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3 id="app-new-modal-label">{{ modalTitle }}</h3>
-    </div>
-    <div class="modal-body">
-
-        <p>Enter a unique name for the app:<br>
-            <input id="app-new-name" type="text" v-model="appName"></p>
-
-    </div>
-    <div class="modal-footer">
-        <button id="app-new-cancel" class="btn" data-dismiss="modal" @click="cancelCreate">Cancel</button>
-        <button id="app-new-action" class="btn btn-primary" @click="createApp">Create</button>
+<div id="app-new-modal" class="modal" tabindex="-1" aria-labelledby="app-new-modal-label" aria-hidden="true" data-bs-backdrop="static" style="--bs-modal-width:620px">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="app-new-modal-label" class="modal-title">{{ modalTitle }}</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Enter a unique name for the app:<br>
+                    <input id="app-new-name" type="text" v-model="appName"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="app-new-cancel" class="btn btn-default" data-bs-dismiss="modal" @click="cancelCreate">Cancel</button>
+                <button id="app-new-action" class="btn btn-primary" @click="createApp">Create</button>
+            </div>
+        </div>
     </div>
 </div>
 

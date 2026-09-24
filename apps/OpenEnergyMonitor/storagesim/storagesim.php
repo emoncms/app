@@ -3,7 +3,7 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 ?>
 
-<link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/Views/css/dark.css"); ?>
 <?php load_js("Modules/feed/feed.js"); ?>
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
 <?php load_js("Modules/app/Lib/vis.helper.js"); ?>
@@ -16,17 +16,17 @@ global $path, $session, $v;
         <div class="col1-inner">
             <div style="float:right;">
                 <div class='btn-group' style="margin-top:10px;">
-                    <button class='btn time' type='button' time='1'>D</button>
-                    <button class='btn time' type='button' time='7'>W</button>
-                    <button class='btn time' type='button' time='30'>M</button>
-                    <button class='btn time' type='button' time='365'>Y</button>
-                    <button class='btn' id='zoomin'>+</button>
-                    <button class='btn' id='zoomout'>-</button>
-                    <button class='btn' id='left'><</button>
-                    <button class='btn' id='right'>></button>
+                    <button class='btn btn-default time' type='button' time='1'>D</button>
+                    <button class='btn btn-default time' type='button' time='7'>W</button>
+                    <button class='btn btn-default time' type='button' time='30'>M</button>
+                    <button class='btn btn-default time' type='button' time='365'>Y</button>
+                    <button class='btn btn-default' id='zoomin'>+</button>
+                    <button class='btn btn-default' id='zoomout'>-</button>
+                    <button class='btn btn-default' id='left'><</button>
+                    <button class='btn btn-default' id='right'>></button>
                 </div>
 
-                <button class="btn config-open" style="margin-top:10px">
+                <button class="btn btn-default config-open" style="margin-top:10px">
                     <i class=" icon-wrench"></i>
                 </button>
             </div>
@@ -37,16 +37,16 @@ global $path, $session, $v;
     <div id="graph" style="height:500px; width:100%;"></div>
     <br>
     <div id="app">
-        <div class="row">
-            <div class="span5" style="background-color:aquamarine">
+        <div class="row g-0">
+            <div class="col-md-5" style="background-color:aquamarine">
                 <h4>Generation</h4>
                 <table class="table">
                     <tr v-for="gen, index in generation">
                         <td>{{gen.name}}</td>
                         <td>
-                            <div class="input-append">
+                            <div class="input-group">
                                 <input type="text" v-model="gen.capacity" style="width:50px" @change="update">
-                                <span class="add-on">kW</span>
+                                <span class="input-group-text">kW</span>
                             </div>
                         </td>
                         <td>{{ toFixed(gen.kwh, 0) }} kWh ({{ toFixed(100*gen.capacity_factor, 1) }}%)</td>
@@ -54,18 +54,18 @@ global $path, $session, $v;
                     <tr>
                         <td>Nuclear / geothermal<br>(non load following)</td>
                         <td>
-                            <div class="input-append">
+                            <div class="input-group">
                                 <input type="text" v-model="nuclear.output" style="width:50px" @change="update">
-                                <span class="add-on">kW</span>
+                                <span class="input-group-text">kW</span>
                             </td>
                         <td>{{ toFixed(nuclear.kwh, 0) }} kWh ({{ toFixed(100*nuclear.capacity_factor, 1) }}%)</td>
                     </tr>
                     <tr>
                         <td>Home solar feed</td>
                         <td>
-                            <div class="input-append">
+                            <div class="input-group">
                                 <input type="text" v-model="home_solar.scale" style="width:50px" @change="update">
-                                <span class="add-on">%</span>
+                                <span class="input-group-text">%</span>
                             </td>
                         <td>{{ toFixed(home_solar.kwh, 0) }} kWh ({{ toFixed(100*home_solar.capacity_factor, 1) }}%)</td>
                     </tr>
@@ -82,9 +82,9 @@ global $path, $session, $v;
                     <tr>
                         <td>Direct e-fuel demand (e.g industry, shipping or aviation)</td>
                         <td>
-                            <div class="input-append">
+                            <div class="input-group">
                                 <input type="text" v-model.number="consumption.efuel_demand" style="width:50px" @change="update">
-                                <span class="add-on">kWh</span>
+                                <span class="input-group-text">kWh</span>
                             </div>
                         </td>
                         <td></td>
@@ -113,9 +113,9 @@ global $path, $session, $v;
                     <tr>
                         <td>Peak shaving storage requirement</td>
                         <td>
-                            <div class="input-append">
-                                <span class="add-on">Show</span>
-                                <span class="add-on">
+                            <div class="input-group">
+                                <span class="input-group-text">Show</span>
+                                <span class="input-group-text">
                                 <input type="checkbox" v-model="show_peak_shaving_balance" @change="update"/>
                                 </span>
                             </div>
@@ -124,61 +124,61 @@ global $path, $session, $v;
                     </tr>                  
                 </table>
             </div>
-            <div class="span3" style="background-color:darkseagreen">
+            <div class="col-md-3 ms-md-3" style="background-color:darkseagreen">
                 <h4>Store 1</h4>
                 <p>E.g battery storage</p>
                 <table class="table">
                     <tr>
                         <td>Storage capacity</td>
                         <td>
-                            <div class="input-append">
+                            <div class="input-group">
                                 <input type="text" v-model.number="store1.capacity" style="width:50px" @change="update">
-                                <span class="add-on">kWh</span>
+                                <span class="input-group-text">kWh</span>
                             </div>
                         </td>
                     </tr>
                     <tr>
                         <td>SOC start</td>
                         <td>
-                            <div class="input-append">
+                            <div class="input-group">
                                 <input type="text" v-model.number="store1.starting_soc" style="width:50px" @change="update">
-                                <span class="add-on">kWh</span>
+                                <span class="input-group-text">kWh</span>
                             </div>
                         </td>
                     </tr>
                     <tr>
                         <td>Charge efficiency</td>
                         <td>
-                            <div class="input-append">
+                            <div class="input-group">
                                 <input type="text" v-model.number="store1.charge_efficiency" style="width:50px" @change="update">
-                                <span class="add-on">%</span>
+                                <span class="input-group-text">%</span>
                             </div>
                         </td>
                     </tr>
                     <tr>
                         <td>Discharge efficiency</td>
                         <td>
-                            <div class="input-append">
+                            <div class="input-group">
                                 <input type="text" v-model.number="store1.discharge_efficiency" style="width:50px" @change="update">
-                                <span class="add-on">%</span>
+                                <span class="input-group-text">%</span>
                             </div>
                         </td>
                     </tr>
                     <tr>
                         <td>Max charge rate</td>
                         <td>
-                            <div class="input-append">
+                            <div class="input-group">
                                 <input type="text" v-model.number="store1.charge_max" style="width:50px" @change="update">
-                                <span class="add-on">kW</span>
+                                <span class="input-group-text">kW</span>
                             </div>
                         </td>
                     </tr>
                     <tr>
                         <td>Max discharge rate</td>
                         <td>
-                            <div class="input-append">
+                            <div class="input-group">
                                 <input type="text" v-model.number="store1.discharge_max" style="width:50px" @change="update">
-                                <span class="add-on">kW</span>
+                                <span class="input-group-text">kW</span>
                             </div>
                         </td>
                     </tr>
@@ -202,61 +202,61 @@ global $path, $session, $v;
 
             </div>
 
-            <div class="span3" style="background-color:deepskyblue">
+            <div class="col-md-3 ms-md-3" style="background-color:deepskyblue">
                 <h4>Store 2</h4>
                 <p>E.g H2, e-Methane, e-Methanol</p>
                 <table class="table">
                     <tr>
                         <td>Storage capacity</td>
                         <td>
-                            <div class="input-append">
+                            <div class="input-group">
                                 <input type="text" v-model.number="store2.capacity" style="width:50px" @change="update">
-                                <span class="add-on">kWh</span>
+                                <span class="input-group-text">kWh</span>
                             </div>
                         </td>
                     </tr>
                     <tr>
                         <td>SOC start</td>
                         <td>
-                            <div class="input-append">
+                            <div class="input-group">
                                 <input type="text" v-model.number="store2.starting_soc" style="width:50px" @change="update">
-                                <span class="add-on">kWh</span>
+                                <span class="input-group-text">kWh</span>
                             </div>
                         </td>
                     </tr>
                     <tr>
                         <td>Charge efficiency</td>
                         <td>
-                            <div class="input-append">
+                            <div class="input-group">
                                 <input type="text" v-model.number="store2.charge_efficiency" style="width:50px" @change="update">
-                                <span class="add-on">%</span>
+                                <span class="input-group-text">%</span>
                             </div>
                         </td>
                     </tr>
                     <tr>
                         <td>Discharge efficiency</td>
                         <td>
-                            <div class="input-append">
+                            <div class="input-group">
                                 <input type="text" v-model.number="store2.discharge_efficiency" style="width:50px" @change="update">
-                                <span class="add-on">%</span>
+                                <span class="input-group-text">%</span>
                             </div>
                         </td>
                     </tr>
                     <tr>
                         <td>Max charge rate</td>
                         <td>
-                            <div class="input-append">
+                            <div class="input-group">
                                 <input type="text" v-model.number="store2.charge_max" style="width:50px" @change="update">
-                                <span class="add-on">kW</span>
+                                <span class="input-group-text">kW</span>
                             </div>
                         </td>
                     </tr>
                     <tr>
                         <td>Max discharge rate</td>
                         <td>
-                            <div class="input-append">
+                            <div class="input-group">
                                 <input type="text" v-model.number="store2.discharge_max" style="width:50px" @change="update">
-                                <span class="add-on">kW</span>
+                                <span class="input-group-text">kW</span>
                             </div>
                         </td>
                     </tr>
@@ -278,7 +278,7 @@ global $path, $session, $v;
                     </tr>
                 </table>
 
-                <button class="btn" @click="auto">Auto</button>
+                <button class="btn btn-default" @click="auto">Auto</button>
 
             </div>
         </div>

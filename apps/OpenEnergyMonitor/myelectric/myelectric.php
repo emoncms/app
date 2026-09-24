@@ -2,7 +2,7 @@
     defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/Views/css/dark.css"); ?>
 <?php load_js("Modules/feed/feed.js"); ?>
 
 <?php load_js("Modules/app/Lib/graph_bars.js"); ?> 
@@ -12,8 +12,8 @@
 
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="btn btn-large btn-link btn-inverse myelectric-view-cost" ><?php echo tr("Cost") ?></button></li>
-        <li><button class="btn btn-large btn-link btn-inverse myelectric-view-kwh active" ><?php echo tr("kWh") ?></button></li>
+        <li><button class="btn btn-lg btn-link myelectric-view-cost" ><?php echo tr("Cost") ?></button></li>
+        <li><button class="btn btn-lg btn-link myelectric-view-kwh active" ><?php echo tr("kWh") ?></button></li>
     </ul>
     <?php include(dirname(__DIR__).'/config-nav.php'); ?>
 </nav>

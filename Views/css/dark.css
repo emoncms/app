@@ -157,7 +157,8 @@ body.app .container-fluid {
    Small devices (landscape phones, 576px and up)
 --------------------------------------------------------------------*/
 @media (min-width: 576px) {
-    .visnav {
+    .visnav,
+    .visnavblock > .visnav {
         flex-grow: 0;
         min-width: 3em;
     }

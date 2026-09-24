@@ -2,8 +2,8 @@
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/config.css?v=<?php echo $v; ?>" rel="stylesheet">
-<link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/Views/css/config.css"); ?>
+<?php load_css("Modules/app/Views/css/dark.css"); ?>
 
 <?php load_js("Modules/app/Lib/appconf.js"); ?>
 <?php load_js("Modules/feed/feed.js"); ?>

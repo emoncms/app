@@ -3,7 +3,7 @@
     global $path, $session, $v;
 ?>
 
-<link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/Views/css/dark.css"); ?>
 <?php load_js("Modules/feed/feed.js"); ?>
 
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
@@ -142,11 +142,11 @@
 
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="viewhistory btn btn-large btn-link btn-inverse" title="<?php echo tr('View History') ?>">
+        <li><button class="viewhistory btn btn-lg btn-link" title="<?php echo tr('View History') ?>">
             <span class="d-xs-none"><?php echo tr("Hist") ?></span>
             <span class="d-none d-xs-inline"><?php echo tr("History") ?></span>
         </button></li>
-        <li><button class="balanceline btn btn-large btn-link btn-inverse" title="<?php echo tr('Show Balance') ?>">
+        <li><button class="balanceline btn btn-lg btn-link" title="<?php echo tr('Show Balance') ?>">
             <span class="d-xs-none"><?php echo tr("Bal") ?></span>
             <span class="d-none d-xs-inline"><?php echo tr("Balance") ?></span>
         </li>

@@ -47,6 +47,7 @@
   text-align: center;
   border-left: 1px solid rgba(255,255,255,0.333);
   cursor: pointer;
+  box-sizing: content-box;
 }
 
 .app-body {

@@ -5,7 +5,7 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 ?>
 
-<link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/Views/css/dark.css"); ?>
 <?php load_js("Modules/feed/feed.js"); ?>
 
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
@@ -52,25 +52,24 @@ global $path, $session, $v;
 <!-- Top navigation bar -->
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="fuelmix btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo tr('Fuel mix history') ?>">
+        <li><button class="fuelmix btn btn-lg btn-link myelectric-view-cost" title="<?php echo tr('Fuel mix history') ?>">
                 <span class="d-xs-none"><?php echo tr("Pwr") ?></span>
                 <span class="d-none d-xs-inline-block"><?php echo tr("UK FUEL MIX") ?></span>
             </button></li>
-        <li><button class="forecast active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo tr('Wind & Solar forecast') ?>">
+        <li><button class="forecast active btn btn-lg btn-link myelectric-view-cost" title="<?php echo tr('Wind & Solar forecast') ?>">
                 <span class="d-xs-none"><?php echo tr("Pwr") ?></span>
                 <span class="d-none d-xs-inline-block"><?php echo tr("FORECAST") ?></span>
             </button></li>
         </ul>
-    <ul class="text-right nav nav-pills mb-0">
-        <li><button class="btn btn-large btn-link btn-inverse config-open" title="<?php echo tr('Edit') ?>"><span class="svg-icon-wrench"></span></button></li>
-        <li><button class="btn btn-large btn-link btn-inverse config-close hide" title="<?php echo tr('Close') ?>"><span class="svg-icon-close"></span></button></li>
+    <ul class="text-end nav nav-pills mb-0">
+        <li><button class="btn btn-lg btn-link config-open" title="<?php echo tr('Edit') ?>"><span class="svg-icon-wrench"></span></button></li>
+        <li><button class="btn btn-lg btn-link config-close hide" title="<?php echo tr('Close') ?>"><span class="svg-icon-close"></span></button></li>
     </ul>
 </nav>
 
 <div id="app-block" style="display:none; color:#ccc">
-    <div class="row">
-        <!--bootstrap 2 column-->
-        <div class="span10">
+    <div class="row g-0">
+        <div class="col-md-10">
             <!--<div style="font-size:28px; font-weight:bold">uk<span style="color:#fff">grid</span></div>-->
             <?php include(dirname(__DIR__).'/graph-nav.php'); ?>
 
@@ -78,7 +77,7 @@ global $path, $session, $v;
                 <div id="placeholder"></div>
             </div>
         </div>
-        <div class="span2">
+        <div class="col-md-2">
             <div id="visible-checkboxes" style="margin-top:10px"></div>
         </div>
     </div>

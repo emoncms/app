@@ -26,14 +26,14 @@ global $path;
             <tbody>
                 <tr v-for="app in apps" :key="app.id">
                     <td>{{ app.id }}</td>
-                    <td><span class="label label-info">{{ app.app }}</span></td>
+                    <td><span class="badge bg-info">{{ app.app }}</span></td>
                     <td>
                         <span v-if="!app.editing">{{ app.name }}</span>
                         <input v-else type="text" class="input-medium" v-model="app.editName" />
                     </td>
                     <td>
                         <span v-if="!app.editing">
-                            <span class="badge" :class="app.public ? 'badge-success' : ''">{{ app.public ? '<?php echo _("Public"); ?>' : '<?php echo _("Private"); ?>' }}</span>
+                            <span class="badge rounded-pill" :class="app.public ? 'bg-success' : 'bg-secondary'">{{ app.public ? '<?php echo _("Public"); ?>' : '<?php echo _("Private"); ?>' }}</span>
                         </span>
                         <span v-else>
                             <label class="checkbox inline" style="margin:0">
@@ -42,14 +42,14 @@ global $path;
                         </span>
                     </td>
                     <td>
-                        <div v-if="!app.editing" class="btn-group">
-                            <a :href="'<?php echo $path; ?>app/view?name=' + encodeURIComponent(app.name)" class="btn btn-small btn-info"><?php echo _("View"); ?></a>
-                            <button class="btn btn-small" @click="editApp(app)"><?php echo _("Edit"); ?></button>
-                            <button class="btn btn-small btn-danger" @click="deleteApp(app.id)"><i class="icon-trash icon-white"></i></button>
+                        <div v-if="!app.editing" class="btn-group text-nowrap">
+                            <a :href="'<?php echo $path; ?>app/view?name=' + encodeURIComponent(app.name)" class="btn btn-sm btn-info"><?php echo _("View"); ?></a>
+                            <button class="btn btn-default btn-sm" @click="editApp(app)"><?php echo _("Edit"); ?></button>
+                            <button class="btn btn-sm btn-danger" @click="deleteApp(app.id)"><i class="icon-trash icon-white"></i></button>
                         </div>
-                        <div v-else class="btn-group">
-                            <button class="btn btn-small btn-success" @click="saveApp(app)"><i class="icon-ok icon-white"></i> <?php echo _("Save"); ?></button>
-                            <button class="btn btn-small" @click="cancelEdit(app)"><?php echo _("Cancel"); ?></button>
+                        <div v-else class="btn-group text-nowrap">
+                            <button class="btn btn-sm btn-success" @click="saveApp(app)"><i class="icon-ok icon-white"></i> <?php echo _("Save"); ?></button>
+                            <button class="btn btn-default btn-sm" @click="cancelEdit(app)"><?php echo _("Cancel"); ?></button>
                         </div>
                     </td>
                 </tr>

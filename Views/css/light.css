@@ -41,6 +41,7 @@ body {
   cursor:pointer;
   min-width:30px;
   text-align:center;
+  box-sizing: content-box;
 }
 
 .bluenav:hover {

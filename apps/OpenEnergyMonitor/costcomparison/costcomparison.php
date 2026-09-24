@@ -2,7 +2,7 @@
     defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/Views/css/light.css"); ?>
 <link rel="stylesheet" href="<?php echo $path; ?>Lib/fonts/montserrat/montserrat.css?v=<?php echo $v; ?>" />
 <?php load_js("Modules/feed/feed.js"); ?>
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>

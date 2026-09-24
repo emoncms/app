@@ -2,7 +2,7 @@
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/Views/css/light.css"); ?>
 
 <link rel="stylesheet" href="<?php echo $path; ?>Lib/fonts/montserrat/montserrat.css?v=<?php echo $v; ?>" />
 
@@ -11,7 +11,7 @@ global $path, $session, $v;
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
 <?php load_js("Modules/app/Lib/vis.helper.js"); ?>
 <?php load_js("Lib/js/clipboard.js"); ?>
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css?v=49>" rel="stylesheet">
+<?php load_css("Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css"); ?>
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
   <div id="app-block" style="display:none">
@@ -126,7 +126,7 @@ global $path, $session, $v;
         <div id="advanced-block" style="background-color:#fff; padding:10px; display:none">
           <div style="color:#000">
 
-            <div id="error-message" style="display:none" class="alert alert-error"></div>
+            <div id="error-message" style="display:none" class="alert alert-danger"></div>
 
             <table style="width:100%; color:#333;">
               <tr>
@@ -200,16 +200,16 @@ global $path, $session, $v;
               <b>Show instantaneous COP</b>
 
               <div id="inst_cop_options" style="display:none">
-                <div class="input-prepend input-append" style="margin-top:10px; margin-bottom:0px">
-                  <span class="add-on">Valid COP</span>
-                  <span class="add-on">Min</span>
+                <div class="input-group" style="margin-top:10px; margin-bottom:0px">
+                  <span class="input-group-text">Valid COP</span>
+                  <span class="input-group-text">Min</span>
                   <input type="text" style="width:50px" id="inst_cop_min" value="1.0">
-                  <span class="add-on">Max</span>
+                  <span class="input-group-text">Max</span>
                   <input type="text" style="width:50px" id="inst_cop_max" value="8.0">
                 </div>
 
-                <div class="input-prepend input-append" style="margin-top:10px; margin-bottom:0px">
-                  <span class="add-on">Moving average</span>
+                <div class="input-group" style="margin-top:10px; margin-bottom:0px">
+                  <span class="input-group-text">Moving average</span>
                   <select id="inst_cop_mv_av_dp" style="width:100px">
                     <option value="0" selected>Disabled</option>
                     <option value="3">3 points</option>
@@ -225,20 +225,20 @@ global $path, $session, $v;
               <b>Show simulated carnot heat output</b>
 
               <div id="carnot_sim_options" style="display:none">
-                <div class="input-prepend" style="margin-top:5px; margin-bottom:0px">
-                  <span class="add-on">Condensing offset (K)</span>
+                <div class="input-group" style="margin-top:5px; margin-bottom:0px">
+                  <span class="input-group-text">Condensing offset (K)</span>
                   <input type="text" style="width:50px" id="condensing_offset" value="2">
                 </div>
-                <div class="input-prepend" style="margin-top:5px; margin-bottom:0px">
-                  <span class="add-on">Evaporator offset (K)</span>
+                <div class="input-group" style="margin-top:5px; margin-bottom:0px">
+                  <span class="input-group-text">Evaporator offset (K)</span>
                   <input type="text" style="width:50px" id="evaporator_offset" value="-6">
                 </div>
-                <div id="heatpump_factor_bound" class="input-prepend" style="margin-top:5px; margin-bottom:0px">
-                  <span class="add-on">Heatpump factor</span>
+                <div id="heatpump_factor_bound" class="input-group" style="margin-top:5px; margin-bottom:0px">
+                  <span class="input-group-text">Heatpump factor</span>
                   <input type="text" style="width:50px" id="heatpump_factor" value="0.47">
                 </div>
-                <div id="fixed_outside_temperature_bound" class="input-prepend input-append" style="margin-top:5px; margin-bottom:0px">
-                  <span class="add-on">Fixed outside temperature (C)</span>
+                <div id="fixed_outside_temperature_bound" class="input-group" style="margin-top:5px; margin-bottom:0px">
+                  <span class="input-group-text">Fixed outside temperature (C)</span>
                   <input type="text" style="width:50px" id="fixed_outside_temperature" value="6.0">
                 </div>
               </div>
@@ -263,22 +263,22 @@ global $path, $session, $v;
               <b>Calculate emitter spec and system volume</b>
               <div id="emitter_spec_options" style="margin-top:10px; display:none">
                 <p>Make sure there is at least a short period of steady state running in the window.<br>Heat output spikes after hot water cycles can skew results.</p>
-                <div class="input-append" style="margin-top:5px">
+                <div class="input-group" style="margin-top:5px">
                   <input type="text" style="width:50px" id="kW_at_50" disabled>
-                  <span class="add-on">kW @ DT50</span>
-                  <span class="add-on">Fix <input type="checkbox" id="fix_kW_at_50"></span>
+                  <span class="input-group-text">kW @ DT50</span>
+                  <span class="input-group-text">Fix <input type="checkbox" id="fix_kW_at_50"></span>
                 </div>
-                <div class="input-append" style="margin-top:5px">
+                <div class="input-group" style="margin-top:5px">
                   <input type="text" style="width:50px" id="system_volume" disabled>
-                  <span class="add-on">Litres</span>
+                  <span class="input-group-text">Litres</span>
                 </div>
                 <br>
-                <div class="input-prepend input-append" style="margin-top:5px">
-                  <span class="add-on">Room temperature</span>
+                <div class="input-group" style="margin-top:5px">
+                  <span class="input-group-text">Room temperature</span>
 
                   <input type="text" style="width:50px" id="room_temperature" disabled>
-                  <span class="add-on">&deg;C</span>
-                  <span class="add-on">Manual <input type="checkbox" id="manual_roomT_enable"></span>
+                  <span class="input-group-text">&deg;C</span>
+                  <span class="input-group-text">Manual <input type="checkbox" id="manual_roomT_enable"></span>
                 </div>
               </div>
             </div>
@@ -288,15 +288,15 @@ global $path, $session, $v;
               <b>Calculate DHW Standby Heat Loss Coefficient</b>
               <div id="standby_dhw_hl_options" style="margin-top:10px; display:none;">
                   <p style="font-size:0.9em; color:#555;"><i>Ensure the selected window only shows natural DHW temperature decay (no heating cycles, no DHW use such as showering). Cylinder volume and environmental temperature are required to compute standby heat loss coefficient, which only works if DHW temperature is measured in °C and not % Charge. </i></p>
-                  <div class="input-prepend input-append" style="margin-top:5px; margin-bottom:5px;">
-                    <span class="add-on">Cylinder Volume (V<sub>cyl</sub>)</span>
+                  <div class="input-group" style="margin-top:5px; margin-bottom:5px;">
+                    <span class="input-group-text">Cylinder Volume (V<sub>cyl</sub>)</span>
                     <input type="text" style="width:60px" id="cylinder_volume" value="200">
-                    <span class="add-on">L</span>
+                    <span class="input-group-text">L</span>
                   </div>
-                  <div class="input-prepend input-append" style="margin-top:5px; margin-bottom:5px;">
-                    <span class="add-on">Environment Temp (T<sub>env</sub>)</span>
+                  <div class="input-group" style="margin-top:5px; margin-bottom:5px;">
+                    <span class="input-group-text">Environment Temp (T<sub>env</sub>)</span>
                     <input type="text" style="width:50px" id="env_temperature" value="15">
-                    <span class="add-on">°C</span>
+                    <span class="input-group-text">°C</span>
                   </div>
                   <div style="margin-top:10px;">
                       DHW Heat Loss Coefficient (U): <b id="standby_dhw_hl_result">---</b> W/K |  DHW charge half-life (T<sub>1/2</sub>): <b id="standby_dhw_t_half_result">---</b> days
@@ -309,10 +309,10 @@ global $path, $session, $v;
               <input id="configure_standby" type="checkbox" class="advanced-options-checkbox">
               <b>Configure standby</b>
               <div id="configure_standby_options" style="display:none">
-                <div class="input-prepend input-append" style="margin-top:10px; margin-bottom:0px;">
-                  <span class="add-on">Starting power</span>
+                <div class="input-group" style="margin-top:10px; margin-bottom:0px;">
+                  <span class="input-group-text">Starting power</span>
                   <input type="text" style="width:50px" id="starting_power" value="150">
-                  <span class="add-on">W</span>
+                  <span class="input-group-text">W</span>
                 </div>
               </div>
 

@@ -6,8 +6,8 @@ global $path, $session, $v, $user;
 $timezone = $user->get_timezone($session['userid']);
 if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/timeofuse2/timeofuse2.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/Views/css/light.css"); ?>
+<?php load_css("Modules/app/apps/OpenEnergyMonitor/timeofuse2/timeofuse2.css"); ?>
 
 <link rel="stylesheet" href="<?php echo $path; ?>Lib/fonts/montserrat/montserrat.css?v=<?php echo $v; ?>" />
 <?php load_js("Modules/feed/feed.js"); ?>

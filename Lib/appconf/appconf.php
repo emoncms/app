@@ -1,21 +1,16 @@
 
-<?php
-    global $path;
-    $app_conf_path = $path . 'Modules/app/Lib/appconf/';
-    $app_conf_version = time(); // Use timestamp for cache busting during development, replace with static version for production
-?>
-
 <?php load_js("Lib/js/vue.global.prod-3.5.22.min.js"); ?>
 
-<link href="<?php echo $app_conf_path; ?>appconf.css?v=<?php echo $app_conf_version; ?>" rel="stylesheet">
+<?php load_css("Modules/app/Lib/appconf/appconf.css"); ?>
+<?php load_css("Modules/app/Views/css/utils.css"); ?>
 
 <div id="vue-config">
 
 <div id="app-setup" class="hide pb-3">
     <!-- instructions and settings -->
     <div class="px-3">
-        <div class="row-fluid">
-            <div class="span7 xappconfig-description app-config">
+        <div class="row g-0">
+            <div class="col-md-7 xappconfig-description app-config">
                 <div class="xappconfig-description-inner text-light">
                     <h2 class="appconfig-title" :style="{ color: app_name_color }">{{ app_name }}</h2>
                     <div v-html="app_description"></div>
@@ -32,7 +27,7 @@
                     <!-- Input text box to set the node name of the feeds to be generated -->
                     <div style="margin-bottom:12px;">
                         <label style="font-size:13px; color:#aaa;"><b>Feed node:</b></label>
-                        <div class="input-append">
+                        <div class="input-group">
                         <input type="text" v-model="autogen_node" style="width:200px" placeholder="Enter feed node name">
                         <button class="btn btn-secondary" style="margin-top:5px" @click="setNode">
                             Set node
@@ -78,7 +73,7 @@
 
 
             </div>
-            <div id="app-config-content" class="span5 app-config pt-3">
+            <div id="app-config-content" class="col-md-5 ps-md-3 app-config pt-3">
 
                 <!-- App name -->
                 <div class="app-config-box">
@@ -102,7 +97,7 @@
                         <b class="feed-name">{{ item.displayName }}<span v-if="item.selectionMode" class="feed-auto"> [{{ item.selectionMode }}]</span></b>
                         <i class="app-config-edit icon-pencil icon-app-config" style="float:right; cursor:pointer" @click="editFeed(item.key)"></i>
                         <br><span class="app-config-info">{{ item.description }}</span>
-                        <div class="feed-select-div input-append" v-show="item.showSelector">
+                        <div class="feed-select-div input-group" v-show="item.showSelector">
                             <select class="feed-select" v-model="item.selectedFeedId">
                                 <option :value="0">Select {{ item.key }} feed:</option>
                                 <option value="auto">AUTO SELECT</option>
@@ -112,7 +107,7 @@
                                     <option v-for="f in group.feeds" :value="f.id">{{ f.name }}</option>
                                 </optgroup>
                             </select>
-                            <button class="btn feed-select-ok" @click="selectFeed(item.key, item.selectedFeedId)">ok</button>
+                            <button class="btn btn-default feed-select-ok" @click="selectFeed(item.key, item.selectedFeedId)">ok</button>
                         </div>
                     </template>
                     <!-- value -->
@@ -138,7 +133,7 @@
 
                 <br>
                 <div style="text-align:center;">
-                    <button class="btn app-launch" style="padding:10px" v-show="config_valid" @click="launchApp">Launch App</button>
+                    <button class="btn btn-default app-launch" style="padding:10px" v-show="config_valid" @click="launchApp">Launch App</button>
                     <button class="btn btn-danger app-delete" style="padding:10px; margin-left:20px" @click="deleteApp"><i class="icon-trash icon-app-config"></i> Delete</button>
                 </div>
 

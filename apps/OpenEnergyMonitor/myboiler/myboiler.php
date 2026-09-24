@@ -2,14 +2,14 @@
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/Views/css/light.css"); ?>
 
 <link rel="stylesheet" href="<?php echo $path; ?>Lib/fonts/montserrat/montserrat.css?v=<?php echo $v; ?>" />
 <?php load_js("Modules/feed/feed.js"); ?>
 
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
 <?php load_js("Modules/app/Lib/vis.helper.js"); ?>
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/myboiler/style.css?v=38>" rel="stylesheet">
+<?php load_css("Modules/app/apps/OpenEnergyMonitor/myboiler/style.css"); ?>
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
   <div id="app-block" style="display:none">
@@ -172,17 +172,17 @@ global $path, $session, $v;
               <div id="emitter_spec_options" style="margin-top:10px; display:none">
                 <p>1. Select period of steady state operation where flow and return temperatures are flat</p>
 
-                <div class="input-append" style="margin-top:5px">
+                <div class="input-group" style="margin-top:5px">
                   <input type="text" style="width:50px" id="kW_at_50" disabled>
-                  <span class="add-on">kW @ DT50</span>
-                  <button class="btn" id="use_for_volume_calc">Use for volume calc</button>
+                  <span class="input-group-text">kW @ DT50</span>
+                  <button class="btn btn-default" id="use_for_volume_calc">Use for volume calc</button>
                 </div>
 
                 <p>2. Select space heating period with increasing flow and return temperatures</p>
 
-                <div class="input-append" style="margin-top:5px">
+                <div class="input-group" style="margin-top:5px">
                   <input type="text" style="width:50px" id="system_volume" disabled>
-                  <span class="add-on">Litres</span>
+                  <span class="input-group-text">Litres</span>
                 </div>
               </div>
             </div>
@@ -192,10 +192,10 @@ global $path, $session, $v;
               <input id="configure_standby" type="checkbox" class="advanced-options-checkbox">
               <b>Configure standby</b>
               <div id="configure_standby_options" style="display:none">
-                <div class="input-prepend input-append" style="margin-top:10px; margin-bottom:0px;">
-                  <span class="add-on">Starting power</span>
+                <div class="input-group" style="margin-top:10px; margin-bottom:0px;">
+                  <span class="input-group-text">Starting power</span>
                   <input type="text" style="width:50px" id="starting_heat" value="100">
-                  <span class="add-on">W</span>
+                  <span class="input-group-text">W</span>
                 </div>
               </div>
 

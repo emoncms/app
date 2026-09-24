@@ -1,0 +1,28 @@
+/* bootstrap4-utils classes used by the apps. Bootstrap 5 lacks them or uses other colours. */
+.text-light { color: #aaa !important; }
+.text-primary { color: #0699fa !important; }
+.text-warning { color: #dccc1f !important; }
+.text-success { color: #89ae65 !important; }
+.text-danger { color: #d52e2e !important; }
+.text-tertiary { color: #b7aa1f !important; }
+.text-quaternary { color: #fb7b50 !important; }
+
+.justify-content-between { flex-wrap: wrap; }
+
+@media (min-width: 320px) {
+    .d-xs-none { display: none !important; }
+    .d-xs-inline-block { display: inline-block !important; }
+    .d-xs-inline { display: inline !important; }
+}
+
+/* Bootstrap 2 link buttons are underlined on hover only */
+.btn-link { text-decoration: none; }
+.btn-link:hover { text-decoration: underline; }
+
+/* Bootstrap 2 lead paragraph, used in app descriptions */
+.lead {
+    margin-bottom: 20px;
+    font-size: 21px;
+    font-weight: 200;
+    line-height: 30px;
+}

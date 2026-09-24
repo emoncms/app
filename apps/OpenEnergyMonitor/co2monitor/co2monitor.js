@@ -437,9 +437,8 @@ $("#decay_mode").click(function() {
     mode = "decay";
     $(".decay").show();
     $(".average").hide();
-    $("#decay_mode").removeClass("btn-primary");
-    $("#average_mode").removeClass("btn-primary");
-    $("#decay_mode").addClass("btn-primary");
+    $("#decay_mode, #average_mode").removeClass("btn-primary").addClass("btn-default");
+    $("#decay_mode").removeClass("btn-default").addClass("btn-primary");
     draw();
 });
 
@@ -447,9 +446,8 @@ $("#average_mode").click(function() {
     mode = "average";
     $(".decay").hide();
     $(".average").show();
-    $("#decay_mode").removeClass("btn-primary");
-    $("#average_mode").removeClass("btn-primary");
-    $("#average_mode").addClass("btn-primary");
+    $("#decay_mode, #average_mode").removeClass("btn-primary").addClass("btn-default");
+    $("#average_mode").removeClass("btn-default").addClass("btn-primary");
     draw();
 });
 

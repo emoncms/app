@@ -2,7 +2,7 @@
     defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/Views/css/dark.css"); ?>
 
 <?php load_js("Modules/feed/feed.js"); ?>
 
@@ -11,7 +11,7 @@
 <?php load_js("Modules/app/Lib/timeseries.js"); ?>
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="balanceline btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo tr('Show Balance') ?>">
+        <li><button class="balanceline btn btn-lg btn-link myelectric-view-kwh" title="<?php echo tr('Show Balance') ?>">
             <?php echo tr("Show Balance") ?>
         </li>
     </ul>

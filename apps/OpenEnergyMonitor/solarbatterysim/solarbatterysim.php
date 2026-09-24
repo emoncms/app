@@ -2,7 +2,7 @@
     defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/Views/css/dark.css"); ?>
 
 <?php load_js("Modules/feed/feed.js"); ?>
 
@@ -28,22 +28,22 @@ textarea {
     <div class="col1-inner">
       <div style="float:right;">
         <div class='btn-group' style="margin-top:10px;">
-          <button class='btn graph-time' type='button' time='1'>D</button>
-          <button class='btn graph-time' type='button' time='7'>W</button>
-          <button class='btn graph-time' type='button' time='30'>M</button>
-          <button class='btn graph-time' type='button' time='365'>Y</button>
-          <button class='btn graph-nav' id='zoomin'>+</button>
-          <button class='btn graph-nav' id='zoomout'>-</button>
-          <button class='btn graph-nav' id='left'><</button>
-          <button class='btn graph-nav' id='right'>></button>
+          <button class='btn btn-default graph-time' type='button' time='1'>D</button>
+          <button class='btn btn-default graph-time' type='button' time='7'>W</button>
+          <button class='btn btn-default graph-time' type='button' time='30'>M</button>
+          <button class='btn btn-default graph-time' type='button' time='365'>Y</button>
+          <button class='btn btn-default graph-nav' id='zoomin'>+</button>
+          <button class='btn btn-default graph-nav' id='zoomout'>-</button>
+          <button class='btn btn-default graph-nav' id='left'><</button>
+          <button class='btn btn-default graph-nav' id='right'>></button>
         </div>   
       
-        <select id="resolution" class="btn" style="width:100px; margin-top:10px; text-align:left">
+        <select id="resolution" class="btn btn-default" style="width:100px; margin-top:10px; text-align:left">
           <option value="600">10 mins</option>
           <option value="900">15 mins</option>
           <option value="1800">30 mins</option>
         </select>
-        <button class="btn config-open" style="margin-top:10px">
+        <button class="btn btn-default config-open" style="margin-top:10px">
           <i class=" icon-wrench"></i>
         </button>
       </div>
@@ -58,34 +58,34 @@ textarea {
     <div style="float:left; width:350px">
         <h4>Solar & Battery</h4>
 
-        <div class="input-prepend">
-          <span class="add-on" style="width:140px">Existing solar</span>
-          <span class="add-on"><input type="checkbox" v-model="input.solar_existing" style="width:120px" /></span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">Existing solar</span>
+          <span class="input-group-text"><input type="checkbox" v-model="input.solar_existing" style="width:120px" /></span>
         </div><br>
         
 
-        <div class="input-prepend">
-          <span class="add-on" style="width:140px">Solar capacity</span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">Solar capacity</span>
           <input type="text" v-model.number="input.solar_capacity" style="width:120px" />
         </div><br>
         
-        <div class="input-prepend">
-          <span class="add-on" style="width:140px">Capacity (Useable)</span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">Capacity (Useable)</span>
           <input type="text" v-model.number="input.battery_capacity" style="width:120px" />
         </div><br>
         
-        <div class="input-prepend">
-          <span class="add-on" style="width:140px">Max charge rate</span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">Max charge rate</span>
           <input type="text" v-model.number="input.battery_max_charge_rate" style="width:120px" />
         </div><br>
 
-        <div class="input-prepend">
-          <span class="add-on" style="width:140px">Max discharge rate</span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">Max discharge rate</span>
           <input type="text" v-model.number="input.battery_max_discharge_rate" style="width:120px" />
         </div><br>
 
-        <div class="input-prepend">
-          <span class="add-on" style="width:140px">Round trip efficiency</span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">Round trip efficiency</span>
           <input type="text" v-model.number="input.battery_round_trip_efficiency" style="width:120px" />
         </div><br>
     
@@ -94,41 +94,41 @@ textarea {
     <div style="float:left; width:350px">
         <h4>Off-peak charging period</h4>
 
-        <div class="input-prepend input-append">
-          <span class="add-on" style="width:140px">Enable</span>
-          <span class="add-on" style="width:79px">
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">Enable</span>
+          <span class="input-group-text" style="width:79px">
           <input type="checkbox" v-model="input.offpeak_enable"  />
           </span>
         </div><br>
 
-        <div class="input-prepend input-append">
-          <span class="add-on" style="width:140px">Winter SOC start</span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">Winter SOC start</span>
           <input type="text" v-model.number="input.battery_offpeak_soc_start_winter" style="width:50px" />
-          <span class="add-on">%</span>
+          <span class="input-group-text">%</span>
         </div><br>
 
-        <div class="input-prepend input-append">
-          <span class="add-on" style="width:140px">Winter SOC end</span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">Winter SOC end</span>
           <input type="text" v-model.number="input.battery_offpeak_soc_target_winter" style="width:50px" />
-          <span class="add-on">%</span>
+          <span class="input-group-text">%</span>
         </div><br>
         
-        <div class="input-prepend input-append">
-          <span class="add-on" style="width:140px">Summer SOC start</span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">Summer SOC start</span>
           <input type="text" v-model.number="input.battery_offpeak_soc_start_summer" style="width:50px" />
-          <span class="add-on">%</span>
+          <span class="input-group-text">%</span>
         </div><br>
 
-        <div class="input-prepend input-append">
-          <span class="add-on" style="width:140px">Summer SOC end</span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">Summer SOC end</span>
           <input type="text" v-model.number="input.battery_offpeak_soc_target_summer" style="width:50px" />
-          <span class="add-on">%</span>
+          <span class="input-group-text">%</span>
         </div><br>
 
-        <div class="input-prepend input-append">
-          <span class="add-on" style="width:140px">Minimum battery SOC</span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">Minimum battery SOC</span>
           <input type="text" v-model.number="input.battery_minimum_soc" style="width:50px" />
-          <span class="add-on">%</span>
+          <span class="input-group-text">%</span>
         </div><br>
     
     </div>
@@ -136,38 +136,38 @@ textarea {
     <div style="float:left">
         <h4>Tariff & Costs</h4>
         
-        <div class="input-prepend">
-          <span class="add-on" style="width:140px">Off-peak start</span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">Off-peak start</span>
           <input type="text" v-model.number="input.offpeak_start" style="width:120px" />
         </div><br>
         
-        <div class="input-prepend">
-          <span class="add-on" style="width:140px">Off-peak end</span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">Off-peak end</span>
           <input type="text" v-model.number="input.offpeak_end" style="width:120px" />
         </div><br>
 
-        <div class="input-prepend">
-          <span class="add-on" style="width:140px">Peak unit rate</span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">Peak unit rate</span>
           <input type="text" v-model.number="input.peak_unit_rate" style="width:120px" />
         </div><br>
         
-        <div class="input-prepend">
-          <span class="add-on" style="width:140px">Off-peak unit rate</span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">Off-peak unit rate</span>
           <input type="text" v-model.number="input.offpeak_unit_rate" style="width:120px" />
         </div><br>
 
-        <div class="input-prepend">
-          <span class="add-on" style="width:140px">Export unit rate</span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">Export unit rate</span>
           <input type="text" v-model.number="input.export_unit_rate" style="width:120px" />
         </div><br>
 
-        <div class="input-prepend">
-          <span class="add-on" style="width:140px">System cost (£)</span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">System cost (£)</span>
           <input type="text" v-model.number="input.system_cost" style="width:120px" />
         </div><br>
 
-        <div class="input-prepend">
-          <span class="add-on" style="width:140px">System lifespan (years)</span>
+        <div class="input-group">
+          <span class="input-group-text" style="width:140px">System lifespan (years)</span>
           <input type="text" v-model.number="input.system_lifespan" style="width:120px" />
         </div><br>
     

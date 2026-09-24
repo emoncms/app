@@ -2,7 +2,7 @@
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/light.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/Views/css/light.css"); ?>
 <link href="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 
 <link rel="stylesheet" href="<?php echo $path; ?>Lib/fonts/montserrat/montserrat.css?v=<?php echo $v; ?>" />
@@ -14,7 +14,7 @@ global $path, $session, $v;
 
 
 <?php $v += 8; ?>
-<link href="<?php echo $path; ?>Modules/app/apps/OpenEnergyMonitor/octopus/tariff_explorer.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/apps/OpenEnergyMonitor/octopus/tariff_explorer.css"); ?>
 
 <div style="font-family: Montserrat, Veranda, sans-serif;">
     <div id="app-block" style="display:none">
@@ -98,24 +98,24 @@ global $path, $session, $v;
                             <tbody id="octopus_totals"></tbody>
                         </table>
 
-                        <div class="input-prepend input-append" style="padding-right:5px">
-                            <span class="add-on" style="width:50px"><?php echo tr('Start') ?></span>
+                        <div class="input-group" style="padding-right:5px">
+                            <span class="input-group-text" style="width:50px"><?php echo tr('Start') ?></span>
                             <span id="datetimepicker1">
                                 <input id="request-start" data-format="dd/MM/yyyy hh:mm:ss" type="text" style="width:140px" />
-                                <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
+                                <span class="input-group-text"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
                             </span>
                         </div>
 
-                        <div class="input-prepend input-append" style="padding-right:5px">
-                            <span class="add-on" style="width:50px"><?php echo tr('End') ?></span>
+                        <div class="input-group" style="padding-right:5px">
+                            <span class="input-group-text" style="width:50px"><?php echo tr('End') ?></span>
                             <span id="datetimepicker2">
                                 <input id="request-end" data-format="dd/MM/yyyy hh:mm:ss" type="text" style="width:140px" />
-                                <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
+                                <span class="input-group-text"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
                             </span>
                         </div>
 
-                        <button class="btn" style="float:right" id="download-csv">Download CSV</button>
-                        <button class="btn hide" style="float:right" id="show_profile">Show Profile</button>
+                        <button class="btn btn-default" style="float:right" id="download-csv">Download CSV</button>
+                        <button class="btn btn-default hide" style="float:right" id="show_profile">Show Profile</button>
                         <div id="use_meter_kwh_hh_bound" class="hide"><input id="use_meter_kwh_hh" type="checkbox" checked /> <span style="font-size:12px">Show energy and costs based on Octopus smart meter data where available</span>
                             <div id="meter_kwh_hh_comparison" style="font-size:12px; padding-left:22px"></div>
                         </div>

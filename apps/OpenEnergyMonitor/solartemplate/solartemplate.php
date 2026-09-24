@@ -2,7 +2,7 @@
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/Views/css/dark.css"); ?>
 <?php load_js("Modules/feed/feed.js"); ?>
 
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
@@ -33,16 +33,16 @@ global $path, $session, $v;
 <!-- Top navigation bar -->
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="viewpower active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo tr('Power View') ?>">
+        <li><button class="viewpower active btn btn-lg btn-link myelectric-view-cost" title="<?php echo tr('Power View') ?>">
                 <span class="d-xs-none"><?php echo tr("Pwr") ?></span>
                 <span class="d-none d-xs-inline-block"><?php echo tr("Power") ?></span>
             </button></li>
     </ul>
-    <ul class="text-right nav nav-pills mb-0">
-        <li><button class="btn btn-large btn-link btn-inverse config-open" title="<?php echo tr('Edit') ?>"><svg class="icon">
+    <ul class="text-end nav nav-pills mb-0">
+        <li><button class="btn btn-lg btn-link config-open" title="<?php echo tr('Edit') ?>"><svg class="icon">
                     <use xlink:href="#icon-wrench"></use>
                 </svg></button></li>
-        <li><button class="btn btn-large btn-link btn-inverse config-close hide" title="<?php echo tr('Close') ?>"><svg class="icon">
+        <li><button class="btn btn-lg btn-link config-close hide" title="<?php echo tr('Close') ?>"><svg class="icon">
                     <use xlink:href="#icon-close"></use>
                 </svg></button></li>
     </ul>

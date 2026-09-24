@@ -29,6 +29,7 @@
     margin:2px;
     padding:2px;
     width:10px;
+    box-sizing: content-box;
     background-color:#aaa;
 }
 

@@ -2,7 +2,7 @@
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/Views/css/dark.css"); ?>
 <?php load_js("Modules/feed/feed.js"); ?>
 
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
@@ -82,14 +82,14 @@ global $path, $session, $v;
 <!-- Top navigation bar -->
 <nav id="buttons" class="d-flex justify-content-between">
     <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="viewpower active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo tr('Power View') ?>">
+        <li><button class="viewpower active btn btn-lg btn-link myelectric-view-cost" title="<?php echo tr('Power View') ?>">
                 <span class="d-xs-none"><?php echo tr("Pwr") ?></span>
                 <span class="d-none d-xs-inline-block"><?php echo tr("Air change rate calculator from CO2 data") ?></span>
             </button></li>
     </ul>
-    <ul class="text-right nav nav-pills mb-0">
-        <li><button class="btn btn-large btn-link btn-inverse config-open" title="<?php echo tr('Edit') ?>"><span class="svg-icon-wrench"></span></button></li>
-        <li><button class="btn btn-large btn-link btn-inverse config-close hide" title="<?php echo tr('Close') ?>"><span class="svg-icon-close"></span></button></li>
+    <ul class="text-end nav nav-pills mb-0">
+        <li><button class="btn btn-lg btn-link config-open" title="<?php echo tr('Edit') ?>"><span class="svg-icon-wrench"></span></button></li>
+        <li><button class="btn btn-lg btn-link config-close hide" title="<?php echo tr('Close') ?>"><span class="svg-icon-close"></span></button></li>
     </ul>
 </nav>
 
@@ -102,18 +102,18 @@ global $path, $session, $v;
 -->
 
     <div class="btn-group" style="float:right">
-      <button class="btn" id="decay_mode">Decay</button>
+      <button class="btn btn-default" id="decay_mode">Decay</button>
       <button class="btn btn-primary" id="average_mode">Average</button>
     </div>
 
-    <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start d-flex justify-content-stretch btn-group">
-        <button class='visnav time btn btn-inverse btn-link btn-large py-1 px-2' time='24'><?php echo tr('D') ?></button>
-        <button class='visnav time btn btn-inverse btn-link btn-large py-1 px-2' time='168'><?php echo tr('W') ?></button>
-        <button class='visnav time btn btn-inverse btn-link btn-large py-1 px-2' time='720'><?php echo tr('M') ?></button>
-        <button id='zoomin' class='visnav btn btn-inverse btn-link btn-large py-1 px-2' >+</button>
-        <button id='zoomout' class='visnav btn btn-inverse btn-link btn-large py-1 px-2' >-</button>
-        <button id='left' class='visnav btn btn-inverse btn-link btn-large py-1 px-2' >&lt;</button>
-        <button id='right' class='visnav btn btn-inverse btn-link btn-large py-1 px-2' >&gt;</button>
+    <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start justify-content-stretch btn-group">
+        <button class='visnav time btn btn-link btn-lg py-1 px-2' time='24'><?php echo tr('D') ?></button>
+        <button class='visnav time btn btn-link btn-lg py-1 px-2' time='168'><?php echo tr('W') ?></button>
+        <button class='visnav time btn btn-link btn-lg py-1 px-2' time='720'><?php echo tr('M') ?></button>
+        <button id='zoomin' class='visnav btn btn-link btn-lg py-1 px-2' >+</button>
+        <button id='zoomout' class='visnav btn btn-link btn-lg py-1 px-2' >-</button>
+        <button id='left' class='visnav btn btn-link btn-lg py-1 px-2' >&lt;</button>
+        <button id='right' class='visnav btn btn-link btn-lg py-1 px-2' >&gt;</button>
     </div>
 
     <div id="graph_bound" class="chart-placeholder">

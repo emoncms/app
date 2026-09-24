@@ -2,7 +2,7 @@
     defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
-<link href="<?php echo $path; ?>Modules/app/Views/css/dark.css?v=<?php echo $v; ?>" rel="stylesheet">
+<?php load_css("Modules/app/Views/css/dark.css"); ?>
 <style>
 /* mobile version offset is default */
 .chart-placeholder {
@@ -56,19 +56,19 @@
 
     <nav id="buttons" class="d-flex justify-content-between">
         <ul id="tabs" class="nav nav-pills mb-0">
-            <li><button class="viewpower active btn btn-large btn-link btn-inverse myelectric-view-cost" title="<?php echo tr('Power View') ?>">
+            <li><button class="viewpower active btn btn-lg btn-link myelectric-view-cost" title="<?php echo tr('Power View') ?>">
                 <span class="d-xs-none"><?php echo tr("Pwr") ?></span>
                 <span class="d-none d-xs-inline-block"><?php echo tr("Power") ?></span>
             </button></li>
-            <li><button class="viewhistory btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo tr('View History') ?>">
+            <li><button class="viewhistory btn btn-lg btn-link myelectric-view-kwh" title="<?php echo tr('View History') ?>">
                 <span class="d-xs-none"><?php echo tr("Hist") ?></span>
                 <span class="d-none d-xs-inline-block"><?php echo tr("History") ?></span>
             </button></li>
-            <li><button class="balanceline btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo tr('Show Balance') ?>">
+            <li><button class="balanceline btn btn-lg btn-link myelectric-view-kwh" title="<?php echo tr('Show Balance') ?>">
                 <span class="d-xs-none"><?php echo tr("Bal") ?></span>
                 <span class="d-none d-xs-inline-block"><?php echo tr("Balance") ?></span>
             </button></li>
-            <li><button id='show-all' class="hide bargraph-viewall btn btn-large btn-link btn-inverse myelectric-view-kwh" title="<?php echo tr('Show All') ?>">
+            <li><button id='show-all' class="hide bargraph-viewall btn btn-lg btn-link myelectric-view-kwh" title="<?php echo tr('Show All') ?>">
                 <span class="d-xs-none"><?php echo tr("All") ?></span>
                 <span class="d-none d-xs-inline-block"><?php echo tr("Show All") ?></span>
             </button></li>
