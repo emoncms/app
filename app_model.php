@@ -107,10 +107,14 @@ class AppConfig
         }
 
         $apps = array();
-        $result = $this->mysqli->query("SELECT `id`, `app`, `name`, `public` FROM app WHERE `userid`='$userid' ORDER BY `id` ASC");
+        $stmt = $this->mysqli->prepare("SELECT `id`, `app`, `name`, `public` FROM app WHERE `userid`=? ORDER BY `id` ASC");
+        $stmt->bind_param("i", $userid);
+        $stmt->execute();
+        $result = $stmt->get_result();
         while ($row = $result->fetch_object()) {
             $apps[] = $row;
         }
+        $stmt->close();
         return $apps;
     }
     
@@ -157,11 +161,16 @@ class AppConfig
     public function get_app_by_id($id) {
         $id = (int) $id;
 
-        $result = $this->mysqli->query("SELECT `id`, `userid`, `app`, `name`, `public`, `config` FROM app WHERE `id`='$id'");
+        $stmt = $this->mysqli->prepare("SELECT `id`, `userid`, `app`, `name`, `public`, `config` FROM app WHERE `id`=?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
         if ($result && $row = $result->fetch_object()) {
+            $stmt->close();
             $row->config = json_decode($row->config);
             return $row;
         } else {
+            $stmt->close();
             return false;
         }
     }
@@ -201,10 +210,15 @@ class AppConfig
         $userid = (int) $userid;
         $id = (int) $id;
 
-        $result = $this->mysqli->query("SELECT `id` FROM app WHERE `userid`='$userid' AND `id`='$id'");
+        $stmt = $this->mysqli->prepare("SELECT `id` FROM app WHERE `userid`=? AND `id`=?");
+        $stmt->bind_param("ii", $userid, $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
         if ($result && $row = $result->fetch_object()) {
+            $stmt->close();
             return $row->id;
         } else {
+            $stmt->close();
             return false;
         }
     }
