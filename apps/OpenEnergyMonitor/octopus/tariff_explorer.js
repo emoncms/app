@@ -177,16 +177,8 @@ var profile_cost = {};
 config.init();
 
 function init() {
-    $("#datetimepicker1").datetimepicker({
-        language: 'en-EN'
-    });
-
-    $("#datetimepicker2").datetimepicker({
-        language: 'en-EN'
-    });
-
-    datetimepicker1 = $('#datetimepicker1').data('datetimepicker');
-    datetimepicker2 = $('#datetimepicker2').data('datetimepicker');
+    datetimepicker1 = DateTimePicker.attach(document.getElementById('request-start'), { onChange: set_view_start });
+    datetimepicker2 = DateTimePicker.attach(document.getElementById('request-end'), { onChange: set_view_end });
 }
 
 function show() {
@@ -333,14 +325,8 @@ function graph_load() {
     view.start = Math.ceil(view.start / intervalms) * intervalms;
     view.end = Math.ceil(view.end / intervalms) * intervalms;
 
-    if (datetimepicker1) {
-        datetimepicker1.setLocalDate(new Date(view.start));
-        datetimepicker1.setEndDate(new Date(view.end));
-    }
-    if (datetimepicker2) {
-        datetimepicker2.setLocalDate(new Date(view.end));
-        datetimepicker2.setStartDate(new Date(view.start));
-    }
+    if (datetimepicker1) datetimepicker1.setDate(new Date(view.start));
+    if (datetimepicker2) datetimepicker2.setDate(new Date(view.end));
 
     // Determine if required solar PV feeds are available
     if (feeds["use_kwh"] != undefined && feeds["solar_kwh"] != undefined) {
@@ -1107,19 +1093,6 @@ function download_data(filename, data) {
     }
 }
 
-function parseTimepickerTime(timestr) {
-    var tmp = timestr.split(" ");
-    if (tmp.length != 2) return false;
-
-    var date = tmp[0].split("/");
-    if (date.length != 3) return false;
-
-    var time = tmp[1].split(":");
-    if (time.length != 3) return false;
-
-    return new Date(date[2], date[1] - 1, date[0], time[0], time[1], time[2], 0).getTime() / 1000;
-}
-
 function getdataremote(id, start, end, interval) {
     var data = [];
     $.ajax({
@@ -1457,36 +1430,33 @@ $("#download-csv").click(function() {
     download_data("tariff-data.csv", csv.join("\n"));
 });
 
-$('#datetimepicker1').on("changeDate", function(e) {
-    var timewindowStart = parseTimepickerTime($("#request-start").val());
-    if (!timewindowStart) {
+// Start and end from the manual date-time pickers
+function set_view_start(date) {
+    if (!date) {
         alert("Please enter a valid start date.");
-        return false;
+        return;
     }
-    if (timewindowStart * 1000 >= view.end) {
+    if (date.getTime() >= view.end) {
         alert("Start date must be further back in time than end date.");
-        return false;
+        return;
     }
-
-    view.start = timewindowStart * 1000;
+    view.start = date.getTime();
     graph_load();
     graph_draw();
     $(".time-select").val("C");
-});
+}
 
-$('#datetimepicker2').on("changeDate", function(e) {
-    var timewindowEnd = parseTimepickerTime($("#request-end").val());
-    if (!timewindowEnd) {
+function set_view_end(date) {
+    if (!date) {
         alert("Please enter a valid end date.");
-        return false;
+        return;
     }
-    if (view.start >= timewindowEnd * 1000) {
+    if (view.start >= date.getTime()) {
         alert("Start date must be further back in time than end date.");
-        return false;
+        return;
     }
-
-    view.end = timewindowEnd * 1000;
+    view.end = date.getTime();
     graph_load();
     graph_draw();
     $(".time-select").val("C");
-});
+}

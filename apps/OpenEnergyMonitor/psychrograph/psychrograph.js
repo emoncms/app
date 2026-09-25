@@ -424,10 +424,8 @@ $("#psychrograph, #givonigraph").each(function () { this.addEventListener("ploth
 // ----------------------------------------------------------------------
 // Manual date-time range nav (mirrors My Electric Flow)
 // ----------------------------------------------------------------------
-$("#datetimepicker1").datetimepicker({ language: 'en-EN' });
-$("#datetimepicker2").datetimepicker({ language: 'en-EN' });
-datetimepicker1 = $('#datetimepicker1').data('datetimepicker');
-datetimepicker2 = $('#datetimepicker2').data('datetimepicker');
+datetimepicker1 = DateTimePicker.attach(document.getElementById('request-start'), { buttonClass: 'add-on', onChange: set_view_start });
+datetimepicker2 = DateTimePicker.attach(document.getElementById('request-end'), { buttonClass: 'add-on', onChange: set_view_end });
 
 $("#time-manual-open").click(function () {
     update_time_pickers();
@@ -439,30 +437,25 @@ $("#time-manual-close").click(function () {
     $("#graph-nav").removeClass("d-none");
 });
 
-$('#datetimepicker1').on("changeDate", function () {
-    var t = parse_timepicker_time($("#request-start").val());
-    if (!t) { alert("Please enter a valid start date."); return false; }
-    if (t * 1000 >= view.end) { alert("Start date must be before the end date."); return false; }
-    view.start = t * 1000;
+
+// Start and end from the manual date-time pickers
+function set_view_start(date) {
+    if (!date) { alert("Please enter a valid start date."); return; }
+    if (date.getTime() >= view.end) { alert("Start date must be before the end date."); return; }
+    view.start = date.getTime();
     load();
-});
-$('#datetimepicker2').on("changeDate", function () {
-    var t = parse_timepicker_time($("#request-end").val());
-    if (!t) { alert("Please enter a valid end date."); return false; }
-    if (view.start >= t * 1000) { alert("End date must be after the start date."); return false; }
-    view.end = t * 1000;
+}
+
+function set_view_end(date) {
+    if (!date) { alert("Please enter a valid end date."); return; }
+    if (view.start >= date.getTime()) { alert("End date must be after the start date."); return; }
+    view.end = date.getTime();
     load();
-});
+}
 
 function update_time_pickers() {
-    if (datetimepicker1) {
-        datetimepicker1.setLocalDate(new Date(view.start));
-        datetimepicker1.setEndDate(new Date(view.end));
-    }
-    if (datetimepicker2) {
-        datetimepicker2.setLocalDate(new Date(view.end));
-        datetimepicker2.setStartDate(new Date(view.start));
-    }
+    if (datetimepicker1) datetimepicker1.setDate(new Date(view.start));
+    if (datetimepicker2) datetimepicker2.setDate(new Date(view.end));
 }
 
 // ----------------------------------------------------------------------

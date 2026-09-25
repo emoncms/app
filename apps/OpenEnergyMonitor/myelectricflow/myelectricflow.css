@@ -482,13 +482,13 @@ body {
 
 .ctrl-group select:focus { border-color: #44b3e2; }
 
-/* datetimepicker wrapper span + text input + calendar icon */
+/* Date-time picker: text input, then the calendar button in its host span */
 .ctrl-group > span {
     display: inline-flex;
     align-items: stretch;
 }
 
-.ctrl-group input[type="text"] {
+.ctrl-group > input[type="text"] {
     background-color: #2e2e2e;
     color: #ccc;
     border: 1px solid #444;
@@ -503,7 +503,7 @@ body {
     margin: 0;
 }
 
-.ctrl-group input[type="text"]:focus { border-color: #44b3e2; }
+.ctrl-group > input[type="text"]:focus { border-color: #44b3e2; }
 
 .ctrl-group .add-on {
     background-color: #2e2e2e;

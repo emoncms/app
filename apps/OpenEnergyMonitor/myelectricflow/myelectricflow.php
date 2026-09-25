@@ -6,8 +6,8 @@ load_js("Modules/feed/feed.js");
 load_js("Lib/js/flot-5.1.0.mod.min.js");
 load_js("Modules/app/Lib/vis.helper.js");
 load_js("Modules/app/Lib/timeseries.js");
-load_js("Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js");
-load_css("Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css");
+load_js("Lib/js/DateTimePicker.js");
+load_css("Theme/css/datetimepicker.css");
 load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css");
 ?>
 
@@ -91,17 +91,11 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
         <div id="graph-nav-manual" class="visnavblock mb-2 d-flex justify-content-start align-items-center d-none">
             <span class="ctrl-group">
                 <span class="ctrl-label"><?php echo tr('Start') ?></span>
-                <span id="datetimepicker1">
-                    <input id="request-start" data-format="dd/MM/yyyy hh:mm:ss" type="text" />
-                    <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
-                </span>
+                <input id="request-start" type="text" placeholder="YYYY-MM-DD HH:MM:SS" />
             </span>
             <span class="ctrl-group">
                 <span class="ctrl-label"><?php echo tr('End') ?></span>
-                <span id="datetimepicker2">
-                    <input id="request-end" data-format="dd/MM/yyyy hh:mm:ss" type="text" />
-                    <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
-                </span>
+                <input id="request-end" type="text" placeholder="YYYY-MM-DD HH:MM:SS" />
             </span>
             <button id='time-manual-close' class='visnav app-btn' title="<?php echo tr('Done') ?>"><i class="icon-ok icon-white"></i></button>
         </div>

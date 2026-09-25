@@ -3,14 +3,14 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 ?>
 <?php load_css("Modules/app/Views/css/light.css"); ?>
-<link href="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+<?php load_css("Theme/css/datetimepicker.css"); ?>
 
 <link rel="stylesheet" href="<?php echo $path; ?>Lib/fonts/montserrat/montserrat.css?v=<?php echo $v; ?>" />
 <?php load_js("Modules/feed/feed.js"); ?>
 
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
 <?php load_js("Modules/app/Lib/vis.helper.js"); ?>
-<?php load_js("Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"); ?>
+<?php load_js("Lib/js/DateTimePicker.js"); ?>
 
 
 <?php $v += 8; ?>
@@ -100,18 +100,12 @@ global $path, $session, $v;
 
                         <div class="input-group" style="padding-right:5px">
                             <span class="input-group-text" style="width:50px"><?php echo tr('Start') ?></span>
-                            <span id="datetimepicker1" class="d-flex">
-                                <input id="request-start" class="form-control" data-format="dd/MM/yyyy hh:mm:ss" type="text" style="width:154px" />
-                                <span class="input-group-text"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
-                            </span>
+                            <input id="request-start" class="form-control" type="text" style="width:154px" placeholder="YYYY-MM-DD HH:MM:SS" />
                         </div>
 
                         <div class="input-group" style="padding-right:5px">
                             <span class="input-group-text" style="width:50px"><?php echo tr('End') ?></span>
-                            <span id="datetimepicker2" class="d-flex">
-                                <input id="request-end" class="form-control" data-format="dd/MM/yyyy hh:mm:ss" type="text" style="width:154px" />
-                                <span class="input-group-text"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
-                            </span>
+                            <input id="request-end" class="form-control" type="text" style="width:154px" placeholder="YYYY-MM-DD HH:MM:SS" />
                         </div>
 
                         <button class="btn btn-default" style="float:right" id="download-csv">Download CSV</button>
