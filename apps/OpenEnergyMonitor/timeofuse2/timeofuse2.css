@@ -62,9 +62,10 @@
 
 #schedule-builder .sched-table select,
 #schedule-builder .sched-table input {
-    height:34px; box-sizing:border-box; margin:0; padding:4px 8px;
-    border:1px solid #ccc; border-radius:4px; font-size:15px; background:#fff;
+    height:34px; box-sizing:border-box; margin:0; padding:4px 8px; line-height:24px;
+    border:1px solid #ccc; border-radius:4px; font-size:15px; background-color:#fff;
 }
+#schedule-builder .sched-table select { padding-right:24px; }
 #schedule-builder .sched-table select.sched-time { width:110px; }
 #schedule-builder .sched-table select.sched-tariff { width:100%; max-width:240px; }
 #schedule-builder .sched-table input.tariff-name { width:100%; max-width:240px; }

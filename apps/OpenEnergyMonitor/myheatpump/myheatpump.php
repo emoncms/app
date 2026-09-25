@@ -203,14 +203,14 @@ global $path, $session, $v;
                 <div class="input-group" style="margin-top:10px; margin-bottom:0px">
                   <span class="input-group-text">Valid COP</span>
                   <span class="input-group-text">Min</span>
-                  <input type="text" style="width:50px" id="inst_cop_min" value="1.0">
+                  <input type="text" class="form-control" style="width:64px" id="inst_cop_min" value="1.0">
                   <span class="input-group-text">Max</span>
-                  <input type="text" style="width:50px" id="inst_cop_max" value="8.0">
+                  <input type="text" class="form-control" style="width:64px" id="inst_cop_max" value="8.0">
                 </div>
 
                 <div class="input-group" style="margin-top:10px; margin-bottom:0px">
                   <span class="input-group-text">Moving average</span>
-                  <select id="inst_cop_mv_av_dp" style="width:100px">
+                  <select id="inst_cop_mv_av_dp" class="form-select" style="width:100px">
                     <option value="0" selected>Disabled</option>
                     <option value="3">3 points</option>
                     <option value="5">5 points</option>
@@ -227,19 +227,19 @@ global $path, $session, $v;
               <div id="carnot_sim_options" style="display:none">
                 <div class="input-group" style="margin-top:5px; margin-bottom:0px">
                   <span class="input-group-text">Condensing offset (K)</span>
-                  <input type="text" style="width:50px" id="condensing_offset" value="2">
+                  <input type="text" class="form-control" style="width:64px" id="condensing_offset" value="2">
                 </div>
                 <div class="input-group" style="margin-top:5px; margin-bottom:0px">
                   <span class="input-group-text">Evaporator offset (K)</span>
-                  <input type="text" style="width:50px" id="evaporator_offset" value="-6">
+                  <input type="text" class="form-control" style="width:64px" id="evaporator_offset" value="-6">
                 </div>
                 <div id="heatpump_factor_bound" class="input-group" style="margin-top:5px; margin-bottom:0px">
                   <span class="input-group-text">Heatpump factor</span>
-                  <input type="text" style="width:50px" id="heatpump_factor" value="0.47">
+                  <input type="text" class="form-control" style="width:64px" id="heatpump_factor" value="0.47">
                 </div>
                 <div id="fixed_outside_temperature_bound" class="input-group" style="margin-top:5px; margin-bottom:0px">
                   <span class="input-group-text">Fixed outside temperature (C)</span>
-                  <input type="text" style="width:50px" id="fixed_outside_temperature" value="6.0">
+                  <input type="text" class="form-control" style="width:64px" id="fixed_outside_temperature" value="6.0">
                 </div>
               </div>
 
@@ -264,19 +264,19 @@ global $path, $session, $v;
               <div id="emitter_spec_options" style="margin-top:10px; display:none">
                 <p>Make sure there is at least a short period of steady state running in the window.<br>Heat output spikes after hot water cycles can skew results.</p>
                 <div class="input-group" style="margin-top:5px">
-                  <input type="text" style="width:50px" id="kW_at_50" disabled>
+                  <input type="text" class="form-control" style="width:64px" id="kW_at_50" disabled>
                   <span class="input-group-text">kW @ DT50</span>
                   <span class="input-group-text">Fix <input type="checkbox" id="fix_kW_at_50"></span>
                 </div>
                 <div class="input-group" style="margin-top:5px">
-                  <input type="text" style="width:50px" id="system_volume" disabled>
+                  <input type="text" class="form-control" style="width:64px" id="system_volume" disabled>
                   <span class="input-group-text">Litres</span>
                 </div>
                 <br>
                 <div class="input-group" style="margin-top:5px">
                   <span class="input-group-text">Room temperature</span>
 
-                  <input type="text" style="width:50px" id="room_temperature" disabled>
+                  <input type="text" class="form-control" style="width:64px" id="room_temperature" disabled>
                   <span class="input-group-text">&deg;C</span>
                   <span class="input-group-text">Manual <input type="checkbox" id="manual_roomT_enable"></span>
                 </div>
@@ -290,12 +290,12 @@ global $path, $session, $v;
                   <p style="font-size:0.9em; color:#555;"><i>Ensure the selected window only shows natural DHW temperature decay (no heating cycles, no DHW use such as showering). Cylinder volume and environmental temperature are required to compute standby heat loss coefficient, which only works if DHW temperature is measured in °C and not % Charge. </i></p>
                   <div class="input-group" style="margin-top:5px; margin-bottom:5px;">
                     <span class="input-group-text">Cylinder Volume (V<sub>cyl</sub>)</span>
-                    <input type="text" style="width:60px" id="cylinder_volume" value="200">
+                    <input type="text" class="form-control" style="width:74px" id="cylinder_volume" value="200">
                     <span class="input-group-text">L</span>
                   </div>
                   <div class="input-group" style="margin-top:5px; margin-bottom:5px;">
                     <span class="input-group-text">Environment Temp (T<sub>env</sub>)</span>
-                    <input type="text" style="width:50px" id="env_temperature" value="15">
+                    <input type="text" class="form-control" style="width:64px" id="env_temperature" value="15">
                     <span class="input-group-text">°C</span>
                   </div>
                   <div style="margin-top:10px;">
@@ -311,7 +311,7 @@ global $path, $session, $v;
               <div id="configure_standby_options" style="display:none">
                 <div class="input-group" style="margin-top:10px; margin-bottom:0px;">
                   <span class="input-group-text">Starting power</span>
-                  <input type="text" style="width:50px" id="starting_power" value="150">
+                  <input type="text" class="form-control" style="width:64px" id="starting_power" value="150">
                   <span class="input-group-text">W</span>
                 </div>
               </div>

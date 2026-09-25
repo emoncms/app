@@ -38,7 +38,7 @@ padding:10px;
                     </div>
                 </div>
                 <div class="graph">
-                    <label for="tariff">Tariff</label> <select id="tariff" name="tariff">
+                    <label for="tariff" class="form-label">Tariff</label> <select id="tariff" name="tariff" class="form-select input-220 mb-2">
                     </select>
                 </div>
             </div>

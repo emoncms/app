@@ -62,7 +62,7 @@ global $path, $session, $v;
                         <span class="bluenav" id="right">&gt;</span>
                         <span class="bluenav" id="left">&lt;</span>
 
-                        <select class="time-select">
+                        <select class="form-select input-165 time-select">
                             <option value='8760'>Previous 365 days</option>
                             <option value='1440'>Previous 60 days</option>
                             <option value='720'>Previous 30 days</option>
@@ -100,16 +100,16 @@ global $path, $session, $v;
 
                         <div class="input-group" style="padding-right:5px">
                             <span class="input-group-text" style="width:50px"><?php echo tr('Start') ?></span>
-                            <span id="datetimepicker1">
-                                <input id="request-start" data-format="dd/MM/yyyy hh:mm:ss" type="text" style="width:140px" />
+                            <span id="datetimepicker1" class="d-flex">
+                                <input id="request-start" class="form-control" data-format="dd/MM/yyyy hh:mm:ss" type="text" style="width:154px" />
                                 <span class="input-group-text"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
                             </span>
                         </div>
 
                         <div class="input-group" style="padding-right:5px">
                             <span class="input-group-text" style="width:50px"><?php echo tr('End') ?></span>
-                            <span id="datetimepicker2">
-                                <input id="request-end" data-format="dd/MM/yyyy hh:mm:ss" type="text" style="width:140px" />
+                            <span id="datetimepicker2" class="d-flex">
+                                <input id="request-end" class="form-control" data-format="dd/MM/yyyy hh:mm:ss" type="text" style="width:154px" />
                                 <span class="input-group-text"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
                             </span>
                         </div>

@@ -26,9 +26,9 @@
 
                     <!-- Input text box to set the node name of the feeds to be generated -->
                     <div style="margin-bottom:12px;">
-                        <label style="font-size:13px; color:#aaa;"><b>Feed node:</b></label>
+                        <label class="form-label" style="font-size:13px; color:#aaa;"><b>Feed node:</b></label>
                         <div class="input-group">
-                        <input type="text" v-model="autogen_node" style="width:200px" placeholder="Enter feed node name">
+                        <input type="text" class="form-control" v-model="autogen_node" style="width:214px" placeholder="Enter feed node name">
                         <button class="btn btn-secondary" style="margin-top:5px" @click="setNode">
                             Set node
                         </button>
@@ -79,7 +79,7 @@
                 <div class="app-config-box">
                     <i class="status icon-ok-sign icon-app-config"></i> <b>App name (menu)</b>
                     <br><span class="app-config-info"></span>
-                    <input class="app-config-name" type="text" :value="config_name" @change="changeName">
+                    <input class="form-control app-config-name" type="text" :value="config_name" @change="changeName">
                 </div>
                 <!-- Public -->
                 <div class="app-config-box">
@@ -98,7 +98,7 @@
                         <i class="app-config-edit icon-pencil icon-app-config" style="float:right; cursor:pointer" @click="editFeed(item.key)"></i>
                         <br><span class="app-config-info">{{ item.description }}</span>
                         <div class="feed-select-div input-group" v-show="item.showSelector">
-                            <select class="feed-select" v-model="item.selectedFeedId">
+                            <select class="form-select feed-select" v-model="item.selectedFeedId">
                                 <option :value="0">Select {{ item.key }} feed:</option>
                                 <option value="auto">AUTO SELECT</option>
                                 <option value="derive" v-if="item.derivable!=undefined">DERIVE</option>
@@ -114,7 +114,7 @@
                     <template v-else-if="item.type === 'value'">
                         <i class="status icon-ok-sign icon-app-config"></i> <b>{{ item.label }}</b>
                         <br><span class="app-config-info">{{ item.description }}</span>
-                        <input class="app-config-value" type="text" :value="item.inputValue" @change="changeValue(item.key, $event.target.value)">
+                        <input class="form-control app-config-value" type="text" :value="item.inputValue" @change="changeValue(item.key, $event.target.value)">
                     </template>
                     <!-- checkbox -->
                     <template v-else-if="item.type === 'checkbox'">
@@ -125,7 +125,7 @@
                     <!-- select -->
                     <template v-else-if="item.type === 'select'">
                         <i class="status icon-ok-sign icon-white"></i> <b>{{ item.label }}</b>
-                        <select class="app-config-value" style="margin-top:5px; width:100%" :value="item.inputValue" @change="changeValue(item.key, $event.target.value)">
+                        <select class="form-select app-config-value" style="margin-top:5px; width:100%" :value="item.inputValue" @change="changeValue(item.key, $event.target.value)">
                             <option v-for="opt in item.selectOptions">{{ opt }}</option>
                         </select>
                     </template>

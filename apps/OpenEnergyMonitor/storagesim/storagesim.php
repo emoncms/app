@@ -45,7 +45,7 @@ global $path, $session, $v;
                         <td>{{gen.name}}</td>
                         <td>
                             <div class="input-group">
-                                <input type="text" v-model="gen.capacity" style="width:50px" @change="update">
+                                <input type="text" class="form-control" v-model="gen.capacity" style="width:64px" @change="update">
                                 <span class="input-group-text">kW</span>
                             </div>
                         </td>
@@ -55,7 +55,7 @@ global $path, $session, $v;
                         <td>Nuclear / geothermal<br>(non load following)</td>
                         <td>
                             <div class="input-group">
-                                <input type="text" v-model="nuclear.output" style="width:50px" @change="update">
+                                <input type="text" class="form-control" v-model="nuclear.output" style="width:64px" @change="update">
                                 <span class="input-group-text">kW</span>
                             </td>
                         <td>{{ toFixed(nuclear.kwh, 0) }} kWh ({{ toFixed(100*nuclear.capacity_factor, 1) }}%)</td>
@@ -64,7 +64,7 @@ global $path, $session, $v;
                         <td>Home solar feed</td>
                         <td>
                             <div class="input-group">
-                                <input type="text" v-model="home_solar.scale" style="width:50px" @change="update">
+                                <input type="text" class="form-control" v-model="home_solar.scale" style="width:64px" @change="update">
                                 <span class="input-group-text">%</span>
                             </td>
                         <td>{{ toFixed(home_solar.kwh, 0) }} kWh ({{ toFixed(100*home_solar.capacity_factor, 1) }}%)</td>
@@ -83,7 +83,7 @@ global $path, $session, $v;
                         <td>Direct e-fuel demand (e.g industry, shipping or aviation)</td>
                         <td>
                             <div class="input-group">
-                                <input type="text" v-model.number="consumption.efuel_demand" style="width:50px" @change="update">
+                                <input type="text" class="form-control" v-model.number="consumption.efuel_demand" style="width:64px" @change="update">
                                 <span class="input-group-text">kWh</span>
                             </div>
                         </td>
@@ -132,7 +132,7 @@ global $path, $session, $v;
                         <td>Storage capacity</td>
                         <td>
                             <div class="input-group">
-                                <input type="text" v-model.number="store1.capacity" style="width:50px" @change="update">
+                                <input type="text" class="form-control" v-model.number="store1.capacity" style="width:64px" @change="update">
                                 <span class="input-group-text">kWh</span>
                             </div>
                         </td>
@@ -141,7 +141,7 @@ global $path, $session, $v;
                         <td>SOC start</td>
                         <td>
                             <div class="input-group">
-                                <input type="text" v-model.number="store1.starting_soc" style="width:50px" @change="update">
+                                <input type="text" class="form-control" v-model.number="store1.starting_soc" style="width:64px" @change="update">
                                 <span class="input-group-text">kWh</span>
                             </div>
                         </td>
@@ -150,7 +150,7 @@ global $path, $session, $v;
                         <td>Charge efficiency</td>
                         <td>
                             <div class="input-group">
-                                <input type="text" v-model.number="store1.charge_efficiency" style="width:50px" @change="update">
+                                <input type="text" class="form-control" v-model.number="store1.charge_efficiency" style="width:64px" @change="update">
                                 <span class="input-group-text">%</span>
                             </div>
                         </td>
@@ -159,7 +159,7 @@ global $path, $session, $v;
                         <td>Discharge efficiency</td>
                         <td>
                             <div class="input-group">
-                                <input type="text" v-model.number="store1.discharge_efficiency" style="width:50px" @change="update">
+                                <input type="text" class="form-control" v-model.number="store1.discharge_efficiency" style="width:64px" @change="update">
                                 <span class="input-group-text">%</span>
                             </div>
                         </td>
@@ -168,7 +168,7 @@ global $path, $session, $v;
                         <td>Max charge rate</td>
                         <td>
                             <div class="input-group">
-                                <input type="text" v-model.number="store1.charge_max" style="width:50px" @change="update">
+                                <input type="text" class="form-control" v-model.number="store1.charge_max" style="width:64px" @change="update">
                                 <span class="input-group-text">kW</span>
                             </div>
                         </td>
@@ -177,7 +177,7 @@ global $path, $session, $v;
                         <td>Max discharge rate</td>
                         <td>
                             <div class="input-group">
-                                <input type="text" v-model.number="store1.discharge_max" style="width:50px" @change="update">
+                                <input type="text" class="form-control" v-model.number="store1.discharge_max" style="width:64px" @change="update">
                                 <span class="input-group-text">kW</span>
                             </div>
                         </td>
@@ -210,7 +210,7 @@ global $path, $session, $v;
                         <td>Storage capacity</td>
                         <td>
                             <div class="input-group">
-                                <input type="text" v-model.number="store2.capacity" style="width:50px" @change="update">
+                                <input type="text" class="form-control" v-model.number="store2.capacity" style="width:64px" @change="update">
                                 <span class="input-group-text">kWh</span>
                             </div>
                         </td>
@@ -219,7 +219,7 @@ global $path, $session, $v;
                         <td>SOC start</td>
                         <td>
                             <div class="input-group">
-                                <input type="text" v-model.number="store2.starting_soc" style="width:50px" @change="update">
+                                <input type="text" class="form-control" v-model.number="store2.starting_soc" style="width:64px" @change="update">
                                 <span class="input-group-text">kWh</span>
                             </div>
                         </td>
@@ -228,7 +228,7 @@ global $path, $session, $v;
                         <td>Charge efficiency</td>
                         <td>
                             <div class="input-group">
-                                <input type="text" v-model.number="store2.charge_efficiency" style="width:50px" @change="update">
+                                <input type="text" class="form-control" v-model.number="store2.charge_efficiency" style="width:64px" @change="update">
                                 <span class="input-group-text">%</span>
                             </div>
                         </td>
@@ -237,7 +237,7 @@ global $path, $session, $v;
                         <td>Discharge efficiency</td>
                         <td>
                             <div class="input-group">
-                                <input type="text" v-model.number="store2.discharge_efficiency" style="width:50px" @change="update">
+                                <input type="text" class="form-control" v-model.number="store2.discharge_efficiency" style="width:64px" @change="update">
                                 <span class="input-group-text">%</span>
                             </div>
                         </td>
@@ -246,7 +246,7 @@ global $path, $session, $v;
                         <td>Max charge rate</td>
                         <td>
                             <div class="input-group">
-                                <input type="text" v-model.number="store2.charge_max" style="width:50px" @change="update">
+                                <input type="text" class="form-control" v-model.number="store2.charge_max" style="width:64px" @change="update">
                                 <span class="input-group-text">kW</span>
                             </div>
                         </td>
@@ -255,7 +255,7 @@ global $path, $session, $v;
                         <td>Max discharge rate</td>
                         <td>
                             <div class="input-group">
-                                <input type="text" v-model.number="store2.discharge_max" style="width:50px" @change="update">
+                                <input type="text" class="form-control" v-model.number="store2.discharge_max" style="width:64px" @change="update">
                                 <span class="input-group-text">kW</span>
                             </div>
                         </td>

@@ -664,7 +664,7 @@ function draw_tables(total, monthly_data) {
 
     var out = "";
     out += "<tr>";
-    out += "<td><select id='tariff_A'>";
+    out += "<td><select id='tariff_A' class='form-select input-220'>";
     for (var key in tariff_options) {
         out += "<option>" + tariff_options[key] + "</option>";
     }
@@ -675,7 +675,7 @@ function draw_tables(total, monthly_data) {
     out += "</tr>";
 
     out += "<tr>";
-    out += "<td><select id='tariff_B'>";
+    out += "<td><select id='tariff_B' class='form-select input-220'>";
     for (var key in tariff_options) {
         out += "<option>" + tariff_options[key] + "</option>";
     }

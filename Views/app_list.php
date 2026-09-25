@@ -29,14 +29,14 @@ global $path;
                     <td><span class="badge bg-info">{{ app.app }}</span></td>
                     <td>
                         <span v-if="!app.editing">{{ app.name }}</span>
-                        <input v-else type="text" class="input-medium" v-model="app.editName" />
+                        <input v-else type="text" class="form-control input-165" v-model="app.editName" />
                     </td>
                     <td>
                         <span v-if="!app.editing">
                             <span class="badge rounded-pill" :class="app.public ? 'bg-success' : 'bg-secondary'">{{ app.public ? '<?php echo _("Public"); ?>' : '<?php echo _("Private"); ?>' }}</span>
                         </span>
                         <span v-else>
-                            <label class="checkbox inline" style="margin:0">
+                            <label class="d-inline-block me-2">
                                 <input type="checkbox" v-model="app.editPublic" /> <?php echo _("Public"); ?>
                             </label>
                         </span>

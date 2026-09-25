@@ -66,27 +66,27 @@ textarea {
 
         <div class="input-group">
           <span class="input-group-text" style="width:140px">Solar capacity</span>
-          <input type="text" v-model.number="input.solar_capacity" style="width:120px" />
+          <input type="text" class="form-control" v-model.number="input.solar_capacity" style="width:134px" />
         </div><br>
         
         <div class="input-group">
           <span class="input-group-text" style="width:140px">Capacity (Useable)</span>
-          <input type="text" v-model.number="input.battery_capacity" style="width:120px" />
+          <input type="text" class="form-control" v-model.number="input.battery_capacity" style="width:134px" />
         </div><br>
         
         <div class="input-group">
           <span class="input-group-text" style="width:140px">Max charge rate</span>
-          <input type="text" v-model.number="input.battery_max_charge_rate" style="width:120px" />
+          <input type="text" class="form-control" v-model.number="input.battery_max_charge_rate" style="width:134px" />
         </div><br>
 
         <div class="input-group">
           <span class="input-group-text" style="width:140px">Max discharge rate</span>
-          <input type="text" v-model.number="input.battery_max_discharge_rate" style="width:120px" />
+          <input type="text" class="form-control" v-model.number="input.battery_max_discharge_rate" style="width:134px" />
         </div><br>
 
         <div class="input-group">
           <span class="input-group-text" style="width:140px">Round trip efficiency</span>
-          <input type="text" v-model.number="input.battery_round_trip_efficiency" style="width:120px" />
+          <input type="text" class="form-control" v-model.number="input.battery_round_trip_efficiency" style="width:134px" />
         </div><br>
     
     </div>
@@ -103,31 +103,31 @@ textarea {
 
         <div class="input-group">
           <span class="input-group-text" style="width:140px">Winter SOC start</span>
-          <input type="text" v-model.number="input.battery_offpeak_soc_start_winter" style="width:50px" />
+          <input type="text" class="form-control" v-model.number="input.battery_offpeak_soc_start_winter" style="width:64px" />
           <span class="input-group-text">%</span>
         </div><br>
 
         <div class="input-group">
           <span class="input-group-text" style="width:140px">Winter SOC end</span>
-          <input type="text" v-model.number="input.battery_offpeak_soc_target_winter" style="width:50px" />
+          <input type="text" class="form-control" v-model.number="input.battery_offpeak_soc_target_winter" style="width:64px" />
           <span class="input-group-text">%</span>
         </div><br>
         
         <div class="input-group">
           <span class="input-group-text" style="width:140px">Summer SOC start</span>
-          <input type="text" v-model.number="input.battery_offpeak_soc_start_summer" style="width:50px" />
+          <input type="text" class="form-control" v-model.number="input.battery_offpeak_soc_start_summer" style="width:64px" />
           <span class="input-group-text">%</span>
         </div><br>
 
         <div class="input-group">
           <span class="input-group-text" style="width:140px">Summer SOC end</span>
-          <input type="text" v-model.number="input.battery_offpeak_soc_target_summer" style="width:50px" />
+          <input type="text" class="form-control" v-model.number="input.battery_offpeak_soc_target_summer" style="width:64px" />
           <span class="input-group-text">%</span>
         </div><br>
 
         <div class="input-group">
           <span class="input-group-text" style="width:140px">Minimum battery SOC</span>
-          <input type="text" v-model.number="input.battery_minimum_soc" style="width:50px" />
+          <input type="text" class="form-control" v-model.number="input.battery_minimum_soc" style="width:64px" />
           <span class="input-group-text">%</span>
         </div><br>
     
@@ -138,37 +138,37 @@ textarea {
         
         <div class="input-group">
           <span class="input-group-text" style="width:140px">Off-peak start</span>
-          <input type="text" v-model.number="input.offpeak_start" style="width:120px" />
+          <input type="text" class="form-control" v-model.number="input.offpeak_start" style="width:134px" />
         </div><br>
         
         <div class="input-group">
           <span class="input-group-text" style="width:140px">Off-peak end</span>
-          <input type="text" v-model.number="input.offpeak_end" style="width:120px" />
+          <input type="text" class="form-control" v-model.number="input.offpeak_end" style="width:134px" />
         </div><br>
 
         <div class="input-group">
           <span class="input-group-text" style="width:140px">Peak unit rate</span>
-          <input type="text" v-model.number="input.peak_unit_rate" style="width:120px" />
+          <input type="text" class="form-control" v-model.number="input.peak_unit_rate" style="width:134px" />
         </div><br>
         
         <div class="input-group">
           <span class="input-group-text" style="width:140px">Off-peak unit rate</span>
-          <input type="text" v-model.number="input.offpeak_unit_rate" style="width:120px" />
+          <input type="text" class="form-control" v-model.number="input.offpeak_unit_rate" style="width:134px" />
         </div><br>
 
         <div class="input-group">
           <span class="input-group-text" style="width:140px">Export unit rate</span>
-          <input type="text" v-model.number="input.export_unit_rate" style="width:120px" />
+          <input type="text" class="form-control" v-model.number="input.export_unit_rate" style="width:134px" />
         </div><br>
 
         <div class="input-group">
           <span class="input-group-text" style="width:140px">System cost (£)</span>
-          <input type="text" v-model.number="input.system_cost" style="width:120px" />
+          <input type="text" class="form-control" v-model.number="input.system_cost" style="width:134px" />
         </div><br>
 
         <div class="input-group">
           <span class="input-group-text" style="width:140px">System lifespan (years)</span>
-          <input type="text" v-model.number="input.system_lifespan" style="width:120px" />
+          <input type="text" class="form-control" v-model.number="input.system_lifespan" style="width:134px" />
         </div><br>
     
     </div>

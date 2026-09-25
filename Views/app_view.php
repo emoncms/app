@@ -115,7 +115,7 @@
             </div>
             <div class="modal-body">
                 <p>Enter a unique name for the app:<br>
-                    <input id="app-new-name" type="text" v-model="appName"></p>
+                    <input id="app-new-name" class="form-control input-220 mb-2" type="text" v-model="appName"></p>
             </div>
             <div class="modal-footer">
                 <button id="app-new-cancel" class="btn btn-default" data-bs-dismiss="modal" @click="cancelCreate">Cancel</button>

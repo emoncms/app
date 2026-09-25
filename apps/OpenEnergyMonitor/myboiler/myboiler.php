@@ -173,7 +173,7 @@ global $path, $session, $v;
                 <p>1. Select period of steady state operation where flow and return temperatures are flat</p>
 
                 <div class="input-group" style="margin-top:5px">
-                  <input type="text" style="width:50px" id="kW_at_50" disabled>
+                  <input type="text" class="form-control" style="width:64px" id="kW_at_50" disabled>
                   <span class="input-group-text">kW @ DT50</span>
                   <button class="btn btn-default" id="use_for_volume_calc">Use for volume calc</button>
                 </div>
@@ -181,7 +181,7 @@ global $path, $session, $v;
                 <p>2. Select space heating period with increasing flow and return temperatures</p>
 
                 <div class="input-group" style="margin-top:5px">
-                  <input type="text" style="width:50px" id="system_volume" disabled>
+                  <input type="text" class="form-control" style="width:64px" id="system_volume" disabled>
                   <span class="input-group-text">Litres</span>
                 </div>
               </div>
@@ -194,7 +194,7 @@ global $path, $session, $v;
               <div id="configure_standby_options" style="display:none">
                 <div class="input-group" style="margin-top:10px; margin-bottom:0px;">
                   <span class="input-group-text">Starting power</span>
-                  <input type="text" style="width:50px" id="starting_heat" value="100">
+                  <input type="text" class="form-control" style="width:64px" id="starting_heat" value="100">
                   <span class="input-group-text">W</span>
                 </div>
               </div>

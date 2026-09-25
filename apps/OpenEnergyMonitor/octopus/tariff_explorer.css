@@ -30,16 +30,16 @@
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-.time-select {
-    width: 165px;
+select.time-select {
     margin: 4px 5px 0px 0px;
     float: right;
     background-color: #44b3e2;
     color: #fff;
+    --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
 }
 
 @media(max-width: 610px) {
-    .time-select {
+    select.time-select {
         margin: 4px 0px 0px 5px;
         float: none;
     }
@@ -47,12 +47,4 @@
     #history-title {
         display: none;
     }
-}
-
-#tariff_A {
-    margin-bottom: 0px;
-}
-
-#tariff_B {
-    margin-bottom: 0px;
 }

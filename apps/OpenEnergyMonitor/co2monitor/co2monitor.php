@@ -66,7 +66,7 @@ global $path, $session, $v;
     }
     
     .co2input {
-        width:70px !important;
+        width:84px !important;
         background-color:#333 !important;
         border: 1px solid #555 !important;
         color:#fff !important;
@@ -128,7 +128,7 @@ global $path, $session, $v;
                 <tr>
                 <td>Total volume: <b><span id="total_volume"></span> m<sup>3</sup></b></td>
                 <td>Mean CO2: <b><span id="total_mean_co2"></span> ppm</b></td>
-                <td>Daily CO2 addition: <input type="text" id="daily_co2_addition" value="1050" class="co2input"> L/day</td>
+                <td>Daily CO2 addition: <input type="text" id="daily_co2_addition" value="1050" class="form-control d-inline-block align-middle co2input"> L/day</td>
                 <td>Air change rate: <b><span id="total_mean_air_change_rate"></span> ACH</b></td>
                 </tr>
             </table>

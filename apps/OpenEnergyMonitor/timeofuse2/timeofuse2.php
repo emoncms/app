@@ -138,10 +138,10 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
                   <td>
                     <div style="display:flex; align-items:center;">
                       <span class="sched-swatch" :style="{background: tariffColour(i)}"></span>
-                      <input type="text" class="tariff-name" style="flex:1" :value="t.name" @change="renameTariff(i, $event.target.value)" placeholder="Tariff name">
+                      <input type="text" class="form-control tariff-name" style="flex:1" :value="t.name" @change="renameTariff(i, $event.target.value)" placeholder="Tariff name">
                     </div>
                   </td>
-                  <td><input type="number" step="0.001" min="0" class="tariff-price" v-model.number="t.price"></td>
+                  <td><input type="number" step="0.001" min="0" class="form-control tariff-price" v-model.number="t.price"></td>
                 </template>
                 <template v-else>
                   <td><span class="sched-swatch" :style="{background: tariffColour(i)}"></span>{{ t.name }}</td>
@@ -194,14 +194,14 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
               <tr v-for="(b, i) in schedule[tab]" :key="i">
                 <template v-if="editing">
                   <td>
-                    <select class="sched-time" v-model="b.start" @change="onBlockTimeChange">
+                    <select class="form-select sched-time" v-model="b.start" @change="onBlockTimeChange">
                       <option v-for="t in timeOptions" :key="t" :value="t">{{ t }}</option>
                     </select>
                   </td>
                   <td>
                     <div style="display:flex; align-items:center;">
                       <span class="sched-swatch" :style="{background: tariffColourByName(b.name)}"></span>
-                      <select class="sched-tariff" v-model="b.name">
+                      <select class="form-select sched-tariff" v-model="b.name">
                         <option v-for="n in tariffOptions(b.name)" :key="n" :value="n">{{ n }}</option>
                       </select>
                     </div>
@@ -218,7 +218,7 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
 
           <div class="sched-ph-wrap">
             <label class="sched-ph-label">Public holidays <span class="sched-muted">(treated as a weekend day)</span></label>
-            <textarea id="sched-ph" rows="2" v-model="phDays" placeholder="2026:1,104,359;2027:1"></textarea>
+            <textarea id="sched-ph" class="form-control" rows="2" v-model="phDays" placeholder="2026:1,104,359;2027:1"></textarea>
             <div class="sched-help">Format: <code>year:day-of-year,day-of-year;year:...</code> &mdash; e.g. <code>2026:1,104,359,360</code>. <a href="https://www.epochconverter.com/days" target="_blank" rel="noopener">day-of-year reference</a></div>
           </div>
         </div>
