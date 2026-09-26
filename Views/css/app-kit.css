@@ -16,6 +16,9 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
     color: #999;
 }
 
+/* Standard app width. Also in app.css, which apps with their own controller do not load. */
+.content-container { max-width: 1150px; }
+
 .app-page #app-block { padding: 0; }
 
 .ajax-loader {
