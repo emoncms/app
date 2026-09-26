@@ -8,16 +8,18 @@ load_js("Modules/app/Lib/vis.helper.js");
 load_js("Modules/app/Lib/timeseries.js");
 load_js("Lib/js/DateTimePicker.js");
 load_css("Theme/css/datetimepicker.css");
+load_css("Modules/app/Views/css/app-kit.css");
 load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css");
 ?>
 
+<div class="app-page" data-bs-theme="dark">
 
 <section id="app-block" style="display:none" class="block">
 
-    <div style="padding:5px; background-color: #262626; border-radius: 0.375rem; margin-bottom: 1rem; margin-top: 1rem;">
+    <div class="app-panel">
 
     <nav class="app-top-bar d-flex justify-content-between">
-        <ul id="tabs" class="btn-list">
+        <ul id="tabs" class="btn-list app-tabs">
             <li><button class="app-btn view-toggle-btn active" data-view="flows"><i class="svg-icon-shuffle"></i><span><?php echo tr('Electric flow') ?></span></button></li>
             <li><button class="app-btn view-toggle-btn d-none" data-view="costs"><i class="svg-icon-schedule"></i><span><?php echo tr('Tariff explorer') ?></span></button></li>
         </ul>
@@ -66,7 +68,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
     </div>
     </div>
 
-    <div style="padding:5px; background-color: #262626; border-radius: 0.375rem; margin-bottom: 1rem;">
+    <div class="app-panel">
         <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
             <button class='visnav time app-btn' time='1'>1<?php echo tr('h') ?></button>
             <button class='visnav time app-btn' time='3'>3<?php echo tr('h') ?></button>
@@ -105,10 +107,10 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
         </div>
     </div>
         
-    <div style="padding:5px; background-color: #262626; border-radius: 0.375rem; margin-bottom: 1rem;">
+    <div class="app-panel">
 
     <div id="cost-view" class="d-none">
-        <table class="tariff-table">
+        <table class="app-table">
             <tr>
                 <th><?php echo tr('Energy flow') ?></th>
                 <th><?php echo tr('Energy') ?></th>
@@ -134,7 +136,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
         </div>
 
         <div id="monthly-data" class="d-none mt-3">
-            <table class="tariff-table mb-3">
+            <table class="app-table mb-3">
                 <thead><tr></tr></thead>
                 <tbody id="monthly-data-body"></tbody>
             </table>
@@ -144,7 +146,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
 
     <table id="flow-block-view" class="statstable">
         <tr>
-            <td id="solar-box" class="statsbox solar-section" colspan="3">
+            <td id="solar-box" class="statsbox statsbox-energy solar-section" colspan="3">
                 <div class="statsbox-inner-unit">
                     <div id="statsbox-generation" class="statsbox-padded">
                         <div class="statsbox-title"><span class="generationtitle">SOLAR</span></div>
@@ -168,7 +170,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
                 </div>
             </td>
 
-            <td id="grid-box" class="statsbox">
+            <td id="grid-box" class="statsbox statsbox-energy">
                 <div class="statsbox-padded statsbox-inner-unit">
                     <div class="statsbox-title">GRID</div>
                     <div><span class="statsbox-value grid_balance_kwh">0</span> <span class="statsbox-units">kWh</span></div>
@@ -209,7 +211,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
         </tr>
         
         <tr>
-            <td id="battery-box" class="statsbox">
+            <td id="battery-box" class="statsbox statsbox-energy">
                 <div class="statsbox-padded statsbox-inner-unit">
                     <div class="statsbox-title">BATTERY</div>
                     <div><span class="statsbox-value battery_soc_change">0</span> <span class="statsbox-units">%</span></div>
@@ -222,7 +224,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
                 </div>
             </td>
 
-            <td id="house-box" class="statsbox" colspan="3">
+            <td id="house-box" class="statsbox statsbox-energy" colspan="3">
                 <div class="statsbox-inner-unit">
                     <div class="statsbox-padded">
                         <div class="statsbox-title">HOUSE</div>
@@ -252,6 +254,8 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
+
+</div>
 
 <?php load_js("Lib/js/gettext.js"); ?> 
 <script>

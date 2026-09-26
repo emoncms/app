@@ -96,7 +96,8 @@ function isohr() {
         var T = -15;
         for (var i = 0; i < 71; i++) { pts.push([T, habs(T, hum)]); T++; }
         hum += 10;
-        plotiso.push({ color: "#555", data: pts, lines: { show: true, lineWidth: 1 }, hoverable: false });
+        // Empty label keeps the curve out of the Flot 5 legend
+        plotiso.push({ label: "", color: "#555", data: pts, lines: { show: true, lineWidth: 1 }, hoverable: false });
     }
     return plotiso;
 }
@@ -261,7 +262,7 @@ function draw_context() {
             { font: { color: "#888", fill: "#888" }, axisPan: false, plotPan: false, axisZoom: false, plotZoom: false },                      // left: temperature
             { position: "right", font: { color: "#888", fill: "#888" }, axisPan: false, plotPan: false, axisZoom: false, plotZoom: false }    // right: humidity
         ],
-        legend: { show: true, position: "nw", margin: [8, 8], backgroundColor: "#1c1c1c", backgroundOpacity: 0.75 },
+        legend: { show: true, position: "nw", margin: [8, 8] },
         selection: { mode: is_touch_primary() ? null : "x", color: "#555", visualization: "fill" },
         zoom: { interactive: is_touch_primary(), enableTouch: true, amount: 1.5 },
         pan: { interactive: is_touch_primary(), enableTouch: true, touchMode: "smartLock", frameRate: 60 },
@@ -309,7 +310,7 @@ function draw_chart() {
 
     var options = {
         grid: { show: true, color: "#444", tickColor: "#2a2a2a", borderWidth: 0, hoverable: true },
-        legend: { show: true, position: "nw", margin: [10, 10], backgroundColor: "#1c1c1c", backgroundOpacity: 0.85 },
+        legend: { show: true, position: "nw", margin: [10, 10] },
         xaxis: { min: Tmin, max: Tmax, autoScale: "none", font: { color: "#888", fill: "#888" } },
         yaxis: { min: habs_min, max: habs_max, autoScale: "none", font: { color: "#888", fill: "#888" } },
         zoom: { interactive: is_touch_primary(), enableTouch: true, amount: 1.5 },

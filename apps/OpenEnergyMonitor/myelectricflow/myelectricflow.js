@@ -288,10 +288,6 @@ function init()
 {        
     app_log("INFO","solar & battery init");
 
-    // Display setup
-    $("body").css('background-color','#222');
-    $("#footer").css('background-color','#181818');
-    $("#footer").css('color','#999');
     if (!sessionwrite) $(".openconfig").hide();
 
     const mode = get_mode();

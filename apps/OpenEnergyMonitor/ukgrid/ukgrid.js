@@ -107,11 +107,9 @@ function init_series() {
             series[z].lines = {show:true, fill:0.6, lineWidth:0};
         }
     
-        var star = "";
-        var show = 0;
-        if (series[z].show) {star = "&nbsp;*&nbsp;"; show = 1;}
-        out += '<div style="display:inline-block; width:180px"><div class="legendcheckbox" index="'+z+'" show='+show+' style="float:left; background-color:'+series[z].color+'; cursor:pointer">';
-        out += '<div class="legendItem">'+star+'</div></div>'+series[z].label+'</div>';
+        var show = series[z].show ? 1 : 0;
+        out += '<button class="uk-series' + (show ? '' : ' is-off') + '" index="' + z + '" show="' + show + '">';
+        out += '<span class="app-swatch" style="background-color:' + series[z].color + '"></span>' + series[z].label + '</button>';
     }
     $("#visible-checkboxes").html(out);
     load();
@@ -228,18 +226,10 @@ $(".forecast").click(function() {
     $("#fuel-mix-info").hide();
 });
 
-$("#visible-checkboxes").on("click",".legendcheckbox",function() {
+$("#visible-checkboxes").on("click",".uk-series",function() {
     var index = $(this).attr("index");
-    var show = $(this).attr("show");
-    
-    if (show==0) {
-        show = 1; 
-        $(this).find(".legendItem").html("&nbsp;*&nbsp;");
-    } else { 
-        show=0;
-        $(this).find(".legendItem").html("");
-    }
-    $(this).attr("show",show);
+    var show = $(this).attr("show") == 0 ? 1 : 0;
+    $(this).attr("show",show).toggleClass("is-off", !show);
     
     series[index].show = show;
     draw();

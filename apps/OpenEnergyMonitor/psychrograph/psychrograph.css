@@ -1,21 +1,8 @@
-/* Psychrometric chart app - dark theme
-   Shares base dark styling (.app-btn, .visnav, .cost-btn, .ctrl-group,
-   .power-title, .ajax-loader ...) with myelectricflow.css */
+/* Psychrograph. Shared components are in Modules/app/Views/css/app-kit.css. */
 
-/* Panels: matches the #262626 rounded blocks used by myelectricflow */
-.psy-panel {
-    padding: 10px;
-    background-color: #262626;
-    border-radius: 0.375rem;
-    margin-bottom: 1rem;
-    margin-top: 1rem;
-}
-.psy-panel + .psy-panel { margin-top: 0; }
+.psy-panel { padding: 10px; }
 
-.psy-axis-note {
-    font-size: 0.85rem;
-    color: #aaa;
-}
+.psy-axis-note { font-size: 0.85rem; }
 
 .psy-context-label,
 .psy-stats-controls .power-title {
@@ -23,10 +10,7 @@
     letter-spacing: 0.04em;
 }
 
-.psy-context-label {
-    color: #888;
-    margin-bottom: 4px;
-}
+.psy-context-label { margin-bottom: 4px; }
 
 /* Chart containers */
 #contextgraph_bound { width: 100%; }
@@ -42,77 +26,26 @@
     min-height: 320px;
 }
 
-/* flot tick labels on dark background */
-#contextgraph .flot-tick-label,
-#psychrograph .flot-tick-label,
-#givonigraph .flot-tick-label {
-    color: #888;
-}
-
-/* flot legends - compact inset panels (psychrometric, givoni, context strip) */
-#psychrograph .legend table,
-#givonigraph .legend table,
-#contextgraph .legend table {
-    color: #ededed;
-    font-size: 12px;
-}
-/* Panel: near-solid dark background for strong text contrast over the chart */
-#psychrograph .legend > div,
-#givonigraph .legend > div,
-#contextgraph .legend > div {
-    background-color: #181818 !important;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-    opacity: 0.94 !important;
-}
-/* Entry text: brighter, with consistent vertical + right padding */
-#psychrograph .legendLabel,
-#givonigraph .legendLabel,
-#contextgraph .legendLabel {
-    padding: 3px 14px 3px 6px;
-    color: #ededed;
-}
-/* Swatch cell: a little inset from the panel edge */
-#psychrograph .legendColorBox,
-#givonigraph .legendColorBox,
-#contextgraph .legendColorBox {
-    padding-left: 8px;
-    vertical-align: middle;
-}
-/* Drop flot's default 1px frame + padding around the swatch (flatter look) */
-#psychrograph .legendColorBox > div,
-#givonigraph .legendColorBox > div,
-#contextgraph .legendColorBox > div {
-    border: none !important;
-    padding: 0 !important;
-}
-/* The actual colour chip: flat, rounded corners */
-#psychrograph .legendColorBox > div > div,
-#givonigraph .legendColorBox > div > div,
-#contextgraph .legendColorBox > div > div {
-    border-radius: 2px;
-}
-
 /* Comfort zone analysis table */
 #psychrotext table {
     width: 100%;
     border-collapse: collapse;
-    color: #aaa;
+    color: var(--text-secondary);
     font-size: 13px;
 }
 #psychrotext th,
 #psychrotext td {
     padding: 6px 8px;
     text-align: left;
-    border-bottom: 1px solid rgba(68,179,226,0.1);
+    border-bottom: 1px solid rgba(var(--bs-primary-rgb), 0.1);
 }
 #psychrotext th {
-    color: #fff;
+    color: var(--bs-emphasis-color);
     font-weight: bold;
 }
-#psychrotext td.zone-name { color: #fff; }
+#psychrotext td.zone-name { color: var(--bs-emphasis-color); }
 
-/* Coloured legend swatch used in the analysis table headers */
+/* Zone colour square in the table heads */
 .zone-swatch {
     display: inline-block;
     width: 10px;

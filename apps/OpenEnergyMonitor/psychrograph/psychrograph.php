@@ -7,15 +7,17 @@ load_js("Lib/js/flot-5.1.0.mod.min.js");
 load_js("Modules/app/Lib/vis.helper.js");
 load_js("Lib/js/DateTimePicker.js");
 load_css("Theme/css/datetimepicker.css");
-load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css");
+load_css("Modules/app/Views/css/app-kit.css");
 load_css("Modules/app/apps/OpenEnergyMonitor/psychrograph/psychrograph.css");
 ?>
 
+<div class="app-page" data-bs-theme="dark">
+
 <section id="app-block" style="display:none" class="block">
 
-    <div class="psy-panel">
+    <div class="app-panel psy-panel">
         <nav class="app-top-bar d-flex justify-content-between">
-            <ul id="tabs" class="btn-list">
+            <ul id="tabs" class="btn-list app-tabs">
                 <li><button class="app-btn view-toggle-btn active" data-view="classic"><i class="svg-icon-show_chart"></i><span><?php echo tr('Psychrometric') ?></span></button></li>
                 <li><button class="app-btn view-toggle-btn givoni-tab d-none" data-view="givoni"><i class="svg-icon-leaf"></i><span><?php echo tr('Givoni') ?></span></button></li>
             </ul>
@@ -30,7 +32,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/psychrograph/psychrograph.css");
         </p>
     </div>
 
-    <div class="psy-panel">
+    <div class="app-panel psy-panel">
         <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
             <button class='visnav time app-btn' time='24'><?php echo tr('D') ?></button>
             <button class='visnav time app-btn' time='168'><?php echo tr('W') ?></button>
@@ -59,7 +61,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/psychrograph/psychrograph.css");
         <div id="contextgraph_bound"><div id="contextgraph"></div></div>
     </div>
 
-    <div class="psy-panel">
+    <div class="app-panel psy-panel">
         <div id="classic-view">
             <div id="psychrograph_bound"><div id="psychrograph"></div></div>
         </div>
@@ -68,7 +70,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/psychrograph/psychrograph.css");
         </div>
     </div>
 
-    <div class="psy-panel">
+    <div class="app-panel psy-panel">
         <div class="psy-stats-controls d-flex justify-content-between align-items-center mb-2">
             <h5 class="power-title text-light mb-0"><?php echo tr('COMFORT ZONE ANALYSIS') ?></h5>
             <div>
@@ -89,6 +91,8 @@ load_css("Modules/app/apps/OpenEnergyMonitor/psychrograph/psychrograph.css");
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
+
+</div>
 
 <script>
     // Transfer php variables to javascript

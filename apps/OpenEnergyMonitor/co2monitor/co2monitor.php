@@ -1,160 +1,82 @@
 <?php
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
+
+load_js("Modules/feed/feed.js");
+load_js("Lib/js/flot-5.1.0.mod.min.js");
+load_js("Modules/app/Lib/vis.helper.js");
+load_css("Modules/app/Views/css/app-kit.css");
+load_css("Modules/app/apps/OpenEnergyMonitor/co2monitor/co2monitor.css");
 ?>
-<?php load_css("Modules/app/Views/css/dark.css"); ?>
-<?php load_js("Modules/feed/feed.js"); ?>
 
-<?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
-<?php load_js("Modules/app/Lib/vis.helper.js"); ?>
+<div class="app-page" data-bs-theme="dark">
 
-<style>
-    /* Dynamic height chart placeholder */
-    /* Adjust the height offset as necessary */
-    .chart-placeholder {
-        --height-offset: 35rem;
-    }
+<section id="app-block" style="display:none">
 
-    @media (min-width: 768px) {
-        .chart-placeholder {
-            --height-offset: 35rem;
-        }
-    }
-
-    .chart-placeholder>* {
-        height: calc(100vh - var(--height-offset)) !important;
-        min-height: 180px;
-    }
-
-    /* Remove padding from container-fluid, gives a little more screen space */
-    .container-fluid {
-        padding: 0px;
-    }
-
-    @media (min-width: 768px) {
-        .container-fluid {
-            padding: 0px 20px 0px 20px;
-        }
-    }
-
-    .input_ppm {
-        width: 75px;
-        background-color: #333 !important;
-        border-color: #666 !important;
-        font-size: 22px !important;
-        padding: 10px !important;
-        color: #aaa !important;
-    }
-
-    .co2table {
-        width: 100%;
-        border-collapse: collapse;
-        border-spacing: 0;
-
-    }
-
-    .co2table th {
-        text-align: left;
-        padding: 10px;
-        border-bottom: 1px solid #333;
-        border-top: 1px solid #333;
-    }
-
-    .co2table td {
-        padding: 10px;
-        border-bottom: 1px solid #333;
-    }
-    
-    .co2input {
-        width:84px !important;
-        background-color:#333 !important;
-        border: 1px solid #555 !important;
-        color:#fff !important;
-    }
-    
-    .box {
-        width:10px;
-        height:10px;
-    }
-
-</style>
-
-<!-- Top navigation bar -->
-<nav id="buttons" class="d-flex justify-content-between">
-    <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="viewpower active btn btn-lg btn-link myelectric-view-cost" title="<?php echo tr('Power View') ?>">
-                <span class="d-xs-none"><?php echo tr("Pwr") ?></span>
-                <span class="d-none d-xs-inline-block"><?php echo tr("Air change rate calculator from CO2 data") ?></span>
-            </button></li>
-    </ul>
-    <ul class="text-end nav nav-pills mb-0">
-        <li><button class="btn btn-lg btn-link config-open" title="<?php echo tr('Edit') ?>"><span class="svg-icon-wrench"></span></button></li>
-        <li><button class="btn btn-lg btn-link config-close hide" title="<?php echo tr('Close') ?>"><span class="svg-icon-close"></span></button></li>
-    </ul>
-</nav>
-
-<!-- App content -->
-<div id="app-block" style="display:none">
-    <!--
-    <div class="d-flex justify-content-between">
-        <h5 class="electric-title text-md-larger text-light"><?php echo tr('CO2') ?>: <span id="powernow">0</span> <span class="power-unit"> ppm</span></h5>
-    </div>
--->
-
-    <div class="btn-group" style="float:right">
-      <button class="btn btn-default" id="decay_mode">Decay</button>
-      <button class="btn btn-primary" id="average_mode">Average</button>
+    <div class="app-panel">
+        <nav class="app-top-bar d-flex justify-content-between mb-0 border-0">
+            <ul id="tabs" class="btn-list app-tabs">
+                <li><button class="app-btn active"><i class="svg-icon-leaf"></i><span><?php echo tr('Air change rate from CO2') ?></span></button></li>
+            </ul>
+            <ul class="btn-list">
+                <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><i class="svg-icon-wrench"></i></button></li>
+                <li><button class="app-btn config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button></li>
+            </ul>
+        </nav>
     </div>
 
-    <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start justify-content-stretch btn-group">
-        <button class='visnav time btn btn-link btn-lg py-1 px-2' time='24'><?php echo tr('D') ?></button>
-        <button class='visnav time btn btn-link btn-lg py-1 px-2' time='168'><?php echo tr('W') ?></button>
-        <button class='visnav time btn btn-link btn-lg py-1 px-2' time='720'><?php echo tr('M') ?></button>
-        <button id='zoomin' class='visnav btn btn-link btn-lg py-1 px-2' >+</button>
-        <button id='zoomout' class='visnav btn btn-link btn-lg py-1 px-2' >-</button>
-        <button id='left' class='visnav btn btn-link btn-lg py-1 px-2' >&lt;</button>
-        <button id='right' class='visnav btn btn-link btn-lg py-1 px-2' >&gt;</button>
-    </div>
-
-    <div id="graph_bound" class="chart-placeholder">
-        <div id="graph"></div>
-    </div>
-
-    <br>
-    <div id="sensors">
-    
-        <div class="average">
-            <table class="co2table" style="color:#fff; font-size:16px">
-                <tr>
-                <td>Total volume: <b><span id="total_volume"></span> m<sup>3</sup></b></td>
-                <td>Mean CO2: <b><span id="total_mean_co2"></span> ppm</b></td>
-                <td>Daily CO2 addition: <input type="text" id="daily_co2_addition" value="1050" class="form-control d-inline-block align-middle co2input"> L/day</td>
-                <td>Air change rate: <b><span id="total_mean_air_change_rate"></span> ACH</b></td>
-                </tr>
-            </table>
-            
+    <div class="app-panel">
+        <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
+            <button class='visnav time app-btn' time='24'><?php echo tr('D') ?></button>
+            <button class='visnav time app-btn' time='168'><?php echo tr('W') ?></button>
+            <button class='visnav time app-btn' time='720'><?php echo tr('M') ?></button>
+            <button id='zoomin' class='visnav app-btn'>+</button>
+            <button id='zoomout' class='visnav app-btn'>-</button>
+            <button id='left' class='visnav app-btn'>&lt;</button>
+            <button id='right' class='visnav app-btn'>&gt;</button>
         </div>
-    
-        <table class="co2table" style="color:#fff">
-            <tr>
-                <th></th>
-                <th>Name</th>
-                <th scope="col" class="average"><?php echo tr('Volume') ?></th>
-                <th scope="col" class="average"><?php echo tr('Mean CO2') ?></th>
-                <th scope="col" class="decay hide"><?php echo tr('Baseline CO2') ?></th>
-                <th scope="col" class="decay hide"><?php echo tr('Air change rate') ?></th>
-                <th scope="col" class="decay hide"><?php echo tr('R2') ?></th>
-                <th class="decay"></th>
-            </tr>
+        <div id="graph_bound"><div id="graph"></div></div>
+    </div>
+
+    <div class="app-panel co2-panel">
+        <div class="co2-controls">
+            <div>
+                <button id="average_mode" class="cost-btn active"><?php echo tr('Average') ?></button>
+                <button id="decay_mode" class="cost-btn"><?php echo tr('Decay') ?></button>
+            </div>
+            <div class="co2-totals average">
+                <span><?php echo tr('Total') ?> <b><span id="total_volume">-</span> m³</b></span>
+                <span><?php echo tr('Mean') ?> <b><span id="total_mean_co2">-</span> ppm</b></span>
+                <span><b><span id="total_mean_air_change_rate">-</span> ACH</b></span>
+                <span class="ctrl-group">
+                    <span class="ctrl-label"><?php echo tr('Daily CO2 addition') ?></span>
+                    <input type="text" id="daily_co2_addition" value="1050" />
+                    <span class="ctrl-label ctrl-unit">L/day</span>
+                </span>
+            </div>
+        </div>
+
+        <table class="app-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th><?php echo tr('Name') ?></th>
+                    <th class="average"><?php echo tr('Volume') ?></th>
+                    <th class="average"><?php echo tr('Mean CO2') ?></th>
+                    <th class="decay"><?php echo tr('Baseline CO2') ?></th>
+                    <th class="decay"><?php echo tr('Air change rate') ?></th>
+                    <th class="decay"><?php echo tr('R2') ?></th>
+                    <th class="decay"></th>
+                </tr>
+            </thead>
             <tbody id="sensors_list"></tbody>
         </table>
-        
-        <p id="windspeed_option" class="hide" style="margin-top:15px; color:#aaa"><input type="checkbox" id="show_windspeed" style="margin: -5px 10px 0px 10px" > Show wind speed</p>
-        
+        <p class="ctrl-note mt-2 mb-0"><?php echo tr('Click a colour square to show or hide the sensor on the chart.') ?></p>
 
+        <label id="windspeed_option" class="ctrl-checkbox mt-2" style="display:none"><input type="checkbox" id="show_windspeed" /> <?php echo tr('Show wind speed') ?></label>
     </div>
 
-</div>
+</section>
 
 <div id="appconf-description" style="display:none">
     <p class="lead">Calculate room air change rates form CO2 decay curves.</p>
@@ -162,6 +84,8 @@ global $path, $session, $v;
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
+
+</div>
 
 <script>
     // Transfer php variables to javascript

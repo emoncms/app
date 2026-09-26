@@ -1,0 +1,42 @@
+/* CO2 Monitor. Shared components are in Modules/app/Views/css/app-kit.css. */
+
+#graph_bound { width: 100%; }
+#graph {
+    width: 100%;
+    height: calc(100vh - 32rem);
+    min-height: 250px;
+}
+
+.co2-panel { padding: 10px; }
+
+/* Mode buttons on the left, CO2 addition field on the right */
+.co2-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Totals across sensors, beside the CO2 addition field that sets the air change rate */
+.co2-totals {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1rem;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+.co2-totals b { color: var(--bs-emphasis-color); }
+
+.co2-controls .ctrl-group > input[type="text"] { width: 70px; }
+.ctrl-unit {
+    border-left: none;
+    border-radius: 0 0.375rem 0.375rem 0;
+}
+
+/* Sensor colour square toggles the series */
+.co2-swatch { cursor: pointer; }
+.app-table tr.co2-off { opacity: 0.4; }
+.app-table td { vertical-align: middle; }

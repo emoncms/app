@@ -282,11 +282,11 @@ function calculate_volume_based_air_change_rate() {
     }
     total_mean = total_mean / total_volume;
     $("#total_volume").html(total_volume);
-    $("#total_mean_co2").html(total_mean.toFixed(0));
+    $("#total_mean_co2").html(isFinite(total_mean) ? total_mean.toFixed(0) : "-");
 
     var co2_litres_per_day = $("#daily_co2_addition").val();
     var mean_air_change_rate = (co2_litres_per_day / 24) / (1000 * total_volume * (0.000001 * (total_mean - 420)));
-    $("#total_mean_air_change_rate").html(mean_air_change_rate.toFixed(2));
+    $("#total_mean_air_change_rate").html(isFinite(mean_air_change_rate) ? mean_air_change_rate.toFixed(2) : "-");
 }
 
 function draw() {
@@ -307,12 +307,9 @@ function draw() {
         if (isNaN(feeds_to_load[z].fit.R2)==false) {
             R2 = feeds_to_load[z].fit.R2.toFixed(5);
         }
-        let highlight = "#fff";
-        if (!feeds_to_load[z].show) highlight = "#666";
-
-        sensors_list += "<tr style='color:"+highlight+"'>";
-        sensors_list += "<td><div class='box' style='background-color:"+colours[z]+"; cursor:pointer' z='"+z+"'></div></td>";
-        sensors_list += "<td>"+config.feedsbyid[feeds_to_load[z].value].tag + ": "+config.feedsbyid[feeds_to_load[z].value].name+"</td>";
+        sensors_list += "<tr class='" + (feeds_to_load[z].show ? "" : "co2-off") + "'>";
+        sensors_list += "<td><span class='app-swatch co2-swatch' style='background-color:"+colours[z]+"' z='"+z+"'></span></td>";
+        sensors_list += "<td class='col-primary'>"+config.feedsbyid[feeds_to_load[z].value].tag + ": "+config.feedsbyid[feeds_to_load[z].value].name+"</td>";
         if (mode=="average") {
             sensors_list += "<td>"+feeds_to_load[z].volume+" m3</td>";
             sensors_list += "<td>"+feeds_to_load[z].params.mean.toFixed(0)+" ppm</td>";
@@ -321,7 +318,7 @@ function draw() {
             sensors_list += "<td>"+air_change_rate+"</td>";
             sensors_list += "<td>"+R2+"</td>";
             // refine button
-            sensors_list += "<td><button class='btn btn-primary' onclick='refine("+z+")'>Refine</button></td>";
+            sensors_list += "<td><button class='cost-btn' onclick='refine("+z+")'>Refine</button></td>";
         }
 
         sensors_list += "</tr>";
@@ -437,8 +434,8 @@ $("#decay_mode").click(function() {
     mode = "decay";
     $(".decay").show();
     $(".average").hide();
-    $("#decay_mode, #average_mode").removeClass("btn-primary").addClass("btn-default");
-    $("#decay_mode").removeClass("btn-default").addClass("btn-primary");
+    $("#decay_mode, #average_mode").removeClass("active");
+    $("#decay_mode").addClass("active");
     draw();
 });
 
@@ -446,12 +443,12 @@ $("#average_mode").click(function() {
     mode = "average";
     $(".decay").hide();
     $(".average").show();
-    $("#decay_mode, #average_mode").removeClass("btn-primary").addClass("btn-default");
-    $("#average_mode").removeClass("btn-default").addClass("btn-primary");
+    $("#decay_mode, #average_mode").removeClass("active");
+    $("#average_mode").addClass("active");
     draw();
 });
 
-$("#sensors_list").on("click",".box",function() {
+$("#sensors_list").on("click",".co2-swatch",function() {
     let z = 1 * $(this).attr("z");
     feeds_to_load[z].show = !feeds_to_load[z].show;
     draw();

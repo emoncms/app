@@ -202,3 +202,10 @@ body.app .container-fluid {
 /* Flot 5 legend on a dark background */
 .legendLayer rect.background { fill: rgba(34, 34, 34, 0.85); }
 .legendLayer text { fill: #ddd; }
+
+/* Flot 5 tick and axis labels are SVG text, black unless an app sets font.fill */
+.flot-tick-label,
+.axisLabels {
+  fill: #999;
+  font-size: 13px;               /* as MyElectricFlow, where Flot sets 0.8 x the 16px placeholder */
+}

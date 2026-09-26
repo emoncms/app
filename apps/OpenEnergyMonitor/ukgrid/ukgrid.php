@@ -3,90 +3,53 @@
 // By Trystan Lea, OpenEnergyMonitor.org
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
+
+load_js("Modules/feed/feed.js");
+load_js("Lib/js/flot-5.1.0.mod.min.js");
+load_js("Modules/app/Lib/vis.helper.js");
+load_js("Lib/js/clipboard.js");
+load_css("Modules/app/Views/css/app-kit.css");
+load_css("Modules/app/apps/OpenEnergyMonitor/ukgrid/ukgrid.css");
 ?>
 
-<?php load_css("Modules/app/Views/css/dark.css"); ?>
-<?php load_js("Modules/feed/feed.js"); ?>
+<div class="app-page" data-bs-theme="dark">
 
-<?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
-<?php load_js("Modules/app/Lib/vis.helper.js"); ?>
-<?php load_js("Lib/js/clipboard.js"); ?>
+<section id="app-block" style="display:none">
 
-<style>
-    /* Dynamic height chart placeholder */
-    /* Adjust the height offset as necessary */
-    .chart-placeholder {
-        --height-offset: 19rem;
-    }
-    @media (min-width: 768px) {
-        .chart-placeholder { --height-offset: 22rem; }
-    }
-    .chart-placeholder>* {
-        height: calc(100vh - var(--height-offset)) !important;
-        min-height: 180px;
-    }
-
-    /* Remove padding from container-fluid, gives a little more screen space */
-    .container-fluid { padding: 0px; }
-    @media (min-width: 768px) {
-        .container-fluid { padding: 0px 20px 0px 20px; }
-    }
-
-    .content-container {
-        max-width: 1250px;
-    }
-
-    .legendcheckbox {
-        width: 15px;
-        height: 12px;
-        border: 1px solid #fff;
-        margin-right: 5px;
-    }
-
-    .legendItem {
-        width: 15px;
-        height: 12px;
-    }
-</style>
-
-<!-- Top navigation bar -->
-<nav id="buttons" class="d-flex justify-content-between">
-    <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="fuelmix btn btn-lg btn-link myelectric-view-cost" title="<?php echo tr('Fuel mix history') ?>">
-                <span class="d-xs-none"><?php echo tr("Pwr") ?></span>
-                <span class="d-none d-xs-inline-block"><?php echo tr("UK FUEL MIX") ?></span>
-            </button></li>
-        <li><button class="forecast active btn btn-lg btn-link myelectric-view-cost" title="<?php echo tr('Wind & Solar forecast') ?>">
-                <span class="d-xs-none"><?php echo tr("Pwr") ?></span>
-                <span class="d-none d-xs-inline-block"><?php echo tr("FORECAST") ?></span>
-            </button></li>
-        </ul>
-    <ul class="text-end nav nav-pills mb-0">
-        <li><button class="btn btn-lg btn-link config-open" title="<?php echo tr('Edit') ?>"><span class="svg-icon-wrench"></span></button></li>
-        <li><button class="btn btn-lg btn-link config-close hide" title="<?php echo tr('Close') ?>"><span class="svg-icon-close"></span></button></li>
-    </ul>
-</nav>
-
-<div id="app-block" style="display:none; color:#ccc">
-    <div class="row g-0">
-        <div class="col-md-10">
-            <!--<div style="font-size:28px; font-weight:bold">uk<span style="color:#fff">grid</span></div>-->
-            <?php include(dirname(__DIR__).'/graph-nav.php'); ?>
-
-            <div id="placeholder_bound" class="chart-placeholder">
-                <div id="placeholder"></div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div id="visible-checkboxes" style="margin-top:10px"></div>
-        </div>
+    <div class="app-panel">
+        <nav class="app-top-bar d-flex justify-content-between mb-0 border-0">
+            <ul id="tabs" class="btn-list app-tabs">
+                <li><button class="app-btn fuelmix" title="<?php echo tr('Fuel mix history') ?>"><i class="svg-icon-earth"></i><span><?php echo tr('UK fuel mix') ?></span></button></li>
+                <li><button class="app-btn forecast active" title="<?php echo tr('Wind and solar forecast') ?>"><i class="svg-icon-sun"></i><span><?php echo tr('Forecast') ?></span></button></li>
+            </ul>
+            <ul class="btn-list">
+                <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><i class="svg-icon-wrench"></i></button></li>
+                <li><button class="app-btn config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button></li>
+            </ul>
+        </nav>
     </div>
-    <br><br>
-    <p style="font-size:14px" id="fuel-mix-info" class="hide">UK historic electricity demand and fuel mix obtained from <a href="https://www.elexonportal.co.uk">elexonportal.co.uk.</a>. <br>Embedded wind and solar obtained from <a href="https://data.nationalgrideso.com/data-groups/demand">data.nationalgrideso.com</a><br>Note that the demand series has been modified to include embedded wind and solar generation.</p>
-    <p style="font-size:14px" id="forecast-info">14 day ahead UK wind, embedded wind, solar and demand forecast obtained from <a href="https://data.nationalgrideso.com/data-groups/demand">data.nationalgrideso.com</a>.<br>Note that the demand forecast has been modified to include embedded wind and solar generation.</p>
-    
-    </p>
-</div>
+
+    <div class="app-panel">
+        <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
+            <button class='visnav time app-btn' time='24'><?php echo tr('D') ?></button>
+            <button class='visnav time app-btn' time='168'><?php echo tr('W') ?></button>
+            <button class='visnav time app-btn' time='720'><?php echo tr('M') ?></button>
+            <button class='visnav time app-btn' time='8760'><?php echo tr('Y') ?></button>
+            <button id='zoomin' class='visnav app-btn'>+</button>
+            <button id='zoomout' class='visnav app-btn'>-</button>
+            <button id='left' class='visnav app-btn'>&lt;</button>
+            <button id='right' class='visnav app-btn'>&gt;</button>
+        </div>
+        <div id="visible-checkboxes" class="uk-series-list"></div>
+        <div id="placeholder_bound"><div id="placeholder"></div></div>
+    </div>
+
+    <div class="app-panel uk-info">
+        <p id="fuel-mix-info" class="hide"><?php echo tr('UK historic electricity demand and fuel mix from') ?> <a href="https://www.elexonportal.co.uk">elexonportal.co.uk</a>. <?php echo tr('Embedded wind and solar from') ?> <a href="https://data.nationalgrideso.com/data-groups/demand">data.nationalgrideso.com</a>.<br><?php echo tr('The demand series includes embedded wind and solar generation.') ?></p>
+        <p id="forecast-info"><?php echo tr('14 day ahead UK wind, embedded wind, solar and demand forecast from') ?> <a href="https://data.nationalgrideso.com/data-groups/demand">data.nationalgrideso.com</a>.<br><?php echo tr('The demand forecast includes embedded wind and solar generation.') ?></p>
+    </div>
+
+</section>
 
 <div id="appconf-description" style="display:none">
     <p class="lead">Explore the UK grid fuel mix and wind and solar forecast.</p>
@@ -94,6 +57,8 @@ global $path, $session, $v;
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
+
+</div>
 
 <script>
     // ----------------------------------------------------------------------
