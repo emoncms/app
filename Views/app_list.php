@@ -5,7 +5,9 @@ global $path;
 <?php load_js("Lib/js/vue.global.prod-3.5.22.min.js"); ?>
 
 <div id="app" style="padding:20px">
-    <h2><?php echo _("My Apps"); ?></h2>
+    <div class="page-header">
+        <h3><?php echo _("My Apps"); ?></h3>
+    </div>
 
     <div v-if="apps.length == 0">
         <p><?php echo _("You have no apps yet. Click the button below to create your first app."); ?></p>

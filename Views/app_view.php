@@ -45,7 +45,9 @@
 
 <div id="app-page" style="padding:20px">
 
-    <h2>Available Apps</h2>
+    <div class="page-header">
+        <h3>Available Apps</h3>
+    </div>
     <p>Create a new instance of an app by clicking on one of the apps below.</p>
 
     <div id="available-apps">
