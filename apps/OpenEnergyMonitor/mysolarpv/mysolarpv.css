@@ -18,12 +18,6 @@
     color: var(--bs-secondary-color);
 }
 
-/* Unit line below a total */
-.app-stat-sub {
-    font-size: 0.85rem;
-    font-weight: bold;
-}
-
 /* Row of many totals: four columns on small screens */
 @media (max-width: 767px) {
     .app-stats-wrap {
@@ -32,13 +26,6 @@
         row-gap: 0.5rem;
     }
 }
-
-/* Flow box colours */
-.statsbox-solar  { background: var(--ec-energy-solar); }
-.statsbox-export { background: var(--ec-energy-export); }
-.statsbox-import { background: var(--ec-energy-import); }
-.statsbox-divert { background: var(--ec-energy-battery); }
-.statsbox-house  { background: var(--ec-energy-use-light); }
 
 /* Flow arrow colours */
 #solar-to-divert-box { --statsbox-color: var(--ec-energy-battery); }

@@ -121,6 +121,8 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
     font-weight: normal;
     font-size: 18px;
 }
+/* Small line under a value, such as the kWh total */
+.app-stat-sub { font-size: 0.85rem; font-weight: bold; }
 
 /* Option rows: checkbox and label, with fields below when ticked */
 .app-option {
@@ -169,7 +171,7 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
 .power-title {
     margin: 0;
     font-size: 0.9rem;
-    color: var(--text-secondary);
+    color: var(--ec-text-secondary);
 }
 
 .power-value {
@@ -219,6 +221,11 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
     color: var(--ec-energy-text);
     --statsbox-color: var(--ec-energy-text);
 }
+.statsbox-solar   { background: var(--ec-energy-solar); }
+.statsbox-import  { background: var(--ec-energy-import); }
+.statsbox-export  { background: var(--ec-energy-export); }
+.statsbox-battery { background: var(--ec-energy-battery); }
+.statsbox-house   { background: var(--ec-energy-use-light); }
 
 .statsbox-inner-unit,
 .statsbox-inner-arrow {
@@ -400,7 +407,7 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
     --bs-btn-padding-y: 3px;              /* 32px high with the border, as the old time bar */
     --bs-btn-font-size: 1rem;
     --bs-btn-line-height: 1.5;
-    --bs-btn-color: color-mix(in srgb, var(--text-secondary) 60%, transparent);
+    --bs-btn-color: color-mix(in srgb, var(--ec-text-secondary) 60%, transparent);
     --bs-btn-bg: rgba(var(--ec-app-nav-rgb), 0.1);
     --bs-btn-border-color: transparent;
     --bs-btn-hover-color: var(--bs-emphasis-color);

@@ -21,7 +21,7 @@
     background: none;
     border: none;
     font-size: 12px;
-    color: var(--text-secondary);
+    color: var(--ec-text-secondary);
     cursor: pointer;
 }
 .uk-series:hover { color: var(--bs-emphasis-color); }
@@ -30,6 +30,6 @@
 .uk-info {
     padding: 10px;
     font-size: 13px;
-    color: var(--text-secondary);
+    color: var(--ec-text-secondary);
 }
 .uk-info p { margin: 0; }

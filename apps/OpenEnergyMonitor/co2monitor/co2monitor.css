@@ -16,7 +16,7 @@
     align-items: center;
     gap: 0.25rem 1rem;
     font-size: 13px;
-    color: var(--text-secondary);
+    color: var(--ec-text-secondary);
 }
 .co2-totals b { color: var(--bs-emphasis-color); }
 

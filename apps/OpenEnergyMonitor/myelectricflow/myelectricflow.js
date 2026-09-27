@@ -881,11 +881,9 @@ function solar_battery_visibility() {
 
         $("#live-solar-value").toggleClass("text-solar", s);
 
-    const boxColors = {
-        "#solar-box":   s ? "#dccc1f" : "#282828",
-        "#battery-box": b ? "#fb7b50" : "#282828"
-    };
-    for (const [id, color] of Object.entries(boxColors)) $(id).css("background-color", color);
+    // Energy fill only when the feed is available
+    $("#solar-box").toggleClass("statsbox-solar", s);
+    $("#battery-box").toggleClass("statsbox-battery", b);
 
     const arrowColors = {
         "#solar-to-grid-box":    s         ? flow_colors["solar_to_grid"]    : "#333",

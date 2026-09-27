@@ -81,7 +81,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
     <div class="app-panel">
     <table class="statstable">
         <tr>
-            <td id="solar-box" class="statsbox statsbox-energy" colspan="3">
+            <td id="solar-box" class="statsbox statsbox-energy statsbox-solar" colspan="3">
                 <div class="statsbox-inner-unit">
                     <div id="statsbox-generation" class="statsbox-padded">
                         <div class="statsbox-title"><span class="generationtitle">SOLAR</span></div>
@@ -99,7 +99,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
                 </div>
             </td>
 
-            <td id="grid-box" class="statsbox statsbox-energy">
+            <td id="grid-box" class="statsbox statsbox-energy statsbox-import">
                 <div class="statsbox-padded statsbox-inner-unit">
                     <div class="statsbox-title">GRID</div>
                     <div><span class="statsbox-value total_grid_balance_kwh">0</span> <span class="statsbox-units">kWh</span></div>
@@ -136,7 +136,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
         </tr>
 
         <tr>
-            <td id="battery-box" class="statsbox statsbox-energy">
+            <td id="battery-box" class="statsbox statsbox-energy statsbox-battery">
                 <div class="statsbox-padded statsbox-inner-unit">
                     <div class="statsbox-title">BATTERY</div>
                     <div><span class="statsbox-value battery_soc_change">0</span> <span class="statsbox-units">%</span></div>
@@ -149,7 +149,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
                 </div>
             </td>
 
-            <td id="house-box" class="statsbox statsbox-energy" colspan="3">
+            <td id="house-box" class="statsbox statsbox-energy statsbox-house" colspan="3">
                 <div class="statsbox-inner-unit">
                     <div class="statsbox-padded">
                         <div class="statsbox-title">HOUSE</div>

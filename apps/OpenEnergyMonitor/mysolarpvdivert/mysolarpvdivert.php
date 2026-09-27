@@ -129,7 +129,7 @@
         </tr>
 
         <tr>
-            <td class="statsbox statsbox-energy statsbox-divert">
+            <td class="statsbox statsbox-energy statsbox-battery">
                 <div class="statsbox-padded statsbox-inner-unit">
                     <div class="statsbox-title">DIVERT</div>
                     <div><span class="statsbox-value total_divert_kwh">0</span> <span class="statsbox-units">kWh</span></div>

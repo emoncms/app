@@ -2,12 +2,6 @@
 
 #placeholder_bound { width: 100%; }
 
-/* Box colours */
-#solar-box   { background: var(--ec-energy-solar); }
-#grid-box    { background: var(--ec-energy-import); }
-#battery-box { background: var(--ec-energy-battery); }
-#house-box   { background: var(--ec-energy-use-light); }
-
 /* Flow colours, from the source or the battery */
 #solar-to-grid-box,
 #solar-to-load-box,

@@ -11,12 +11,6 @@
     border-radius: 0.375rem;
 }
 
-/* Box colours. Solar and battery are set by JS when feeds are unavailable. */
-#solar-box   { background: var(--ec-energy-solar); }
-#grid-box    { background: var(--ec-energy-import); }
-#battery-box { background: var(--ec-energy-battery); }
-#house-box   { background: var(--ec-energy-use-light); }
-
 /* Battery flow label boxes: alignment, room for the arrow, smaller value */
 #grid-to-battery-box { text-align: left; }
 #battery-to-grid-box { text-align: right; }

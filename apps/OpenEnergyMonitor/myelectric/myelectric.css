@@ -14,7 +14,7 @@
 }
 
 .myelectric-totals { padding: 10px 0; }
-.myelectric-totals .app-stat-title { color: var(--text-secondary); }
+.myelectric-totals .app-stat-title { color: var(--ec-text-secondary); }
 .myelectric-kwhd { font-weight: bold; font-size: 14px; }
 
 @media (max-width: 576px) {

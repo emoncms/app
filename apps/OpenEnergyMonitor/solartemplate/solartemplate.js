@@ -394,7 +394,7 @@ function updater() {
         $("#battery-value").css("color", "var(--ec-energy-battery)");
     } else {
         $("#battery-label").text("BATTERY");
-        $("#battery-value").css("color", "var(--text-secondary)");
+        $("#battery-value").css("color", "var(--ec-text-secondary)");
     }
 
     // Grid: positive = import, negative = export
@@ -407,7 +407,7 @@ function updater() {
         $("#grid-value").css("color", "var(--ec-energy-export)");
     } else {
         $("#grid-label").text("GRID");
-        $("#grid-value").css("color", "var(--text-secondary)");
+        $("#grid-value").css("color", "var(--ec-text-secondary)");
     }
 
     // Battery SOC
