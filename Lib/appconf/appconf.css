@@ -5,7 +5,6 @@ body.app-config-open { background-color: #222; }
 body.app-config-open #footer { background-color: #181818; color: #999; }
 
 .cfg { max-width: 1040px; margin: 0 auto; padding: 28px 0 40px; font-family: var(--bs-body-font-family); color: var(--bs-body-color); }
-.cfg-mono { font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; }
 
 /* Title, lead and launch */
 .cfg-head { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px 20px; margin-bottom: 20px; }
@@ -19,8 +18,7 @@ body.app-config-open #footer { background-color: #181818; color: #999; }
     display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 12px 18px;
     border: 1px solid var(--bs-border-color); border-radius: 10px; background-color: var(--bs-body-bg);
 }
-.cfg-progress { flex: 1; max-width: 260px; height: 6px; border-radius: 3px; overflow: hidden; background-color: rgba(var(--bs-emphasis-color-rgb), 0.08); }
-.cfg-progress > div { height: 100%; background-color: var(--bs-success); }
+.cfg-progress { flex: 1; max-width: 260px; --bs-progress-height: 6px; }
 
 /* Cards, as the API page key cards */
 .cfg-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
@@ -65,7 +63,7 @@ body.app-config-open #footer { background-color: #181818; color: #999; }
 .cfg-desc { font-size: 13px; line-height: 18px; color: var(--bs-secondary-color); }
 .cfg-value { font-size: 13px; text-align: right; }
 .cfg-node { color: var(--bs-secondary-color); }
-.cfg-node .cfg-tag { margin-left: 6px; }
+.cfg-node .badge { margin-left: 6px; }
 .cfg-form { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px 16px; }
 .cfg-form .form-select { width: auto; min-width: 260px; }
 .cfg-ctrl { flex-shrink: 0; }
@@ -77,17 +75,11 @@ body.app-config-open #footer { background-color: #181818; color: #999; }
     display: block; width: 100%; margin-top: 10px; padding: 10px;
     border: 1px dashed var(--bs-border-color); border-radius: 10px; background: none; color: var(--bs-secondary-color);
 }
-.cfg-more .cfg-mono { font-size: 12px; }
+.cfg-more .font-monospace { font-size: 12px; }
 .cfg-more:hover { color: var(--bs-emphasis-color); border-color: var(--bs-secondary-color); }
 
-/* Pastel tags, as the Network and feed engine tags */
-.cfg-tag { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: bold; line-height: 16px; white-space: nowrap; }
-.cfg-tag-auto   { color: var(--bs-info-text-emphasis); background-color: var(--bs-info-bg-subtle); }
-.cfg-tag-set    { color: var(--bs-success-text-emphasis); background-color: var(--bs-success-bg-subtle); }
-.cfg-tag-warn   { color: var(--bs-warning-text-emphasis); background-color: var(--bs-warning-bg-subtle); }
-.cfg-tag-miss   { color: var(--bs-danger-text-emphasis); background-color: var(--bs-danger-bg-subtle); }
-.cfg-tag-off    { color: var(--bs-secondary-color); background-color: rgba(var(--bs-emphasis-color-rgb), 0.06); }
-.cfg-tag-derive { color: #c9a0f0; background-color: rgba(160, 100, 220, 0.18); }
+/* Derived feed: purple badge, no Bootstrap colour for it */
+.cfg-derive { color: #c9a0f0; background-color: rgba(160, 100, 220, 0.18); }
 
 .cfg-table { margin: 0; }
 .cfg-table > :not(caption) > * > * { padding: 7px 16px; font-size: 13px; }
