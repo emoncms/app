@@ -634,6 +634,12 @@ var vue_config_app = Vue.createApp({
             return "miss";
         },
 
+        // Icon circle colours per state; auto keeps the default accent
+        stateClass: function(item) {
+            return { ok: "bg-success-subtle text-success-emphasis", auto: "",
+                     off: "bg-secondary-subtle text-secondary-emphasis", miss: "bg-danger-subtle text-danger-emphasis" }[item.state];
+        },
+
         stateIcon: function(item) {
             return { ok: "svg-icon-check", auto: item.selectionMode === "DERIVE" ? "svg-icon-shuffle" : "svg-icon-check",
                      off: "svg-icon-minimize", miss: "svg-icon-close" }[item.state];
