@@ -16,7 +16,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/solarbatterysim/solarbatterysim.css
 <section id="app-block" style="display:none">
 
   <div class="app-panel">
-    <nav class="app-top-bar d-flex justify-content-between align-items-center mb-0 border-0">
+    <nav class="app-top-bar align-items-center mb-0 border-0">
       <ul class="btn-list app-tabs">
         <li><h1 class="app-btn active m-0"><i class="svg-icon-sun"></i><span>Solar &amp; Battery Simulator</span></h1></li>
       </ul>
@@ -60,23 +60,23 @@ load_css("Modules/app/apps/OpenEnergyMonitor/solarbatterysim/solarbatterysim.css
         </div>
         <div>
           <h5 class="power-title">SIMPLE PAYBACK</h5>
-          <h2 class="power-value text-primary">{{ toFixed(output.simple_payback, 1) }}<span class="power-unit fs-5"> years</span></h2>
+          <h2 class="power-value text-use">{{ toFixed(output.simple_payback, 1) }}<span class="power-unit fs-5"> years</span></h2>
         </div>
         <div>
           <h5 class="power-title">UNIT PRICE</h5>
-          <h2 class="power-value text-primary">{{ toFixed(annual.unit_price*100, 1) }}<span class="power-unit fs-5"> p/kWh</span></h2>
+          <h2 class="power-value text-use">{{ toFixed(annual.unit_price*100, 1) }}<span class="power-unit fs-5"> p/kWh</span></h2>
         </div>
         <div>
           <h5 class="power-title">SYSTEM COST</h5>
-          <h2 class="power-value text-quaternary">£{{ toFixed(annual.system_cost, 0) }}<span class="power-unit fs-5"> /yr</span></h2>
+          <h2 class="power-value text-battery">£{{ toFixed(annual.system_cost, 0) }}<span class="power-unit fs-5"> /yr</span></h2>
         </div>
         <div>
           <h5 class="power-title">SYSTEM + IMPORT</h5>
-          <h2 class="power-value text-quaternary">£{{ toFixed(annual.total_cost, 0) }}<span class="power-unit fs-5"> /yr</span></h2>
+          <h2 class="power-value text-battery">£{{ toFixed(annual.total_cost, 0) }}<span class="power-unit fs-5"> /yr</span></h2>
         </div>
         <div>
           <h5 class="power-title">GRID IMPORT</h5>
-          <h2 class="power-value text-danger">{{ toFixed(annual.total_import, 0) }}<span class="power-unit fs-5"> kWh</span></h2>
+          <h2 class="power-value text-import">{{ toFixed(annual.total_import, 0) }}<span class="power-unit fs-5"> kWh</span></h2>
         </div>
       </div>
     </div>

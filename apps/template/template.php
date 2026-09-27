@@ -15,7 +15,7 @@ load_css("Modules/app/apps/template/template.css");
 
     <!-- Top bar and live values -->
     <div class="app-panel">
-        <nav class="app-top-bar d-flex justify-content-between">
+        <nav class="app-top-bar">
             <ul id="tabs" class="btn-list app-tabs">
                 <li><button class="app-btn active" title="<?php echo tr('Power view') ?>"><i class="svg-icon-show_chart"></i><span><?php echo tr('Power') ?></span></button></li>
             </ul>
@@ -27,11 +27,11 @@ load_css("Modules/app/apps/template/template.css");
         <div class="stats-grid stats-grid-2">
             <div>
                 <h5 class="power-title"><?php echo tr('POWER') ?></h5>
-                <h2 class="power-value text-primary"><span id="powernow">0</span><span class="power-unit">W</span></h2>
+                <h2 class="power-value text-use"><span id="powernow">0</span><span class="power-unit">W</span></h2>
             </div>
             <div>
                 <h5 class="power-title"><?php echo tr('ENERGY') ?></h5>
-                <h2 class="power-value text-primary"><span id="kwhwindow">---</span><span class="power-unit">kWh</span></h2>
+                <h2 class="power-value text-use"><span id="kwhwindow">---</span><span class="power-unit">kWh</span></h2>
             </div>
         </div>
     </div>

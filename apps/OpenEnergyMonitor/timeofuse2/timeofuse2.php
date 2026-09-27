@@ -17,7 +17,7 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
   <section id="app-block" style="display:none">
 
     <div class="app-panel">
-      <nav class="app-top-bar d-flex justify-content-between">
+      <nav class="app-top-bar">
         <ul class="btn-list app-tabs">
           <li><button class="app-btn active"><i class="svg-icon-schedule"></i><span>TIME OF USE</span></button></li>
         </ul>
@@ -30,11 +30,11 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
       <div class="stats-grid stats-grid-2">
         <div>
           <h5 class="power-title">POWER NOW</h5>
-          <h2 class="power-value text-primary" id="power_now">---</h2>
+          <h2 class="power-value text-use" id="power_now">---</h2>
         </div>
         <div>
           <h5 class="power-title">USE TODAY</h5>
-          <h2 class="power-value text-primary" id="kwh_today">---</h2>
+          <h2 class="power-value text-use" id="kwh_today">---</h2>
         </div>
       </div>
     </div>
@@ -87,7 +87,7 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
          Directives must sit on a child of the mount root, so #schedule-builder carries v-show. -->
     <div id="schedule-builder-app">
       <div id="schedule-builder" class="app-panel" v-show="visible">
-        <nav class="app-top-bar d-flex justify-content-between">
+        <nav class="app-top-bar">
           <ul class="btn-list app-tabs">
             <li><button class="app-btn active"><i class="svg-icon-calendar"></i><span>Tariffs &amp; schedule</span></button></li>
           </ul>
@@ -244,7 +244,7 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
 <h3 class="text-white">Public holidays</h3>
 <p>Public holidays are entered in the schedule editor as a comma separated list of days of the year (1-365/366) per year, for example
 <code>2017:2,104,107,115,163,275,359,360;2018:1</code>.
-<a href="https://www.epochconverter.com/days" class="text-light">epochconverter.com/days</a> provides an easy reference.</p>
+<a href="https://www.epochconverter.com/days">epochconverter.com/days</a> provides an easy reference.</p>
 
 <hr>
 <h3 class="text-white">Supply charge</h3>

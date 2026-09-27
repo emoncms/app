@@ -2,7 +2,6 @@
 <?php load_js("Lib/js/vue.global.prod-3.5.22.min.js"); ?>
 
 <?php load_css("Modules/app/Lib/appconf/appconf.css"); ?>
-<?php load_css("Modules/app/Views/css/utils.css"); ?>
 
 <div id="vue-config">
 
@@ -11,7 +10,7 @@
     <div class="px-3">
         <div class="row g-0">
             <div class="col-md-7 xappconfig-description app-config">
-                <div class="xappconfig-description-inner text-light">
+                <div class="xappconfig-description-inner">
                     <h2 class="appconfig-title" :style="{ color: app_name_color }">{{ app_name }}</h2>
                     <div v-html="app_description"></div>
                     <div v-html="app_instructions"></div>

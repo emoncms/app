@@ -1,150 +1,58 @@
-.content-container {
-  max-width:1150px;
-}
+/* Available apps list (app/new). App views use app-kit.css. */
+
+.content-container { max-width: 1150px; }
 
 .app-item {
-  padding: 15px;
-  border-bottom: 1px solid #ccc;
-  border-left: 1px solid #ccc;
-  border-right: 1px solid #ccc;
+    padding: 15px;
+    border: 1px solid var(--ec-input-border-color);
+    border-top: none;
 }
 .app-item:hover {
-  background-color: #eee;
-  cursor: pointer;
+    background-color: var(--bs-secondary-bg);
+    cursor: pointer;
 }
 
 .app-item-title {
-  font-weight: bold;
-  font-size: 14px;
+    font-weight: bold;
+    font-size: 14px;
 }
 
-.col1 {
-  width: 100%;
+.app-group-box {
+    border: 1px solid var(--ec-input-border-color);
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
 }
-.col1-inner {
-  padding: 10px;
+.app-group-box.featured {
+    border-color: #e8b923;
+    border-left: 4px solid #e8b923;
+    background: #fffdf5;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
-
-#app-block.in_kw .power-value {
-    font-size: 1rem;
+.app-group-title {
+    margin: 0 0 4px 0;
 }
-
-/* -------------------------------------------------------------------
-   MOBILE FIRST:
-
-   Extra small devices (portrait phones, 320px and up)
---------------------------------------------------------------------*/
-@media (min-width: 320px) {
-    .text-xs-right {
-        text-align: right!important;
-    }
-    .text-xs-center {
-        text-align: center!important;
-    }
-    .d-xs-none {
-        display: none;
-    }
-    .d-xs-inline-block {
-        display: inline-block;
-    }
+.app-group-title i {
+    margin-right: 6px;
 }
-
-/* -------------------------------------------------------------------
-   Small devices (landscape phones, 576px and up)
---------------------------------------------------------------------*/
-@media (min-width: 576px) {
-    .d-sm-none {
-        display: none;
-    }
-    .d-sm-inline-block {
-        display: inline-block;
-    }
-    .d-xs-inline-block {
-        display: inline-block;
-    }
-    .display-sm-3{
-        font-size: 4.5rem;
-    }
-    .display-sm-4 {
-        font-size: 3.25rem;
-    }
-    h3.text-sm-larger{
-      font-size: 1.78rem;
-    }
-    h5.text-sm-larger{
-        font-size: 1.34rem;
-    }
-    #app-block.in_kw .power-value.display-sm-4 {
-        font-size: 2rem;
-    }
+.app-group-box.featured .app-group-title i {
+    color: #e8b923;
 }
-
-/* -------------------------------------------------------------------
-   Medium devices (tablets, 768px and up)
---------------------------------------------------------------------*/
-@media (min-width: 768px) {
-    .display-md-3{
-        font-size: 4.5rem;
-    }
-    .d-md-none {
-        display: none;
-    }
-    .d-md-inline-block {
-        display: inline-block;
-    }
-    h3.text-md-larger{
-        font-size: 1.78rem;
-    }
-    h5.text-md-larger{
-        font-size: 1.34rem;
-    }
-    #app-block.in_kw .power-value.display-md-3 {
-        font-size: 3rem;
-    }
+.app-item-title i {
+    margin-right: 6px;
+    opacity: 0.7;
 }
-
-/* -------------------------------------------------------------------
-   Large devices (desktops, 992px and up)
---------------------------------------------------------------------*/
-@media (min-width: 992px) {
-    h4.text-lg-larger{
-        font-size: 1.5rem;
-    }
-    h5.text-lg-larger{
-        font-size: 1.34rem;
-    }
-    .display-3.text-lg-larger{
-        font-size: 4.5rem;
-    }
-    .mb-lg-3{
-        margin-bottom: .3em!important;
-    }
-    .py-lg-3,.pt-lg-3{
-        padding-top: calc(var(--spacer) * .8)
-    }
-    .py-lg-3,.pb-lg-3{
-        padding-bottom: calc(var(--spacer) * .8)
-    }
-    .display-lg-2{
-        font-size: 4.5rem;
-    }
-    #app-block.in_kw .power-value.display-lg-2 {
-        font-size: 4.4rem;
-    }
+.app-group-toggle {
+    cursor: pointer;
+    margin: 0;
+    user-select: none;
+    display: flex;
+    align-items: center;
 }
-
-/* -------------------------------------------------------------------
-   Extra large devices (large desktops, 1200px and up)
---------------------------------------------------------------------*/
-@media (min-width: 1200px) {
-    #app-block.in_kw .power-value.display-lg-2 {
-        font-size: 4.5rem;
-    }
+.app-group-toggle i {
+    margin-right: 6px;
+    opacity: 0.6;
 }
-
-/* -------------------------------------------------------------------
-   Flot 5 legend. Drawn as SVG, so the panel and label colour are set here.
---------------------------------------------------------------------*/
-.legend { font-size: 13px; }
-.legendLayer rect.background { fill: rgba(255, 255, 255, 0.85); }
-.legendLayer text { fill: #333; }
+.app-group-toggle:hover i {
+    opacity: 1;
+}

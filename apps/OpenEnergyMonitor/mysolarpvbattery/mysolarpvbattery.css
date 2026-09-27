@@ -1,8 +1,5 @@
 /* My Solar PV Battery. Shared components are in Modules/app/Views/css/app-kit.css. */
 
-/* Live grid balance, exporting */
-.power-value.is-export { color: var(--ec-energy-export); }
-
 #placeholder_bound { width: 100%; }
 
 /* Box colours */

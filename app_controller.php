@@ -60,7 +60,6 @@ function app_controller()
     else if ($route->action == "new" && $session['write']) {
         $applist = $appconfig->get_list($session['userid']);
         $route->format = "html";
-        $result .= "<link href='".$path."Modules/app/Views/css/app.css?v=".filemtime("Modules/app/Views/css/app.css")."' rel='stylesheet'>";
         $appavail = $appconfig->get_available();
         $result .= view("Modules/app/Views/app_view.php", array("apps"=>$appavail));
         return $result;
@@ -251,7 +250,6 @@ function app_controller()
     else if ($route->action == "view" || $route->action == "") {
         $route->format = "html";
         $result = "\n<!-- global app css and js -->";
-        $result .= "\n" . '<link href="' . $path . 'Modules/app/Views/css/app.css?v=' . filemtime("Modules/app/Views/css/app.css") . '" rel="stylesheet">';
         $result .= "\n" . '<script src="' . $path . 'Modules/app/Views/js/app.js?v=' . filemtime("Modules/app/Views/js/app.js") . '"></script>';
         $result .= "\n\n <!-- app specific view -->\n";
 

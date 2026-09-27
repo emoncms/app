@@ -15,7 +15,7 @@
 <section id="app-block" style="display:none" class="block">
 
     <div class="app-panel">
-        <nav class="app-top-bar d-flex justify-content-between">
+        <nav class="app-top-bar">
             <ul id="tabs" class="btn-list app-tabs">
                 <li><button class="app-btn viewhistory" title="<?php echo tr('View History') ?>"><i class="svg-icon-calendar"></i><span><?php echo tr('History') ?></span></button></li>
                 <li><button class="app-btn balanceline" title="<?php echo tr('Show Balance') ?>"><i class="svg-icon-show_chart"></i><span><?php echo tr('Balance') ?></span></button></li>
@@ -29,7 +29,7 @@
         <div class="stats-grid">
             <div>
                 <h5 class="power-title"><?php echo tr('TOTAL USE') ?></h5>
-                <h2 class="power-value text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
+                <h2 class="power-value text-use"><span class="usenow"></span><span class="power-unit"></span></h2>
             </div>
             <div>
                 <h5 class="power-title"><span class="balance-label">-</span></h5>
@@ -37,7 +37,7 @@
             </div>
             <div>
                 <h5 class="power-title"><span class="generationtitle"><?php echo tr('SOLAR') ?></span></h5>
-                <h2 class="power-value text-warning"><span class="generationnow"></span><span class="power-unit"></span></h2>
+                <h2 class="power-value text-solar"><span class="generationnow"></span><span class="power-unit"></span></h2>
             </div>
             <div>
                 <h5 class="power-title"><?php echo tr('HOUSE') ?></h5>
@@ -45,7 +45,7 @@
             </div>
             <div>
                 <h5 class="power-title"><?php echo tr('DIVERT') ?></h5>
-                <h2 class="power-value text-quaternary"><span class="divertnow">-</span><span class="power-unit"></span></h2>
+                <h2 class="power-value text-battery"><span class="divertnow">-</span><span class="power-unit"></span></h2>
             </div>
         </div>
     </div>
@@ -405,14 +405,12 @@ function livefn()
         use_now = as_kw(use_now)
         balance = as_kw(balance)
         $('.power-unit').text('kW')
-        $('#app-block').addClass('in_kw');
     } else {
         wind_now = Math.round(wind_now)
         solar_now = Math.round(solar_now)
         gen_now = solar_now + wind_now
         balance = Math.round(balance)
         $('.power-unit').text('W')
-        $('#app-block').removeClass('in_kw');
     }
 
     if (balance==0) {

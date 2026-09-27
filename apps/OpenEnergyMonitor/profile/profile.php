@@ -15,7 +15,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/profile/profile.css");
 <section id="app-block" style="display:none">
 
   <div class="app-panel">
-    <nav class="app-top-bar d-flex justify-content-between align-items-center">
+    <nav class="app-top-bar align-items-center">
       <ul class="btn-list app-tabs">
         <li><h1 class="app-btn active m-0"><i class="svg-icon-show_chart"></i><span>Profile Explorer</span></h1></li>
       </ul>

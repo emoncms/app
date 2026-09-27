@@ -16,7 +16,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/storagesim/storagesim.css");
 <section id="app-block" style="display:none">
 
     <div class="app-panel">
-        <nav class="app-top-bar d-flex justify-content-between mb-0 border-0">
+        <nav class="app-top-bar mb-0 border-0">
             <ul id="tabs" class="btn-list app-tabs">
                 <li><button class="app-btn active"><i class="svg-icon-box-add"></i><span><?php echo tr('Storage simulator') ?></span></button></li>
             </ul>

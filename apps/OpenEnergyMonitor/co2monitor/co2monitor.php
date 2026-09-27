@@ -14,7 +14,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/co2monitor/co2monitor.css");
 <section id="app-block" style="display:none">
 
     <div class="app-panel">
-        <nav class="app-top-bar d-flex justify-content-between mb-0 border-0">
+        <nav class="app-top-bar mb-0 border-0">
             <ul id="tabs" class="btn-list app-tabs">
                 <li><button class="app-btn active"><i class="svg-icon-leaf"></i><span><?php echo tr('Air change rate from CO2') ?></span></button></li>
             </ul>

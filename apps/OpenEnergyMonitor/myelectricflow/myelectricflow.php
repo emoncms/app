@@ -18,7 +18,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
 
     <div class="app-panel">
 
-    <nav class="app-top-bar d-flex justify-content-between">
+    <nav class="app-top-bar">
         <ul id="tabs" class="btn-list app-tabs">
             <li><button class="app-btn view-toggle-btn active" data-view="flows"><i class="svg-icon-shuffle"></i><span><?php echo tr('Electric flow') ?></span></button></li>
             <li><button class="app-btn view-toggle-btn d-none" data-view="costs"><i class="svg-icon-schedule"></i><span><?php echo tr('Tariff explorer') ?></span></button></li>
@@ -31,38 +31,38 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
 
     <div id="live-power-view" class="stats-grid">
         <div>
-            <h5 class="power-title text-light"><?php echo tr('USE') ?></h5>
-            <h2 class="power-value text-primary"><span class="use-now"></span><span class="power-unit"></span></h2>
+            <h5 class="power-title"><?php echo tr('USE') ?></h5>
+            <h2 class="power-value text-use"><span class="use-now"></span><span class="power-unit"></span></h2>
         </div>
         <div>
-            <h5 class="power-title text-light"><span class="balance-label">-</span></h5>
+            <h5 class="power-title"><span class="balance-label">-</span></h5>
             <h2 class="power-value"><span class="grid-now">0</span><span class="power-unit">W</span></h2>
         </div>
         <div>
-            <h5 id="live-solar-title" class="power-title text-light"><?php echo tr('SOLAR') ?></h5>
-            <h2 id="live-solar-value" class="power-value text-warning"><span class="solar-now"></span><span class="power-unit"></span></h2>
+            <h5 id="live-solar-title" class="power-title"><?php echo tr('SOLAR') ?></h5>
+            <h2 id="live-solar-value" class="power-value text-solar"><span class="solar-now"></span><span class="power-unit"></span></h2>
         </div>
         <div class="battery-section">
-            <h5 class="power-title text-light"><span class="d-none d-sm-inline"><?php echo tr('BATTERY'); ?></span> <span class="battery_now_title"><?php echo tr('POWER') ?></span></h5>
-            <h2 class="power-value text-quaternary"><span class="battery-now">--</span><span class="power-unit"></span></h2>
+            <h5 class="power-title"><span class="d-none d-sm-inline"><?php echo tr('BATTERY'); ?></span> <span class="battery_now_title"><?php echo tr('POWER') ?></span></h5>
+            <h2 class="power-value text-battery"><span class="battery-now">--</span><span class="power-unit"></span></h2>
         </div>
         <div class="battery-section">
-            <h5 class="power-title text-light"><span class="battery_time_left_title"><span class="d-inline d-sm-none"><?php echo tr('TIME LEFT') ?></span><span class="d-none d-sm-inline"><?php echo tr('BATTERY TIME LEFT') ?></span></span></h5>
-            <h2 class="power-value text-quaternary"><span class="battery_time_left">--</span></h2>
+            <h5 class="power-title"><span class="battery_time_left_title"><span class="d-inline d-sm-none"><?php echo tr('TIME LEFT') ?></span><span class="d-none d-sm-inline"><?php echo tr('BATTERY TIME LEFT') ?></span></span></h5>
+            <h2 class="power-value text-battery"><span class="battery_time_left">--</span></h2>
         </div>
         <div class="battery-section">
-            <h5 class="power-title text-light"><span class="d-inline d-sm-none"><?php echo tr('SOC') ?></span><span class="d-none d-sm-inline"><?php echo tr('STATE OF CHARGE') ?></span></h5>
-            <h2 class="power-value text-quaternary"><span class="battery_soc">-</span>%</h2>
+            <h5 class="power-title"><span class="d-inline d-sm-none"><?php echo tr('SOC') ?></span><span class="d-none d-sm-inline"><?php echo tr('STATE OF CHARGE') ?></span></h5>
+            <h2 class="power-value text-battery"><span class="battery_soc">-</span>%</h2>
         </div>
     </div>
 
     <div id="live-cost-view" class="live-cost-grid d-none">
         <div>
-            <h5 class="power-title text-light"><span class="balance-label">-</span></h5>
+            <h5 class="power-title"><span class="balance-label">-</span></h5>
             <h2 class="power-value"><span class="grid-now">0</span><span class="power-unit">W</span></h2>
         </div>
         <div>
-            <h5 class="power-title text-light"><span class="live-cost-tariff-label"><?php echo tr('IMPORT PRICE') ?></span></h5>
+            <h5 class="power-title"><span class="live-cost-tariff-label"><?php echo tr('IMPORT PRICE') ?></span></h5>
             <h2 class="power-value"><span class="live-cost-tariff-now">--</span><span class="live-cost-tariff-unit" style="font-size:1.2rem"> p/kWh</span></h2>
         </div>
     </div>

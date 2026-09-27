@@ -879,8 +879,7 @@ function solar_battery_visibility() {
     const s = available.solar;
     const b = available.battery;
 
-    $("#live-solar-title").toggleClass("text-light", s);
-    $("#live-solar-value").toggleClass("text-warning", s);
+        $("#live-solar-value").toggleClass("text-solar", s);
 
     const boxColors = {
         "#solar-box":   s ? "#dccc1f" : "#282828",

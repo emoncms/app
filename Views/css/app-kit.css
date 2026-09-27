@@ -16,7 +16,7 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
     color: #999;
 }
 
-/* Standard app width. Also in app.css, which apps with their own controller do not load. */
+/* Standard app width */
 .content-container { max-width: 1150px; }
 
 .app-page #app-block { padding: 0; }
@@ -143,6 +143,9 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
 /* -- Top bar and tabs ------------------------------------------------------ */
 
 .app-top-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
     padding: .5rem 0;
     border-bottom: 1px solid var(--border);
     margin-bottom: .4rem;
@@ -400,6 +403,16 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
     .power-value { font-size: 3.5rem; }
 }
 
+/* Energy colours for text, the same in every app */
+.text-use     { color: var(--ec-energy-use); }
+.text-house   { color: var(--ec-energy-use-light); }
+.text-solar   { color: var(--ec-energy-solar); }
+.text-wind    { color: var(--ec-energy-wind); }
+.text-direct  { color: var(--ec-energy-direct); }
+.text-import  { color: var(--ec-energy-import); }
+.text-export  { color: var(--ec-energy-export); }
+.text-battery { color: var(--ec-energy-battery); }
+
 /* -- Flow blocks ----------------------------------------------------------- */
 
 .statstable {
@@ -537,6 +550,7 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
 /* -- Charts ---------------------------------------------------------------- */
 
 /* Flot 5 legend is SVG, so the panel and label colours are set here */
+.app-page .legend { font-size: 13px; }
 .app-page .legendLayer rect.background { fill: rgba(var(--bs-body-bg-rgb), 0.85); }
 .app-page .legendLayer text { fill: var(--bs-body-color); }
 

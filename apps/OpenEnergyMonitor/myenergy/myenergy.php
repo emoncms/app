@@ -15,7 +15,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myenergy/myenergy.css");
 <section id="app-block" style="display:none">
 
     <div class="app-panel">
-        <nav class="app-top-bar d-flex justify-content-between">
+        <nav class="app-top-bar">
             <ul id="tabs" class="btn-list app-tabs">
                 <li><button class="app-btn active"><i class="svg-icon-leaf"></i><span><?php echo tr('Renewable energy') ?></span></button></li>
             </ul>
@@ -28,7 +28,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myenergy/myenergy.css");
         <div class="stats-grid">
             <div>
                 <h5 class="power-title"><?php echo tr('USE NOW') ?></h5>
-                <h2 class="power-value text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
+                <h2 class="power-value text-use"><span class="usenow"></span><span class="power-unit"></span></h2>
             </div>
             <div>
                 <h5 class="power-title"><span class="balance-label">-</span></h5>
@@ -36,10 +36,10 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myenergy/myenergy.css");
             </div>
             <div>
                 <h5 class="power-title"><?php echo tr('RENEWABLE GEN') ?></h5>
-                <h2 class="power-value text-warning"><span class="gennow"></span><span class="power-unit"></span></h2>
+                <h2 class="power-value text-solar"><span class="gennow"></span><span class="power-unit"></span></h2>
                 <h5 class="power-title">
-                    <span class="text-warning" title="<?php echo tr('SOLAR') ?>"><span class="d-none d-sm-inline"><?php echo tr('SOLAR') ?>: </span><span class="solarnow">0</span><span class="power-unit"></span></span> |
-                    <span class="text-success" title="<?php echo tr('WIND') ?>"><span class="d-none d-sm-inline"><?php echo tr('WIND') ?>: </span><span class="windnow">0</span><span class="power-unit"></span></span>
+                    <span class="text-solar" title="<?php echo tr('SOLAR') ?>"><span class="d-none d-sm-inline"><?php echo tr('SOLAR') ?>: </span><span class="solarnow">0</span><span class="power-unit"></span></span> |
+                    <span class="text-wind" title="<?php echo tr('WIND') ?>"><span class="d-none d-sm-inline"><?php echo tr('WIND') ?>: </span><span class="windnow">0</span><span class="power-unit"></span></span>
                 </h5>
             </div>
         </div>
@@ -67,23 +67,23 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myenergy/myenergy.css");
         <div class="app-stats myenergy-totals">
             <div>
                 <div class="app-stat-title"><?php echo tr('USE') ?></div>
-                <div class="app-stat-value text-primary"><span class="total_use_kwh">--</span><span class="app-stat-unit">kWh</span></div>
+                <div class="app-stat-value text-use"><span class="total_use_kwh">--</span><span class="app-stat-unit">kWh</span></div>
             </div>
             <div>
                 <div class="app-stat-title"><?php echo tr('WIND') ?></div>
-                <div class="app-stat-value text-tertiary"><span class="total_wind_kwh">--</span><span class="app-stat-unit">kWh</span></div>
+                <div class="app-stat-value text-wind"><span class="total_wind_kwh">--</span><span class="app-stat-unit">kWh</span></div>
             </div>
             <div>
                 <div class="app-stat-title"><?php echo tr('SOLAR') ?></div>
-                <div class="app-stat-value text-warning"><span class="total_solar_kwh">--</span><span class="app-stat-unit">kWh</span></div>
+                <div class="app-stat-value text-solar"><span class="total_solar_kwh">--</span><span class="app-stat-unit">kWh</span></div>
             </div>
             <div>
                 <div class="app-stat-title"><?php echo tr('DIRECT') ?></div>
-                <div class="app-stat-value text-success"><span class="total_use_direct_prc">--</span><span class="app-stat-unit"><span class="total_use_direct_kwh"></span> kWh</span></div>
+                <div class="app-stat-value text-direct"><span class="total_use_direct_prc">--</span><span class="app-stat-unit"><span class="total_use_direct_kwh"></span> kWh</span></div>
             </div>
             <div>
                 <div class="app-stat-title"><?php echo tr('GRID') ?></div>
-                <div class="app-stat-value text-danger"><span class="total_use_via_store_kwh">--</span><span class="app-stat-unit">kWh</span></div>
+                <div class="app-stat-value text-import"><span class="total_use_via_store_kwh">--</span><span class="app-stat-unit">kWh</span></div>
             </div>
         </div>
     </div>

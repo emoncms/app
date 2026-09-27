@@ -16,7 +16,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectric/myelectric.css");
 <section id="app-block" style="display:none">
 
     <div class="app-panel">
-        <nav class="app-top-bar d-flex justify-content-between">
+        <nav class="app-top-bar">
             <ul id="tabs" class="btn-list app-tabs">
                 <li><button class="app-btn myelectric-view-cost"><i class="svg-icon-schedule"></i><span><?php echo tr("Cost") ?></span></button></li>
                 <li><button class="app-btn myelectric-view-kwh active"><i class="svg-icon-smartmeter"></i><span><?php echo tr("kWh") ?></span></button></li>
@@ -30,11 +30,11 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectric/myelectric.css");
         <div class="stats-grid stats-grid-2">
             <div>
                 <h5 class="power-title"><?php echo tr('POWER NOW') ?></h5>
-                <h2 class="power-value text-primary"><span id="powernow">0</span></h2>
+                <h2 class="power-value text-use"><span id="powernow">0</span></h2>
             </div>
             <div>
                 <h5 class="power-title"><?php echo tr('TODAY') ?></h5>
-                <h2 class="power-value text-primary"><span id="usetoday_units_a"></span><span id="usetoday"></span><small id="usetoday_units_b"></small></h2>
+                <h2 class="power-value text-use"><span id="usetoday_units_a"></span><span id="usetoday"></span><small id="usetoday_units_b"></small></h2>
             </div>
         </div>
     </div>
@@ -64,23 +64,23 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectric/myelectric.css");
         <div class="app-stats myelectric-totals">
             <div>
                 <div class="app-stat-title"><?php echo tr('WEEK') ?></div>
-                <div class="app-stat-value text-primary"><span class="u1a"></span><span id="week_kwh"></span><span class="app-stat-unit u1b"></span></div>
-                <div class="myelectric-kwhd text-primary"><span class="u2a"></span><span id="week_kwhd"></span><span class="u2b">/day</span></div>
+                <div class="app-stat-value text-use"><span class="u1a"></span><span id="week_kwh"></span><span class="app-stat-unit u1b"></span></div>
+                <div class="myelectric-kwhd text-use"><span class="u2a"></span><span id="week_kwhd"></span><span class="u2b">/day</span></div>
             </div>
             <div>
                 <div class="app-stat-title"><?php echo tr('MONTH') ?></div>
-                <div class="app-stat-value text-primary"><span class="u1a"></span><span id="month_kwh"></span><span class="app-stat-unit u1b"></span></div>
-                <div class="myelectric-kwhd text-primary"><span class="u2a"></span><span id="month_kwhd"></span><span class="u2b">/day</span></div>
+                <div class="app-stat-value text-use"><span class="u1a"></span><span id="month_kwh"></span><span class="app-stat-unit u1b"></span></div>
+                <div class="myelectric-kwhd text-use"><span class="u2a"></span><span id="month_kwhd"></span><span class="u2b">/day</span></div>
             </div>
             <div>
                 <div class="app-stat-title"><?php echo tr('YEAR') ?></div>
-                <div class="app-stat-value text-primary"><span class="u1a"></span><span id="year_kwh"></span><span class="app-stat-unit u1b"></span></div>
-                <div class="myelectric-kwhd text-primary"><span class="u2a"></span><span id="year_kwhd"></span><span class="u2b">/day</span></div>
+                <div class="app-stat-value text-use"><span class="u1a"></span><span id="year_kwh"></span><span class="app-stat-unit u1b"></span></div>
+                <div class="myelectric-kwhd text-use"><span class="u2a"></span><span id="year_kwhd"></span><span class="u2b">/day</span></div>
             </div>
             <div>
                 <div class="app-stat-title"><?php echo tr('ALL') ?></div>
-                <div class="app-stat-value text-primary"><span class="u1a"></span><span id="alltime_kwh"></span><span class="app-stat-unit u1b"></span></div>
-                <div class="myelectric-kwhd text-primary"><span class="u2a"></span><span id="alltime_kwhd"></span><span class="u2b">/day</span></div>
+                <div class="app-stat-value text-use"><span class="u1a"></span><span id="alltime_kwh"></span><span class="app-stat-unit u1b"></span></div>
+                <div class="myelectric-kwhd text-use"><span class="u2a"></span><span id="alltime_kwhd"></span><span class="u2b">/day</span></div>
             </div>
         </div>
     </div>

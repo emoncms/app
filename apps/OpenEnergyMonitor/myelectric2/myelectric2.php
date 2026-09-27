@@ -12,7 +12,7 @@
   <section id="app-block" style="display:none">
 
     <div id="myelectric-realtime" class="app-panel">
-      <nav class="app-top-bar d-flex justify-content-between">
+      <nav class="app-top-bar">
         <ul class="btn-list app-tabs">
           <li><button class="app-btn active"><i class="svg-icon-show_chart"></i><span id="app-title">MY ELECTRIC</span></button></li>
         </ul>
@@ -25,11 +25,11 @@
       <div class="stats-grid stats-grid-2">
         <div>
           <h5 class="power-title">NOW</h5>
-          <h2 class="power-value text-primary" id="power_now">---</h2>
+          <h2 class="power-value text-use" id="power_now">---</h2>
         </div>
         <div>
           <h5 class="power-title">TODAY</h5>
-          <h2 class="power-value text-primary" id="kwh_today">---</h2>
+          <h2 class="power-value text-use" id="kwh_today">---</h2>
         </div>
       </div>
     </div>

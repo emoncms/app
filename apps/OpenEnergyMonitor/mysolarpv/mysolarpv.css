@@ -33,8 +33,6 @@
     }
 }
 
-.text-house { color: var(--ec-energy-use-light); }
-
 /* Flow box colours */
 .statsbox-solar  { background: var(--ec-energy-solar); }
 .statsbox-export { background: var(--ec-energy-export); }

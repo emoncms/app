@@ -12,6 +12,15 @@
   color: #fff;
 }
 
+/* App description, Bootstrap 2 lead size */
+.xappconfig-description-inner { color: #aaa; }
+.xappconfig-description-inner .lead {
+  margin-bottom: 20px;
+  font-size: 21px;
+  font-weight: 200;
+  line-height: 30px;
+}
+
 .app-config-description-inner {
   padding-right: 20px;
   color: #ccc;

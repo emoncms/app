@@ -14,7 +14,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpv/mysolarpv.css");
 <section id="app-block" style="display:none">
 
     <div class="app-panel">
-        <nav class="app-top-bar d-flex justify-content-between">
+        <nav class="app-top-bar">
             <ul id="tabs" class="btn-list app-tabs">
                 <li><button class="app-btn viewpower active" title="<?php echo tr('Power View') ?>"><i class="svg-icon-sun"></i><span><?php echo tr('Power') ?></span></button></li>
             </ul>
@@ -27,7 +27,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpv/mysolarpv.css");
         <div class="stats-grid">
             <div>
                 <h5 class="power-title"><?php echo tr('USE') ?></h5>
-                <h2 class="power-value text-primary"><span id="powernow">0</span><span class="power-unit">W</span></h2>
+                <h2 class="power-value text-use"><span id="powernow">0</span><span class="power-unit">W</span></h2>
             </div>
             <div>
                 <h5 class="power-title" id="grid-label"><?php echo tr('GRID') ?></h5>
@@ -35,7 +35,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpv/mysolarpv.css");
             </div>
             <div>
                 <h5 class="power-title"><?php echo tr('SOLAR') ?></h5>
-                <h2 class="power-value text-warning"><span id="solarnow">0</span><span class="power-unit">W</span></h2>
+                <h2 class="power-value text-solar"><span id="solarnow">0</span><span class="power-unit">W</span></h2>
             </div>
             <div>
                 <h5 class="power-title" id="battery-label"><?php echo tr('BATTERY') ?></h5>
@@ -43,7 +43,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpv/mysolarpv.css");
             </div>
             <div>
                 <h5 class="power-title"><?php echo tr('BAT SOC') ?></h5>
-                <h2 class="power-value text-quaternary"><span id="socnow">--</span>%</h2>
+                <h2 class="power-value text-battery"><span id="socnow">--</span>%</h2>
             </div>
         </div>
     </div>
@@ -69,22 +69,22 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpv/mysolarpv.css");
     </div>
 
     <div class="app-panel app-stats py-2">
-        <div class="text-primary">
+        <div class="text-use">
             <h5 class="power-title"><?php echo tr('USE') ?></h5>
             <div class="app-stat-value" id="use_kwh">---</div>
             <div class="app-stat-sub">kWh</div>
         </div>
-        <div class="text-warning">
+        <div class="text-solar">
             <h5 class="power-title"><?php echo tr('SOLAR') ?></h5>
             <div class="app-stat-value" id="solar_kwh">---</div>
             <div class="app-stat-sub">kWh</div>
         </div>
-        <div class="text-danger">
+        <div class="text-import">
             <h5 class="power-title"><?php echo tr('IMPORT') ?></h5>
             <div class="app-stat-value" id="import_kwh">---</div>
             <div class="app-stat-sub">kWh</div>
         </div>
-        <div class="text-tertiary">
+        <div class="text-export">
             <h5 class="power-title"><?php echo tr('EXPORT') ?></h5>
             <div class="app-stat-value" id="export_kwh">---</div>
             <div class="app-stat-sub">kWh</div>

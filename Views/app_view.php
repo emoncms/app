@@ -1,47 +1,6 @@
 <?php global $path; ?>
 <?php load_js("Lib/js/vue.global.prod-3.5.22.min.js"); ?>
-
-<style>
-    .app-group-box {
-        border: 1px solid #ccc;
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-    }
-    .app-group-box.featured {
-        border-color: #e8b923;
-        border-left: 4px solid #e8b923;
-        background: #fffdf5;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    }
-    .app-group-title {
-        margin: 0 0 4px 0;
-    }
-    .app-group-title i {
-        margin-right: 6px;
-    }
-    .app-group-box.featured .app-group-title i {
-        color: #e8b923;
-    }
-    .app-item-title i {
-        margin-right: 6px;
-        opacity: 0.7;
-    }
-    .app-group-toggle {
-        cursor: pointer;
-        margin: 0;
-        user-select: none;
-        display: flex;
-        align-items: center;
-    }
-    .app-group-toggle i {
-        margin-right: 6px;
-        opacity: 0.6;
-    }
-    .app-group-toggle:hover i {
-        opacity: 1;
-    }
-</style>
+<?php load_css("Modules/app/Views/css/app.css"); ?>
 
 <div id="app-page" style="padding:20px">
 

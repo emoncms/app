@@ -16,7 +16,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/psychrograph/psychrograph.css");
 <section id="app-block" style="display:none" class="block">
 
     <div class="app-panel psy-panel">
-        <nav class="app-top-bar d-flex justify-content-between">
+        <nav class="app-top-bar">
             <ul id="tabs" class="btn-list app-tabs">
                 <li><button class="app-btn view-toggle-btn active" data-view="classic"><i class="svg-icon-show_chart"></i><span><?php echo tr('Psychrometric') ?></span></button></li>
                 <li><button class="app-btn view-toggle-btn givoni-tab d-none" data-view="givoni"><i class="svg-icon-leaf"></i><span><?php echo tr('Givoni') ?></span></button></li>
@@ -27,7 +27,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/psychrograph/psychrograph.css");
             </ul>
         </nav>
 
-        <p class="psy-axis-note text-light mb-0">
+        <p class="psy-axis-note text-body-secondary mb-0">
             <?php echo tr('Y-axis: absolute humidity (g water / kg dry air) &nbsp;&middot;&nbsp; X-axis: temperature (&deg;C)') ?>
         </p>
     </div>
@@ -57,7 +57,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/psychrograph/psychrograph.css");
             <button id='time-manual-close' class='visnav app-btn' title="<?php echo tr('Done') ?>"><i class="icon-ok icon-white"></i></button>
         </div>
 
-        <div class="psy-context-label text-light"><?php echo tr('Drag to select a time window') ?></div>
+        <div class="psy-context-label text-body-secondary"><?php echo tr('Drag to select a time window') ?></div>
         <div id="contextgraph_bound"><div id="contextgraph"></div></div>
     </div>
 
@@ -71,8 +71,8 @@ load_css("Modules/app/apps/OpenEnergyMonitor/psychrograph/psychrograph.css");
     </div>
 
     <div class="app-panel psy-panel">
-        <div class="psy-stats-controls d-flex justify-content-between align-items-center mb-2">
-            <h5 class="power-title text-light mb-0"><?php echo tr('COMFORT ZONE ANALYSIS') ?></h5>
+        <div class="psy-stats-controls d-flex flex-wrap justify-content-between align-items-center mb-2">
+            <h5 class="power-title mb-0"><?php echo tr('COMFORT ZONE ANALYSIS') ?></h5>
             <div>
                 <button id="calc" class="cost-btn"><?php echo tr('Calculate %') ?></button>
                 <button id="clear" class="cost-btn"><?php echo tr('Clear') ?></button>

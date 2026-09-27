@@ -15,7 +15,7 @@
 <section id="app-block" style="display:none" class="block">
 
     <div class="app-panel">
-        <nav class="app-top-bar d-flex justify-content-between">
+        <nav class="app-top-bar">
             <ul id="tabs" class="btn-list app-tabs">
                 <li><button class="app-btn viewpower active" title="<?php echo tr('Power View') ?>"><i class="svg-icon-sun"></i><span><?php echo tr('Power') ?></span></button></li>
                 <li><button class="app-btn viewhistory" title="<?php echo tr('View History') ?>"><i class="svg-icon-calendar"></i><span><?php echo tr('History') ?></span></button></li>
@@ -31,7 +31,7 @@
         <div class="stats-grid">
             <div>
                 <h5 class="power-title"><?php echo tr('USE NOW') ?></h5>
-                <h2 class="power-value text-primary"><span class="usenow">0</span><span class="power-unit"></span></h2>
+                <h2 class="power-value text-use"><span class="usenow">0</span><span class="power-unit"></span></h2>
             </div>
             <div>
                 <h5 class="power-title"><span class="balance-label">-</span></h5>
@@ -39,7 +39,7 @@
             </div>
             <div>
                 <h5 class="power-title"><?php echo tr('SOLAR PV') ?></h5>
-                <h2 class="power-value text-warning"><span class="solarnow"></span><span class="power-unit"></span></h2>
+                <h2 class="power-value text-solar"><span class="solarnow"></span><span class="power-unit"></span></h2>
             </div>
         </div>
     </div>
@@ -65,27 +65,27 @@
     </div>
 
     <div id="breakdown" class="app-panel app-stats py-2">
-        <div class="text-primary">
+        <div class="text-use">
             <h5 class="power-title"><?php echo tr('USE') ?></h5>
             <div class="app-stat-value total_use_kwh">--</div>
             <div class="app-stat-sub">kWh</div>
         </div>
-        <div class="text-warning">
+        <div class="text-solar">
             <h5 class="power-title"><?php echo tr('SOLAR') ?></h5>
             <div class="app-stat-value total_solar_kwh">--</div>
             <div class="app-stat-sub">kWh</div>
         </div>
-        <div class="text-success">
+        <div class="text-direct">
             <h5 class="power-title"><?php echo tr('DIRECT') ?></h5>
             <div class="app-stat-value total_use_direct_prc">--</div>
             <div class="app-stat-sub"><span id="total_use_direct_kwh"></span> kWh</div>
         </div>
-        <div class="text-tertiary">
+        <div class="text-export">
             <h5 class="power-title"><?php echo tr('EXPORT') ?></h5>
             <div class="app-stat-value total_export_prc">--</div>
             <div class="app-stat-sub"><span id="total_export_kwh"></span> kWh</div>
         </div>
-        <div class="text-danger">
+        <div class="text-import">
             <h5 class="power-title"><?php echo tr('GRID') ?></h5>
             <div class="app-stat-value total_import_prc">--</div>
             <div class="app-stat-sub"><span id="total_import_kwh"></span> kWh</div>
@@ -406,10 +406,8 @@ function livefn()
         solar_now = as_kw(solar_now)
         use_now = as_kw(use_now)
         balance = as_kw(balance)
-        $('#app-block').addClass('in_kw')
     } else {
         $('.power-unit').text(powerUnit)
-        $('#app-block').removeClass('in_kw')
     }
     $('.power-unit').text(powerUnit)
     $(".solarnow").html(solar_now)

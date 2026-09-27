@@ -15,7 +15,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
 <section id="app-block" style="display:none">
 
     <div class="app-panel">
-        <nav class="app-top-bar d-flex justify-content-between">
+        <nav class="app-top-bar">
             <ul id="tabs" class="btn-list app-tabs">
                 <li><button class="app-btn active"><i class="svg-icon-sun"></i><span><?php echo tr('Solar PV battery') ?></span></button></li>
             </ul>
@@ -27,28 +27,28 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
 
         <div class="stats-grid">
             <div>
-                <h5 class="power-title text-light"><?php echo tr('USE') ?></h5>
-                <h2 class="power-value text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
+                <h5 class="power-title"><?php echo tr('USE') ?></h5>
+                <h2 class="power-value text-use"><span class="usenow"></span><span class="power-unit"></span></h2>
             </div>
             <div>
-                <h5 class="power-title text-light"><span class="balance-label">-</span></h5>
+                <h5 class="power-title"><span class="balance-label">-</span></h5>
                 <h2 class="power-value"><span class="balance">--</span></h2>
             </div>
             <div>
-                <h5 class="power-title text-light"><?php echo tr('SOLAR') ?></h5>
-                <h2 class="power-value text-warning"><span class="generationnow"></span><span class="power-unit"></span></h2>
+                <h5 class="power-title"><?php echo tr('SOLAR') ?></h5>
+                <h2 class="power-value text-solar"><span class="generationnow"></span><span class="power-unit"></span></h2>
             </div>
             <div>
-                <h5 class="power-title text-light"><span class="battery_charge_discharge_title"><?php echo tr('BATTERY POWER') ?></span></h5>
-                <h2 class="power-value text-quaternary"><span class="battery_charge_discharge">-</span><span class="power-unit"></span></h2>
+                <h5 class="power-title"><span class="battery_charge_discharge_title"><?php echo tr('BATTERY POWER') ?></span></h5>
+                <h2 class="power-value text-battery"><span class="battery_charge_discharge">-</span><span class="power-unit"></span></h2>
             </div>
             <div>
-                <h5 class="power-title text-light"><span class="discharge_time_left_title"><span class="d-inline d-sm-none"><?php echo tr('TIME LEFT') ?></span><span class="d-none d-sm-inline"><?php echo tr('BATTERY TIME LEFT') ?></span></span></h5>
-                <h2 class="power-value text-quaternary"><span class="discharge_time_left">-</span></h2>
+                <h5 class="power-title"><span class="discharge_time_left_title"><span class="d-inline d-sm-none"><?php echo tr('TIME LEFT') ?></span><span class="d-none d-sm-inline"><?php echo tr('BATTERY TIME LEFT') ?></span></span></h5>
+                <h2 class="power-value text-battery"><span class="discharge_time_left">-</span></h2>
             </div>
             <div>
-                <h5 class="power-title text-light"><span class="d-inline d-sm-none"><?php echo tr('SOC') ?></span><span class="d-none d-sm-inline"><?php echo tr('STATE OF CHARGE') ?></span></h5>
-                <h2 class="power-value text-quaternary"><span class="battery_soc">-</span>%</h2>
+                <h5 class="power-title"><span class="d-inline d-sm-none"><?php echo tr('SOC') ?></span><span class="d-none d-sm-inline"><?php echo tr('STATE OF CHARGE') ?></span></h5>
+                <h2 class="power-value text-battery"><span class="battery_soc">-</span>%</h2>
             </div>
         </div>
     </div>
@@ -453,13 +453,11 @@ function livefn()
         battery_charge_now = as_kw(battery_charge_now)
         battery_discharge_now = as_kw(battery_discharge_now)
         $('.power-unit').text('kW')
-        $('#app-block').addClass('in_kw');
     } else {
         solar_now = Math.round(solar_now)
         gen_now = solar_now
         balance = Math.round(balance)
         $('.power-unit').text('W')
-        $('#app-block').removeClass('in_kw');
     }
 
     if (balance==0) {
@@ -476,7 +474,7 @@ function livefn()
         $(".balance-label").html("IMPORTING");
         $(".balance").html(Math.round(Math.abs(balance))+powerUnit);
     }
-    $(".balance").parent().toggleClass("is-export", balance>0).toggleClass("text-danger", balance<0);
+    $(".balance").parent().toggleClass("text-export", balance>0).toggleClass("text-import", balance<0);
     
     $(".generationnow").html(gen_now);
     $(".usenow").html(use_now);

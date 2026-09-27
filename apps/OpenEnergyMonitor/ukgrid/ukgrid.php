@@ -17,7 +17,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/ukgrid/ukgrid.css");
 <section id="app-block" style="display:none">
 
     <div class="app-panel">
-        <nav class="app-top-bar d-flex justify-content-between mb-0 border-0">
+        <nav class="app-top-bar mb-0 border-0">
             <ul id="tabs" class="btn-list app-tabs">
                 <li><button class="app-btn fuelmix" title="<?php echo tr('Fuel mix history') ?>"><i class="svg-icon-earth"></i><span><?php echo tr('UK fuel mix') ?></span></button></li>
                 <li><button class="app-btn forecast active" title="<?php echo tr('Wind and solar forecast') ?>"><i class="svg-icon-sun"></i><span><?php echo tr('Forecast') ?></span></button></li>
