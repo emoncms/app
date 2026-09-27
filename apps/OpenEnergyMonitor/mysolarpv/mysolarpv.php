@@ -16,16 +16,16 @@
 
     <div class="app-panel">
         <nav class="app-top-bar">
-            <ul id="tabs" class="btn-list app-tabs">
-                <li><button class="app-btn viewpower active" title="<?php echo tr('Power View') ?>"><i class="svg-icon-sun"></i><span><?php echo tr('Power') ?></span></button></li>
-                <li><button class="app-btn viewhistory" title="<?php echo tr('View History') ?>"><i class="svg-icon-calendar"></i><span><?php echo tr('History') ?></span></button></li>
-                <li><button class="app-btn balanceline" title="<?php echo tr('Show Balance') ?>"><i class="svg-icon-show_chart"></i><span><?php echo tr('Balance') ?></span></button></li>
-                <li><button id="show-all" class="app-btn bargraph-viewall d-none" title="<?php echo tr('Show All') ?>"><i class="svg-icon-expand"></i><span><?php echo tr('Show All') ?></span></button></li>
-            </ul>
-            <ul class="btn-list">
-                <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><i class="svg-icon-wrench"></i></button></li>
-                <li><button class="app-btn config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button></li>
-            </ul>
+            <div id="tabs" class="nav nav-underline">
+                <button class="nav-link viewpower active" title="<?php echo tr('Power View') ?>"><i class="svg-icon-sun"></i><?php echo tr('Power') ?></button>
+                <button class="nav-link viewhistory" title="<?php echo tr('View History') ?>"><i class="svg-icon-calendar"></i><?php echo tr('History') ?></button>
+                <button class="nav-link balanceline" title="<?php echo tr('Show Balance') ?>"><i class="svg-icon-show_chart"></i><?php echo tr('Balance') ?></button>
+                <button id="show-all" class="nav-link bargraph-viewall d-none" title="<?php echo tr('Show All') ?>"><i class="svg-icon-expand"></i><?php echo tr('Show All') ?></button>
+            </div>
+            <div class="nav">
+                <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
+                <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+            </div>
         </nav>
 
         <div class="stats-grid">
@@ -45,18 +45,20 @@
     </div>
 
     <div class="app-panel">
-        <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
-            <button class='visnav time app-btn' time='1'>1<?php echo tr('h') ?></button>
-            <button class='visnav time app-btn' time='3'>3<?php echo tr('h') ?></button>
-            <button class='visnav time app-btn' time='6'>6<?php echo tr('h') ?></button>
-            <button class='visnav time app-btn' time='24'><?php echo tr('D') ?></button>
-            <button class='visnav time app-btn' time='168'><?php echo tr('W') ?></button>
-            <button class='visnav time app-btn' time='720'><?php echo tr('M') ?></button>
-            <button class='visnav time app-btn' time='8760'><?php echo tr('Y') ?></button>
-            <button id='zoomin' class='visnav app-btn'>+</button>
-            <button id='zoomout' class='visnav app-btn'>-</button>
-            <button id='left' class='visnav app-btn'>&lt;</button>
-            <button id='right' class='visnav app-btn'>&gt;</button>
+        <div id="graph-nav" class="app-navbar">
+            <div class="btn-group app-timebar">
+                <button class='btn time' time='1'>1<?php echo tr('h') ?></button>
+                <button class='btn time' time='3'>3<?php echo tr('h') ?></button>
+                <button class='btn time' time='6'>6<?php echo tr('h') ?></button>
+                <button class='btn time' time='24'><?php echo tr('D') ?></button>
+                <button class='btn time' time='168'><?php echo tr('W') ?></button>
+                <button class='btn time' time='720'><?php echo tr('M') ?></button>
+                <button class='btn time' time='8760'><?php echo tr('Y') ?></button>
+                <button id='zoomin' class='btn'>+</button>
+                <button id='zoomout' class='btn'>-</button>
+                <button id='left' class='btn'>&lt;</button>
+                <button id='right' class='btn'>&gt;</button>
+            </div>
         </div>
 
         <div id="placeholder_bound">

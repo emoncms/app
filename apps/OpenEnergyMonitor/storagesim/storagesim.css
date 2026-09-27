@@ -26,18 +26,4 @@
     color: var(--bs-emphasis-color);
     margin: 0 0 0.5rem;
 }
-.sim-title + .ctrl-note { padding-left: 0; }
-
-.sim-grid .app-table td { vertical-align: middle; }
-.sim-grid .app-table td:last-child { white-space: nowrap; }
-
-/* Number field with a unit after it */
-.sim-grid .ctrl-group > input[type="text"] {
-    width: 64px;
-    border-radius: 0.375rem 0 0 0.375rem;
-}
-.ctrl-unit {
-    border: 1px solid var(--ec-input-border-color);
-    border-left: none;
-    border-radius: 0 0.375rem 0.375rem 0;
-}
+.sim-grid td:last-child { white-space: nowrap; }

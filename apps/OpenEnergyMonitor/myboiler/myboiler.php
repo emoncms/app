@@ -80,7 +80,7 @@ global $path, $session, $v;
         <div class="me-auto">
           <span id="window-efficiency-bound" style="display:none">Efficiency in window: <b id="window-efficiency" style="cursor:pointer"></b> <span class="svg-icon-info" title="Make sure to select period that includes all boiler fuel steps"></span></span>
         </div>
-        <button id="advanced-toggle" class="app-btn" style="display:none">SHOW DETAIL</button>
+        <button id="advanced-toggle" class="nav-link" style="display:none">SHOW DETAIL</button>
       </div>
 
         <div id="advanced-block" class="app-block-body" style="display:none">

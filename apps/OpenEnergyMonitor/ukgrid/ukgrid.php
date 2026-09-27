@@ -18,27 +18,29 @@ load_css("Modules/app/apps/OpenEnergyMonitor/ukgrid/ukgrid.css");
 
     <div class="app-panel">
         <nav class="app-top-bar mb-0 border-0">
-            <ul id="tabs" class="btn-list app-tabs">
-                <li><button class="app-btn fuelmix" title="<?php echo tr('Fuel mix history') ?>"><i class="svg-icon-earth"></i><span><?php echo tr('UK fuel mix') ?></span></button></li>
-                <li><button class="app-btn forecast active" title="<?php echo tr('Wind and solar forecast') ?>"><i class="svg-icon-sun"></i><span><?php echo tr('Forecast') ?></span></button></li>
-            </ul>
-            <ul class="btn-list">
-                <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><i class="svg-icon-wrench"></i></button></li>
-                <li><button class="app-btn config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button></li>
-            </ul>
+            <div id="tabs" class="nav nav-underline">
+                <button class="nav-link fuelmix" title="<?php echo tr('Fuel mix history') ?>"><i class="svg-icon-earth"></i><?php echo tr('UK fuel mix') ?></button>
+                <button class="nav-link forecast active" title="<?php echo tr('Wind and solar forecast') ?>"><i class="svg-icon-sun"></i><?php echo tr('Forecast') ?></button>
+            </div>
+            <div class="nav">
+                <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
+                <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+            </div>
         </nav>
     </div>
 
     <div class="app-panel">
-        <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
-            <button class='visnav time app-btn' time='24'><?php echo tr('D') ?></button>
-            <button class='visnav time app-btn' time='168'><?php echo tr('W') ?></button>
-            <button class='visnav time app-btn' time='720'><?php echo tr('M') ?></button>
-            <button class='visnav time app-btn' time='8760'><?php echo tr('Y') ?></button>
-            <button id='zoomin' class='visnav app-btn'>+</button>
-            <button id='zoomout' class='visnav app-btn'>-</button>
-            <button id='left' class='visnav app-btn'>&lt;</button>
-            <button id='right' class='visnav app-btn'>&gt;</button>
+        <div id="graph-nav" class="app-navbar">
+            <div class="btn-group app-timebar">
+                <button class='btn time' time='24'><?php echo tr('D') ?></button>
+                <button class='btn time' time='168'><?php echo tr('W') ?></button>
+                <button class='btn time' time='720'><?php echo tr('M') ?></button>
+                <button class='btn time' time='8760'><?php echo tr('Y') ?></button>
+                <button id='zoomin' class='btn'>+</button>
+                <button id='zoomout' class='btn'>-</button>
+                <button id='left' class='btn'>&lt;</button>
+                <button id='right' class='btn'>&gt;</button>
+            </div>
         </div>
         <div id="visible-checkboxes" class="uk-series-list"></div>
         <div id="placeholder_bound"><div id="placeholder"></div></div>

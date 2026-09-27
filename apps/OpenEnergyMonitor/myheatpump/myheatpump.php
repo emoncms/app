@@ -90,7 +90,7 @@ global $path, $session, $v;
         <div class="me-auto">COP in window: <b id="window-cop" style="cursor:pointer"></b> <span id="window-carnot-cop"></span></div>
         <div id="emitter-spec-volume" style="display:none"></div>
         <div id="data-error" style="display:none">DATA ERROR</div>
-        <button id="advanced-toggle" class="app-btn" style="display:none">SHOW DETAIL</button>
+        <button id="advanced-toggle" class="nav-link" style="display:none">SHOW DETAIL</button>
       </div>
 
         <div id="advanced-block" class="app-block-body" style="display:none">

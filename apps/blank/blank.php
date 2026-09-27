@@ -10,10 +10,10 @@ load_css("Modules/app/Views/css/app-kit.css");
 
 <section id="app-block" style="display:none">
     <div class="app-panel">
-        <nav class="app-top-bar d-flex justify-content-end">
-            <ul class="btn-list">
-                <li><button class="app-btn config-open" title="Configure app"><i class="svg-icon-wrench"></i></button></li>
-            </ul>
+        <nav class="app-top-bar justify-content-end">
+            <div class="nav">
+                <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
+            </div>
         </nav>
         <p class="power-title text-center p-3">Oops something went wrong, this app does not exist!</p>
     </div>

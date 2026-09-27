@@ -17,35 +17,37 @@ load_css("Modules/app/apps/OpenEnergyMonitor/solarbatterysim/solarbatterysim.css
 
   <div class="app-panel">
     <nav class="app-top-bar align-items-center mb-0 border-0">
-      <ul class="btn-list app-tabs">
-        <li><h1 class="app-btn active m-0"><i class="svg-icon-sun"></i><span>Solar &amp; Battery Simulator</span></h1></li>
-      </ul>
-      <ul class="btn-list gap-2">
-        <li>
-          <span class="ctrl-group">
-            <span class="ctrl-label">Interval</span>
-            <select id="resolution">
-              <option value="600">10 mins</option>
-              <option value="900">15 mins</option>
-              <option value="1800">30 mins</option>
-            </select>
-          </span>
-        </li>
-        <li><button class="app-btn config-open" title="Configure app"><i class="svg-icon-wrench"></i></button></li>
-      </ul>
+      <div class="nav nav-underline">
+        <span class="nav-link active"><i class="svg-icon-sun"></i>Solar &amp; Battery Simulator</span>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <div class="input-group">
+          <span class="input-group-text">Interval</span>
+          <select id="resolution" class="form-select">
+            <option value="600">10 mins</option>
+            <option value="900">15 mins</option>
+            <option value="1800">30 mins</option>
+          </select>
+        </div>
+        <div class="nav">
+          <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
+        </div>
+      </div>
     </nav>
   </div>
 
   <div class="app-panel">
-    <div class="visnavblock mb-2 d-flex justify-content-start">
-      <button class="visnav app-btn graph-time" time="1">D</button>
-      <button class="visnav app-btn graph-time" time="7">W</button>
-      <button class="visnav app-btn graph-time" time="30">M</button>
-      <button class="visnav app-btn graph-time" time="365">Y</button>
-      <button id="zoomin" class="visnav app-btn">+</button>
-      <button id="zoomout" class="visnav app-btn">-</button>
-      <button id="left" class="visnav app-btn">&lt;</button>
-      <button id="right" class="visnav app-btn">&gt;</button>
+    <div class="app-navbar">
+      <div class="btn-group app-timebar">
+        <button class="btn graph-time" time="1">D</button>
+        <button class="btn graph-time" time="7">W</button>
+        <button class="btn graph-time" time="30">M</button>
+        <button class="btn graph-time" time="365">Y</button>
+        <button id="zoomin" class="btn">+</button>
+        <button id="zoomout" class="btn">-</button>
+        <button id="left" class="btn">&lt;</button>
+        <button id="right" class="btn">&gt;</button>
+      </div>
     </div>
     <div id="graph"></div>
   </div>
@@ -189,13 +191,13 @@ load_css("Modules/app/apps/OpenEnergyMonitor/solarbatterysim/solarbatterysim.css
         </div>
       </div>
       <div class="text-end">
-        <button class="cost-btn" id="simulate" @click="run">Simulate</button>
+        <button class="btn btn-outline-primary" id="simulate" @click="run">Simulate</button>
       </div>
     </div>
 
     <div class="app-panel">
       <div class="table-responsive">
-        <table class="app-table text-nowrap">
+        <table class="table text-nowrap mb-0">
           <tr>
             <th>Month</th>
             <th>Use</th>

@@ -60,7 +60,7 @@
       <div id="power-graph-footer" class="app-block-foot" style="display:none">
         <div class="d-flex flex-wrap align-items-center gap-3">
           <div class="me-auto">kWh in window: <b id="window-kwh"></b> <b>kWh</b>, Off-peak: <b id="window-offpeak"></b> <b>kWh</b>, Peak: <b id="window-peak"></b> <b>kWh</b></div>
-          <button id="advanced-toggle" class="app-btn">SHOW DETAIL</button>
+          <button id="advanced-toggle" class="nav-link">SHOW DETAIL</button>
         </div>
       </div>
 

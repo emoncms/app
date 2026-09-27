@@ -318,7 +318,7 @@ function draw() {
             sensors_list += "<td>"+air_change_rate+"</td>";
             sensors_list += "<td>"+R2+"</td>";
             // refine button
-            sensors_list += "<td><button class='cost-btn' onclick='refine("+z+")'>Refine</button></td>";
+            sensors_list += "<td><button class='btn btn-outline-primary btn-sm' onclick='refine("+z+")'>Refine</button></td>";
         }
 
         sensors_list += "</tr>";

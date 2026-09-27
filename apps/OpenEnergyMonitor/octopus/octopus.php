@@ -97,11 +97,11 @@ global $path, $session, $v;
                 <div>
                     <div id="use_meter_kwh_hh_bound" class="app-option hide">
                         <input id="use_meter_kwh_hh" type="checkbox" checked> <b>Show energy and costs based on Octopus smart meter data where available</b>
-                        <div id="meter_kwh_hh_comparison" class="ctrl-note"></div>
+                        <div id="meter_kwh_hh_comparison" class="small text-body-secondary ps-4"></div>
                     </div>
                     <div id="show_carbonintensity_bound" class="app-option">
                         <input id="show_carbonintensity" type="checkbox"> <b>Show grid carbon intensity</b>
-                        <div id="carbonintensity_result" class="ctrl-note"></div>
+                        <div id="carbonintensity_result" class="small text-body-secondary ps-4"></div>
                     </div>
                 </div>
 

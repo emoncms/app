@@ -25,32 +25,3 @@
     height: calc(100vh - 31rem);
     min-height: 320px;
 }
-
-/* Comfort zone analysis table */
-#psychrotext table {
-    width: 100%;
-    border-collapse: collapse;
-    color: var(--text-secondary);
-    font-size: 13px;
-}
-#psychrotext th,
-#psychrotext td {
-    padding: 6px 8px;
-    text-align: left;
-    border-bottom: 1px solid rgba(var(--bs-primary-rgb), 0.1);
-}
-#psychrotext th {
-    color: var(--bs-emphasis-color);
-    font-weight: bold;
-}
-#psychrotext td.zone-name { color: var(--bs-emphasis-color); }
-
-/* Zone colour square in the table heads */
-.zone-swatch {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 2px;
-    margin-right: 5px;
-    vertical-align: baseline;
-}

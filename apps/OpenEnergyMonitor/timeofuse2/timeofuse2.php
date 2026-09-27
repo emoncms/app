@@ -18,13 +18,13 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
 
     <div class="app-panel">
       <nav class="app-top-bar">
-        <ul class="btn-list app-tabs">
-          <li><button class="app-btn active"><i class="svg-icon-schedule"></i><span>TIME OF USE</span></button></li>
-        </ul>
-        <ul class="btn-list">
-          <li><button class="app-btn viewcostenergy">ENERGY MODE</button></li>
-          <li><button class="app-btn config-open" title="Configure app"><i class="svg-icon-wrench"></i></button></li>
-        </ul>
+        <div class="nav nav-underline">
+          <button class="nav-link active"><i class="svg-icon-schedule"></i>TIME OF USE</button>
+        </div>
+        <div class="nav">
+          <button class="nav-link viewcostenergy">ENERGY MODE</button>
+          <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
+        </div>
       </nav>
 
       <div class="stats-grid stats-grid-2">
@@ -40,21 +40,27 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
     </div>
 
     <div class="app-panel">
-      <div class="visnavblock bargraph-navigation mb-2">
-        <button class="visnav app-btn bargraph-week" days="7">WEEK</button>
-        <button class="visnav app-btn bargraph-month" days="30">MONTH</button>
-        <button class="visnav app-btn bargraph-year" days="365">YEAR</button>
+      <div class="app-navbar bargraph-navigation">
+        <div class="btn-group app-timebar">
+          <button class="btn bargraph-week" days="7">WEEK</button>
+          <button class="btn bargraph-month" days="30">MONTH</button>
+          <button class="btn bargraph-year" days="365">YEAR</button>
+        </div>
       </div>
 
-      <div class="visnavblock powergraph-navigation mb-2" style="display:none">
-        <button class="visnav app-btn time" time='24' title="Day">D</button>
-        <button class="visnav app-btn time" time='168' title="Week">W</button>
-        <button class="visnav app-btn time" time='720' title="Month">M</button>
-        <button class="visnav app-btn" id="zoomin" title="Zoom in">+</button>
-        <button class="visnav app-btn" id="zoomout" title="Zoom out">-</button>
-        <button class="visnav app-btn" id="left" title="Scroll left">&lt;</button>
-        <button class="visnav app-btn" id="right" title="Scroll right">&gt;</button>
-        <button class="app-btn viewhistory ms-auto" title="Back to daily summary">Daily</button>
+      <div class="app-navbar powergraph-navigation" style="display:none">
+        <div class="btn-group app-timebar">
+          <button class="btn time" time='24' title="Day">D</button>
+          <button class="btn time" time='168' title="Week">W</button>
+          <button class="btn time" time='720' title="Month">M</button>
+          <button class="btn" id="zoomin" title="Zoom in">+</button>
+          <button class="btn" id="zoomout" title="Zoom out">-</button>
+          <button class="btn" id="left" title="Scroll left">&lt;</button>
+          <button class="btn" id="right" title="Scroll right">&gt;</button>
+        </div>
+        <div class="nav ms-auto">
+          <button class="nav-link viewhistory" title="Back to daily summary">Daily</button>
+        </div>
       </div>
 
       <div id="placeholder_bound" style="width:100%; height:500px">
@@ -64,12 +70,12 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
       <div id="power-graph-footer" style="display:none">
         <div class="d-flex flex-wrap align-items-center gap-3 px-2">
           <div class="me-auto text-body-secondary">kWh in window: <b class="text-body"><span id="window-kwh"></span> kWh</b></div>
-          <button id="advanced-toggle" class="app-btn">SHOW DETAIL</button>
+          <div class="nav"><button id="advanced-toggle" class="nav-link">SHOW DETAIL</button></div>
         </div>
       </div>
 
       <div id="advanced-block" style="display:none">
-        <table class="app-table">
+        <table class="table table-sm">
           <tr>
             <th></th>
             <th class="text-center">Min</th>
@@ -88,12 +94,12 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
     <div id="schedule-builder-app">
       <div id="schedule-builder" class="app-panel" v-show="visible">
         <nav class="app-top-bar">
-          <ul class="btn-list app-tabs">
-            <li><button class="app-btn active"><i class="svg-icon-calendar"></i><span>Tariffs &amp; schedule</span></button></li>
-          </ul>
-          <ul class="btn-list">
-            <li><button class="app-btn sched-configure" :class="{active: editing}" v-show="sessionwrite" title="Configure tariffs &amp; schedule" @click="toggleConfigure"><i class="svg-icon-wrench"></i></button></li>
-          </ul>
+          <div class="nav nav-underline">
+            <button class="nav-link active"><i class="svg-icon-calendar"></i>Tariffs &amp; schedule</button>
+          </div>
+          <div class="nav">
+            <button class="nav-link sched-configure" :class="{active: editing}" v-show="sessionwrite" title="Configure tariffs &amp; schedule" @click="toggleConfigure"><i class="svg-icon-wrench"></i></button>
+          </div>
         </nav>
 
         <div class="p-2">

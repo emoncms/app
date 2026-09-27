@@ -694,8 +694,8 @@ $(".viewcostenergy").click(function(){
 // Load and draw the bar graph for the most recent `days` days up to now.
 function load_last_days(days) {
     // Mark the chosen period
-    $(".bargraph-navigation .app-btn").removeClass("active");
-    $(".bargraph-navigation .app-btn[days="+days+"]").addClass("active");
+    $(".bargraph-navigation .btn").removeClass("active");
+    $(".bargraph-navigation .btn[days="+days+"]").addClass("active");
     var end = (new Date()).getTime();
     bargraph_load(end - 3600000*24.0*days, end);
     bargraph_draw();

@@ -17,14 +17,14 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectric/myelectric.css");
 
     <div class="app-panel">
         <nav class="app-top-bar">
-            <ul id="tabs" class="btn-list app-tabs">
-                <li><button class="app-btn myelectric-view-cost"><i class="svg-icon-schedule"></i><span><?php echo tr("Cost") ?></span></button></li>
-                <li><button class="app-btn myelectric-view-kwh active"><i class="svg-icon-smartmeter"></i><span><?php echo tr("kWh") ?></span></button></li>
-            </ul>
-            <ul class="btn-list">
-                <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><i class="svg-icon-wrench"></i></button></li>
-                <li><button class="app-btn config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button></li>
-            </ul>
+            <div id="tabs" class="nav nav-underline">
+                <button class="nav-link myelectric-view-cost"><i class="svg-icon-schedule"></i><?php echo tr("Cost") ?></button>
+                <button class="nav-link myelectric-view-kwh active"><i class="svg-icon-smartmeter"></i><?php echo tr("kWh") ?></button>
+            </div>
+            <div class="nav">
+                <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
+                <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+            </div>
         </nav>
 
         <div class="stats-grid stats-grid-2">
@@ -40,18 +40,20 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectric/myelectric.css");
     </div>
 
     <div class="app-panel">
-        <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
-            <button class='visnav time app-btn' time='1'>1<?php echo tr('h') ?></button>
-            <button class='visnav time app-btn' time='3'>3<?php echo tr('h') ?></button>
-            <button class='visnav time app-btn' time='6'>6<?php echo tr('h') ?></button>
-            <button class='visnav time app-btn' time='24'><?php echo tr('D') ?></button>
-            <button class='visnav time app-btn' time='168'><?php echo tr('W') ?></button>
-            <button class='visnav time app-btn' time='720'><?php echo tr('M') ?></button>
-            <button class='visnav time app-btn' time='8760'><?php echo tr('Y') ?></button>
-            <button id='zoomin' class='visnav app-btn'>+</button>
-            <button id='zoomout' class='visnav app-btn'>-</button>
-            <button id='left' class='visnav app-btn'>&lt;</button>
-            <button id='right' class='visnav app-btn'>&gt;</button>
+        <div id="graph-nav" class="app-navbar">
+            <div class="btn-group app-timebar">
+                <button class='btn time' time='1'>1<?php echo tr('h') ?></button>
+                <button class='btn time' time='3'>3<?php echo tr('h') ?></button>
+                <button class='btn time' time='6'>6<?php echo tr('h') ?></button>
+                <button class='btn time' time='24'><?php echo tr('D') ?></button>
+                <button class='btn time' time='168'><?php echo tr('W') ?></button>
+                <button class='btn time' time='720'><?php echo tr('M') ?></button>
+                <button class='btn time' time='8760'><?php echo tr('Y') ?></button>
+                <button id='zoomin' class='btn'>+</button>
+                <button id='zoomout' class='btn'>-</button>
+                <button id='left' class='btn'>&lt;</button>
+                <button id='right' class='btn'>&gt;</button>
+            </div>
         </div>
 
         <div class="myelectric-charts">

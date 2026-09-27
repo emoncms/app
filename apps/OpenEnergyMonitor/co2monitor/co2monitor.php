@@ -15,48 +15,50 @@ load_css("Modules/app/apps/OpenEnergyMonitor/co2monitor/co2monitor.css");
 
     <div class="app-panel">
         <nav class="app-top-bar mb-0 border-0">
-            <ul id="tabs" class="btn-list app-tabs">
-                <li><button class="app-btn active"><i class="svg-icon-leaf"></i><span><?php echo tr('Air change rate from CO2') ?></span></button></li>
-            </ul>
-            <ul class="btn-list">
-                <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><i class="svg-icon-wrench"></i></button></li>
-                <li><button class="app-btn config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button></li>
-            </ul>
+            <div id="tabs" class="nav nav-underline">
+                <button class="nav-link active"><i class="svg-icon-leaf"></i><?php echo tr('Air change rate from CO2') ?></button>
+            </div>
+            <div class="nav">
+                <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
+                <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+            </div>
         </nav>
     </div>
 
     <div class="app-panel">
-        <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
-            <button class='visnav time app-btn' time='24'><?php echo tr('D') ?></button>
-            <button class='visnav time app-btn' time='168'><?php echo tr('W') ?></button>
-            <button class='visnav time app-btn' time='720'><?php echo tr('M') ?></button>
-            <button id='zoomin' class='visnav app-btn'>+</button>
-            <button id='zoomout' class='visnav app-btn'>-</button>
-            <button id='left' class='visnav app-btn'>&lt;</button>
-            <button id='right' class='visnav app-btn'>&gt;</button>
+        <div id="graph-nav" class="app-navbar">
+            <div class="btn-group app-timebar">
+                <button class='btn time' time='24'><?php echo tr('D') ?></button>
+                <button class='btn time' time='168'><?php echo tr('W') ?></button>
+                <button class='btn time' time='720'><?php echo tr('M') ?></button>
+                <button id='zoomin' class='btn'>+</button>
+                <button id='zoomout' class='btn'>-</button>
+                <button id='left' class='btn'>&lt;</button>
+                <button id='right' class='btn'>&gt;</button>
+            </div>
         </div>
         <div id="graph_bound"><div id="graph"></div></div>
     </div>
 
     <div class="app-panel co2-panel">
-        <div class="co2-controls">
-            <div>
-                <button id="average_mode" class="cost-btn active"><?php echo tr('Average') ?></button>
-                <button id="decay_mode" class="cost-btn"><?php echo tr('Decay') ?></button>
+        <div class="d-flex flex-wrap justify-content-between align-items-center column-gap-3 row-gap-2 mb-2">
+            <div class="d-flex gap-2">
+                <button id="average_mode" class="btn btn-outline-primary active"><?php echo tr('Average') ?></button>
+                <button id="decay_mode" class="btn btn-outline-primary"><?php echo tr('Decay') ?></button>
             </div>
             <div class="co2-totals average">
                 <span><?php echo tr('Total') ?> <b><span id="total_volume">-</span> m³</b></span>
                 <span><?php echo tr('Mean') ?> <b><span id="total_mean_co2">-</span> ppm</b></span>
                 <span><b><span id="total_mean_air_change_rate">-</span> ACH</b></span>
-                <span class="ctrl-group">
-                    <span class="ctrl-label"><?php echo tr('Daily CO2 addition') ?></span>
-                    <input type="text" id="daily_co2_addition" value="1050" />
-                    <span class="ctrl-label ctrl-unit">L/day</span>
-                </span>
+                <div class="input-group w-auto">
+                    <span class="input-group-text"><?php echo tr('Daily CO2 addition') ?></span>
+                    <input type="text" id="daily_co2_addition" class="form-control input-75" value="1050" />
+                    <span class="input-group-text">L/day</span>
+                </div>
             </div>
         </div>
 
-        <table class="app-table">
+        <table class="table align-middle">
             <thead>
                 <tr>
                     <th></th>
@@ -71,9 +73,12 @@ load_css("Modules/app/apps/OpenEnergyMonitor/co2monitor/co2monitor.css");
             </thead>
             <tbody id="sensors_list"></tbody>
         </table>
-        <p class="ctrl-note mt-2 mb-0"><?php echo tr('Click a colour square to show or hide the sensor on the chart.') ?></p>
+        <p class="small text-body-secondary mt-2 mb-0"><?php echo tr('Click a colour square to show or hide the sensor on the chart.') ?></p>
 
-        <label id="windspeed_option" class="ctrl-checkbox mt-2" style="display:none"><input type="checkbox" id="show_windspeed" /> <?php echo tr('Show wind speed') ?></label>
+        <div id="windspeed_option" class="form-check small mt-2" style="display:none">
+            <input type="checkbox" id="show_windspeed" class="form-check-input" />
+            <label class="form-check-label" for="show_windspeed"><?php echo tr('Show wind speed') ?></label>
+        </div>
     </div>
 
 </section>

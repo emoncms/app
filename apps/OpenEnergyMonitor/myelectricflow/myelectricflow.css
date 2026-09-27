@@ -41,32 +41,3 @@
 .prc-battery-to-house { position: absolute; width: 0; left: 3px; top: 40%; }
 .prc-solar-to-house   { position: absolute; width: 33.33333%; left: 0; top: 0; }
 .prc-grid-to-house    { position: absolute; width: 33.33333%; left: 66.66667%; top: 0; }
-
-/* Cost view: import and export power, current tariff price */
-.live-cost-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem 1rem;
-    padding: 0.5rem 0;
-}
-.live-cost-grid > div {
-    text-align: center;
-    min-width: 0;
-}
-
-/* Cost view controls: tariff select, CSV, baseline */
-.cost-controls {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem 1rem;
-    margin: 1rem 0 0.25rem;
-}
-
-/* Cost view option toggles, such as carbon intensity */
-.cost-options {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    margin: 0.75rem 0 0.25rem;
-}

@@ -422,8 +422,8 @@ function init()
     // Modules/graph/view.php). The calendar button swaps the standard
     // time-window buttons for Start/End date-time pickers.
     // -------------------------------------------------------------------
-    datetimepicker1 = DateTimePicker.attach(document.getElementById('request-start'), { buttonClass: 'add-on', onChange: set_view_start });
-    datetimepicker2 = DateTimePicker.attach(document.getElementById('request-end'), { buttonClass: 'add-on', onChange: set_view_end });
+    datetimepicker1 = DateTimePicker.attach(document.getElementById('request-start'), { onChange: set_view_start });
+    datetimepicker2 = DateTimePicker.attach(document.getElementById('request-end'), { onChange: set_view_end });
 
     $("#time-manual-open").click(function () {
         update_time_pickers();

@@ -16,36 +16,34 @@ load_css("Modules/app/apps/OpenEnergyMonitor/profile/profile.css");
 
   <div class="app-panel">
     <nav class="app-top-bar align-items-center">
-      <ul class="btn-list app-tabs">
-        <li><h1 class="app-btn active m-0"><i class="svg-icon-show_chart"></i><span>Profile Explorer</span></h1></li>
-      </ul>
-      <ul class="btn-list gap-2">
-        <li><button class="cost-btn mode-toggle-btn active" data-mode="monthly">Monthly</button></li>
-        <li><button class="cost-btn mode-toggle-btn" data-mode="annual">Annual</button></li>
-        <li>
-          <span class="ctrl-group">
-            <span class="ctrl-label">Interval</span>
-            <select id="resolution">
-              <option value="600">10 mins</option>
-              <option value="900">15 mins</option>
-              <option value="1800">30 mins</option>
-              <option value="3600">60 mins</option>
-            </select>
-          </span>
-        </li>
-        <li><button class="app-btn config-open" title="Configure app"><i class="svg-icon-wrench"></i></button></li>
-      </ul>
+      <div class="nav nav-underline">
+        <span class="nav-link active"><i class="svg-icon-show_chart"></i>Profile Explorer</span>
+      </div>
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <button class="btn btn-outline-primary mode-toggle-btn active" data-mode="monthly">Monthly</button>
+        <button class="btn btn-outline-primary mode-toggle-btn" data-mode="annual">Annual</button>
+        <div class="input-group">
+          <span class="input-group-text">Interval</span>
+          <select id="resolution" class="form-select">
+            <option value="600">10 mins</option>
+            <option value="900">15 mins</option>
+            <option value="1800">30 mins</option>
+            <option value="3600">60 mins</option>
+          </select>
+        </div>
+        <div class="nav">
+          <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
+        </div>
+      </div>
     </nav>
     <div id="graph"></div>
   </div>
 
   <div class="app-panel">
-    <table class="app-table">
+    <table class="table align-middle">
       <tbody id="table"></tbody>
     </table>
-    <div class="p-2">
-      <button class="cost-btn gap-2" id="copy_to_clipboard" title="Copy CSV data to clipboard"><span>Copy CSV</span><i class="svg-icon-content_copy"></i></button>
-    </div>
+    <button class="btn btn-outline-primary" id="copy_to_clipboard" title="Copy CSV data to clipboard">Copy CSV <i class="svg-icon-content_copy"></i></button>
   </div>
 
 </section>

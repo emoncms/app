@@ -231,7 +231,7 @@ function process_and_draw_graph() {
 // fitted to the current view.start / view.end time range.
 function draw_graph() {
 
-    $(".visnav[time=1], .visnav[time=3], .visnav[time=6], .visnav[time=24]").toggle(viewmode !== "bargraph");
+    $(".time[time=1], .time[time=3], .time[time=6], .time[time=24]").toggle(viewmode !== "bargraph");
 
     const font_color = "#888";
     const options = {

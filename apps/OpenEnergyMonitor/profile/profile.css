@@ -1,13 +1,9 @@
 /* Profile Explorer. Shared components are in Modules/app/Views/css/app-kit.css. */
 
-/* App title in the top bar, styled as the active tab */
-.app-tabs h1.app-btn { cursor: default; }
-
 /* Flot ignores padding on the placeholder, so the spacing is a margin */
 #graph {
     height: 500px;
     margin: 0.5rem 0.75rem 0.75rem;
 }
 
-.app-table .profile-check { width: 70px; text-align: center; }
-.app-table td { vertical-align: middle; }
+.profile-check { width: 70px; text-align: center; }

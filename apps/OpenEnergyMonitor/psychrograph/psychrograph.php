@@ -17,14 +17,14 @@ load_css("Modules/app/apps/OpenEnergyMonitor/psychrograph/psychrograph.css");
 
     <div class="app-panel psy-panel">
         <nav class="app-top-bar">
-            <ul id="tabs" class="btn-list app-tabs">
-                <li><button class="app-btn view-toggle-btn active" data-view="classic"><i class="svg-icon-show_chart"></i><span><?php echo tr('Psychrometric') ?></span></button></li>
-                <li><button class="app-btn view-toggle-btn givoni-tab d-none" data-view="givoni"><i class="svg-icon-leaf"></i><span><?php echo tr('Givoni') ?></span></button></li>
-            </ul>
-            <ul class="btn-list">
-                <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><i class="icon-wrench icon-white" title="Configure app"></i></button></li>
-                <li><button class="app-btn config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close icon-white"></i></button></li>
-            </ul>
+            <div id="tabs" class="nav nav-underline">
+                <button class="nav-link view-toggle-btn active" data-view="classic"><i class="svg-icon-show_chart"></i><?php echo tr('Psychrometric') ?></button>
+                <button class="nav-link view-toggle-btn givoni-tab d-none" data-view="givoni"><i class="svg-icon-leaf"></i><?php echo tr('Givoni') ?></button>
+            </div>
+            <div class="nav">
+                <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
+                <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+            </div>
         </nav>
 
         <p class="psy-axis-note text-body-secondary mb-0">
@@ -33,28 +33,32 @@ load_css("Modules/app/apps/OpenEnergyMonitor/psychrograph/psychrograph.css");
     </div>
 
     <div class="app-panel psy-panel">
-        <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
-            <button class='visnav time app-btn' time='24'><?php echo tr('D') ?></button>
-            <button class='visnav time app-btn' time='168'><?php echo tr('W') ?></button>
-            <button class='visnav time app-btn' time='720'><?php echo tr('M') ?></button>
-            <button class='visnav time app-btn' time='8760'><?php echo tr('Y') ?></button>
-            <button id='zoomin' class='visnav app-btn'>+</button>
-            <button id='zoomout' class='visnav app-btn'>-</button>
-            <button id='left' class='visnav app-btn'>&lt;</button>
-            <button id='right' class='visnav app-btn'>&gt;</button>
-            <button id='time-manual-open' class='visnav app-btn' title="<?php echo tr('Select time window') ?>"><i class="icon-calendar icon-white"></i></button>
+        <div id="graph-nav" class="app-navbar">
+            <div class="btn-group app-timebar">
+                <button class='btn time' time='24'><?php echo tr('D') ?></button>
+                <button class='btn time' time='168'><?php echo tr('W') ?></button>
+                <button class='btn time' time='720'><?php echo tr('M') ?></button>
+                <button class='btn time' time='8760'><?php echo tr('Y') ?></button>
+                <button id='zoomin' class='btn'>+</button>
+                <button id='zoomout' class='btn'>-</button>
+                <button id='left' class='btn'>&lt;</button>
+                <button id='right' class='btn'>&gt;</button>
+                <button id='time-manual-open' class='btn' title="<?php echo tr('Select time window') ?>"><i class="svg-icon-calendar"></i></button>
+            </div>
         </div>
 
-        <div id="graph-nav-manual" class="visnavblock mb-2 d-flex justify-content-start align-items-center d-none">
-            <span class="ctrl-group">
-                <span class="ctrl-label"><?php echo tr('Start') ?></span>
-                <input id="request-start" type="text" placeholder="YYYY-MM-DD HH:MM:SS" />
-            </span>
-            <span class="ctrl-group">
-                <span class="ctrl-label"><?php echo tr('End') ?></span>
-                <input id="request-end" type="text" placeholder="YYYY-MM-DD HH:MM:SS" />
-            </span>
-            <button id='time-manual-close' class='visnav app-btn' title="<?php echo tr('Done') ?>"><i class="icon-ok icon-white"></i></button>
+        <div id="graph-nav-manual" class="d-flex flex-wrap align-items-center gap-2 mb-2 d-none">
+            <div class="input-group w-auto">
+                <span class="input-group-text"><?php echo tr('Start') ?></span>
+                <input id="request-start" class="form-control" type="text" placeholder="YYYY-MM-DD HH:MM:SS" />
+            </div>
+            <div class="input-group w-auto">
+                <span class="input-group-text"><?php echo tr('End') ?></span>
+                <input id="request-end" class="form-control" type="text" placeholder="YYYY-MM-DD HH:MM:SS" />
+            </div>
+            <div class="btn-group app-timebar flex-grow-0">
+                <button id='time-manual-close' class='btn' title="<?php echo tr('Done') ?>"><i class="svg-icon-check"></i></button>
+            </div>
         </div>
 
         <div class="psy-context-label text-body-secondary"><?php echo tr('Drag to select a time window') ?></div>
@@ -73,12 +77,12 @@ load_css("Modules/app/apps/OpenEnergyMonitor/psychrograph/psychrograph.css");
     <div class="app-panel psy-panel">
         <div class="psy-stats-controls d-flex flex-wrap justify-content-between align-items-center mb-2">
             <h5 class="power-title mb-0"><?php echo tr('COMFORT ZONE ANALYSIS') ?></h5>
-            <div>
-                <button id="calc" class="cost-btn"><?php echo tr('Calculate %') ?></button>
-                <button id="clear" class="cost-btn"><?php echo tr('Clear') ?></button>
+            <div class="d-flex gap-2">
+                <button id="calc" class="btn btn-outline-primary"><?php echo tr('Calculate %') ?></button>
+                <button id="clear" class="btn btn-outline-primary"><?php echo tr('Clear') ?></button>
             </div>
         </div>
-        <div id="psychrotext"><p class="ctrl-note"><?php echo tr('Click "Calculate %" to show the proportion of data points falling in each comfort zone.') ?></p></div>
+        <div id="psychrotext"><p class="small text-body-secondary"><?php echo tr('Click "Calculate %" to show the proportion of data points falling in each comfort zone.') ?></p></div>
     </div>
 
 </section>

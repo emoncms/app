@@ -140,7 +140,7 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
     .app-stat-value { font-size: 18px; }
 }
 
-/* -- Top bar and tabs ------------------------------------------------------ */
+/* -- Top bar ---------------------------------------------------------------- */
 
 .app-top-bar {
     display: flex;
@@ -149,221 +149,6 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
     padding: .5rem 0;
     border-bottom: 1px solid var(--border);
     margin-bottom: .4rem;
-}
-
-/* Replaces Bootstrap .nav .nav-pills */
-.btn-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    align-items: center;
-}
-
-/* Tabs: icon and label, accent underline on the active tab */
-.app-tabs .app-btn {
-    gap: 0.45em;
-    font-weight: bold;
-    border-radius: 0;
-    border-bottom: 2px solid transparent;
-    padding: 0.25rem 0.6rem 0.4rem;
-}
-.app-tabs .app-btn [class^="svg-icon-"] { font-size: 1.1em; }
-.app-tabs .app-btn.active {
-    text-decoration: none;
-    color: var(--bs-emphasis-color);
-    opacity: 1;
-    border-bottom-color: var(--bs-primary);
-}
-
-/* -- Buttons --------------------------------------------------------------- */
-
-/* Text button for tabs, the time bar and top bar icons. Resets Bootstrap button properties. */
-.app-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.25em;
-    padding: 0.25rem 0.5rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    font-family: inherit;
-    cursor: pointer;
-    text-align: center;
-    white-space: nowrap;
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
-    text-shadow: none;
-    color: var(--text-secondary);
-    opacity: .6;
-    transition: opacity .3s linear;
-    text-decoration: none;
-}
-.app-btn:hover,
-.app-btn:active {
-    opacity: 1;
-    text-decoration: none;
-}
-.app-btn.active {
-    color: var(--bs-emphasis-color);
-    opacity: .8;
-    font-weight: bold;
-    text-decoration: underline;
-}
-.app-btn[disabled],
-.app-btn[disabled]:hover {
-    color: var(--bs-secondary-color);
-    opacity: .5;
-    background: rgba(var(--ec-app-nav-rgb), 0.06);
-}
-
-/* Outlined accent button for actions. .active marks the chosen option. */
-.cost-btn {
-    display: inline-flex;
-    align-items: center;
-    background-color: rgba(var(--bs-primary-rgb), 0.12);
-    color: var(--bs-primary);
-    border: 1px solid rgba(var(--bs-primary-rgb), 0.35);
-    border-radius: 0.375rem;
-    padding: 0.3rem 0.75rem;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    font-family: inherit;
-    cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s;
-}
-.cost-btn:hover,
-.cost-btn:focus {
-    background-color: rgba(var(--bs-primary-rgb), 0.25);
-    color: var(--bs-emphasis-color);
-    outline: none;
-}
-.cost-btn.active {
-    background-color: rgba(var(--bs-primary-rgb), 0.35);
-    color: var(--bs-emphasis-color);
-    border-color: rgba(var(--bs-primary-rgb), 0.6);
-    font-weight: bold;
-}
-
-/* -- Time bar -------------------------------------------------------------- */
-
-.visnavblock {
-    display: flex;
-    color: var(--ec-app-nav);
-    font-size: 18px;
-}
-
-.visnav {
-    background-color: rgba(var(--ec-app-nav-rgb), 0.1);
-    flex-grow: 1;
-}
-.visnav:focus,
-.visnav:active,
-.visnav:hover {
-    color: var(--ec-app-nav);
-    text-decoration: none !important;
-}
-
-@media (min-width: 576px) {
-    .visnav {
-        flex-grow: 0;
-        min-width: 3em;
-    }
-}
-
-/* Joined buttons: rounded ends, faint dividers */
-.visnavblock > .app-btn:first-child { border-radius: 0.375rem 0 0 0.375rem; }
-.visnavblock > .app-btn:last-child  { border-radius: 0 0.375rem 0.375rem 0; }
-.visnavblock > .app-btn + .app-btn  { border-left: 1px solid rgba(var(--bs-emphasis-color-rgb), 0.12); }
-
-.visnavblock .ctrl-group + .ctrl-group { margin-left: 0.5rem; }
-
-/* -- Label and field pair -------------------------------------------------- */
-
-.ctrl-group {
-    display: inline-flex;
-    align-items: stretch;
-    height: 30px;
-}
-
-.ctrl-label {
-    background-color: var(--bs-body-bg);
-    color: var(--text-secondary);
-    border: 1px solid var(--ec-input-border-color);
-    border-right: none;
-    border-radius: 0.375rem 0 0 0.375rem;
-    padding: 4px 10px;
-    font-size: 13px;
-    box-sizing: border-box;
-    display: inline-flex;
-    align-items: center;
-    white-space: nowrap;
-}
-
-.ctrl-group select,
-.ctrl-group > input[type="text"] {
-    background-color: var(--bs-body-bg);
-    color: var(--bs-body-color);
-    border: 1px solid var(--ec-input-border-color);
-    padding: 0 8px;
-    font-size: 13px;
-    height: 30px;
-    box-sizing: border-box;
-    outline: none;
-}
-.ctrl-group select {
-    border-radius: 0 0.375rem 0.375rem 0;
-    cursor: pointer;
-}
-.ctrl-group > input[type="text"] {
-    border-radius: 0;
-    width: 150px;
-    box-shadow: none;
-    margin: 0;
-}
-.ctrl-group select:focus,
-.ctrl-group > input[type="text"]:focus { border-color: var(--bs-primary); }
-
-/* Date picker: text field, then the calendar button in its host span */
-.ctrl-group > span {
-    display: inline-flex;
-    align-items: stretch;
-}
-
-.ctrl-group .add-on {
-    background-color: var(--bs-body-bg);
-    color: var(--text-secondary);
-    border: 1px solid var(--ec-input-border-color);
-    border-left: none;
-    border-radius: 0 0.375rem 0.375rem 0;
-    padding: 0 8px;
-    font-size: 13px;
-    box-sizing: border-box;
-    display: inline-flex;
-    align-items: center;
-    cursor: pointer;
-}
-.ctrl-group .add-on:hover {
-    color: var(--bs-primary);
-    background-color: var(--bs-secondary-bg);
-}
-
-.ctrl-checkbox {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 12px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    margin: 0;
-}
-
-.ctrl-note {
-    font-size: 12px;
-    padding-left: 22px;
-    color: var(--bs-secondary-color);
 }
 
 /* -- Live values ----------------------------------------------------------- */
@@ -524,20 +309,6 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
 
 /* -- Tables ---------------------------------------------------------------- */
 
-.app-table {
-    width: 100%;
-    border-collapse: collapse;
-    color: var(--text-secondary);
-}
-.app-table th,
-.app-table td {
-    padding: 8px;
-    text-align: left;
-    vertical-align: top;
-}
-.app-table tr { border-bottom: 1px solid rgba(var(--bs-primary-rgb), 0.1); }
-.app-table .col-primary { color: var(--bs-emphasis-color); }
-
 /* Colour square before a name */
 .app-swatch {
     display: inline-block;
@@ -577,3 +348,76 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
     font-weight: bold;
     font-size: 10px;
 }
+
+/* -- Bootstrap components in apps ------------------------------------------
+   Tabs are nav-underline, text and icon buttons nav-link, the time bar a
+   btn-group, actions btn-outline-primary, fields input-group, tables table.
+   Tuned here through their variables. */
+
+.app-page,
+.app-page .nav {
+    --bs-nav-link-padding-x: 0.6rem;
+    --bs-nav-link-padding-y: 0.25rem;
+    --bs-nav-link-color: var(--bs-secondary-color);
+    --bs-nav-link-hover-color: var(--bs-emphasis-color);
+    --bs-nav-underline-gap: 0;
+    --bs-nav-underline-link-active-color: var(--bs-emphasis-color);
+}
+.app-page .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    font-weight: bold;
+}
+.app-page .nav-underline .nav-link { padding-inline: var(--bs-nav-link-padding-x); }
+.app-page .nav-underline .nav-link.active { border-bottom-color: var(--bs-primary); }
+.app-page .nav-link.active { color: var(--bs-emphasis-color); }
+.app-page .nav:not(.nav-underline) .nav-link.active { text-decoration: underline; }
+
+/* Row above a chart: time bar, then notes and links. JS may show and hide it. */
+.app-navbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+/* Time bar */
+.app-timebar > .btn {
+    --bs-btn-padding-x: 0.5rem;
+    --bs-btn-padding-y: 3px;              /* 32px high with the border, as the old time bar */
+    --bs-btn-font-size: 1rem;
+    --bs-btn-line-height: 1.5;
+    --bs-btn-color: color-mix(in srgb, var(--text-secondary) 60%, transparent);
+    --bs-btn-bg: rgba(var(--ec-app-nav-rgb), 0.1);
+    --bs-btn-border-color: transparent;
+    --bs-btn-hover-color: var(--bs-emphasis-color);
+    --bs-btn-hover-bg: rgba(var(--ec-app-nav-rgb), 0.2);
+    --bs-btn-hover-border-color: transparent;
+    --bs-btn-active-color: var(--bs-emphasis-color);
+    --bs-btn-active-bg: rgba(var(--ec-app-nav-rgb), 0.3);
+    --bs-btn-active-border-color: transparent;
+    min-width: 3em;
+}
+.app-timebar > .btn + .btn { border-left-color: rgba(var(--bs-emphasis-color-rgb), 0.12); }
+
+/* Rounded ends on the group, so they hold when JS hides the first or last button */
+.app-timebar {
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+.app-timebar > .btn {
+    --bs-btn-border-radius: 0;
+    --bs-btn-focus-box-shadow: inset 0 0 0 2px rgba(var(--bs-primary-rgb), 0.5);
+}
+
+@media (max-width: 575.98px) {
+    .app-timebar { flex: 1; }
+    .app-timebar > .btn { min-width: 0; --bs-btn-padding-x: 0.3rem; }
+}
+
+/* Fields line up with buttons in a flex row */
+.app-page .input-group { margin-bottom: 0; }
+
+/* Name cell in a table */
+.app-page .table .col-primary { color: var(--bs-emphasis-color); }

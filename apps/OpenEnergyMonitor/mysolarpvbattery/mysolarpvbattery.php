@@ -16,13 +16,13 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
 
     <div class="app-panel">
         <nav class="app-top-bar">
-            <ul id="tabs" class="btn-list app-tabs">
-                <li><button class="app-btn active"><i class="svg-icon-sun"></i><span><?php echo tr('Solar PV battery') ?></span></button></li>
-            </ul>
-            <ul class="btn-list">
-                <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><i class="svg-icon-wrench"></i></button></li>
-                <li><button class="app-btn config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button></li>
-            </ul>
+            <div id="tabs" class="nav nav-underline">
+                <button class="nav-link active"><i class="svg-icon-sun"></i><?php echo tr('Solar PV battery') ?></button>
+            </div>
+            <div class="nav">
+                <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
+                <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+            </div>
         </nav>
 
         <div class="stats-grid">
@@ -54,19 +54,23 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
     </div>
 
     <div class="app-panel">
-        <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
-            <button class='visnav time app-btn' time='1'>1<?php echo tr('h') ?></button>
-            <button class='visnav time app-btn' time='3'>3<?php echo tr('h') ?></button>
-            <button class='visnav time app-btn' time='6'>6<?php echo tr('h') ?></button>
-            <button class='visnav time app-btn' time='24'><?php echo tr('D') ?></button>
-            <button class='visnav time app-btn' time='168'><?php echo tr('W') ?></button>
-            <button class='visnav time app-btn' time='720'><?php echo tr('M') ?></button>
-            <button class='visnav time app-btn' time='8760'><?php echo tr('Y') ?></button>
-            <button id='zoomin' class='visnav app-btn'>+</button>
-            <button id='zoomout' class='visnav app-btn'>-</button>
-            <button id='left' class='visnav app-btn'>&lt;</button>
-            <button id='right' class='visnav app-btn'>&gt;</button>
-            <button class="viewhistory app-btn ms-auto" title="<?php echo tr('View History') ?>"><span><?php echo tr('History') ?></span></button>
+        <div id="graph-nav" class="app-navbar">
+            <div class="btn-group app-timebar">
+                <button class='btn time' time='1'>1<?php echo tr('h') ?></button>
+                <button class='btn time' time='3'>3<?php echo tr('h') ?></button>
+                <button class='btn time' time='6'>6<?php echo tr('h') ?></button>
+                <button class='btn time' time='24'><?php echo tr('D') ?></button>
+                <button class='btn time' time='168'><?php echo tr('W') ?></button>
+                <button class='btn time' time='720'><?php echo tr('M') ?></button>
+                <button class='btn time' time='8760'><?php echo tr('Y') ?></button>
+                <button id='zoomin' class='btn'>+</button>
+                <button id='zoomout' class='btn'>-</button>
+                <button id='left' class='btn'>&lt;</button>
+                <button id='right' class='btn'>&gt;</button>
+            </div>
+            <div class="nav ms-auto">
+                <button class="nav-link viewhistory" title="<?php echo tr('View History') ?>"><?php echo tr('History') ?></button>
+            </div>
         </div>
 
         <div id="placeholder_bound">
@@ -730,10 +734,10 @@ function draw_powergraph() {
 // ------------------------------------------------------------------------------------------
 
 function powergraph_events() {
-    $(".visnav[time=1]").show();
-    $(".visnav[time=3]").show();
-    $(".visnav[time=6]").show();
-    $(".visnav[time=24]").show();
+    $(".time[time=1]").show();
+    $(".time[time=3]").show();
+    $(".time[time=6]").show();
+    $(".time[time=24]").show();
             
     plot_unbind('placeholder');
 
@@ -935,10 +939,10 @@ function draw_bargraph()
 // - click through to power graph
 // ------------------------------------------------------------------------------------------
 function bargraph_events() {
-    $(".visnav[time=1]").hide();
-    $(".visnav[time=3]").hide();
-    $(".visnav[time=6]").hide();
-    $(".visnav[time=24]").hide();
+    $(".time[time=1]").hide();
+    $(".time[time=3]").hide();
+    $(".time[time=6]").hide();
+    $(".time[time=24]").hide();
             
     plot_unbind('placeholder');
     $('.bargraph-viewall').unbind("click");

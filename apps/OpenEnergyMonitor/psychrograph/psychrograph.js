@@ -329,15 +329,15 @@ function draw_chart() {
 // Comfort zone analysis table
 // ----------------------------------------------------------------------
 function clear_confort_stats() {
-    $("#psychrotext").html('<p class="ctrl-note">Click "Calculate %" to show the proportion of data points falling in each comfort zone.</p>');
+    $("#psychrotext").html('<p class="small text-body-secondary">Click "Calculate %" to show the proportion of data points falling in each comfort zone.</p>');
 }
 
 function calc_confort_stats() {
     if (!pairs.length) { clear_confort_stats(); return; }
 
-    function swatch(c) { return '<span class="zone-swatch" style="background:' + c + '"></span>'; }
+    function swatch(c) { return '<span class="app-swatch" style="background:' + c + '"></span>'; }
 
-    var html = "<table><thead><tr>";
+    var html = "<table class='table table-sm small mb-0'><thead><tr>";
     html += "<th>Zone</th>";
     html += "<th>" + swatch(ZONE_COLORS.comfort) + "comfort</th>";
     html += "<th>" + swatch(ZONE_COLORS.mites) + "fungus / dust mites</th>";
@@ -359,7 +359,7 @@ function calc_confort_stats() {
         }
         var n = data.length || 1;
         var pct = function (v) { return (Math.floor(v * 1000 / n) / 10) + "%"; };
-        html += "<tr><td class='zone-name'>" + pairs[i].label + "</td>";
+        html += "<tr><td class='col-primary'>" + pairs[i].label + "</td>";
         html += "<td>" + pct(c4) + "</td>";
         html += "<td>" + pct(c3) + "</td>";
         html += "<td>" + pct(c2) + "</td>";
@@ -425,8 +425,8 @@ $("#psychrograph, #givonigraph").each(function () { this.addEventListener("ploth
 // ----------------------------------------------------------------------
 // Manual date-time range nav (mirrors My Electric Flow)
 // ----------------------------------------------------------------------
-datetimepicker1 = DateTimePicker.attach(document.getElementById('request-start'), { buttonClass: 'add-on', onChange: set_view_start });
-datetimepicker2 = DateTimePicker.attach(document.getElementById('request-end'), { buttonClass: 'add-on', onChange: set_view_end });
+datetimepicker1 = DateTimePicker.attach(document.getElementById('request-start'), { onChange: set_view_start });
+datetimepicker2 = DateTimePicker.attach(document.getElementById('request-end'), { onChange: set_view_end });
 
 $("#time-manual-open").click(function () {
     update_time_pickers();

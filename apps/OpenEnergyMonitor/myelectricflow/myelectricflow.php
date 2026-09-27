@@ -19,14 +19,14 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
     <div class="app-panel">
 
     <nav class="app-top-bar">
-        <ul id="tabs" class="btn-list app-tabs">
-            <li><button class="app-btn view-toggle-btn active" data-view="flows"><i class="svg-icon-shuffle"></i><span><?php echo tr('Electric flow') ?></span></button></li>
-            <li><button class="app-btn view-toggle-btn d-none" data-view="costs"><i class="svg-icon-schedule"></i><span><?php echo tr('Tariff explorer') ?></span></button></li>
-        </ul>
-        <ul class="btn-list">
-            <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><i class="icon-wrench icon-white" title="Configure app"></i></button></li>
-            <li><button class="app-btn config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close icon-white"></i></button></li>
-        </ul>
+        <div id="tabs" class="nav nav-underline">
+            <button class="nav-link view-toggle-btn active" data-view="flows"><i class="svg-icon-shuffle"></i><?php echo tr('Electric flow') ?></button>
+            <button class="nav-link view-toggle-btn d-none" data-view="costs"><i class="svg-icon-schedule"></i><?php echo tr('Tariff explorer') ?></button>
+        </div>
+        <div class="nav">
+            <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
+            <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+        </div>
     </nav>
 
     <div id="live-power-view" class="stats-grid">
@@ -56,7 +56,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
         </div>
     </div>
 
-    <div id="live-cost-view" class="live-cost-grid d-none">
+    <div id="live-cost-view" class="stats-grid stats-grid-2 d-none">
         <div>
             <h5 class="power-title"><span class="balance-label">-</span></h5>
             <h2 class="power-value"><span class="grid-now">0</span><span class="power-unit">W</span></h2>
@@ -69,37 +69,39 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
     </div>
 
     <div class="app-panel">
-        <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
-            <button class='visnav time app-btn' time='1'>1<?php echo tr('h') ?></button>
-            <button class='visnav time app-btn' time='3'>3<?php echo tr('h') ?></button>
-            <button class='visnav time app-btn' time='6'>6<?php echo tr('h') ?></button>
-            <button class='visnav time app-btn' time='24'><?php echo tr('D') ?></button>
-            <button class='visnav time app-btn' time='168'><?php echo tr('W') ?></button>
-            <button class='visnav time app-btn' time='720'><?php echo tr('M') ?></button>
-            <button class='visnav time app-btn' time='8760'><?php echo tr('Y') ?></button>
-            <button id='zoomin' class='visnav app-btn' >+</button>
-            <button id='zoomout' class='visnav app-btn' >-</button>
-            <button id='left' class='visnav app-btn' >&lt;</button>
-            <button id='right' class='visnav app-btn' >&gt;</button>
-            <button id='time-manual-open' class='visnav app-btn' title="<?php echo tr('Select time window') ?>"><i class="icon-calendar icon-white"></i></button>
-            <div class="d-flex align-items-center">
-                <span id="data-mode-indicator" class="d-none d-md-inline"></span>
+        <div id="graph-nav" class="app-navbar">
+            <div class="btn-group app-timebar">
+                <button class='btn time' time='1'>1<?php echo tr('h') ?></button>
+                <button class='btn time' time='3'>3<?php echo tr('h') ?></button>
+                <button class='btn time' time='6'>6<?php echo tr('h') ?></button>
+                <button class='btn time' time='24'><?php echo tr('D') ?></button>
+                <button class='btn time' time='168'><?php echo tr('W') ?></button>
+                <button class='btn time' time='720'><?php echo tr('M') ?></button>
+                <button class='btn time' time='8760'><?php echo tr('Y') ?></button>
+                <button id='zoomin' class='btn'>+</button>
+                <button id='zoomout' class='btn'>-</button>
+                <button id='left' class='btn'>&lt;</button>
+                <button id='right' class='btn'>&gt;</button>
+                <button id='time-manual-open' class='btn' title="<?php echo tr('Select time window') ?>"><i class="svg-icon-calendar"></i></button>
             </div>
-
-            <button class="viewhistory app-btn ms-auto" title="<?php echo tr('View History') ?>"><span><?php echo tr("Daily") ?></span></button>
-
+            <span id="data-mode-indicator" class="d-none d-md-inline"></span>
+            <div class="nav ms-auto">
+                <button class="nav-link viewhistory" title="<?php echo tr('View History') ?>"><?php echo tr("Daily") ?></button>
+            </div>
         </div>
 
-        <div id="graph-nav-manual" class="visnavblock mb-2 d-flex justify-content-start align-items-center d-none">
-            <span class="ctrl-group">
-                <span class="ctrl-label"><?php echo tr('Start') ?></span>
-                <input id="request-start" type="text" placeholder="YYYY-MM-DD HH:MM:SS" />
-            </span>
-            <span class="ctrl-group">
-                <span class="ctrl-label"><?php echo tr('End') ?></span>
-                <input id="request-end" type="text" placeholder="YYYY-MM-DD HH:MM:SS" />
-            </span>
-            <button id='time-manual-close' class='visnav app-btn' title="<?php echo tr('Done') ?>"><i class="icon-ok icon-white"></i></button>
+        <div id="graph-nav-manual" class="d-flex flex-wrap align-items-center gap-2 mb-2 d-none">
+            <div class="input-group w-auto">
+                <span class="input-group-text"><?php echo tr('Start') ?></span>
+                <input id="request-start" class="form-control" type="text" placeholder="YYYY-MM-DD HH:MM:SS" />
+            </div>
+            <div class="input-group w-auto">
+                <span class="input-group-text"><?php echo tr('End') ?></span>
+                <input id="request-end" class="form-control" type="text" placeholder="YYYY-MM-DD HH:MM:SS" />
+            </div>
+            <div class="btn-group app-timebar flex-grow-0">
+                <button id='time-manual-close' class='btn' title="<?php echo tr('Done') ?>"><i class="svg-icon-check"></i></button>
+            </div>
         </div>
 
         <div id="placeholder_bound">
@@ -110,7 +112,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
     <div class="app-panel">
 
     <div id="cost-view" class="d-none">
-        <table class="app-table">
+        <table class="table">
             <tr>
                 <th><?php echo tr('Energy flow') ?></th>
                 <th><?php echo tr('Energy') ?></th>
@@ -121,26 +123,27 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
             <tbody id="cost_breakdown_body"></tbody>
         </table>
 
-        <div class="cost-controls">
-            <div class="ctrl-group">
-                <span class="ctrl-label"><?php echo tr('Tariff') ?></span>
-                <select id="tariff"></select>
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+            <div class="input-group w-auto">
+                <span class="input-group-text"><?php echo tr('Tariff') ?></span>
+                <select id="tariff" class="form-select"></select>
             </div>
-            <button id="show_profile" class="cost-btn"><?php echo tr('Profile') ?></button>
-            <button id="download-csv" class="cost-btn"><?php echo tr('Download CSV') ?></button>
+            <button id="show_profile" class="btn btn-outline-primary"><?php echo tr('Profile') ?></button>
+            <button id="download-csv" class="btn btn-outline-primary"><?php echo tr('Download CSV') ?></button>
         </div>
 
-        <div class="cost-options">
-            <label class="ctrl-checkbox"><input id="show_carbonintensity" type="checkbox" /> <?php echo tr('Show grid carbon intensity') ?></label>
-            <div id="carbonintensity_result" class="ctrl-note"></div>
+        <div class="form-check small">
+            <input id="show_carbonintensity" class="form-check-input" type="checkbox" />
+            <label class="form-check-label" for="show_carbonintensity"><?php echo tr('Show grid carbon intensity') ?></label>
         </div>
+        <div id="carbonintensity_result" class="small text-body-secondary"></div>
 
         <div id="monthly-data" class="d-none mt-3">
-            <table class="app-table mb-3">
+            <table class="table mb-3">
                 <thead><tr></tr></thead>
                 <tbody id="monthly-data-body"></tbody>
             </table>
-            <button id="save-baseline" class="cost-btn"><?php echo tr('Save baseline') ?></button>
+            <button id="save-baseline" class="btn btn-outline-primary"><?php echo tr('Save baseline') ?></button>
         </div>
     </div>
 

@@ -24,7 +24,7 @@
         <span class="window generation hide"><b id="window-gen"></b> <?php echo "generated"; ?></span>
         <span class="window self hide"><b id="window-selfcons"></b> <?php echo "self-consumed"; ?></span>
         <span class="window self hide"><b id="window-selfsuff"></b> <?php echo "self-sufficient"; ?></span>
-        <button class="app-btn ms-auto window power details" style="display:none"><?php echo "SHOW DETAIL"; ?></button>
+        <button class="nav-link ms-auto window power details" style="display:none"><?php echo "SHOW DETAIL"; ?></button>
     </div>
 </div>
 
