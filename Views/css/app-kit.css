@@ -3,7 +3,7 @@
    Shared components for apps, taken from MyElectricFlow. Colours come from
    the light and dark sets in Theme/css/bootstrap5-theme.css. An app wraps its
    view in .app-page and sets data-bs-theme="dark" on it for the dark look.
-   Components are listed in docs/design/ui-patterns.md.
+   Components are listed in docs/design/css-guide.md.
    ========================================================================== */
 
 /* -- Page frame ------------------------------------------------------------ */
