@@ -22,8 +22,15 @@ var config = {
 
         vue_config.app_name = config.app_name;
         vue_config.app_name_color = config.app_name_color || "#44b3e2";
-        let html = $("#appconf-description").html();
-        vue_config.app_description = html ? html : "";
+        // The first .lead paragraph of the description goes in the header, the rest in the About card
+        let desc = document.createElement("div");
+        desc.innerHTML = $("#appconf-description").html() || "";
+        let lead = desc.querySelector(".lead");
+        if (lead) {
+            vue_config.app_lead = lead.innerHTML;
+            lead.remove();
+        }
+        vue_config.app_description = desc.innerHTML;
         
         for (var z in config.feeds) config.feedsbyname[config.feeds[z].name] = config.feeds[z];
         for (var z in config.feeds) config.feedsbyid[config.feeds[z].id] = config.feeds[z];
@@ -76,10 +83,10 @@ var config = {
     closeConfig: function () {
         $("#app-block").show();
         $("#app-setup").hide();
+        $("body").removeClass("app-config-open");
         
         $('.config-open').show();
         $('.config-close').hide();
-        $('#buttons #tabs .btn').attr('disabled',false).css('opacity',1);
         // allow app to react to closing config window
         $('body').trigger('config.closed')
     },
@@ -91,16 +98,13 @@ var config = {
     showConfig: function () {
         $("#app-block").hide();
         $("#app-setup").show();
+        $("body").addClass("app-config-open");
         
         $('.config-open').hide();
         $('.config-close').show();
-        $('#buttons #tabs .btn').attr('disabled',true).css('opacity',.2);
     },
 
     UI: function() {
-        $("body").css('background-color','#222');
-        $("#footer").css('background-color','#181818');
-        $("#footer").css('color','#999');
         vue_config.renderUI();
     },
 
@@ -581,6 +585,7 @@ var vue_config_app = Vue.createApp({
         return {
             app_name: "App Name",
             app_name_color: "#44b3e2",
+            app_lead: "",
             app_description: "",
             app_instructions: "",
             config_name: "",
@@ -594,10 +599,55 @@ var vue_config_app = Vue.createApp({
             autogen_status_color: "#aaa",
 
             // Button only currently used by myheatpump app.
-            enable_process_daily: false
+            enable_process_daily: false,
+
+            open_key: null,         // feed row open for editing
+            show_unused: false,     // show optional feeds that are not in use
+            about_open: false,
+            about_long: false       // description taller than the clamped card
         };
     },
+    computed: {
+        feed_items: function() { return this.config_items.filter(function(i) { return i.type === "feed"; }); },
+        option_items: function() { return this.config_items.filter(function(i) { return i.type !== "feed"; }); },
+        connected_feeds: function() { return this.feed_items.filter(function(i) { return i.state === "ok" || i.state === "auto"; }); },
+        missing_feeds: function() { return this.feed_items.filter(function(i) { return i.state === "miss"; }); },
+        unused_feeds: function() { return this.feed_items.filter(function(i) { return i.state === "off"; }); },
+        // Missing required feeds first, then connected, then unused when shown. An open row stays shown.
+        shown_feeds: function() {
+            var self = this;
+            var unused = this.unused_feeds.filter(function(i) { return self.show_unused || i.key === self.open_key; });
+            return this.missing_feeds.concat(this.connected_feeds, unused);
+        },
+        feed_progress: function() {
+            return this.feed_items.length ? Math.round(100 * this.connected_feeds.length / this.feed_items.length) : 0;
+        },
+        autogen_present_count: function() { return this.autogen_feeds.filter(function(f) { return f.feedid; }).length; }
+    },
     methods: {
+
+        // Row state: ok (set), auto (auto matched or derived), off (not used), miss (required and not set)
+        feedState: function(item, optional) {
+            if (item.selectionMode === "DERIVE") return "auto";
+            if (item.isValid) return item.selectionMode === "AUTO" ? "auto" : "ok";
+            if (item.selectionMode === "DISABLED" || optional) return "off";
+            return "miss";
+        },
+
+        stateIcon: function(item) {
+            return { ok: "svg-icon-check", auto: item.selectionMode === "DERIVE" ? "svg-icon-shuffle" : "svg-icon-check",
+                     off: "svg-icon-minimize", miss: "svg-icon-close" }[item.state];
+        },
+
+        // Name and node of the feed a key resolves to, for display
+        setFeedDisplay: function(item, feedObj) {
+            item.feedName = feedObj ? feedObj.name : "";
+            item.feedTag = feedObj ? (feedObj.tag || "") : false;
+        },
+
+        toggleFeed: function(key) {
+            this.open_key = this.open_key === key ? null : key;
+        },
 
         // Build config_items from config.app and refresh all derived state.
         // Called by config.UI() every time the panel needs to (re-)render.
@@ -629,6 +679,11 @@ var vue_config_app = Vue.createApp({
                     description:   config.app[z].description || "",
                     // feed-specific
                     displayName:   config.app[z].autoname || z,
+                    autoname:      config.app[z].autoname || z,
+                    optional:      !!config.app[z].optional,
+                    feedName:      "",
+                    feedTag:       false,
+                    state:         "off",
                     selectionMode: "AUTO",
                     isValid:       false,
                     showSelector:  false,
@@ -672,6 +727,7 @@ var vue_config_app = Vue.createApp({
                                 item.displayName    = keyappend + config.feedsbyid[feedid].name;
                                 item.selectionMode  = "";
                                 item.selectedFeedId = feedid * 1;
+                                this.setFeedDisplay(item, config.feedsbyid[feedid]);
                                 feedvalid = true;
                             } else {
                                 delete config.db[z];
@@ -684,11 +740,14 @@ var vue_config_app = Vue.createApp({
                             if (config.feedsbyid[n].name == config.app[z].autoname && config.engine_check(config.feedsbyid[n], config.app[z])) {
                                 item.selectedFeedId = "auto";
                                 item.selectionMode  = "AUTO";
+                                this.setFeedDisplay(item, config.feedsbyid[n]);
                                 feedvalid = true;
                             }
                         }
                     }
                     item.isValid = feedvalid;
+                    if (config.db[z] == undefined && !feedvalid) item.selectedFeedId = "auto";
+                    item.state = this.feedState(item, item.optional);
 
                 } else if (item.type === "value" || item.type === "checkbox" || item.type === "select") {
                     if (config.db[z] != undefined) item.inputValue = config.db[z];
@@ -699,6 +758,12 @@ var vue_config_app = Vue.createApp({
 
             this.config_items = items;
             this.config_valid = config.check();
+
+            var self = this;
+            this.$nextTick(function() {
+                var el = self.$refs.about;
+                self.about_long = !!el && el.scrollHeight > 140;
+            });
         },
 
         editFeed: function(key) {
@@ -716,27 +781,34 @@ var vue_config_app = Vue.createApp({
                 item.displayName   = keyappend + config.feedsbyid[feedid].name;
                 item.selectionMode = "";
                 item.isValid       = true;
+                this.setFeedDisplay(item, config.feedsbyid[feedid]);
             }
             if (feedid === "auto") {
                 delete config.db[key];
                 item.displayName   = config.app[key].autoname;
                 item.selectionMode = "AUTO";
-                item.isValid       = true;
+                var match = config.feedsbyname[config.app[key].autoname];
+                item.isValid       = !!(match && config.engine_check(match, config.app[key]));
+                this.setFeedDisplay(item, item.isValid ? match : null);
             }
             if (feedid === "disable") {
                 config.db[key]     = "disable";
                 item.displayName   = config.app[key].autoname;
                 item.selectionMode = "DISABLED";
                 item.isValid       = false;
+                this.setFeedDisplay(item, null);
             }
             if (feedid === "derive") {
                 config.db[key]     = "derive";
                 item.displayName   = config.app[key].autoname;
                 item.selectionMode = "DERIVE";
                 item.isValid       = true;
+                this.setFeedDisplay(item, null);
             }
 
+            item.state = this.feedState(item, item.optional);
             item.showSelector = false;
+            this.open_key = null;
             config.set();
             this.config_valid = config.check();
             if (typeof config.ui_after_value_change === 'function') config.ui_after_value_change(key);
@@ -776,7 +848,7 @@ var vue_config_app = Vue.createApp({
         },
 
         deleteApp: function() {
-            console.log("delete: " + config.id);
+            if (!confirm("Delete this app? Its settings are removed, feeds are kept.")) return;
             $.ajax({
                 url: path + "app/remove",
                 data: "id=" + config.id,

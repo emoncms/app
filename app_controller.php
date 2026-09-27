@@ -215,6 +215,11 @@ function app_controller()
         }
     }
 
+    // Name of the app found, also when opened by id or when the default app was returned
+    if ($app && isset($app->name)) {
+        $app_name = $app->name;
+    }
+
     if (!$app) {
         if ($route->action == "view" || $route->action == "") {
             return ""; // redirects to login

@@ -1,109 +1,104 @@
+/* App config panel. Shared dark set, look of the API and Network pages. */
 
-/* -------------------------------------------------------------------
-   Config
---------------------------------------------------------------------*/
-.app-config-box {
-  border: 1px solid #fff;
-  color: #fff;
+/* Page background and footer sit outside the panel */
+body.app-config-open { background-color: #222; }
+body.app-config-open #footer { background-color: #181818; color: #999; }
+
+.cfg { max-width: 1040px; margin: 0 auto; padding: 28px 0 40px; font-family: var(--bs-body-font-family); color: var(--bs-body-color); }
+.cfg-mono { font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+
+/* Title, lead and launch */
+.cfg-head { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px 20px; margin-bottom: 20px; }
+.cfg-head > div:first-child { flex: 1; min-width: 280px; }
+.cfg-head h2 { margin: 0; font-size: 28px; line-height: 36px; }
+.cfg-head p { margin: 4px 0 0; font-size: 15px; line-height: 22px; color: var(--bs-secondary-color); }
+.cfg-actions { display: flex; gap: 8px; margin-left: auto; }
+
+/* Readiness strip */
+.cfg-status {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 12px 18px;
+    border: 1px solid var(--bs-border-color); border-radius: 10px; background-color: var(--bs-body-bg);
+}
+.cfg-progress { flex: 1; max-width: 260px; height: 6px; border-radius: 3px; overflow: hidden; background-color: rgba(var(--bs-emphasis-color-rgb), 0.08); }
+.cfg-progress > div { height: 100%; background-color: var(--bs-success); }
+
+/* Cards, as the API page key cards */
+.cfg-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.cfg-card { padding: 20px 24px; border: 1px solid var(--bs-border-color); border-radius: 12px; background-color: var(--bs-body-bg); }
+.cfg-card-title { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; font-size: 20px; font-weight: bold; color: var(--bs-emphasis-color); }
+.cfg-label { display: block; margin-bottom: 5px; color: var(--bs-secondary-color); }
+.cfg-card .form-control { width: 100%; }
+.cfg-switch-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 16px; }
+.cfg-about { line-height: 21px; color: var(--bs-secondary-color); }
+.cfg-about b, .cfg-about strong { color: var(--bs-body-color); }
+.cfg-about.is-clamped {
+    max-height: 128px; overflow: hidden;
+    -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent);
 }
 
-.app-config-box-main {
-  border: 1px solid #aaa;
-  color: #fff;
+/* Icon circle, and the feed state colours */
+.cfg-icon {
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 38px; height: 38px;
+    border-radius: 50%; font-size: 17px; color: var(--bs-primary); background-color: rgba(var(--bs-primary-rgb), 0.15);
 }
+.cfg-state { width: 26px; height: 26px; font-size: 13px; }
+.cfg-state.ok   { color: var(--bs-success-text-emphasis); background-color: var(--bs-success-bg-subtle); }
+.cfg-state.miss { color: var(--bs-danger-text-emphasis); background-color: var(--bs-danger-bg-subtle); }
+.cfg-state.off  { color: var(--bs-secondary-color); background-color: rgba(var(--bs-emphasis-color-rgb), 0.06); }
+
+/* Section heading, as the Network page */
+.cfg-section { display: flex; align-items: center; gap: 12px; margin: 30px 0 12px; }
+.cfg-section h4 { margin: 0; font-size: 13px; font-weight: bold; letter-spacing: 0.1em; text-transform: uppercase; color: var(--bs-secondary-color); }
+.cfg-count { font-size: 13px; color: var(--bs-secondary-color); }
+
+/* Rows, two columns on wide screens. An open row spans both. */
+.cfg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 10px; }
+.cfg-row { border: 1px solid var(--bs-border-color); border-radius: 10px; background-color: var(--bs-body-bg); }
+.cfg-row-main { display: flex; align-items: center; gap: 14px; min-height: 58px; padding: 9px 16px; }
+.cfg-row.is-link .cfg-row-main { cursor: pointer; border-radius: 9px; }
+.cfg-row.is-link .cfg-row-main:hover { background-color: var(--bs-tertiary-bg); }
+.cfg-row.open { grid-column: 1 / -1; }
+.cfg-row.open .cfg-row-main { border-bottom: 1px solid var(--bs-border-color); border-radius: 9px 9px 0 0; }
+.cfg-danger { border-color: var(--bs-danger-border-subtle); }
+.cfg-text { flex: 1; min-width: 0; }
+.cfg-key { font-weight: bold; color: var(--bs-emphasis-color); overflow-wrap: anywhere; }
+.cfg-desc { font-size: 13px; line-height: 18px; color: var(--bs-secondary-color); }
+.cfg-value { font-size: 13px; text-align: right; }
+.cfg-node { color: var(--bs-secondary-color); }
+.cfg-node .cfg-tag { margin-left: 6px; }
+.cfg-form { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px 16px; }
+.cfg-form .form-select { width: auto; min-width: 260px; }
+.cfg-ctrl { flex-shrink: 0; }
+.cfg-ctrl .form-control { width: 170px; }
+.cfg-ctrl .form-select { max-width: 240px; }
+
+/* Button that shows the unused optional feeds */
+.cfg-more {
+    display: block; width: 100%; margin-top: 10px; padding: 10px;
+    border: 1px dashed var(--bs-border-color); border-radius: 10px; background: none; color: var(--bs-secondary-color);
+}
+.cfg-more .cfg-mono { font-size: 12px; }
+.cfg-more:hover { color: var(--bs-emphasis-color); border-color: var(--bs-secondary-color); }
+
+/* Pastel tags, as the Network and feed engine tags */
+.cfg-tag { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: bold; line-height: 16px; white-space: nowrap; }
+.cfg-tag-auto   { color: var(--bs-info-text-emphasis); background-color: var(--bs-info-bg-subtle); }
+.cfg-tag-set    { color: var(--bs-success-text-emphasis); background-color: var(--bs-success-bg-subtle); }
+.cfg-tag-warn   { color: var(--bs-warning-text-emphasis); background-color: var(--bs-warning-bg-subtle); }
+.cfg-tag-miss   { color: var(--bs-danger-text-emphasis); background-color: var(--bs-danger-bg-subtle); }
+.cfg-tag-off    { color: var(--bs-secondary-color); background-color: rgba(var(--bs-emphasis-color-rgb), 0.06); }
+.cfg-tag-derive { color: #c9a0f0; background-color: rgba(160, 100, 220, 0.18); }
+
+.cfg-table { margin: 0; }
+.cfg-table > :not(caption) > * > * { padding: 7px 16px; font-size: 13px; }
 
 /* App description, Bootstrap 2 lead size */
-.xappconfig-description-inner { color: #aaa; }
-.xappconfig-description-inner .lead {
-  margin-bottom: 20px;
-  font-size: 21px;
-  font-weight: 200;
-  line-height: 30px;
-}
+.cfg-about .lead { margin-bottom: 20px; font-size: 21px; font-weight: 200; line-height: 30px; }
 
-.app-config-description-inner {
-  padding-right: 20px;
-  color: #ccc;
-}
-
-.app-config select {
-  background-color: #333;
-  color: #fff;
-}
-.app-config select optgroup {
-  background-color: #666;
-}
-/* Light arrow on the dark select */
-.app-config .form-select {
-  --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dee2e6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-}
-.app-config input[type=text] {
-  background-color: #333;
-  color: #fff;
-}
-.app-config .icon-app-config {
-  background-image: url("../../../../Theme/img/glyphicons-halflings-white.png");
-  margin-top:5px;
-}
-
-.app-config .feed-auto {
-  color: #ccc;
-}
-
-.app-config-box {
-  margin-bottom:8px;
-  padding: 8px 10px 10px 10px;
-}
-
-.app-config-box-main {
-  margin-bottom:8px;
-  padding:10px;
-}
-
-.app-config-title {
-  color:#0699fa;
-}
-
-.app-config-description {
-  font-size:18px;
-  margin-bottom:20px;
-  color:#ccc
-}
-
-.app-config select {
-  margin:0px;
-  width:85%;
-}
-
-.app-config input[type=text] {
-  margin:0px;
-  margin-top:5px;
-  width:90%;
-}
-
-.app-config .feed-auto {
-  font-size:12px;
-}
-
-.app-config .feed-select-div {
-  margin:0px;
-  margin-top:5px;
-  width:100%;
-}
-
-.app-config .feed-name {
-	margin-right:22px;
-}
-
-#tooltip {
-  position: absolute;
-  display: none;
-  border: 1px solid #545454;
-  border-radius: .1em;
-  padding: .3em .5em;
-  background-color: #333;
-  opacity: .8;
-  top: 0;
-  left: 0;
-  color: white
+@media (max-width: 575px) {
+    .cfg-grid { grid-template-columns: 1fr; }
+    .cfg-row-main { flex-wrap: wrap; }
+    .cfg-value { width: 100%; padding-left: 40px; text-align: left; }
+    .cfg-actions { margin-left: 0; }
+    .cfg-progress { display: none; }
 }

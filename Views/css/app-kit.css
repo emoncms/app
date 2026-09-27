@@ -333,6 +333,18 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
 }
 
 /* Tooltip is added to body, outside .app-page, so its colours are fixed */
+#tooltip {
+    position: absolute;
+    display: none;
+    top: 0;
+    left: 0;
+    padding: .3em .5em;
+    border: 1px solid #545454;
+    border-radius: .1em;
+    background-color: #333;
+    color: #fff;
+    opacity: .8;
+}
 .tooltip-title {
     color: #aaa;
     font-weight: bold;
