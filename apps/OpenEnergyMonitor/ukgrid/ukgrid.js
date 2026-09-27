@@ -6,6 +6,7 @@ var options = {
       timeBase: "milliseconds",
       autoScale: "none"
   },
+  yaxes: [{}, { position: "right" }],     // carbon intensity on axis 2
   selection: { 
       mode: "x", 
       color:"#000",

@@ -39,6 +39,8 @@ var series = [];
 var feed_data = {};
 var options = {
     legend: { show: true },
+    // Flot 5 needs every axis a series uses: SOC on 2, peak shaving balance on 3
+    yaxes: [{}, { position: "right" }, { position: "right" }],
     xaxis: {
         mode: "time",
         timezone: "browser",

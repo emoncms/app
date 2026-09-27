@@ -56,6 +56,7 @@ var options = {
         timeBase: "milliseconds",
         autoScale: "none"
     },
+    yaxes: [{}, { position: "right" }],     // wind speed on axis 2
     grid: {
         show: true,
         color: "#aaa",

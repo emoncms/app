@@ -457,7 +457,7 @@ function draw_powergraph() {
     var options = {
         series: { lines: { fill: fill, lineWidth: 2 } },
         xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none", min: view.start, max: view.end},
-        yaxes: [{ min: 0, autoScale: "none" }],
+        yaxes: [{ min: 0, autoScale: "none" }, { position: "right" }],   // balance line on axis 2
         grid: { hoverable: true, clickable: true },
         selection: { mode: "x", color: "#e8cfac", visualization: "fill" },
         legend: { show: false }

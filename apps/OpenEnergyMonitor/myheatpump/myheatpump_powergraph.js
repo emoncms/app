@@ -696,7 +696,9 @@ function powergraph_draw() {
             { min: 0, autoScale: "none", font: style, reserveSpace: false },
             { font: style, reserveSpace: false },
             { min: 0, autoScale: "none", font: { size: flot_font_size, color: "#44b3e2", fill: "#44b3e2" }, reserveSpace: false },
-            { min: 0, max: 1, autoScale: "none", show: false, reserveSpace: false }
+            { min: 0, max: 1, autoScale: "none", show: false, reserveSpace: false },
+            { font: style, reserveSpace: false },   // emitter spec
+            { font: style, reserveSpace: false }    // system volume
         ],
         grid: {
             show: true,
