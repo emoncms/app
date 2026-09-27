@@ -10,15 +10,6 @@ var profile_mode = false;
 
 var show_carbonintensity = $("#show_carbonintensity")[0].checked;
 
-// ----------------------------------------------------------------------
-// Display
-// ----------------------------------------------------------------------
-$("body").css('background-color', 'WhiteSmoke');
-$(window).ready(function() {
-    //$("#footer").css('background-color','#181818');
-    //$("#footer").css('color','#999');
-});
-
 if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
@@ -182,7 +173,6 @@ function init() {
 }
 
 function show() {
-    $("body").css('background-color', 'WhiteSmoke');
     $("#app-title").html(config.app.title.value);
 
     // Quick translation of feed ids
@@ -294,9 +284,9 @@ function updater() {
 
         if (feeds["import"] != undefined) {
             if (feeds["import"].value < 10000) {
-                $("#power_now").html(Math.round(feeds["import"].value) + "<span class='units'>W</span>");
+                $("#power_now").html(Math.round(feeds["import"].value) + "<span class='app-stat-unit'>W</span>");
             } else {
-                $("#power_now").html((feeds["import"].value * 0.001).toFixed(1) + "<span class='units'>kW</span>");
+                $("#power_now").html((feeds["import"].value * 0.001).toFixed(1) + "<span class='app-stat-unit'>kW</span>");
             }
         }
     });
@@ -762,7 +752,7 @@ function draw_tables(total, monthly_data) {
             }
 
             // link icon that zooms to month
-            monthly_out += "<td><i class='icon-eye-open zoom-to-month' timestamp='"+month+"' style='cursor:pointer'></i></td>";
+            monthly_out += "<td><span class='svg-icon-eye zoom-to-month' timestamp='"+month+"' style='cursor:pointer'></span></td>";
             monthly_out += "</tr>";
 
             monthly_sum_kwh += monthly_data[month]["import"];
@@ -800,16 +790,16 @@ function graph_draw() {
         let kwh_last_halfhour = data["import"][this_halfhour_index][1];
 
         if (kwh_last_halfhour != null) {
-            $("#kwh_halfhour").html(kwh_last_halfhour.toFixed(2) + "<span class='units'>kWh</span>");
+            $("#kwh_halfhour").html(kwh_last_halfhour.toFixed(2) + "<span class='app-stat-unit'>kWh</span>");
         } else {
             $("#kwh_halfhour").html("N/A");
         }
 
         let cost_last_halfhour = data["import_cost_tariff_A"][this_halfhour_index][1] * 100;
-        $("#cost_halfhour").html("(" + cost_last_halfhour.toFixed(2) + "<span class='units'>p</span>)");
+        $("#cost_halfhour").html("(" + cost_last_halfhour.toFixed(2) + "p)");
 
         let unit_price = data["tariff_A"][this_halfhour_index][1] * 1.05;
-        $("#unit_price").html(unit_price.toFixed(2) + "<span class='units'>p</span>");
+        $("#unit_price").html(unit_price.toFixed(2) + "<span class='app-stat-unit'>p</span>");
 
         $(".last_halfhour_stats").show();
     } else {
@@ -1022,20 +1012,6 @@ function resize() {
     placeholder.width(width);
     placeholder_bound.height(height);
     placeholder.height(height - top_offset);
-
-    if (width <= 500) {
-        $(".electric-title").css("font-size", "14px");
-        $(".power-value").css("font-size", "36px");
-        $(".halfhour-value").css("font-size", "26px");
-    } else if (width <= 724) {
-        $(".electric-title").css("font-size", "16px");
-        $(".power-value").css("font-size", "50px");
-        $(".halfhour-value").css("font-size", "40px");
-    } else {
-        $(".electric-title").css("font-size", "20px");
-        $(".power-value").css("font-size", "50px");
-        $(".halfhour-value").css("font-size", "40px");
-    }
 }
 
 $(function() {

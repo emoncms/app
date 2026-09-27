@@ -1,110 +1,90 @@
 <?php
-    defined('EMONCMS_EXEC') or die('Restricted access');
-    global $path, $session, $v;
+defined('EMONCMS_EXEC') or die('Restricted access');
+global $path, $session, $v;
+
+load_js("Modules/feed/feed.js");
+load_js("Modules/app/Lib/graph_bars.js");
+load_js("Modules/app/Lib/graph_lines.js");
+load_js("Modules/app/Lib/timeseries.js");
+load_js("Modules/app/Lib/vis.helper.js");
+load_css("Modules/app/Views/css/app-kit.css");
+load_css("Modules/app/apps/OpenEnergyMonitor/myelectric/myelectric.css");
 ?>
-<?php load_css("Modules/app/Views/css/dark.css"); ?>
-<?php load_js("Modules/feed/feed.js"); ?>
 
-<?php load_js("Modules/app/Lib/graph_bars.js"); ?> 
-<?php load_js("Modules/app/Lib/graph_lines.js"); ?> 
-<?php load_js("Modules/app/Lib/timeseries.js"); ?> 
-<?php load_js("Modules/app/Lib/vis.helper.js"); ?> 
-
-<nav id="buttons" class="d-flex justify-content-between">
-    <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="btn btn-lg btn-link myelectric-view-cost" ><?php echo tr("Cost") ?></button></li>
-        <li><button class="btn btn-lg btn-link myelectric-view-kwh active" ><?php echo tr("kWh") ?></button></li>
-    </ul>
-    <?php include(dirname(__DIR__).'/config-nav.php'); ?>
-</nav>
+<div class="app-page" data-bs-theme="dark">
 
 <section id="app-block" style="display:none">
-    <div class="d-flex justify-content-between">
-        <div>
-            <h5 class="electric-title mb-0 text-sm-larger text-light"><?php echo tr('POWER NOW') ?></h5>
-            <h2 class="power-value display-sm-4 display-sm-3 display-lg-2 mt-0 mb-lg-3 text-primary">
-                <span id="powernow">0</span>
-            </h2>
-        </div>
-        <div class="text-xs-right">
-            <h5 class="electric-title mb-0 text-sm-larger text-light"><?php echo tr('TODAY') ?></h5>
-            <h2 class="power-value display-sm-4 display-sm-3 display-lg-2 mt-0 mb-lg-3 text-primary">
-                <span id="usetoday_units_a"></span>
-                <span id="usetoday"></span>
-                <small id="usetoday_units_b" class="usetoday"></small>
-            </h2>
+
+    <div class="app-panel">
+        <nav class="app-top-bar d-flex justify-content-between">
+            <ul id="tabs" class="btn-list app-tabs">
+                <li><button class="app-btn myelectric-view-cost"><i class="svg-icon-schedule"></i><span><?php echo tr("Cost") ?></span></button></li>
+                <li><button class="app-btn myelectric-view-kwh active"><i class="svg-icon-smartmeter"></i><span><?php echo tr("kWh") ?></span></button></li>
+            </ul>
+            <ul class="btn-list">
+                <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><i class="svg-icon-wrench"></i></button></li>
+                <li><button class="app-btn config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button></li>
+            </ul>
+        </nav>
+
+        <div class="stats-grid stats-grid-2">
+            <div>
+                <h5 class="power-title"><?php echo tr('POWER NOW') ?></h5>
+                <h2 class="power-value text-primary"><span id="powernow">0</span></h2>
+            </div>
+            <div>
+                <h5 class="power-title"><?php echo tr('TODAY') ?></h5>
+                <h2 class="power-value text-primary"><span id="usetoday_units_a"></span><span id="usetoday"></span><small id="usetoday_units_b"></small></h2>
+            </div>
         </div>
     </div>
 
-    <?php include(dirname(__DIR__).'/graph-nav.php'); ?>
-
-    <div class="d-flex justify-content-between">
-        <div class="chart-placeholder double" id="placeholder_bound_power">
-            <canvas id="placeholder_power"></canvas>
+    <div class="app-panel">
+        <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
+            <button class='visnav time app-btn' time='1'>1<?php echo tr('h') ?></button>
+            <button class='visnav time app-btn' time='3'>3<?php echo tr('h') ?></button>
+            <button class='visnav time app-btn' time='6'>6<?php echo tr('h') ?></button>
+            <button class='visnav time app-btn' time='24'><?php echo tr('D') ?></button>
+            <button class='visnav time app-btn' time='168'><?php echo tr('W') ?></button>
+            <button class='visnav time app-btn' time='720'><?php echo tr('M') ?></button>
+            <button class='visnav time app-btn' time='8760'><?php echo tr('Y') ?></button>
+            <button id='zoomin' class='visnav app-btn'>+</button>
+            <button id='zoomout' class='visnav app-btn'>-</button>
+            <button id='left' class='visnav app-btn'>&lt;</button>
+            <button id='right' class='visnav app-btn'>&gt;</button>
         </div>
-        <div class="chart-placeholder double" id="placeholder_bound_kwhd">
-            <canvas id="placeholder_kwhd"></canvas>
+
+        <div class="myelectric-charts">
+            <div id="placeholder_bound_power"><canvas id="placeholder_power"></canvas></div>
+            <div id="placeholder_bound_kwhd"><canvas id="placeholder_kwhd"></canvas></div>
+        </div>
+    </div>
+
+    <div class="app-panel">
+        <div class="app-stats myelectric-totals">
+            <div>
+                <div class="app-stat-title"><?php echo tr('WEEK') ?></div>
+                <div class="app-stat-value text-primary"><span class="u1a"></span><span id="week_kwh"></span><span class="app-stat-unit u1b"></span></div>
+                <div class="myelectric-kwhd text-primary"><span class="u2a"></span><span id="week_kwhd"></span><span class="u2b">/day</span></div>
+            </div>
+            <div>
+                <div class="app-stat-title"><?php echo tr('MONTH') ?></div>
+                <div class="app-stat-value text-primary"><span class="u1a"></span><span id="month_kwh"></span><span class="app-stat-unit u1b"></span></div>
+                <div class="myelectric-kwhd text-primary"><span class="u2a"></span><span id="month_kwhd"></span><span class="u2b">/day</span></div>
+            </div>
+            <div>
+                <div class="app-stat-title"><?php echo tr('YEAR') ?></div>
+                <div class="app-stat-value text-primary"><span class="u1a"></span><span id="year_kwh"></span><span class="app-stat-unit u1b"></span></div>
+                <div class="myelectric-kwhd text-primary"><span class="u2a"></span><span id="year_kwhd"></span><span class="u2b">/day</span></div>
+            </div>
+            <div>
+                <div class="app-stat-title"><?php echo tr('ALL') ?></div>
+                <div class="app-stat-value text-primary"><span class="u1a"></span><span id="alltime_kwh"></span><span class="app-stat-unit u1b"></span></div>
+                <div class="myelectric-kwhd text-primary"><span class="u2a"></span><span id="alltime_kwhd"></span><span class="u2b">/day</span></div>
+            </div>
         </div>
     </div>
 
-
-    <div id="breakdown" class="d-flex justify-content-between py-lg-2 text-light">
-        <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title my-0 text-light text-sm-larger"><?php echo tr('WEEK') ?></h5>
-            <h3 class="appbox-value mb-0 text-sm-larger">
-                <span class="u1a"></span>
-                <span id="week_kwh"></span>
-                <small class="u1b"></small>
-            </h3>
-            <h5 class="appbox-units my-0">
-                <span class="u2a"></span>
-                <span id="week_kwhd"></span>
-                <span class="u2b">/day</span>
-            </h5>
-        </div>
-
-        <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title my-0 text-light text-sm-larger"><?php echo tr('MONTH') ?></h5>
-            <h3 class="appbox-value mb-0 text-sm-larger">
-                <span class="u1a"></span>
-                <span id="month_kwh"></span>
-                <small class="u1b"></small>
-            </h3>
-            <h5 class="appbox-units my-0">
-                <span class="u2a"></span>
-                <span id="month_kwhd"></span>
-                <span class="u2b">/day</span>
-            </h5>
-        </div>
-
-        <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title my-0 text-light text-sm-larger"><?php echo tr('YEAR') ?></h5>
-            <h3 class="appbox-value mb-0 text-sm-larger">
-                <span class="u1a"></span>
-                <span id="year_kwh"></span>
-                <small class="u1b"></small>
-            </h3>
-            <h5 class="appbox-units my-0">
-                <span class="u2a"></span>
-                <span id="year_kwhd"></span>
-                <span class="u2b">/day</span>
-            </h5>
-        </div>
-
-        <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title my-0 text-light text-sm-larger"><?php echo tr('ALL') ?></h5>
-            <h3 class="appbox-value mb-0 text-sm-larger">
-                <span class="u1a"></span>
-                <span id="alltime_kwh"></span>
-                <small class="u1b"></small>
-            </h3>
-            <h5 class="appbox-units my-0">
-                <span class="u2a"></span>
-                <span id="alltime_kwhd"></span>
-                <span class="u2b">/day</span>
-            </h5>
-        </div>
-    </div>
 </section>
 
 <div id="appconf-description" style="display:none">
@@ -112,7 +92,9 @@
 </div>
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
-<div class="ajax-loader"><img src="<?php echo $path; ?>Modules/app/images/ajax-loader.gif"/></div>
+<div class="ajax-loader"></div>
+
+</div>
 
 <?php load_js("Lib/js/gettext.js"); ?> 
 <script>
@@ -137,14 +119,6 @@ var sessionwrite = <?php echo $session['write']; ?>;
 feed.apikey = apikey;
 feed.public_userid = public_userid;
 feed.public_username = public_username;
-// ----------------------------------------------------------------------
-// Display
-// ----------------------------------------------------------------------
-$("body").css('background-color','#222');
-$(window).ready(function(){
-    $("#footer").css('background-color','#181818');
-    $("#footer").css('color','#999');
-});
 if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
@@ -307,7 +281,7 @@ function fastupdate(event)
    var use_kwh = config.app.use_kwh.value;
    if (event && event.target) {
        // triggered by click
-       $target = $(event.target);
+       $target = $(event.currentTarget || event.target);
        $target.addClass('active').siblings().removeClass('active');
    }
     if (viewmode=="energy") {

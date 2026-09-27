@@ -138,7 +138,7 @@ class Graph {
     }
 
     reset() {
-        $(".graph-footer .power.action.details", this.view.container).find('span').html("SHOW DETAIL");
+        $(".graph-footer .details", this.view.container).html("SHOW DETAIL");
         $(".graph-stats", this.view.container).hide();
         
         return load();
@@ -533,12 +533,12 @@ class PowerGraph extends Graph {
         var windowStatsOut = "";
         for (var key in windowStats) {
             windowStatsOut += "<tr>";
-            windowStatsOut += "<td style='text-align:left'>"+key+"</td>";
-            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].minval.toFixed(2)+"</td>";
-            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].maxval.toFixed(2)+"</td>";
-            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].diff.toFixed(2)+"</td>";
-            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].mean.toFixed(2)+"</td>";
-            windowStatsOut += "<td style='text-align:center'>"+windowStats[key].stdev.toFixed(2)+"</td>";
+            windowStatsOut += "<td>"+key+"</td>";
+            windowStatsOut += "<td class='text-center'>"+windowStats[key].minval.toFixed(2)+"</td>";
+            windowStatsOut += "<td class='text-center'>"+windowStats[key].maxval.toFixed(2)+"</td>";
+            windowStatsOut += "<td class='text-center'>"+windowStats[key].diff.toFixed(2)+"</td>";
+            windowStatsOut += "<td class='text-center'>"+windowStats[key].mean.toFixed(2)+"</td>";
+            windowStatsOut += "<td class='text-center'>"+windowStats[key].stdev.toFixed(2)+"</td>";
             windowStatsOut += "</tr>";
         }
         $("#graph-stats").html(windowStatsOut);

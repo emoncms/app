@@ -1,0 +1,39 @@
+/* Live values, coloured by source. .cost is set by JS in cost mode. */
+.feedin-values .consumption { color: var(--ec-energy-use); }
+.feedin-values .consumption.cost { color: var(--ec-energy-import); }
+.feedin-values .generation { color: var(--ec-energy-solar); }
+.feedin-values .generation.cost { color: var(--ec-energy-export); }
+.feedin-values .selfcons { color: var(--bs-secondary-color); }
+
+.graph-body .graph {
+    min-height: 200px;
+    max-height: 500px;
+}
+
+/* Tooltip is added to body, outside .app-page, so its colours are fixed */
+.graph-tooltip {
+    z-index: 100;
+    position: absolute;
+    padding: 5px;
+    opacity: 0.75;
+    color: #000;
+    background-color: #fff;
+    border: 1px solid #333;
+    font-family: Montserrat, Verdana, sans-serif;
+}
+
+/* Elements shown by JS, so hidden here with !important */
+@media (max-width: 768px) {
+    .feedin-values .generation,
+    .graph-info .generation,
+    .graph-info .details,
+    .graph-header .power.time { display: none !important; }
+}
+
+@media (max-width: 1200px) {
+    .feedin-values .selfcons { display: none !important; }
+}
+
+@media (max-width: 1300px) {
+    .graph-info .self { display: none !important; }
+}

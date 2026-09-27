@@ -1,28 +1,27 @@
 <?php
-    defined('EMONCMS_EXEC') or die('Restricted access');
-    global $path, $session, $v;
+defined('EMONCMS_EXEC') or die('Restricted access');
+global $path, $session, $v;
+
+load_js("Modules/feed/feed.js");
+load_js("Lib/js/flot-5.1.0.mod.min.js");
+load_js("Modules/app/Lib/vis.helper.js");
+load_js("Lib/js/clipboard.js");
+load_css("Modules/app/Views/css/app-kit.css");
+load_css("Modules/app/apps/OpenEnergyMonitor/profile/profile.css");
 ?>
-<?php load_css("Modules/app/Views/css/dark.css"); ?>
-<?php load_css("Modules/app/apps/OpenEnergyMonitor/profile/profile.css"); ?>
-<?php load_js("Modules/feed/feed.js"); ?>
 
-<?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
-<?php load_js("Modules/app/Lib/vis.helper.js"); ?>
-<?php load_js("Lib/js/clipboard.js"); ?>
+<div class="app-page" data-bs-theme="dark">
 
-<div id="app-block" style="display:none">
-  <div class="app-card">
-    <nav class="app-top-bar d-flex justify-content-between">
-      <ul class="btn-list">
-        <li><h3 class="app-heading"><i class="svg-icon-show_chart"></i><span>Profile Explorer</span></h3></li>
+<section id="app-block" style="display:none">
+
+  <div class="app-panel">
+    <nav class="app-top-bar d-flex justify-content-between align-items-center">
+      <ul class="btn-list app-tabs">
+        <li><h1 class="app-btn active m-0"><i class="svg-icon-show_chart"></i><span>Profile Explorer</span></h1></li>
       </ul>
-      <ul class="btn-list">
-        <li>
-          <span class="mode-toggle">
-            <button class="mode-toggle-btn active" data-mode="monthly">Monthly</button>
-            <button class="mode-toggle-btn" data-mode="annual">Annual</button>
-          </span>
-        </li>
+      <ul class="btn-list gap-2">
+        <li><button class="cost-btn mode-toggle-btn active" data-mode="monthly">Monthly</button></li>
+        <li><button class="cost-btn mode-toggle-btn" data-mode="annual">Annual</button></li>
         <li>
           <span class="ctrl-group">
             <span class="ctrl-label">Interval</span>
@@ -34,25 +33,22 @@
             </select>
           </span>
         </li>
-        <li><button class="app-btn config-open" title="Configure app"><i class="icon-wrench icon-white"></i></button></li>
+        <li><button class="app-btn config-open" title="Configure app"><i class="svg-icon-wrench"></i></button></li>
       </ul>
     </nav>
-
-    <div class="graph-wrap">
-      <div id="graph" style="height:500px; width:100%;"></div>
-    </div>
+    <div id="graph"></div>
   </div>
 
-  <div class="app-card">
-    <table class="data-table">
+  <div class="app-panel">
+    <table class="app-table">
       <tbody id="table"></tbody>
     </table>
-
-    <div style="padding: 0.75rem 8px;">
-      <button class="action-btn" id="copy_to_clipboard" title="Copy CSV data to clipboard">Copy CSV <i class="icon-share-alt icon-white"></i></button>
+    <div class="p-2">
+      <button class="cost-btn gap-2" id="copy_to_clipboard" title="Copy CSV data to clipboard"><span>Copy CSV</span><i class="svg-icon-content_copy"></i></button>
     </div>
   </div>
-</div>
+
+</section>
 
 <div id="appconf-description" style="display:none">
     <p class="lead">Explore average daily profiles for different months of the year.</p>
@@ -60,6 +56,8 @@
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
+
+</div>
 
 <script>
 
@@ -260,13 +258,10 @@ function show()
         }
     }
 
-    // Graph options
-    var font_color = "#888";
+    // Graph options. Tick label and legend colours come from app-kit.css.
     options = {
         series: { lines: { fill: false, lineWidth: 2 } },
-        //bars: { show: true, align: "center", barWidth: 0.75*interval*1000, fill: false},
-        xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", font: { color: font_color, fill: font_color } },
-        yaxis: { font: { color: font_color, fill: font_color } },
+        xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds" },
         grid: {
             show:true,
             hoverable: true,
@@ -277,9 +272,6 @@ function show()
             show: true,
             position: "ne",
             noColumns: 2,
-            backgroundColor: "#262626",
-            backgroundOpacity: 0.85,
-            labelBoxBorderColor: "#262626",
             margin: [10, 10]
         }
     }
@@ -294,8 +286,7 @@ function show()
     var out = "";
     
     out += '<tr>';
-    out += '<th style="width:50px">Enable</th>';
-    out += '<th style="width:50px">Key</th>';
+    out += '<th class="profile-check">Enable</th>';
     out += '<th>'+(mode=="annual" ? "Profile" : "Month")+'</th>';
     if (config.app.feed_type.value=='Other') {
         out += '<th>Average</th>';
@@ -308,9 +299,8 @@ function show()
     
     for (var z in data) {
         out += "<tr>";
-        out += "<td style='text-align:center'><input type='checkbox' class='showhidemonth' z='"+z+"' checked /></td>";
-        out += "<td><div class='color-box' style='background-color:"+data[z].color+"'></div></td>";
-        out += "<td>"+data[z].label+"</td>"
+        out += "<td class='profile-check'><input type='checkbox' class='form-check-input mt-0 showhidemonth' z='"+z+"' checked /></td>";
+        out += "<td class='col-primary'><span class='app-swatch' style='background-color:"+data[z].color+"'></span>"+data[z].label+"</td>";
         if (config.app.feed_type.value=='Other') {
             out += "<td>"+(data[z].mean).toFixed(2)+"</td>";    
         } else {
@@ -331,8 +321,6 @@ function updater()
 function resize() 
 {
     updater();
-    // Resize graph (fit the inner width of the containing card)
-    $("#graph").width($('#graph').parent().width());
     Flot.plot(document.getElementById('graph'),visible, options);
 }
 
@@ -418,7 +406,7 @@ function show_tooltip(x, y, values) {
     for (var i in values) {
         var value = values[i];
         var row = $('<tr/>').appendTo(table);
-        var swatch = value[3] ? '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+value[3]+';margin-right:6px"></span>' : '';
+        var swatch = value[3] ? '<span class="app-swatch" style="background:'+value[3]+'"></span>' : '';
         $('<td style="padding-right: 8px">'+swatch+'<span class="tooltip-title">'+value[0]+'</span></td>').appendTo(row);
         $('<td><span class="tooltip-value">'+value[1]+'</span> <span class="tooltip-units">'+value[2]+'</span></td>').appendTo(row);
     }

@@ -2,96 +2,56 @@
     defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
-<?php load_css("Modules/app/Views/css/light.css"); ?>
-<link rel="stylesheet" href="<?php echo $path; ?>Lib/fonts/montserrat/montserrat.css?v=<?php echo $v; ?>" />
+<?php load_css("Modules/app/Views/css/app-kit.css"); ?>
+<?php load_css("Lib/fonts/montserrat/montserrat.css"); ?>
 <?php load_js("Modules/feed/feed.js"); ?>
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
 <?php load_js("Modules/app/Lib/vis.helper.js"); ?>
 <?php load_js($appdir."rates.js"); ?>
 
-<style>
-.block-bound {
-background-color:#394d74;
-}
+<div class="app-page" data-bs-theme="light">
+    <section id="app-block" style="display:none">
+        <div class="app-block">
+            <div class="app-bar">
+                <div class="app-bar-title">Energy Cost Comparison</div>
+                <button class="app-bar-btn config-open" title="Configure app"><span class="svg-icon-wrench"></span></button>
+            </div>
+            <div class="app-block-body">
+                <label for="tariff" class="form-label">Tariff</label>
+                <select id="tariff" name="tariff" class="form-select input-220"></select>
+            </div>
+        </div>
 
-div.font {
-font-family: Montserrat, Veranda, sans-serif;
-}
-
-div.graph {
-background-color:#dbdee5;
-padding:10px;
-}
-.selected { font-size:20pt; }
-</style>
-
-<section class="font">
-    <div id="app-block" style="display:none">
-        <div class="col1">
-            <div class="col1-inner">
-                <div class="block-bound">
-                    <div class="bluenav config-open">
-                        <i class="icon-wrench icon-white"></i>
-                    </div>
-                    <div class="block-title">
-                        Energy Cost Comparison
-                    </div>
-                </div>
-                <div class="graph">
-                    <label for="tariff" class="form-label">Tariff</label> <select id="tariff" name="tariff" class="form-select input-220 mb-2">
-                    </select>
+        <div class="app-block">
+            <div class="app-bar bargraph-navigation">
+                <div class="app-bar-title">HISTORY</div>
+                <button class="app-bar-btn bargraph-day">DAY</button>
+                <button class="app-bar-btn bargraph-week">WEEK</button>
+                <button class="app-bar-btn bargraph-month">MONTH</button>
+                <button class="app-bar-btn bargraph-year">YEAR</button>
+                <button class="app-bar-btn bargraph-alltime">ALL TIME</button>
+            </div>
+            <div class="app-block-body">
+                <div id="placeholder_bound" style="width:100%; height:500px">
+                    <div id="placeholder_legend"></div>
+                    <div id="placeholder" style="width:100%; height:100%"></div>
                 </div>
             </div>
         </div>
-        <div class="col1">
-            <div class="col1-inner">
-                <div class="block-bound">
-                    <div class="bargraph-navigation">
-                        <div class="bluenav bargraph-alltime">
-                            ALL TIME
-                        </div>
-                        <div class="bluenav bargraph-year">
-                            YEAR
-                        </div>
-                        <div class="bluenav bargraph-month">
-                            MONTH
-                        </div>
-                        <div class="bluenav bargraph-week">
-                            WEEK
-                        </div>
-                        <div class="bluenav bargraph-day">
-                            DAY
-                        </div>
-                    </div>
-                    <div class="block-title">
-                        HISTORY
-                    </div>
-                </div>
-                <div class="graph">
-                    <div id="placeholder_bound" style="width:100%; height:500px;">
-                        <div id="placeholder_legend"></div>
-                        <div id="placeholder" style="width:100%; height:100%;"></div>
-                    </div>
+
+        <div class="app-block">
+            <div class="app-bar">
+                <div class="app-bar-title">Energy used by half-hour of day (over whole period)</div>
+            </div>
+            <div class="app-block-body">
+                <div id="halfhour_placeholder_bound" style="width:100%; height:250px">
+                    <div id="halfhour_legend"></div>
+                    <div id="halfhour_placeholder" style="height:250px"></div>
                 </div>
             </div>
         </div>
-        <div class="col1">
-            <div class="col1-inner">
-                <div class="block-bound">
-                    <div class="block-title">
-                        Energy used by half-hour of day (over whole period)
-                    </div>
-                </div>
-                <div class="graph">
-                    <div id="halfhour_placeholder_bound" style="width:100%; height:250px;">
-                        <div id="halfhour_legend"></div>
-                        <div id="halfhour_placeholder" style="height:250px"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+    </section>
+
 <div class="ajax-loader"></div>
 
 <div id="appconf-description" style="display:none">
@@ -99,6 +59,7 @@ padding:10px;
     <p><strong>Note:</strong> If you have solar or renewable energy generation then use the import_kwh feed to view the actual cost based on energy brought from the grid</p>
 </div>
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
+</div>
 
 <script type="text/javascript">
 // ----------------------------------------------------------------------
@@ -220,8 +181,6 @@ function init() {
 }
 
 function show() {
-    $("body").css('background-color', 'WhiteSmoke');
-    
     console.log(feeds);
     
     meta["use_kwh"] = feed.getmeta(feeds.use_kwh.id);
@@ -243,11 +202,11 @@ function show() {
 }
 
 function updater() {
-    if (selected_start==null) {    oneweek(); $(".bargraph-week").addClass("selected");} else { reloadExistingRange(); }
+    if (selected_start==null) {    oneweek(); $(".bargraph-week").addClass("active");} else { reloadExistingRange(); }
 }
 
 function clearHighlight() {
-    $(".bargraph-navigation .bluenav").removeClass("selected");
+    $(".bargraph-navigation .app-bar-btn").removeClass("active");
 }
 
 
@@ -292,7 +251,7 @@ $('.bargraph-alltime').click(function() {
     selected_end = d.getTime();
     reloadExistingRange();
     clearHighlight();
-    $(this).addClass("selected");
+    $(this).addClass("active");
 });
 
 
@@ -300,14 +259,14 @@ $('.bargraph-alltime').click(function() {
 $('.bargraph-week').click(function() {
     oneweek();
     clearHighlight();
-    $(this).addClass("selected");
+    $(this).addClass("active");
 });
 
 $('.bargraph-month').click(function() {
     //TODO: We really should work out number of days in the month and not assume 30 days
     loadAndDisplay(30);
     clearHighlight();
-    $(this).addClass("selected");
+    $(this).addClass("active");
 });
 
 $('.bargraph-year').click(function() {
@@ -324,13 +283,13 @@ $('.bargraph-year').click(function() {
     reloadExistingRange();
     
     clearHighlight();
-    $(this).addClass("selected");
+    $(this).addClass("active");
 });
 
 $('.bargraph-day').click(function() {
     loadAndDisplay(2);    
     clearHighlight();
-    $(this).addClass("selected");
+    $(this).addClass("active");
 });
 
 function timeFormatter(ms) {

@@ -2,10 +2,10 @@
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 ?>
-<?php load_css("Modules/app/Views/css/light.css"); ?>
+<?php load_css("Modules/app/Views/css/app-kit.css"); ?>
+<?php load_css("Lib/fonts/montserrat/montserrat.css"); ?>
 <?php load_css("Theme/css/datetimepicker.css"); ?>
 
-<link rel="stylesheet" href="<?php echo $path; ?>Lib/fonts/montserrat/montserrat.css?v=<?php echo $v; ?>" />
 <?php load_js("Modules/feed/feed.js"); ?>
 
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
@@ -14,134 +14,119 @@ global $path, $session, $v;
 
 
 <?php $v += 8; ?>
-<?php load_css("Modules/app/apps/OpenEnergyMonitor/octopus/tariff_explorer.css"); ?>
 
-<div style="font-family: Montserrat, Veranda, sans-serif;">
-    <div id="app-block" style="display:none">
+<div class="app-page" data-bs-theme="light">
+    <section id="app-block" style="display:none">
 
-        <div id="octopus-realtime" class="col1">
-            <div class="col1-inner">
+        <div id="octopus-realtime" class="app-block">
+            <div class="app-bar">
+                <div id="app-title" class="app-bar-title">Time of use tariff explorer</div>
+                <button class="app-bar-btn config-open" title="Configure app"><span class="svg-icon-wrench"></span></button>
+            </div>
 
-                <div class="block-bound">
-                    <div class="bluenav config-open"><i class="icon-wrench icon-white"></i></div>
-                    <div id="app-title" class="block-title">Time of use tariff explorer</div>
+            <div class="app-block-body app-stats">
+                <div>
+                    <div class="app-stat-title">IMPORT NOW</div>
+                    <div class="app-stat-value" id="power_now">0</div>
+                </div>
+                <div class="last_halfhour_stats">
+                    <div class="app-stat-title">CURRENT PRICE</div>
+                    <div class="app-stat-value" id="unit_price"></div>
+                </div>
+                <div class="last_halfhour_stats">
+                    <div class="app-stat-title">CURRENT HALF HOUR</div>
+                    <div class="app-stat-value"><span id="kwh_halfhour"></span> <span id="cost_halfhour" class="app-stat-unit"></span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="app-block">
+            <div class="app-bar graph-navigation">
+                <div id="history-title" class="app-bar-title d-none d-sm-block">HISTORY</div>
+                <select class="form-select form-select-sm w-auto align-self-center mx-2 time-select">
+                    <option value='8760'>Previous 365 days</option>
+                    <option value='1440'>Previous 60 days</option>
+                    <option value='720'>Previous 30 days</option>
+                    <option value='168'>Previous 7 days</option>
+                    <option value='24'>Previous 24 hours</option>
+                    <option value='12'>Previous 12 hours</option>
+                    <option value='M'>Since midnight 1st of month</option>
+                    <option value='W'>Since midnight Sunday</option>
+                    <option value='Y'>Yesterday</option>
+                    <option value='T' selected>Today since midnight</option>
+                    <option value='C'>Custom</option>
+                </select>
+                <button class="app-bar-btn" id="left" title="Scroll left">&lt;</button>
+                <button class="app-bar-btn" id="right" title="Scroll right">&gt;</button>
+                <button class="app-bar-btn" id="fastleft" title="Scroll left fast">&lt;&lt;</button>
+                <button class="app-bar-btn" id="fastright" title="Scroll right fast">&gt;&gt;</button>
+            </div>
+
+            <div class="app-block-body">
+                <div id="placeholder_bound" style="width:100%; height:400px">
+                    <div id="placeholder" style="height:400px"></div>
+                </div>
+            </div>
+
+            <div class="app-block-foot power-graph-footer" style="display:none">
+                <table class="table">
+                    <tr>
+                        <th></th>
+                        <th>Energy</th>
+                        <th>Cost / Value</th>
+                        <th>Unit price</th>
+                    </tr>
+                    <tbody id="octopus_totals"></tbody>
+                </table>
+
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                    <div class="input-group w-auto">
+                        <span class="input-group-text"><?php echo tr('Start') ?></span>
+                        <input id="request-start" class="form-control" type="text" style="width:190px" placeholder="YYYY-MM-DD HH:MM:SS" />
+                    </div>
+                    <div class="input-group w-auto">
+                        <span class="input-group-text"><?php echo tr('End') ?></span>
+                        <input id="request-end" class="form-control" type="text" style="width:190px" placeholder="YYYY-MM-DD HH:MM:SS" />
+                    </div>
+                    <div class="ms-auto">
+                        <button class="btn btn-default hide" id="show_profile">Show Profile</button>
+                        <button class="btn btn-default" id="download-csv">Download CSV</button>
+                    </div>
                 </div>
 
-                <div style="background-color:#fff; color:#333; padding:10px;">
-                    <table style="width:100%">
-                        <tr>
-                            <td style="width:40%">
-                                <div class="electric-title">IMPORT NOW</div>
-                                <div class="power-value"><span id="power_now">0</span></div>
-                            </td>
+                <div>
+                    <div id="use_meter_kwh_hh_bound" class="app-option hide">
+                        <input id="use_meter_kwh_hh" type="checkbox" checked> <b>Show energy and costs based on Octopus smart meter data where available</b>
+                        <div id="meter_kwh_hh_comparison" class="ctrl-note"></div>
+                    </div>
+                    <div id="show_carbonintensity_bound" class="app-option">
+                        <input id="show_carbonintensity" type="checkbox"> <b>Show grid carbon intensity</b>
+                        <div id="carbonintensity_result" class="ctrl-note"></div>
+                    </div>
+                </div>
 
-                            <td style="text-align:center" class="last_halfhour_stats">
-                                <div class="electric-title">CURRENT PRICE</div>
-                                <div class="power-value"><span id="unit_price"></span></div>
-                            </td>
-
-                            <td style="text-align:right" class="last_halfhour_stats">
-                                <div class="electric-title">CURRENT HALF HOUR</div>
-                                <div class="halfhour-value"><span id="kwh_halfhour"></span> <span id="cost_halfhour"></span></div>
-                            </td>
-
-                        </tr>
+                <!-- Monthly data table -->
+                <div id="monthly-data" class="hide mt-3">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Energy (kWh)</th>
+                                <th>Tariff A Cost (&pound;)</th>
+                                <th></th>
+                                <th>Tariff B Cost (&pound;)</th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="monthly-data-body"></tbody>
                     </table>
                 </div>
-
             </div>
         </div>
-        <div class="col1">
-            <div class="col1-inner">
 
-                <div class="block-bound" style="min-height:36px">
-
-                    <div class="graph-navigation">
-                        <span class="bluenav" id="fastright">&gt;&gt;</span>
-                        <span class="bluenav" id="fastleft">&lt;&lt;</span>
-                        <span class="bluenav" id="right">&gt;</span>
-                        <span class="bluenav" id="left">&lt;</span>
-
-                        <select class="form-select input-165 time-select">
-                            <option value='8760'>Previous 365 days</option>
-                            <option value='1440'>Previous 60 days</option>
-                            <option value='720'>Previous 30 days</option>
-                            <option value='168'>Previous 7 days</option>
-                            <option value='24'>Previous 24 hours</option>
-                            <option value='12'>Previous 12 hours</option>
-                            <option value='M'>Since midnight 1st of month</option>
-                            <option value='W'>Since midnight Sunday</option>
-                            <option value='Y'>Yesterday</option>
-                            <option value='T' selected>Today since midnight</option>
-                            <option value='C'>Custom</option>
-                        </select>
-                    </div>
-
-                    <div id="history-title" class="block-title">HISTORY</div>
-                </div>
-
-                <div style="background-color:rgba(68,179,226,0.1); padding:10px;">
-                    <div id="placeholder_bound" style="width:100%; height:400px;">
-                        <div id="placeholder" style="height:400px"></div>
-                    </div>
-                </div>
-
-                <div class="power-graph-footer" style="background-color:#f0f0f0; color:#333; display:none">
-                    <div style="padding:20px;">
-                        <table style="width:100%" class="table">
-                            <tr>
-                                <th></th>
-                                <th>Energy</th>
-                                <th>Cost / Value</th>
-                                <th>Unit price</th>
-                            </tr>
-                            <tbody id="octopus_totals"></tbody>
-                        </table>
-
-                        <div class="input-group" style="padding-right:5px">
-                            <span class="input-group-text" style="width:50px"><?php echo tr('Start') ?></span>
-                            <input id="request-start" class="form-control" type="text" style="width:154px" placeholder="YYYY-MM-DD HH:MM:SS" />
-                        </div>
-
-                        <div class="input-group" style="padding-right:5px">
-                            <span class="input-group-text" style="width:50px"><?php echo tr('End') ?></span>
-                            <input id="request-end" class="form-control" type="text" style="width:154px" placeholder="YYYY-MM-DD HH:MM:SS" />
-                        </div>
-
-                        <button class="btn btn-default" style="float:right" id="download-csv">Download CSV</button>
-                        <button class="btn btn-default hide" style="float:right" id="show_profile">Show Profile</button>
-                        <div id="use_meter_kwh_hh_bound" class="hide"><input id="use_meter_kwh_hh" type="checkbox" checked /> <span style="font-size:12px">Show energy and costs based on Octopus smart meter data where available</span>
-                            <div id="meter_kwh_hh_comparison" style="font-size:12px; padding-left:22px"></div>
-                        </div>
-                        <div id="show_carbonintensity_bound"><input id="show_carbonintensity" type="checkbox" /> <span style="font-size:12px">Show grid carbon intensity</span>
-                            <div id="carbonintensity_result" style="font-size:12px; padding-left:22px"></div>
-                        </div>
-
-                        <!-- Monthly data table -->
-                        <div id="monthly-data" class="hide mt-3">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Month</th>
-                                        <th>Energy (kWh)</th>
-                                        <th>Tariff A Cost (&pound;)</th>
-                                        <th></th>
-                                        <th>Tariff B Cost (&pound;)</th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="monthly-data-body"></tbody>
-                            </table>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+    </section>
 
 <div id="appconf-description" class="hide">
 <p class="lead">Explore Octopus Agile tariff costs over time.</p>
@@ -153,6 +138,7 @@ global $path, $session, $v;
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
+</div>
 
 <script>
     var apikey = "<?php print $apikey; ?>";

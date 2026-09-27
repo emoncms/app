@@ -1,0 +1,8 @@
+/* Template app. Shared components are in Modules/app/Views/css/app-kit.css. */
+
+/* Chart fills the height left below the panels */
+#graph {
+    width: 100%;
+    height: calc(100vh - 24rem);
+    min-height: 250px;
+}

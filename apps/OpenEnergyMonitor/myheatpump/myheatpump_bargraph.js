@@ -588,18 +588,8 @@ function bargraph_tooltip(item)
 
 $(".bargraph_mode").click(function () {
     var mode = $(this).attr("mode");
-    // change color of selected mode
-    $(".bargraph_mode").css("color", "#fff");
-
-    var mode_colors = {
-        "combined": "#44b3e2",
-        "running": "#44b3e2",
-        "water": "#44b3e2",
-        "space": "#44b3e2",
-        "cooling": "#44b3e2"
-    };
-
-    $(this).css("color", mode_colors[mode]);
+    $(".bargraph_mode").removeClass("active");
+    $(this).addClass("active");
 
     bargraph_mode = mode;
     bargraph_draw();

@@ -925,11 +925,10 @@ $('.time').click(function () {
 
 $(".show_stats_category").click(function () {
     var key = $(this).attr("key");
-    var color = $(this).css("color");
     $(".stats_category").hide();
     $(".stats_category[key='" + key + "'").show();
-    $(".show_stats_category").css("border-bottom", "none");
-    $(this).css("border-bottom", "1px solid " + color);
+    $(".show_stats_category").removeClass("active");
+    $(this).addClass("active");
 });
 
 

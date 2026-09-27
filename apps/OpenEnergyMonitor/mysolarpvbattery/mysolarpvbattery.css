@@ -1,0 +1,42 @@
+/* My Solar PV Battery. Shared components are in Modules/app/Views/css/app-kit.css. */
+
+/* Live grid balance, exporting */
+.power-value.is-export { color: var(--ec-energy-export); }
+
+#placeholder_bound { width: 100%; }
+
+/* Box colours */
+#solar-box   { background: var(--ec-energy-solar); }
+#grid-box    { background: var(--ec-energy-import); }
+#battery-box { background: var(--ec-energy-battery); }
+#house-box   { background: var(--ec-energy-use-light); }
+
+/* Flow colours, from the source or the battery */
+#solar-to-grid-box,
+#solar-to-load-box,
+#solar-to-battery-box { --statsbox-color: var(--ec-energy-solar); }
+#grid-to-battery-box,
+#battery-to-load-box  { --statsbox-color: var(--ec-energy-battery); }
+#grid-to-load-box     { --statsbox-color: var(--ec-energy-use-light); }
+
+/* Grid charge box: alignment, room for the arrow, smaller value */
+#grid-to-battery-box { text-align: left; }
+#battery_import .statsbox-arrow-left { padding: 10px 0 0 10px; }
+#grid-to-battery-box .statsbox-value { font-size: 22px; }
+
+/* Solar box: percentage overlays */
+#statsbox-generation { position: relative; }
+.prc-solar-to-battery { position: absolute; width: 50%; left: 0; bottom: 0; }
+.prc-solar-direct     { position: absolute; width: 50%; left: 50%; bottom: 0; }
+.prc-solar-export     { position: absolute; height: 100%; right: 0; top: 0;
+                        display: flex; align-items: center; }
+
+/* House box: percentage overlays */
+#house-box .statsbox-padded { position: relative; }
+.prc-battery-to-house { position: absolute; width: 0; left: 3px; top: 40%; }
+.prc-solar-to-house   { position: absolute; width: 33.33333%; left: 0; top: 0; }
+.prc-grid-to-house    { position: absolute; width: 33.33333%; left: 66.66667%; top: 0; }
+
+@media (max-width: 576px) {
+    #statsbox-generation { padding-bottom: 18px; }
+}

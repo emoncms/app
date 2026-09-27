@@ -21,7 +21,7 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
 
 .app-page #app-block { padding: 0; }
 
-.ajax-loader {
+.app-page[data-bs-theme="dark"] .ajax-loader {
     background: #222 url(../../images/ajax-loader.gif) center no-repeat;
 }
 
@@ -33,6 +33,112 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
     margin-bottom: 1rem;
 }
 .app-panel:first-child { margin-top: 1rem; }
+
+/* Light apps use Montserrat, as MyHeatpump */
+.app-page[data-bs-theme="light"] { font-family: Montserrat, Verdana, sans-serif; }
+
+/* -- Blocks: header bar and body, from MyHeatpump --------------------------- */
+
+.app-block { margin-bottom: 1.25rem; }
+.app-block:first-child { margin-top: 1.25rem; }
+
+.app-bar {
+    display: flex;
+    flex-wrap: wrap;
+    background-color: var(--ec-app-bar-bg);
+    color: #fff;
+}
+
+.app-bar-title {
+    font-weight: bold;
+    padding: 10px;
+    margin-right: auto;
+}
+
+/* Button in the bar. .active marks the chosen option. */
+.app-bar-btn {
+    display: block;
+    min-width: 30px;
+    padding: 11px;
+    border: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.5);
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 18px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    box-sizing: content-box;
+}
+.app-bar-btn:hover,
+.app-bar-btn:focus {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: inherit;
+    text-decoration: none;
+}
+.app-bar-btn.active { color: var(--bs-primary); }
+.app-bar-btn [class^="svg-icon-"] { font-size: 18px; vertical-align: top; }
+.app-bar > .app-bar-btn:first-child { border-left: none; }
+.app-bar-spacer { margin-right: auto; }
+
+.app-block-body {
+    padding: 10px;
+    background-color: var(--ec-app-panel-bg);
+    color: var(--bs-body-color);
+}
+
+/* Strip below the body for a summary line */
+.app-block-foot {
+    padding: 10px;
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-body-color);
+}
+
+/* Row of values: title, value and unit */
+.app-stats {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    text-align: center;
+}
+.app-stats > * {
+    display: flex;
+    flex-direction: column;
+}
+.app-stat-title { font-weight: bold; }
+.app-stat-value {
+    margin-top: auto;
+    font-weight: bold;
+    font-size: 32px;
+    padding: 10px 0;
+}
+.app-stat-unit {
+    display: inline-block;
+    padding-left: 8px;
+    font-weight: normal;
+    font-size: 18px;
+}
+
+/* Option rows: checkbox and label, with fields below when ticked */
+.app-option {
+    padding: 10px;
+    border: 1px solid var(--ec-input-border-color);
+    border-bottom: none;
+}
+.app-option:last-child { border-bottom: 1px solid var(--ec-input-border-color); }
+.app-option > input[type="checkbox"] { margin: 0 10px 0 7px; vertical-align: -1px; }
+.app-option .input-group { margin-top: 5px; }
+
+@media (max-width: 450px) {
+    .app-bar-title { font-size: 12px; padding: 8px; }
+    .app-bar-btn { font-size: 12px; padding: 8px; min-width: 15px; }
+    .app-block-body { padding: 5px; }
+    .app-stat-title { font-size: 12px; }
+    .app-stat-value { font-size: 18px; }
+}
 
 /* -- Top bar and tabs ------------------------------------------------------ */
 
@@ -141,6 +247,7 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
 /* -- Time bar -------------------------------------------------------------- */
 
 .visnavblock {
+    display: flex;
     color: var(--ec-app-nav);
     font-size: 18px;
 }
@@ -269,6 +376,7 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
     text-align: center;
     min-width: 0;
 }
+.stats-grid-2 { grid-template-columns: repeat(2, 1fr); }
 
 .power-title {
     margin: 0;

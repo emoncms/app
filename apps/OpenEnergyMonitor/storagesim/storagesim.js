@@ -27,7 +27,6 @@ config.initapp = function() {
 };
 config.showapp = function() {
     $(".ajax-loader").hide();
-    $("body").css('background-color','#fff');
     load();
 };
 config.hideapp = function() {
@@ -48,7 +47,7 @@ var options = {
     },
     selection: { 
         mode: "x", 
-        color:"#000",
+        color:"#888",
         visualization: "fill"
     },
     grid: {
@@ -230,10 +229,10 @@ function model(){
     series.push({label: "Nuclear", data: [], color: "#DDA0DD", lines: { show: true, fill: true, lineWidth: 1 }});
     series.push({label: "Store2 Discharge", data: [], color: "#888", stack: true, lines: { show: true, fill: true, lineWidth: 0 }});
     series.push({label: "Consumption", data: [], color: "#666", lines: { show: true, fill: true, lineWidth: 1 }});
-    series.push({label: "Store1 SOC", data: [], color: "#000", yaxis: 2, lines: { show: true, fill: false, lineWidth: 1 }});
-    series.push({label: "Store2 SOC", data: [], color: "#0000ff", yaxis: 2, lines: { show: true, fill: false, lineWidth: 1 }});
+    series.push({label: "Store1 SOC", data: [], color: "#ddd", yaxis: 2, lines: { show: true, fill: false, lineWidth: 1 }});
+    series.push({label: "Store2 SOC", data: [], color: "#44b3e2", yaxis: 2, lines: { show: true, fill: false, lineWidth: 1 }});
     if (app.show_peak_shaving_balance) {
-        series.push({label: "Peak Shaving Balance", data: [], color: "#000", yaxis: 3, lines: { show: true, fill: false, lineWidth: 1 }});
+        series.push({label: "Peak Shaving Balance", data: [], color: "#ddd", yaxis: 3, lines: { show: true, fill: false, lineWidth: 1 }});
     }
     let power_to_kwh = interval / 3600;
 

@@ -89,7 +89,6 @@ function init() {
 function show() {
     $("#app_name").html(config.app['app_name'].value);
 
-    $("body").css('background-color', 'WhiteSmoke');
     // -------------------------------------------------------------------------------
     // Configurations
     // -------------------------------------------------------------------------------
@@ -859,11 +858,10 @@ function stats_min_max(category, key, value) {
 
 $(".show_stats_category").click(function () {
     var key = $(this).attr("key");
-    var color = $(this).css("color");
     $(".stats_category").hide();
     $(".stats_category[key='" + key + "'").show();
-    $(".show_stats_category").css("border-bottom", "none");
-    $(this).css("border-bottom", "1px solid " + color);
+    $(".show_stats_category").removeClass("active");
+    $(this).addClass("active");
 });
 
 function emitter_and_volume_calculator() {

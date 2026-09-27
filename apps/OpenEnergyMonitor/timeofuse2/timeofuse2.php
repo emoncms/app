@@ -6,236 +6,218 @@ global $path, $session, $v, $user;
 $timezone = $user->get_timezone($session['userid']);
 if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
 ?>
-<?php load_css("Modules/app/Views/css/light.css"); ?>
+<?php load_css("Modules/app/Views/css/app-kit.css"); ?>
 <?php load_css("Modules/app/apps/OpenEnergyMonitor/timeofuse2/timeofuse2.css"); ?>
-
-<link rel="stylesheet" href="<?php echo $path; ?>Lib/fonts/montserrat/montserrat.css?v=<?php echo $v; ?>" />
 <?php load_js("Modules/feed/feed.js"); ?>
 
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
 <?php load_js("Modules/app/Lib/vis.helper.js"); ?>
 
-<div style="font-family: Montserrat, Veranda, sans-serif;">
-<div id="app-block" style="display:none">
+<div class="app-page" data-bs-theme="dark">
+  <section id="app-block" style="display:none">
 
-  <div class="col1"><div class="col1-inner">
+    <div class="app-panel">
+      <nav class="app-top-bar d-flex justify-content-between">
+        <ul class="btn-list app-tabs">
+          <li><button class="app-btn active"><i class="svg-icon-schedule"></i><span>TIME OF USE</span></button></li>
+        </ul>
+        <ul class="btn-list">
+          <li><button class="app-btn viewcostenergy">ENERGY MODE</button></li>
+          <li><button class="app-btn config-open" title="Configure app"><i class="svg-icon-wrench"></i></button></li>
+        </ul>
+      </nav>
 
-    <div class="block-bound">
-      <div class="bluenav config-open"><i class="icon-wrench icon-white"></i></div>
-      <div class="bluenav viewcostenergy">ENERGY MODE</div>
-      <!--<div class="bluenav cost">Cost</div>
-      <div class="bluenav energy">Energy</div>-->
-      <div class="block-title">TIME OF USE</div>
+      <div class="stats-grid stats-grid-2">
+        <div>
+          <h5 class="power-title">POWER NOW</h5>
+          <h2 class="power-value text-primary" id="power_now">---</h2>
+        </div>
+        <div>
+          <h5 class="power-title">USE TODAY</h5>
+          <h2 class="power-value text-primary" id="kwh_today">---</h2>
+        </div>
+      </div>
     </div>
 
-    <div style="background-color:#fff; color:#333; padding:10px;">
-      <table style="width:100%">
-        <tr>
-          <td style="width:40%">
-              <div class="electric-title">POWER NOW</div>
-              <div class="power-value"><span id="power_now">0</span></div>
-          </td>
-          <td style="text-align:right">
-              <div class="electric-title">USE TODAY</div>
-              <div class="power-value"><span id="kwh_today">0</span></div>
-          </td>
-        </tr>
-      </table>
-    </div>
-
-  </div></div>
-  <div class="col1"><div class="col1-inner">
-
-    <div class="block-bound">
-
-      <div class="bargraph-navigation">
-        <!--<div class="bluenav bargraph-other">OTHER</div>-->
-        <div class="bluenav bargraph-year">YEAR</div>
-        <div class="bluenav bargraph-month">MONTH</div>
-        <div class="bluenav bargraph-week">WEEK</div>
+    <div class="app-panel">
+      <div class="visnavblock bargraph-navigation mb-2">
+        <button class="visnav app-btn bargraph-week" days="7">WEEK</button>
+        <button class="visnav app-btn bargraph-month" days="30">MONTH</button>
+        <button class="visnav app-btn bargraph-year" days="365">YEAR</button>
       </div>
 
-      <div class="powergraph-navigation" style="display:none">
-        <div class="bluenav viewhistory">VIEW HISTORY</div>
-        <span class="bluenav" id="right" >&gt;</span>
-        <span class="bluenav" id="left" >&lt;</span>
-        <span class="bluenav" id="zoomout" >-</span>
-        <span class="bluenav" id="zoomin" >+</span>
-        <span class="bluenav time" time='720'>M</span>
-        <span class="bluenav time" time='168'>W</span>
-        <span class="bluenav time" time='24'>D</span>
+      <div class="visnavblock powergraph-navigation mb-2" style="display:none">
+        <button class="visnav app-btn time" time='24' title="Day">D</button>
+        <button class="visnav app-btn time" time='168' title="Week">W</button>
+        <button class="visnav app-btn time" time='720' title="Month">M</button>
+        <button class="visnav app-btn" id="zoomin" title="Zoom in">+</button>
+        <button class="visnav app-btn" id="zoomout" title="Zoom out">-</button>
+        <button class="visnav app-btn" id="left" title="Scroll left">&lt;</button>
+        <button class="visnav app-btn" id="right" title="Scroll right">&gt;</button>
+        <button class="app-btn viewhistory ms-auto" title="Back to daily summary">Daily</button>
       </div>
 
-      <div class="block-title">HISTORY</div>
-
-    </div>
-
-    <div style="background-color:rgba(68,179,226,0.1); padding:10px;">
-      <div id="placeholder_bound" style="width:100%; height:500px;">
+      <div id="placeholder_bound" style="width:100%; height:500px">
         <div id="placeholder" style="height:500px"></div>
       </div>
-    </div>
 
-    <div id="power-graph-footer" style="background-color:#eee; color:#333; display:none">
-      <div id='advanced-toggle' class='bluenav' >SHOW DETAIL</div>
-
-       <div style="padding:10px;">
-        kWh in window: <b id="window-kwh"></b> <b>kWh</b>
+      <div id="power-graph-footer" style="display:none">
+        <div class="d-flex flex-wrap align-items-center gap-3 px-2">
+          <div class="me-auto text-body-secondary">kWh in window: <b class="text-body"><span id="window-kwh"></span> kWh</b></div>
+          <button id="advanced-toggle" class="app-btn">SHOW DETAIL</button>
+        </div>
       </div>
 
-      <div style="clear:both"></div>
-    </div>
-
-    <div id="advanced-block" style="background-color:#eee; padding:10px; display:none">
-      <div style="color:#000">
-        <table class="table">
+      <div id="advanced-block" style="display:none">
+        <table class="app-table">
           <tr>
-          <th></th>
-          <th style="text-align:center">Min</th>
-          <th style="text-align:center">Max</th>
-          <th style="text-align:center">Diff</th>
-          <th style="text-align:center">Mean</th>
-          <th style="text-align:center">StDev</th>
+            <th></th>
+            <th class="text-center">Min</th>
+            <th class="text-center">Max</th>
+            <th class="text-center">Diff</th>
+            <th class="text-center">Mean</th>
+            <th class="text-center">StDev</th>
           </tr>
           <tbody id="stats"></tbody>
         </table>
       </div>
     </div>
 
-  </div></div>
+    <!-- Tariffs and schedule builder, a Vue app mounted on #schedule-builder-app.
+         Directives must sit on a child of the mount root, so #schedule-builder carries v-show. -->
+    <div id="schedule-builder-app">
+      <div id="schedule-builder" class="app-panel" v-show="visible">
+        <nav class="app-top-bar d-flex justify-content-between">
+          <ul class="btn-list app-tabs">
+            <li><button class="app-btn active"><i class="svg-icon-calendar"></i><span>Tariffs &amp; schedule</span></button></li>
+          </ul>
+          <ul class="btn-list">
+            <li><button class="app-btn sched-configure" :class="{active: editing}" v-show="sessionwrite" title="Configure tariffs &amp; schedule" @click="toggleConfigure"><i class="svg-icon-wrench"></i></button></li>
+          </ul>
+        </nav>
 
-  <div style="clear:both"></div>
+        <div class="p-2">
+          <div class="row g-3">
 
-  <!-- Tariffs & schedule builder (Vue app, mounted on #schedule-builder-app).
-       Note: directives must live on a child of the mount root, so #schedule-builder
-       itself carries v-show / :class rather than the wrapper. -->
-  <div id="schedule-builder-app">
-  <div id="schedule-builder" class="col1" style="width:100%;" v-show="visible" :class="{editing: editing}"><div class="col1-inner">
-    <div class="block-bound">
-      <div class="bluenav sched-configure" v-show="sessionwrite" title="Configure tariffs &amp; schedule" @click="toggleConfigure"><i class="icon-wrench icon-white"></i></div>
-      <div class="block-title">TARIFFS &amp; SCHEDULE</div>
-    </div>
-    <div style="background-color:#fff; color:#333; padding:15px;">
+            <!-- Tariff names and prices, with totals -->
+            <div class="col-md-8">
+              <div class="border rounded p-3 h-100">
+                <div class="sched-subhead">Tariffs</div>
+                <table class="table table-sm align-middle sched-table">
+                  <thead>
+                    <tr>
+                      <th>Tariff</th>
+                      <th>Price (<span class="sched-cur">{{ currency }}</span>/kWh)</th>
+                      <th class="text-end">Total</th>
+                      <th class="text-end">Average</th>
+                      <th class="text-end" v-show="editing"><button type="button" class="btn btn-link p-0 tariff-add" title="Add a tariff" @click="addTariff"><span class="svg-icon-plus"></span></button></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(t, i) in tariffs" :key="i">
+                      <template v-if="editing">
+                        <td>
+                          <div class="d-flex align-items-center">
+                            <span class="app-swatch" :style="{background: tariffColour(i)}"></span>
+                            <input type="text" class="form-control form-control-sm sched-name" :value="t.name" @change="renameTariff(i, $event.target.value)" placeholder="Tariff name">
+                          </div>
+                        </td>
+                        <td><input type="number" step="0.001" min="0" class="form-control form-control-sm text-end sched-num" v-model.number="t.price"></td>
+                      </template>
+                      <template v-else>
+                        <td><span class="app-swatch" :style="{background: tariffColour(i)}"></span>{{ t.name }}</td>
+                        <td class="text-body-secondary">{{ t.price }}</td>
+                      </template>
+                      <td class="text-end text-nowrap text-body-secondary">{{ tierTotal(t.name) }}</td>
+                      <td class="text-end text-nowrap text-body-secondary">{{ tierAverage(t.name) }}</td>
+                      <td class="text-end" v-show="editing"><button type="button" class="btn btn-link p-0 sched-del" title="Remove tariff" @click="delTariff(i)"><span class="svg-icon-close"></span></button></td>
+                    </tr>
+                  </tbody>
+                  <tfoot id="tariff-foot" class="table-group-divider fw-bold" v-if="totals">
+                    <tr>
+                      <td class="text-end text-body-secondary" colspan="2">Combined</td>
+                      <td class="text-end text-nowrap">{{ fmt(totals.combined.total, false) }}</td>
+                      <td class="text-end text-nowrap">{{ fmt(totals.combined.average, true) }}</td>
+                      <td v-show="editing"></td>
+                    </tr>
+                    <tr v-if="totals.cl">
+                      <td class="text-end text-body-secondary" colspan="2">Controlled load</td>
+                      <td class="text-end text-nowrap">{{ fmt(totals.cl.total, false) }}</td>
+                      <td class="text-end text-nowrap">{{ fmt(totals.cl.average, true) }}</td>
+                      <td v-show="editing"></td>
+                    </tr>
+                    <tr v-if="totals.supply">
+                      <td class="text-end text-body-secondary" colspan="2">Supply</td>
+                      <td class="text-end text-nowrap">{{ fmt(totals.supply.total, false) }}</td>
+                      <td class="text-end text-nowrap">{{ fmt(totals.supply.average, true) }}</td>
+                      <td v-show="editing"></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
 
-      <div class="sched-cols">
+            <!-- When each tariff applies -->
+            <div class="col-md-4">
+              <div class="border rounded p-3 h-100">
+                <div class="sched-subhead">Schedule</div>
+                <nav class="nav nav-underline mb-2">
+                  <a class="nav-link" href="#" :class="{active: tab=='weekday'}" @click.prevent="setTab('weekday')">Weekday</a>
+                  <a class="nav-link" href="#" :class="{active: tab=='weekend'}" @click.prevent="setTab('weekend')">Weekend</a>
+                </nav>
+                <table class="table table-sm align-middle sched-table">
+                  <thead>
+                    <tr>
+                      <th>Time</th>
+                      <th>Tariff</th>
+                      <th class="text-end" v-show="editing"><button type="button" class="btn btn-link p-0 block-add" title="Add a time block" @click="addBlock"><span class="svg-icon-plus"></span></button></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(b, i) in schedule[tab]" :key="i">
+                      <template v-if="editing">
+                        <td>
+                          <select class="form-select form-select-sm sched-num" v-model="b.start" @change="onBlockTimeChange">
+                            <option v-for="t in timeOptions" :key="t" :value="t">{{ t }}</option>
+                          </select>
+                        </td>
+                        <td>
+                          <div class="d-flex align-items-center">
+                            <span class="app-swatch" :style="{background: tariffColourByName(b.name)}"></span>
+                            <select class="form-select form-select-sm sched-name" v-model="b.name">
+                              <option v-for="n in tariffOptions(b.name)" :key="n" :value="n">{{ n }}</option>
+                            </select>
+                          </div>
+                        </td>
+                      </template>
+                      <template v-else>
+                        <td>{{ b.start }}</td>
+                        <td><span class="app-swatch" :style="{background: tariffColourByName(b.name)}"></span>{{ b.name }}</td>
+                      </template>
+                      <td class="text-end" v-show="editing"><button type="button" class="btn btn-link p-0 sched-del" title="Remove this block" @click="delBlock(i)"><span class="svg-icon-close"></span></button></td>
+                    </tr>
+                  </tbody>
+                </table>
 
-        <!-- Left: tariff definitions (name + price), where totals are shown -->
-        <div class="sched-col sched-col-left">
-          <div class="sched-subhead">Tariffs</div>
-          <table class="sched-table tariff-table">
-            <thead>
-              <tr>
-                <th class="sched-th-name">Tariff</th>
-                <th class="sched-th-price">Price (<span class="sched-cur">{{ currency }}</span>/kWh)</th>
-                <th class="sched-th-total">Total</th>
-                <th class="sched-th-average">Average</th>
-                <th class="sched-th-actions"><span class="tariff-add" title="Add a tariff" @click="addTariff">+</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(t, i) in tariffs" :key="i">
-                <template v-if="editing">
-                  <td>
-                    <div style="display:flex; align-items:center;">
-                      <span class="sched-swatch" :style="{background: tariffColour(i)}"></span>
-                      <input type="text" class="form-control tariff-name" style="flex:1" :value="t.name" @change="renameTariff(i, $event.target.value)" placeholder="Tariff name">
-                    </div>
-                  </td>
-                  <td><input type="number" step="0.001" min="0" class="form-control tariff-price" v-model.number="t.price"></td>
-                </template>
-                <template v-else>
-                  <td><span class="sched-swatch" :style="{background: tariffColour(i)}"></span>{{ t.name }}</td>
-                  <td class="sched-ro-price">{{ t.price }}</td>
-                </template>
-                <td class="sched-total">{{ tierTotal(t.name) }}</td>
-                <td class="sched-average">{{ tierAverage(t.name) }}</td>
-                <td class="sched-actions-cell"><span class="tariff-del" title="Remove tariff" @click="delTariff(i)">&#10005;</span></td>
-              </tr>
-            </tbody>
-            <tfoot id="tariff-foot" v-if="totals">
-              <tr>
-                <td class="sched-foot-label" colspan="2">Combined</td>
-                <td class="sched-total">{{ fmt(totals.combined.total, false) }}</td>
-                <td class="sched-average">{{ fmt(totals.combined.average, true) }}</td>
-                <td class="sched-actions-cell"></td>
-              </tr>
-              <tr v-if="totals.cl">
-                <td class="sched-foot-label" colspan="2">Controlled load</td>
-                <td class="sched-total">{{ fmt(totals.cl.total, false) }}</td>
-                <td class="sched-average">{{ fmt(totals.cl.average, true) }}</td>
-                <td class="sched-actions-cell"></td>
-              </tr>
-              <tr v-if="totals.supply">
-                <td class="sched-foot-label" colspan="2">Supply</td>
-                <td class="sched-total">{{ fmt(totals.supply.total, false) }}</td>
-                <td class="sched-average">{{ fmt(totals.supply.average, true) }}</td>
-                <td class="sched-actions-cell"></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
+                <div class="mt-3" v-show="editing">
+                  <label class="form-label fw-bold mb-1" for="sched-ph">Public holidays <span class="fw-normal text-body-secondary">(treated as a weekend day)</span></label>
+                  <textarea id="sched-ph" class="form-control font-monospace" rows="2" v-model="phDays" placeholder="2026:1,104,359;2027:1"></textarea>
+                  <div class="form-text">Format: <code>year:day-of-year,day-of-year;year:...</code>, e.g. <code>2026:1,104,359,360</code>. <a href="https://www.epochconverter.com/days" target="_blank" rel="noopener">day-of-year reference</a></div>
+                </div>
+              </div>
+            </div>
 
-        <!-- Right: when each tariff applies -->
-        <div class="sched-col sched-col-right">
-          <div class="sched-subhead">Schedule</div>
-          <div class="sched-tabs">
-            <span class="sched-tab" :class="{active: tab=='weekday'}" @click="setTab('weekday')">Weekday</span>
-            <span class="sched-tab" :class="{active: tab=='weekend'}" @click="setTab('weekend')">Weekend</span>
           </div>
-          <table class="sched-table schedule-table">
-            <thead>
-              <tr>
-                <th class="sched-th-time">Time</th>
-                <th class="sched-th-name">Tariff</th>
-                <th class="sched-th-actions"><span class="block-add" title="Add a time block" @click="addBlock">+</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(b, i) in schedule[tab]" :key="i">
-                <template v-if="editing">
-                  <td>
-                    <select class="form-select sched-time" v-model="b.start" @change="onBlockTimeChange">
-                      <option v-for="t in timeOptions" :key="t" :value="t">{{ t }}</option>
-                    </select>
-                  </td>
-                  <td>
-                    <div style="display:flex; align-items:center;">
-                      <span class="sched-swatch" :style="{background: tariffColourByName(b.name)}"></span>
-                      <select class="form-select sched-tariff" v-model="b.name">
-                        <option v-for="n in tariffOptions(b.name)" :key="n" :value="n">{{ n }}</option>
-                      </select>
-                    </div>
-                  </td>
-                </template>
-                <template v-else>
-                  <td class="sched-ro-time">{{ b.start }}</td>
-                  <td><span class="sched-swatch" :style="{background: tariffColourByName(b.name)}"></span>{{ b.name }}</td>
-                </template>
-                <td class="sched-actions-cell"><span class="block-del" title="Remove this block" @click="delBlock(i)">&#10005;</span></td>
-              </tr>
-            </tbody>
-          </table>
 
-          <div class="sched-ph-wrap">
-            <label class="sched-ph-label">Public holidays <span class="sched-muted">(treated as a weekend day)</span></label>
-            <textarea id="sched-ph" class="form-control" rows="2" v-model="phDays" placeholder="2026:1,104,359;2027:1"></textarea>
-            <div class="sched-help">Format: <code>year:day-of-year,day-of-year;year:...</code> &mdash; e.g. <code>2026:1,104,359,360</code>. <a href="https://www.epochconverter.com/days" target="_blank" rel="noopener">day-of-year reference</a></div>
+          <div class="mt-3" v-show="editing || status.text">
+            <button type="button" id="sched-save" class="btn btn-primary me-2" v-show="editing" :disabled="saving" @click="save">Save</button>
+            <span id="sched-status" :class="{'text-success': status.cls=='ok', 'text-danger': status.cls=='err'}">{{ status.text }}</span>
           </div>
         </div>
-
       </div>
-
-      <div class="sched-actions">
-        <button type="button" id="sched-save" class="sched-save-btn" :disabled="saving" @click="save">Save</button>
-        <span id="sched-status" class="sched-status" :class="status.cls">{{ status.text }}</span>
-      </div>
-
     </div>
-  </div></div>
-  </div>
 
-</div>
-</div>
+  </section>
 
 <div id="appconf-description" style="display:none">
 <p class="lead">The "Time of Use - flexible" app is a simple home energy monitoring app for exploring home or building electricity consumption and cost over time. It allows you to track multiple electricity tariffs as used in Australia, an optional daily supply charge, and an optional separately-monitored controlled load.</p>
@@ -274,6 +256,7 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
+</div>
 
 <script>
 // Transfer php variables to javascript (consumed by timeofuse2.js)

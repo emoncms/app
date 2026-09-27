@@ -1,33 +1,32 @@
 <?php
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
+
+load_js("Modules/feed/feed.js");
+load_css("Modules/app/Views/css/app-kit.css");
 ?>
-<?php load_css("Modules/app/Views/css/config.css"); ?>
-<?php load_css("Modules/app/Views/css/dark.css"); ?>
 
-<?php load_js("Modules/app/Lib/appconf.js"); ?>
-<?php load_js("Modules/feed/feed.js"); ?>
+<div class="app-page" data-bs-theme="dark">
 
-<div id="app-block" style="display:none">
-  <div style="height:20px; border-bottom:1px solid #333; padding:8px;">
-    <div style="float:right;">
-      <i class="config-open icon-wrench icon-white" style="cursor:pointer"></i>
+<section id="app-block" style="display:none">
+    <div class="app-panel">
+        <nav class="app-top-bar d-flex justify-content-end">
+            <ul class="btn-list">
+                <li><button class="app-btn config-open" title="Configure app"><i class="svg-icon-wrench"></i></button></li>
+            </ul>
+        </nav>
+        <p class="power-title text-center p-3">Oops something went wrong, this app does not exist!</p>
     </div>
-  </div>
-  <div style="text-align:center">
-    <div class="electric-title">Oops something went wrong, this app does not exist!</div>
-  </div>
-</div>
+</section>
 
-<div id="app-setup" style="display:none; padding-top:50px" class="block">
-    <h2 class="app-config-title">Oops something went wrong, this app does not exist!</h2>
-    <div class="app-config-description">
-    <div class="app-config-description-inner">You can delete this entry on the right</div>
-    </div>
-    <div class="app-config"></div>
+<div id="appconf-description" style="display:none">
+    <p class="lead">Oops something went wrong, this app does not exist! You can delete this entry on the right.</p>
 </div>
+<?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
+
+</div>
 
 <script>
 
@@ -38,20 +37,13 @@ var apikey = "<?php print $apikey; ?>";
 var sessionwrite = <?php echo $session['write']; ?>;
 feed.apikey = apikey;
 
-// ----------------------------------------------------------------------
-// Display
-// ----------------------------------------------------------------------
-$("body").css('background-color','#222');
-$(window).ready(function(){
-    $("#footer").css('background-color','#181818');
-    $("#footer").css('color','#999');
-});
 if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {};
+config.app_name = "Blank";
 config.id = <?php echo $id; ?>;
 config.name = "<?php echo $name; ?>";
 config.public = <?php echo $public; ?>;

@@ -1,0 +1,14 @@
+/* Solar & Battery Simulator. Shared components are in Modules/app/Views/css/app-kit.css. */
+
+/* App title in the top bar, styled as the active tab */
+.app-tabs h1.app-btn { cursor: default; }
+
+#graph {
+    width: 100%;
+    height: 500px;
+}
+
+.sim-inputs { padding: 10px; }
+.sim-inputs h4 { font-size: 1.1rem; color: var(--bs-emphasis-color); }
+.sim-inputs .input-group { margin-bottom: 0.5rem; }
+.sim-inputs .input-group-text:first-child { width: 11rem; }

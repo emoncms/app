@@ -9,11 +9,6 @@ feed.apikey = apikey;
 feed.public_userid = public_userid;
 feed.public_username = public_username;
 
-// ----------------------------------------------------------------------
-// Display
-// ----------------------------------------------------------------------
-$("body").css('background-color','WhiteSmoke');
-
 if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
@@ -524,8 +519,6 @@ function build_profile(blocks, tier_index, price_by_name) {
 function tier_colour(i) { return series_tier_colours[i % series_tier_colours.length]; }
 
 function show() {
-    $("body").css('background-color','WhiteSmoke');
-
     meta["use_kwh"] = feed.getmeta(feeds["use_kwh"].id);
     if (meta["use_kwh"].start_time>start_time) start_time = meta["use_kwh"].start_time;
     use_start = feed.getvalue(feeds["use_kwh"].id, start_time);
@@ -555,7 +548,7 @@ function updater()
         }
         var power_now = feeds["use"].value;
         if (cl_enabled && feeds["cl_use"]) power_now += feeds["cl_use"].value;
-        $("#power_now").html(Math.round(power_now)+"W");
+        $("#power_now").html(Math.round(power_now)+"<span class='power-unit'>W</span>");
     });
 }
 
@@ -681,10 +674,10 @@ $('.bargraph-year').click(function () { load_last_days(365); });
 $(".viewcostenergy").click(function(){
     var view = $(this).html();
     if (view=="ENERGY MODE") {
-        $(this).html("COST MODE");
+        $(this).html("COST MODE").addClass("active");
         viewcostenergy = "cost";
     } else {
-        $(this).html("ENERGY MODE");
+        $(this).html("ENERGY MODE").removeClass("active");
         viewcostenergy = "energy";
     }
 
@@ -700,6 +693,9 @@ $(".viewcostenergy").click(function(){
 
 // Load and draw the bar graph for the most recent `days` days up to now.
 function load_last_days(days) {
+    // Mark the chosen period
+    $(".bargraph-navigation .app-btn").removeClass("active");
+    $(".bargraph-navigation .app-btn[days="+days+"]").addClass("active");
     var end = (new Date()).getTime();
     bargraph_load(end - 3600000*24.0*days, end);
     bargraph_draw();
@@ -852,12 +848,12 @@ function powergraph_load()
     var out = "";
     for (var z in feedstats) {
         out += "<tr>";
-        out += "<td style='text-align:left'>"+z+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].minval.toFixed(0)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].maxval.toFixed(0)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].diff.toFixed(0)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].mean.toFixed(0)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].stdev.toFixed(0)+"</td>";
+        out += "<td>"+z+"</td>";
+        out += "<td class='text-center'>"+feedstats[z].minval.toFixed(0)+"</td>";
+        out += "<td class='text-center'>"+feedstats[z].maxval.toFixed(0)+"</td>";
+        out += "<td class='text-center'>"+feedstats[z].diff.toFixed(0)+"</td>";
+        out += "<td class='text-center'>"+feedstats[z].mean.toFixed(0)+"</td>";
+        out += "<td class='text-center'>"+feedstats[z].stdev.toFixed(0)+"</td>";
         out += "</tr>";
     }
     $("#stats").html(out);
@@ -1049,7 +1045,7 @@ function bargraph_load(start,end)
     if (cost_mode) {
         $("#kwh_today").html(config.app["currency"].value + use_today.toFixed(2));
     } else {
-        $("#kwh_today").html(use_today.toFixed(1)+" kWh");
+        $("#kwh_today").html(use_today.toFixed(1)+"<span class='power-unit'>kWh</span>");
     }
 }
 
@@ -1105,17 +1101,6 @@ function resize() {
     placeholder.width(width);
     placeholder_bound.height(height);
     placeholder.height(height-top_offset);
-
-    if (width<=500) {
-        $(".electric-title").css("font-size","16px");
-        $(".power-value").css("font-size","38px");
-    } else if (width<=724) {
-        $(".electric-title").css("font-size","18px");
-        $(".power-value").css("font-size","42px");
-    } else {
-        $(".electric-title").css("font-size","22px");
-        $(".power-value").css("font-size","42px");
-    }
 }
 
 $(function() {

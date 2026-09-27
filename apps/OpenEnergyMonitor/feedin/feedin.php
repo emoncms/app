@@ -2,8 +2,9 @@
     defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
-<?php load_css("Modules/app/Views/css/light.css"); ?>
-<?php load_css("Modules/app/Views/css/graph.css"); ?>
+<?php load_css("Modules/app/Views/css/app-kit.css"); ?>
+<?php load_css("Lib/fonts/montserrat/montserrat.css"); ?>
+<?php load_css("Modules/app/apps/OpenEnergyMonitor/feedin/feedin.css"); ?>
 
 <?php load_js("Modules/app/Lib/data.js"); ?>
 <?php load_js("Modules/app/Lib/graph.js"); ?>
@@ -11,33 +12,38 @@
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
 <?php load_js("Modules/app/Lib/vis.helper.js"); ?>
 
-<section id="app-block" class="app hide">
+<div class="app-page" data-bs-theme="light">
+<section id="app-block" class="app" style="display:none">
     <div class="app-block info">
-        <div class="app-header">
-            <div id="app-title" class="title grow"><?php echo "HOUSEHOLD"; ?></div>
-            <div class="action app-unit"><?php echo "VIEW COST"; ?></div>
-            <div class="action config-open"><span class="icon-wrench icon-white"></span></div>
+        <div class="app-bar">
+            <div id="app-title" class="app-bar-title"><?php echo "HOUSEHOLD"; ?></div>
+            <button class="app-bar-btn app-unit"><?php echo "VIEW COST"; ?></button>
+            <button class="app-bar-btn config-open" title="Configure app"><span class="svg-icon-wrench"></span></button>
         </div>
-        <div class="app-body">
-            <div class="title">
-                <div><span class="power consumption hide"><?php echo "NOW"; ?></span></div>
-                <div><span class="power generation hide"><?php echo "GENERATION"; ?></span></div>
-                <div class="grow"></div>
-                <div><span class="energy selfcons hide"><?php echo "SELF-CONSUMPTION"; ?></span></div>
-                <div><span class="energy generation hide"><?php echo "GENERATION"; ?></span></div>
-                <div><span class="energy consumption"><?php echo "TODAY"; ?></span></div>
+        <div class="app-block-body app-stats feedin-values">
+            <div class="power consumption hide">
+                <div class="app-stat-title"><?php echo "NOW"; ?></div>
+                <div class="app-stat-value" id="cons-power"></div>
             </div>
-            <div class="value">
-                <div><span class="power consumption" id="cons-power"></span></div>
-                <div><span class="power generation hide" id="gen-power"></span></div>
-                <div class="grow"></div>
-                <div class="right"><span class="energy selfcons hide" id="selfcons-energy"></span></div>
-                <div class="right"><span class="energy generation hide" id="gen-energy"></span></div>
-                <div class="right"><span class="energy consumption" id="cons-energy"></span></div>
+            <div class="power generation hide">
+                <div class="app-stat-title"><?php echo "GENERATION"; ?></div>
+                <div class="app-stat-value" id="gen-power"></div>
+            </div>
+            <div class="energy selfcons hide">
+                <div class="app-stat-title"><?php echo "SELF-CONSUMPTION"; ?></div>
+                <div class="app-stat-value" id="selfcons-energy"></div>
+            </div>
+            <div class="energy generation hide">
+                <div class="app-stat-title"><?php echo "GENERATION"; ?></div>
+                <div class="app-stat-value" id="gen-energy"></div>
+            </div>
+            <div class="energy consumption">
+                <div class="app-stat-title"><?php echo "TODAY"; ?></div>
+                <div class="app-stat-value" id="cons-energy"></div>
             </div>
         </div>
     </div>
-    
+
     <div id="graph" class="app-block"></div>
 </section>
 
@@ -46,8 +52,8 @@
 </div>
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
-
 <div class="ajax-loader"></div>
+</div>
 
 <script>
 
@@ -275,11 +281,11 @@ function drawPowerValues(values) {
             unit = "W";
         }
         
-        $("#cons-power").html(cons.toFixed(fixed)+"<span class='unit'>"+unit+"</span>");
+        $("#cons-power").html(cons.toFixed(fixed)+"<span class='app-stat-unit'>"+unit+"</span>");
         $(".consumption.power").removeClass('cost').show();
         
         if (values["solar_power"] != undefined && solar != null) {
-            $("#gen-power").html(solar.toFixed(fixed)+"<span class='unit'>"+unit+"</span>");
+            $("#gen-power").html(solar.toFixed(fixed)+"<span class='app-stat-unit'>"+unit+"</span>");
             $(".generation.power").removeClass('cost').show();
         }
         else {
@@ -298,7 +304,7 @@ function drawPowerValues(values) {
         else {
             fixed = 3;
         }
-        $("#cons-power").html(config.app.currency.value+costNow.toFixed(fixed)+"<span class='unit'>/hr</span>");
+        $("#cons-power").html(config.app.currency.value+costNow.toFixed(fixed)+"<span class='app-stat-unit'>/hr</span>");
         $(".consumption.power").addClass('cost').show();
         
         if (values["solar_power"] != undefined && solar != null && 
@@ -315,7 +321,7 @@ function drawPowerValues(values) {
             else {
                 fixed = 3;
             }
-            $("#gen-power").html(config.app.currency.value+fitNow.toFixed(fixed)+"<span class='unit'>/hr</span>");
+            $("#gen-power").html(config.app.currency.value+fitNow.toFixed(fixed)+"<span class='app-stat-unit'>/hr</span>");
             $(".generation.power").addClass('cost').show();
         }
         else {
@@ -335,7 +341,7 @@ function drawEnergyValues() {
     
     if (graph.unit == Graph.ENERGY) {
         if (energy.has(Graph.SOLAR)) {
-            $("#gen-energy").html(solar.toFixed(1)+"<span class='unit'>kWh</span>");
+            $("#gen-energy").html(solar.toFixed(1)+"<span class='app-stat-unit'>kWh</span>");
             $(".generation.energy").removeClass('cost').show();
             
             var selfCons = 0;
@@ -348,14 +354,14 @@ function drawEnergyValues() {
             if (solar > 0) {
                 selfConsShare = Math.min(100, selfCons/solar*100);
             }
-            $("#selfcons-energy").html(selfConsShare.toFixed(0)+"<span class='unit'>%</span>");
+            $("#selfcons-energy").html(selfConsShare.toFixed(0)+"<span class='app-stat-unit'>%</span>");
             $(".selfcons.energy").show();
         }
         else {
             $(".generation.energy").hide();
             $(".selfcons.energy").hide();
         }
-        $("#cons-energy").html(cons.toFixed(1)+"<span class='unit'>kWh</span>");
+        $("#cons-energy").html(cons.toFixed(1)+"<span class='app-stat-unit'>kWh</span>");
         $(".consumption.energy").removeClass('cost');
     }
     else {
@@ -394,7 +400,7 @@ function resize() {
     var height = $(window).height();
     
     // Subtract the height of all relevant elements
-    $('.graph-info .graph-header, .app-header, .app-body').each(function() {
+    $('.info .app-bar, .info .app-block-body').each(function() {
         height -= $(this).outerHeight();
     });
     // Subtract the padding height of all blocks

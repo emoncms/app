@@ -1,0 +1,67 @@
+/* My Solar PV, My Solar PV Divert and Solar Template.
+   Shared components are in Modules/app/Views/css/app-kit.css. */
+
+/* Chart fills the screen below the live values. Divert sets the height in JS. */
+#placeholder_bound,
+#graph_bound { width: 100%; position: relative; }
+#placeholder,
+#graph {
+    height: calc(100vh - 32rem);
+    min-height: 250px;
+}
+
+/* Chart notes drawn over the bar graph */
+.chart-note {
+    position: absolute;
+    left: 50px;
+    font-size: 12px;
+    color: var(--bs-secondary-color);
+}
+
+/* Unit line below a total */
+.app-stat-sub {
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+/* Row of many totals: four columns on small screens */
+@media (max-width: 767px) {
+    .app-stats-wrap {
+        grid-auto-flow: row;
+        grid-template-columns: repeat(4, 1fr);
+        row-gap: 0.5rem;
+    }
+}
+
+.text-house { color: var(--ec-energy-use-light); }
+
+/* Flow box colours */
+.statsbox-solar  { background: var(--ec-energy-solar); }
+.statsbox-export { background: var(--ec-energy-export); }
+.statsbox-import { background: var(--ec-energy-import); }
+.statsbox-divert { background: var(--ec-energy-battery); }
+.statsbox-house  { background: var(--ec-energy-use-light); }
+
+/* Flow arrow colours */
+#solar-to-divert-box { --statsbox-color: var(--ec-energy-battery); }
+#solar-to-house-box  { --statsbox-color: var(--ec-energy-use-light); }
+#grid-to-house-box   { --statsbox-color: var(--ec-energy-import); }
+
+/* Percentage overlays on the solar and house boxes */
+.prc-box { position: relative; }
+.prc-bottom-left,
+.prc-bottom-right { position: absolute; bottom: 0; width: 50%; }
+.prc-bottom-left  { left: 0; }
+.prc-bottom-right { left: 50%; }
+.prc-top-left,
+.prc-top-right { position: absolute; top: 0; width: 33.33%; }
+.prc-top-left  { left: 0; }
+.prc-top-right { left: 66.67%; }
+.prc-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}

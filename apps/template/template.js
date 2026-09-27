@@ -50,7 +50,6 @@ var options = {
     },
     grid: {
         show: true,
-        color: "#aaa",
         borderWidth: 0,
         hoverable: true
     },

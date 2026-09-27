@@ -2,153 +2,123 @@
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $session, $v;
 ?>
-<?php load_css("Modules/app/Views/css/light.css"); ?>
-
-<link rel="stylesheet" href="<?php echo $path; ?>Lib/fonts/montserrat/montserrat.css?v=<?php echo $v; ?>" />
+<?php load_css("Modules/app/Views/css/app-kit.css"); ?>
+<?php load_css("Lib/fonts/montserrat/montserrat.css"); ?>
+<?php load_css("Modules/app/apps/OpenEnergyMonitor/myheatpump/style.css"); ?>
 <?php load_js("Modules/feed/feed.js"); ?>
 
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
 <?php load_js("Modules/app/Lib/vis.helper.js"); ?>
-<?php load_css("Modules/app/apps/OpenEnergyMonitor/myboiler/style.css"); ?>
 
-<div style="font-family: Montserrat, Veranda, sans-serif;">
-  <div id="app-block" style="display:none">
+<div class="app-page" data-bs-theme="light">
+  <section id="app-block" style="display:none">
 
-    <div class="col1">
-      <div class="col1-inner">
-        <div class="block-bound">
-          <div style="float:right">
-            <a id="permalink" href="" title="Share this view" class="myboiler-top-buttons"><i class="icon-share icon-white"></i></a>
-            <div class="myboiler-top-buttons config-open">
-              <i class="icon-wrench icon-white" title="Configure app"></i>
-            </div>
+    <div class="app-block">
+      <div class="app-bar">
+        <div class="app-bar-title" id="app_name">MY BOILER</div>
+        <a id="permalink" href="" title="Share this view" class="app-bar-btn"><span class="svg-icon-link"></span></a>
+        <button class="app-bar-btn config-open" title="Configure app"><span class="svg-icon-wrench"></span></button>
+      </div>
+
+      <div class="app-block-body">
+        <div id="last_updated" class="app-stat-title text-center py-2" style="display:none">Last updated 3rd of June 2022</div>
+
+        <div id="live_table" class="app-stats">
+          <div>
+            <div class="app-stat-title">Boiler Heat</div>
+            <div class="app-stat-value"><span id="boiler_heat">---</span><span class="app-stat-unit">W</span></div>
           </div>
-
-          <div class="block-title" id="app_name">MY BOILER</div>
+          <div>
+            <div class="app-stat-title">Boiler Electric</div>
+            <div class="app-stat-value"><span id="boiler_elec">---</span><span class="app-stat-unit">W</span></div>
+          </div>
+          <div>
+            <div class="app-stat-title">Flow temp</div>
+            <div class="app-stat-value"><span id="boiler_flowT">---</span><span class="app-stat-unit">&deg;C</span></div>
+          </div>
+          <div>
+            <div class="app-stat-title">Room temp</div>
+            <div class="app-stat-value"><span id="boiler_roomT">---</span><span class="app-stat-unit">&deg;C</span></div>
+          </div>
         </div>
-
-        <div style="background-color:#fff; color:#333">
-          <br>
-          <div id="last_updated" class="title1" style="text-align:center; height:40px; display:none">Last updated 3rd of June 2022</div>
-
-          <table id="live_table" style="width:100%; color:#333">
-            <tr>
-
-              <td style="width:25%; text-align:center" valign="top">
-                <div class="title1">Boiler Heat</div>
-                <div class="value1"><span id="boiler_heat">---</span>
-                  <div class="units1">W</div>
-                </div>
-              </td>
-
-              <td style="width:25%; text-align:center" valign="top">
-                <div class="title1">Boiler Electric</div>
-                <div class="value1"><span id="boiler_elec">---</span>
-                  <div class="units1">W</div>
-                </div>
-              </td>   
-
-              <td style="width:25%; text-align:center" valign="top">
-                <div class="title1">Flow temp</div>
-                <div class="value1"><span id="boiler_flowT">---</span>
-                  <div class="units1">&deg;C</div>
-                </div>
-              </td> 
-              
-              <td style="width:25%; text-align:center" valign="top">
-                <div class="title1">Room temp</div>
-                <div class="value1"><span id="boiler_roomT">---</span>
-                  <div class="units1">&deg;C</div>
-                </div>
-              </td>  
-            </tr>
-          </table>
-        </div>
-
       </div>
     </div>
-    <div class="col1">
-      <div class="col1-inner">
 
-        <div class="block-bound">
+    <div class="app-block">
+      <div class="app-bar bargraph-navigation">
+        <div class="app-bar-spacer"></div>
+        <button class="app-bar-btn bargraph-day">DAY</button>
+        <button class="app-bar-btn bargraph-week">WEEK</button>
+        <button class="app-bar-btn bargraph-month">MONTH</button>
+        <button class="app-bar-btn bargraph-quarter">3 MONTHS</button>
+        <button class="app-bar-btn bargraph-year">YEAR</button>
+        <button class="app-bar-btn bargraph-alltime">ALL</button>
+      </div>
 
-          <div class="bargraph-navigation">
-            <div class="bluenav bargraph-alltime">ALL</div>
-            <div class="bluenav bargraph-year">YEAR</div>
-            <div class="bluenav bargraph-quarter">3 MONTHS</div>
-            <div class="bluenav bargraph-month">MONTH</div>
-            <div class="bluenav bargraph-week">WEEK</div>
-            <div class="bluenav bargraph-day">DAY</div>
-          </div>
+      <div class="app-bar powergraph-navigation" style="display:none">
+        <div class="app-bar-spacer"></div>
+        <button class="app-bar-btn time d-none d-sm-block" time='1' title="Last hour">H</button>
+        <button class="app-bar-btn time" time='6' title="Last 6 hours">6</button>
+        <button class="app-bar-btn time" time='24' title="Last 24 hours">D</button>
+        <button class="app-bar-btn time d-none d-sm-block" time='168' title="Last 7 days">W</button>
+        <button class="app-bar-btn time d-none d-sm-block" time='720' title="Last 30 days">M</button>
+        <button class="app-bar-btn" id="zoomin" title="Zoom in">+</button>
+        <button class="app-bar-btn" id="zoomout" title="Zoom out">-</button>
+        <button class="app-bar-btn" id="left" title="Scroll left">&lt;</button>
+        <button class="app-bar-btn" id="right" title="Scroll right">&gt;</button>
+        <button class="app-bar-btn" id="live" title="Live scroll" style="display:none; color:yellow; cursor:default">&gt;&gt;</button>
+        <button class="app-bar-btn viewhistory" title="Back to daily summary">BACK</button>
+      </div>
 
-          <div class="powergraph-navigation" style="display:none">
-            <div class="bluenav viewhistory" title="Back to daily summary">BACK</div>
-            <span class="bluenav" id="live" title="Live scroll" style="display:none; color: yellow; cursor: default">&gt;&gt;</span>
-            <span class="bluenav" id="right" title="Scroll right">&gt;</span>
-            <span class="bluenav" id="left" title="Scroll left">&lt;</span>
-            <span class="bluenav" id="zoomout" title="Zoom out">-</span>
-            <span class="bluenav" id="zoomin" title="Zoom in">+</span>
-            <span class="bluenav time dmy" time='720' title="Last 30 days">M</span>
-            <span class="bluenav time dmy" time='168' title="Last 7 days">W</span>
-            <span class="bluenav time" time='24' title="Last 24 hours">D</span>
-            <span class="bluenav time" time='6' title="Last 6 hours">6</span>
-            <span class="bluenav time" time='1' title="Last hour">H</span>
-          </div>
+      <div class="app-block-body">
+        <div id="placeholder_bound" style="width:100%; height:500px; overflow:hidden">
+          <div id="placeholder" style="height:500px"></div>
         </div>
+      </div>
 
-        <div style="background-color:#fff; padding:10px;">
-          <div id="placeholder_bound" style="width:100%; height:500px;overflow:hidden">
-            <div id="placeholder" style="height:500px"></div>
-          </div>
+      <div class="app-block-foot d-flex flex-wrap align-items-center gap-3">
+        <div class="me-auto">
+          <span id="window-efficiency-bound" style="display:none">Efficiency in window: <b id="window-efficiency" style="cursor:pointer"></b> <span class="svg-icon-info" title="Make sure to select period that includes all boiler fuel steps"></span></span>
         </div>
+        <button id="advanced-toggle" class="app-btn" style="display:none">SHOW DETAIL</button>
+      </div>
 
-        <div style="background-color:#eee; color:#333">
-          <div id='advanced-toggle' class='bluenav' style="display:none">SHOW DETAIL</div>
-          
-          <div style="padding:10px; display:none" id="window-efficiency-bound">
-            Efficiency in window: <b id="window-efficiency" style="cursor:pointer"></b> <i class="icon-info-sign" title="Make sure to select period that includes all boiler fuel steps" style="margin-top:3px"></i>
-          </div>
-          
-        </div>
-
-        <div id="advanced-block" style="background-color:#fff; padding:10px; display:none">
-          <div style="color:#000">
+        <div id="advanced-block" class="app-block-body" style="display:none">
+          <div>
 
 
 
-            <table style="width:100%; color:#333;">
-              <tr>
-                <td valign="top" class="show_stats_category" key="combined" style="border-bottom:1px solid #000">
+            <div class="app-stats">
+                <div class="show_stats_category active" key="combined">
                   <div class="cop-title">Full window</div>
-                  <div class="cop-value"><span class="cop_combined">---</span> <span style="font-size:12px">kWh heat</span></div>
-                </td>
+                  <div class="cop-value"><span class="cop_combined">---</span> <span class="small">kWh heat</span></div>
+                </div>
 
-                <td valign="top" class="show_stats_category" key="when_running" style="color:#698d5d">
+                <div class="show_stats_category" key="when_running" style="color:#698d5d">
                   <div class="cop-title">When running</div>
-                  <div class="cop-value"><span class="cop_when_running">---</span> <span style="font-size:12px">kWh heat</span></div>
-                </td>
+                  <div class="cop-value"><span class="cop_when_running">---</span> <span class="small">kWh heat</span></div>
+                </div>
 
-                <td valign="top" class="show_stats_category" key="space_heating" style="color:#f6a801">
+                <div class="show_stats_category" key="space_heating" style="color:#f6a801">
                   <div class="cop-title">Space heating</div>
-                  <div class="cop-value"><span class="cop_space_heating">---</span> <span style="font-size:12px">kWh heat</span></div>
-                </td>
+                  <div class="cop-value"><span class="cop_space_heating">---</span> <span class="small">kWh heat</span></div>
+                </div>
 
-                <td valign="top" class="show_stats_category" key="water_heating" style="color:#014656">
+                <div class="show_stats_category" key="water_heating" style="color:#014656">
                   <div class="cop-title">Water heating</div>
-                  <div class="cop-value"><span class="cop_water_heating">---</span> <span style="font-size:12px">kWh heat</span></div>
-                </td>
-              </tr>
-            </table>
+                  <div class="cop-value"><span class="cop_water_heating">---</span> <span class="small">kWh heat</span></div>
+                </div>
+            </div>
 
 
             <table class="table">
               <tr>
                 <th></th>
-                <th style="text-align:center; width:150px; color:#777">Min</th>
-                <th style="text-align:center; width:150px; color:#777">Max</th>
-                <th style="text-align:center; width:150px; color:#777">Diff</th>
-                <th style="text-align:center; width:150px">Mean</th>
-                <th style="text-align:center; width:150px">kWh</th>
+                <th class="stats-col text-body-secondary">Min</th>
+                <th class="stats-col text-body-secondary">Max</th>
+                <th class="stats-col text-body-secondary">Diff</th>
+                <th class="stats-col">Mean</th>
+                <th class="stats-col">kWh</th>
               </tr>
               <tbody class="stats_category" key="combined"></tbody>
               <tbody class="stats_category" key="when_running" style="display:none"></tbody>
@@ -156,23 +126,23 @@ global $path, $session, $v;
               <tbody class="stats_category" key="space_heating" style="display:none"></tbody>
             </table>
 
-            <div id="show_boiler_fuel_kwh_bound" class="advanced-options">
-              <input id="show_boiler_fuel_kwh" type="checkbox" class="advanced-options-checkbox" checked>
+            <div id="show_boiler_fuel_kwh_bound" class="app-option">
+              <input id="show_boiler_fuel_kwh" type="checkbox" checked>
               <b>Show boiler fuel kWh</b>
             </div>
 
-            <div id="show_flow_rate_bound" style="display:none" class="advanced-options">
-              <input id="show_flow_rate" type="checkbox" class="advanced-options-checkbox">
+            <div id="show_flow_rate_bound" style="display:none" class="app-option">
+              <input id="show_flow_rate" type="checkbox">
               <b>Show flow rate</b>
             </div>
 
-            <div id="show_inst_cop_bound" class="advanced-options">
-              <input id="emitter_spec_enable" type="checkbox" class="advanced-options-checkbox">
+            <div id="show_inst_cop_bound" class="app-option">
+              <input id="emitter_spec_enable" type="checkbox">
               <b>Calculate emitter spec and system volume</b>
               <div id="emitter_spec_options" style="margin-top:10px; display:none">
                 <p>1. Select period of steady state operation where flow and return temperatures are flat</p>
 
-                <div class="input-group" style="margin-top:5px">
+                <div class="input-group">
                   <input type="text" class="form-control" style="width:64px" id="kW_at_50" disabled>
                   <span class="input-group-text">kW @ DT50</span>
                   <button class="btn btn-default" id="use_for_volume_calc">Use for volume calc</button>
@@ -180,19 +150,19 @@ global $path, $session, $v;
 
                 <p>2. Select space heating period with increasing flow and return temperatures</p>
 
-                <div class="input-group" style="margin-top:5px">
+                <div class="input-group">
                   <input type="text" class="form-control" style="width:64px" id="system_volume" disabled>
                   <span class="input-group-text">Litres</span>
                 </div>
               </div>
             </div>
 
-            <div class="advanced-options" style="border-bottom:1px solid #ccc">
-              <div style="float:right"><span id="standby_kwh"></span> kWh</span></div>
-              <input id="configure_standby" type="checkbox" class="advanced-options-checkbox">
+            <div class="app-option">
+              <div style="float:right"><span id="standby_kwh"></span> kWh</div>
+              <input id="configure_standby" type="checkbox">
               <b>Configure standby</b>
               <div id="configure_standby_options" style="display:none">
-                <div class="input-group" style="margin-top:10px; margin-bottom:0px;">
+                <div class="input-group">
                   <span class="input-group-text">Starting power</span>
                   <input type="text" class="form-control" style="width:64px" id="starting_heat" value="100">
                   <span class="input-group-text">W</span>
@@ -203,55 +173,34 @@ global $path, $session, $v;
 
           </div>
         </div>
-
-      </div>
     </div>
-    <div class="col1">
-      <div class="col1-inner">
 
-        <div class="block-bound">
-          <div class="block-title" id="all_time_history_title">ALL TIME HISTORY</div>
+    <div class="app-block">
+      <div class="app-bar">
+        <div class="app-bar-title" id="all_time_history_title">ALL TIME HISTORY</div>
+      </div>
+
+      <div class="app-block-body app-stats">
+        <div>
+          <div class="app-stat-title">Total fuel input</div>
+          <div class="app-stat-value"><span id="total_fuel"></span><span class="app-stat-unit">kWh</span></div>
         </div>
-
-        <div style="background-color:#fff; padding:10px;">
-          <table style="width:100%; color:#333;">
-            <tr>
-              <td style="width:25%; text-align:center" valign="top">
-                <div class="title1">Total fuel input</div>
-                <div class="value1"><span id="total_fuel"></span>
-                  <div class="units1">kWh</div>
-                </div>
-              </td>
-              
-              <td style="width:25%; text-align:center" valign="top">
-                <div class="title1">Total Electricity input</div>
-                <div class="value1"><span id="total_elec"></span>
-                  <div class="units1">kWh</div>
-                </div>
-              </td>
-
-              <td style="width:25%; text-align:center" valign="top">
-                <div class="title1">Total Heat output</div>
-                <div class="value1"><span id="total_heat"></span>
-                  <div class="units1">kWh</div>
-                </div>
-              </td>
-
-              <td style="width:25%; text-align:center" valign="top">
-                <div class="title1">Efficiency</div>
-                <div class="value1"><span id="total_efficiency"></span>
-                  <div class="units1">%</div>
-                </div>
-              </td>
-            </tr>
-          </table>
+        <div>
+          <div class="app-stat-title">Total Electricity input</div>
+          <div class="app-stat-value"><span id="total_elec"></span><span class="app-stat-unit">kWh</span></div>
         </div>
-
+        <div>
+          <div class="app-stat-title">Total Heat output</div>
+          <div class="app-stat-value"><span id="total_heat"></span><span class="app-stat-unit">kWh</span></div>
+        </div>
+        <div>
+          <div class="app-stat-title">Efficiency</div>
+          <div class="app-stat-value"><span id="total_efficiency"></span><span class="app-stat-unit">%</span></div>
+        </div>
       </div>
     </div>
 
-  </div>
-</div>
+  </section>
 
 <div id="appconf-description" style="display:none">
   <p class="lead">The My Boiler app can be used to explore the performance of a boiler including, fuel input, electricity consumption, heat output, efficiency and system temperatures.</p>
@@ -261,6 +210,7 @@ global $path, $session, $v;
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
+</div>
 
 <script>
   var apikey = "<?php print $apikey; ?>";

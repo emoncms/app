@@ -1,0 +1,22 @@
+/* MyElectric. Shared components are in Modules/app/Views/css/app-kit.css. */
+
+/* Power and kWh per day charts, side by side on wide screens. JS sizes each canvas to its box. */
+.myelectric-charts {
+    display: grid;
+    gap: 1rem;
+}
+.myelectric-charts > div { height: 10rem; min-width: 0; }
+.myelectric-charts canvas { display: block; }
+
+@media (min-width: 992px) {
+    .myelectric-charts { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .myelectric-charts > div { height: 19rem; }
+}
+
+.myelectric-totals { padding: 10px 0; }
+.myelectric-totals .app-stat-title { color: var(--text-secondary); }
+.myelectric-kwhd { font-weight: bold; font-size: 14px; }
+
+@media (max-width: 576px) {
+    .myelectric-totals .app-stat-unit { display: block; padding: 0; font-size: 12px; }
+}

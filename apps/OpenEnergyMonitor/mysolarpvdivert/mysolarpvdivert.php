@@ -1,234 +1,98 @@
 <?php
     defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
+
+    load_js("Modules/feed/feed.js");
+    load_js("Lib/js/flot-5.1.0.mod.min.js");
+    load_js("Modules/app/Lib/vis.helper.js");
+    load_js("Modules/app/Lib/timeseries.js");
+    load_css("Modules/app/Views/css/app-kit.css");
+    load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpv/mysolarpv.css");
 ?>
 
-<?php load_css("Modules/app/Views/css/dark.css"); ?>
-<?php load_js("Modules/feed/feed.js"); ?>
-
-<?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
-<?php load_js("Modules/app/Lib/vis.helper.js"); ?>
-<?php load_js("Modules/app/Lib/timeseries.js"); ?> 
-
-
-
-
-<style type="text/css">
-.statstable {
-    width: 100%;
-    border-spacing: 10px;
-    border-collapse: separate;
-}
-
-.statsbox {
-    width: 25%;
-    text-align: center;
-    vertical-align: middle;
-    background: #262626;
-}
-
-.statsbox-inner-unit {
-    color: #333;
-}
-
-.statsbox-padded {
-    padding: 10px;
-}
-
-.statsbox-inner-arrow {
-    color: #999;
-}
-
-.statsbox-title {
-    font-weight: bold;
-    font-size: 20px;
-    padding-bottom: 15px;
-}
-
-.statsbox-value {
-    font-weight: bold;
-    font-size: 36px;
-}
-
-.statsbox-units {
-    font-weight: bold;
-    font-size: 16px;
-}
-
-.statsbox-prc {
-    font-weight: normal;
-    font-size: 16px;
-}
-
-.statsbox-arrow-down {
-    position: relative;
-    margin-bottom: 16px;
-}
-
-.statsbox-arrow-down:after {
-    top: 100%;
-    left: 50%;
-    border: solid transparent;
-    content: " ";
-    width: 0; 
-    height: 0; 
-    position: absolute;
-    pointer-events: none;
-    border-top-color: #999;
-    border-width: 16px;
-    margin-left: -16px;
-}
-
-.statsbox-arrow-right {
-    position: relative;
-    margin-right: 16px;
-}
-
-.statsbox-arrow-right:after {
-  left: 100%;
-  top: 50%;
-  border: solid transparent;
-  content: " ";
-  width: 0; 
-  height: 0; 
-  position: absolute;
-  pointer-events: none;
-  border-left-color: #999;
-  border-width: 16px;
-  margin-top: -16px;
-}
-
-.tooltip-item {
-}
-
-.tooltip-title {
-  color: #aaa;
-  font-weight:bold;
-  font-size:12px;
-}
-
-.tooltip-value {
-  color: #fff;
-  font-weight:bold;
-  font-size:14px;
-}
-
-.tooltip-units {
-  color: #fff;
-  font-weight:bold;
-  font-size:10px;
-}
-
-/*Small devices (landscape phones, 576px and up)*/
-@media (max-width: 576px) {
-  #statsbox-generation { padding-bottom:18px; }
-  .statsbox-padded { padding: 4px; }
-  .statsbox-title { font-size: 14px; padding-bottom: 5px; } /* 20px */
-  .statsbox-value { font-size:28px; } /* 36px */
-  .statsbox-units { font-size:14px; } /* 16px */
-  .statsbox-prc { font-size: 14px; } /* 16px */
-  .statsbox-arrow-down:after {
-    border-width: 10px;
-    margin-left: -10px;
-  }
-  .statsbox-arrow-right:after {
-    border-width: 10px;
-    margin-top: -10px;
-  }
-}
-
-</style>
-
-
-<nav id="buttons" class="d-flex justify-content-between">
-    <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="viewhistory btn btn-lg btn-link" title="<?php echo tr('View History') ?>">
-            <span class="d-xs-none"><?php echo tr("Hist") ?></span>
-            <span class="d-none d-xs-inline"><?php echo tr("History") ?></span>
-        </button></li>
-        <li><button class="balanceline btn btn-lg btn-link" title="<?php echo tr('Show Balance') ?>">
-            <span class="d-xs-none"><?php echo tr("Bal") ?></span>
-            <span class="d-none d-xs-inline"><?php echo tr("Balance") ?></span>
-        </li>
-    </ul>
-    <?php include(dirname(__DIR__).'/config-nav.php'); ?>
-</nav>
-
+<div class="app-page" data-bs-theme="dark">
 
 <section id="app-block" style="display:none" class="block">
-    <div class="d-flex justify-content-between">
-        <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('HOUSE') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-info"><span class="housenow">0</span><span class="power-unit"></span></h2>
-        </div>
-        <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light px-1"><?php echo tr('DIVERT') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 mt-0 mb-lg-3 text-quaternary"><span class="divertnow">-</span><span class="power-unit"></span></h2>
-        </div>
-        <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('TOTAL USE') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
-        </div>
-        <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><span class="balance-label">-</h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-success ">
-                <span class="balance"></span>
-            </h2>
-        </div>
-        <div class="text-xs-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('SOLAR') ?></h5>
-            <h2 class="power-value display-md-3 display-lg-2 my-0 text-warning "><span class="generationnow"></span><span class="power-unit"></span></h2>
+
+    <div class="app-panel">
+        <nav class="app-top-bar d-flex justify-content-between">
+            <ul id="tabs" class="btn-list app-tabs">
+                <li><button class="app-btn viewhistory" title="<?php echo tr('View History') ?>"><i class="svg-icon-calendar"></i><span><?php echo tr('History') ?></span></button></li>
+                <li><button class="app-btn balanceline" title="<?php echo tr('Show Balance') ?>"><i class="svg-icon-show_chart"></i><span><?php echo tr('Balance') ?></span></button></li>
+            </ul>
+            <ul class="btn-list">
+                <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><i class="svg-icon-wrench"></i></button></li>
+                <li><button class="app-btn config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button></li>
+            </ul>
+        </nav>
+
+        <div class="stats-grid">
+            <div>
+                <h5 class="power-title"><?php echo tr('TOTAL USE') ?></h5>
+                <h2 class="power-value text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
+            </div>
+            <div>
+                <h5 class="power-title"><span class="balance-label">-</span></h5>
+                <h2 class="power-value"><span class="balance">--</span><span class="balance-unit"></span></h2>
+            </div>
+            <div>
+                <h5 class="power-title"><span class="generationtitle"><?php echo tr('SOLAR') ?></span></h5>
+                <h2 class="power-value text-warning"><span class="generationnow"></span><span class="power-unit"></span></h2>
+            </div>
+            <div>
+                <h5 class="power-title"><?php echo tr('HOUSE') ?></h5>
+                <h2 class="power-value text-house"><span class="housenow">0</span><span class="power-unit"></span></h2>
+            </div>
+            <div>
+                <h5 class="power-title"><?php echo tr('DIVERT') ?></h5>
+                <h2 class="power-value text-quaternary"><span class="divertnow">-</span><span class="power-unit"></span></h2>
+            </div>
         </div>
     </div>
 
-    <?php include(dirname(__DIR__).'/graph-nav.php'); ?>
-    <?php /*
-    <div class="bargraph-navigation">
-        <span class="bargraph-viewall visnav" style="font-size:14px">VIEW ALL</span>
-        <!--
-        <span class="bargraph-viewdaily visnav" style="font-size:14px">DAILY</span>
-        <span class="bargraph-viewmonthly visnav" style="font-size:14px">MONTHLY</span>
-        <span class="bargraph-viewannually visnav" style="font-size:14px">ANNUALLY</span>
-        -->
+    <div class="app-panel">
+        <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
+            <button class='visnav time app-btn' time='1'>1<?php echo tr('h') ?></button>
+            <button class='visnav time app-btn' time='3'>3<?php echo tr('h') ?></button>
+            <button class='visnav time app-btn' time='6'>6<?php echo tr('h') ?></button>
+            <button class='visnav time app-btn' time='24'><?php echo tr('D') ?></button>
+            <button class='visnav time app-btn' time='168'><?php echo tr('W') ?></button>
+            <button class='visnav time app-btn' time='720'><?php echo tr('M') ?></button>
+            <button class='visnav time app-btn' time='8760'><?php echo tr('Y') ?></button>
+            <button id='zoomin' class='visnav app-btn'>+</button>
+            <button id='zoomout' class='visnav app-btn'>-</button>
+            <button id='left' class='visnav app-btn'>&lt;</button>
+            <button id='right' class='visnav app-btn'>&gt;</button>
+        </div>
+
+        <div id="placeholder_bound">
+            <div id="placeholder"></div>
+        </div>
     </div>
-    */
-    ?>
-    <div id="placeholder_bound" style="width:100%; height:500px;">
-        <div id="placeholder" style="height:500px"></div>
-    </div>
-        
+
+    <div class="app-panel">
     <table class="statstable">
         <tr>
-            <td class="statsbox" colspan="2" style="background: #dccc1f">
+            <td class="statsbox statsbox-energy statsbox-solar" colspan="2">
                 <div class="statsbox-inner-unit">
-                    <div id="statsbox-generation" class="statsbox-padded" style="position: relative;">
+                    <div class="statsbox-padded prc-box">
                         <div class="statsbox-title"><span class="generationtitle">SOLAR</span></div>
                         <div><span class="statsbox-value total_generated_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                        <div style="position: absolute; width: 50%; left: 0%; bottom: 0%">
-                            <span class="statsbox-prc divert_total_generated_prc">0</span>
-                        </div>
-                        <div style="position: absolute; width: 50%; left: 50%; bottom: 0%">
-                            <span class="statsbox-prc house_generated_total_generated_prc">0</span>
-                        </div>
-                        <div style="position: absolute; height: 100%; right: 0%; top: 0%">
-                            <div style="display: table; height: 100%; border-spacing: 0px;">
-                            <div style="display: table-cell; vertical-align: middle;">
-                            <span class="statsbox-prc total_export_prc">0</span>
-                            </div>
-                            </div>
-                        </div>
+                        <div class="prc-bottom-left"><span class="statsbox-prc divert_total_generated_prc">0</span></div>
+                        <div class="prc-bottom-right"><span class="statsbox-prc house_generated_total_generated_prc">0</span></div>
+                        <div class="prc-right"><span class="statsbox-prc total_export_prc">0</span></div>
                     </div>
                 </div>
             </td>
-            
-            <td class="statsbox" style="background: #2ed52e">
-                <div class="statsbox-padded  statsbox-arrow-right">
+
+            <td class="statsbox statsbox-energy statsbox-export">
+                <div class="statsbox-padded">
                     <div class="statsbox-title">EXPORT</div>
                     <div><span class="statsbox-value total_export_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
 
-            <td class="statsbox" style="background: #d52e2e">
+            <td class="statsbox statsbox-energy statsbox-import">
                 <div class="statsbox-padded statsbox-inner-unit">
                     <div class="statsbox-title">GRID<span class="statsbox-units"> (IMPORT / BALANCE)</span></div>
                     <div>
@@ -239,54 +103,50 @@
                 </div>
             </td>
         </tr>
-        
+
         <tr>
-            <td class="statsbox">
+            <td id="solar-to-divert-box" class="statsbox">
                 <div class="statsbox-inner-arrow">
                     <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_divert_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
-            
-            <td class="statsbox">
+
+            <td id="solar-to-house-box" class="statsbox">
                 <div class="statsbox-inner-arrow">
                     <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_house_generated_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
 
-            <td class="statsbox">
-            </td>
-            
-            <td class="statsbox">
+            <td class="statsbox"></td>
+
+            <td id="grid-to-house-box" class="statsbox">
                 <div class="statsbox-inner-arrow">
                     <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_import_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
         </tr>
-        
+
         <tr>
-            <td class="statsbox" style="background: #fb7b50">
+            <td class="statsbox statsbox-energy statsbox-divert">
                 <div class="statsbox-padded statsbox-inner-unit">
                     <div class="statsbox-title">DIVERT</div>
                     <div><span class="statsbox-value total_divert_kwh">0</span> <span class="statsbox-units">kWh</span></div>
                 </div>
             </td>
-            
-            <td class="statsbox" colspan="3" style="background: #82cbfc">
+
+            <td class="statsbox statsbox-energy statsbox-house" colspan="3">
                 <div class="statsbox-inner-unit">
-                    <div class="statsbox-padded" style="position: relative;">
+                    <div class="statsbox-padded prc-box">
                         <div class="statsbox-title">HOUSE</div>
                         <div><span class="statsbox-value total_house_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                        <div style="position: absolute; width: 33.33333%; left: 0%; top: 0%">
-                            <div><span class="statsbox-prc house_generated_house_use_prc">0</span></div>
-                        </div>
-                        <div style="position: absolute; width: 33.33333%; left: 66.66667%; top: 0%">
-                            <div><span class="statsbox-prc total_import_prc">0</span></div>
-                        </div>
+                        <div class="prc-top-left"><span class="statsbox-prc house_generated_house_use_prc">0</span></div>
+                        <div class="prc-top-right"><span class="statsbox-prc total_import_prc">0</span></div>
                     </div>
                 </div>
             </td>
         </tr>
     </table>
+    </div>
 </section>
 
 <div id="appconf-description" style="display:none">
@@ -298,6 +158,8 @@ The My Solar with Divert app can be used to explore onsite solar (and optionally
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
+
+</div>
 
 <?php load_js("Lib/js/gettext.js"); ?> 
 <script>
@@ -317,14 +179,6 @@ var sessionwrite = <?php echo $session['write']; ?>;
 feed.apikey = apikey;
 feed.public_userid = public_userid;
 feed.public_username = public_username;
-// ----------------------------------------------------------------------
-// Display
-// ----------------------------------------------------------------------
-$("body").css('background-color','#222');
-$(window).ready(function(){
-    $("#footer").css('background-color','#181818');
-    $("#footer").css('color','#999');
-});
 if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
@@ -563,17 +417,20 @@ function livefn()
 
     if (balance==0) {
         $(".balance-label").html("PERFECT BALANCE");
-        $(".balance").html("--");
+        $(".balance").html("--").parent().css("color", "");
+        $(".balance-unit").text("");
     }
     
     if (balance>0) {
         $(".balance-label").html("EXPORTING");
-        $(".balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+powerUnit+"</b></span>");
+        $(".balance").html(Math.round(Math.abs(balance))).parent().css("color", "var(--ec-energy-export)");
+        $(".balance-unit").text(powerUnit);
     }
     
     if (balance<0) {
         $(".balance-label").html("IMPORTING");
-        $(".balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+powerUnit+"</b></span>");
+        $(".balance").html(Math.round(Math.abs(balance))).parent().css("color", "var(--ec-energy-import)");
+        $(".balance-unit").text(powerUnit);
     }
     
     $(".generationnow").html(gen_now);
@@ -965,8 +822,8 @@ function draw_bargraph()
     
     var plot = Flot.plot(document.getElementById('placeholder'),historyseries,options);
     
-    $('#placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Solar usage (house, diverted & exported)</div>");
-    $('#placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> House usage</div>");
+    $('#placeholder').append("<div class='chart-note' style='top:30px'><b>Above:</b> Solar usage (house, diverted & exported)</div>");
+    $('#placeholder').append("<div class='chart-note' style='bottom:50px'><b>Below:</b> House usage</div>");
 
     // Because the bargraph is only drawn once when the view is changed we attach the events at this point
     bargraph_events();
@@ -1040,6 +897,7 @@ function bargraph_events() {
             view.end = view.start + 86400*1000;
 
             $(".balanceline").attr('disabled',false);
+            $(".viewhistory").removeClass('active');
             // $(".bargraph-navigation").hide();
             $(".powergraph-navigation").show();
             

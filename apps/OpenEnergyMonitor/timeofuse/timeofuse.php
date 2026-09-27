@@ -2,167 +2,136 @@
     defined('EMONCMS_EXEC') or die('Restricted access');
     global $path, $session, $v;
 ?>
-<?php load_css("Modules/app/Views/css/light.css"); ?>
-
-<link rel="stylesheet" href="<?php echo $path; ?>Lib/fonts/montserrat/montserrat.css?v=<?php echo $v; ?>" />
+<?php load_css("Modules/app/Views/css/app-kit.css"); ?>
+<?php load_css("Lib/fonts/montserrat/montserrat.css"); ?>
 <?php load_js("Modules/feed/feed.js"); ?>
 
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
 <?php load_js("Modules/app/Lib/vis.helper.js"); ?>
 
-<style>
+<div class="app-page" data-bs-theme="light">
+  <section id="app-block" style="display:none">
 
-.electric-title {
-    font-weight:bold;
-    font-size:22px;
-    color:#44b3e2;
-}
-
-.power-value {
-    font-weight:bold; 
-    font-size:52px; 
-    color:#44b3e2;
-    line-height: 1.1;
-}
-
-.block-bound {
-  background-color:rgb(68,179,226);
-}
-
-</style>
-
-<div style="font-family: Montserrat, Veranda, sans-serif;">
-<div id="app-block" style="display:none">
-    
-  <div class="col1"><div class="col1-inner">
-  
-    <div class="block-bound">
-      <div class="bluenav config-open"><i class="icon-wrench icon-white"></i></div>
-      <div class="bluenav viewcostenergy">ENERGY MODE</div>
-      <!--<div class="bluenav cost">Cost</div>
-      <div class="bluenav energy">Energy</div>-->
-      <div class="block-title">MY ELECTRIC</div>
-    </div>
-
-    <div style="background-color:#fff; color:#333; padding:10px;">
-      <table style="width:100%">
-        <tr>
-          <td style="width:40%">
-              <div class="electric-title">POWER NOW</div>
-              <div class="power-value"><span id="power_now">0</span></div>
-          </td>
-          <td style="text-align:right">
-              <div class="electric-title">USE TODAY</div>
-              <div class="power-value"><span id="kwh_today">0</span></div>
-          </td>
-        </tr>
-      </table>
-    </div>
-    
-  </div></div>
-  <div class="col1"><div class="col1-inner">
-
-    <div class="block-bound">
-    
-      <div class="bargraph-navigation">
-        <!--<div class="bluenav bargraph-other">OTHER</div>-->
-        <div class="bluenav bargraph-alltime">ALL TIME</div>
-        <div class="bluenav bargraph-month">MONTH</div>
-        <div class="bluenav bargraph-week">WEEK</div>
+    <div class="app-block">
+      <div class="app-bar">
+        <div class="app-bar-title">MY ELECTRIC</div>
+        <button class="app-bar-btn viewcostenergy">ENERGY MODE</button>
+        <button class="app-bar-btn config-open" title="Configure app"><span class="svg-icon-wrench"></span></button>
       </div>
-      
-      <div class="powergraph-navigation" style="display:none">
-        <div class="bluenav viewhistory">VIEW HISTORY</div>
-        <span class="bluenav" id="right" >></span>
-        <span class="bluenav" id="left" ><</span>
-        <span class="bluenav" id="zoomout" >-</span>
-        <span class="bluenav" id="zoomin" >+</span>
-        <span class="bluenav time" time='720'>M</span>
-        <span class="bluenav time" time='168'>W</span>
-        <span class="bluenav time" time='24'>D</span>
-      </div>
-        
-      <div class="block-title">HISTORY</div>
-         
-    </div>
-    
-    <div style="background-color:rgba(68,179,226,0.1); padding:10px;">
-      <div id="placeholder_bound" style="width:100%; height:500px;">
-        <div id="placeholder" style="height:500px"></div>
+
+      <div class="app-block-body app-stats">
+        <div>
+          <div class="app-stat-title">POWER NOW</div>
+          <div class="app-stat-value" id="power_now">0</div>
+        </div>
+        <div>
+          <div class="app-stat-title">USE TODAY</div>
+          <div class="app-stat-value" id="kwh_today">0</div>
+        </div>
       </div>
     </div>
-          
-    <div id="power-graph-footer" style="background-color:#eee; color:#333; display:none">
-      <div id='advanced-toggle' class='bluenav' >SHOW DETAIL</div>
- 
-       <div style="padding:10px;">
-        kWh in window: <b id="window-kwh"></b> <b>kWh</b>, Off-peak: <b id="window-offpeak"></b> <b>kWh</b>, Peak: <b id="window-peak"></b> <b>kWh</b>
+
+    <div class="app-block">
+      <div class="app-bar bargraph-navigation">
+        <div class="app-bar-title">HISTORY</div>
+        <button class="app-bar-btn bargraph-week">WEEK</button>
+        <button class="app-bar-btn bargraph-month">MONTH</button>
+        <button class="app-bar-btn bargraph-alltime">ALL TIME</button>
       </div>
-      
-      <div style="clear:both"></div>
-    </div>
-          
-    <div id="advanced-block" style="background-color:#eee; padding:10px; display:none">
-      <div style="color:#000">
+
+      <div class="app-bar powergraph-navigation" style="display:none">
+        <div class="app-bar-spacer"></div>
+        <button class="app-bar-btn time" time='24' title="Last 24 hours">D</button>
+        <button class="app-bar-btn time" time='168' title="Last 7 days">W</button>
+        <button class="app-bar-btn time" time='720' title="Last 30 days">M</button>
+        <button class="app-bar-btn" id="zoomin" title="Zoom in">+</button>
+        <button class="app-bar-btn" id="zoomout" title="Zoom out">-</button>
+        <button class="app-bar-btn" id="left" title="Scroll left">&lt;</button>
+        <button class="app-bar-btn" id="right" title="Scroll right">&gt;</button>
+        <button class="app-bar-btn viewhistory" title="Back to daily history">BACK</button>
+      </div>
+
+      <div class="app-block-body">
+        <div id="placeholder_bound" style="width:100%; height:500px">
+          <div id="placeholder" style="height:500px"></div>
+        </div>
+      </div>
+
+      <div id="power-graph-footer" class="app-block-foot" style="display:none">
+        <div class="d-flex flex-wrap align-items-center gap-3">
+          <div class="me-auto">kWh in window: <b id="window-kwh"></b> <b>kWh</b>, Off-peak: <b id="window-offpeak"></b> <b>kWh</b>, Peak: <b id="window-peak"></b> <b>kWh</b></div>
+          <button id="advanced-toggle" class="app-btn">SHOW DETAIL</button>
+        </div>
+      </div>
+
+      <div id="advanced-block" class="app-block-body" style="display:none">
         <table class="table">
           <tr>
-          <th></th>
-          <th style="text-align:center">Min</th>
-          <th style="text-align:center">Max</th>
-          <th style="text-align:center">Diff</th>
-          <th style="text-align:center">Mean</th>
-          <th style="text-align:center">StDev</th>
+            <th></th>
+            <th class="text-center">Min</th>
+            <th class="text-center">Max</th>
+            <th class="text-center">Diff</th>
+            <th class="text-center">Mean</th>
+            <th class="text-center">StDev</th>
           </tr>
           <tbody id="stats"></tbody>
         </table>
       </div>
     </div>
-    
-  </div></div>
-    
-  <div class="col2">
-    <div class="col2-inner">
-      <div class="block-bound">
-          <div class="block-title">TOTALS</div>
-      </div>
-      
-      <div style="background-color:rgba(68,179,226,0.1); padding:20px; color:#333;">
-          <div class="electric-title">DAY TIME TOTAL</div>
-          <div class="power-value"><span id="daytime_total_kwh">0</span></div><br>
-          <div class="electric-title">DAY TIME DAILY AVERAGE</div>
-          <div class="power-value"><span id="daytime_average_kwhd">0</span></div><br>
-          <div class="electric-title">NIGHT TIME TOTAL</div>
-          <div class="power-value"><span id="nighttime_total_kwh">0</span></div><br>
-          <div class="electric-title">NIGHT TIME DAILY AVERAGE</div>
-          <div class="power-value"><span id="nighttime_average_kwhd">0</span></div><br>
-      </div>
-    </div>
-  </div>
-  
-  <div class="col2">
-    <div class="col2-inner">
-      <div class="block-bound">
-          <div class="block-title">COMPARISON</div>
-      </div>
-      
-      <div style="background-color:rgba(68,179,226,0.1); padding:20px; color:#333; text-align:center">
-        <div id="comparison_summary" style=""></div><br>
-        <canvas id="energystack" width="270px" height="360px"></canvas>
-        <div style="text-align:left">
-        The ZeroCarbonBritain target is based on a household using all low energy appliances and LED lighting.
-        <br><br>
-        
-        <b>My Electric includes:</b><br>
-        <input id="heating" type="checkbox"> Heatpump or electric heating<br><input id="transport" type="checkbox"> Electric Vehicle
-        </div>
-        <div style="clear:both"></div>
-      </div>
-    </div>
-  </div>
-    
-</div>    
-</div>
 
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="app-block mt-0">
+          <div class="app-bar">
+            <div class="app-bar-title">TOTALS</div>
+          </div>
+
+          <div class="app-block-body">
+            <div class="app-stats mb-2">
+              <div>
+                <div class="app-stat-title">DAY TIME TOTAL</div>
+                <div class="app-stat-value" id="daytime_total_kwh">0</div>
+              </div>
+              <div>
+                <div class="app-stat-title">DAY TIME DAILY AVERAGE</div>
+                <div class="app-stat-value" id="daytime_average_kwhd">0</div>
+              </div>
+            </div>
+            <div class="app-stats">
+              <div>
+                <div class="app-stat-title">NIGHT TIME TOTAL</div>
+                <div class="app-stat-value" id="nighttime_total_kwh">0</div>
+              </div>
+              <div>
+                <div class="app-stat-title">NIGHT TIME DAILY AVERAGE</div>
+                <div class="app-stat-value" id="nighttime_average_kwhd">0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="app-block mt-0">
+          <div class="app-bar">
+            <div class="app-bar-title">COMPARISON</div>
+          </div>
+
+          <div class="app-block-body">
+            <div class="text-center">
+              <p id="comparison_summary"></p>
+              <canvas id="energystack" width="270" height="360"></canvas>
+            </div>
+            <p>The ZeroCarbonBritain target is based on a household using all low energy appliances and LED lighting.</p>
+            <p class="fw-bold mb-2">My Electric includes:</p>
+            <div class="app-option"><input id="heating" type="checkbox"> Heatpump or electric heating</div>
+            <div class="app-option"><input id="transport" type="checkbox"> Electric Vehicle</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
 
 <div id="appconf-description" style="display:none">
     <p class="lead">The My Electric app is a simple home energy monitoring app for exploring home or building electricity consumption over time.</p>
@@ -170,6 +139,7 @@
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
+</div>
 
 <script>
 
@@ -181,15 +151,6 @@ var sessionwrite = <?php echo $session['write']; ?>;
 feed.apikey = apikey;
 feed.public_userid = public_userid;
 feed.public_username = public_username;
-// ----------------------------------------------------------------------
-// Display
-// ----------------------------------------------------------------------
-$("body").css('background-color','WhiteSmoke');
-$(window).ready(function(){
-    //$("#footer").css('background-color','#181818');
-    //$("#footer").css('color','#999');
-});
-
 if (!sessionwrite) $(".openconfig").hide();
 
 // ----------------------------------------------------------------------
@@ -251,8 +212,6 @@ function init()
 }
 
 function show() {
-    $("body").css('background-color','WhiteSmoke');
-    
     meta["use_kwh"] = feed.getmeta(feeds["use_kwh"].id);
     if (meta["use_kwh"].start_time>start_time) start_time = meta["use_kwh"].start_time;
     use_start = feed.getvalue(feeds["use_kwh"].id, start_time);
@@ -284,7 +243,7 @@ function updater()
             if (config.app[key].value) feeds[key] = result[config.app[key].value];
         }
         
-        $("#power_now").html(Math.round(feeds["use"].value)+"W");
+        $("#power_now").html(Math.round(feeds["use"].value)+"<span class='app-stat-unit'>W</span>");
     });
 }
 
@@ -526,12 +485,12 @@ function powergraph_load()
     var out = "";
     for (var z in feedstats) {
         out += "<tr>";
-        out += "<td style='text-align:left'>"+z+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].minval.toFixed(0)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].maxval.toFixed(0)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].diff.toFixed(0)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].mean.toFixed(0)+"</td>";
-        out += "<td style='text-align:center'>"+feedstats[z].stdev.toFixed(0)+"</td>";
+        out += "<td>"+z+"</td>";
+        out += "<td class='text-center'>"+feedstats[z].minval.toFixed(0)+"</td>";
+        out += "<td class='text-center'>"+feedstats[z].maxval.toFixed(0)+"</td>";
+        out += "<td class='text-center'>"+feedstats[z].diff.toFixed(0)+"</td>";
+        out += "<td class='text-center'>"+feedstats[z].mean.toFixed(0)+"</td>";
+        out += "<td class='text-center'>"+feedstats[z].stdev.toFixed(0)+"</td>";
         out += "</tr>";
     }
     $("#stats").html(out);
@@ -661,17 +620,17 @@ function bargraph_load(start,end)
         if (typeof daytime_total_kwh === 'undefined') daytime_total_kwh = 0;
         if (typeof nighttime_total_kwh === 'undefined') nighttime_total_kwh = 0;
 
-        $("#daytime_total_kwh").html(daytime_total_kwh.toFixed(1)+" kWh");
-        $("#daytime_average_kwhd").html((daytime_total_kwh/n).toFixed(1)+" kWh/d");
+        $("#daytime_total_kwh").html(daytime_total_kwh.toFixed(1)+"<span class='app-stat-unit'>kWh</span>");
+        $("#daytime_average_kwhd").html((daytime_total_kwh/n).toFixed(1)+"<span class='app-stat-unit'>kWh/d</span>");
         
-        $("#nighttime_total_kwh").html(nighttime_total_kwh.toFixed(1)+" kWh");
-        $("#nighttime_average_kwhd").html((nighttime_total_kwh/n).toFixed(1)+" kWh/d");
+        $("#nighttime_total_kwh").html(nighttime_total_kwh.toFixed(1)+"<span class='app-stat-unit'>kWh</span>");
+        $("#nighttime_average_kwhd").html((nighttime_total_kwh/n).toFixed(1)+"<span class='app-stat-unit'>kWh/d</span>");
     } else {
         $("#daytime_total_kwh").html(config.app.currency.value+(daytime_total_kwh*config.app.unitcost_day.value).toFixed(2));
-        $("#daytime_average_kwhd").html(config.app.currency.value+(daytime_total_kwh*config.app.unitcost_day.value/n).toFixed(2)+"/day");
+        $("#daytime_average_kwhd").html(config.app.currency.value+(daytime_total_kwh*config.app.unitcost_day.value/n).toFixed(2)+"<span class='app-stat-unit'>/day</span>");
         
         $("#nighttime_total_kwh").html(config.app.currency.value+(nighttime_total_kwh*config.app.unitcost_night.value).toFixed(2));
-        $("#nighttime_average_kwhd").html(config.app.currency.value+(nighttime_total_kwh*config.app.unitcost_night.value/n).toFixed(2)+"/day");
+        $("#nighttime_average_kwhd").html(config.app.currency.value+(nighttime_total_kwh*config.app.unitcost_night.value/n).toFixed(2)+"<span class='app-stat-unit'>/day</span>");
     }
 
     if (typeof data["economy7"][data["economy7"].length-1] !== 'undefined') {
@@ -680,7 +639,7 @@ function bargraph_load(start,end)
         var kwh_today = 0;
     }
 
-    $("#kwh_today").html(kwh_today.toFixed(1)+" kWh");
+    $("#kwh_today").html(kwh_today.toFixed(1)+"<span class='app-stat-unit'>kWh</span>");
     
     //if (viewcostenergy=="energy") {
     //    $("#kwh_today").html(kwh_today.toFixed(1));
@@ -811,17 +770,6 @@ function resize() {
     placeholder.width(width);
     placeholder_bound.height(height);
     placeholder.height(height-top_offset);
-    
-    if (width<=500) {
-        $(".electric-title").css("font-size","16px");
-        $(".power-value").css("font-size","38px");
-    } else if (width<=724) {
-        $(".electric-title").css("font-size","18px");
-        $(".power-value").css("font-size","52px");
-    } else {
-        $(".electric-title").css("font-size","22px");
-        $(".power-value").css("font-size","52px");
-    }
 }
 
 $(function() {

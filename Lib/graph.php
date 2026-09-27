@@ -1,69 +1,43 @@
-<div class="graph-header">
-    <div class="title grow"><?php echo "HISTORY"; ?></div>
-    <div class="action power history" style="display:none;"><?php echo "VIEW ENERGY"; ?></div>
-    <div class="action power time" data-days='1' data-text='day' style="display:none;"><?php echo "DAY"; ?></div>
-    <div class="action energy power time" data-days='7' data-text='week'><?php echo "WEEK"; ?></div>
-    <div class="action energy power time" data-days='30' data-text='month'><?php echo "MONTH"; ?></div>
-    <div class="action energy time" data-text='all'><?php echo "ALL TIME"; ?></div>
-    <div class="action power zoom-in" style="display:none;"><span class="icon-plus icon-white"></span></div>
-    <div class="action power zoom-out" style="display:none;"><span class="icon-minus icon-white"></span></div>
-    <div class="action power pan-left" style="display:none;"><span class="icon-chevron-left icon-white"></span></div>
-    <div class="action power pan-right" style="display:none;"><span class="icon-chevron-right icon-white"></span></div>
+<div class="app-bar graph-header">
+    <div class="app-bar-title"><?php echo "HISTORY"; ?></div>
+    <button class="app-bar-btn power history" style="display:none"><?php echo "VIEW ENERGY"; ?></button>
+    <button class="app-bar-btn power time" data-days='1' data-text='day' style="display:none"><?php echo "DAY"; ?></button>
+    <button class="app-bar-btn energy power time" data-days='7' data-text='week'><?php echo "WEEK"; ?></button>
+    <button class="app-bar-btn energy power time" data-days='30' data-text='month'><?php echo "MONTH"; ?></button>
+    <button class="app-bar-btn energy time" data-text='all'><?php echo "ALL TIME"; ?></button>
+    <button class="app-bar-btn power zoom-in" title="Zoom in" style="display:none">+</button>
+    <button class="app-bar-btn power zoom-out" title="Zoom out" style="display:none">-</button>
+    <button class="app-bar-btn power pan-left" title="Scroll left" style="display:none">&lt;</button>
+    <button class="app-bar-btn power pan-right" title="Scroll right" style="display:none">&gt;</button>
 </div>
 
-<div class="graph-body">
+<div class="app-block-body graph-body position-relative">
     <div class="graph"></div>
-    <div class="graph-loader ajax-loader" style="display:none;"></div>
+    <div class="graph-loader ajax-loader" style="display:none"></div>
 </div>
 
-<div class="graph-footer">
-    <div class="graph-info">
-        <div>
-            <span class="window energy">
-                <span><?php echo "Average in window:"; ?></span>
-            </span>
-        </div>
-        <div>
-            <span class="window power hide">
-                <span><?php echo "Energy in window:"; ?></span>
-            </span>
-        </div>
-        <div>
-            <span class="window info">
-                <b><span id="window-cons"></span></b> <span style="padding-right:20px;"><?php echo "consumed"; ?></span>
-            </span>
-        </div>
-        <div>
-            <span class="window generation hide">
-                <b><span id="window-gen"></span></b> <span style="padding-right:20px;"><?php echo "generated"; ?></span>
-            </span>
-        </div>
-        <div>
-            <span class="window self hide">
-                <b><span id="window-selfcons"></span></b> <span style="padding-right:20px;"><?php echo "self-consumed"; ?></span>
-            </span>
-        </div>
-        <div>
-            <span class="window self hide" >
-                <b><span id="window-selfsuff"></span></b> <span style="padding-right:20px;"><?php echo "self-sufficient"; ?></span>
-            </span>
-        </div>
-        <div class="window grow"></div>
-        <div class='window power action details' style="display:none;">
-            <span><?php echo "SHOW DETAILS"; ?></span>
-        </div>
+<div class="app-block-foot graph-footer">
+    <div class="graph-info d-flex flex-wrap align-items-center gap-3">
+        <span class="window energy"><?php echo "Average in window:"; ?></span>
+        <span class="window power hide"><?php echo "Energy in window:"; ?></span>
+        <span class="window info"><b id="window-cons"></b> <?php echo "consumed"; ?></span>
+        <span class="window generation hide"><b id="window-gen"></b> <?php echo "generated"; ?></span>
+        <span class="window self hide"><b id="window-selfcons"></b> <?php echo "self-consumed"; ?></span>
+        <span class="window self hide"><b id="window-selfsuff"></b> <?php echo "self-sufficient"; ?></span>
+        <button class="app-btn ms-auto window power details" style="display:none"><?php echo "SHOW DETAIL"; ?></button>
     </div>
-    <div class="graph-stats" style="display:none">
-        <table class="table">
-            <tr>
-                <th></th>
-                <th style="text-align:center"><?php echo "Min"; ?></th>
-                <th style="text-align:center"><?php echo "Max"; ?></th>
-                <th style="text-align:center"><?php echo "Diff"; ?></th>
-                <th style="text-align:center"><?php echo "Mean"; ?></th>
-                <th style="text-align:center"><?php echo "StDev"; ?></th>
-            </tr>
-            <tbody id="graph-stats"></tbody>
-        </table>
-    </div>
+</div>
+
+<div class="app-block-body graph-stats" style="display:none">
+    <table class="table mb-0">
+        <tr>
+            <th></th>
+            <th class="text-center"><?php echo "Min"; ?></th>
+            <th class="text-center"><?php echo "Max"; ?></th>
+            <th class="text-center"><?php echo "Diff"; ?></th>
+            <th class="text-center"><?php echo "Mean"; ?></th>
+            <th class="text-center"><?php echo "StDev"; ?></th>
+        </tr>
+        <tbody id="graph-stats"></tbody>
+    </table>
 </div>

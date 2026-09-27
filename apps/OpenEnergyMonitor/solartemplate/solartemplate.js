@@ -384,30 +384,30 @@ function updater() {
     $("#powernow").html(use_w.toFixed(0));
     $("#solarnow").html(solar_w.toFixed(0));
 
-    // Battery: positive = discharging (orange), negative = charging (purple)
+    // Battery: positive = discharging, negative = charging
     $("#batterynow").html(Math.abs(battery_w).toFixed(0));
     if (battery_w > 10) {
-        $("#battery-label").text("BAT DISCHG").css("color", "#fba050");
-        $("#battery-value").css("color", "#fba050");
+        $("#battery-label").text("BAT DISCHG");
+        $("#battery-value").css("color", "var(--ec-energy-battery)");
     } else if (battery_w < -10) {
-        $("#battery-label").text("BAT CHRG").css("color", "#c084fc");
-        $("#battery-value").css("color", "#c084fc");
+        $("#battery-label").text("BAT CHRG");
+        $("#battery-value").css("color", "var(--ec-energy-battery)");
     } else {
-        $("#battery-label").text("BATTERY").css("color", "#aaa");
-        $("#battery-value").css("color", "#aaa");
+        $("#battery-label").text("BATTERY");
+        $("#battery-value").css("color", "var(--text-secondary)");
     }
 
-    // Grid: positive = import (light blue), negative = export (yellow-green)
+    // Grid: positive = import, negative = export
     $("#gridnow").html(Math.abs(grid_w).toFixed(0));
     if (grid_w > 10) {
-        $("#grid-label").text("IMPORT").css("color", "#82cbfc");
-        $("#grid-value").css("color", "#82cbfc");
+        $("#grid-label").text("IMPORT");
+        $("#grid-value").css("color", "var(--ec-energy-import)");
     } else if (grid_w < -10) {
-        $("#grid-label").text("EXPORT").css("color", "#dccc1f");
-        $("#grid-value").css("color", "#dccc1f");
+        $("#grid-label").text("EXPORT");
+        $("#grid-value").css("color", "var(--ec-energy-export)");
     } else {
-        $("#grid-label").text("GRID").css("color", "#aaa");
-        $("#grid-value").css("color", "#aaa");
+        $("#grid-label").text("GRID");
+        $("#grid-value").css("color", "var(--text-secondary)");
     }
 
     // Battery SOC

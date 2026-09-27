@@ -1,100 +1,104 @@
 <?php
-    defined('EMONCMS_EXEC') or die('Restricted access');
-    global $path, $session, $v;
+defined('EMONCMS_EXEC') or die('Restricted access');
+global $path, $session, $v;
+
+load_js("Modules/feed/feed.js");
+load_js("Lib/js/flot-5.1.0.mod.min.js");
+load_js("Modules/app/Lib/vis.helper.js");
+load_js("Modules/app/Lib/timeseries.js");
+load_css("Modules/app/Views/css/app-kit.css");
+load_css("Modules/app/apps/OpenEnergyMonitor/myenergy/myenergy.css");
 ?>
-<?php load_css("Modules/app/Views/css/dark.css"); ?>
 
-<?php load_js("Modules/feed/feed.js"); ?>
+<div class="app-page" data-bs-theme="dark">
 
-<?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
-<?php load_js("Modules/app/Lib/vis.helper.js"); ?>
-<?php load_js("Modules/app/Lib/timeseries.js"); ?>
-<nav id="buttons" class="d-flex justify-content-between">
-    <ul id="tabs" class="nav nav-pills mb-0">
-        <li><button class="balanceline btn btn-lg btn-link myelectric-view-kwh" title="<?php echo tr('Show Balance') ?>">
-            <?php echo tr("Show Balance") ?>
-        </li>
-    </ul>
-    <?php include(dirname(__DIR__).'/config-nav.php'); ?>
+<section id="app-block" style="display:none">
 
-</nav>
-    
-<section id="app-block" style="display:none" class="block">
-    <div id="summary" class="d-flex justify-content-between">
-        <div class="text-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('USE NOW') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3 text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
-        </div>
-        <div class="text-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light px-1"><span class="balance-label"></span></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 mt-0 mb-lg-3"><span class="balance"></span></h2>
-        </div>
-        <div class="text-center">
-            <h5 class="electric-title mb-0 text-md-larger text-light"><?php echo tr('RENEWABLE GEN') ?></h5>
-            <h2 class="power-value display-sm-4 display-md-3 display-lg-2 my-0 text-warning "><span class="gennow"></span><span class="power-unit"></span></h2>
+    <div class="app-panel">
+        <nav class="app-top-bar d-flex justify-content-between">
+            <ul id="tabs" class="btn-list app-tabs">
+                <li><button class="app-btn active"><i class="svg-icon-leaf"></i><span><?php echo tr('Renewable energy') ?></span></button></li>
+            </ul>
+            <ul class="btn-list">
+                <li><button class="app-btn config-open" title="<?php echo tr('Edit') ?>"><i class="svg-icon-wrench"></i></button></li>
+                <li><button class="app-btn config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button></li>
+            </ul>
+        </nav>
 
-            <h5 class="electric-title mt-0 mb-lg-3 text-md-larger ">
-                <span class="text-warning" title="<?php echo tr('SOLAR') ?>"><span class="d-none d-sm-inline-block"><?php echo tr('SOLAR') ?>: </span> <span class="solarnow">0</span><span class="power-unit"></span></span> | 
-                <span class="text-success" title="<?php echo tr('WIND') ?>"><span class="d-none d-sm-inline-block"><?php echo tr('WIND') ?>: </span> <span class="windnow">0</span><span class="power-unit"></span></span>
-            </h5>
+        <div class="stats-grid">
+            <div>
+                <h5 class="power-title"><?php echo tr('USE NOW') ?></h5>
+                <h2 class="power-value text-primary"><span class="usenow"></span><span class="power-unit"></span></h2>
+            </div>
+            <div>
+                <h5 class="power-title"><span class="balance-label">-</span></h5>
+                <h2 class="power-value balance"></h2>
+            </div>
+            <div>
+                <h5 class="power-title"><?php echo tr('RENEWABLE GEN') ?></h5>
+                <h2 class="power-value text-warning"><span class="gennow"></span><span class="power-unit"></span></h2>
+                <h5 class="power-title">
+                    <span class="text-warning" title="<?php echo tr('SOLAR') ?>"><span class="d-none d-sm-inline"><?php echo tr('SOLAR') ?>: </span><span class="solarnow">0</span><span class="power-unit"></span></span> |
+                    <span class="text-success" title="<?php echo tr('WIND') ?>"><span class="d-none d-sm-inline"><?php echo tr('WIND') ?>: </span><span class="windnow">0</span><span class="power-unit"></span></span>
+                </h5>
+            </div>
         </div>
     </div>
 
-    <?php include(dirname(__DIR__).'/graph-nav.php'); ?>
+    <div class="app-panel">
+        <div id="graph-nav" class="visnavblock mb-2 d-flex justify-content-start">
+            <button class='visnav time app-btn' time='1'>1<?php echo tr('h') ?></button>
+            <button class='visnav time app-btn' time='3'>3<?php echo tr('h') ?></button>
+            <button class='visnav time app-btn' time='6'>6<?php echo tr('h') ?></button>
+            <button class='visnav time app-btn' time='24'><?php echo tr('D') ?></button>
+            <button class='visnav time app-btn' time='168'><?php echo tr('W') ?></button>
+            <button class='visnav time app-btn' time='720'><?php echo tr('M') ?></button>
+            <button class='visnav time app-btn' time='8760'><?php echo tr('Y') ?></button>
+            <button id='zoomin' class='visnav app-btn'>+</button>
+            <button id='zoomout' class='visnav app-btn'>-</button>
+            <button id='left' class='visnav app-btn'>&lt;</button>
+            <button id='right' class='visnav app-btn'>&gt;</button>
+            <button class="balanceline app-btn ms-auto" title="<?php echo tr('Show Balance') ?>"><?php echo tr('Balance') ?></button>
+        </div>
+        <div id="placeholder_bound"><div id="placeholder"></div></div>
+    </div>
 
-    <div id="placeholder_bound" style="width:100%; height:500px;">
-        <div id="placeholder" style="height:500px"></div>
-    </div>
-        
-    <div id="breakdown" class="d-flex justify-content-between py-lg-3 text-light">
-        <div class="appbox mb-3 text-primary">
-            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo tr('USE') ?></h5>
-            <h2 class="appbox-value total_use_kwh my-0">--</h2>
-            <h5 class="appbox-units my-0">
-                kWh
-            </h5>
-        </div>
-        <div class="appbox mb-3 text-tertiary">
-            <h5 class="appbox-title mb-1 text-light text-md-larger px-1"><?php echo tr('WIND') ?></h5>
-            <h2 class="appbox-value total_wind_kwh my-0">--</h2>
-            <h5 class="appbox-units my-0">
-                <span id="total_export_kwh"></span>
-                <span>kWh</span>
-            </h5>
-        </div>
-        <div class="appbox mb-3 text-warning">
-            <h5 class="appbox-title mb-1 text-light text-md-larger px-1"><?php echo tr('SOLAR') ?></h5>
-            <h2 class="appbox-value total_solar_kwh my-0">--</h2>
-            <h5 class="appbox-units my-0">
-                kWh
-            </h5>
-        </div>
-        <div class="appbox mb-3 text-success">
-            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo tr('DIRECT') ?></h5>
-            <h2 class="appbox-value total_use_direct_prc my-0">--</h2>
-            <h5 class="appbox-units my-0">
-                <span id="total_use_direct_kwh"></span>
-                <span>kWh</span>
-            </h5>
-        </div>
-        <div class="appbox mb-3 text-danger">
-            <h5 class="appbox-title mb-1 text-light text-md-larger"><?php echo tr('GRID') ?></h5>
-            <h2 class="appbox-value total_use_via_store_kwh my-0">--</h2>
-            <h5 class="appbox-units my-0">
-                <span id="total_import_kwh"></span>
-                <span>kWh</span>
-            </h5>
+    <div class="app-panel">
+        <div class="app-stats myenergy-totals">
+            <div>
+                <div class="app-stat-title"><?php echo tr('USE') ?></div>
+                <div class="app-stat-value text-primary"><span class="total_use_kwh">--</span><span class="app-stat-unit">kWh</span></div>
+            </div>
+            <div>
+                <div class="app-stat-title"><?php echo tr('WIND') ?></div>
+                <div class="app-stat-value text-tertiary"><span class="total_wind_kwh">--</span><span class="app-stat-unit">kWh</span></div>
+            </div>
+            <div>
+                <div class="app-stat-title"><?php echo tr('SOLAR') ?></div>
+                <div class="app-stat-value text-warning"><span class="total_solar_kwh">--</span><span class="app-stat-unit">kWh</span></div>
+            </div>
+            <div>
+                <div class="app-stat-title"><?php echo tr('DIRECT') ?></div>
+                <div class="app-stat-value text-success"><span class="total_use_direct_prc">--</span><span class="app-stat-unit"><span class="total_use_direct_kwh"></span> kWh</span></div>
+            </div>
+            <div>
+                <div class="app-stat-title"><?php echo tr('GRID') ?></div>
+                <div class="app-stat-value text-danger"><span class="total_use_via_store_kwh">--</span><span class="app-stat-unit">kWh</span></div>
+            </div>
         </div>
     </div>
+
 </section>
 
-<div id="appconf-description" class="hide">
+<div id="appconf-description" style="display:none">
     <p class="lead">This app extends the My Solar app by adding in a 'share of UK wind' estimate.</p>
     <p>The share of wind estimate is calculated by using real-time electricity data from wind power in the uk and then scaling it so that the annual wind generation matches a percentage of annual household consumption. The default estimate assumes 60% or near 2000 kWh annually. This is close to the fuel mix quoted by two of the UK's leading green electricity suppliers.</p>
 </div>
 <?php include('Modules/app/Lib/appconf/appconf.php'); ?>
 
 <div class="ajax-loader"></div>
+
+</div>
 
 <?php load_js("Lib/js/gettext.js"); ?> 
 <script>
@@ -120,11 +124,6 @@ feed.public_username = public_username;
 // ----------------------------------------------------------------------
 // Display
 // ----------------------------------------------------------------------
-$("body").css('background-color','#222');
-$(window).ready(function(){
-    $("#footer").css('background-color','#181818');
-    $("#footer").css('color','#999');
-});
 if (!sessionwrite) $(".config-open").hide();
 
 // ----------------------------------------------------------------------
@@ -303,12 +302,12 @@ function livefn()
     
     if (balance>0) {
         $(".balance-label").html("EXCESS");
-        $(".balance").html("<span style='color:#2ed52e'><b>"+Math.round(Math.abs(balance))+powerUnit+"</b></span>");
+        $(".balance").css("color", "var(--ec-energy-export)").html(Math.round(Math.abs(balance))+powerUnit);
     }
     
     if (balance<0) {
         $(".balance-label").html("BACKUP");
-        $(".balance").html("<span style='color:#d52e2e'><b>"+Math.round(Math.abs(balance))+powerUnit+"</b></span>");
+        $(".balance").css("color", "var(--ec-energy-import)").html(Math.round(Math.abs(balance))+powerUnit);
     }
 
     // convert W to kW
@@ -321,12 +320,10 @@ function livefn()
         gen_now = as_kw(gen_now)
         balance = as_kw(balance)
         $('.power-unit').text('kW')
-        $('#app-block').addClass('in_kw');
     } else {
         gen_now = Math.round(gen_now)
         wind_now = Math.round(wind_now)
         $('.power-unit').text('W')
-        $('#app-block').removeClass('in_kw');
     }
 
     $(".gennow").html(gen_now);
@@ -352,7 +349,7 @@ function draw_powergraph() {
     var options = {
         series: { lines: { fill: fill, lineWidth: 2 } },
         xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none", min: view.start, max: view.end},
-        yaxes: [{ min: 0, autoScale: "none" }],
+        yaxes: [{ min: 0, autoScale: "none" }, { position: "right" }],
         grid: {
             hoverable: true, 
             clickable: true,
