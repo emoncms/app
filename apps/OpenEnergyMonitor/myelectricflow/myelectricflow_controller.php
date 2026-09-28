@@ -76,6 +76,11 @@ function myelectricflow_app_controller($route,$app,$appconfig,$apikey)
         // Consumption only: use and grid are the same, send use only
         if (!$has_solar && !$has_battery && $use) $grid = 0;
 
+        // Output feed id, false when not used in this mode
+        $output = function($name, $used) use ($feed, $userid, $tag) {
+            return $used ? $feed->exists_tag_name($userid, $tag, $name) : false;
+        };
+
         $process_conf = (object) array(
             "solar"               => $solar,
             "use"                 => $use,
@@ -84,13 +89,13 @@ function myelectricflow_app_controller($route,$app,$appconfig,$apikey)
 
             "strategy"            => isset($app->config->strategy) ? $app->config->strategy : "Solar first",
 
-            "solar_to_load_kwh"    => $feed->exists_tag_name($userid, $tag, "solar_to_load_kwh"),
-            "solar_to_grid_kwh"    => $feed->exists_tag_name($userid, $tag, "solar_to_grid_kwh"),
-            "solar_to_battery_kwh" => $feed->exists_tag_name($userid, $tag, "solar_to_battery_kwh"),
-            "battery_to_load_kwh"  => $feed->exists_tag_name($userid, $tag, "battery_to_load_kwh"),
-            "battery_to_grid_kwh"  => $feed->exists_tag_name($userid, $tag, "battery_to_grid_kwh"),
-            "grid_to_load_kwh"     => $feed->exists_tag_name($userid, $tag, "grid_to_load_kwh"),
-            "grid_to_battery_kwh"  => $feed->exists_tag_name($userid, $tag, "grid_to_battery_kwh"),
+            "solar_to_load_kwh"    => $output("solar_to_load_kwh", $has_solar),
+            "solar_to_grid_kwh"    => $output("solar_to_grid_kwh", $has_solar),
+            "solar_to_battery_kwh" => $output("solar_to_battery_kwh", $has_solar && $has_battery),
+            "battery_to_load_kwh"  => $output("battery_to_load_kwh", $has_battery),
+            "battery_to_grid_kwh"  => $output("battery_to_grid_kwh", $has_battery),
+            "grid_to_load_kwh"     => $output("grid_to_load_kwh", true),
+            "grid_to_battery_kwh"  => $output("grid_to_battery_kwh", $has_battery),
 
             // For testing
             // "solar_kwh"            => $feed->exists_tag_name($userid, $tag, "solar_kwh"),
