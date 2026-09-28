@@ -597,6 +597,7 @@ var vue_config_app = Vue.createApp({
             autogen_all_present: false,
             autogen_status: "",
             autogen_status_color: "#aaa",
+            autogen_blocked: "",    // reason the post-processor cannot run, from config.autogen_check()
 
             // Button only currently used by myheatpump app.
             enable_process_daily: false,
@@ -610,6 +611,19 @@ var vue_config_app = Vue.createApp({
     computed: {
         feed_items: function() { return this.config_items.filter(function(i) { return i.type === "feed"; }); },
         option_items: function() { return this.config_items.filter(function(i) { return i.type !== "feed"; }); },
+        // Options with section "setup" show before the feeds
+        setup_items: function() { return this.option_items.filter(function(i) { return i.section === "setup"; }); },
+        // Other options grouped by section name, in declaration order
+        option_groups: function() {
+            var groups = [];
+            this.option_items.forEach(function(i) {
+                if (i.section === "setup") return;
+                var group = groups.find(function(g) { return g.name === i.section; });
+                if (!group) groups.push(group = { name: i.section, items: [] });
+                group.items.push(i);
+            });
+            return groups;
+        },
         connected_feeds: function() { return this.feed_items.filter(function(i) { return i.state === "ok" || i.state === "auto"; }); },
         missing_feeds: function() { return this.feed_items.filter(function(i) { return i.state === "miss"; }); },
         unused_feeds: function() { return this.feed_items.filter(function(i) { return i.state === "off"; }); },
@@ -683,6 +697,7 @@ var vue_config_app = Vue.createApp({
                     type:          config.app[z].type,
                     label:         config.app[z].name || config.app[z].autoname || z,
                     description:   config.app[z].description || "",
+                    section:       config.app[z].section || "Options",
                     // feed-specific
                     displayName:   config.app[z].autoname || z,
                     autoname:      config.app[z].autoname || z,
@@ -892,6 +907,7 @@ var vue_config_app = Vue.createApp({
             }
             this.autogen_feeds = rows;
             this.autogen_all_present = (missing_count === 0);
+            this.autogen_blocked = (typeof config.autogen_check === 'function') ? config.autogen_check() : "";
             this.autogen_status = "";
             this.autogen_status_color = "#aaa";
         },

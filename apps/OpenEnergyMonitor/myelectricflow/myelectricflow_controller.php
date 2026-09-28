@@ -59,12 +59,28 @@ function myelectricflow_app_controller($route,$app,$appconfig,$apikey)
             return array("success"=>false, "message"=>"Feed node name not set");
         }
         $tag = $app->config->autogenerate_nodename;
-        
+
+        // Feed id for an input, 0 if not set, disabled or derived
+        $input = function($key) use ($app) {
+            $value = isset($app->config->$key) ? $app->config->$key : 0;
+            return is_numeric($value) ? (int) $value : 0;
+        };
+        // Solar and battery default to on when not set, as in the app
+        $has_solar = !isset($app->config->has_solar) || $app->config->has_solar;
+        $has_battery = !isset($app->config->has_battery) || $app->config->has_battery;
+
+        $solar = $has_solar ? $input("solar") : 0;
+        $battery = $has_battery ? $input("battery") : 0;
+        $use = $input("use");
+        $grid = $input("grid");
+        // Consumption only: use and grid are the same, send use only
+        if (!$has_solar && !$has_battery && $use) $grid = 0;
+
         $process_conf = (object) array(
-            "solar"               => (int) isset($app->config->solar) ? $app->config->solar : 0,
-            "use"                 => (int) isset($app->config->use) ? $app->config->use : 0,
-            "grid"                => (int) isset($app->config->grid) ? $app->config->grid : 0,
-            "battery"             => (int) isset($app->config->battery) ? $app->config->battery : 0,
+            "solar"               => $solar,
+            "use"                 => $use,
+            "grid"                => $grid,
+            "battery"             => $battery,
 
             "strategy"            => isset($app->config->strategy) ? $app->config->strategy : "Solar first",
 

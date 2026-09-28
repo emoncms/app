@@ -53,9 +53,10 @@ config.app = {
     //   Full (solar+battery): GRID=USE-SOLAR-BATTERY, USE=GRID+SOLAR+BATTERY, SOLAR=USE-GRID-BATTERY, BATTERY=USE-GRID-SOLAR
     //   Solar only:           GRID=USE-SOLAR,         USE=GRID+SOLAR,         SOLAR=USE-GRID
     //   Battery only:         GRID=USE-BATTERY,       USE=GRID+BATTERY,       BATTERY=USE-GRID
-    //   Consumption only:     no derivation; only USE (or GRID) feed needed
-    "has_solar":{"type":"checkbox", "default":1, "name":"Has solar PV", "description":"Does the system have solar PV generation?"},
-    "has_battery":{"type":"checkbox", "default":1, "name":"Has battery", "description":"Does the system have a battery?"},
+    //   Consumption only:     one feed, USE or GRID
+    // Defaults are set from the available feeds before config.init()
+    "has_solar":{"type":"checkbox", "default":1, "section":"setup", "name":"Has solar PV", "description":"Does the system have solar PV generation?"},
+    "has_battery":{"type":"checkbox", "default":1, "section":"setup", "name":"Has battery", "description":"Does the system have a battery?"},
 
     // == Key power feeds ==
     // All four feeds are optional at the config level; the custom check() below enforces the
@@ -63,11 +64,11 @@ config.app = {
     // Any single missing feed will be derived from the other three (or two in solar/battery-only modes).
     "use":{"optional":true, "type":"feed", "engine":5, "derivable":true, "autoname":"use", "description":"House or building use in watts"},
     "solar":{"optional":true, "type":"feed", "engine":5, "derivable":true, "autoname":"solar", "description":"Solar generation in watts"},
-    "battery":{"optional":true, "type":"feed", "engine":5, "derivable":true, "autoname":"battery_power", "description":"Battery power in watts, positive for discharge, negative for charge (only shown when has_battery is enabled)"},
+    "battery":{"optional":true, "type":"feed", "engine":5, "derivable":true, "autoname":"battery_power", "description":"Battery power in watts, positive for discharge, negative for charge"},
     "grid":{"optional":true, "type":"feed", "engine":5, "derivable":true, "autoname":"grid", "description":"Grid power in watts (positive for import, negative for export)"},
 
     // Battery state of charge feed (optional)
-    "battery_soc":{"optional":true, "type":"feed", "engine":5, "autoname":"battery_soc", "description":"Battery state of charge in % (only shown when has_battery is enabled)"},
+    "battery_soc":{"optional":true, "type":"feed", "engine":5, "autoname":"battery_soc", "description":"Battery state of charge in %"},
 
     // History feeds (energy flow breakdown from solarbatterykwh post-processor)
 
@@ -91,14 +92,15 @@ config.app = {
 
     // Other options
     "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description": "Display power as kW"},
-    "battery_capacity_kwh":{"type":"value", "default":0, "name":"Battery Capacity", "description":"Battery capacity in kWh (used for time-remaining estimate; only used when has_battery is enabled)"},
+    "battery_capacity_kwh":{"type":"value", "default":0, "name":"Battery Capacity", "description":"Battery capacity in kWh, used for the time left estimate"},
 
-    "strategy":{"type":"select", "default":"Solar first", "options":["Solar first", "Battery first"], "name":"Flow allocation strategy", "description":""},
+    "strategy":{"type":"select", "default":"Solar first", "options":["Solar first", "Battery first"], "name":"Flow allocation strategy", "description":"Which source supplies the load first when solar and battery are both available"},
 
     // == Tariff cost breakdown (Octopus) ==
     // Region + tariff used by the integrated cost breakdown view (myelectricflow_tariff.js).
     "region": {
         "type": "select",
+        "section": "Tariff",
         "name": "Select region:",
         "default": "D_Merseyside_and_Northern_Wales",
         "options": ["A_Eastern_England", "B_East_Midlands", "C_London", "E_West_Midlands", "D_Merseyside_and_Northern_Wales", "F_North_Eastern_England", "G_North_Western_England", "H_Southern_England", "J_South_Eastern_England", "K_Southern_Wales", "L_South_Western_England", "M_Yorkshire", "N_Southern_Scotland", "P_Northern_Scotland"]
@@ -106,6 +108,7 @@ config.app = {
 
     "tariff": {
         "type": "select",
+        "section": "Tariff",
         "name": "Select tariff:",
         "default": "AGILE-23-12-06",
         "options": tariff_options
@@ -123,18 +126,6 @@ config.app = {
 // ----------------------------------------------------------------------
 config.check = function() {
     const { has_solar, has_battery } = get_mode();
-
-    // Helper: is a feed key resolved (either auto-matched by name or explicitly set in db)?
-    function feed_resolved(key) {
-        if (config.db[key] == "disable") return false; // explicitly disabled
-        if (config.db[key] != undefined) {
-            // user-set: check the feed id still exists
-            return config.feedsbyid[config.db[key]] !== undefined;
-        }
-        // auto-match by name
-        const autoname = config.app[key] && config.app[key].autoname;
-        return autoname && config.feedsbyname[autoname] !== undefined;
-    }
 
     const use_ok   = feed_resolved("use");
     const solar_ok = feed_resolved("solar");
@@ -156,7 +147,44 @@ config.check = function() {
     }
 };
 
+// Is a feed key resolved (either auto-matched by name or explicitly set in db)?
+function feed_resolved(key) {
+    if (config.db[key] == "disable") return false; // explicitly disabled
+    if (config.db[key] != undefined) {
+        // user-set: check the feed id still exists
+        return config.feedsbyid[config.db[key]] !== undefined;
+    }
+    // auto-match by name
+    const autoname = config.app[key] && config.app[key].autoname;
+    return !!autoname && config.feedsbyname[autoname] !== undefined;
+}
+
+// Post-processor input rules, returns the reason it cannot run or ""
+config.autogen_check = function() {
+    const mode = get_mode();
+    const solar_ok = mode.has_solar && feed_resolved("solar");
+    const bat_ok   = mode.has_battery && feed_resolved("battery");
+    const use_ok   = feed_resolved("use");
+    const grid_ok  = feed_resolved("grid");
+    if (!use_ok && !grid_ok) return "Needs a use or grid feed";
+    if (mode.has_solar && mode.has_battery && [use_ok, solar_ok, bat_ok, grid_ok].filter(Boolean).length < 3) {
+        return "Needs three of use, solar, battery and grid";
+    }
+    if (mode.has_solar && !solar_ok && !(use_ok && grid_ok)) return "Needs a solar feed, or both use and grid";
+    if (mode.has_battery && !bat_ok && !(use_ok && grid_ok)) return "Needs a battery feed, or both use and grid";
+    return "";
+};
+
 config.feeds = feed.list();
+
+// New apps start with solar and battery on only when a matching feed exists
+function feed_present(key) {
+    const db = config.db || {};
+    if (db[key] !== undefined) return db[key] !== "disable";
+    return config.feeds.some(f => f.name === config.app[key].autoname);
+}
+config.app.has_solar.default   = feed_present("solar") ? 1 : 0;
+config.app.has_battery.default = feed_present("battery") ? 1 : 0;
 
 const feeds_by_tag_name = feed.by_tag_and_name(config.feeds);
 
@@ -178,8 +206,19 @@ function get_mode() {
 }
 
 // Called by appconf.js before rendering the config UI
+const use_description = config.app.use.description;
+
 config.ui_before_render = function() {
     const mode = get_mode();
+
+    // Consumption only: one feed, use unless only grid is available
+    const consumption_only = !mode.has_solar && !mode.has_battery;
+    const grid_only = consumption_only && !feed_resolved("use") && feed_resolved("grid");
+    config.app.use.hidden  = grid_only;
+    config.app.grid.hidden = consumption_only && !grid_only;
+    config.app.use.description = consumption_only ? "House use or grid import in watts" : use_description;
+    // Allocation strategy only matters with both solar and battery
+    config.app.strategy.hidden = !(mode.has_solar && mode.has_battery);
 
     // solar feed: only relevant if has_solar is on
     config.app.solar.hidden         = !mode.has_solar;
@@ -531,6 +570,8 @@ function flow_available() {
     if (feedids['use']) available.use = true;
     if (config.app.has_battery.value && feedids['battery']) available.battery = true;
     if (feedids['grid']) available.grid = true;
+    // Consumption only: use and grid are the same, prefer use
+    if (!config.app.has_solar.value && !config.app.has_battery.value && available.use) available.grid = false;
 
     let number_of_feeds = 0;
     if (available.solar) number_of_feeds++;

@@ -2,6 +2,28 @@
 
 <?php load_css("Modules/app/Lib/appconf/appconf.css"); ?>
 
+<?php
+// Option card for each item in a Vue list
+if (!function_exists('cfg_option_cards')) { function cfg_option_cards($items) { ?>
+            <div v-for="item in <?php echo $items; ?>" :key="item.key" class="card">
+                <div class="ref-row">
+                    <div class="cfg-text">
+                        <div class="cfg-key">{{ item.label }}</div>
+                        <div class="cfg-desc">{{ item.description }}</div>
+                    </div>
+                    <div class="cfg-ctrl">
+                        <div v-if="item.type === 'checkbox'" class="form-check form-switch m-0">
+                            <input class="form-check-input app-config-value" type="checkbox" :checked="item.inputValue" @change="changeValue(item.key, $event.target.checked)">
+                        </div>
+                        <input v-else-if="item.type === 'value'" class="form-control app-config-value" type="text" :value="item.inputValue" @change="changeValue(item.key, $event.target.value)">
+                        <select v-else-if="item.type === 'select'" class="form-select app-config-value" :value="item.inputValue" @change="changeValue(item.key, $event.target.value)">
+                            <option v-for="opt in item.selectOptions">{{ opt }}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+<?php } } ?>
+
 <div id="vue-config">
 
 <div id="app-setup" class="hide" data-bs-theme="dark">
@@ -24,6 +46,7 @@
         <div>
             <b>{{ config_valid ? "Ready to launch" : (missing_feeds.length ? missing_feeds.length + " required feed" + (missing_feeds.length > 1 ? "s" : "") + " missing" : "Configuration incomplete") }}</b>
             <span class="text-body-secondary ms-2">{{ connected_feeds.length }} of {{ feed_items.length }} feeds connected</span>
+            <span v-if="config_valid && autogen_feeds.length && !autogen_all_present" class="text-warning-emphasis ms-2">History needs the kWh flow feeds below</span>
         </div>
         <div class="progress cfg-progress ms-auto" role="progressbar" :aria-valuenow="feed_progress" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-success" :style="{ width: feed_progress + '%' }"></div></div>
     </div></div>
@@ -49,6 +72,14 @@
             <button v-if="about_long" class="btn btn-link p-0 align-self-start" @click="about_open = !about_open">{{ about_open ? "Show less" : "Show more" }}</button>
         </div></div>
     </div>
+
+    <!-- Setup options, before the feeds -->
+    <template v-if="setup_items.length">
+        <div class="ref-section"><h4 class="ref-label">Setup</h4></div>
+        <div class="cfg-grid">
+<?php cfg_option_cards("setup_items"); ?>
+        </div>
+    </template>
 
     <!-- Feeds -->
     <div class="ref-section"><h4 class="ref-label">Feeds</h4><span class="small text-body-secondary">{{ connected_feeds.length }} connected</span></div>
@@ -92,6 +123,14 @@
         <span class="font-monospace">({{ unused_feeds.map(i => i.key).join(", ") }})</span>
     </button>
 
+    <!-- Option groups, e.g. Options or Tariff -->
+    <template v-for="group in option_groups" :key="group.name">
+        <div class="ref-section"><h4 class="ref-label">{{ group.name }}</h4></div>
+        <div class="cfg-grid">
+<?php cfg_option_cards("group.items"); ?>
+        </div>
+    </template>
+
     <!-- Auto generated kWh flow feeds -->
     <template v-if="autogen_feeds.length > 0">
         <div class="ref-section">
@@ -120,33 +159,10 @@
             </table>
             <div class="d-flex flex-wrap align-items-center gap-2 p-3">
                 <button class="btn btn-outline-primary" v-show="!autogen_all_present" @click="createMissingFeeds"><i class="svg-icon-plus"></i> Create missing feeds</button>
-                <button class="btn btn-outline-primary" v-show="autogen_all_present" @click="runPostProcessor"><i class="svg-icon-play"></i> Run post-processor</button>
+                <button class="btn btn-outline-primary" v-show="autogen_all_present" :disabled="!!autogen_blocked" @click="runPostProcessor"><i class="svg-icon-play"></i> Run post-processor</button>
                 <button class="btn btn-default" v-show="autogen_all_present" @click="resetFeeds">Reset and clear</button>
+                <span v-if="autogen_blocked && !autogen_status" class="small ms-2 text-warning-emphasis">{{ autogen_blocked }}</span>
                 <span class="small ms-2" :style="{ color: autogen_status_color }">{{ autogen_status }}</span>
-            </div>
-        </div>
-    </template>
-
-    <!-- Options -->
-    <template v-if="option_items.length">
-        <div class="ref-section"><h4 class="ref-label">Options</h4></div>
-        <div class="cfg-grid">
-            <div v-for="item in option_items" :key="item.key" class="card">
-                <div class="ref-row">
-                    <div class="cfg-text">
-                        <div class="cfg-key">{{ item.label }}</div>
-                        <div class="cfg-desc">{{ item.description }}</div>
-                    </div>
-                    <div class="cfg-ctrl">
-                        <div v-if="item.type === 'checkbox'" class="form-check form-switch m-0">
-                            <input class="form-check-input app-config-value" type="checkbox" :checked="item.inputValue" @change="changeValue(item.key, $event.target.checked)">
-                        </div>
-                        <input v-else-if="item.type === 'value'" class="form-control app-config-value" type="text" :value="item.inputValue" @change="changeValue(item.key, $event.target.value)">
-                        <select v-else-if="item.type === 'select'" class="form-select app-config-value" :value="item.inputValue" @change="changeValue(item.key, $event.target.value)">
-                            <option v-for="opt in item.selectOptions">{{ opt }}</option>
-                        </select>
-                    </div>
-                </div>
             </div>
         </div>
     </template>
