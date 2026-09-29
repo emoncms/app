@@ -727,10 +727,12 @@ function resize()
     let width = placeholder_bound.width();
 
     // Viewport height less content above the chart (measured from the top of the page,
-    // independent of scroll position), the legend and the flow block. Flow block height
-    // is kept from flow view so the chart keeps its size in tariff view.
+    // independent of scroll position), one legend line and the flow block. Legend is
+    // redrawn with the chart and varies by view, so a fixed line height is used. Flow
+    // block height is kept from flow view so the chart keeps its size in tariff view.
     if ($('#flow-section').is(':visible')) flow_card_height = $('#flow-section').closest('.app-card').outerHeight(true);
-    const bottom_margin = $('#chart-legend').outerHeight(true) + 40 + flow_card_height;
+    const legend_line = 24;
+    const bottom_margin = legend_line + 40 + flow_card_height;
     const offset_top = placeholder_bound.offset().top;
     let height = window.innerHeight - offset_top - bottom_margin;
 
