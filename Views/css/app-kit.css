@@ -31,6 +31,8 @@ body:has(.app-page[data-bs-theme="dark"]) #footer { margin: 0; }
 
 /* Light apps use Montserrat, as MyHeatpump */
 .app-page[data-bs-theme="light"] { font-family: Montserrat, Verdana, sans-serif; }
+/* Bold title from the variable font weight axis. Montserrat is declared as 400 only. */
+.app-page[data-bs-theme="light"] .app-card-head .nav-underline .nav-link.active { font-weight: 400; font-variation-settings: "wght" 700; }
 
 /* -- Blocks: header bar and body, from MyHeatpump --------------------------- */
 
