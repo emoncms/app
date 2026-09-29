@@ -706,9 +706,9 @@ function draw() {
     $("#time-now").hide();
 }
 
+// No timers to stop
 function clear()
 {
-    clearInterval(updaterinst);
 }
 
 $(window).resize(function(){

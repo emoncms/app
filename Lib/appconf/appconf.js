@@ -864,6 +864,9 @@ var vue_config_app = Vue.createApp({
             if (!config.initialized) {
                 config.initapp();
                 config.initialized = true;
+            } else if (typeof config.hideapp === "function") {
+                // Stop the running app's timers before it starts again
+                config.hideapp();
             }
             config.showapp();
         },

@@ -245,7 +245,8 @@ function draw_graph() {
     if (viewmode == "powergraph") {
         options.yaxes = [
             { min: 0, autoScale: "none", reserveSpace: false, font: { color: font_color, fill: font_color } },
-            { min: 0, max: 100, autoScale: "none", reserveSpace: false, font: { color: font_color, fill: font_color } }
+            // SOC on the right, in %
+            { min: 0, max: 100, autoScale: "none", position: "right", labelWidth: 40, tickFormatter: v => v + "%", font: { color: font_color, fill: font_color } }
         ];
     } else {
         options.yaxis = { font: { color: font_color, fill: font_color } };

@@ -232,6 +232,7 @@ function show() {
     energystacks_draw();
 
     updater();
+    clearInterval(updaterinst);
     updaterinst = setInterval(updater,5000);
     $(".ajax-loader").hide();
 }

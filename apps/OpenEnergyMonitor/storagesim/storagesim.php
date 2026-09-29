@@ -68,7 +68,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/storagesim/storagesim.css");
                     <td>{{ toFixed(supply.kwh, 0) }} kWh</td>
                 </tr>
                 <tr>
-                    <td class="col-primary">Consumption</td>
+                    <td class="col-primary">Consumption<div v-if="consumption.example" class="small text-body-secondary">Example profile: no consumption data for this period</div></td>
                     <td></td>
                     <td>{{ toFixed(consumption.kwh, 0) }} kWh</td>
                 </tr>

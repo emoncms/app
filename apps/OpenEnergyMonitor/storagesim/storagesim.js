@@ -118,7 +118,8 @@ var app = Vue.createApp({
         },
         consumption: {
             kwh: 0,
-            efuel_demand: 0
+            efuel_demand: 0,
+            example: false
         },
         balance: {
             before_store1: 0,
@@ -169,8 +170,9 @@ var app = Vue.createApp({
             this.auto_optimise = false;
             model();
         },
+        // Dash for a ratio with nothing to divide by, such as a source with no capacity
         toFixed: function(value, dp) {
-            return value.toFixed(dp);
+            return isFinite(value) ? value.toFixed(dp) : "--";
         }
     }
 }).mount('#app');
@@ -190,6 +192,11 @@ function load(){
     } else {
         feed_data["home_solar"] = undefined;
     }
+
+    // No data for the window: use the example consumption, and no home solar
+    if (!feed_data["consumption"] || !feed_data["consumption"].length) feed_data["consumption"] = undefined;
+    if (!feed_data["home_solar"] || !feed_data["home_solar"].length) feed_data["home_solar"] = undefined;
+    app.consumption.example = feed_data["consumption"] == undefined;
 
     // Specify generation feeds
     var ids = [];
@@ -293,7 +300,7 @@ function model(){
 
     app.max_peak_shaving_deficit = 0
 
-    if (feed_data['consumption']==undefined) {
+    if (!feed_data['consumption'] || !feed_data['consumption'].length) {
         return false;
     }
 

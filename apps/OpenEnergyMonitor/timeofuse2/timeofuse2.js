@@ -528,6 +528,7 @@ function show() {
     load_last_days(30);
 
     updater();
+    clearInterval(updaterinst);
     updaterinst = setInterval(updater,5000);
     $(".ajax-loader").hide();
 
@@ -719,9 +720,11 @@ $(".viewcostenergy").click(function(){
 // Load and draw the bar graph for the most recent `days` days, today included.
 // Window is whole days, so the time bar shows the chosen range.
 function load_last_days(days) {
+    // Today and the days before it. Midday of the first day, so a clock change
+    // in the window still aligns to the right midnight.
     var dayms = 3600000*24;
-    var end = Math.ceil((new Date()).getTime()/dayms)*dayms;
-    bargraph_load(end - dayms*days, end);
+    var now = (new Date()).getTime();
+    bargraph_load(now - dayms*(days-1) - 12*3600000, now);
     bargraph_draw();
 }
 
@@ -920,10 +923,11 @@ function bargraph_load(start,end)
     $("#advanced-toggle").html("SHOW DETAIL");
     $("#advanced-block").hide();
 
-    // Align the requested window to whole local days.
-    var dayms = 3600*24*1000;
-    end = Math.ceil(end/dayms)*dayms;
-    start = Math.floor(start/dayms)*dayms;
+    // Align the requested window to whole days in the app timezone
+    start = tz_midnight(start);
+    var end_midnight = tz_midnight(end);
+    if (end_midnight < end) end_midnight = tz_midnight(end_midnight + 26*3600000);
+    end = end_midnight;
     view.start = start;
     view.end = end;
 
@@ -1193,6 +1197,16 @@ function tz_parts(ms) {
 // points sit on whole/half-hour boundaries so this is exact in practice.
 function tz_day_start(ms, parts) {
     return ms - (parts.hour*60 + parts.minute)*60*1000;
+}
+
+// Midnight in the app timezone at or before ms, corrected across a clock change
+function tz_midnight(ms) {
+    ms = Math.floor(ms / 60000) * 60000;
+    var t = tz_day_start(ms, tz_parts(ms));
+    var hour = tz_parts(t).hour;
+    if (hour == 23) t += 3600000;
+    else if (hour == 1) t -= 3600000;
+    return t;
 }
 
 // ----------------------------------------------------------------------

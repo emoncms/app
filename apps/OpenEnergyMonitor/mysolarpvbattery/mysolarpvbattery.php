@@ -701,7 +701,8 @@ function draw_powergraph() {
     var options = {
         series: { lines: { fill: false, lineWidth: 2 } },
         xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none", min: view.start, max: view.end},
-        yaxes: [{ min: 0, autoScale: "none" },{ min: 0, max: 100, autoScale: "none" }],
+        // SOC on the right, in %
+        yaxes: [{ min: 0, autoScale: "none" },{ min: 0, max: 100, autoScale: "none", position: "right", labelWidth: 40, tickFormatter: function(v){ return v + "%"; } }],
         grid: { hoverable: true, clickable: true },
         selection: { mode: "x", color: "#e8cfac", visualization: "fill" },
         legend: { show: false }
