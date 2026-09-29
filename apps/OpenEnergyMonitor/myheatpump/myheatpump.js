@@ -15,7 +15,7 @@ if (!session_write) $(".config-open").hide();
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "app_name": { "type": "value", "name": "App title", "default": "MY HEATPUMP", "optional": true, "description": "Enter custom title for app" },
+    "app_name": { "type": "value", "name": "App title", "default": "My Heatpump", "optional": true, "description": "Enter custom title for app" },
     // Electric
     "heatpump_elec": { "type": "feed", "autoname": "heatpump_elec", "description": "Electric use in watts" },
     "heatpump_elec_kwh": { "type": "feed", "autoname": "heatpump_elec_kwh", "description": "Cumulative electric use kWh" },
@@ -124,7 +124,9 @@ function init() {
 
 function show() {
 
-    $("#app_name").html(config.app['app_name'].value);
+    // Saved configs may hold the old upper case default
+    var app_name = config.app['app_name'].value;
+    $("#app_name").text(app_name == "MY HEATPUMP" ? "My Heatpump" : app_name);
     // Apply starting_power
     $("#starting_power").val(config.app.starting_power.value);
 

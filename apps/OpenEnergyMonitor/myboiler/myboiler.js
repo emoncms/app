@@ -15,7 +15,7 @@ if (!session_write) $(".config-open").hide();
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "app_name": { "type": "value", "name": "App name", "default": "MY BOILER", "optional": true, "description": "Enter custom name for app" },
+    "app_name": { "type": "value", "name": "App name", "default": "My Boiler", "optional": true, "description": "Enter custom name for app" },
     "boiler_fuel_kwh": { "type": "feed", "autoname": "boiler_fuel_kwh", "description": "Cumulative fuel use kWh" },    
     "boiler_elec": { "type": "feed", "autoname": "boiler_elec", "optional": true, "description": "Electric use in watts" },
     "boiler_elec_kwh": { "type": "feed", "autoname": "boiler_elec_kwh", "optional": true, "description": "Cumulative electric use kWh" },
@@ -92,7 +92,9 @@ function init() {
 }
 
 function show() {
-    $("#app_name").html(config.app['app_name'].value);
+    // Saved configs may hold the old upper case default
+    var app_name = config.app['app_name'].value;
+    $("#app_name").text(app_name == "MY BOILER" ? "My Boiler" : app_name);
 
     // -------------------------------------------------------------------------------
     // Configurations

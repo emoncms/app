@@ -16,12 +16,12 @@
     <div id="myelectric-realtime" class="app-card">
       <nav class="app-card-head">
         <div class="nav nav-underline">
-          <button class="nav-link active"><i class="svg-icon-show_chart"></i><span id="app-title">MY ELECTRIC</span></button>
+          <button class="nav-link active"><i class="svg-icon-show_chart"></i><span id="app-title">My Electric</span></button>
         </div>
         <div class="app-card-tools">
           <span id="live-status" class="app-status"><span class="app-status-dot"></span><span class="app-status-text"></span></span>
           <div class="nav">
-            <button class="nav-link viewcostenergy">VIEW COST</button>
+            <button class="nav-link viewcostenergy">View cost</button>
             <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
           </div>
         </div>
@@ -134,7 +134,7 @@ if (!sessionwrite) $(".config-open").hide();
 // Configuration
 // ----------------------------------------------------------------------
 config.app = {
-    "title":{"type":"value", "default":"MY ELECTRIC", "name": "Title", "description":"Optional title for app"},
+    "title":{"type":"value", "default":"My Electric", "name": "Title", "description":"Optional title for app"},
     "use":{"type":"feed", "autoname":"use"},
     "use_kwh":{"type":"feed", "autoname":"use_kwh"},
     "unitcost":{"type":"value", "default":0.1508, "name": "Unit cost", "description":"Unit cost of electricity £/kWh"},
@@ -191,7 +191,8 @@ function init()
 }
 
 function show() {
-    $("#app-title").html(config.app.title.value);
+    // Saved configs may hold the old upper case default
+    $("#app-title").text(config.app.title.value == "MY ELECTRIC" ? "My Electric" : config.app.title.value);
     if (config.app.showcomparison.value) {
         $("#energystack-comparison").show();
     } else {
@@ -472,11 +473,11 @@ $("#transport").click(function() {
 
 $(".viewcostenergy").click(function(){
     var view = $(this).html();
-    if (view=="VIEW COST") {
-        $(this).html("VIEW ENERGY").addClass("active");
+    if (view=="View cost") {
+        $(this).html("View energy").addClass("active");
         viewcostenergy = "cost";
     } else {
-        $(this).html("VIEW COST").removeClass("active");
+        $(this).html("View cost").removeClass("active");
         viewcostenergy = "energy";
     }
     

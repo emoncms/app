@@ -5,6 +5,9 @@
 .text-hp-elec { color: #3a86c0; }
 .text-hp-heat { color: #b8890c; }
 .text-hp-flow { color: #c9362f; }
+/* Heat pump icon in the header tab */
+.hp-title-icon { color: var(--bs-primary); }
+
 .hp-return { margin-left: 10px; font-size: 16px; color: #3aa655; }
 
 /* COP in window, under the chart */

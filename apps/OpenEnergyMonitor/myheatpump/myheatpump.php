@@ -20,7 +20,7 @@ global $path, $session, $v;
     <div class="app-card">
       <nav class="app-card-head">
         <div class="nav nav-underline">
-          <button class="nav-link active"><i class="svg-icon-radiator"></i><span id="app_name">My Heatpump</span></button>
+          <button class="nav-link active"><i class="svg-icon-hpmon hp-title-icon"></i><span id="app_name">My Heatpump</span></button>
         </div>
         <div class="app-card-tools">
           <span id="live-status" class="app-status"><span class="app-status-dot"></span><span class="app-status-text"></span></span>

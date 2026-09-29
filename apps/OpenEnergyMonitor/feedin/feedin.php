@@ -216,7 +216,8 @@ data.loadFeeds().then(function(feeds) {
 	config.init();
 });
 function init() {
-    $("#app-title").html(config.app.title.value);
+    // Saved configs may hold the old upper case default
+    $("#app-title").text(config.app.title.value == "HOUSEHOLD" ? "Household" : config.app.title.value);
     
     events();
 }
