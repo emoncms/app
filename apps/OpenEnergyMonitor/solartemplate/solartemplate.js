@@ -88,7 +88,7 @@ var options = {
     },
     yaxes: [
         { min: 0, autoScale: "none" },            // yaxis 1: power — never show negative
-        { min: 0, max: 100, autoScale: "none", position: "right" }  // yaxis 2: SOC %
+        { min: 0, max: 100, autoScale: "none", position: "right", labelWidth: 40, tickFormatter: function(v){ return v + "%"; } }  // yaxis 2: SOC %
     ],
     grid: {
         show: true,

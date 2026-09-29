@@ -20,12 +20,12 @@
     <div class="app-card">
         <nav class="app-card-head">
             <div class="nav nav-underline">
-                <button class="nav-link active"><i class="svg-icon-home"></i><span id="app-title">HOUSEHOLD</span></button>
+                <button class="nav-link active"><i class="svg-icon-home"></i><span id="app-title">Household</span></button>
             </div>
             <div class="app-card-tools">
                 <span id="live-status" class="app-status"><span class="app-status-dot"></span><span class="app-status-text"></span></span>
                 <div class="nav">
-                    <button class="nav-link app-unit">VIEW COST</button>
+                    <button class="nav-link app-unit">View cost</button>
                     <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
                 </div>
             </div>
@@ -82,7 +82,7 @@
             <span class="app-caption-note window generation hide"><b id="window-gen"></b> generated</span>
             <span class="app-caption-note window self hide"><b id="window-selfcons"></b> self-consumed</span>
             <span class="app-caption-note window self hide"><b id="window-selfsuff"></b> self-sufficient</span>
-            <div class="nav ms-auto"><button class="nav-link window power details" style="display:none">SHOW DETAIL</button></div>
+            <div class="nav ms-auto"><button class="nav-link window power details" style="display:none">Show detail</button></div>
         </div>
 
         <div class="graph-stats" style="display:none">
@@ -132,7 +132,7 @@ graph.container = $('#graph');
 config.app = {
     "title": {
         "type": "value",
-        "default": "HOUSEHOLD",
+        "default": "Household",
         "name": "Title",
         "description": "Optional title for app"
     },
@@ -216,7 +216,7 @@ data.loadFeeds().then(function(feeds) {
 	config.init();
 });
 function init() {
-    $("#app-title").html(config.app.title.value.toUpperCase());
+    $("#app-title").html(config.app.title.value);
     
     events();
 }
@@ -249,6 +249,11 @@ function setup() {
         "solar_power", "import_power", "export_power"], config);
     
     return graph.setup(data, config).then(function(result) {
+        // Midnight meter reading for Today, as the power view loads no daily data
+        var today = new Date();
+        today.setHours(0,0,0,0);
+        return data.getGroup(Graph.ENERGY).loadDailyData(today.getTime(), today.getTime());
+    }).then(function(result) {
         update();
         updateTimer = setInterval(update, INTERVAL_UPDATE);
         
@@ -479,11 +484,11 @@ function events() {
 
     $(".app-unit").on('click', function() {
         var view = $(this).html();
-        if (view == "VIEW COST") {
-            $(this).html("VIEW ENERGY");
+        if (view == "View cost") {
+            $(this).html("View energy");
             graph.unit = "cost";
         } else {
-            $(this).html("VIEW COST");
+            $(this).html("View cost");
             graph.unit = "energy";
         }
         graph.draw();

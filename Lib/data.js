@@ -133,8 +133,9 @@ class Data {
         	for (let i in this.updates) {
         		var key = this.updates[i];
         		var feed = this.cache[key];
+                if (feed == undefined) continue;
                 var data = feeds[feed.id];
-                if (data.value == null) {
+                if (data == undefined || data.value == null) {
                 	continue;
                 }
             	var value = [data.time*1000, data.value];

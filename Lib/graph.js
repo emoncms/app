@@ -138,7 +138,7 @@ class Graph {
     }
 
     reset() {
-        $(".graph-footer .details", this.view.container).html("SHOW DETAIL");
+        $(".graph-footer .details", this.view.container).html("Show detail");
         $(".graph-stats", this.view.container).hide();
         
         return load();
@@ -647,11 +647,11 @@ class PowerGraph extends Graph {
             var mode = action.html();
             if (mode.toLowerCase().indexOf('show') !== -1) {
                 $(".graph-stats", this.view.container).slideDown(350);
-                action.html("HIDE DETAIL");
+                action.html("Hide detail");
             }
             else {
                 $(".graph-stats", this.view.container).slideUp(350);
-                action.html("SHOW DETAIL");
+                action.html("Show detail");
             }
         }.bind(this));
     }

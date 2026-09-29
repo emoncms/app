@@ -633,6 +633,11 @@ function graph_load() {
     draw_tables(total, monthly_data);
 }
 
+// Unit price inc VAT, -- when there is no energy in the window
+function pence_per_kwh(unit_cost) {
+    return isFinite(unit_cost) ? (unit_cost * 100 * 1.05).toFixed(1) + "p/kWh (inc VAT)" : "--";
+}
+
 function draw_tables(total, monthly_data) {
 
     var unit_cost_import_tariff_A = (total.import_tariff_A.cost / total.import_tariff_A.kwh);
@@ -647,7 +652,7 @@ function draw_tables(total, monthly_data) {
     out += "</select></td>";
     out += "<td>" + total.import_tariff_A.kwh.toFixed(1) + " kWh</td>";
     out += "<td>£" + (total.import_tariff_A.cost * 1.05).toFixed(2) + "</td>";
-    out += "<td>" + (unit_cost_import_tariff_A * 100 * 1.05).toFixed(1) + "p/kWh (inc VAT)</td>";
+    out += "<td>" + pence_per_kwh(unit_cost_import_tariff_A) + "</td>";
     out += "</tr>";
 
     out += "<tr>";
@@ -658,7 +663,7 @@ function draw_tables(total, monthly_data) {
     out += "</select></td>";
     out += "<td>" + total.import_tariff_B.kwh.toFixed(1) + " kWh</td>";
     out += "<td>£" + (total.import_tariff_B.cost * 1.05).toFixed(2) + "</td>";
-    out += "<td>" + (unit_cost_import_tariff_B * 100 * 1.05).toFixed(1) + "p/kWh (inc VAT)</td>";
+    out += "<td>" + pence_per_kwh(unit_cost_import_tariff_B) + "</td>";
     out += "</tr>";
 
     if (show_carbonintensity) {
@@ -672,7 +677,7 @@ function draw_tables(total, monthly_data) {
         out += "<td>Export</td>";
         out += "<td>" + total.export_tariff.kwh.toFixed(1) + " kWh</td>";
         out += "<td>£" + total.export_tariff.cost.toFixed(2) + "</td>";
-        out += "<td>" + (unit_cost_export * 100 * 1.05).toFixed(1) + "p/kWh (inc VAT)</td>";
+        out += "<td>" + pence_per_kwh(unit_cost_export) + "</td>";
         out += "</tr>";
     }
 
@@ -682,7 +687,7 @@ function draw_tables(total, monthly_data) {
         out += "<td>Solar self consumption</td>";
         out += "<td>" + total.solar_used.kwh.toFixed(1) + " kWh</td>";
         out += "<td>£" + total.solar_used.cost.toFixed(2) + "</td>";
-        out += "<td>" + (unit_cost_solar_used * 100 * 1.05).toFixed(1) + "p/kWh (inc VAT)</td>";
+        out += "<td>" + pence_per_kwh(unit_cost_solar_used) + "</td>";
         out += "</tr>";
 
         var unit_cost_solar_combined = ((total.solar_used.cost + total.export_tariff.cost) / (total.solar_used.kwh + total.export_tariff.kwh));
@@ -690,7 +695,7 @@ function draw_tables(total, monthly_data) {
         out += "<td>Solar + Export</td>";
         out += "<td>" + (total.solar_used.kwh + total.export_tariff.kwh).toFixed(1) + " kWh</td>";
         out += "<td>£" + (total.solar_used.cost + total.export_tariff.cost).toFixed(2) + "</td>";
-        out += "<td>" + (unit_cost_solar_combined * 100 * 1.05).toFixed(1) + "p/kWh (inc VAT)</td>";
+        out += "<td>" + pence_per_kwh(unit_cost_solar_combined) + "</td>";
         out += "</tr>";
     }
 
