@@ -54,7 +54,7 @@
         </div>
     </div>
 
-    <!-- Chart card. Markup read by Lib/graph.js, loaded here in place of Lib/graph.php -->
+    <!-- Chart card. Markup read by Lib/graph.js -->
     <div id="graph" class="app-card app-card-body">
         <div id="graph-nav" class="app-navbar">
             <?php
@@ -122,9 +122,7 @@ var sessionwrite = <?php echo $session['write']; ?>;
 if (!sessionwrite) $(".app-setup").hide();
 
 var data = new Data(apikey);
-// Chart markup is in this page, so skip the load of Lib/graph.php
-var graph = new GraphView(path, { load: function() {} });
-graph.container = $('#graph');
+var graph = new GraphView(path, $('#graph'));
 
 // ----------------------------------------------------------------------
 // Configuration

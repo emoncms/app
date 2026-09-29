@@ -11,7 +11,6 @@ class GraphView {
             return false;
         }
         this.container = container;
-        this.container.load(path + "Modules/app/Lib/graph.php");
         
         if (!$('.graph-tooltip').length) $("<div class='graph-tooltip' style='display:none'></div>").appendTo("body");
         
