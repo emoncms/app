@@ -724,12 +724,12 @@ function resize()
 
     let width = placeholder_bound.width();
 
-    // Height from the top of the chart to the bottom of the viewport, with room
-    // for the legend and, when shown, the flow block
+    // Viewport height less content above the chart (measured from the top of the page,
+    // independent of scroll position), the legend and, when shown, the flow block
     let bottom_margin = $('#chart-legend').outerHeight(true) + 40;
     if ($('#flow-section').is(':visible')) bottom_margin += $('#flow-section').closest('.app-card').outerHeight(true);
-    const offset_top = placeholder_bound.offset().top - $(window).scrollTop();
-    let height = $(window).height() - offset_top - bottom_margin;
+    const offset_top = placeholder_bound.offset().top;
+    let height = window.innerHeight - offset_top - bottom_margin;
 
     // min size to avoid flot errors
     if (height < 200) height = 200;
