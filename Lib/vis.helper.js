@@ -402,3 +402,94 @@ function plot_apply_hidden(plot){
         plot.draw();
     }
 }
+
+// -- Compact card layout: time bar, status and legend ------------------------
+// Markup in Lib/timebar.php and Lib/timebar_manual.php, classes in app-kit.css.
+
+// Sync the time bar after each redraw: range select, window dates and the Now
+// button. daily hides the ranges under a week and shows dates without times.
+function timebar_update(daily){
+    var $select = $("#time-select");
+    $select.find("option[value=1], option[value=3], option[value=6], option[value=24]").prop("hidden", !!daily);
+    var hours = Math.round((view.end - view.start) / 3600000);
+    var $option = $select.find("option[value='" + hours + "']");
+    if ($option.length && !$option.prop("hidden")) {
+        $select.val(String(hours));
+    } else {
+        $("#time-custom").text(hours < 48 ? hours + " h" : Math.round(hours / 24) + " days");
+        $select.val("");
+    }
+
+    var opts = daily
+        ? { day: "numeric", month: "short", year: "numeric" }
+        : { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" };
+    var fmt = function(t){ return new Date(t).toLocaleString(undefined, opts); };
+    $("#window-label").text(fmt(view.start) + " – " + fmt(view.end));
+
+    $("#time-now").toggle(!daily && (Date.now() - view.end) > 300000);
+}
+
+// Start and End fields in place of the time bar. on_change runs after either
+// field sets the window.
+function timebar_manual(on_change){
+    var set = function(key){
+        return function(date){
+            if (!date) { alert("Please enter a valid " + key + " date."); return; }
+            var t = date.getTime();
+            if (key == "start" ? t >= view.end : t <= view.start) { alert("Start date must be before the end date."); return; }
+            view[key] = t;
+            on_change();
+        };
+    };
+    var start = DateTimePicker.attach(document.getElementById("request-start"), { onChange: set("start") });
+    var end = DateTimePicker.attach(document.getElementById("request-end"), { onChange: set("end") });
+
+    $("#time-manual-open").click(function(){
+        start.setDate(new Date(view.start));
+        end.setDate(new Date(view.end));
+        $("#graph-nav").addClass("d-none");
+        $("#graph-nav-manual").removeClass("d-none");
+    });
+    $("#time-manual-close").click(function(){
+        $("#graph-nav-manual").addClass("d-none");
+        $("#graph-nav").removeClass("d-none");
+    });
+}
+
+// Now button: move the window to end now, keeping its length. on_change gets
+// the length in ms, so the app can decide whether to follow live data.
+function timebar_now(on_change){
+    $("#time-now").click(function(){
+        var length = view.end - view.start;
+        view.end = Date.now();
+        view.start = view.end - length;
+        on_change(length);
+    });
+}
+
+// Header status from the time of the latest value, in seconds. Live when
+// under 5 minutes old.
+function live_status_update(time){
+    if (!time) return;
+    var age = Math.max(0, Date.now() / 1000 - time);
+    var live = age < 300;
+    var text = "Live";
+    if (!live) {
+        if (age < 3600) text = Math.round(age / 60) + " min";
+        else if (age < 172800) text = Math.round(age / 3600) + " h";
+        else text = Math.round(age / 86400) + " days";
+        text = "Updated " + text + " ago";
+    }
+    $("#live-status").toggleClass("is-live", live).attr("title", "Latest value " + new Date(time * 1000).toLocaleString());
+    $("#live-status .app-status-text").text(text);
+}
+
+// Legend below the chart from the drawn series. Series on the second axis
+// are drawn as lines.
+function chart_legend(series){
+    var items = series.filter(function(s){ return s.label; }).map(function(s){
+        var mark = s.yaxis == 2 ? "app-legend-line" : "app-legend-swatch";
+        return '<span class="app-legend-item"><span class="' + mark + '" style="background:' + s.color + '"></span>' + s.label + '</span>';
+    });
+    $("#chart-legend").html(items.join(""));
+}

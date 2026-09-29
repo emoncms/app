@@ -11,7 +11,6 @@ function load_process_draw_graph() {
     // In Costs mode the shared chart shows the half-hourly kWh + tariff view, which is
     // loaded/drawn entirely by load_tariff_analysis. Skip the power load/draw path.
     if (tariff_view_active) {
-        update_time_pickers();
         load_tariff_analysis();
         return;
     }
@@ -88,9 +87,6 @@ function load_process_draw_graph() {
         process_and_draw_graph();
 
     }, false, "notime");
-
-    // Keep the manual date-time range pickers in sync with the current window.
-    update_time_pickers();
 }
 
 // Iterates over the loaded timeseries data, derives any missing power flows using
@@ -231,7 +227,6 @@ function process_and_draw_graph() {
 // fitted to the current view.start / view.end time range.
 function draw_graph() {
 
-    $("#time-select").find("option[value=1], option[value=3], option[value=6], option[value=24]").prop("hidden", viewmode == "bargraph");
 
     // Theme colours from the page, so the chart follows the light or dark set
     const page_css = getComputedStyle(document.querySelector(".app-page"));
@@ -272,7 +267,7 @@ function draw_graph() {
 
     $(".ajax-loader").hide();
 
-    render_legend(powerseries);
+    chart_legend(powerseries);
     update_window_label();
 }
 

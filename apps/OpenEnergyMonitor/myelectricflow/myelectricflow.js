@@ -263,8 +263,6 @@ let kwhd_cache = {};
 let tariff_view_active = false;
 
 // Manual date-time range pickers (DateTimePicker.attach)
-let datetimepicker1 = false;
-let datetimepicker2 = false;
 
 
 // == Flow decomposition control variables ==
@@ -457,33 +455,17 @@ function init()
         livefn(); // ensure the top live panel is updated to match the current mode's chart
     });
 
-    // -------------------------------------------------------------------
-    // Manual date-time range nav (mirrors the showTimeManual toggle in
-    // Modules/graph/view.php). The calendar button swaps the standard
-    // time-window buttons for Start/End date-time pickers.
-    // -------------------------------------------------------------------
-    datetimepicker1 = DateTimePicker.attach(document.getElementById('request-start'), { onChange: set_view_start });
-    datetimepicker2 = DateTimePicker.attach(document.getElementById('request-end'), { onChange: set_view_end });
-
-    // Move the window to end now, keeping its length. Follows live data for a day or less.
-    $("#time-now").click(function () {
-        live_timerange = view.end - view.start;
-        view.end = +new Date();
-        view.start = view.end - live_timerange;
-        autoupdate = live_timerange < (25*3600000);
+    // Start and End fields, and the Now button, from Lib/vis.helper.js.
+    // Now follows live data for a window of a day or less.
+    timebar_manual(function () {
+        autoupdate = false;
         load_process_draw_graph();
     });
-
-    $("#time-manual-open").click(function () {
-        update_time_pickers();
-        $("#graph-nav").addClass("d-none");
-        $("#graph-nav-manual").removeClass("d-none");
+    timebar_now(function (length) {
+        live_timerange = length;
+        autoupdate = length < (25*3600000);
+        load_process_draw_graph();
     });
-    $("#time-manual-close").click(function () {
-        $("#graph-nav-manual").addClass("d-none");
-        $("#graph-nav").removeClass("d-none");
-    });
-
 }
 
 // Power and Daily kWh buttons follow viewmode
@@ -492,76 +474,11 @@ function update_viewmode_buttons() {
     $(".viewpower").toggleClass("active", viewmode != "bargraph");
 }
 
-// Window label between the pan buttons, and the Now button when the window ends in the past
+// Time bar after a redraw. Now is hidden in the tariff view.
 function update_window_label() {
-    const daily = viewmode == "bargraph" && !tariff_view_active;
-    const opts = daily
-        ? { day: "numeric", month: "short", year: "numeric" }
-        : { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" };
-    const fmt = (t) => new Date(t).toLocaleString(undefined, opts);
-    $("#window-label").text(fmt(view.start) + " \u2013 " + fmt(view.end));
-
-    // Range select shows the window length, from the list or as a custom entry
-    const hours = Math.round((view.end - view.start) / 3600000);
-    const $option = $("#time-select option[value='" + hours + "']");
-    if ($option.length && !$option.prop("hidden")) {
-        $("#time-select").val(String(hours));
-    } else {
-        $("#time-custom").text(hours < 48 ? hours + " h" : Math.round(hours / 24) + " days");
-        $("#time-select").val("");
-    }
-
-    const behind = (+new Date() - view.end) > 300000;
-    $("#time-now").toggle(behind && viewmode == "powergraph" && !tariff_view_active);
+    timebar_update(viewmode == "bargraph" && !tariff_view_active);
+    if (tariff_view_active) $("#time-now").hide();
     $(".viewpower").attr("title", data_mode === "kwh" ? "Chart from energy data" : "Chart from power data");
-}
-
-// Header status: age of the latest feed value. Live when under 5 minutes old.
-function update_live_status(time) {
-    if (!time) return;
-    const age = Math.max(0, Date.now() / 1000 - time);
-    const live = age < 300;
-    let text = "Live";
-    if (!live) {
-        if (age < 3600) text = Math.round(age / 60) + " min";
-        else if (age < 172800) text = Math.round(age / 3600) + " h";
-        else text = Math.round(age / 86400) + " days";
-        text = "Updated " + text + " ago";
-    }
-    $("#live-status").toggleClass("is-live", live).attr("title", "Latest value " + new Date(time * 1000).toLocaleString());
-    $("#live-status .app-status-text").text(text);
-}
-
-// Legend below the chart. Series on the second axis are lines.
-function render_legend(series) {
-    const items = series.filter(s => s.label).map(s => {
-        const mark = s.yaxis == 2 ? "app-legend-line" : "app-legend-swatch";
-        return '<span class="app-legend-item"><span class="' + mark + '" style="background:' + s.color + '"></span>' + s.label + '</span>';
-    });
-    $("#chart-legend").html(items.join(""));
-}
-
-// Start and end from the manual date-time pickers
-function set_view_start(date) {
-    if (!date) { alert("Please enter a valid start date."); return; }
-    if (date.getTime() >= view.end) { alert("Start date must be before the end date."); return; }
-    view.start = date.getTime();
-    autoupdate = false;
-    load_process_draw_graph();
-}
-
-function set_view_end(date) {
-    if (!date) { alert("Please enter a valid end date."); return; }
-    if (view.start >= date.getTime()) { alert("End date must be after the start date."); return; }
-    view.end = date.getTime();
-    autoupdate = false;
-    load_process_draw_graph();
-}
-
-// Keep the manual date-time pickers in sync with the current view window.
-function update_time_pickers() {
-    if (datetimepicker1) datetimepicker1.setDate(new Date(view.start));
-    if (datetimepicker2) datetimepicker2.setDate(new Date(view.end));
 }
 
 function show() 
@@ -864,7 +781,7 @@ function livefn()
             break;
         }
     }
-    update_live_status(updatetime);
+    live_status_update(updatetime);
 
     if (autoupdate) {
         if (updatetime) {

@@ -72,44 +72,14 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
 
     <div class="app-card app-card-body">
         <div id="graph-nav" class="app-navbar">
-            <div class="btn-group app-timebar">
-                <select id="time-select" class="btn" title="<?php echo tr('Time range') ?>">
-                    <option id="time-custom" value="" hidden></option>
-                    <option value="1"><?php echo tr('1 hour') ?></option>
-                    <option value="3"><?php echo tr('3 hours') ?></option>
-                    <option value="6"><?php echo tr('6 hours') ?></option>
-                    <option value="24"><?php echo tr('24 hours') ?></option>
-                    <option value="168"><?php echo tr('1 week') ?></option>
-                    <option value="720"><?php echo tr('1 month') ?></option>
-                    <option value="8760"><?php echo tr('1 year') ?></option>
-                </select>
-                <button id='time-manual-open' class='btn' title="<?php echo tr('Select time window') ?>"><i class="icon-resize-horizontal icon-white"></i></button>
-                <button id='zoomin' class='btn' title="<?php echo tr('Zoom in') ?>">+</button>
-                <button id='zoomout' class='btn' title="<?php echo tr('Zoom out') ?>">&minus;</button>
-                <button id='left' class='btn' title="<?php echo tr('Earlier') ?>">&lt;</button>
-                <button id='right' class='btn' title="<?php echo tr('Later') ?>">&gt;</button>
-                <button id='time-now' class='btn' title="<?php echo tr('Move the window to now') ?>" style="display:none"><?php echo tr('Now') ?></button>
-            </div>
-            <span id="window-label" class="app-window-text"></span>
+            <?php include "Modules/app/Lib/timebar.php"; ?>
             <div class="btn-group app-segmented viewmode-toggle ms-auto">
                 <button class="btn viewpower active"><?php echo tr('Power') ?></button>
                 <button class="btn viewhistory"><?php echo tr('Daily') ?><span class="d-none d-sm-inline"> kWh</span></button>
             </div>
         </div>
 
-        <div id="graph-nav-manual" class="app-navbar d-none">
-            <div class="input-group w-auto">
-                <span class="input-group-text"><?php echo tr('Start') ?></span>
-                <input id="request-start" class="form-control" type="text" placeholder="YYYY-MM-DD HH:MM:SS" />
-            </div>
-            <div class="input-group w-auto">
-                <span class="input-group-text"><?php echo tr('End') ?></span>
-                <input id="request-end" class="form-control" type="text" placeholder="YYYY-MM-DD HH:MM:SS" />
-            </div>
-            <div class="btn-group app-timebar">
-                <button id='time-manual-close' class='btn' title="<?php echo tr('Done') ?>"><i class="icon-ok icon-white"></i></button>
-            </div>
-        </div>
+        <?php include "Modules/app/Lib/timebar_manual.php"; ?>
 
         <div id="placeholder_bound">
             <div id="placeholder"></div>
