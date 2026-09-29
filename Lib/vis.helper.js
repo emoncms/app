@@ -391,6 +391,45 @@ if (window.Flot) Flot.plugins.push({
     }
 });
 
+// Touch pan and pinch zoom on time charts, as the graph module. Drag select
+// is off on touch. When a gesture ends the new window is sent as a
+// plotselected event, so each app reloads as for a selection. Added first so
+// its options are set before the Flot touch plugins read them.
+if (window.Flot && is_touch_primary()) Flot.plugins.unshift({
+    name: "app-touch",
+    init: function(plot){
+        plot.hooks.processOptions.push(function(plot, options){
+            if (!options.pan || options.xaxes[0].mode != "time") return;
+            if (options.selection) options.selection.mode = null;
+            Object.assign(options.zoom, { interactive: true, enableTouch: true, amount: 1.5 });
+            Object.assign(options.pan, { interactive: true, enableTouch: true, touchMode: "smartLock", frameRate: 60 });
+            Object.assign(options.recenter, { interactive: true, enableTouch: true });
+            options.yaxes.forEach(function(axis){
+                Object.assign(axis, { axisPan: false, plotPan: false, axisZoom: false, plotZoom: false });
+            });
+            // Gestures stay in the chart, no page scroll or browser zoom
+            var placeholder = plot.getPlaceholder();
+            placeholder.style.touchAction = "none";
+            placeholder.style.overscrollBehavior = "contain";
+            // One handler per placeholder. Flot does not shut down a plot
+            // that is drawn over, so the plot is taken from the event.
+            if (placeholder.app_touch_bound) return;
+            placeholder.app_touch_bound = true;
+            var timer = null;
+            var on_window = function(event){
+                var xaxis = event.detail[0].getAxes().xaxis;
+                var range = { from: xaxis.min, to: xaxis.max };
+                clearTimeout(timer);
+                timer = setTimeout(function(){
+                    placeholder.dispatchEvent(new CustomEvent("plotselected", { detail: [{ xaxis: range }] }));
+                }, 250);
+            };
+            placeholder.addEventListener("plotpan", on_window);
+            placeholder.addEventListener("plotzoom", on_window);
+        });
+    }
+});
+
 // Click on a legend entry to hide or show its series. Flot 5 draws the legend
 // as static svg, so this is wired up here. Hidden labels are kept across
 // redraws, so call this after every Flot.plot on the chart. left, when given,

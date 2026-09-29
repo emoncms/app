@@ -674,10 +674,7 @@ function show()
             clickable: true,
             borderWidth: 0
         },
-        selection: { mode: is_touch_primary() ? null : "x", color: "#e8cfac", visualization: "fill" },
-        zoom: { interactive: is_touch_primary(), enableTouch: true, amount: 1.5 },
-        pan: { interactive: is_touch_primary(), enableTouch: true, touchMode: "smartLock", frameRate: 60 },
-        recenter: { interactive: is_touch_primary(), enableTouch: true }
+        selection: { mode: "x", color: "#e8cfac", visualization: "fill" }
     }
     
     draw();

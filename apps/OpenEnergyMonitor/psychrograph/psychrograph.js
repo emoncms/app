@@ -260,10 +260,7 @@ function draw_context() {
             { position: "right", font: { color: flot_font_color(), fill: flot_font_color() }, axisPan: false, plotPan: false, axisZoom: false, plotZoom: false }    // right: humidity
         ],
         legend: { show: false },
-        selection: { mode: is_touch_primary() ? null : "x", color: "#555", visualization: "fill" },
-        zoom: { interactive: is_touch_primary(), enableTouch: true, amount: 1.5 },
-        pan: { interactive: is_touch_primary(), enableTouch: true, touchMode: "smartLock", frameRate: 60 },
-        recenter: { interactive: is_touch_primary(), enableTouch: true }
+        selection: { mode: "x", color: "#555", visualization: "fill" }
     };
     Flot.plot(document.getElementById("contextgraph"), contextseries, options);
     chart_legend(contextseries);
