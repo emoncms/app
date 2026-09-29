@@ -261,6 +261,8 @@ let kwhd_cache = {};
 
 // Lower-panel view toggle: false = energy-flow block, true = tariff cost breakdown
 let tariff_view_active = false;
+// Flow block card height, last measured in flow view
+let flow_card_height = 0;
 
 // Manual date-time range pickers (DateTimePicker.attach)
 
@@ -725,9 +727,10 @@ function resize()
     let width = placeholder_bound.width();
 
     // Viewport height less content above the chart (measured from the top of the page,
-    // independent of scroll position), the legend and, when shown, the flow block
-    let bottom_margin = $('#chart-legend').outerHeight(true) + 40;
-    if ($('#flow-section').is(':visible')) bottom_margin += $('#flow-section').closest('.app-card').outerHeight(true);
+    // independent of scroll position), the legend and the flow block. Flow block height
+    // is kept from flow view so the chart keeps its size in tariff view.
+    if ($('#flow-section').is(':visible')) flow_card_height = $('#flow-section').closest('.app-card').outerHeight(true);
+    const bottom_margin = $('#chart-legend').outerHeight(true) + 40 + flow_card_height;
     const offset_top = placeholder_bound.offset().top;
     let height = window.innerHeight - offset_top - bottom_margin;
 
