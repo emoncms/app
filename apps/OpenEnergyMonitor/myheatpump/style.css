@@ -7,63 +7,18 @@
 .text-hp-flow { color: #c9362f; }
 .hp-return { margin-left: 10px; font-size: 16px; color: #3aa655; }
 
-/* COP in window line under the chart */
-.hp-window {
-  align-items: center;
-  margin: 8px 0 0;
-  padding-top: 8px;
-  border-top: 1px solid var(--border);
-}
+/* COP in window, under the chart */
 .hp-window-cop { font-size: 16px; color: var(--ec-primary-darker); cursor: pointer; }
 
-/* COP by category, click to show its stats */
-.hp-cop-tiles {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.show_stats_category {
-  padding: 8px 12px;
-  border: 1px solid var(--bs-border-color);
-  border-radius: 6px;
-  cursor: pointer;
-}
-.show_stats_category:hover { background-color: var(--bs-tertiary-bg); }
-.show_stats_category.active {
-  border-color: var(--bs-primary-border-subtle);
-  background-color: var(--bs-primary-bg-subtle);
-}
-.cop-title {
-  font-size: 11px;
-  font-weight: bold;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--bs-secondary-color);
-}
-.cop-value { font-size: 22px; font-weight: 600; }
-.show_stats_category[key="combined"] .cop-value { color: var(--ec-primary-darker); }
+/* Full window tile in the COP colour. Other tiles set theirs inline. */
+.show_stats_category[key="combined"] .app-tile-value { color: var(--ec-primary-darker); }
 
 .stats-col {
   text-align: center;
   width: 150px;
 }
 
-/* Chart options: two columns of rows, an open row spans both */
-.hp-options-label { display: block; margin: 16px 0 8px; }
-.hp-options {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-.hp-options > .app-option {
-  border: 1px solid var(--bs-border-color);
-  border-radius: 6px;
-}
-.hp-options > .app-option:has(> div[id$="_options"]:not([style*="none"])) { grid-column: 1 / -1; }
-
 @media (max-width: 767.98px) {
-  .hp-options { grid-template-columns: 1fr; }
   .bargraph-navigation { flex: 1 1 100%; }
   .bargraph-navigation > .btn { flex: 1; }
   .bargraph-navigation [class^="svg-icon-"] { display: none; }

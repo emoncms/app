@@ -1,0 +1,21 @@
+/* MyBoiler. Shared components are in Modules/app/Views/css/app-kit.css. */
+
+/* Value colours, darker than the chart series so they read on white */
+.text-boiler-fuel { color: #8a6d14; }
+.text-boiler-heat { color: #b8890c; }
+.text-boiler-elec { color: #3a86c0; }
+.text-boiler-flow { color: #c9362f; }
+.text-boiler-eff  { color: #1f7fa6; }
+
+/* Efficiency in window, under the chart */
+.boiler-window-value { font-size: 16px; color: #1f7fa6; cursor: pointer; }
+
+/* Heat tiles: unit after the value, full window in the heat colour */
+.app-tile-unit { font-size: 13px; font-weight: normal; }
+.show_stats_category[key="combined"] .app-tile-value { color: #b8890c; }
+
+.stats-col {
+  text-align: center;
+  width: 150px;
+}
+

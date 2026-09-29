@@ -69,14 +69,15 @@ function profile_draw() {
                 reserveSpace: false
             },
             {
-                position: 'left',
+                // Unit price scale on the right, coloured as tariff A
+                position: 'right',
+                labelWidth: 36,
                 alignTicksWithAxis: 1,
                 font: {
                     size: flot_font_size,
-                    color: "#666",
-                    fill: "#666"
-                },
-                reserveSpace: false
+                    color: "#fb1a80",
+                    fill: "#fb1a80"
+                }
             }
         ],
         grid: {
@@ -84,12 +85,7 @@ function profile_draw() {
             color: "#aaa",
             borderWidth: 0,
             hoverable: true,
-            clickable: true,
-            // labelMargin:0,
-            // axisMargin:0
-            margin: {
-                top: 30
-            }
+            clickable: true
         },
         selection: {
             mode: "x",
@@ -97,10 +93,9 @@ function profile_draw() {
             visualization: "fill"
         },
         legend: {
-            show: true,
-            position: "nw",
-            noColumns: 5
+            show: false
         }
     }
     Flot.plot(document.getElementById('placeholder'), graph_series, options);
+    chart_legend(graph_series);
 }

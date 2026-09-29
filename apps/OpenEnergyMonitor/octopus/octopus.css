@@ -1,0 +1,6 @@
+/* Tariff explorer. Shared components are in Modules/app/Views/css/app-kit.css. */
+
+/* Value colours, darker than the chart series so they read on white */
+.text-te-import { color: #3a86c0; }
+.text-te-price  { color: #c8146a; }
+

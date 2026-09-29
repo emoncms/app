@@ -12,39 +12,93 @@
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
 <?php load_js("Modules/app/Lib/vis.helper.js"); ?>
 
+<?php load_js("Lib/js/DateTimePicker.js"); ?>
+<?php load_css("Theme/css/datetimepicker.css"); ?>
 <div class="app-page" data-bs-theme="light">
 <section id="app-block" class="app" style="display:none">
-    <div class="app-block info">
-        <div class="app-bar">
-            <div id="app-title" class="app-bar-title"><?php echo "HOUSEHOLD"; ?></div>
-            <button class="app-bar-btn app-unit"><?php echo "VIEW COST"; ?></button>
-            <button class="app-bar-btn config-open" title="Configure app"><span class="svg-icon-wrench"></span></button>
-        </div>
-        <div class="app-block-body app-stats feedin-values">
+
+    <div class="app-card">
+        <nav class="app-card-head">
+            <div class="nav nav-underline">
+                <button class="nav-link active"><i class="svg-icon-home"></i><span id="app-title">HOUSEHOLD</span></button>
+            </div>
+            <div class="app-card-tools">
+                <span id="live-status" class="app-status"><span class="app-status-dot"></span><span class="app-status-text"></span></span>
+                <div class="nav">
+                    <button class="nav-link app-unit">VIEW COST</button>
+                    <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
+                </div>
+            </div>
+        </nav>
+        <div class="app-live feedin-values">
             <div class="power consumption hide">
-                <div class="app-stat-title"><?php echo "NOW"; ?></div>
-                <div class="app-stat-value" id="cons-power"></div>
+                <div class="app-live-label">Now</div>
+                <div class="app-live-value" id="cons-power">---</div>
             </div>
             <div class="power generation hide">
-                <div class="app-stat-title"><?php echo "GENERATION"; ?></div>
-                <div class="app-stat-value" id="gen-power"></div>
+                <div class="app-live-label">Generation</div>
+                <div class="app-live-value" id="gen-power">---</div>
             </div>
             <div class="energy selfcons hide">
-                <div class="app-stat-title"><?php echo "SELF-CONSUMPTION"; ?></div>
-                <div class="app-stat-value" id="selfcons-energy"></div>
+                <div class="app-live-label">Self-consumption</div>
+                <div class="app-live-value" id="selfcons-energy">---</div>
             </div>
             <div class="energy generation hide">
-                <div class="app-stat-title"><?php echo "GENERATION"; ?></div>
-                <div class="app-stat-value" id="gen-energy"></div>
+                <div class="app-live-label">Generation today</div>
+                <div class="app-live-value" id="gen-energy">---</div>
             </div>
             <div class="energy consumption">
-                <div class="app-stat-title"><?php echo "TODAY"; ?></div>
-                <div class="app-stat-value" id="cons-energy"></div>
+                <div class="app-live-label">Today</div>
+                <div class="app-live-value" id="cons-energy">---</div>
             </div>
         </div>
     </div>
 
-    <div id="graph" class="app-block"></div>
+    <!-- Chart card. Markup read by Lib/graph.js, loaded here in place of Lib/graph.php -->
+    <div id="graph" class="app-card app-card-body">
+        <div id="graph-nav" class="app-navbar">
+            <?php
+            // Power view up to a month, daily bars from a week to all time
+            $timebar_ranges = array(24 => tr('24 hours'), 168 => tr('1 week'), 720 => tr('1 month'), 'all' => tr('All time'));
+            include "Modules/app/Lib/timebar.php";
+            ?>
+            <div class="btn-group app-segmented ms-auto">
+                <button class="btn viewpower active" title="Power graph">Power</button>
+                <button class="btn viewhistory" title="Daily summary">Daily</button>
+            </div>
+        </div>
+        <?php include "Modules/app/Lib/timebar_manual.php"; ?>
+
+        <div class="graph-body position-relative">
+            <div class="graph"></div>
+            <div class="graph-loader ajax-loader" style="display:none"></div>
+        </div>
+        <div id="chart-legend" class="app-legend"></div>
+
+        <div class="app-card-caption graph-footer graph-info app-chart-foot">
+            <span class="app-section-label window energy">Average in window</span>
+            <span class="app-section-label window power hide">Energy in window</span>
+            <span class="app-caption-note window info"><b id="window-cons"></b> consumed</span>
+            <span class="app-caption-note window generation hide"><b id="window-gen"></b> generated</span>
+            <span class="app-caption-note window self hide"><b id="window-selfcons"></b> self-consumed</span>
+            <span class="app-caption-note window self hide"><b id="window-selfsuff"></b> self-sufficient</span>
+            <div class="nav ms-auto"><button class="nav-link window power details" style="display:none">SHOW DETAIL</button></div>
+        </div>
+
+        <div class="graph-stats" style="display:none">
+            <table class="table table-sm mb-0">
+                <tr>
+                    <th></th>
+                    <th class="text-center">Min</th>
+                    <th class="text-center">Max</th>
+                    <th class="text-center">Diff</th>
+                    <th class="text-center">Mean</th>
+                    <th class="text-center">StDev</th>
+                </tr>
+                <tbody id="graph-stats"></tbody>
+            </table>
+        </div>
+    </div>
 </section>
 
 <div id="appconf-description" style="display:none">
@@ -68,7 +122,9 @@ var sessionwrite = <?php echo $session['write']; ?>;
 if (!sessionwrite) $(".app-setup").hide();
 
 var data = new Data(apikey);
-var graph = new GraphView(path, $('#graph'));
+// Chart markup is in this page, so skip the load of Lib/graph.php
+var graph = new GraphView(path, { load: function() {} });
+graph.container = $('#graph');
 
 // ----------------------------------------------------------------------
 // Configuration
@@ -252,6 +308,7 @@ function drawPowerValues(values) {
     if (imp == null) {
     	return;
     }
+    live_status_update(values["import_power"][0]*0.001);
     var cons = imp;
     var solar = getPowerValue("solar_power", values);
     if (solar == null) {
@@ -281,11 +338,11 @@ function drawPowerValues(values) {
             unit = "W";
         }
         
-        $("#cons-power").html(cons.toFixed(fixed)+"<span class='app-stat-unit'>"+unit+"</span>");
+        $("#cons-power").html(cons.toFixed(fixed)+"<span class='power-unit-static'>"+unit+"</span>");
         $(".consumption.power").removeClass('cost').show();
         
         if (values["solar_power"] != undefined && solar != null) {
-            $("#gen-power").html(solar.toFixed(fixed)+"<span class='app-stat-unit'>"+unit+"</span>");
+            $("#gen-power").html(solar.toFixed(fixed)+"<span class='power-unit-static'>"+unit+"</span>");
             $(".generation.power").removeClass('cost').show();
         }
         else {
@@ -304,7 +361,7 @@ function drawPowerValues(values) {
         else {
             fixed = 3;
         }
-        $("#cons-power").html(config.app.currency.value+costNow.toFixed(fixed)+"<span class='app-stat-unit'>/hr</span>");
+        $("#cons-power").html(config.app.currency.value+costNow.toFixed(fixed)+"<span class='power-unit-static'>/hr</span>");
         $(".consumption.power").addClass('cost').show();
         
         if (values["solar_power"] != undefined && solar != null && 
@@ -321,7 +378,7 @@ function drawPowerValues(values) {
             else {
                 fixed = 3;
             }
-            $("#gen-power").html(config.app.currency.value+fitNow.toFixed(fixed)+"<span class='app-stat-unit'>/hr</span>");
+            $("#gen-power").html(config.app.currency.value+fitNow.toFixed(fixed)+"<span class='power-unit-static'>/hr</span>");
             $(".generation.power").addClass('cost').show();
         }
         else {
@@ -341,7 +398,7 @@ function drawEnergyValues() {
     
     if (graph.unit == Graph.ENERGY) {
         if (energy.has(Graph.SOLAR)) {
-            $("#gen-energy").html(solar.toFixed(1)+"<span class='app-stat-unit'>kWh</span>");
+            $("#gen-energy").html(solar.toFixed(1)+"<span class='power-unit-static'>kWh</span>");
             $(".generation.energy").removeClass('cost').show();
             
             var selfCons = 0;
@@ -354,14 +411,14 @@ function drawEnergyValues() {
             if (solar > 0) {
                 selfConsShare = Math.min(100, selfCons/solar*100);
             }
-            $("#selfcons-energy").html(selfConsShare.toFixed(0)+"<span class='app-stat-unit'>%</span>");
+            $("#selfcons-energy").html(selfConsShare.toFixed(0)+"<span class='power-unit-static'>%</span>");
             $(".selfcons.energy").show();
         }
         else {
             $(".generation.energy").hide();
             $(".selfcons.energy").hide();
         }
-        $("#cons-energy").html(cons.toFixed(1)+"<span class='app-stat-unit'>kWh</span>");
+        $("#cons-energy").html(cons.toFixed(1)+"<span class='power-unit-static'>kWh</span>");
         $(".consumption.energy").removeClass('cost');
     }
     else {
@@ -382,6 +439,44 @@ function drawEnergyValues() {
 function events() {
     $(".app").on('click touchstart', function() { idle = Date.now(); });
 
+    // Power and Daily views
+    $(".viewpower").click(function() {
+        if (!graph.ready || graph.mode == Graph.POWER) return;
+        graph.mode = Graph.POWER;
+        graph.load();
+    });
+    $(".viewhistory").click(function() {
+        if (!graph.ready || graph.mode == Graph.ENERGY) return;
+        $(".graph-stats", graph.container).hide();
+        $("#graph-stats").empty();
+        graph.mode = Graph.ENERGY;
+        graph.load();
+    });
+
+    // Range select: hours of power data, or days of bars
+    $("#time-select").change(function() {
+        var value = $(this).val();
+        if (!value || !graph.ready) return;
+        range_all = value == "all";
+        var now = Date.now();
+        if (graph.mode == Graph.ENERGY) {
+            if (range_all) graph.energy.setTimeWindow(graph.energy.earliest, now);
+            else graph.energy.setTimeWindowDays(value/24);
+        } else {
+            graph.power.setTimeWindow(now - value*3600000, now);
+        }
+        graph.load();
+    });
+
+    $("#zoomin").click(function() { feedin_navigate("zoomIn", "zoomin"); });
+    $("#zoomout").click(function() { feedin_navigate("zoomOut", "zoomout"); });
+    $("#left").click(function() { feedin_navigate("panLeft", "panleft"); });
+    $("#right").click(function() { feedin_navigate("panRight", "panright"); });
+
+    // Start and End fields, and Now for the power view, from Lib/vis.helper.js
+    timebar_manual(feedin_set_window);
+    timebar_now(feedin_set_window);
+
     $(".app-unit").on('click', function() {
         var view = $(this).html();
         if (view == "VIEW COST") {
@@ -399,19 +494,18 @@ function events() {
 function resize() {
     var height = $(window).height();
     
-    // Subtract the height of all relevant elements
-    $('.info .app-bar, .info .app-block-body').each(function() {
-        height -= $(this).outerHeight();
+    // Subtract the live values card and the rows around the chart
+    height -= $('#app-block > .app-card').first().outerHeight(true);
+    $('#graph-nav, #chart-legend, .graph-footer').each(function() {
+        height -= $(this).outerHeight(true);
     });
-    // Subtract the padding height of all blocks
-    $('.app-block').each(function() {
-        var block = $(this);
-        height -= (block.outerHeight(true) - block.height());
-    });
-    // Subtract the heigt of the graph and emoncms footer and navbar
+    // Subtract the padding of the chart card
+    var card = $('#graph');
+    height -= (card.outerHeight(true) - card.height());
+    // Subtract the emoncms navbar and footer
     var container = $('.content-container');
     height -= (container.outerHeight(true) - container.height());
-    height -= 146;
+    height -= 70;
 
     $('.graph').height(height);
 }
@@ -435,6 +529,61 @@ function graphError(error) {
         }
     }
     appLog('WARN', message);
+}
+
+// ----------------------------------------------------------------------
+// Time bar
+// ----------------------------------------------------------------------
+var range_all = false;
+
+// Time bar, toggle and legend from the window of the graph drawn
+function feedin_timebar_sync() {
+    var current = graph.graph();
+    if (!current) return;
+    var daily = graph.mode == Graph.ENERGY;
+    view.start = current.start;
+    // Daily window ends at midnight, the last bar covers the day after it
+    view.end = daily ? current.end + 86400000 : current.end;
+    $("#time-select").find("option[value=all]").prop("hidden", !daily);
+    timebar_update(daily);
+    if (daily && range_all) $("#time-select").val("all");
+    $(".viewhistory").toggleClass("active", daily);
+    $(".viewpower").toggleClass("active", !daily);
+    if (current.plot) chart_legend(current.plot.getData());
+}
+[PowerGraph, EnergyGraph].forEach(function(type) {
+    var draw = type.prototype.draw;
+    type.prototype.draw = function() {
+        draw.apply(this, arguments);
+        feedin_timebar_sync();
+    };
+});
+
+// Zoom and pan: methods of the power graph, or the view for daily bars
+function feedin_navigate(power_move, view_move) {
+    if (!graph.ready) return;
+    range_all = false;
+    if (graph.mode == Graph.POWER) {
+        graph.power[power_move]();
+        return;
+    }
+    // Daily window ends after today, so nothing later to pan to
+    if (view_move == "panright" && view.end > view.now()) return;
+    view.first_data = graph.energy.earliest;
+    view[view_move]();
+    feedin_set_window();
+}
+
+// Apply the Start and End fields or a view change to the graph shown
+function feedin_set_window() {
+    if (!graph.ready) return;
+    range_all = false;
+    if (graph.mode == Graph.ENERGY) {
+        graph.energy.setTimeWindow(view.start, view.end - 1);
+    } else {
+        graph.power.setTimeWindow(view.start, view.end);
+    }
+    graph.load();
 }
 
 // on finish sidebar hide/show

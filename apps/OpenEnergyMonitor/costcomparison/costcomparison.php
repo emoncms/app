@@ -9,46 +9,52 @@
 <?php load_js("Modules/app/Lib/vis.helper.js"); ?>
 <?php load_js($appdir."rates.js"); ?>
 
+<?php load_js("Lib/js/DateTimePicker.js"); ?>
+<?php load_css("Theme/css/datetimepicker.css"); ?>
 <div class="app-page" data-bs-theme="light">
     <section id="app-block" style="display:none">
-        <div class="app-block">
-            <div class="app-bar">
-                <div class="app-bar-title">Energy Cost Comparison</div>
-                <button class="app-bar-btn config-open" title="Configure app"><span class="svg-icon-wrench"></span></button>
-            </div>
-            <div class="app-block-body">
-                <label for="tariff" class="form-label">Tariff</label>
-                <select id="tariff" name="tariff" class="form-select input-220"></select>
-            </div>
-        </div>
 
-        <div class="app-block">
-            <div class="app-bar bargraph-navigation">
-                <div class="app-bar-title">HISTORY</div>
-                <button class="app-bar-btn bargraph-day">DAY</button>
-                <button class="app-bar-btn bargraph-week">WEEK</button>
-                <button class="app-bar-btn bargraph-month">MONTH</button>
-                <button class="app-bar-btn bargraph-year">YEAR</button>
-                <button class="app-bar-btn bargraph-alltime">ALL TIME</button>
-            </div>
-            <div class="app-block-body">
-                <div id="placeholder_bound" style="width:100%; height:500px">
-                    <div id="placeholder_legend"></div>
-                    <div id="placeholder" style="width:100%; height:100%"></div>
+        <div class="app-card">
+            <nav class="app-card-head">
+                <div class="nav nav-underline">
+                    <button class="nav-link active"><i class="svg-icon-schedule"></i><span>Energy Cost Comparison</span></button>
+                </div>
+                <div class="app-card-tools">
+                    <div class="nav">
+                        <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
+                    </div>
+                </div>
+            </nav>
+            <div class="app-card-body">
+                <div class="input-group" style="max-width:480px">
+                    <label for="tariff" class="input-group-text">Tariff</label>
+                    <select id="tariff" name="tariff" class="form-select"></select>
                 </div>
             </div>
         </div>
 
-        <div class="app-block">
-            <div class="app-bar">
-                <div class="app-bar-title">Energy used by half-hour of day (over whole period)</div>
+        <div class="app-card app-card-body">
+            <div id="graph-nav" class="app-navbar">
+                <?php
+                // Daily bars: two days to all time, This year from 1 January
+                $timebar_ranges = array(48 => tr('2 days'), 168 => tr('1 week'), 720 => tr('1 month'), 'ytd' => tr('This year'), 'all' => tr('All time'));
+                include "Modules/app/Lib/timebar.php";
+                ?>
             </div>
-            <div class="app-block-body">
-                <div id="halfhour_placeholder_bound" style="width:100%; height:250px">
-                    <div id="halfhour_legend"></div>
-                    <div id="halfhour_placeholder" style="height:250px"></div>
-                </div>
+            <?php include "Modules/app/Lib/timebar_manual.php"; ?>
+
+            <div id="placeholder_bound" style="width:100%; height:500px">
+                <div id="placeholder" style="width:100%; height:100%"></div>
             </div>
+            <div id="chart-legend" class="app-legend"></div>
+        </div>
+
+        <div class="app-card app-card-body">
+            <div class="app-card-caption"><span class="app-section-label">Energy used by half-hour of day (over whole period)</span></div>
+            <div id="halfhour_placeholder_bound" style="width:100%; height:250px">
+                <div id="halfhour_placeholder" style="height:250px"></div>
+            </div>
+            <div id="halfhour_legend" class="app-legend"></div>
         </div>
     </section>
 
@@ -202,11 +208,7 @@ function show() {
 }
 
 function updater() {
-    if (selected_start==null) {    oneweek(); $(".bargraph-week").addClass("active");} else { reloadExistingRange(); }
-}
-
-function clearHighlight() {
-    $(".bargraph-navigation .app-bar-btn").removeClass("active");
+    if (selected_start==null) { oneweek(); } else { reloadExistingRange(); }
 }
 
 
@@ -240,57 +242,56 @@ document.getElementById('placeholder').addEventListener("plotselected", function
     var ranges = event.detail[0];
     selected_start = ranges.xaxis.from;
     selected_end = ranges.xaxis.to;   
+    range_key = "";
     reloadExistingRange();    
 });
 
-$('.bargraph-alltime').click(function() {
-    //From start of data capture to today
-    selected_start = start_time * 1000;
-    var d=new Date();    
-    d.setHours(23,59,59,0);
-    selected_end = d.getTime();
+// Range select: days of bars ending today, This year or All time
+var range_key = "";
+$("#time-select").change(function() {
+    var value = $(this).val();
+    if (!value) return;
+    range_key = value;
+    if (value == "all" || value == "ytd") {
+        //From 1 January this year or the start of data capture to today
+        selected_start = start_time * 1000;
+        if (value == "ytd") {
+            var d = new Date((new Date).getFullYear(), 0, 1, 0, 0, 0, 0);
+            selected_start = Math.max(d.getTime(), selected_start);
+        }
+        var d = new Date();
+        d.setHours(23,59,59,0);
+        selected_end = d.getTime();
+        reloadExistingRange();
+    } else {
+        loadAndDisplay(value / 24);
+    }
+});
+
+// Zoom and pan, from the view in Lib/vis.helper.js
+function cc_navigate(move) {
+    view.start = selected_start;
+    view.end = selected_end;
+    view.first_data = start_time * 1000;
+    // Window ends at the end of today, so nothing later to pan to
+    if (move == "panright" && view.end > view.now()) return;
+    view[move]();
+    cc_set_window();
+}
+$("#zoomin").click(function() { cc_navigate("zoomin"); });
+$("#zoomout").click(function() { cc_navigate("zoomout"); });
+$("#left").click(function() { cc_navigate("panleft"); });
+$("#right").click(function() { cc_navigate("panright"); });
+
+// Apply the Start and End fields or a view change
+function cc_set_window() {
+    range_key = "";
+    selected_start = view.start;
+    selected_end = view.end;
     reloadExistingRange();
-    clearHighlight();
-    $(this).addClass("active");
-});
-
-
-
-$('.bargraph-week').click(function() {
-    oneweek();
-    clearHighlight();
-    $(this).addClass("active");
-});
-
-$('.bargraph-month').click(function() {
-    //TODO: We really should work out number of days in the month and not assume 30 days
-    loadAndDisplay(30);
-    clearHighlight();
-    $(this).addClass("active");
-});
-
-$('.bargraph-year').click(function() {
-    //Go back to 1st Jan in current year
-    var d=new Date((new Date).getFullYear(), 0, 1, 0, 0, 0, 0)
-    selected_start = d.getTime();    
-    
-    selected_start = Math.max(selected_start, (start_time * 1000));
-    
-    d=new Date();
-    d.setHours(23,59,59,0);
-    selected_end = d.getTime();
-    
-    reloadExistingRange();
-    
-    clearHighlight();
-    $(this).addClass("active");
-});
-
-$('.bargraph-day').click(function() {
-    loadAndDisplay(2);    
-    clearHighlight();
-    $(this).addClass("active");
-});
+}
+timebar_manual(cc_set_window);
+timebar_now(cc_set_window);
 
 function timeFormatter(ms) {
     var date = new Date(ms);
@@ -603,17 +604,16 @@ function halfhour_usage_bargraph_draw() {
             clickable: false
             //, backgroundColor: { colors: ["#dbdee5", "#999"] }
         },
-        legend: {
-            show: true,
-            container: document.getElementById('halfhour_legend'),
-            margin: 15,
-            position: "nw",
-            noColumns: 8,
-            placement: 'outsideGrid'
-        }
+        legend: { show: false }
     };
 
     var halfhour_plot = Flot.plot(document.getElementById('halfhour_placeholder'), halfhour_usage_series, halfhour_options);
+
+    // Legend as chart_legend in Lib/vis.helper.js, which writes to #chart-legend only
+    var items = halfhour_usage_series.map(function(s) {
+        return '<span class="app-legend-item"><span class="app-legend-swatch" style="background:' + s.color + '"></span>' + s.label + '</span>';
+    });
+    $("#halfhour_legend").html(items.join(""));
 }
 
 
@@ -662,12 +662,13 @@ function bargraph_draw() {
                 autoScale: "none",
                 alignTicksWithAxis: 1,
                 position: 'right',
+                labelWidth: 44,
                 tickFormatter: currencyFormatter, 
                 tickDecimals:2,
                 font: {
                     size: flot_font_size,
-                    color: "#666",
-                    fill: "#666"
+                    color: "#000",
+                    fill: "#000"
                 }
                 //,axisLabel: "Total energy cost"
                 //,axisLabelUseCanvas: true
@@ -685,17 +686,17 @@ function bargraph_draw() {
             borderWidth: 0,
             hoverable: true
         },
-        legend: {
-            show: true,
-            container: document.getElementById('placeholder_legend'),
-            margin: 15,
-            position: "nw",
-            noColumns: 8,
-            placement: 'outsideGrid'
-        }
+        legend: { show: false }
     };
 
     var plot = Flot.plot(document.getElementById('placeholder'), bargraph_series, options);
+    chart_legend(bargraph_series);
+
+    // Time bar from the window drawn, keeping This year and All time selected
+    view.start = selected_start;
+    view.end = selected_end;
+    timebar_update(true);
+    if (range_key == "all" || range_key == "ytd") $("#time-select").val(range_key);
 }
 
 // -------------------------------------------------------------------------------

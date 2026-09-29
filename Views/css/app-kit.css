@@ -528,6 +528,57 @@ body:has(.app-page[data-bs-theme="light"] .app-card) { background-color: var(--b
     .app-legend { padding-left: 0; }
 }
 
+/* Line under a chart: window totals and a detail toggle, with a rule above */
+.app-chart-foot {
+    align-items: center;
+    margin: 8px 0 0;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+}
+
+/* Tiles to pick a category, the chosen one tinted */
+.app-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.app-tiles > * {
+    padding: 8px 12px;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 6px;
+    cursor: pointer;
+}
+.app-tiles > *:hover { background-color: var(--bs-tertiary-bg); }
+.app-tiles > .active {
+    border-color: var(--bs-primary-border-subtle);
+    background-color: var(--bs-primary-bg-subtle);
+}
+.app-tile-title {
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color);
+}
+.app-tile-value { font-size: 22px; font-weight: 600; }
+
+/* Option rows in two columns. An open row spans both. */
+.app-options-label { display: block; margin: 16px 0 8px; }
+.app-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+.app-options > .app-option {
+    border: 1px solid var(--bs-border-color);
+    border-radius: 6px;
+}
+.app-options > .app-option:has(> div[id$="_options"]:not([style*="none"])) { grid-column: 1 / -1; }
+@media (max-width: 767.98px) {
+    .app-options { grid-template-columns: 1fr; }
+}
+
 /* -- Tables ---------------------------------------------------------------- */
 
 /* Colour square before a name */

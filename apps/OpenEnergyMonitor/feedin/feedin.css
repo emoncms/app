@@ -1,14 +1,19 @@
-/* Live values, coloured by source. .cost is set by JS in cost mode. */
-.feedin-values .consumption { color: var(--ec-energy-use); }
-.feedin-values .consumption.cost { color: var(--ec-energy-import); }
-.feedin-values .generation { color: var(--ec-energy-solar); }
-.feedin-values .generation.cost { color: var(--ec-energy-export); }
+/* Feed-in. Shared components are in Modules/app/Views/css/app-kit.css. */
+
+/* Live values, darker than the chart series so they read on white.
+   .cost is set by JS in cost mode. */
+.feedin-values .consumption { color: #2a8bbd; }
+.feedin-values .consumption.cost { color: #b84a4a; }
+.feedin-values .generation { color: #b8890c; }
+.feedin-values .generation.cost { color: #5f7a3a; }
 .feedin-values .selfcons { color: var(--bs-secondary-color); }
 
 .graph-body .graph {
     min-height: 200px;
     max-height: 500px;
 }
+
+.graph-stats { margin-top: 8px; }
 
 /* Tooltip is added to body, outside .app-page, so its colours are fixed */
 .graph-tooltip {
@@ -26,8 +31,7 @@
 @media (max-width: 768px) {
     .feedin-values .generation,
     .graph-info .generation,
-    .graph-info .details,
-    .graph-header .power.time { display: none !important; }
+    .graph-info .details { display: none !important; }
 }
 
 @media (max-width: 1200px) {

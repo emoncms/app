@@ -65,8 +65,9 @@ var view =
     var time_window = this.end - this.start;
     var shiftsize = time_window * view.pan_speed;
     var now = this.now();
+    // Stop at now. A window already past now, such as daily bars to the end of today, stays put.
     if (this.end + shiftsize > now && this.limit_x) {
-      shiftsize = now - this.end;
+      shiftsize = Math.max(0, now - this.end);
     }
     this.start += shiftsize;
     this.end += shiftsize;

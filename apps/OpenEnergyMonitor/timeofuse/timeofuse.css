@@ -1,0 +1,6 @@
+/* Time of Use. Shared components are in Modules/app/Views/css/app-kit.css. */
+
+/* Value colours, darker than the chart series so they read on white */
+.text-tou-day   { color: #3a86c0; }
+.text-tou-night { color: #16729a; }
+

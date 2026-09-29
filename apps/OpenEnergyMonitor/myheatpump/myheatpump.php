@@ -79,7 +79,7 @@ global $path, $session, $v;
       </div>
       <div id="chart-legend" class="app-legend"></div>
 
-      <div class="app-card-caption hp-window">
+      <div class="app-card-caption app-chart-foot">
         <span class="app-section-label">COP in window</span>
         <b id="window-cop" class="hp-window-cop"></b>
         <span id="window-carnot-cop" class="app-caption-note"></span>
@@ -94,30 +94,30 @@ global $path, $session, $v;
 
             <div id="error-message" style="display:none" class="alert alert-danger"></div>
 
-            <div class="hp-cop-tiles">
+            <div class="app-tiles">
               <div class="show_stats_category active" key="combined">
-                <div class="cop-title">Full window</div>
-                <div class="cop-value"><span class="cop_combined">---</span></div>
+                <div class="app-tile-title">Full window</div>
+                <div class="app-tile-value"><span class="cop_combined">---</span></div>
               </div>
 
               <div class="show_stats_category" key="when_running" style="color:#698d5d">
-                <div class="cop-title">When running</div>
-                <div class="cop-value"><span class="cop_when_running">---</span></div>
+                <div class="app-tile-title">When running</div>
+                <div class="app-tile-value"><span class="cop_when_running">---</span></div>
               </div>
 
               <div class="show_stats_category" key="space_heating" style="color:#f6a801">
-                <div class="cop-title">Space heating</div>
-                <div class="cop-value"><span class="cop_space_heating">---</span></div>
+                <div class="app-tile-title">Space heating</div>
+                <div class="app-tile-value"><span class="cop_space_heating">---</span></div>
               </div>
 
               <div class="show_stats_category" key="water_heating" style="color:#014656">
-                <div class="cop-title">Water heating</div>
-                <div class="cop-value"><span class="cop_water_heating">---</span></div>
+                <div class="app-tile-title">Water heating</div>
+                <div class="app-tile-value"><span class="cop_water_heating">---</span></div>
               </div>
 
               <div class="show_stats_category" key="cooling" style="color:#014656; display:none">
-                <div class="cop-title">Cooling</div>
-                <div class="cop-value"><span class="cop_cooling">---</span></div>
+                <div class="app-tile-title">Cooling</div>
+                <div class="app-tile-value"><span class="cop_cooling">---</span></div>
               </div>
             </div>
 
@@ -138,8 +138,8 @@ global $path, $session, $v;
               <tbody class="stats_category" key="cooling" style="display:none"></tbody>
             </table>
 
-            <div class="app-section-label hp-options-label">Chart options</div>
-            <div class="hp-options">
+            <div class="app-section-label app-options-label">Chart options</div>
+            <div class="app-options">
             <div id="show_immersion_bound" style="display:none" class="app-option">
               <div style="float:right"><span id="immersion_kwh"></span> kWh</div>
               <input id="show_immersion" type="checkbox">

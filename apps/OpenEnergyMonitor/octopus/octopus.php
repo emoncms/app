@@ -5,6 +5,7 @@ global $path, $session, $v;
 <?php load_css("Modules/app/Views/css/app-kit.css"); ?>
 <?php load_css("Lib/fonts/montserrat/montserrat.css"); ?>
 <?php load_css("Theme/css/datetimepicker.css"); ?>
+<?php load_css("Modules/app/apps/OpenEnergyMonitor/octopus/octopus.css"); ?>
 
 <?php load_js("Modules/feed/feed.js"); ?>
 
@@ -18,57 +19,73 @@ global $path, $session, $v;
 <div class="app-page" data-bs-theme="light">
     <section id="app-block" style="display:none">
 
-        <div id="octopus-realtime" class="app-block">
-            <div class="app-bar">
-                <div id="app-title" class="app-bar-title">Time of use tariff explorer</div>
-                <button class="app-bar-btn config-open" title="Configure app"><span class="svg-icon-wrench"></span></button>
-            </div>
-
-            <div class="app-block-body app-stats">
+        <div id="octopus-realtime" class="app-card">
+            <nav class="app-card-head">
+                <div class="nav nav-underline">
+                    <button class="nav-link active"><i class="svg-icon-smartmeter"></i><span id="app-title">Time of use tariff explorer</span></button>
+                </div>
+                <div class="app-card-tools">
+                    <span id="live-status" class="app-status"><span class="app-status-dot"></span><span class="app-status-text"></span></span>
+                    <div class="nav">
+                        <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
+                    </div>
+                </div>
+            </nav>
+            <div class="app-live">
                 <div>
-                    <div class="app-stat-title">IMPORT NOW</div>
-                    <div class="app-stat-value" id="power_now">0</div>
+                    <div class="app-live-label">Import now</div>
+                    <div class="app-live-value text-te-import" id="power_now">---</div>
                 </div>
                 <div class="last_halfhour_stats">
-                    <div class="app-stat-title">CURRENT PRICE</div>
-                    <div class="app-stat-value" id="unit_price"></div>
+                    <div class="app-live-label">Current price</div>
+                    <div class="app-live-value text-te-price" id="unit_price"></div>
                 </div>
                 <div class="last_halfhour_stats">
-                    <div class="app-stat-title">CURRENT HALF HOUR</div>
-                    <div class="app-stat-value"><span id="kwh_halfhour"></span> <span id="cost_halfhour" class="app-stat-unit"></span></div>
+                    <div class="app-live-label">Current half hour</div>
+                    <div class="app-live-value text-te-import"><span id="kwh_halfhour"></span><span id="cost_halfhour" class="power-unit-static"></span></div>
                 </div>
             </div>
         </div>
 
-        <div class="app-block">
-            <div class="app-bar graph-navigation">
-                <div id="history-title" class="app-bar-title d-none d-sm-block">HISTORY</div>
-                <select class="form-select form-select-sm w-auto align-self-center mx-2 time-select">
-                    <option value='8760'>Previous 365 days</option>
-                    <option value='1440'>Previous 60 days</option>
-                    <option value='720'>Previous 30 days</option>
-                    <option value='168'>Previous 7 days</option>
-                    <option value='24'>Previous 24 hours</option>
-                    <option value='12'>Previous 12 hours</option>
-                    <option value='M'>Since midnight 1st of month</option>
-                    <option value='W'>Since midnight Sunday</option>
-                    <option value='Y'>Yesterday</option>
-                    <option value='T' selected>Today since midnight</option>
-                    <option value='C'>Custom</option>
-                </select>
-                <button class="app-bar-btn" id="left" title="Scroll left">&lt;</button>
-                <button class="app-bar-btn" id="right" title="Scroll right">&gt;</button>
-                <button class="app-bar-btn" id="fastleft" title="Scroll left fast">&lt;&lt;</button>
-                <button class="app-bar-btn" id="fastright" title="Scroll right fast">&gt;&gt;</button>
-            </div>
-
-            <div class="app-block-body">
-                <div id="placeholder_bound" style="width:100%; height:400px">
-                    <div id="placeholder" style="height:400px"></div>
+        <div class="app-card app-card-body">
+            <div id="graph-nav" class="app-navbar">
+                <?php
+                // Named periods first, then windows ending now
+                $timebar_ranges = array(
+                    'T' => tr('Today'),
+                    'Y' => tr('Yesterday'),
+                    'W' => tr('Since Sunday'),
+                    'M' => tr('This month'),
+                    12 => tr('12 hours'),
+                    24 => tr('24 hours'),
+                    168 => tr('1 week'),
+                    720 => tr('1 month'),
+                    1440 => tr('2 months'),
+                    8760 => tr('1 year')
+                );
+                include "Modules/app/Lib/timebar.php";
+                ?>
+                <div class="btn-group app-timebar">
+                    <button id="fastleft" class="btn" title="Scroll left fast">&laquo;</button>
+                    <button id="fastright" class="btn" title="Scroll right fast">&raquo;</button>
+                </div>
+                <div class="nav ms-auto align-items-center">
+                    <span id="history-title" class="app-section-label me-2 d-none d-sm-inline">HISTORY</span>
+                    <button class="nav-link hide" id="show_profile" title="Average day in the window">Show profile</button>
+                    <button class="nav-link" id="download-csv" title="Download half hourly data"><i class="svg-icon-download"></i> CSV</button>
                 </div>
             </div>
+            <?php include "Modules/app/Lib/timebar_manual.php"; ?>
 
-            <div class="app-block-foot power-graph-footer" style="display:none">
+            <div id="placeholder_bound" style="width:100%; height:400px">
+                <div id="placeholder" style="height:400px"></div>
+            </div>
+            <div id="chart-legend" class="app-legend"></div>
+        </div>
+
+        <div class="app-card app-card-body power-graph-footer" style="display:none">
+            <div class="app-card-caption"><span class="app-section-label">Tariff comparison</span><span class="app-caption-note">Totals in the window</span></div>
+            <div class="table-responsive">
                 <table class="table">
                     <tr>
                         <th></th>
@@ -78,35 +95,23 @@ global $path, $session, $v;
                     </tr>
                     <tbody id="octopus_totals"></tbody>
                 </table>
+            </div>
 
-                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-                    <div class="input-group w-auto">
-                        <span class="input-group-text"><?php echo tr('Start') ?></span>
-                        <input id="request-start" class="form-control" type="text" style="width:190px" placeholder="YYYY-MM-DD HH:MM:SS" />
-                    </div>
-                    <div class="input-group w-auto">
-                        <span class="input-group-text"><?php echo tr('End') ?></span>
-                        <input id="request-end" class="form-control" type="text" style="width:190px" placeholder="YYYY-MM-DD HH:MM:SS" />
-                    </div>
-                    <div class="ms-auto">
-                        <button class="btn btn-default hide" id="show_profile">Show Profile</button>
-                        <button class="btn btn-default" id="download-csv">Download CSV</button>
-                    </div>
+            <div class="app-options">
+                <div id="use_meter_kwh_hh_bound" class="app-option hide">
+                    <input id="use_meter_kwh_hh" type="checkbox" checked> <b>Show energy and costs based on Octopus smart meter data where available</b>
+                    <div id="meter_kwh_hh_comparison" class="small text-body-secondary ps-4"></div>
                 </div>
-
-                <div>
-                    <div id="use_meter_kwh_hh_bound" class="app-option hide">
-                        <input id="use_meter_kwh_hh" type="checkbox" checked> <b>Show energy and costs based on Octopus smart meter data where available</b>
-                        <div id="meter_kwh_hh_comparison" class="small text-body-secondary ps-4"></div>
-                    </div>
-                    <div id="show_carbonintensity_bound" class="app-option">
-                        <input id="show_carbonintensity" type="checkbox"> <b>Show grid carbon intensity</b>
-                        <div id="carbonintensity_result" class="small text-body-secondary ps-4"></div>
-                    </div>
+                <div id="show_carbonintensity_bound" class="app-option">
+                    <input id="show_carbonintensity" type="checkbox"> <b>Show grid carbon intensity</b>
+                    <div id="carbonintensity_result" class="small text-body-secondary ps-4"></div>
                 </div>
+            </div>
 
-                <!-- Monthly data table -->
-                <div id="monthly-data" class="hide mt-3">
+            <!-- Monthly data table -->
+            <div id="monthly-data" class="hide mt-3">
+                <div class="app-card-caption"><span class="app-section-label">Monthly</span></div>
+                <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
                             <tr>
