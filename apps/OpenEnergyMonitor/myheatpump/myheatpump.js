@@ -101,6 +101,7 @@ var bargraph_end = 0;
 var last_bargraph_start = 0;
 var last_bargraph_end = 0;
 var bargraph_mode = "combined";
+var bargraph_alltime = false;
 
 var realtime_cop_div_mode = "30min";
 
@@ -188,10 +189,10 @@ function show() {
     if (config_start_date > alltime_start_time) {
         alltime_start_time = config_start_date;
         var d = new Date(alltime_start_time * 1000);
-        $("#all_time_history_title").html("TOTAL SINCE: " + d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear());
+        $("#all_time_history_title").html("Total since " + d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear());
     } else {
         var d = new Date(start_time * 1000);
-        $("#all_time_history_title").html("TOTAL SINCE: " + d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear());
+        $("#all_time_history_title").html("Total since " + d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear());
     }
 
     // Load elec start here after start_time may have been modified by heat start time
@@ -210,19 +211,10 @@ function show() {
 
     end = end_time * 1000;
 
-    if (now - end > HOUR) {
-        $("#last_updated").show();
-        $("#live_table").hide();
-        date.setTime(end);
-        let h = date.getHours();
-        let m = date.getMinutes();
-        if (h < 10) h = "0" + h;
-        if (m < 10) m = "0" + m;
-        $("#last_updated").html("Last updated: " + date.toDateString() + " " + h + ":" + m)
-    } else {
-        $("#last_updated").hide();
-        $("#live_table").show();
-    }
+    // Live values only when the data is recent. The header status gives its age.
+    live_status_update(end_time);
+    $("#live_table").toggle(now - end <= HOUR);
+    $(".hp-return-part").toggle(feeds["heatpump_returnT"] != undefined);
 
     if (urlParams.mode != undefined) {
         if (urlParams.mode == "power") {
@@ -340,6 +332,11 @@ function updater() {
         if (feeds["heatpump_elec"] != undefined) $("#heatpump_elec").html(Math.round(feeds["heatpump_elec"].value));
         if (feeds["heatpump_heat"] != undefined) $("#heatpump_heat").html(Math.round(feeds["heatpump_heat"].value));
         if (feeds["heatpump_flowT"] != undefined) $("#heatpump_flowT").html((1 * feeds["heatpump_flowT"].value).toFixed(1));
+        if (feeds["heatpump_returnT"] != undefined) $("#heatpump_returnT").html((1 * feeds["heatpump_returnT"].value).toFixed(1));
+
+        // Header status from the latest electric or heat value
+        var latest = feeds["heatpump_elec"] || feeds["heatpump_heat"] || feeds["heatpump_elec_kwh"];
+        if (latest != undefined) live_status_update(latest.time);
 
         if (realtime_cop_div_mode == "inst" && feeds["heatpump_elec"] != undefined && feeds["heatpump_heat"] != undefined) {
             var COP_inst = 0;
@@ -509,12 +506,72 @@ function set_url_view_params(mode, start, end) {
 }
 
 // -------------------------------------------------------------------------------
+// TIME BAR
+// -------------------------------------------------------------------------------
+
+// Time bar after a redraw. Daily bars use their own window; the power view
+// stops at a month and has no all time range.
+function hp_timebar_sync() {
+    var daily = viewmode == "bargraph";
+    if (daily) {
+        view.start = bargraph_start;
+        view.end = bargraph_end;
+    }
+    $("#time-select").find("option[value=all], option[value=2160], option[value=8760]").prop("hidden", !daily);
+    timebar_update(daily);
+    if (daily && bargraph_alltime) $("#time-select").val("all");
+    $(".viewhistory").toggleClass("active", daily);
+    $(".viewpower").toggleClass("active", !daily);
+    $(".bargraph-navigation").toggle(daily);
+}
+
+// Range select: days of bars, or hours of power data
+$("#time-select").change(function () {
+    var value = $(this).val();
+    if (!value) return;
+    if (viewmode == "bargraph") {
+        var end = (new Date()).getTime();
+        var start = value == "all" ? start_time * 1000 : end - value * HOUR;
+        if (start < start_time * 1000) start = start_time * 1000;
+        bargraph_alltime = value == "all";
+        bargraph_load(start, end);
+        bargraph_draw();
+    } else {
+        view.timewindow(value / 24.0);
+        powergraph_load();
+    }
+});
+
+// Zoom and pan act on the daily bars or the power graph
+function hp_navigate(move) {
+    if (viewmode == "bargraph") {
+        view.start = bargraph_start;
+        view.end = bargraph_end;
+        move();
+        bargraph_alltime = false;
+        bargraph_load(view.start, view.end);
+        bargraph_draw();
+    } else {
+        move();
+        powergraph_load();
+    }
+}
+$("#zoomout").click(function () { hp_navigate(function () { view.zoomout(); }); });
+$("#zoomin").click(function () { hp_navigate(function () { view.zoomin(); }); });
+$("#right").click(function () { hp_navigate(function () { view.panright(); }); });
+$("#left").click(function () { hp_navigate(function () { view.panleft(); }); });
+
+// Start and End fields, and Now for the power view, from Lib/vis.helper.js
+timebar_manual(function () { hp_navigate(function () {}); });
+timebar_now(function () { powergraph_load(); });
+
+// -------------------------------------------------------------------------------
 // EVENTS
 // -------------------------------------------------------------------------------
 
 // Switch to bargraph
 $(".viewhistory").click(function () {
-    $(".powergraph-navigation").hide();
+    if (viewmode == "bargraph") return;
     var timeWindow = 30 * DAY;
     // var end = (new Date()).getTime();
     var end = end_time * 1000;

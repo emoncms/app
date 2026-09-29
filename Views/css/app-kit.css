@@ -311,6 +311,9 @@ body:has(.app-page[data-bs-theme="dark"]) #footer { margin: 0; }
 
 /* -- Cards: compact layout, from MyElectricFlow ---------------------------- */
 
+/* Light apps on cards sit on the grey page background */
+body:has(.app-page[data-bs-theme="light"] .app-card) { background-color: var(--bg-body); }
+
 /* Bordered block, as the config cards */
 .app-card {
     margin-bottom: 10px;
@@ -430,7 +433,8 @@ body:has(.app-page[data-bs-theme="dark"]) #footer { margin: 0; }
     text-align: left;
 }
 .app-timebar > select.btn option { color: var(--bs-body-color); background-color: var(--bs-body-bg); }
-/* Sprite icons in the time bar, faded as the button text */
+/* Sprite icons in the time bar: white set on dark, faded as the button text */
+.app-page[data-bs-theme="dark"] .app-timebar [class^="icon-"] { background-image: url("../../../../Theme/img/glyphicons-halflings-white.png"); }
 .app-timebar > .btn > [class^="icon-"] { opacity: 0.6; }
 .app-timebar > .btn:hover > [class^="icon-"] { opacity: 1; }
 .app-window-text { font-size: 13px; color: var(--bs-secondary-color); white-space: nowrap; }
@@ -520,7 +524,7 @@ body:has(.app-page[data-bs-theme="dark"]) #footer { margin: 0; }
     .app-card-head { padding: 0 6px; }
     .app-status-text { display: none; }
     .app-card .app-navbar { gap: 6px; }
-    .app-card .app-navbar > .app-timebar:first-child { flex: 1 1 100%; }
+    .app-card .app-navbar > .app-timebar:has(#time-select) { flex: 1 1 100%; }
     .app-legend { padding-left: 0; }
 }
 

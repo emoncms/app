@@ -16,6 +16,6 @@ defined('EMONCMS_EXEC') or die('Restricted access');
         <input id="request-end" class="form-control" type="text" placeholder="YYYY-MM-DD HH:MM:SS" />
     </div>
     <div class="btn-group app-timebar">
-        <button id="time-manual-close" class="btn" title="<?php echo tr('Done') ?>"><i class="icon-ok icon-white"></i></button>
+        <button id="time-manual-close" class="btn" title="<?php echo tr('Done') ?>"><i class="icon-ok"></i></button>
     </div>
 </div>

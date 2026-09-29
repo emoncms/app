@@ -411,10 +411,14 @@ function plot_apply_hidden(plot){
 function timebar_update(daily){
     var $select = $("#time-select");
     $select.find("option[value=1], option[value=3], option[value=6], option[value=24]").prop("hidden", !!daily);
+    // Nearest listed range within 5%, so a month of whole days reads "1 month"
     var hours = Math.round((view.end - view.start) / 3600000);
-    var $option = $select.find("option[value='" + hours + "']");
-    if ($option.length && !$option.prop("hidden")) {
-        $select.val(String(hours));
+    var $option = $select.find("option").filter(function(){
+        var h = parseFloat(this.value);
+        return !this.hidden && h > 0 && Math.abs(h - hours) <= h * 0.05;
+    }).first();
+    if ($option.length) {
+        $select.val($option.val());
     } else {
         $("#time-custom").text(hours < 48 ? hours + " h" : Math.round(hours / 24) + " days");
         $select.val("");

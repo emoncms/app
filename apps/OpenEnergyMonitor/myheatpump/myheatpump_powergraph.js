@@ -694,8 +694,9 @@ function powergraph_draw() {
         },
         yaxes: [
             { min: 0, autoScale: "none", font: style, reserveSpace: false },
-            { font: style, reserveSpace: false },
-            { min: 0, autoScale: "none", font: { size: flot_font_size, color: "#44b3e2", fill: "#44b3e2" }, reserveSpace: false },
+            // Temperatures and instantaneous COP on the right
+            { font: style, position: "right", labelWidth: 36, tickFormatter: function (v) { return v + "\u00b0"; } },
+            { min: 0, autoScale: "none", font: { size: flot_font_size, color: "#44b3e2", fill: "#44b3e2" }, position: "right", labelWidth: 30 },
             { min: 0, max: 1, autoScale: "none", show: false, reserveSpace: false },
             { font: style, reserveSpace: false },   // emitter spec
             { font: style, reserveSpace: false }    // system volume
@@ -736,16 +737,9 @@ function powergraph_draw() {
         plot_legend(plot, 0);
     }
 
-    // show symbol when live scrolling is active
-    var now = new Date().getTime();
-    if (view.end > now - 5 * MINUTE && view.end <= now + 5 * MINUTE && view.end - view.start <= 2 * DAY) {
-        $('#right').hide();
-        $('#live').show();
-    }
-    else {
-        $('#live').hide();
-        $('#right').show();
-    }
+    // Power view keeps its legend in the chart
+    $("#chart-legend").empty();
+    hp_timebar_sync();
 }
 
 
@@ -911,17 +905,6 @@ function linearRegression(x, y) {
 }
 
 // Powergraph events (advanced section)
-
-// Power graph navigation
-$("#zoomout").click(function () { view.zoomout(); powergraph_load(); });
-$("#zoomin").click(function () { view.zoomin(); powergraph_load(); });
-$('#right').click(function () { view.panright(); powergraph_load(); });
-$('#left').click(function () { view.panleft(); powergraph_load(); });
-
-$('.time').click(function () {
-    view.timewindow($(this).attr("time") / 24.0);
-    powergraph_load();
-});
 
 // Detail section events
 

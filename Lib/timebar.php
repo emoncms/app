@@ -27,7 +27,7 @@ if (!isset($timebar_ranges)) {
         <option value="<?php echo $hours ?>"><?php echo $label ?></option>
         <?php } ?>
     </select>
-    <button id="time-manual-open" class="btn" title="<?php echo tr('Select time window') ?>"><i class="icon-resize-horizontal icon-white"></i></button>
+    <button id="time-manual-open" class="btn" title="<?php echo tr('Select time window') ?>"><i class="icon-resize-horizontal"></i></button>
     <button id="zoomin" class="btn" title="<?php echo tr('Zoom in') ?>">+</button>
     <button id="zoomout" class="btn" title="<?php echo tr('Zoom out') ?>">&minus;</button>
     <button id="left" class="btn" title="<?php echo tr('Earlier') ?>">&lt;</button>

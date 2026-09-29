@@ -12,93 +12,89 @@ global $path, $session, $v;
 <?php load_js("Modules/app/Lib/vis.helper.js"); ?>
 <?php load_js("Lib/js/clipboard.js"); ?>
 
+<?php load_js("Lib/js/DateTimePicker.js"); ?>
+<?php load_css("Theme/css/datetimepicker.css"); ?>
 <div class="app-page" data-bs-theme="light">
   <section id="app-block" style="display:none">
 
-    <div class="app-block">
-      <div class="app-bar">
-        <div class="app-bar-title" id="app_name">MY HEATPUMP</div>
-        <a id="permalink" href="" title="Share this view" class="app-bar-btn"><span class="svg-icon-link"></span></a>
-        <button class="app-bar-btn config-open" title="Configure app"><span class="svg-icon-wrench"></span></button>
-      </div>
-
-      <div class="app-block-body">
-        <div id="last_updated" class="app-stat-title text-center py-2" style="display:none">Last updated 3rd of June 2022</div>
-
-        <div id="live_table" class="app-stats">
-          <div id="realtime_cop_div" style="cursor:pointer">
-            <div class="app-stat-title" id="realtime_cop_title">COP 30 mins</div>
-            <div class="app-stat-value" id="realtime_cop_value">---</div>
+    <div class="app-card">
+      <nav class="app-card-head">
+        <div class="nav nav-underline">
+          <button class="nav-link active"><i class="svg-icon-radiator"></i><span id="app_name">My Heatpump</span></button>
+        </div>
+        <div class="app-card-tools">
+          <span id="live-status" class="app-status"><span class="app-status-dot"></span><span class="app-status-text"></span></span>
+          <div class="nav">
+            <a id="permalink" href="" title="Share this view" class="nav-link"><i class="svg-icon-link"></i></a>
+            <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
           </div>
-          <div>
-            <div class="app-stat-title">Electric</div>
-            <div class="app-stat-value"><span id="heatpump_elec">---</span><span class="app-stat-unit">W</span></div>
-          </div>
-          <div>
-            <div class="app-stat-title">Heat Output</div>
-            <div class="app-stat-value"><span id="heatpump_heat">---</span><span class="app-stat-unit">W</span></div>
-          </div>
-          <div>
-            <div class="app-stat-title">Flow</div>
-            <div class="app-stat-value"><span id="heatpump_flowT">---</span><span class="app-stat-unit">&deg;C</span></div>
-          </div>
+        </div>
+      </nav>
+      <div id="live_table" class="app-live">
+        <div id="realtime_cop_div" style="cursor:pointer" title="Switch between 30 minute and instant COP">
+          <div class="app-live-label" id="realtime_cop_title">COP 30 mins</div>
+          <div class="app-live-value text-hp-cop" id="realtime_cop_value">---</div>
+        </div>
+        <div>
+          <div class="app-live-label">Electric</div>
+          <div class="app-live-value text-hp-elec"><span id="heatpump_elec">---</span><span class="power-unit-static">W</span></div>
+        </div>
+        <div>
+          <div class="app-live-label">Heat output</div>
+          <div class="app-live-value text-hp-heat"><span id="heatpump_heat">---</span><span class="power-unit-static">W</span></div>
+        </div>
+        <div>
+          <div class="app-live-label">Flow<span class="hp-return-part"> &middot; return</span></div>
+          <div class="app-live-value text-hp-flow"><span id="heatpump_flowT">---</span><span class="power-unit-static">&deg;C</span><span class="hp-return-part hp-return"><span id="heatpump_returnT">---</span>&deg;</span></div>
         </div>
       </div>
     </div>
 
-    <div class="app-block">
-      <div class="app-bar bargraph-navigation">
-        <button class="app-bar-btn bargraph_mode active" mode="combined" title="Combined">ALL</button>
-        <button class="app-bar-btn bargraph_mode" mode="running" title="When running"><span class="svg-icon-play"></span></button>
-        <button class="app-bar-btn bargraph_mode" mode="space" title="Space heating"><span class="svg-icon-radiator"></span></button>
-        <button class="app-bar-btn bargraph_mode" mode="water" title="Water heating"><span class="svg-icon-shower"></span></button>
-        <button class="app-bar-btn bargraph_mode" mode="cooling" title="Cooling"><span class="svg-icon-snowflake"></span></button>
-        <div class="app-bar-spacer"></div>
-        <button class="app-bar-btn bargraph-day">DAY</button>
-        <button class="app-bar-btn bargraph-period wide" days=7>WEEK</button>
-        <button class="app-bar-btn bargraph-period" days=30>MONTH</button>
-        <button class="app-bar-btn bargraph-period wide" days=90>3 MONTHS</button>
-        <button class="app-bar-btn bargraph-period" days=365>YEAR</button>
-        <button class="app-bar-btn bargraph-alltime">ALL</button>
-      </div>
-
-      <div class="app-bar powergraph-navigation" style="display:none">
-        <div class="app-bar-spacer"></div>
-        <button class="app-bar-btn time d-none d-sm-block" time='1' title="Last hour">H</button>
-        <button class="app-bar-btn time" time='6' title="Last 6 hours">6</button>
-        <button class="app-bar-btn time" time='24' title="Last 24 hours">D</button>
-        <button class="app-bar-btn time d-none d-sm-block" time='168' title="Last 7 days">W</button>
-        <button class="app-bar-btn time d-none d-sm-block" time='720' title="Last 30 days">M</button>
-        <button class="app-bar-btn" id="zoomin" title="Zoom in">+</button>
-        <button class="app-bar-btn" id="zoomout" title="Zoom out">-</button>
-        <button class="app-bar-btn" id="left" title="Scroll left">&lt;</button>
-        <button class="app-bar-btn" id="right" title="Scroll right">&gt;</button>
-        <button class="app-bar-btn" id="live" title="Live scroll" style="display:none; color:yellow; cursor:default">&gt;&gt;</button>
-        <button class="app-bar-btn viewhistory" title="Back to daily summary">BACK</button>
-      </div>
-
-      <div class="app-block-body">
-        <div id="placeholder_bound" style="width:100%; height:500px; overflow:hidden; position:relative">
-          <div id="placeholder" style="height:500px"></div>
-          <div id="overlay" style="display:none">
-            <div id="overlay_text"></div>
-          </div>
+    <div class="app-card app-card-body">
+      <div id="graph-nav" class="app-navbar">
+        <div class="btn-group app-segmented bargraph-navigation">
+          <button class="btn bargraph_mode active" mode="combined" title="Combined">All</button>
+          <button class="btn bargraph_mode" mode="running" title="When running"><i class="svg-icon-play"></i> Running</button>
+          <button class="btn bargraph_mode" mode="space" title="Space heating"><i class="svg-icon-radiator"></i> Space</button>
+          <button class="btn bargraph_mode" mode="water" title="Water heating"><i class="svg-icon-shower"></i> Water</button>
+          <button class="btn bargraph_mode" mode="cooling" title="Cooling"><i class="svg-icon-snowflake"></i> Cooling</button>
+        </div>
+        <?php
+        // Power view uses up to a month, daily bars from a week to all time
+        $timebar_ranges = array(1 => tr('1 hour'), 6 => tr('6 hours'), 24 => tr('24 hours'), 168 => tr('1 week'), 720 => tr('1 month'), 2160 => tr('3 months'), 8760 => tr('1 year'), 'all' => tr('All time'));
+        include "Modules/app/Lib/timebar.php";
+        ?>
+        <div class="btn-group app-segmented viewmode-toggle ms-auto">
+          <button class="btn viewpower"><?php echo tr('Power') ?></button>
+          <button class="btn viewhistory active"><?php echo tr('Daily') ?></button>
         </div>
       </div>
+      <?php include "Modules/app/Lib/timebar_manual.php"; ?>
 
-      <div class="app-block-foot d-flex flex-wrap align-items-center gap-3">
-        <div class="me-auto">COP in window: <b id="window-cop" style="cursor:pointer"></b> <span id="window-carnot-cop"></span></div>
-        <div id="emitter-spec-volume" style="display:none"></div>
-        <div id="data-error" style="display:none">DATA ERROR</div>
-        <button id="advanced-toggle" class="nav-link" style="display:none">SHOW DETAIL</button>
+      <div id="placeholder_bound" style="width:100%; height:500px; overflow:hidden; position:relative">
+        <div id="placeholder" style="height:500px"></div>
+        <div id="overlay" style="display:none">
+          <div id="overlay_text"></div>
+        </div>
       </div>
+      <div id="chart-legend" class="app-legend"></div>
 
-        <div id="advanced-block" class="app-block-body" style="display:none">
+      <div class="app-card-caption hp-window">
+        <span class="app-section-label">COP in window</span>
+        <b id="window-cop" class="hp-window-cop"></b>
+        <span id="window-carnot-cop" class="app-caption-note"></span>
+        <span id="emitter-spec-volume" class="app-caption-note" style="display:none"></span>
+        <span id="data-error" style="display:none">DATA ERROR</span>
+        <div class="nav ms-auto"><button id="advanced-toggle" class="nav-link" style="display:none">SHOW DETAIL</button></div>
+      </div>
+    </div>
+
+    <div id="advanced-block" class="app-card app-card-body" style="display:none">
           <div>
 
             <div id="error-message" style="display:none" class="alert alert-danger"></div>
 
-            <div class="app-stats">
+            <div class="hp-cop-tiles">
               <div class="show_stats_category active" key="combined">
                 <div class="cop-title">Full window</div>
                 <div class="cop-value"><span class="cop_combined">---</span></div>
@@ -142,6 +138,8 @@ global $path, $session, $v;
               <tbody class="stats_category" key="cooling" style="display:none"></tbody>
             </table>
 
+            <div class="app-section-label hp-options-label">Chart options</div>
+            <div class="hp-options">
             <div id="show_immersion_bound" style="display:none" class="app-option">
               <div style="float:right"><span id="immersion_kwh"></span> kWh</div>
               <input id="show_immersion" type="checkbox">
@@ -286,31 +284,28 @@ global $path, $session, $v;
 
             </div>
 
+            </div>
           </div>
         </div>
-    </div>
 
-    <div class="app-block">
-      <div class="app-bar">
-        <div class="app-bar-title" id="all_time_history_title">ALL TIME HISTORY</div>
-      </div>
-
-      <div class="app-block-body app-stats">
+    <div class="app-card app-card-body">
+      <div class="app-card-caption"><span class="app-section-label" id="all_time_history_title">All time history</span></div>
+      <div class="app-live">
         <div>
-          <div class="app-stat-title">Total Electricity input</div>
-          <div class="app-stat-value"><span id="total_elec"></span><span class="app-stat-unit">kWh</span></div>
+          <div class="app-live-label">Electricity input</div>
+          <div class="app-live-value text-hp-elec"><span id="total_elec"></span><span class="power-unit-static">kWh</span></div>
         </div>
         <div>
-          <div class="app-stat-title">Total Heat output</div>
-          <div class="app-stat-value"><span id="total_heat"></span><span class="app-stat-unit">kWh</span></div>
+          <div class="app-live-label">Heat output</div>
+          <div class="app-live-value text-hp-heat"><span id="total_heat"></span><span class="power-unit-static">kWh</span></div>
         </div>
         <div>
-          <div class="app-stat-title">SCOP</div>
-          <div class="app-stat-value"><span id="total_cop"></span></div>
+          <div class="app-live-label">SCOP</div>
+          <div class="app-live-value text-hp-cop"><span id="total_cop"></span></div>
         </div>
         <div id="boiler_total_bound" style="display:none">
-          <div class="app-stat-title">Boiler Heat</div>
-          <div class="app-stat-value"><span id="total_boiler"></span><span class="app-stat-unit">kWh</span></div>
+          <div class="app-live-label">Boiler heat</div>
+          <div class="app-live-value"><span id="total_boiler"></span><span class="power-unit-static">kWh</span></div>
         </div>
       </div>
     </div>
