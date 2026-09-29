@@ -49,8 +49,8 @@ body:has(.app-page[data-bs-theme="dark"]) #footer { margin: 0; }
 
 /* -- Cards: compact layout, from MyElectricFlow ---------------------------- */
 
-/* Light apps on cards sit on the grey page background */
-body:has(.app-page[data-bs-theme="light"] .app-card) { background-color: var(--bg-body); }
+/* Light apps on cards sit on the grey page background. Config stays dark. */
+body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { background-color: var(--bg-body); }
 
 /* Bordered block, as the config cards */
 .app-card {
