@@ -16,81 +16,88 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
 
 <section id="app-block" style="display:none" class="block">
 
-    <div class="app-panel">
+    <div class="app-card">
+        <nav class="app-card-head">
+            <div id="tabs" class="nav nav-underline">
+                <button class="nav-link view-toggle-btn active" data-view="flows"><i class="svg-icon-shuffle"></i><?php echo tr('Electric flow') ?></button>
+                <button class="nav-link view-toggle-btn d-none" data-view="costs"><i class="svg-icon-schedule"></i><?php echo tr('Tariff explorer') ?></button>
+            </div>
+            <div class="app-card-tools">
+                <span id="live-status" class="app-status"><span class="app-status-dot"></span><span class="app-status-text"></span></span>
+                <div class="nav">
+                    <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
+                    <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+                </div>
+            </div>
+        </nav>
 
-    <nav class="app-top-bar">
-        <div id="tabs" class="nav nav-underline">
-            <button class="nav-link view-toggle-btn active" data-view="flows"><i class="svg-icon-shuffle"></i><?php echo tr('Electric flow') ?></button>
-            <button class="nav-link view-toggle-btn d-none" data-view="costs"><i class="svg-icon-schedule"></i><?php echo tr('Tariff explorer') ?></button>
+        <div id="live-power-view" class="app-live">
+            <div>
+                <div class="app-live-label"><?php echo tr('USE') ?></div>
+                <div class="app-live-value text-use"><span class="use-now"></span><span class="power-unit"></span></div>
+            </div>
+            <div>
+                <div class="app-live-label"><?php echo tr('GRID') ?> &middot; <span class="balance-label">-</span></div>
+                <div class="app-live-value"><span class="grid-now">0</span><span class="power-unit">W</span></div>
+            </div>
+            <div>
+                <div id="live-solar-title" class="app-live-label"><?php echo tr('SOLAR') ?></div>
+                <div id="live-solar-value" class="app-live-value text-solar"><span class="solar-now"></span><span class="power-unit"></span></div>
+            </div>
+            <div class="battery-section">
+                <div class="app-live-label"><?php echo tr('BATTERY') ?> &middot; <span class="battery_now_title"><?php echo tr('POWER') ?></span></div>
+                <div class="app-live-value text-battery"><span class="battery-now">--</span><span class="power-unit"></span></div>
+            </div>
+            <div class="battery-section">
+                <div class="app-live-label"><?php echo tr('TIME LEFT') ?></div>
+                <div class="app-live-value text-battery"><span class="battery_time_left">--</span></div>
+            </div>
+            <div class="battery-section">
+                <div class="app-live-label"><span class="d-inline d-sm-none"><?php echo tr('SOC') ?></span><span class="d-none d-sm-inline"><?php echo tr('STATE OF CHARGE') ?></span></div>
+                <div class="app-live-value text-battery"><span class="battery_soc">-</span><span class="power-unit-static">%</span></div>
+            </div>
         </div>
-        <div class="nav">
-            <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
-            <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
-        </div>
-    </nav>
 
-    <div id="live-power-view" class="stats-grid">
-        <div>
-            <h5 class="power-title"><?php echo tr('USE') ?></h5>
-            <h2 class="power-value text-use"><span class="use-now"></span><span class="power-unit"></span></h2>
-        </div>
-        <div>
-            <h5 class="power-title"><span class="balance-label">-</span></h5>
-            <h2 class="power-value"><span class="grid-now">0</span><span class="power-unit">W</span></h2>
-        </div>
-        <div>
-            <h5 id="live-solar-title" class="power-title"><?php echo tr('SOLAR') ?></h5>
-            <h2 id="live-solar-value" class="power-value text-solar"><span class="solar-now"></span><span class="power-unit"></span></h2>
-        </div>
-        <div class="battery-section">
-            <h5 class="power-title"><span class="d-none d-sm-inline"><?php echo tr('BATTERY'); ?></span> <span class="battery_now_title"><?php echo tr('POWER') ?></span></h5>
-            <h2 class="power-value text-battery"><span class="battery-now">--</span><span class="power-unit"></span></h2>
-        </div>
-        <div class="battery-section">
-            <h5 class="power-title"><span class="battery_time_left_title"><span class="d-inline d-sm-none"><?php echo tr('TIME LEFT') ?></span><span class="d-none d-sm-inline"><?php echo tr('BATTERY TIME LEFT') ?></span></span></h5>
-            <h2 class="power-value text-battery"><span class="battery_time_left">--</span></h2>
-        </div>
-        <div class="battery-section">
-            <h5 class="power-title"><span class="d-inline d-sm-none"><?php echo tr('SOC') ?></span><span class="d-none d-sm-inline"><?php echo tr('STATE OF CHARGE') ?></span></h5>
-            <h2 class="power-value text-battery"><span class="battery_soc">-</span>%</h2>
+        <div id="live-cost-view" class="app-live d-none">
+            <div>
+                <div class="app-live-label"><span class="balance-label">-</span></div>
+                <div class="app-live-value"><span class="grid-now">0</span><span class="power-unit">W</span></div>
+            </div>
+            <div>
+                <div class="app-live-label"><span class="live-cost-tariff-label"><?php echo tr('IMPORT PRICE') ?></span></div>
+                <div class="app-live-value"><span class="live-cost-tariff-now">--</span><span class="live-cost-tariff-unit power-unit-static">p/kWh</span></div>
+            </div>
         </div>
     </div>
 
-    <div id="live-cost-view" class="stats-grid stats-grid-2 d-none">
-        <div>
-            <h5 class="power-title"><span class="balance-label">-</span></h5>
-            <h2 class="power-value"><span class="grid-now">0</span><span class="power-unit">W</span></h2>
-        </div>
-        <div>
-            <h5 class="power-title"><span class="live-cost-tariff-label"><?php echo tr('IMPORT PRICE') ?></span></h5>
-            <h2 class="power-value"><span class="live-cost-tariff-now">--</span><span class="live-cost-tariff-unit" style="font-size:1.2rem"> p/kWh</span></h2>
-        </div>
-    </div>
-    </div>
-
-    <div class="app-panel">
+    <div class="app-card app-card-body">
         <div id="graph-nav" class="app-navbar">
             <div class="btn-group app-timebar">
-                <button class='btn time' time='1'>1<?php echo tr('h') ?></button>
-                <button class='btn time' time='3'>3<?php echo tr('h') ?></button>
-                <button class='btn time' time='6'>6<?php echo tr('h') ?></button>
-                <button class='btn time' time='24'><?php echo tr('D') ?></button>
-                <button class='btn time' time='168'><?php echo tr('W') ?></button>
-                <button class='btn time' time='720'><?php echo tr('M') ?></button>
-                <button class='btn time' time='8760'><?php echo tr('Y') ?></button>
-                <button id='zoomin' class='btn'>+</button>
-                <button id='zoomout' class='btn'>-</button>
-                <button id='left' class='btn'>&lt;</button>
-                <button id='right' class='btn'>&gt;</button>
-                <button id='time-manual-open' class='btn' title="<?php echo tr('Select time window') ?>"><i class="svg-icon-calendar"></i></button>
+                <select id="time-select" class="btn" title="<?php echo tr('Time range') ?>">
+                    <option id="time-custom" value="" hidden></option>
+                    <option value="1"><?php echo tr('1 hour') ?></option>
+                    <option value="3"><?php echo tr('3 hours') ?></option>
+                    <option value="6"><?php echo tr('6 hours') ?></option>
+                    <option value="24"><?php echo tr('24 hours') ?></option>
+                    <option value="168"><?php echo tr('1 week') ?></option>
+                    <option value="720"><?php echo tr('1 month') ?></option>
+                    <option value="8760"><?php echo tr('1 year') ?></option>
+                </select>
+                <button id='time-manual-open' class='btn' title="<?php echo tr('Select time window') ?>"><i class="icon-resize-horizontal icon-white"></i></button>
+                <button id='zoomin' class='btn' title="<?php echo tr('Zoom in') ?>">+</button>
+                <button id='zoomout' class='btn' title="<?php echo tr('Zoom out') ?>">&minus;</button>
+                <button id='left' class='btn' title="<?php echo tr('Earlier') ?>">&lt;</button>
+                <button id='right' class='btn' title="<?php echo tr('Later') ?>">&gt;</button>
+                <button id='time-now' class='btn' title="<?php echo tr('Move the window to now') ?>" style="display:none"><?php echo tr('Now') ?></button>
             </div>
-            <span id="data-mode-indicator" class="d-none d-md-inline"></span>
-            <div class="nav ms-auto">
-                <button class="nav-link viewhistory" title="<?php echo tr('View History') ?>"><?php echo tr("Daily") ?></button>
+            <span id="window-label" class="app-window-text"></span>
+            <div class="btn-group app-segmented viewmode-toggle ms-auto">
+                <button class="btn viewpower active"><?php echo tr('Power') ?></button>
+                <button class="btn viewhistory"><?php echo tr('Daily') ?><span class="d-none d-sm-inline"> kWh</span></button>
             </div>
         </div>
 
-        <div id="graph-nav-manual" class="d-flex flex-wrap align-items-center gap-2 mb-2 d-none">
+        <div id="graph-nav-manual" class="app-navbar d-none">
             <div class="input-group w-auto">
                 <span class="input-group-text"><?php echo tr('Start') ?></span>
                 <input id="request-start" class="form-control" type="text" placeholder="YYYY-MM-DD HH:MM:SS" />
@@ -99,17 +106,18 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
                 <span class="input-group-text"><?php echo tr('End') ?></span>
                 <input id="request-end" class="form-control" type="text" placeholder="YYYY-MM-DD HH:MM:SS" />
             </div>
-            <div class="btn-group app-timebar flex-grow-0">
-                <button id='time-manual-close' class='btn' title="<?php echo tr('Done') ?>"><i class="svg-icon-check"></i></button>
+            <div class="btn-group app-timebar">
+                <button id='time-manual-close' class='btn' title="<?php echo tr('Done') ?>"><i class="icon-ok icon-white"></i></button>
             </div>
         </div>
 
         <div id="placeholder_bound">
             <div id="placeholder"></div>
         </div>
+        <div id="chart-legend" class="app-legend"></div>
     </div>
-        
-    <div class="app-panel">
+
+    <div class="app-card app-card-body">
 
     <div id="cost-view" class="d-none">
         <table class="table">
@@ -147,105 +155,52 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
         </div>
     </div>
 
-    <table id="flow-block-view" class="statstable">
-        <tr>
-            <td id="solar-box" class="statsbox statsbox-energy statsbox-solar solar-section" colspan="3">
-                <div class="statsbox-inner-unit">
-                    <div id="statsbox-generation" class="statsbox-padded">
-                        <div class="statsbox-title"><span class="generationtitle">SOLAR</span></div>
-                        <div><span class="statsbox-value solar_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                        <div class="prc-solar-to-battery">
-                            <span class="statsbox-prc solar_to_battery_prc prc-solar-battery">0</span>
-                        </div>
-                        <div class="prc-solar-direct">
-                            <span class="statsbox-prc solar_to_load_prc prc-solar">0</span>
-                        </div>
-                        <div class="prc-solar-export">
-                            <span class="statsbox-prc solar_export_prc prc-solar">0</span>
-                        </div>
-                    </div>
-                </div>
-            </td>
-            
-            <td id="solar-to-grid-box" class="statsbox solar-section">
-                <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-right"><span class="statsbox-value solar_to_grid">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
+    <div id="flow-section">
+        <div class="app-card-caption">
+            <span class="app-section-label"><?php echo tr('Energy flow') ?> &middot; <?php echo tr('this window') ?></span>
+            <span class="app-caption-note prc-self">
+                <span class="prc-solar"><?php echo tr('Self-consumption') ?> <b class="self_consumption_prc"></b> &middot; </span><?php echo tr('Self-sufficiency') ?> <b class="self_sufficiency_prc"></b>
+            </span>
+        </div>
 
-            <td id="grid-box" class="statsbox statsbox-energy statsbox-import">
-                <div class="statsbox-padded statsbox-inner-unit">
-                    <div class="statsbox-title">GRID</div>
-                    <div><span class="statsbox-value grid_balance_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
-        </tr>
-        
-        <tr>
-            <td id="solar-to-battery-box" class="statsbox">
-                <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value solar_to_battery">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
+        <div id="flow-block-view" class="app-flow">
+            <div id="solar-box" class="app-flow-node app-flow-wide statsbox-solar">
+                <span class="app-flow-name"><?php echo tr('SOLAR') ?></span><span class="app-flow-value solar_kwh">0</span><span class="app-flow-unit">kWh</span>
+            </div>
+            <div id="solar-to-grid-box" class="app-flow-link">
+                <span class="app-flow-value solar_to_grid">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9654;</span>
+            </div>
+            <div id="grid-box" class="app-flow-node statsbox-import">
+                <span class="app-flow-name"><?php echo tr('GRID') ?></span><span class="app-flow-value grid_balance_kwh">0</span><span class="app-flow-unit">kWh</span>
+            </div>
 
-            <td id="grid-to-battery-box" class="statsbox">
-                <div id="battery_import" class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-left"><div class="statsbox-flow-title">GRID CHARGE</div><span class="statsbox-value grid_to_battery">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
-            
-            <td id="solar-to-load-box" class="statsbox solar-section">
-                <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value solar_to_load">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
+            <div id="solar-to-battery-box" class="app-flow-link">
+                <span class="app-flow-value solar_to_battery">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
+            </div>
+            <div id="grid-to-battery-box" class="app-flow-link">
+                <span id="battery_import"><span class="app-flow-arrow">&#9664;</span><span class="app-flow-title"><?php echo tr('Grid charge') ?></span><span class="app-flow-value grid_to_battery">0</span></span>
+            </div>
+            <div id="solar-to-load-box" class="app-flow-link">
+                <span class="app-flow-value solar_to_load">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
+            </div>
+            <div id="battery-to-grid-box" class="app-flow-link">
+                <span id="battery_export"><span class="app-flow-title"><?php echo tr('Battery to grid') ?></span><span class="app-flow-value battery_to_grid">0</span><span class="app-flow-arrow">&#9654;</span></span>
+            </div>
+            <div id="grid-to-load-box" class="app-flow-link">
+                <span class="app-flow-value grid_to_load">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
+            </div>
 
-            <td id="battery-to-grid-box" class="statsbox">
-                <div id="battery_export" class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-right"><div class="statsbox-flow-title">BATTERY TO GRID</div><span class="statsbox-value battery_to_grid">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
-            
-            <td id="grid-to-load-box" class="statsbox">
-                <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value grid_to_load">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
-        </tr>
-        
-        <tr>
-            <td id="battery-box" class="statsbox statsbox-energy statsbox-battery">
-                <div class="statsbox-padded statsbox-inner-unit">
-                    <div class="statsbox-title">BATTERY</div>
-                    <div><span class="statsbox-value battery_soc_change">0</span> <span class="statsbox-units">%</span></div>
-                </div>
-            </td>
-
-            <td id="battery-to-load-box" class="statsbox">
-                <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-right"><span class="statsbox-value battery_to_load">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
-
-            <td id="house-box" class="statsbox statsbox-energy statsbox-house" colspan="3">
-                <div class="statsbox-inner-unit">
-                    <div class="statsbox-padded">
-                        <div class="statsbox-title">HOUSE</div>
-                        <div><span class="statsbox-value use_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                        <div class="prc-battery-to-house">
-                            <span class="statsbox-prc use_from_battery_prc prc-battery">0</span>
-                        </div>
-                        <div class="prc-solar-to-house">
-                            <span class="statsbox-prc use_from_solar_prc prc-solar">0</span>
-                        </div>
-                        <div class="prc-grid-to-house">
-                            <span class="statsbox-prc use_from_import_prc">0</span>
-                        </div>
-                    </div>
-                </div>
-            </td>
-        </tr>
-    </table>
+            <div id="battery-box" class="app-flow-node statsbox-battery">
+                <span class="app-flow-name"><?php echo tr('BATTERY') ?></span><span class="app-flow-value battery_soc_change">0</span><span class="app-flow-unit">%</span>
+            </div>
+            <div id="battery-to-load-box" class="app-flow-link">
+                <span class="app-flow-value battery_to_load">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9654;</span>
+            </div>
+            <div id="house-box" class="app-flow-node app-flow-wide statsbox-house">
+                <span class="app-flow-name"><?php echo tr('HOUSE') ?></span><span class="app-flow-value use_kwh">0</span><span class="app-flow-unit">kWh</span>
+            </div>
+        </div>
+    </div>
     </div>
 </section>
 

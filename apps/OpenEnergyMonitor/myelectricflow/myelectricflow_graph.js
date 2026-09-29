@@ -231,7 +231,7 @@ function process_and_draw_graph() {
 // fitted to the current view.start / view.end time range.
 function draw_graph() {
 
-    $(".time[time=1], .time[time=3], .time[time=6], .time[time=24]").toggle(viewmode !== "bargraph");
+    $("#time-select").find("option[value=1], option[value=3], option[value=6], option[value=24]").prop("hidden", viewmode == "bargraph");
 
     // Theme colours from the page, so the chart follows the light or dark set
     const page_css = getComputedStyle(document.querySelector(".app-page"));
@@ -272,13 +272,8 @@ function draw_graph() {
 
     $(".ajax-loader").hide();
 
-    const mode_label = data_mode === "kwh" ? "E" : "P";
-    const auto_label = (autoupdate) ? "AUTO | " : "";
-    $("#data-mode-indicator").text(auto_label + mode_label);
-    // set title
-    let indicator_title = (autoupdate) ? "Auto-updating " : "";
-    indicator_title += (data_mode === "kwh") ? "From energy data" : "From power data";
-    $("#data-mode-indicator").attr("title", indicator_title);
+    render_legend(powerseries);
+    update_window_label();
 }
 
 // Remove null gaps shorter than 15 minutes by forward-filling from the last
@@ -425,10 +420,9 @@ function bind_bar_click() {
             view.start = ref_day_data[z][0];
             view.end = view.start + 86400*1000;
 
-            $(".viewhistory").toggleClass('active');
-            
             autoupdate = false;
             viewmode = "powergraph";
+            update_viewmode_buttons();
 
             // cache the daily kWh data
             kwhd_cache = JSON.parse(JSON.stringify(kwh_data));

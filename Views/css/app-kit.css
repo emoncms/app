@@ -309,6 +309,209 @@ body:has(.app-page[data-bs-theme="dark"]) #footer { margin: 0; }
     .statsbox-units { display: none; }
 }
 
+/* -- Cards: compact layout, from MyElectricFlow ---------------------------- */
+
+/* Bordered block, as the config cards */
+.app-card {
+    margin-bottom: 10px;
+    background-color: var(--ec-app-panel-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 8px;
+}
+.app-card:first-child { margin-top: 14px; }
+.app-card-body { padding: 10px 16px 8px; }
+
+/* Header row: tabs, then status and tools */
+.app-card-head {
+    display: flex;
+    align-items: stretch;
+    min-height: 40px;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+.app-card-head > .nav { align-items: stretch; }
+.app-card-tools {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-left: auto;
+}
+
+/* Live or paused, with a dot */
+.app-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--bs-secondary-color);
+    white-space: nowrap;
+}
+.app-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--bs-secondary-color);
+}
+.app-status.is-live .app-status-dot { background-color: var(--ec-btn-success); }
+
+/* Row of live values. Hidden items give their width to the rest. */
+.app-live {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    padding: 10px 4px;
+}
+.app-live > * { min-width: 0; padding: 0 12px; }
+.app-live > * + * { border-left: 1px solid var(--border); }
+.app-live-label {
+    overflow: hidden;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--bs-secondary-color);
+}
+.app-live-value {
+    font-size: 28px;
+    font-weight: bold;
+    line-height: 34px;
+    white-space: nowrap;
+}
+.app-live-value :is(.power-unit, .power-unit-static) {
+    margin-left: 3px;
+    font-size: 14px;
+}
+
+@media (max-width: 767.98px) {
+    .app-live { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 8px; }
+    .app-live > :nth-child(3n+1) { border-left: none; }
+    .app-live > * { padding: 0 8px; }
+    .app-live-value { font-size: 22px; line-height: 28px; }
+}
+
+/* Uppercase label and a note after it */
+.app-card-caption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+    margin-bottom: 8px;
+}
+.app-section-label {
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color);
+}
+.app-caption-note { font-size: 12px; color: var(--ec-text-muted); }
+.app-caption-note b { color: var(--bs-body-color); }
+
+/* Chart toolbar in a card: time bar, window label, zoom, mode toggle */
+.app-card .app-navbar { gap: 8px 12px; margin-bottom: 6px; }
+.app-timebar > select.btn {
+    --bs-btn-padding-x: 0.6rem;
+    --bs-btn-font-size: 14px;
+    min-width: 0;
+    text-align: left;
+}
+.app-timebar > select.btn option { color: var(--bs-body-color); background-color: var(--bs-body-bg); }
+/* Sprite icons in the time bar, faded as the button text */
+.app-timebar > .btn > [class^="icon-"] { opacity: 0.6; }
+.app-timebar > .btn:hover > [class^="icon-"] { opacity: 1; }
+.app-window-text { font-size: 13px; color: var(--bs-secondary-color); white-space: nowrap; }
+@media (max-width: 991.98px) { .app-window-text { display: none; } }
+
+/* Two way toggle */
+.app-segmented > .btn {
+    --bs-btn-padding-x: 0.75rem;
+    --bs-btn-padding-y: 3px;
+    --bs-btn-font-size: 13px;
+    --bs-btn-line-height: 24px;
+    --bs-btn-font-weight: bold;
+    --bs-btn-color: var(--bs-secondary-color);
+    --bs-btn-bg: transparent;
+    --bs-btn-border-color: var(--bs-border-color);
+    --bs-btn-hover-color: var(--bs-emphasis-color);
+    --bs-btn-hover-bg: transparent;
+    --bs-btn-hover-border-color: var(--bs-border-color);
+    --bs-btn-active-color: var(--bs-emphasis-color);
+    --bs-btn-active-bg: rgba(var(--bs-primary-rgb), 0.2);
+    --bs-btn-active-border-color: var(--bs-border-color);
+}
+
+/* Legend below a chart, built from the series */
+.app-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    min-height: 22px;
+    padding: 4px 0 0 40px;
+    font-size: 12px;
+    color: var(--bs-secondary-color);
+}
+.app-legend-item { display: inline-flex; align-items: center; gap: 5px; }
+.app-legend-swatch { width: 10px; height: 10px; border-radius: 2px; }
+.app-legend-line { width: 14px; height: 2px; }
+
+/* Compact flow diagram: five columns, energy nodes and the flows between them.
+   Flow colour comes from --statsbox-color, set by the app. */
+.app-flow {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-rows: 46px 38px 46px;
+    gap: 6px;
+    margin-bottom: 4px;
+    font-weight: bold;
+}
+.app-flow > *,
+.app-flow-link > span[id] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 0;
+    white-space: nowrap;
+}
+.app-flow > * { overflow: hidden; }
+.app-flow-wide { grid-column: span 3; }
+/* :where keeps the energy fill classes stronger */
+:where(.app-flow-node, .app-flow-link) { background-color: var(--ec-app-box-bg); }
+.app-flow-node { color: var(--bs-secondary-color); }
+.app-flow-node:is(.statsbox-solar, .statsbox-import, .statsbox-battery, .statsbox-house) { color: var(--ec-energy-text); }
+.app-flow-link {
+    --statsbox-color: var(--border);
+    color: var(--statsbox-color);
+}
+.app-flow-name { font-size: 13px; }
+.app-flow-value { font-size: 18px; }
+.app-flow-node .app-flow-value { font-size: 22px; }
+.app-flow-unit,
+.app-flow-title { font-size: 12px; }
+.app-flow-arrow { font-size: 11px; }
+
+@media (max-width: 767.98px) {
+    .app-flow { grid-template-rows: 40px 34px 40px; gap: 4px; }
+    .app-flow > *, .app-flow-link > span[id] { gap: 3px; }
+    .app-flow-value { font-size: 15px; }
+    .app-flow-node .app-flow-value { font-size: 17px; }
+    .app-flow-name { font-size: 11px; }
+    .app-flow-title, .app-flow-link .app-flow-unit { display: none; }
+    .app-flow-node:not(.app-flow-wide) :is(.app-flow-name, .app-flow-unit) { display: none; }
+}
+
+/* Phones: time bar on its own row, window label shortened */
+@media (max-width: 575.98px) {
+    .app-card-body { padding: 8px 10px 6px; }
+    .app-card-head { padding: 0 6px; }
+    .app-status-text { display: none; }
+    .app-card .app-navbar { gap: 6px; }
+    .app-card .app-navbar > .app-timebar:first-child { flex: 1 1 100%; }
+    .app-legend { padding-left: 0; }
+}
+
 /* -- Tables ---------------------------------------------------------------- */
 
 /* Colour square before a name */

@@ -562,6 +562,8 @@ function draw_tariff_graph() {
     };
 
     Flot.plot(document.getElementById('placeholder'), graph_series, options);
+    render_legend(graph_series);
+    update_window_label();
     $(".ajax-loader").hide();
 }
 
@@ -601,6 +603,8 @@ function profile_draw() {
     };
 
     Flot.plot(document.getElementById('placeholder'), graph_series, options);
+    render_legend(graph_series);
+    update_window_label();
     $(".ajax-loader").hide();
 }
 

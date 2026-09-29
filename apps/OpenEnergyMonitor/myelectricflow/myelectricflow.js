@@ -360,7 +360,7 @@ function init()
 
     // Show history bargraph button only when all required kWh flow feeds are available for the current mode
     const has_history = check_history_feeds(mode);
-    $(".viewhistory").toggle(has_history);
+    $(".viewmode-toggle").toggle(has_history);
 
     // The tariff cost breakdown also needs the half-hourly kWh flow feeds, so gate its toggle
     // button on the same condition.
@@ -373,8 +373,10 @@ function init()
     $('#right').click(function () {view.panright(); autoupdate = false; load_process_draw_graph();});
     $('#left').click(function () {view.panleft(); autoupdate = false; load_process_draw_graph();});
     
-    $('.time').click(function () {
-        view.timewindow($(this).attr("time")/24.0);
+    $('#time-select').change(function () {
+        const hours = parseFloat($(this).val());
+        if (!hours) return;
+        view.timewindow(hours/24.0);
         live_timerange = view.end - view.start;
 
         if (live_timerange < (25*3600000)) {
@@ -386,13 +388,12 @@ function init()
         load_process_draw_graph();
     });
     
-    $(".viewhistory").click(function () {
-        $btn = $(this);
-        $btn.toggleClass('active');
-        
-        $('.balanceline').attr('disabled', $btn.is('.active'));
-        viewmode = $btn.is('.active') ? 'bargraph' : 'powergraph';
-        
+    $(".viewpower, .viewhistory").click(function () {
+        const bargraph = $(this).is(".viewhistory");
+        if (bargraph === (viewmode == "bargraph")) return;
+        viewmode = bargraph ? "bargraph" : "powergraph";
+        update_viewmode_buttons();
+
         if (viewmode=="bargraph") {
             power_start = view.start
             power_end = view.end
@@ -426,7 +427,7 @@ function init()
         $(".view-toggle-btn").removeClass("active");
         $(this).addClass("active");
 
-        $("#flow-block-view").toggleClass("d-none", tariff_view_active);
+        $("#flow-section").toggleClass("d-none", tariff_view_active);
         $("#cost-view").toggleClass("d-none", !tariff_view_active);
 
         // Top live panel: 6-box power grid in flow mode, 2-column import/export + tariff in cost mode.
@@ -445,8 +446,7 @@ function init()
 
         // The shared chart switches style by mode: hide power/bar-specific chrome in Costs mode.
         // (The Costs toggle is only available when has_history, so the Daily button is restorable.)
-        $(".viewhistory").toggle(!tariff_view_active);
-        $("#data-mode-indicator").css("visibility", tariff_view_active ? "hidden" : "visible");
+        $(".viewmode-toggle").toggle(!tariff_view_active);
 
         if (tariff_view_active) {
             load_tariff_analysis();        // loads + draws the tariff chart and tables
@@ -465,6 +465,15 @@ function init()
     datetimepicker1 = DateTimePicker.attach(document.getElementById('request-start'), { onChange: set_view_start });
     datetimepicker2 = DateTimePicker.attach(document.getElementById('request-end'), { onChange: set_view_end });
 
+    // Move the window to end now, keeping its length. Follows live data for a day or less.
+    $("#time-now").click(function () {
+        live_timerange = view.end - view.start;
+        view.end = +new Date();
+        view.start = view.end - live_timerange;
+        autoupdate = live_timerange < (25*3600000);
+        load_process_draw_graph();
+    });
+
     $("#time-manual-open").click(function () {
         update_time_pickers();
         $("#graph-nav").addClass("d-none");
@@ -475,6 +484,61 @@ function init()
         $("#graph-nav").removeClass("d-none");
     });
 
+}
+
+// Power and Daily kWh buttons follow viewmode
+function update_viewmode_buttons() {
+    $(".viewhistory").toggleClass("active", viewmode == "bargraph");
+    $(".viewpower").toggleClass("active", viewmode != "bargraph");
+}
+
+// Window label between the pan buttons, and the Now button when the window ends in the past
+function update_window_label() {
+    const daily = viewmode == "bargraph" && !tariff_view_active;
+    const opts = daily
+        ? { day: "numeric", month: "short", year: "numeric" }
+        : { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" };
+    const fmt = (t) => new Date(t).toLocaleString(undefined, opts);
+    $("#window-label").text(fmt(view.start) + " \u2013 " + fmt(view.end));
+
+    // Range select shows the window length, from the list or as a custom entry
+    const hours = Math.round((view.end - view.start) / 3600000);
+    const $option = $("#time-select option[value='" + hours + "']");
+    if ($option.length && !$option.prop("hidden")) {
+        $("#time-select").val(String(hours));
+    } else {
+        $("#time-custom").text(hours < 48 ? hours + " h" : Math.round(hours / 24) + " days");
+        $("#time-select").val("");
+    }
+
+    const behind = (+new Date() - view.end) > 300000;
+    $("#time-now").toggle(behind && viewmode == "powergraph" && !tariff_view_active);
+    $(".viewpower").attr("title", data_mode === "kwh" ? "Chart from energy data" : "Chart from power data");
+}
+
+// Header status: age of the latest feed value. Live when under 5 minutes old.
+function update_live_status(time) {
+    if (!time) return;
+    const age = Math.max(0, Date.now() / 1000 - time);
+    const live = age < 300;
+    let text = "Live";
+    if (!live) {
+        if (age < 3600) text = Math.round(age / 60) + " min";
+        else if (age < 172800) text = Math.round(age / 3600) + " h";
+        else text = Math.round(age / 86400) + " days";
+        text = "Updated " + text + " ago";
+    }
+    $("#live-status").toggleClass("is-live", live).attr("title", "Latest value " + new Date(time * 1000).toLocaleString());
+    $("#live-status .app-status-text").text(text);
+}
+
+// Legend below the chart. Series on the second axis are lines.
+function render_legend(series) {
+    const items = series.filter(s => s.label).map(s => {
+        const mark = s.yaxis == 2 ? "app-legend-line" : "app-legend-swatch";
+        return '<span class="app-legend-item"><span class="' + mark + '" style="background:' + s.color + '"></span>' + s.label + '</span>';
+    });
+    $("#chart-legend").html(items.join(""));
 }
 
 // Start and end from the manual date-time pickers
@@ -743,9 +807,10 @@ function resize()
 
     let width = placeholder_bound.width();
 
-    // Calculate height from the top of the chart to the bottom of the viewport,
-    // leaving enough room for the stats table below to remain visible.
-    const bottom_margin = $('.statstable').outerHeight(true) + 64;
+    // Height from the top of the chart to the bottom of the viewport, with room
+    // for the legend and, when shown, the flow block
+    let bottom_margin = $('#chart-legend').outerHeight(true) + 40;
+    if ($('#flow-section').is(':visible')) bottom_margin += $('#flow-section').closest('.app-card').outerHeight(true);
     const offset_top = placeholder_bound.offset().top - $(window).scrollTop();
     let height = $(window).height() - offset_top - bottom_margin;
 
@@ -791,18 +856,17 @@ function livefn()
         battery_soc_now = parseInt(feeds[config.app.battery_soc.value].value);
     }
 
-    if (autoupdate) {
-
-        let updatetime = false;
-
-        // Find and update time based on the first available.
-        for (const key in available) {
-            if (available[key] && feeds[config.app[key].value]!=undefined) {
-                updatetime = feeds[config.app[key].value].time;
-                break;
-            }
+    // Time of the first available feed
+    let updatetime = false;
+    for (const key in available) {
+        if (available[key] && feeds[config.app[key].value]!=undefined) {
+            updatetime = feeds[config.app[key].value].time;
+            break;
         }
+    }
+    update_live_status(updatetime);
 
+    if (autoupdate) {
         if (updatetime) {
             // Append new data to timeseries for each available feed, and trim old data outside of view
             for (const key in available) {
@@ -943,6 +1007,7 @@ function solar_battery_visibility() {
     $(".prc-solar").toggle(s);
     $(".prc-battery").toggle(b);
     $(".prc-solar-battery").toggle(s && b);
+    $(".prc-self").toggle(s || b);
 
     $(".battery-section").toggle(b);
 }
@@ -996,6 +1061,8 @@ function calc_stats(d) {
         solar_to_battery_prc:  solar_kwh > 0 ? (100 * d.solar_to_battery  / solar_kwh).toFixed(0) + "%" : "",
         use_from_solar_prc:    use_kwh   > 0 ? (100 * d.solar_to_load     / use_kwh).toFixed(0)   + "%" : "",
         use_from_battery_prc:  use_kwh   > 0 ? (100 * d.battery_to_load   / use_kwh).toFixed(0)   + "%" : "",
+        self_consumption_prc:  solar_kwh > 0 ? (100 * (d.solar_to_load + d.solar_to_battery) / solar_kwh).toFixed(0) + "%" : "",
+        self_sufficiency_prc:  use_kwh   > 0 ? (100 * (d.solar_to_load + d.battery_to_load) / use_kwh).toFixed(0)    + "%" : "",
     };
 }
 
@@ -1024,6 +1091,8 @@ function updateStats(d) {
     $(".battery_to_load").html(d.battery_to_load.toFixed(1));
     $(".battery_to_grid").html(d.battery_to_grid.toFixed(1));
     $(".use_from_battery_prc").html(s.use_from_battery_prc);
+    $(".self_consumption_prc").html(s.self_consumption_prc);
+    $(".self_sufficiency_prc").html(s.self_sufficiency_prc);
 
     toggleBatteryFlowVisibility(d.grid_to_battery, d.battery_to_grid);
 }
