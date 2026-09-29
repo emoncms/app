@@ -3,7 +3,6 @@
     global $path, $session, $v;
 ?>
 <?php load_css("Modules/app/Views/css/app-kit.css"); ?>
-<?php load_css("Lib/fonts/montserrat/montserrat.css"); ?>
 <?php load_css("Modules/app/apps/OpenEnergyMonitor/timeofuse/timeofuse.css"); ?>
 <?php load_js("Modules/feed/feed.js"); ?>
 
