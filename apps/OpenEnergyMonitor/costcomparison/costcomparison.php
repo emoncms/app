@@ -3,6 +3,7 @@
     global $path, $session, $v;
 ?>
 <?php load_css("Modules/app/Views/css/app-kit.css"); ?>
+<?php load_css("Lib/fonts/montserrat/montserrat.css"); ?>
 <?php load_js("Modules/feed/feed.js"); ?>
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
 <?php load_js("Modules/app/Lib/vis.helper.js"); ?>

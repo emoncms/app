@@ -29,6 +29,9 @@ body:has(.app-page[data-bs-theme="dark"]) #footer { margin: 0; }
 }
 .app-panel:first-child { margin-top: 1rem; }
 
+/* Light apps use Montserrat, as MyHeatpump */
+.app-page[data-bs-theme="light"] { font-family: Montserrat, Verdana, sans-serif; }
+
 /* -- Blocks: header bar and body, from MyHeatpump --------------------------- */
 
 .app-block { margin-bottom: 1.25rem; }
