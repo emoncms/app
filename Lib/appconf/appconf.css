@@ -1,9 +1,6 @@
 /* App config panel. Page, cards, rows and labels are the reference page
-   components in Theme/css/bootstrap5-theme.css. */
-
-/* Page background and footer sit outside the panel */
-body.app-config-open { background-color: #222; }
-body.app-config-open #footer { background-color: #181818; color: #999; }
+   components in Theme/css/bootstrap5-theme.css. Page background and footer
+   come from body.app-config-open in the same file. */
 
 .cfg-progress { flex: 1; max-width: 260px; --bs-progress-height: 6px; }
 

@@ -927,13 +927,15 @@ function solar_battery_visibility() {
     $("#solar-box").toggleClass("statsbox-solar", s);
     $("#battery-box").toggleClass("statsbox-battery", b);
 
+    // Flows that cannot occur use the border colour
+    const off = "var(--border)";
     const arrowColors = {
-        "#solar-to-grid-box":    s         ? flow_colors["solar_to_grid"]    : "#333",
-        "#solar-to-load-box":    s         ? flow_colors["solar_to_load"]    : "#333",
-        "#solar-to-battery-box": s && b    ? flow_colors["solar_to_battery"] : "#333",
-        "#battery-to-load-box":  b         ? flow_colors["battery_to_load"]  : "#333",
-        "#battery-to-grid-box":  b         ? flow_colors["battery_to_grid"]  : "#333",
-        "#grid-to-battery-box":  b         ? flow_colors["grid_to_battery"]  : "#333",
+        "#solar-to-grid-box":    s         ? flow_colors["solar_to_grid"]    : off,
+        "#solar-to-load-box":    s         ? flow_colors["solar_to_load"]    : off,
+        "#solar-to-battery-box": s && b    ? flow_colors["solar_to_battery"] : off,
+        "#battery-to-load-box":  b         ? flow_colors["battery_to_load"]  : off,
+        "#battery-to-grid-box":  b         ? flow_colors["battery_to_grid"]  : off,
+        "#grid-to-battery-box":  b         ? flow_colors["grid_to_battery"]  : off,
         "#grid-to-load-box":               flow_colors["grid_to_load"]
     };
     for (const [id, color] of Object.entries(arrowColors)) $(id).css("--statsbox-color", color);

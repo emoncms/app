@@ -8,13 +8,8 @@
 
 /* -- Page frame ------------------------------------------------------------ */
 
-/* Page background and footer sit outside .app-page, so the dark values are fixed */
-body:has(.app-page[data-bs-theme="dark"]) { background-color: #222; }
-body:has(.app-page[data-bs-theme="dark"]) #footer {
-    margin: 0;
-    background-color: #181818;
-    color: #999;
-}
+/* Dark page background and footer colours are in Theme/css/bootstrap5-theme.css */
+body:has(.app-page[data-bs-theme="dark"]) #footer { margin: 0; }
 
 /* Standard app width */
 .content-container { max-width: 1150px; }
@@ -22,7 +17,7 @@ body:has(.app-page[data-bs-theme="dark"]) #footer {
 .app-page #app-block { padding: 0; }
 
 .app-page[data-bs-theme="dark"] .ajax-loader {
-    background: #222 url(../../images/ajax-loader.gif) center no-repeat;
+    background: var(--ec-dark-page-bg) url(../../images/ajax-loader.gif) center no-repeat;
 }
 
 /* Rounded block that groups a row of the app */

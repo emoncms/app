@@ -233,7 +233,9 @@ function draw_graph() {
 
     $(".time[time=1], .time[time=3], .time[time=6], .time[time=24]").toggle(viewmode !== "bargraph");
 
-    const font_color = "#888";
+    // Theme colours from the page, so the chart follows the light or dark set
+    const page_css = getComputedStyle(document.querySelector(".app-page"));
+    const font_color = page_css.getPropertyValue("--bs-secondary-color").trim();
     const options = {
         series: { lines: { fill: false, lineWidth: 2 } },
         xaxis: { 
@@ -256,7 +258,7 @@ function draw_graph() {
 
     if (viewmode == "bargraph") {
         options.xaxis.minTickSize = [1, "day"];
-        options.grid.markings = [{ color: "#ccc", lineWidth: 1, yaxis: { from: 0, to: 0 } }];
+        options.grid.markings = [{ color: font_color, lineWidth: 1, yaxis: { from: 0, to: 0 } }];
     }
     
     options.xaxis.min = view.start;
@@ -264,8 +266,8 @@ function draw_graph() {
     Flot.plot(document.getElementById('placeholder'),powerseries,options);
 
     if (viewmode == "bargraph") {
-        $('#placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use &amp; Total Use</div>");
-        $('#placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> Total export (solar + battery to grid)</div>");
+        $('#placeholder').append("<div style='position:absolute;left:50px;top:30px;color:var(--bs-secondary-color);font-size:12px'><b>Above:</b> Onsite Use &amp; Total Use</div>");
+        $('#placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:var(--bs-secondary-color);font-size:12px'><b>Below:</b> Total export (solar + battery to grid)</div>");
     }
 
     $(".ajax-loader").hide();
