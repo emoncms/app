@@ -1029,7 +1029,20 @@ function toggleBatteryFlowVisibility(grid_to_battery, battery_to_grid) {
 }
 
 $(function() {
-    $(document).on('window.resized hidden.sidebar.collapse shown.sidebar.collapse', function(){
+    let last_width = window.innerWidth;
+    let last_height = window.innerHeight;
+
+    $(document).on('window.resized', function(){
+        // Touch devices: skip small height-only changes from the browser address bar
+        // showing and hiding on scroll, and from the on-screen keyboard
+        const touch = window.matchMedia('(pointer: coarse)').matches;
+        if (touch && window.innerWidth == last_width && Math.abs(window.innerHeight - last_height) < 150) return;
+        last_width = window.innerWidth;
+        last_height = window.innerHeight;
+        resize();
+    })
+
+    $(document).on('hidden.sidebar.collapse shown.sidebar.collapse', function(){
         resize()
     })
 })
