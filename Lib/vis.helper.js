@@ -369,6 +369,14 @@ if (window.Flot) Flot.plugins.push({
             if (grid.tickColor === base.clone().scale("a", 0.22).toString()) {
                 grid.tickColor = base.scale("a", 0.35).toString();
             }
+            // Y labels sized to fit and less space between y axes. Narrow
+            // charts also drop the y tick marks.
+            var narrow = plot.getPlaceholder().clientWidth < 576;
+            grid.axisMargin = narrow ? 2 : 4;
+            options.yaxes.forEach(function(axis){
+                axis.labelWidth = null;
+                if (narrow && axis.showTicks == null) axis.showTicks = false;
+            });
         });
         plot.hooks.drawBackground.push(function(plot){
             [plot.getXAxes(), plot.getYAxes()].forEach(function(axes){

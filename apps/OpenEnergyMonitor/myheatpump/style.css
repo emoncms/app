@@ -26,6 +26,12 @@
   .bargraph-navigation > .btn { flex: 1; }
   .bargraph-navigation [class^="svg-icon-"] { display: none; }
   .hp-return { font-size: 13px; margin-left: 6px; }
+  /* Live values stay in one row of 4 */
+  #live_table { grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.4fr); }
+  #live_table > :nth-child(4) { border-left: 1px solid var(--border); }
+  #live_table .app-live-label { font-size: 10px; letter-spacing: 0.03em; }
+  #live_table .app-live-value { font-size: 20px; }
+  #live_table .hp-return { font-size: 12px; margin-left: 3px; }
 }
 
 #overlay {
