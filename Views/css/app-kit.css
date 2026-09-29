@@ -20,6 +20,22 @@ body:has(.app-page[data-bs-theme="dark"]) #footer { margin: 0; }
     background: var(--ec-dark-page-bg) url(../../images/ajax-loader.gif) center no-repeat;
 }
 
+/* Text greys in apps: lighter on dark, darker on light, for contrast */
+.app-page[data-bs-theme="dark"] {
+    --bs-body-color: #ddd;
+    --bs-body-color-rgb: 221, 221, 221;
+    --bs-secondary-color: #bbb;
+    --bs-secondary-text-emphasis: #bbb;
+}
+.app-page[data-bs-theme="light"] {
+    --bs-body-color: #222;
+    --bs-body-color-rgb: 34, 34, 34;
+    --bs-secondary-color: #555;
+    --bs-secondary-text-emphasis: #444;
+    --ec-text-secondary: #333;
+    --ec-text-muted: #444;
+}
+
 /* Light apps use Montserrat, as MyHeatpump */
 .app-page[data-bs-theme="light"] { font-family: Montserrat, Verdana, sans-serif; }
 
@@ -173,7 +189,7 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
 .app-timebar > select.btn option { color: var(--bs-body-color); background-color: var(--bs-body-bg); }
 /* Sprite icons in the time bar: white set on dark, faded as the button text */
 .app-page[data-bs-theme="dark"] .app-timebar [class^="icon-"] { background-image: url("../../../../Theme/img/glyphicons-halflings-white.png"); }
-.app-timebar > .btn > [class^="icon-"] { opacity: 0.6; }
+.app-timebar > .btn > [class^="icon-"] { opacity: 0.8; }
 .app-timebar > .btn:hover > [class^="icon-"] { opacity: 1; }
 .app-window-text { font-size: 13px; color: var(--bs-secondary-color); white-space: nowrap; }
 @media (max-width: 991.98px) { .app-window-text { display: none; } }
@@ -362,7 +378,7 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
     opacity: .8;
 }
 .tooltip-title {
-    color: #aaa;
+    color: #ccc;
     font-weight: bold;
     font-size: 12px;
 }
@@ -416,7 +432,7 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
     --bs-btn-padding-y: 3px;              /* 32px high with the border, as the old time bar */
     --bs-btn-font-size: 1rem;
     --bs-btn-line-height: 1.5;
-    --bs-btn-color: color-mix(in srgb, var(--ec-text-secondary) 60%, transparent);
+    --bs-btn-color: color-mix(in srgb, var(--ec-text-secondary) 85%, transparent);
     --bs-btn-bg: rgba(var(--ec-app-nav-rgb), 0.1);
     --bs-btn-border-color: transparent;
     --bs-btn-hover-color: var(--bs-emphasis-color);

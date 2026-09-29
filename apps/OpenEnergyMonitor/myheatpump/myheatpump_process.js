@@ -320,15 +320,15 @@ function process_stats() {
 
                 var minval_str = "";
                 if (stats[x][key].minval != null) minval_str = (1*stats[x][key].minval).toFixed(feed_options[key].dp) + " " + feed_options[key].unit;
-                out += "<td style='text-align:center; color:#777'>" + minval_str + "</td>";
+                out += "<td style='text-align:center; color:var(--bs-secondary-color)'>" + minval_str + "</td>";
 
                 var maxval_str = "";
                 if (stats[x][key].maxval != null) maxval_str = (1*stats[x][key].maxval).toFixed(feed_options[key].dp) + " " + feed_options[key].unit;
-                out += "<td style='text-align:center; color:#777'>" + maxval_str + "</td>";
+                out += "<td style='text-align:center; color:var(--bs-secondary-color)'>" + maxval_str + "</td>";
 
                 var diff_str = "";
                 if (stats[x][key].diff != null) diff_str = (1*stats[x][key].diff).toFixed(feed_options[key].dp) + " " + feed_options[key].unit;
-                out += "<td style='text-align:center; color:#777'>" + diff_str + "</td>";
+                out += "<td style='text-align:center; color:var(--bs-secondary-color)'>" + diff_str + "</td>";
 
                 out += "<td style='text-align:center'>" + (1*stats[x][key].mean).toFixed(feed_options[key].dp) + " " + feed_options[key].unit + "</td>";
 

@@ -329,7 +329,7 @@ function calc_monthly_summaries() {
 function render_cost_cell(net_cost, unit_rate) {
     var text = (net_cost >= 0 ? "£" : "-£") + Math.abs(net_cost).toFixed(2);
     if (!isNaN(unit_rate)) {
-        text += " <span style='font-size:12px;color:#888'>" + unit_rate.toFixed(1) + " p/kWh</span>";
+        text += " <span style='font-size:12px;color:var(--bs-secondary-color)'>" + unit_rate.toFixed(1) + " p/kWh</span>";
     }
     return "<td>" + text + "</td>";
 }
@@ -340,7 +340,7 @@ function render_flow_row(label, kwh, value_gbp, value_label, color, rowStyle) {
 
     var value_color;
     if (value_label.indexOf("avoided") !== -1) {
-        value_color = "#aaa";
+        value_color = "var(--bs-secondary-color)";
     } else if (value_label.indexOf("earned") !== -1) {
         value_color = "#29af29";
     } else {
@@ -358,7 +358,7 @@ function render_flow_row(label, kwh, value_gbp, value_label, color, rowStyle) {
             + (value_gbp !== null ? (value_gbp >= 0 ? "£" : "-£") + Math.abs(value_gbp).toFixed(2) : "&mdash;")
             + "</td>"
         + unit_price_cell
-        + "<td style='color:#aaa;font-size:12px'>" + value_label + "</td>"
+        + "<td style='color:var(--bs-secondary-color);font-size:12px'>" + value_label + "</td>"
         + "</tr>";
 }
 
@@ -548,7 +548,7 @@ function draw_tariff_graph() {
         });
     }
 
-    var font_color = "#888";
+    var font_color = flot_font_color();
     var options = {
         xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none", min: view.start, max: view.end,
                  font: { color: font_color, fill: font_color }, reserveSpace: false },
@@ -590,7 +590,7 @@ function profile_draw() {
         color: "#fb1a80", lines: { show: true, align: "left", lineWidth: 1 }
     });
 
-    var font_color = "#888";
+    var font_color = flot_font_color();
     var options = {
         xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", font: { color: font_color, fill: font_color }, reserveSpace: false },
         yaxes: [

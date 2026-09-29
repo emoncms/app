@@ -1110,7 +1110,7 @@ function bargraph_draw()
     }
 
     var plot = Flot.plot(document.getElementById('placeholder'),bargraph_series,options);
-    $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'></div>");
+    $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:var(--bs-secondary-color);font-size:12px'></div>");
     timebar_update(true);
 }
 

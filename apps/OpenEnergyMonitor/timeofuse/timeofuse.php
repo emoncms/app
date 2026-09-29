@@ -526,12 +526,12 @@ function powergraph_draw()
         xaxis: { 
             mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none",
             min: view.start, max: view.end, 
-            font: {size:flot_font_size, color:"#666", fill:"#666"},
+            font: {size:flot_font_size, color: flot_font_color(), fill: flot_font_color()},
             reserveSpace:false
         },
         yaxes: [
-            { min: 0, autoScale: "none", font: {size:flot_font_size, color:"#666", fill:"#666"},reserveSpace:false},
-            {font: {size:flot_font_size, color:"#666", fill:"#666"},reserveSpace:false}
+            { min: 0, autoScale: "none", font: {size:flot_font_size, color: flot_font_color(), fill: flot_font_color()},reserveSpace:false},
+            {font: {size:flot_font_size, color: flot_font_color(), fill: flot_font_color()},reserveSpace:false}
         ],
         grid: {
             show:true, 
@@ -683,12 +683,12 @@ function bargraph_draw()
             mode: "time", 
             timezone: "browser", 
             timeBase: "milliseconds",
-            font: {size:flot_font_size, color:"#666", fill:"#666"}, 
+            font: {size:flot_font_size, color: flot_font_color(), fill: flot_font_color()}, 
             // labelHeight:-5
             reserveSpace:false
         },
         yaxis: { 
-            font: {size:flot_font_size, color:"#666", fill:"#666"}, 
+            font: {size:flot_font_size, color: flot_font_color(), fill: flot_font_color()}, 
             // labelWidth:-5
             reserveSpace:false,
             min:0,
@@ -706,7 +706,7 @@ function bargraph_draw()
     }
 
     var plot = Flot.plot(document.getElementById('placeholder'),bargraph_series,options);
-    $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'></div>");
+    $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:var(--bs-secondary-color);font-size:12px'></div>");
     chart_legend(bargraph_series);
     tou_timebar_sync();
 }

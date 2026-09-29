@@ -774,15 +774,15 @@ function process_stats() {
 
                 var minval_str = "";
                 if (stats[x][key].minval != null) minval_str = (1*stats[x][key].minval).toFixed(feed_options[key].dp) + " " + feed_options[key].unit;
-                out += "<td style='text-align:center; color:#777'>" + minval_str + "</td>";
+                out += "<td style='text-align:center; color:var(--bs-secondary-color)'>" + minval_str + "</td>";
 
                 var maxval_str = "";
                 if (stats[x][key].maxval != null) maxval_str = (1*stats[x][key].maxval).toFixed(feed_options[key].dp) + " " + feed_options[key].unit;
-                out += "<td style='text-align:center; color:#777'>" + maxval_str + "</td>";
+                out += "<td style='text-align:center; color:var(--bs-secondary-color)'>" + maxval_str + "</td>";
 
                 var diff_str = "";
                 if (stats[x][key].diff != null) diff_str = (1*stats[x][key].diff).toFixed(feed_options[key].dp) + " " + feed_options[key].unit;
-                out += "<td style='text-align:center; color:#777'>" + diff_str + "</td>";
+                out += "<td style='text-align:center; color:var(--bs-secondary-color)'>" + diff_str + "</td>";
 
                 out += "<td style='text-align:center'>" + (1*stats[x][key].mean).toFixed(feed_options[key].dp) + " " + feed_options[key].unit + "</td>";
 
@@ -933,7 +933,7 @@ function emitter_and_volume_calculator() {
 function powergraph_draw() {
     set_url_view_params("power", view.start, view.end);
 
-    var style = { size: flot_font_size, color: "#666", fill: "#666" }
+    var style = { size: flot_font_size, color: flot_font_color(), fill: flot_font_color() }
     var options = {
         series: { lines: { fill: false, lineWidth: 2 } },
         xaxis: {
@@ -1103,7 +1103,7 @@ function bargraph_draw() {
             timezone: "browser",
             timeBase: "milliseconds",
             autoScale: "none",
-            font: { size: flot_font_size, color: "#666", fill: "#666" },
+            font: { size: flot_font_size, color: flot_font_color(), fill: flot_font_color() },
             // labelHeight:-5
             reserveSpace: false,
             // Half a day earlier so the first bar is not cut
@@ -1111,7 +1111,7 @@ function bargraph_draw() {
             max: bargraph_end - 0.5 * DAY
         },
         yaxes: [{
-            font: { size: flot_font_size, color: "#666", fill: "#666" },
+            font: { size: flot_font_size, color: flot_font_color(), fill: flot_font_color() },
             // labelWidth:-5
             reserveSpace: false,
             min: 0,
@@ -1141,7 +1141,7 @@ function bargraph_draw() {
     }
     if ($('#placeholder').width()) {
         var plot = Flot.plot(document.getElementById('placeholder'), bargraph_series, options);
-        $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'></div>");
+        $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:var(--bs-secondary-color);font-size:12px'></div>");
     }
     chart_legend(bargraph_series);
     boiler_timebar_sync();
@@ -1240,12 +1240,12 @@ function draw_histogram(histogram) {
         xaxis: {
             // mode: "time", timezone: "browser", 
             min: 0.2, max: 0.8, autoScale: "none",
-            font: { size: flot_font_size, color: "#666", fill: "#666" },
+            font: { size: flot_font_size, color: flot_font_color(), fill: flot_font_color() },
             reserveSpace: false
         },
         yaxes: [
             //{ min: 0,font: {size:flot_font_size, color:"#666"},reserveSpace:false},
-            { font: { size: flot_font_size, color: "#666", fill: "#666" }, reserveSpace: false }
+            { font: { size: flot_font_size, color: flot_font_color(), fill: flot_font_color() }, reserveSpace: false }
         ],
         grid: {
             show: true,

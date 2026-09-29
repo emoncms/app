@@ -253,11 +253,11 @@ function load() {
 // Compact temperature-over-time chart, used for drag-to-zoom time selection
 function draw_context() {
     var options = {
-        grid: { show: true, color: "#444", tickColor: "#2a2a2a", borderWidth: 0, hoverable: false },
-        xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none", min: view.start, max: view.end, font: { color: "#888", fill: "#888" }, axisPan: true, plotPan: true, axisZoom: true, plotZoom: true },
+        grid: { show: true, color: "#444", tickColor: "#3d3d3d", borderWidth: 0, hoverable: false },
+        xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none", min: view.start, max: view.end, font: { color: flot_font_color(), fill: flot_font_color() }, axisPan: true, plotPan: true, axisZoom: true, plotZoom: true },
         yaxes: [
-            { font: { color: "#888", fill: "#888" }, axisPan: false, plotPan: false, axisZoom: false, plotZoom: false },                      // left: temperature
-            { position: "right", font: { color: "#888", fill: "#888" }, axisPan: false, plotPan: false, axisZoom: false, plotZoom: false }    // right: humidity
+            { font: { color: flot_font_color(), fill: flot_font_color() }, axisPan: false, plotPan: false, axisZoom: false, plotZoom: false },                      // left: temperature
+            { position: "right", font: { color: flot_font_color(), fill: flot_font_color() }, axisPan: false, plotPan: false, axisZoom: false, plotZoom: false }    // right: humidity
         ],
         legend: { show: false },
         selection: { mode: is_touch_primary() ? null : "x", color: "#555", visualization: "fill" },
@@ -308,10 +308,10 @@ function draw_chart() {
     var habs_max = parseFloat(config.app.habs_max.value);
 
     var options = {
-        grid: { show: true, color: "#444", tickColor: "#2a2a2a", borderWidth: 0, hoverable: true },
+        grid: { show: true, color: "#444", tickColor: "#3d3d3d", borderWidth: 0, hoverable: true },
         legend: { show: true, position: "nw", margin: [10, 10] },
-        xaxis: { min: Tmin, max: Tmax, autoScale: "none", font: { color: "#888", fill: "#888" } },
-        yaxis: { min: habs_min, max: habs_max, autoScale: "none", font: { color: "#888", fill: "#888" } },
+        xaxis: { min: Tmin, max: Tmax, autoScale: "none", font: { color: flot_font_color(), fill: flot_font_color() } },
+        yaxis: { min: habs_min, max: habs_max, autoScale: "none", font: { color: flot_font_color(), fill: flot_font_color() } },
         zoom: { interactive: is_touch_primary(), enableTouch: true, amount: 1.5 },
         pan: { interactive: is_touch_primary(), enableTouch: true, touchMode: "smartLock", frameRate: 60 },
         recenter: { interactive: is_touch_primary(), enableTouch: true }

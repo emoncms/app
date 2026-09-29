@@ -573,8 +573,8 @@ function halfhour_usage_bargraph_draw() {
             timeBase: "milliseconds",
             font: {
                 size: flot_font_size,
-                color: "#666",
-                fill: "#666"
+                color: flot_font_color(),
+                fill: flot_font_color()
             },
             minTickSize: [30, "minute"]
         },
@@ -586,8 +586,8 @@ function halfhour_usage_bargraph_draw() {
             alignTicksWithAxis: null,
             font: {
                 size: flot_font_size,
-                color: "#666",
-                fill: "#666"
+                color: flot_font_color(),
+                fill: flot_font_color()
             }
         }, ],
 
@@ -633,8 +633,8 @@ function bargraph_draw() {
             timeBase: "milliseconds",
             font: {
                 size: flot_font_size,
-                color: "#666",
-                fill: "#666"
+                color: flot_font_color(),
+                fill: flot_font_color()
             },
             reserveSpace: false,
             minTickSize: [1, "day"]
@@ -651,8 +651,8 @@ function bargraph_draw() {
                 alignTicksWithAxis: null,
                 font: {
                     size: flot_font_size,
-                    color: "#666",
-                    fill: "#666"
+                    color: flot_font_color(),
+                    fill: flot_font_color()
                 }                
                 //,axisLabel: "Energy usage (kWh)"
                 //,axisLabelUseCanvas: true

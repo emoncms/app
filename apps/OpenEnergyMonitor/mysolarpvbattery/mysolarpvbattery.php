@@ -909,8 +909,8 @@ function draw_bargraph()
     
     var plot = Flot.plot(document.getElementById('placeholder'),historyseries,options);
     
-    $('#placeholder').append("<div style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'><b>Above:</b> Onsite Use & Total Use</div>");
-    $('#placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:#666;font-size:12px'><b>Below:</b> Exported solar</div>");
+    $('#placeholder').append("<div style='position:absolute;left:50px;top:30px;color:var(--bs-secondary-color);font-size:12px'><b>Above:</b> Onsite Use & Total Use</div>");
+    $('#placeholder').append("<div style='position:absolute;left:50px;bottom:50px;color:var(--bs-secondary-color);font-size:12px'><b>Below:</b> Exported solar</div>");
 }
 
 // ------------------------------------------------------------------------------------------

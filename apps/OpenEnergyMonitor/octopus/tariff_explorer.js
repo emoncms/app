@@ -945,8 +945,8 @@ function graph_draw() {
             max: view.end,
             font: {
                 size: flot_font_size,
-                color: "#666",
-                fill: "#666"
+                color: flot_font_color(),
+                fill: flot_font_color()
             },
             reserveSpace: false
         },
@@ -954,8 +954,8 @@ function graph_draw() {
                 position: 'left',
                 font: {
                     size: flot_font_size,
-                    color: "#666",
-                    fill: "#666"
+                    color: flot_font_color(),
+                    fill: flot_font_color()
                 },
                 reserveSpace: false
             },

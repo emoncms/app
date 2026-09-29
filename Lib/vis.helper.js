@@ -349,6 +349,40 @@ function flot_color(index){
     return "rgb(" + rgb.join(",") + ")";
 }
 
+// Axis label colour for Flot font options: muted text colour of the app theme
+function flot_font_color(){
+    var page = document.querySelector(".app-page") || document.body;
+    return getComputedStyle(page).getPropertyValue("--bs-secondary-color").trim() || "#999";
+}
+
+// Grid lines: Flot draws them at 0.22 alpha of grid.color. Raised here for
+// contrast. An explicit grid.tickColor is kept.
+// Flot also draws grid lines for the inner axis on each side, so a right y
+// axis adds a second set. Only the first shown axis in each direction keeps
+// them, unless an axis sets gridLines: true.
+if (window.Flot) Flot.plugins.push({
+    name: "app-grid",
+    init: function(plot){
+        plot.hooks.processOptions.push(function(plot, options){
+            var grid = options.grid;
+            var base = Flot.color.parse(grid.color);
+            if (grid.tickColor === base.clone().scale("a", 0.22).toString()) {
+                grid.tickColor = base.scale("a", 0.35).toString();
+            }
+        });
+        plot.hooks.drawBackground.push(function(plot){
+            [plot.getXAxes(), plot.getYAxes()].forEach(function(axes){
+                var first = true;
+                axes.forEach(function(axis){
+                    if (!axis.show || !axis.gridLines) return;
+                    if (!first && axis.options.gridLines !== true) axis.gridLines = false;
+                    first = false;
+                });
+            });
+        });
+    }
+});
+
 // Click on a legend entry to hide or show its series. Flot 5 draws the legend
 // as static svg, so this is wired up here. Hidden labels are kept across
 // redraws, so call this after every Flot.plot on the chart. left, when given,
