@@ -1,11 +1,9 @@
-/* My Solar PV, My Solar PV Divert and Solar Template.
+/* My Solar PV and My Solar PV Divert.
    Shared components are in Modules/app/Views/css/app-kit.css. */
 
 /* Chart fills the screen below the live values. Divert sets the height in JS. */
-#placeholder_bound,
-#graph_bound { width: 100%; position: relative; }
-#placeholder,
-#graph {
+#placeholder_bound { width: 100%; position: relative; }
+#placeholder {
     height: calc(100vh - 32rem);
     min-height: 250px;
 }
@@ -18,35 +16,9 @@
     color: var(--bs-secondary-color);
 }
 
-/* Row of many totals: four columns on small screens */
-@media (max-width: 767px) {
-    .app-stats-wrap {
-        grid-auto-flow: row;
-        grid-template-columns: repeat(4, 1fr);
-        row-gap: 0.5rem;
-    }
-}
 
-/* Flow arrow colours */
+/* Flow colours */
+#solar-to-grid-box   { --statsbox-color: var(--ec-energy-solar); }
 #solar-to-divert-box { --statsbox-color: var(--ec-energy-battery); }
 #solar-to-house-box  { --statsbox-color: var(--ec-energy-use-light); }
 #grid-to-house-box   { --statsbox-color: var(--ec-energy-import); }
-
-/* Percentage overlays on the solar and house boxes */
-.prc-box { position: relative; }
-.prc-bottom-left,
-.prc-bottom-right { position: absolute; bottom: 0; width: 50%; }
-.prc-bottom-left  { left: 0; }
-.prc-bottom-right { left: 50%; }
-.prc-top-left,
-.prc-top-right { position: absolute; top: 0; width: 33.33%; }
-.prc-top-left  { left: 0; }
-.prc-top-right { left: 66.67%; }
-.prc-right {
-    position: absolute;
-    top: 0;
-    right: 0;
-    height: 100%;
-    display: flex;
-    align-items: center;
-}

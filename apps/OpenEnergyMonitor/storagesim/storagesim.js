@@ -38,7 +38,7 @@ config.hideapp = function() {
 var series = [];
 var feed_data = {};
 var options = {
-    legend: { show: true },
+    legend: { show: false },
     // Flot 5 needs every axis a series uses: SOC on 2, peak shaving balance on 3
     yaxes: [{}, { position: "right" }, { position: "right" }],
     xaxis: {
@@ -532,6 +532,10 @@ function draw() {
     options.xaxis.min = view.start;
     options.xaxis.max = view.end;
     var plot = Flot.plot(document.getElementById("graph"), series, options);
+    chart_legend(series);
+    timebar_update(false);
+    // Fixed dataset, so no Now button
+    $("#time-now").hide();
 }
 
 document.getElementById('graph').addEventListener("plotselected", function (event) {
@@ -545,4 +549,12 @@ $("#zoomout").click(function () {view.zoomout(); draw();});
 $("#zoomin").click(function () {view.zoomin(); draw();});
 $('#right').click(function () {view.panright(); draw();});
 $('#left').click(function () {view.panleft(); draw();});
-$('.time').click(function () {view.timewindow($(this).attr("time")); draw();});
+$('#time-select').change(function () {
+    var hours = parseFloat($(this).val());
+    if (!hours) return;
+    view.timewindow(hours/24.0);
+    draw();
+});
+
+// Start and End fields from Lib/vis.helper.js
+timebar_manual(draw);

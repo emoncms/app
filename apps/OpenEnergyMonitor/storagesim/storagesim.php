@@ -7,6 +7,8 @@ load_js("Lib/js/flot-5.1.0.mod.min.js");
 load_js("Modules/app/Lib/vis.helper.js");
 load_js("Modules/app/Lib/remotefeed.js");
 load_js("Lib/js/vue.global.prod-3.5.22.min.js");
+load_js("Lib/js/DateTimePicker.js");
+load_css("Theme/css/datetimepicker.css");
 load_css("Modules/app/Views/css/app-kit.css");
 load_css("Modules/app/apps/OpenEnergyMonitor/storagesim/storagesim.css");
 ?>
@@ -15,37 +17,35 @@ load_css("Modules/app/apps/OpenEnergyMonitor/storagesim/storagesim.css");
 
 <section id="app-block" style="display:none">
 
-    <div class="app-panel">
-        <nav class="app-top-bar mb-0 border-0">
+    <div class="app-card">
+        <nav class="app-card-head">
             <div id="tabs" class="nav nav-underline">
-                <span class="nav-link active"><i class="svg-icon-box-add"></i><?php echo tr('Storage simulator') ?></span>
+                <button class="nav-link active"><i class="svg-icon-box-add"></i><?php echo tr('Storage simulator') ?></button>
             </div>
-            <div class="nav">
-                <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
-                <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+            <div class="app-card-tools">
+                <div class="nav">
+                    <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
+                    <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+                </div>
             </div>
         </nav>
     </div>
 
-    <div class="app-panel">
+    <div class="app-card app-card-body">
         <div id="graph-nav" class="app-navbar">
-            <div class="btn-group app-timebar">
-                <button class='btn time' time='1'><?php echo tr('D') ?></button>
-                <button class='btn time' time='7'><?php echo tr('W') ?></button>
-                <button class='btn time' time='30'><?php echo tr('M') ?></button>
-                <button class='btn time' time='365'><?php echo tr('Y') ?></button>
-                <button id='zoomin' class='btn'>+</button>
-                <button id='zoomout' class='btn'>-</button>
-                <button id='left' class='btn'>&lt;</button>
-                <button id='right' class='btn'>&gt;</button>
-            </div>
+            <?php
+            $timebar_ranges = array(24 => tr('1 day'), 168 => tr('1 week'), 720 => tr('1 month'), 8760 => tr('1 year'));
+            include "Modules/app/Lib/timebar.php";
+            ?>
         </div>
+        <?php include "Modules/app/Lib/timebar_manual.php"; ?>
         <div id="graph"></div>
+        <div id="chart-legend" class="app-legend"></div>
     </div>
 
     <div id="app" class="sim-grid">
-        <div class="app-panel">
-            <h5 class="sim-title">Generation</h5>
+        <div class="app-card app-card-body">
+            <div class="app-card-caption"><span class="app-section-label">Generation</span></div>
             <table class="table align-middle mb-0">
                 <tr v-for="gen, index in generation">
                     <td class="col-primary">{{gen.name}}</td>
@@ -105,9 +105,8 @@ load_css("Modules/app/apps/OpenEnergyMonitor/storagesim/storagesim.css");
             </table>
         </div>
 
-        <div class="app-panel">
-            <h5 class="sim-title">Store 1</h5>
-            <p class="small text-body-secondary">E.g battery storage</p>
+        <div class="app-card app-card-body">
+            <div class="app-card-caption"><span class="app-section-label">Store 1</span><span class="app-caption-note">E.g battery storage</span></div>
             <table class="table align-middle mb-0">
                 <tr>
                     <td class="col-primary">Storage capacity</td>
@@ -152,9 +151,8 @@ load_css("Modules/app/apps/OpenEnergyMonitor/storagesim/storagesim.css");
             </table>
         </div>
 
-        <div class="app-panel">
-            <h5 class="sim-title">Store 2</h5>
-            <p class="small text-body-secondary">E.g H2, e-Methane, e-Methanol</p>
+        <div class="app-card app-card-body">
+            <div class="app-card-caption"><span class="app-section-label">Store 2</span><span class="app-caption-note">E.g H2, e-Methane, e-Methanol</span></div>
             <table class="table align-middle mb-0">
                 <tr>
                     <td class="col-primary">Storage capacity</td>

@@ -364,12 +364,14 @@ function draw() {
     }
 
     Flot.plot(document.getElementById('graph'), series, options);
+    timebar_update(false);
 }
 
 function updater() {
     var use = config.app.feedA.value;
     var feeds = feed.listbyid();
     $("#powernow").html((feeds[use].value * 1).toFixed(0));
+    live_status_update(feeds[use].time);
 }
 
 function resize() {
@@ -388,10 +390,14 @@ $("#zoomin").click(function () { view.zoomin(); load(); });
 $('#right').click(function () { view.panright(); load(); });
 $('#left').click(function () { view.panleft(); load(); });
 
-$('.time').click(function () {
-    view.timewindow($(this).attr("time") / 24.0);
+$('#time-select').change(function () {
+    var hours = parseFloat($(this).val());
+    if (!hours) return;
+    view.timewindow(hours / 24.0);
     load();
 });
+timebar_manual(load);
+timebar_now(load);
 
 // Tooltip code
 document.getElementById('graph').addEventListener("plothover", function (event) {

@@ -5,6 +5,8 @@ global $path, $session, $v;
 load_js("Modules/feed/feed.js");
 load_js("Lib/js/flot-5.1.0.mod.min.js");
 load_js("Modules/app/Lib/vis.helper.js");
+load_js("Lib/js/DateTimePicker.js");
+load_css("Theme/css/datetimepicker.css");
 load_css("Modules/app/Views/css/app-kit.css");
 load_css("Modules/app/apps/template/template.css");
 ?>
@@ -13,44 +15,43 @@ load_css("Modules/app/apps/template/template.css");
 
 <section id="app-block" style="display:none">
 
-    <!-- Top bar and live values -->
-    <div class="app-panel">
-        <nav class="app-top-bar">
+    <!-- Header and live values -->
+    <div class="app-card">
+        <nav class="app-card-head">
             <div id="tabs" class="nav nav-underline">
                 <button class="nav-link active" title="<?php echo tr('Power view') ?>"><i class="svg-icon-show_chart"></i><?php echo tr('Power') ?></button>
             </div>
-            <div class="nav">
-                <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
-                <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+            <div class="app-card-tools">
+                <span id="live-status" class="app-status"><span class="app-status-dot"></span><span class="app-status-text"></span></span>
+                <div class="nav">
+                    <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
+                    <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+                </div>
             </div>
         </nav>
-        <div class="stats-grid stats-grid-2">
+        <div class="app-live">
             <div>
-                <h5 class="power-title"><?php echo tr('POWER') ?></h5>
-                <h2 class="power-value text-use"><span id="powernow">0</span><span class="power-unit">W</span></h2>
+                <div class="app-live-label"><?php echo tr('POWER') ?></div>
+                <div class="app-live-value text-use"><span id="powernow">0</span><span class="power-unit">W</span></div>
             </div>
             <div>
-                <h5 class="power-title"><?php echo tr('ENERGY') ?></h5>
-                <h2 class="power-value text-use"><span id="kwhwindow">---</span><span class="power-unit">kWh</span></h2>
+                <div class="app-live-label"><?php echo tr('ENERGY') ?></div>
+                <div class="app-live-value text-use"><span id="kwhwindow">---</span><span class="power-unit-static">kWh</span></div>
             </div>
         </div>
     </div>
 
-    <!-- Time bar and chart -->
-    <div class="app-panel">
-        <div class="app-navbar">
-            <div class="btn-group app-timebar">
-                <button class="btn time" time="1">1<?php echo tr('h') ?></button>
-                <button class="btn time" time="24"><?php echo tr('D') ?></button>
-                <button class="btn time" time="168"><?php echo tr('W') ?></button>
-                <button class="btn time" time="720"><?php echo tr('M') ?></button>
-                <button id="zoomin" class="btn">+</button>
-                <button id="zoomout" class="btn">-</button>
-                <button id="left" class="btn">&lt;</button>
-                <button id="right" class="btn">&gt;</button>
-            </div>
+    <!-- Time bar, chart and legend -->
+    <div class="app-card app-card-body">
+        <div id="graph-nav" class="app-navbar">
+            <?php
+            $timebar_ranges = array(1 => tr('1 hour'), 24 => tr('24 hours'), 168 => tr('1 week'), 720 => tr('1 month'));
+            include "Modules/app/Lib/timebar.php";
+            ?>
         </div>
+        <?php include "Modules/app/Lib/timebar_manual.php"; ?>
         <div id="graph"></div>
+        <div id="chart-legend" class="app-legend"></div>
     </div>
 
 </section>

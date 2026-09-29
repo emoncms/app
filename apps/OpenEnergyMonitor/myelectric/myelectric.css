@@ -13,10 +13,11 @@
     .myelectric-charts > div { height: 19rem; }
 }
 
-.myelectric-totals { padding: 10px 0; }
-.myelectric-totals .app-stat-title { color: var(--ec-text-secondary); }
 .myelectric-kwhd { font-weight: bold; font-size: 14px; }
 
-@media (max-width: 576px) {
-    .myelectric-totals .app-stat-unit { display: block; padding: 0; font-size: 12px; }
+/* Four totals as two rows of two on narrow screens */
+@media (max-width: 767.98px) {
+    .myelectric-totals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .myelectric-totals > :nth-child(3n+1) { border-left: 1px solid var(--border); }
+    .myelectric-totals > :nth-child(2n+1) { border-left: none; }
 }

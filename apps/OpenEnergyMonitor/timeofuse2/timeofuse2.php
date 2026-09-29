@@ -12,65 +12,63 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
 
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
 <?php load_js("Modules/app/Lib/vis.helper.js"); ?>
+<?php load_js("Lib/js/DateTimePicker.js"); ?>
+<?php load_css("Theme/css/datetimepicker.css"); ?>
 
 <div class="app-page" data-bs-theme="dark">
   <section id="app-block" style="display:none">
 
-    <div class="app-panel">
-      <nav class="app-top-bar">
+    <div class="app-card">
+      <nav class="app-card-head">
         <div class="nav nav-underline">
           <button class="nav-link active"><i class="svg-icon-schedule"></i>TIME OF USE</button>
         </div>
-        <div class="nav">
-          <button class="nav-link viewcostenergy">ENERGY MODE</button>
-          <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
+        <div class="app-card-tools">
+          <span id="live-status" class="app-status"><span class="app-status-dot"></span><span class="app-status-text"></span></span>
+          <div class="nav">
+            <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
+          </div>
         </div>
       </nav>
 
-      <div class="stats-grid stats-grid-2">
+      <div class="app-live">
         <div>
-          <h5 class="power-title">POWER NOW</h5>
-          <h2 class="power-value text-use" id="power_now">---</h2>
+          <div class="app-live-label">POWER NOW</div>
+          <div class="app-live-value text-use" id="power_now">---</div>
         </div>
         <div>
-          <h5 class="power-title">USE TODAY</h5>
-          <h2 class="power-value text-use" id="kwh_today">---</h2>
+          <div class="app-live-label">USE TODAY</div>
+          <div class="app-live-value text-use" id="kwh_today">---</div>
         </div>
       </div>
     </div>
 
-    <div class="app-panel">
-      <div class="app-navbar bargraph-navigation">
-        <div class="btn-group app-timebar">
-          <button class="btn bargraph-week" days="7">WEEK</button>
-          <button class="btn bargraph-month" days="30">MONTH</button>
-          <button class="btn bargraph-year" days="365">YEAR</button>
+    <div class="app-card app-card-body">
+      <div id="graph-nav" class="app-navbar">
+        <?php include "Modules/app/Lib/timebar.php"; ?>
+        <div class="d-flex flex-wrap gap-2 ms-auto">
+          <div class="btn-group app-segmented">
+            <button class="btn viewcostenergy active" data-mode="energy" title="Show energy">Energy</button>
+            <button class="btn viewcostenergy" data-mode="cost" title="Show cost">Cost</button>
+          </div>
+          <div class="btn-group app-segmented">
+            <button class="btn viewpower" title="Power in the window">Power</button>
+            <button class="btn viewhistory active" title="Daily summary">Daily</button>
+          </div>
         </div>
       </div>
 
-      <div class="app-navbar powergraph-navigation" style="display:none">
-        <div class="btn-group app-timebar">
-          <button class="btn time" time='24' title="Day">D</button>
-          <button class="btn time" time='168' title="Week">W</button>
-          <button class="btn time" time='720' title="Month">M</button>
-          <button class="btn" id="zoomin" title="Zoom in">+</button>
-          <button class="btn" id="zoomout" title="Zoom out">-</button>
-          <button class="btn" id="left" title="Scroll left">&lt;</button>
-          <button class="btn" id="right" title="Scroll right">&gt;</button>
-        </div>
-        <div class="nav ms-auto">
-          <button class="nav-link viewhistory" title="Back to daily summary">Daily</button>
-        </div>
-      </div>
+      <?php include "Modules/app/Lib/timebar_manual.php"; ?>
 
       <div id="placeholder_bound" style="width:100%; height:500px">
         <div id="placeholder" style="height:500px"></div>
       </div>
 
       <div id="power-graph-footer" style="display:none">
-        <div class="d-flex flex-wrap align-items-center gap-3 px-2">
-          <div class="me-auto text-body-secondary">kWh in window: <b class="text-body"><span id="window-kwh"></span> kWh</b></div>
-          <div class="nav"><button id="advanced-toggle" class="nav-link">SHOW DETAIL</button></div>
+        <div class="app-card-caption align-items-center mt-2 mb-0">
+          <span class="app-section-label">Energy in window</span>
+          <span class="app-caption-note"><b><span id="window-kwh"></span> kWh</b></span>
+          <div class="nav ms-auto"><button id="advanced-toggle" class="nav-link small py-0">SHOW DETAIL</button></div>
         </div>
       </div>
 
@@ -92,17 +90,19 @@ if (!$timezone || is_numeric($timezone)) $timezone = 'UTC';
     <!-- Tariffs and schedule builder, a Vue app mounted on #schedule-builder-app.
          Directives must sit on a child of the mount root, so #schedule-builder carries v-show. -->
     <div id="schedule-builder-app">
-      <div id="schedule-builder" class="app-panel" v-show="visible">
-        <nav class="app-top-bar">
+      <div id="schedule-builder" class="app-card" v-show="visible">
+        <nav class="app-card-head">
           <div class="nav nav-underline">
             <button class="nav-link active"><i class="svg-icon-calendar"></i>Tariffs &amp; schedule</button>
           </div>
-          <div class="nav">
-            <button class="nav-link sched-configure" :class="{active: editing}" v-show="sessionwrite" title="Configure tariffs &amp; schedule" @click="toggleConfigure"><i class="svg-icon-wrench"></i></button>
+          <div class="app-card-tools">
+            <div class="nav">
+              <button class="nav-link sched-configure" :class="{active: editing}" v-show="sessionwrite" title="Configure tariffs &amp; schedule" @click="toggleConfigure"><i class="svg-icon-wrench"></i></button>
+            </div>
           </div>
         </nav>
 
-        <div class="p-2">
+        <div class="app-card-body">
           <div class="row g-3">
 
             <!-- Tariff names and prices, with totals -->

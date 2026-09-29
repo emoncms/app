@@ -6,6 +6,8 @@ load_js("Modules/feed/feed.js");
 load_js("Lib/js/flot-5.1.0.mod.min.js");
 load_js("Modules/app/Lib/vis.helper.js");
 load_js("Modules/app/Lib/timeseries.js");
+load_js("Lib/js/DateTimePicker.js");
+load_css("Theme/css/datetimepicker.css");
 load_css("Modules/app/Views/css/app-kit.css");
 load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.css");
 ?>
@@ -14,154 +16,107 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
 
 <section id="app-block" style="display:none">
 
-    <div class="app-panel">
-        <nav class="app-top-bar">
+    <div class="app-card">
+        <nav class="app-card-head">
             <div id="tabs" class="nav nav-underline">
                 <button class="nav-link active"><i class="svg-icon-sun"></i><?php echo tr('Solar PV battery') ?></button>
             </div>
-            <div class="nav">
-                <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
-                <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+            <div class="app-card-tools">
+                <span id="live-status" class="app-status"><span class="app-status-dot"></span><span class="app-status-text"></span></span>
+                <div class="nav">
+                    <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
+                    <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+                </div>
             </div>
         </nav>
 
-        <div class="stats-grid">
+        <div class="app-live">
             <div>
-                <h5 class="power-title"><?php echo tr('USE') ?></h5>
-                <h2 class="power-value text-use"><span class="usenow"></span><span class="power-unit"></span></h2>
+                <div class="app-live-label"><?php echo tr('USE') ?></div>
+                <div class="app-live-value text-use"><span class="usenow"></span><span class="power-unit"></span></div>
             </div>
             <div>
-                <h5 class="power-title"><span class="balance-label">-</span></h5>
-                <h2 class="power-value"><span class="balance">--</span></h2>
+                <div class="app-live-label"><?php echo tr('GRID') ?> &middot; <span class="balance-label">-</span></div>
+                <div class="app-live-value"><span class="balance">--</span><span class="balance-unit power-unit-static"></span></div>
             </div>
             <div>
-                <h5 class="power-title"><?php echo tr('SOLAR') ?></h5>
-                <h2 class="power-value text-solar"><span class="generationnow"></span><span class="power-unit"></span></h2>
+                <div class="app-live-label"><?php echo tr('SOLAR') ?></div>
+                <div class="app-live-value text-solar"><span class="generationnow"></span><span class="power-unit"></span></div>
             </div>
             <div>
-                <h5 class="power-title"><span class="battery_charge_discharge_title"><?php echo tr('BATTERY POWER') ?></span></h5>
-                <h2 class="power-value text-battery"><span class="battery_charge_discharge">-</span><span class="power-unit"></span></h2>
+                <div class="app-live-label"><?php echo tr('BATTERY') ?> &middot; <span class="battery_charge_discharge_title"><?php echo tr('POWER') ?></span></div>
+                <div class="app-live-value text-battery"><span class="battery_charge_discharge">-</span><span class="power-unit"></span></div>
             </div>
             <div>
-                <h5 class="power-title"><span class="discharge_time_left_title"><span class="d-inline d-sm-none"><?php echo tr('TIME LEFT') ?></span><span class="d-none d-sm-inline"><?php echo tr('BATTERY TIME LEFT') ?></span></span></h5>
-                <h2 class="power-value text-battery"><span class="discharge_time_left">-</span></h2>
+                <div class="app-live-label"><span class="discharge_time_left_title"><?php echo tr('TIME LEFT') ?></span></div>
+                <div class="app-live-value text-battery"><span class="discharge_time_left">-</span></div>
             </div>
             <div>
-                <h5 class="power-title"><span class="d-inline d-sm-none"><?php echo tr('SOC') ?></span><span class="d-none d-sm-inline"><?php echo tr('STATE OF CHARGE') ?></span></h5>
-                <h2 class="power-value text-battery"><span class="battery_soc">-</span>%</h2>
+                <div class="app-live-label"><span class="d-inline d-sm-none"><?php echo tr('SOC') ?></span><span class="d-none d-sm-inline"><?php echo tr('STATE OF CHARGE') ?></span></div>
+                <div class="app-live-value text-battery"><span class="battery_soc">-</span><span class="power-unit-static">%</span></div>
             </div>
         </div>
     </div>
 
-    <div class="app-panel">
+    <div class="app-card app-card-body">
         <div id="graph-nav" class="app-navbar">
-            <div class="btn-group app-timebar">
-                <button class='btn time' time='1'>1<?php echo tr('h') ?></button>
-                <button class='btn time' time='3'>3<?php echo tr('h') ?></button>
-                <button class='btn time' time='6'>6<?php echo tr('h') ?></button>
-                <button class='btn time' time='24'><?php echo tr('D') ?></button>
-                <button class='btn time' time='168'><?php echo tr('W') ?></button>
-                <button class='btn time' time='720'><?php echo tr('M') ?></button>
-                <button class='btn time' time='8760'><?php echo tr('Y') ?></button>
-                <button id='zoomin' class='btn'>+</button>
-                <button id='zoomout' class='btn'>-</button>
-                <button id='left' class='btn'>&lt;</button>
-                <button id='right' class='btn'>&gt;</button>
-            </div>
-            <div class="nav ms-auto">
-                <button class="nav-link viewhistory" title="<?php echo tr('View History') ?>"><?php echo tr('History') ?></button>
+            <?php include "Modules/app/Lib/timebar.php"; ?>
+            <div class="btn-group app-segmented viewmode-toggle ms-auto">
+                <button class="btn viewpower active" title="<?php echo tr('Power View') ?>"><?php echo tr('Power') ?></button>
+                <button class="btn viewhistory" title="<?php echo tr('View History') ?>"><?php echo tr('Daily') ?><span class="d-none d-sm-inline"> kWh</span></button>
             </div>
         </div>
+
+        <?php include "Modules/app/Lib/timebar_manual.php"; ?>
 
         <div id="placeholder_bound">
             <div id="placeholder"></div>
         </div>
+        <div id="chart-legend" class="app-legend"></div>
     </div>
 
-    <div class="app-panel">
-    <table class="statstable">
-        <tr>
-            <td id="solar-box" class="statsbox statsbox-energy statsbox-solar" colspan="3">
-                <div class="statsbox-inner-unit">
-                    <div id="statsbox-generation" class="statsbox-padded">
-                        <div class="statsbox-title"><span class="generationtitle">SOLAR</span></div>
-                        <div><span class="statsbox-value total_solar_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                        <div class="prc-solar-to-battery"><span class="statsbox-prc solar_to_battery_prc">0</span></div>
-                        <div class="prc-solar-direct"><span class="statsbox-prc solar_direct_prc">0</span></div>
-                        <div class="prc-solar-export"><span class="statsbox-prc solar_export_prc">0</span></div>
-                    </div>
-                </div>
-            </td>
+    <div class="app-card app-card-body">
+        <div class="app-card-caption">
+            <span class="app-section-label"><?php echo tr('Energy flow') ?> &middot; <?php echo tr('this window') ?></span>
+            <span class="app-caption-note"><?php echo tr('Solar') ?>: <?php echo tr('direct') ?> <b class="solar_direct_prc"></b> &middot; <?php echo tr('battery') ?> <b class="solar_to_battery_prc"></b> &middot; <?php echo tr('export') ?> <b class="solar_export_prc"></b></span>
+            <span class="app-caption-note"><?php echo tr('House') ?>: <?php echo tr('solar') ?> <b class="use_from_solar_prc"></b> &middot; <?php echo tr('battery') ?> <b class="use_from_battery_prc"></b> &middot; <?php echo tr('grid') ?> <b class="use_from_import_prc"></b></span>
+        </div>
 
-            <td id="solar-to-grid-box" class="statsbox">
-                <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-right"><span class="statsbox-value total_solar_export_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
+        <div class="app-flow">
+            <div id="solar-box" class="app-flow-node app-flow-wide statsbox-solar">
+                <span class="app-flow-name generationtitle"><?php echo tr('SOLAR') ?></span><span class="app-flow-value total_solar_kwh">0</span><span class="app-flow-unit">kWh</span>
+            </div>
+            <div id="solar-to-grid-box" class="app-flow-link">
+                <span class="app-flow-value total_solar_export_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9654;</span>
+            </div>
+            <div id="grid-box" class="app-flow-node statsbox-import">
+                <span class="app-flow-name"><?php echo tr('GRID') ?></span><span class="app-flow-value total_grid_balance_kwh">0</span><span class="app-flow-unit">kWh</span>
+            </div>
 
-            <td id="grid-box" class="statsbox statsbox-energy statsbox-import">
-                <div class="statsbox-padded statsbox-inner-unit">
-                    <div class="statsbox-title">GRID</div>
-                    <div><span class="statsbox-value total_grid_balance_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
-        </tr>
+            <div id="solar-to-battery-box" class="app-flow-link">
+                <span class="app-flow-value total_battery_charge_from_solar_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
+            </div>
+            <div id="grid-to-battery-box" class="app-flow-link">
+                <span id="battery_import"><span class="app-flow-arrow">&#9664;</span><span class="app-flow-title"><?php echo tr('Grid charge') ?></span><span class="app-flow-value total_import_for_battery_kwh">0</span></span>
+            </div>
+            <div id="solar-to-load-box" class="app-flow-link">
+                <span class="app-flow-value total_solar_direct_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
+            </div>
+            <div class="app-flow-link"></div>
+            <div id="grid-to-load-box" class="app-flow-link">
+                <span class="app-flow-value total_import_direct_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
+            </div>
 
-        <tr>
-            <td id="solar-to-battery-box" class="statsbox">
-                <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_battery_charge_from_solar_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
-
-            <td id="grid-to-battery-box" class="statsbox">
-                <div id="battery_import" class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-left"><div class="statsbox-flow-title">GRID CHARGE</div><span class="statsbox-value total_import_for_battery_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
-
-            <td id="solar-to-load-box" class="statsbox">
-                <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_solar_direct_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
-
-            <td class="statsbox"></td>
-
-            <td id="grid-to-load-box" class="statsbox">
-                <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_import_direct_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
-        </tr>
-
-        <tr>
-            <td id="battery-box" class="statsbox statsbox-energy statsbox-battery">
-                <div class="statsbox-padded statsbox-inner-unit">
-                    <div class="statsbox-title">BATTERY</div>
-                    <div><span class="statsbox-value battery_soc_change">0</span> <span class="statsbox-units">%</span></div>
-                </div>
-            </td>
-
-            <td id="battery-to-load-box" class="statsbox discharge-box">
-                <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-right"><span class="statsbox-value total_battery_discharge_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
-
-            <td id="house-box" class="statsbox statsbox-energy statsbox-house" colspan="3">
-                <div class="statsbox-inner-unit">
-                    <div class="statsbox-padded">
-                        <div class="statsbox-title">HOUSE</div>
-                        <div><span class="statsbox-value total_use_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                        <div class="prc-battery-to-house"><span class="statsbox-prc use_from_battery_prc">0</span></div>
-                        <div class="prc-solar-to-house"><span class="statsbox-prc use_from_solar_prc">0</span></div>
-                        <div class="prc-grid-to-house"><span class="statsbox-prc use_from_import_prc">0</span></div>
-                    </div>
-                </div>
-            </td>
-        </tr>
-    </table>
+            <div id="battery-box" class="app-flow-node statsbox-battery">
+                <span class="app-flow-name"><?php echo tr('BATTERY') ?></span><span class="app-flow-value battery_soc_change">0</span><span class="app-flow-unit">%</span>
+            </div>
+            <div id="battery-to-load-box" class="app-flow-link discharge-box">
+                <span class="app-flow-value total_battery_discharge_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9654;</span>
+            </div>
+            <div id="house-box" class="app-flow-node app-flow-wide statsbox-house">
+                <span class="app-flow-name"><?php echo tr('HOUSE') ?></span><span class="app-flow-value total_use_kwh">0</span><span class="app-flow-unit">kWh</span>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -300,9 +255,9 @@ function init()
   
     if (config.app.solar_kwh.value && config.app.use_kwh.value && config.app.import_kwh.value && config.app.battery_charge_kwh.value && config.app.battery_discharge_kwh.value) {
         init_bargraph();
-        $(".viewhistory").show();
+        $(".viewmode-toggle").show();
     } else {
-        $(".viewhistory").hide();
+        $(".viewmode-toggle").hide();
     }
     
     // The buttons for these powergraph events are hidden when in historic mode 
@@ -312,20 +267,34 @@ function init()
     $('#right').click(function () {view.panright(); reload = true; autoupdate = false; draw(true);});
     $('#left').click(function () {view.panleft(); reload = true; autoupdate = false; draw(true);});
     
-    $('.time').click(function () {
-        view.timewindow($(this).attr("time")/24.0); 
+    $('#time-select').change(function () {
+        var hours = parseFloat($(this).val());
+        if (!hours) return;
+        view.timewindow(hours/24.0); 
         reload = true; 
         autoupdate = true;
         live_timerange = view.end - view.start;
         draw(true);
     });
+
+    // Start and End fields, and the Now button, from Lib/vis.helper.js
+    timebar_manual(function () {
+        reload = true;
+        autoupdate = false;
+        draw(true);
+    });
+    timebar_now(function (length) {
+        live_timerange = length;
+        reload = true;
+        autoupdate = true;
+        draw(true);
+    });
     
-    $(".viewhistory").click(function () {
-        $btn = $(this);
-        $btn.toggleClass('active');
-        
-        $('.balanceline').attr('disabled', $btn.is('.active'));
-        viewmode = $btn.is('.active') ? 'bargraph' : 'powergraph';
+    $(".viewpower, .viewhistory").click(function () {
+        var bargraph = $(this).is(".viewhistory");
+        if (bargraph === (viewmode == "bargraph")) return;
+        viewmode = bargraph ? "bargraph" : "powergraph";
+        update_viewmode_buttons();
         
         if (viewmode=="bargraph") {
             power_start = view.start
@@ -350,6 +319,12 @@ function init()
     });
 }
 
+// Power and Daily kWh buttons follow viewmode
+function update_viewmode_buttons() {
+    $(".viewhistory").toggleClass("active", viewmode == "bargraph");
+    $(".viewpower").toggleClass("active", viewmode != "bargraph");
+}
+
 function show() 
 {
     app_log("INFO","solar & battery show");
@@ -371,20 +346,21 @@ function resize()
 {
     app_log("INFO","solar & battery resize");
     
-    var top_offset = 0;
     var placeholder_bound = $('#placeholder_bound');
     var placeholder = $('#placeholder');
 
-    var is_landscape = $(window).height() < $(window).width();
+    // Height from the top of the chart to the bottom of the viewport, with room
+    // for the legend and the flow card, as MyElectricFlow
     var width = placeholder_bound.width();
-    var height = $(window).height()*(is_landscape ? 0.3: 0.3);
+    var bottom_margin = $('#chart-legend').outerHeight(true) + $('.app-flow').closest('.app-card').outerHeight(true) + 40;
+    var offset_top = placeholder_bound.offset().top - $(window).scrollTop();
+    var height = $(window).height() - offset_top - bottom_margin;
 
-    if (height>width) height = width;
-    if (height<180) height = 180;
+    if (height<200) height = 200;
 
     placeholder.width(width);
     placeholder_bound.height(height);
-    placeholder.height(height-top_offset);
+    placeholder.height(height);
     
     draw(false)
 }
@@ -415,8 +391,10 @@ function livefn()
         battery_soc_now = parseInt(feeds[config.app.battery_soc.value].value);
     }
     
+    var updatetime = feeds[config.app.solar.value].time;
+    live_status_update(updatetime);
+
     if (autoupdate) {
-        var updatetime = feeds[config.app.solar.value].time;
         timeseries.append("solar",updatetime,solar_now);
         timeseries.trim_start("solar",view.start*0.001);
         timeseries.append("use",updatetime,use_now);
@@ -467,16 +445,19 @@ function livefn()
     if (balance==0) {
         $(".balance-label").html("PERFECT BALANCE");
         $(".balance").html("--");
+        $(".balance-unit").text("");
     }
     
     if (balance>0) {
         $(".balance-label").html("EXPORTING");
-        $(".balance").html(Math.round(Math.abs(balance))+powerUnit);
+        $(".balance").html(Math.round(Math.abs(balance)));
+        $(".balance-unit").text(powerUnit);
     }
     
     if (balance<0) {
         $(".balance-label").html("IMPORTING");
-        $(".balance").html(Math.round(Math.abs(balance))+powerUnit);
+        $(".balance").html(Math.round(Math.abs(balance)));
+        $(".balance-unit").text(powerUnit);
     }
     $(".balance").parent().toggleClass("text-export", balance>0).toggleClass("text-import", balance<0);
     
@@ -486,7 +467,7 @@ function livefn()
 
     const net_battery_charge = battery_charge_now - battery_discharge_now;
     if (net_battery_charge>0) {
-        $(".battery_charge_discharge_title").html("BATTERY CHARGING");
+        $(".battery_charge_discharge_title").html("CHARGING");
         $(".battery_charge_discharge").html(net_battery_charge);
         $(".discharge_time_left").html("--");
     } else if (net_battery_charge<0) {
@@ -503,10 +484,10 @@ function livefn()
             $(".discharge_time_left").html("--");
         }
 
-        $(".battery_charge_discharge_title").html("BATTERY DISCHARGING");
+        $(".battery_charge_discharge_title").html("DISCHARGING");
         $(".battery_charge_discharge").html(-net_battery_charge);
     } else {
-        $(".battery_charge_discharge_title").html("BATTERY POWER");
+        $(".battery_charge_discharge_title").html("POWER");
         $(".battery_charge_discharge").html(0);
         $(".discharge_time_left").html("--");
     }
@@ -519,11 +500,14 @@ function draw(load) {
     if (viewmode=="powergraph") {
         if (load) load_powergraph();
         draw_powergraph();
+        chart_legend(powerseries);
     }
     if (viewmode=="bargraph") {
         if (load) load_bargraph();
         draw_bargraph();
+        chart_legend(historyseries);
     }
+    timebar_update(viewmode=="bargraph");
 }
 
 function load_powergraph() {
@@ -734,11 +718,6 @@ function draw_powergraph() {
 // ------------------------------------------------------------------------------------------
 
 function powergraph_events() {
-    $(".time[time=1]").show();
-    $(".time[time=3]").show();
-    $(".time[time=6]").show();
-    $(".time[time=24]").show();
-            
     plot_unbind('placeholder');
 
     document.getElementById('placeholder').addEventListener("plothover", plot_handlers.plothover = function (event)
@@ -939,11 +918,6 @@ function draw_bargraph()
 // - click through to power graph
 // ------------------------------------------------------------------------------------------
 function bargraph_events() {
-    $(".time[time=1]").hide();
-    $(".time[time=3]").hide();
-    $(".time[time=6]").hide();
-    $(".time[time=24]").hide();
-            
     plot_unbind('placeholder');
     $('.bargraph-viewall').unbind("click");
     
@@ -1014,12 +988,10 @@ function bargraph_events() {
             view.start = solar_kwhd_data[z][0];
             view.end = view.start + 86400*1000;
 
-            $(".balanceline").attr('disabled',false);
-            $(".viewhistory").toggleClass('active');
-            
             reload = true; 
             autoupdate = false;
             viewmode = "powergraph";
+            update_viewmode_buttons();
             
             draw(true);
             powergraph_events();

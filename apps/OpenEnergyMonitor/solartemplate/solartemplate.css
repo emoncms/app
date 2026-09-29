@@ -1,0 +1,8 @@
+/* Solar Template. Shared components are in Modules/app/Views/css/app-kit.css. */
+
+/* Chart fills the screen above the totals */
+#graph_bound { width: 100%; position: relative; }
+#graph {
+    height: calc(100vh - 32rem);
+    min-height: 250px;
+}

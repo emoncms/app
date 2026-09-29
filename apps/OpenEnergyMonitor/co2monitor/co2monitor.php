@@ -5,6 +5,8 @@ global $path, $session, $v;
 load_js("Modules/feed/feed.js");
 load_js("Lib/js/flot-5.1.0.mod.min.js");
 load_js("Modules/app/Lib/vis.helper.js");
+load_js("Lib/js/DateTimePicker.js");
+load_css("Theme/css/datetimepicker.css");
 load_css("Modules/app/Views/css/app-kit.css");
 load_css("Modules/app/apps/OpenEnergyMonitor/co2monitor/co2monitor.css");
 ?>
@@ -13,38 +15,43 @@ load_css("Modules/app/apps/OpenEnergyMonitor/co2monitor/co2monitor.css");
 
 <section id="app-block" style="display:none">
 
-    <div class="app-panel">
-        <nav class="app-top-bar mb-0 border-0">
+    <div class="app-card">
+        <nav class="app-card-head border-0">
             <div id="tabs" class="nav nav-underline">
                 <button class="nav-link active"><i class="svg-icon-leaf"></i><?php echo tr('Air change rate from CO2') ?></button>
             </div>
-            <div class="nav">
-                <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
-                <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+            <div class="app-card-tools">
+                <span id="live-status" class="app-status"><span class="app-status-dot"></span><span class="app-status-text"></span></span>
+                <div class="nav">
+                    <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
+                    <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+                </div>
             </div>
         </nav>
     </div>
 
-    <div class="app-panel">
+    <div class="app-card app-card-body">
         <div id="graph-nav" class="app-navbar">
-            <div class="btn-group app-timebar">
-                <button class='btn time' time='24'><?php echo tr('D') ?></button>
-                <button class='btn time' time='168'><?php echo tr('W') ?></button>
-                <button class='btn time' time='720'><?php echo tr('M') ?></button>
-                <button id='zoomin' class='btn'>+</button>
-                <button id='zoomout' class='btn'>-</button>
-                <button id='left' class='btn'>&lt;</button>
-                <button id='right' class='btn'>&gt;</button>
-            </div>
+            <?php
+            $timebar_ranges = array(
+                24 => tr('24 hours'),
+                168 => tr('1 week'),
+                720 => tr('1 month')
+            );
+            include "Modules/app/Lib/timebar.php";
+            ?>
         </div>
+
+        <?php include "Modules/app/Lib/timebar_manual.php"; ?>
+
         <div id="graph_bound"><div id="graph"></div></div>
     </div>
 
-    <div class="app-panel co2-panel">
+    <div class="app-card app-card-body">
         <div class="d-flex flex-wrap justify-content-between align-items-center column-gap-3 row-gap-2 mb-2">
-            <div class="d-flex gap-2">
-                <button id="average_mode" class="btn btn-outline-primary active"><?php echo tr('Average') ?></button>
-                <button id="decay_mode" class="btn btn-outline-primary"><?php echo tr('Decay') ?></button>
+            <div class="btn-group app-segmented">
+                <button id="average_mode" class="btn active"><?php echo tr('Average') ?></button>
+                <button id="decay_mode" class="btn"><?php echo tr('Decay') ?></button>
             </div>
             <div class="co2-totals average">
                 <span><?php echo tr('Total') ?> <b><span id="total_volume">-</span> m³</b></span>

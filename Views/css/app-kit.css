@@ -330,6 +330,8 @@ body:has(.app-page[data-bs-theme="dark"]) #footer { margin: 0; }
     border-bottom: 1px solid var(--bs-border-color);
 }
 .app-card-head > .nav { align-items: stretch; }
+/* Header alone in a card: no rule under it */
+.app-card-head:last-child { border-bottom: 0; }
 .app-card-tools {
     display: flex;
     align-items: center;
@@ -390,6 +392,16 @@ body:has(.app-page[data-bs-theme="dark"]) #footer { margin: 0; }
     .app-live > * { padding: 0 8px; }
     .app-live-value { font-size: 22px; line-height: 28px; }
 }
+
+/* Row of values inside a card body, first value in line with the body edge */
+.app-card-body > .app-live { margin: 0 -12px; padding: 0 0 6px; }
+@media (max-width: 767.98px) {
+    .app-card-body > .app-live { margin: 0 -8px; }
+}
+
+/* Text toggles and links beside the tabs, time bar or a caption: smaller than tabs */
+.app-card .nav:not(.nav-underline) > .nav-link { font-size: 13px; }
+.app-card .nav:not(.nav-underline) > .nav-link [class^="svg-icon-"] { font-size: 1rem; }
 
 /* Uppercase label and a note after it */
 .app-card-caption {

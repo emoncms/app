@@ -3,70 +3,71 @@
     global $path, $session, $v;
 ?>
 <?php load_css("Modules/app/Views/css/app-kit.css"); ?>
+<?php load_css("Theme/css/datetimepicker.css"); ?>
 <?php load_js("Modules/feed/feed.js"); ?>
 
 <?php load_js("Lib/js/flot-5.1.0.mod.min.js"); ?>
 <?php load_js("Modules/app/Lib/vis.helper.js"); ?>
+<?php load_js("Lib/js/DateTimePicker.js"); ?>
 
 <div class="app-page" data-bs-theme="dark">
   <section id="app-block" style="display:none">
 
-    <div id="myelectric-realtime" class="app-panel">
-      <nav class="app-top-bar">
+    <div id="myelectric-realtime" class="app-card">
+      <nav class="app-card-head">
         <div class="nav nav-underline">
           <button class="nav-link active"><i class="svg-icon-show_chart"></i><span id="app-title">MY ELECTRIC</span></button>
         </div>
-        <div class="nav">
-          <button class="nav-link viewcostenergy">VIEW COST</button>
-          <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
+        <div class="app-card-tools">
+          <span id="live-status" class="app-status"><span class="app-status-dot"></span><span class="app-status-text"></span></span>
+          <div class="nav">
+            <button class="nav-link viewcostenergy">VIEW COST</button>
+            <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
+          </div>
         </div>
       </nav>
 
-      <div class="stats-grid stats-grid-2">
+      <div class="app-live">
         <div>
-          <h5 class="power-title">NOW</h5>
-          <h2 class="power-value text-use" id="power_now">---</h2>
+          <div class="app-live-label">NOW</div>
+          <div class="app-live-value text-use" id="power_now">---</div>
         </div>
         <div>
-          <h5 class="power-title">TODAY</h5>
-          <h2 class="power-value text-use" id="kwh_today">---</h2>
+          <div class="app-live-label">TODAY</div>
+          <div class="app-live-value text-use" id="kwh_today">---</div>
         </div>
       </div>
     </div>
 
-    <div class="app-panel">
-      <div class="app-navbar bargraph-navigation">
-        <div class="btn-group app-timebar">
-          <button class="btn bargraph-week">WEEK</button>
-          <button class="btn bargraph-month active">MONTH</button>
-          <button class="btn bargraph-alltime">ALL TIME</button>
+    <div class="app-card app-card-body">
+      <div id="graph-nav" class="app-navbar">
+        <?php
+        $timebar_ranges = array(
+            24 => tr('24 hours'),
+            168 => tr('1 week'),
+            720 => tr('1 month'),
+            8760 => tr('1 year'),
+            'all' => tr('All time')
+        );
+        include "Modules/app/Lib/timebar.php";
+        ?>
+        <div class="btn-group app-segmented ms-auto">
+          <button class="btn viewpower" title="Power graph">Power</button>
+          <button class="btn viewhistory active" title="Daily summary">Daily<span class="d-none d-sm-inline"> kWh</span></button>
         </div>
       </div>
 
-      <div class="app-navbar powergraph-navigation" style="display:none">
-        <div class="btn-group app-timebar">
-          <button class="btn time" time='24' title="Day">D</button>
-          <button class="btn time" time='168' title="Week">W</button>
-          <button class="btn time" time='720' title="Month">M</button>
-          <button class="btn" id="zoomin" title="Zoom in">+</button>
-          <button class="btn" id="zoomout" title="Zoom out">-</button>
-          <button class="btn" id="left" title="Scroll left">&lt;</button>
-          <button class="btn" id="right" title="Scroll right">&gt;</button>
-        </div>
-        <div class="nav ms-auto">
-          <button class="nav-link viewhistory" title="Back to daily summary">Daily</button>
-        </div>
-      </div>
+      <?php include "Modules/app/Lib/timebar_manual.php"; ?>
 
       <div id="placeholder_bound" style="width:100%; height:500px">
         <div id="placeholder" style="height:500px"></div>
       </div>
 
       <div id="power-graph-footer" style="display:none">
-        <div class="d-flex flex-wrap align-items-center gap-3 px-2">
-          <div class="me-auto text-body-secondary">kWh in window: <b class="text-body">
-            <span id="window-kwh"></span> <span id="window-cost"></span></b></div>
-          <div class="nav"><button id="advanced-toggle" class="nav-link">SHOW DETAIL</button></div>
+        <div class="app-card-caption align-items-center mt-2 mb-0">
+          <span class="app-section-label">kWh in window</span>
+          <span class="app-caption-note"><b><span id="window-kwh"></span> <span id="window-cost"></span></b></span>
+          <div class="nav ms-auto"><button id="advanced-toggle" class="nav-link">SHOW DETAIL</button></div>
         </div>
       </div>
 
@@ -85,22 +86,24 @@
       </div>
     </div>
 
-    <div id="energystack-comparison" class="app-panel" style="display:none">
-      <div class="app-top-bar px-2"><b>COMPARISON</b></div>
-      <div class="text-center p-2">
-        <div id="comparison_summary" class="mb-3"></div>
+    <div id="energystack-comparison" class="app-card app-card-body" style="display:none">
+      <div class="app-card-caption">
+        <span class="app-section-label">Comparison</span>
+        <span id="comparison_summary" class="app-caption-note"></span>
+      </div>
+      <div class="text-center">
         <canvas id="energystack" width="270" height="360"></canvas>
-        <div class="text-start mt-3">
-          <p>The ZeroCarbonBritain target is based on a household using all low energy appliances and LED lighting.</p>
-          <b>My Electric includes:</b><br>
-          <div class="form-check small">
-            <input id="heating" class="form-check-input" type="checkbox">
-            <label class="form-check-label" for="heating">Heatpump or electric heating</label>
-          </div>
-          <div class="form-check small">
-            <input id="transport" class="form-check-input" type="checkbox">
-            <label class="form-check-label" for="transport">Electric Vehicle</label>
-          </div>
+      </div>
+      <div class="mt-3">
+        <p>The ZeroCarbonBritain target is based on a household using all low energy appliances and LED lighting.</p>
+        <b>My Electric includes:</b><br>
+        <div class="form-check small">
+          <input id="heating" class="form-check-input" type="checkbox">
+          <label class="form-check-label" for="heating">Heatpump or electric heating</label>
+        </div>
+        <div class="form-check small">
+          <input id="transport" class="form-check-input" type="checkbox">
+          <label class="form-check-label" for="transport">Electric Vehicle</label>
         </div>
       </div>
     </div>
@@ -170,6 +173,11 @@ var flot_font_size = 12;
 var start_time = 0;
 var updaterinst = false;
 var use_start_day = 0;
+var alltime = false;
+var power_start = 0;
+var power_end = 0;
+var history_start = 0;
+var history_end = 0;
 
 config.init();
 
@@ -209,9 +217,17 @@ function show() {
     }
 
     var start = end - timeWindow;
+
+    // Power graph opens on the last day, daily bars on the last month
+    power_end = end;
+    power_start = end - 3600000*24.0;
+    viewmode = "bargraph";
+    alltime = false;
+    period_text = "month";
+    update_viewmode_buttons();
+
     bargraph_load(start,end);
     bargraph_draw();
-    set_period_active(".bargraph-month");
     timeofuse_load();
     energystacks_draw();
 
@@ -228,6 +244,7 @@ function updater()
 {
     feed.listbyidasync(function(result){
         if (result === null) { return; }
+        if (result[config.app.use.value]) live_status_update(result[config.app.use.value].time);
         
         for (var key in config.app) {
             if (config.app[key].value) feeds[key] = result[config.app[key].value];
@@ -262,28 +279,97 @@ function updater()
 // -------------------------------------------------------------------------------
 // EVENTS
 // -------------------------------------------------------------------------------
-// The buttons for these powergraph events are hidden when in historic mode 
-// The events are loaded at the start here and dont need to be unbinded and binded again.
-$("#zoomout").click(function () {view.zoomout(); powergraph_load(); powergraph_draw(); });
-$("#zoomin").click(function () {view.zoomin(); powergraph_load(); powergraph_draw(); });
-$('#right').click(function () {view.panright(); powergraph_load(); powergraph_draw(); });
-$('#left').click(function () {view.panleft(); powergraph_load(); powergraph_draw(); });
+// Zoom, pan and range act on the daily bars or the power graph, by viewmode
+function window_changed() {
+    if (viewmode=="bargraph") {
+        bargraph_load(view.start,view.end);
+        bargraph_draw();
+        timeofuse_load();
+        energystacks_draw();
+    } else {
+        powergraph_load();
+        powergraph_draw();
+    }
+}
 
-$('.time').click(function () {
-    view.timewindow($(this).attr("time")/24.0);
-    powergraph_load(); powergraph_draw(); 
+function daily_zoom_pan() {
+    if (viewmode=="bargraph") {
+        alltime = false;
+        period_text = "period";
+    }
+    window_changed();
+}
+
+$("#zoomout").click(function () {view.zoomout(); daily_zoom_pan(); });
+$("#zoomin").click(function () {view.zoomin(); daily_zoom_pan(); });
+$('#right').click(function () {view.panright(); daily_zoom_pan(); });
+$('#left').click(function () {view.panleft(); daily_zoom_pan(); });
+
+$('#time-select').change(function () {
+    var value = $(this).val();
+    if (!value) return;
+
+    // All time is shown as daily bars
+    if (value=="all") {
+        if (viewmode!="bargraph") {
+            power_start = view.start;
+            power_end = view.end;
+            viewmode = "bargraph";
+            update_viewmode_buttons();
+        }
+        alltime = true;
+        period_text = "period";
+        view.start = start_time * 1000;
+        view.end = (new Date()).getTime();
+        window_changed();
+        return;
+    }
+
+    var hours = parseFloat(value);
+    view.timewindow(hours/24.0);
+    if (viewmode=="bargraph") {
+        alltime = false;
+        period_text = {168:"week", 720:"month", 8760:"year"}[hours] || "period";
+    }
+    window_changed();
+});
+
+// Start and End fields, and the Now button, from Lib/vis.helper.js
+timebar_manual(function () {
+    alltime = false;
+    window_changed();
+});
+timebar_now(function () {
+    alltime = false;
+    window_changed();
+});
+
+// Power and Daily buttons follow viewmode
+function update_viewmode_buttons() {
+    $(".viewhistory").toggleClass("active", viewmode=="bargraph");
+    $(".viewpower").toggleClass("active", viewmode!="bargraph");
+}
+
+$(".viewpower").click(function () {
+    if (viewmode!="bargraph") return;
+    history_start = view.start;
+    history_end = view.end;
+    viewmode = "powergraph";
+    update_viewmode_buttons();
+    view.start = power_start;
+    view.end = power_end;
+    powergraph_load();
+    powergraph_draw();
 });
 
 $(".viewhistory").click(function () {
-    $(".powergraph-navigation").hide();
-    var timeWindow = (3600000*24.0*30);
-    var end = (new Date()).getTime();
-    var start = end - timeWindow;
+    if (viewmode=="bargraph") return;
+    power_start = view.start;
+    power_end = view.end;
     viewmode = "bargraph";
-    bargraph_load(start,end);
+    update_viewmode_buttons();
+    bargraph_load(history_start,history_end);
     bargraph_draw();
-    set_period_active(".bargraph-month");
-    $(".bargraph-navigation").show();
 });
 
 $("#advanced-toggle").click(function () { 
@@ -342,13 +428,14 @@ document.getElementById('placeholder').addEventListener("plotclick", function (e
     var pos = event.detail[0], item = event.detail[1];
     if (item && !panning && viewmode=="bargraph") {
         var z = item.dataIndex;
+        history_start = view.start;
+        history_end = view.end;
         view.start = data["use_kwhd"][z][0];
         view.end = view.start + 86400*1000;
-        $(".bargraph-navigation").hide();
         viewmode = "powergraph";
+        update_viewmode_buttons();
         powergraph_load();
         powergraph_draw();
-        $(".powergraph-navigation").show();
     }
 });
 
@@ -359,6 +446,7 @@ document.getElementById('placeholder').addEventListener("plotselected", function
     panning = true; 
 
     if (viewmode=="bargraph") {
+        alltime = false;
         bargraph_load(start,end);
         bargraph_draw();
     } else {
@@ -367,45 +455,6 @@ document.getElementById('placeholder').addEventListener("plotselected", function
         powergraph_draw();
     }
     setTimeout(function() { panning = false; }, 100);
-});
-
-// Mark the chosen period
-function set_period_active(selector) {
-    $(".bargraph-navigation .btn").removeClass("active");
-    $(selector).addClass("active");
-}
-$(".bargraph-navigation .btn").click(function () { set_period_active(this); });
-
-$('.bargraph-alltime').click(function () {
-    var start = start_time * 1000;
-    var end = (new Date()).getTime();
-    bargraph_load(start,end);
-    bargraph_draw();
-    period_text = "period";
-    timeofuse_load();
-    energystacks_draw();
-});
-
-$('.bargraph-week').click(function () {
-    var timeWindow = (3600000*24.0*7);
-    var end = (new Date()).getTime();
-    var start = end - timeWindow;
-    bargraph_load(start,end);
-    bargraph_draw();
-    period_text = "week";
-    timeofuse_load();
-    energystacks_draw();
-});
-
-$('.bargraph-month').click(function () {
-    var timeWindow = (3600000*24.0*30);
-    var end = (new Date()).getTime();
-    var start = end - timeWindow;
-    bargraph_load(start,end);
-    bargraph_draw();
-    period_text = "month";
-    timeofuse_load();
-    energystacks_draw();
 });
 
 $("#heating").click(function() {
@@ -430,9 +479,6 @@ $(".viewcostenergy").click(function(){
         viewcostenergy = "energy";
     }
     
-    $(".powergraph-navigation").hide();
-    viewmode = "bargraph";
-    $(".bargraph-navigation").show();
     show();
 });
 
@@ -521,6 +567,7 @@ function powergraph_draw()
         legend:{position:"nw", noColumns:4}
     }
     Flot.plot(document.getElementById('placeholder'),powergraph_series,options);
+    timebar_update(false);
 }
 
 function bargraph_load(start,end) 
@@ -529,6 +576,9 @@ function bargraph_load(start,end)
     $("#advanced-toggle").html("SHOW DETAIL");
     $("#advanced-block").hide();
         
+    view.start = start;
+    view.end = end;
+
     var interval = 3600*24;
     var intervalms = interval * 1000;
     end = Math.ceil(end/intervalms)*intervalms;
@@ -586,6 +636,8 @@ function bargraph_draw()
 
     var plot = Flot.plot(document.getElementById('placeholder'),bargraph_series,options);
     $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'></div>");
+    timebar_update(true);
+    if (alltime) $("#time-select").val("all");
 }
 
 function timeofuse_load() 
@@ -703,19 +755,20 @@ function resize() {
     var placeholder = $('#placeholder');
 
     var window_height = $(window).height();
-    var topblock = $("#myelectric-realtime").height();
-    
-    
-    
 
     var width = placeholder_bound.width();
     var height = width*0.6;
     if (height>500) height = 500;
     if (height>width) height = width;
-    
-    if (!config.app.showcomparison.value) height = window_height - topblock - 200;
-    
-    if (height<180) height = 180;
+
+    // Without the comparison card, fit the chart to the viewport with room for
+    // the window total below it
+    if (!config.app.showcomparison.value) {
+        var offset_top = placeholder_bound.offset().top - $(window).scrollTop();
+        height = window_height - offset_top - 80;
+    }
+
+    if (height<200) height = 200;
 
     placeholder.width(width);
     placeholder_bound.height(height);

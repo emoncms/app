@@ -7,8 +7,6 @@
     min-height: 250px;
 }
 
-.co2-panel { padding: 10px; }
-
 /* Totals across sensors, beside the CO2 addition field that sets the air change rate */
 .co2-totals {
     display: flex;

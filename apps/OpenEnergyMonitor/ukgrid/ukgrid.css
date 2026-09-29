@@ -7,28 +7,18 @@
     min-height: 250px;
 }
 
-/* Series toggles above the chart */
-.uk-series-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem 1rem;
-    margin: 0 0 0.5rem 0.25rem;
-}
+/* Legend items that switch a series on and off */
 .uk-series {
-    display: inline-flex;
-    align-items: center;
     padding: 0;
     background: none;
     border: none;
-    font-size: 12px;
-    color: var(--ec-text-secondary);
+    color: inherit;
     cursor: pointer;
 }
 .uk-series:hover { color: var(--bs-emphasis-color); }
 .uk-series.is-off { opacity: 0.4; }
 
 .uk-info {
-    padding: 10px;
     font-size: 13px;
     color: var(--ec-text-secondary);
 }

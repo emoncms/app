@@ -41,8 +41,9 @@ var mode = "forecast";
 init_series();
 
 function init_series() {
+    // Range select counts back from now, so it is hidden for the forecast
+    $("#time-select").toggle(mode!="forecast");
     if (mode=="forecast") {
-        $('.time').hide();
         series = [
             {label:"WIND", feedid:477240, color:"rgba(0,255,0,0.6)"},
             {label:"WIND EMBEDDED", feedid:477234, color:"rgba(0,200,0,0.6)"},
@@ -53,10 +54,6 @@ function init_series() {
         view.end = view.start + (86400*1000*7);
     
     } else {
-        $('.time').show();
-        $('.time[time=1]').hide();
-        $('.time[time=3]').hide();
-        $('.time[time=6]').hide();
         series = [
             {label:"NUCLEAR", feedid:97697, color:"rgba(227,225,36,0.6)"},
             {label:"BIOMASS", feedid:382965, color:"#735d34"},
@@ -109,8 +106,9 @@ function init_series() {
         }
     
         var show = series[z].show ? 1 : 0;
-        out += '<button class="uk-series' + (show ? '' : ' is-off') + '" index="' + z + '" show="' + show + '">';
-        out += '<span class="app-swatch" style="background-color:' + series[z].color + '"></span>' + series[z].label + '</button>';
+        var mark = series[z].fill===false ? "app-legend-line" : "app-legend-swatch";
+        out += '<button class="app-legend-item uk-series' + (show ? '' : ' is-off') + '" index="' + z + '" show="' + show + '">';
+        out += '<span class="' + mark + '" style="background-color:' + series[z].color + '"></span>' + series[z].label + '</button>';
     }
     $("#visible-checkboxes").html(out);
     load();
@@ -201,6 +199,9 @@ function draw() {
     options.xaxis.min = view.start;
     options.xaxis.max = view.end;  
     Flot.plot(document.getElementById("placeholder"),data, options);
+    timebar_update(false);
+    // Window end is rounded down to the interval, so Now shows only when further back
+    if (Date.now() - view.end < intervalms + 300000) $("#time-now").hide();
 }
 
 function resize(){
@@ -247,7 +248,14 @@ $("#zoomout").click(function () {view.zoomout(); load();});
 $("#zoomin").click(function () {view.zoomin(); load();});
 $('#right').click(function () {view.panright(); load();});
 $('#left').click(function () {view.panleft(); load();});
-$('.time').click(function () {view.timewindow($(this).attr("time")/24.0); load();});
+$('#time-select').change(function () {
+    var hours = parseFloat($(this).val());
+    if (!hours) return;
+    view.timewindow(hours/24.0);
+    load();
+});
+timebar_manual(load);
+timebar_now(load);
 
 
 document.getElementById('placeholder').addEventListener("plothover", function (event) {

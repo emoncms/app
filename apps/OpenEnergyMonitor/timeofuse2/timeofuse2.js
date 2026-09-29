@@ -549,29 +549,63 @@ function updater()
         var power_now = feeds["use"].value;
         if (cl_enabled && feeds["cl_use"]) power_now += feeds["cl_use"].value;
         $("#power_now").html(Math.round(power_now)+"<span class='power-unit'>W</span>");
+        if (feeds["use"]) live_status_update(feeds["use"].time);
     });
 }
 
 // -------------------------------------------------------------------------------
 // EVENTS
 // -------------------------------------------------------------------------------
-// The buttons for these powergraph events are hidden when in historic mode
-// The events are loaded at the start here and dont need to be unbinded and binded again.
-$("#zoomout").click(function () {view.zoomout(); powergraph_load(); powergraph_draw(); });
-$("#zoomin").click(function () {view.zoomin(); powergraph_load(); powergraph_draw(); });
-$('#right').click(function () {view.panright(); powergraph_load(); powergraph_draw(); });
-$('#left').click(function () {view.panleft(); powergraph_load(); powergraph_draw(); });
+// Time bar for both views. Daily view reloads whole days from view.start to view.end.
+function graph_reload() {
+    if (viewmode=="bargraph") {
+        bargraph_load(view.start, view.end);
+        bargraph_draw();
+    } else {
+        powergraph_load();
+        powergraph_draw();
+    }
+}
 
-$('.time').click(function () {
-    view.timewindow($(this).attr("time")/24.0);
-    powergraph_load(); powergraph_draw();
+$("#zoomout").click(function () {view.zoomout(); graph_reload(); });
+$("#zoomin").click(function () {view.zoomin(); graph_reload(); });
+$('#right').click(function () {view.panright(); graph_reload(); });
+$('#left').click(function () {view.panleft(); graph_reload(); });
+
+$('#time-select').change(function () {
+    var hours = parseFloat($(this).val());
+    if (!hours) return;
+    if (viewmode=="bargraph") {
+        load_last_days(hours/24);
+    } else {
+        view.timewindow(hours/24.0);
+        graph_reload();
+    }
 });
 
+timebar_manual(graph_reload);
+timebar_now(graph_reload);
+
+// Power and Daily buttons follow viewmode
+function update_viewmode_buttons() {
+    $(".viewhistory").toggleClass("active", viewmode == "bargraph");
+    $(".viewpower").toggleClass("active", viewmode != "bargraph");
+}
+
 $(".viewhistory").click(function () {
-    $(".powergraph-navigation").hide();
+    if (viewmode == "bargraph") return;
     viewmode = "bargraph";
+    update_viewmode_buttons();
     load_last_days(30);
-    $(".bargraph-navigation").show();
+});
+
+// Power view of the last 24 hours
+$(".viewpower").click(function () {
+    if (viewmode == "powergraph") return;
+    viewmode = "powergraph";
+    update_viewmode_buttons();
+    view.timewindow(1);
+    graph_reload();
 });
 
 $("#advanced-toggle").click(function () {
@@ -642,11 +676,10 @@ document.getElementById('placeholder').addEventListener("plotclick", function (e
         var z = item.dataIndex;
         view.start = bargraph_series[0].data[z][0];
         view.end = view.start + 86400*1000;
-        $(".bargraph-navigation").hide();
         viewmode = "powergraph";
+        update_viewmode_buttons();
         powergraph_load();
         powergraph_draw();
-        $(".powergraph-navigation").show();
     }
 });
 
@@ -667,23 +700,15 @@ document.getElementById('placeholder').addEventListener("plotselected", function
     setTimeout(function() { panning = false; }, 100);
 });
 
-$('.bargraph-week').click(function () { load_last_days(7); });
-$('.bargraph-month').click(function () { load_last_days(30); });
-$('.bargraph-year').click(function () { load_last_days(365); });
-
 $(".viewcostenergy").click(function(){
-    var view = $(this).html();
-    if (view=="ENERGY MODE") {
-        $(this).html("COST MODE").addClass("active");
-        viewcostenergy = "cost";
-    } else {
-        $(this).html("ENERGY MODE").removeClass("active");
-        viewcostenergy = "energy";
-    }
+    var mode = $(this).attr("data-mode");
+    if (mode == viewcostenergy) return;
+    viewcostenergy = mode;
+    $(".viewcostenergy").removeClass("active");
+    $(this).addClass("active");
 
-    $(".powergraph-navigation").hide();
     viewmode = "bargraph";
-    $(".bargraph-navigation").show();
+    update_viewmode_buttons();
     show();
 });
 
@@ -691,13 +716,12 @@ $(".viewcostenergy").click(function(){
 // FUNCTIONS
 // -------------------------------------------------------------------------------
 
-// Load and draw the bar graph for the most recent `days` days up to now.
+// Load and draw the bar graph for the most recent `days` days, today included.
+// Window is whole days, so the time bar shows the chosen range.
 function load_last_days(days) {
-    // Mark the chosen period
-    $(".bargraph-navigation .btn").removeClass("active");
-    $(".bargraph-navigation .btn[days="+days+"]").addClass("active");
-    var end = (new Date()).getTime();
-    bargraph_load(end - 3600000*24.0*days, end);
+    var dayms = 3600000*24;
+    var end = Math.ceil((new Date()).getTime()/dayms)*dayms;
+    bargraph_load(end - dayms*days, end);
     bargraph_draw();
 }
 
@@ -887,6 +911,7 @@ function powergraph_draw()
         legend:{position:"nw", noColumns:4}
     }
     Flot.plot(document.getElementById('placeholder'),powergraph_series,options);
+    timebar_update(false);
 }
 
 function bargraph_load(start,end)
@@ -899,6 +924,8 @@ function bargraph_load(start,end)
     var dayms = 3600*24*1000;
     end = Math.ceil(end/dayms)*dayms;
     start = Math.floor(start/dayms)*dayms;
+    view.start = start;
+    view.end = end;
 
     // Fetch the accumulated kWh feeds as half-hourly energy deltas using the
     // standard fixed interval getdata API in delta mode. Delta mode returns the
@@ -1080,6 +1107,7 @@ function bargraph_draw()
 
     var plot = Flot.plot(document.getElementById('placeholder'),bargraph_series,options);
     $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:#666;font-size:12px'></div>");
+    timebar_update(true);
 }
 
 // -------------------------------------------------------------------------------

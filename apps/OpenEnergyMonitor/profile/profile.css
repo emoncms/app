@@ -1,9 +1,5 @@
 /* Profile Explorer. Shared components are in Modules/app/Views/css/app-kit.css. */
 
-/* Flot ignores padding on the placeholder, so the spacing is a margin */
-#graph {
-    height: 500px;
-    margin: 0.5rem 0.75rem 0.75rem;
-}
+#graph { height: 500px; }
 
 .profile-check { width: 70px; text-align: center; }

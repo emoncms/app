@@ -7,6 +7,8 @@ load_js("Modules/app/Lib/graph_bars.js");
 load_js("Modules/app/Lib/graph_lines.js");
 load_js("Modules/app/Lib/timeseries.js");
 load_js("Modules/app/Lib/vis.helper.js");
+load_js("Lib/js/DateTimePicker.js");
+load_css("Theme/css/datetimepicker.css");
 load_css("Modules/app/Views/css/app-kit.css");
 load_css("Modules/app/apps/OpenEnergyMonitor/myelectric/myelectric.css");
 ?>
@@ -15,46 +17,39 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectric/myelectric.css");
 
 <section id="app-block" style="display:none">
 
-    <div class="app-panel">
-        <nav class="app-top-bar">
+    <div class="app-card">
+        <nav class="app-card-head">
             <div id="tabs" class="nav nav-underline">
                 <button class="nav-link myelectric-view-cost"><i class="svg-icon-schedule"></i><?php echo tr("Cost") ?></button>
                 <button class="nav-link myelectric-view-kwh active"><i class="svg-icon-smartmeter"></i><?php echo tr("kWh") ?></button>
             </div>
-            <div class="nav">
-                <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
-                <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+            <div class="app-card-tools">
+                <span id="live-status" class="app-status"><span class="app-status-dot"></span><span class="app-status-text"></span></span>
+                <div class="nav">
+                    <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
+                    <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+                </div>
             </div>
         </nav>
 
-        <div class="stats-grid stats-grid-2">
+        <div class="app-live">
             <div>
-                <h5 class="power-title"><?php echo tr('POWER NOW') ?></h5>
-                <h2 class="power-value text-use"><span id="powernow">0</span></h2>
+                <div class="app-live-label"><?php echo tr('POWER NOW') ?></div>
+                <div class="app-live-value text-use"><span id="powernow">0</span></div>
             </div>
             <div>
-                <h5 class="power-title"><?php echo tr('TODAY') ?></h5>
-                <h2 class="power-value text-use"><span id="usetoday_units_a"></span><span id="usetoday"></span><small id="usetoday_units_b"></small></h2>
+                <div class="app-live-label"><?php echo tr('TODAY') ?></div>
+                <div class="app-live-value text-use"><span id="usetoday_units_a"></span><span id="usetoday"></span><span id="usetoday_units_b" class="power-unit-static"></span></div>
             </div>
         </div>
     </div>
 
-    <div class="app-panel">
+    <div class="app-card app-card-body">
         <div id="graph-nav" class="app-navbar">
-            <div class="btn-group app-timebar">
-                <button class='btn time' time='1'>1<?php echo tr('h') ?></button>
-                <button class='btn time' time='3'>3<?php echo tr('h') ?></button>
-                <button class='btn time' time='6'>6<?php echo tr('h') ?></button>
-                <button class='btn time' time='24'><?php echo tr('D') ?></button>
-                <button class='btn time' time='168'><?php echo tr('W') ?></button>
-                <button class='btn time' time='720'><?php echo tr('M') ?></button>
-                <button class='btn time' time='8760'><?php echo tr('Y') ?></button>
-                <button id='zoomin' class='btn'>+</button>
-                <button id='zoomout' class='btn'>-</button>
-                <button id='left' class='btn'>&lt;</button>
-                <button id='right' class='btn'>&gt;</button>
-            </div>
+            <?php include "Modules/app/Lib/timebar.php"; ?>
         </div>
+
+        <?php include "Modules/app/Lib/timebar_manual.php"; ?>
 
         <div class="myelectric-charts">
             <div id="placeholder_bound_power"><canvas id="placeholder_power"></canvas></div>
@@ -62,26 +57,29 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectric/myelectric.css");
         </div>
     </div>
 
-    <div class="app-panel">
-        <div class="app-stats myelectric-totals">
+    <div class="app-card app-card-body">
+        <div class="app-card-caption">
+            <span class="app-section-label"><?php echo tr('Totals') ?></span>
+        </div>
+        <div class="app-live myelectric-totals">
             <div>
-                <div class="app-stat-title"><?php echo tr('WEEK') ?></div>
-                <div class="app-stat-value text-use"><span class="u1a"></span><span id="week_kwh"></span><span class="app-stat-unit u1b"></span></div>
+                <div class="app-live-label"><?php echo tr('WEEK') ?></div>
+                <div class="app-live-value text-use"><span class="u1a"></span><span id="week_kwh"></span><span class="power-unit-static u1b"></span></div>
                 <div class="myelectric-kwhd text-use"><span class="u2a"></span><span id="week_kwhd"></span><span class="u2b">/day</span></div>
             </div>
             <div>
-                <div class="app-stat-title"><?php echo tr('MONTH') ?></div>
-                <div class="app-stat-value text-use"><span class="u1a"></span><span id="month_kwh"></span><span class="app-stat-unit u1b"></span></div>
+                <div class="app-live-label"><?php echo tr('MONTH') ?></div>
+                <div class="app-live-value text-use"><span class="u1a"></span><span id="month_kwh"></span><span class="power-unit-static u1b"></span></div>
                 <div class="myelectric-kwhd text-use"><span class="u2a"></span><span id="month_kwhd"></span><span class="u2b">/day</span></div>
             </div>
             <div>
-                <div class="app-stat-title"><?php echo tr('YEAR') ?></div>
-                <div class="app-stat-value text-use"><span class="u1a"></span><span id="year_kwh"></span><span class="app-stat-unit u1b"></span></div>
+                <div class="app-live-label"><?php echo tr('YEAR') ?></div>
+                <div class="app-live-value text-use"><span class="u1a"></span><span id="year_kwh"></span><span class="power-unit-static u1b"></span></div>
                 <div class="myelectric-kwhd text-use"><span class="u2a"></span><span id="year_kwhd"></span><span class="u2b">/day</span></div>
             </div>
             <div>
-                <div class="app-stat-title"><?php echo tr('ALL') ?></div>
-                <div class="app-stat-value text-use"><span class="u1a"></span><span id="alltime_kwh"></span><span class="app-stat-unit u1b"></span></div>
+                <div class="app-live-label"><?php echo tr('ALL') ?></div>
+                <div class="app-live-value text-use"><span class="u1a"></span><span id="alltime_kwh"></span><span class="power-unit-static u1b"></span></div>
                 <div class="myelectric-kwhd text-use"><span class="u2a"></span><span id="alltime_kwhd"></span><span class="u2b">/day</span></div>
             </div>
         </div>
@@ -189,17 +187,31 @@ function init()
     // Decleration of myelectric events
     // -------------------------------------------------------------------------
     
-    $("#zoomout").click(function (e) {view.zoomout(); reload = true; autoupdate = false; fastupdate(e);});
-    $("#zoomin").click(function (e) {view.zoomin(); reload = true; autoupdate = false; fastupdate(e);});
-    $('#right').click(function (e) {view.panright(); reload = true; autoupdate = false; fastupdate(e);});
-    $('#left').click(function (e) {view.panleft(); reload = true; autoupdate = false; fastupdate(e);});
+    $("#zoomout").click(function () {view.zoomout(); reload = true; autoupdate = false; fastupdate();});
+    $("#zoomin").click(function () {view.zoomin(); reload = true; autoupdate = false; fastupdate();});
+    $('#right').click(function () {view.panright(); reload = true; autoupdate = false; fastupdate();});
+    $('#left').click(function () {view.panleft(); reload = true; autoupdate = false; fastupdate();});
     
     // zoom graph to timescale
-    $('.time').click(function (event) {
-        view.timewindow($(this).attr("time")/24.0); 
-        reload = true; 
+    $('#time-select').change(function () {
+        var hours = parseFloat($(this).val());
+        if (!hours) return;
+        view.timewindow(hours/24.0);
+        reload = true;
         autoupdate = true;
-        fastupdate(event);
+        fastupdate();
+    });
+
+    // Start and End fields, and the Now button, from Lib/vis.helper.js
+    timebar_manual(function () {
+        reload = true;
+        autoupdate = false;
+        fastupdate();
+    });
+    timebar_now(function () {
+        reload = true;
+        autoupdate = true;
+        fastupdate();
     });
     
     // toggle cost/kwh
@@ -289,7 +301,7 @@ function fastupdate(event)
     if (viewmode=="energy") {
         scale = 1;
         $("#usetoday_units_a").html("");
-        $("#usetoday_units_b").html(" kWh");
+        $("#usetoday_units_b").html("kWh");
         $(".u1a").html(""); $(".u1b").html("kWh");
         $(".u2a").html(""); $(".u2b").html(" kWh/d");
     } else {
@@ -331,22 +343,23 @@ function fastupdate(event)
     // --------------------------------------------------------------------
     feeds = feed.listbyid();
     if (feeds === null) { return; }
+    if (feeds[use]) live_status_update(feeds[use].time);
     
     // set the power now value
     if (viewmode=="energy") {
         if (powerUnit==='W') {
-            $("#powernow").html((feeds[use].value*1).toFixed(0)+"W");
+            $("#powernow").html((feeds[use].value*1).toFixed(0)+"<span class='power-unit'>W</span>");
         } else {
-            $("#powernow").html((feeds[use].value*0.001).toFixed(1)+"kW");
+            $("#powernow").html((feeds[use].value*0.001).toFixed(1)+"<span class='power-unit'>kW</span>");
         }
     } else {
         // 1000W for an hour (x3600) = 3600000 Joules / 3600,000 = 1.0 kWh x 0.15p = 0.15p/kWh (scaling factor is x3600 / 3600,000 = 0.001)
         var cost_now = feeds[use].value*1*config.app.unitcost.value*0.001;
         
         if (cost_now<1.0) {
-            $("#powernow").html(config.app.currency.value+(feeds[use].value*1*config.app.unitcost.value*0.001).toFixed(3)+"/hr");
+            $("#powernow").html(config.app.currency.value+(feeds[use].value*1*config.app.unitcost.value*0.001).toFixed(3)+"<span class='power-unit-static'>/hr</span>");
         } else {
-            $("#powernow").html(config.app.currency.value+(feeds[use].value*1*config.app.unitcost.value*0.001).toFixed(2)+"/hr");
+            $("#powernow").html(config.app.currency.value+(feeds[use].value*1*config.app.unitcost.value*0.001).toFixed(2)+"<span class='power-unit-static'>/hr</span>");
         }
     }
     // Advance view
@@ -408,6 +421,7 @@ function fastupdate(event)
     
     graph_lines.draw("placeholder_power",series,options);
     $(".ajax-loader").hide();
+    timebar_update(false);
 
     // --------------------------------------------------------------------------------------------------------
     // THIS WEEK, MONTH, YEAR TOTALS

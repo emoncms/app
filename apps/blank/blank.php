@@ -9,13 +9,18 @@ load_css("Modules/app/Views/css/app-kit.css");
 <div class="app-page" data-bs-theme="dark">
 
 <section id="app-block" style="display:none">
-    <div class="app-panel">
-        <nav class="app-top-bar justify-content-end">
-            <div class="nav">
-                <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
+    <div class="app-card">
+        <nav class="app-card-head">
+            <div class="app-card-tools">
+                <div class="nav">
+                    <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
+                    <button class="nav-link config-close d-none" title="Close"><i class="svg-icon-close"></i></button>
+                </div>
             </div>
         </nav>
-        <p class="power-title text-center p-3">Oops something went wrong, this app does not exist!</p>
+        <div class="app-card-body">
+            <p class="text-center text-body-secondary my-3">Oops something went wrong, this app does not exist!</p>
+        </div>
     </div>
 </section>
 

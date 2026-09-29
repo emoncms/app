@@ -14,15 +14,21 @@ load_css("Modules/app/apps/OpenEnergyMonitor/profile/profile.css");
 
 <section id="app-block" style="display:none">
 
-  <div class="app-panel">
-    <nav class="app-top-bar align-items-center">
-      <div class="nav nav-underline">
-        <span class="nav-link active"><i class="svg-icon-show_chart"></i>Profile Explorer</span>
+  <div class="app-card">
+    <nav class="app-card-head">
+      <div id="tabs" class="nav nav-underline">
+        <button class="nav-link active"><i class="svg-icon-show_chart"></i>Profile Explorer</button>
       </div>
-      <div class="d-flex flex-wrap align-items-center gap-2">
-        <button class="btn btn-outline-primary mode-toggle-btn active" data-mode="monthly">Monthly</button>
-        <button class="btn btn-outline-primary mode-toggle-btn" data-mode="annual">Annual</button>
-        <div class="input-group">
+      <div class="app-card-tools">
+        <div class="nav">
+          <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
+          <button class="nav-link config-close d-none" title="Close"><i class="svg-icon-close"></i></button>
+        </div>
+      </div>
+    </nav>
+    <div class="app-card-body">
+      <div class="app-navbar">
+        <div class="input-group input-group-sm w-auto">
           <span class="input-group-text">Interval</span>
           <select id="resolution" class="form-select">
             <option value="600">10 mins</option>
@@ -31,19 +37,21 @@ load_css("Modules/app/apps/OpenEnergyMonitor/profile/profile.css");
             <option value="3600">60 mins</option>
           </select>
         </div>
-        <div class="nav">
-          <button class="nav-link config-open" title="Configure app"><i class="svg-icon-wrench"></i></button>
+        <div class="btn-group app-segmented ms-auto">
+          <button class="btn mode-toggle-btn active" data-mode="monthly">Monthly</button>
+          <button class="btn mode-toggle-btn" data-mode="annual">Annual</button>
         </div>
       </div>
-    </nav>
-    <div id="graph"></div>
+      <div id="graph"></div>
+      <div id="chart-legend" class="app-legend"></div>
+    </div>
   </div>
 
-  <div class="app-panel">
+  <div class="app-card app-card-body">
     <table class="table align-middle">
       <tbody id="table"></tbody>
     </table>
-    <button class="btn btn-outline-primary" id="copy_to_clipboard" title="Copy CSV data to clipboard">Copy CSV <i class="svg-icon-content_copy"></i></button>
+    <button class="btn btn-outline-primary mb-2" id="copy_to_clipboard" title="Copy CSV data to clipboard">Copy CSV <i class="svg-icon-content_copy"></i></button>
   </div>
 
 </section>
@@ -266,19 +274,14 @@ function show()
             clickable: true,
             borderWidth: 0
         },
-        legend: {
-            show: true,
-            position: "ne",
-            noColumns: 2,
-            margin: [10, 10]
-        }
+        legend: { show: false }
     }
     
     // Visibility
     visible = JSON.parse(JSON.stringify(data));
     
     // Draw graph
-    Flot.plot(document.getElementById('graph'),visible, options);
+    draw();
     
     // Table
     var out = "";
@@ -319,7 +322,14 @@ function updater()
 function resize() 
 {
     updater();
+    draw();
+}
+
+// Chart and the legend below it, from the enabled profiles
+function draw()
+{
     Flot.plot(document.getElementById('graph'),visible, options);
+    chart_legend(visible);
 }
 
 function clear()
@@ -338,7 +348,7 @@ $("#table").on("click",".showhidemonth",function() {
           visible.push(data[$(this).attr('z')]);
       }
   });
-  Flot.plot(document.getElementById('graph'),visible, options);
+  draw();
 });
 
 $("#resolution").change(function(){

@@ -420,7 +420,9 @@ function timebar_update(daily){
         $select.val("");
     }
 
-    var opts = daily
+    // Dates with the year for daily bars and windows over two months
+    var dates_only = daily || (view.end - view.start) > 60 * 86400000;
+    var opts = dates_only
         ? { day: "numeric", month: "short", year: "numeric" }
         : { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" };
     var fmt = function(t){ return new Date(t).toLocaleString(undefined, opts); };

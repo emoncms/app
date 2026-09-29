@@ -2,9 +2,3 @@
 
 #placeholder_bound { width: 100%; }
 
-.myenergy-totals { padding: 10px 0; }
-.myenergy-totals .app-stat-title { color: var(--ec-text-secondary); }
-
-@media (max-width: 576px) {
-    .myenergy-totals .app-stat-unit { display: block; padding: 0; font-size: 12px; }
-}

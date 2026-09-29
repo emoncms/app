@@ -114,7 +114,9 @@ config.init();
 // init() is called once when the app is first loaded.
 // Use this for any one-time setup that should happen before show() is called.
 function init() {
-    // Nothing needed for this template — extend here as required.
+    // Start and End fields, and the Now button, from Lib/vis.helper.js
+    timebar_manual(load);
+    timebar_now(load);
 }
 
 function show() {
@@ -364,6 +366,8 @@ function draw() {
     // Flot requires a plain array (not a keyed object), so convert here
     let series_array = Object.values(powergraph_series);
     Flot.plot(document.getElementById('graph'), series_array, options);
+    chart_legend(series_array);
+    timebar_update(false);
 }
 
 function updater() {
@@ -381,32 +385,34 @@ function updater() {
     var grid_w    = feeds[grid_id]    ? feeds[grid_id].value * 1    : 0;
     var soc       = feeds[soc_id]     ? feeds[soc_id].value * 1     : null;
 
+    if (feeds[use_id]) live_status_update(feeds[use_id].time);
+
     $("#powernow").html(use_w.toFixed(0));
     $("#solarnow").html(solar_w.toFixed(0));
 
     // Battery: positive = discharging, negative = charging
     $("#batterynow").html(Math.abs(battery_w).toFixed(0));
     if (battery_w > 10) {
-        $("#battery-label").text("BAT DISCHG");
+        $("#battery-label").text("DISCHARGING");
         $("#battery-value").css("color", "var(--ec-energy-battery)");
     } else if (battery_w < -10) {
-        $("#battery-label").text("BAT CHRG");
+        $("#battery-label").text("CHARGING");
         $("#battery-value").css("color", "var(--ec-energy-battery)");
     } else {
-        $("#battery-label").text("BATTERY");
+        $("#battery-label").text("POWER");
         $("#battery-value").css("color", "var(--ec-text-secondary)");
     }
 
     // Grid: positive = import, negative = export
     $("#gridnow").html(Math.abs(grid_w).toFixed(0));
     if (grid_w > 10) {
-        $("#grid-label").text("IMPORT");
+        $("#grid-label").text("IMPORTING");
         $("#grid-value").css("color", "var(--ec-energy-import)");
     } else if (grid_w < -10) {
-        $("#grid-label").text("EXPORT");
+        $("#grid-label").text("EXPORTING");
         $("#grid-value").css("color", "var(--ec-energy-export)");
     } else {
-        $("#grid-label").text("GRID");
+        $("#grid-label").text("BALANCED");
         $("#grid-value").css("color", "var(--ec-text-secondary)");
     }
 
@@ -434,8 +440,10 @@ $("#zoomin").click(function () { view.zoomin(); load(); });
 $('#right').click(function () { view.panright(); load(); });
 $('#left').click(function () { view.panleft(); load(); });
 
-$('.time').click(function () {
-    view.timewindow($(this).attr("time") / 24.0);
+$('#time-select').change(function () {
+    let hours = parseFloat($(this).val());
+    if (!hours) return;
+    view.timewindow(hours / 24.0);
     load();
 });
 

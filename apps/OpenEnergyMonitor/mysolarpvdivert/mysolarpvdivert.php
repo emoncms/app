@@ -6,6 +6,8 @@
     load_js("Lib/js/flot-5.1.0.mod.min.js");
     load_js("Modules/app/Lib/vis.helper.js");
     load_js("Modules/app/Lib/timeseries.js");
+    load_js("Lib/js/DateTimePicker.js");
+    load_css("Theme/css/datetimepicker.css");
     load_css("Modules/app/Views/css/app-kit.css");
     load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpv/mysolarpv.css");
 ?>
@@ -14,140 +16,102 @@
 
 <section id="app-block" style="display:none" class="block">
 
-    <div class="app-panel">
-        <nav class="app-top-bar">
+    <div class="app-card">
+        <nav class="app-card-head">
             <div id="tabs" class="nav nav-underline">
-                <button class="nav-link viewhistory" title="<?php echo tr('View History') ?>"><i class="svg-icon-calendar"></i><?php echo tr('History') ?></button>
-                <button class="nav-link balanceline" title="<?php echo tr('Show Balance') ?>"><i class="svg-icon-show_chart"></i><?php echo tr('Balance') ?></button>
+                <button class="nav-link active"><i class="svg-icon-sun"></i><?php echo tr('Solar PV divert') ?></button>
             </div>
-            <div class="nav">
-                <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
-                <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+            <div class="app-card-tools">
+                <span id="live-status" class="app-status"><span class="app-status-dot"></span><span class="app-status-text"></span></span>
+                <div class="nav">
+                    <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
+                    <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+                </div>
             </div>
         </nav>
 
-        <div class="stats-grid">
+        <div class="app-live">
             <div>
-                <h5 class="power-title"><?php echo tr('TOTAL USE') ?></h5>
-                <h2 class="power-value text-use"><span class="usenow"></span><span class="power-unit"></span></h2>
+                <div class="app-live-label"><?php echo tr('TOTAL USE') ?></div>
+                <div class="app-live-value text-use"><span class="usenow"></span><span class="power-unit"></span></div>
             </div>
             <div>
-                <h5 class="power-title"><span class="balance-label">-</span></h5>
-                <h2 class="power-value"><span class="balance">--</span><span class="balance-unit"></span></h2>
+                <div class="app-live-label"><?php echo tr('GRID') ?> &middot; <span class="balance-label">-</span></div>
+                <div class="app-live-value"><span class="balance">--</span><span class="balance-unit power-unit-static"></span></div>
             </div>
             <div>
-                <h5 class="power-title"><span class="generationtitle"><?php echo tr('SOLAR') ?></span></h5>
-                <h2 class="power-value text-solar"><span class="generationnow"></span><span class="power-unit"></span></h2>
+                <div class="app-live-label"><span class="generationtitle"><?php echo tr('SOLAR') ?></span></div>
+                <div class="app-live-value text-solar"><span class="generationnow"></span><span class="power-unit"></span></div>
             </div>
             <div>
-                <h5 class="power-title"><?php echo tr('HOUSE') ?></h5>
-                <h2 class="power-value text-house"><span class="housenow">0</span><span class="power-unit"></span></h2>
+                <div class="app-live-label"><?php echo tr('HOUSE') ?></div>
+                <div class="app-live-value text-house"><span class="housenow">0</span><span class="power-unit"></span></div>
             </div>
             <div>
-                <h5 class="power-title"><?php echo tr('DIVERT') ?></h5>
-                <h2 class="power-value text-battery"><span class="divertnow">-</span><span class="power-unit"></span></h2>
+                <div class="app-live-label"><?php echo tr('DIVERT') ?></div>
+                <div class="app-live-value text-battery"><span class="divertnow">-</span><span class="power-unit"></span></div>
             </div>
         </div>
     </div>
 
-    <div class="app-panel">
+    <div class="app-card app-card-body">
         <div id="graph-nav" class="app-navbar">
-            <div class="btn-group app-timebar">
-                <button class='btn time' time='1'>1<?php echo tr('h') ?></button>
-                <button class='btn time' time='3'>3<?php echo tr('h') ?></button>
-                <button class='btn time' time='6'>6<?php echo tr('h') ?></button>
-                <button class='btn time' time='24'><?php echo tr('D') ?></button>
-                <button class='btn time' time='168'><?php echo tr('W') ?></button>
-                <button class='btn time' time='720'><?php echo tr('M') ?></button>
-                <button class='btn time' time='8760'><?php echo tr('Y') ?></button>
-                <button id='zoomin' class='btn'>+</button>
-                <button id='zoomout' class='btn'>-</button>
-                <button id='left' class='btn'>&lt;</button>
-                <button id='right' class='btn'>&gt;</button>
+            <?php include "Modules/app/Lib/timebar.php"; ?>
+            <div class="nav ms-auto">
+                <button class="nav-link balanceline" title="<?php echo tr('Show Balance') ?>"><i class="svg-icon-show_chart"></i><?php echo tr('Balance') ?></button>
+            </div>
+            <div class="btn-group app-segmented viewmode-toggle">
+                <button class="btn viewpower active" title="<?php echo tr('Power View') ?>"><?php echo tr('Power') ?></button>
+                <button class="btn viewhistory" title="<?php echo tr('View History') ?>"><?php echo tr('Daily') ?><span class="d-none d-sm-inline"> kWh</span></button>
             </div>
         </div>
+
+        <?php include "Modules/app/Lib/timebar_manual.php"; ?>
 
         <div id="placeholder_bound">
             <div id="placeholder"></div>
         </div>
+        <div id="chart-legend" class="app-legend"></div>
     </div>
 
-    <div class="app-panel">
-    <table class="statstable">
-        <tr>
-            <td class="statsbox statsbox-energy statsbox-solar" colspan="2">
-                <div class="statsbox-inner-unit">
-                    <div class="statsbox-padded prc-box">
-                        <div class="statsbox-title"><span class="generationtitle">SOLAR</span></div>
-                        <div><span class="statsbox-value total_generated_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                        <div class="prc-bottom-left"><span class="statsbox-prc divert_total_generated_prc">0</span></div>
-                        <div class="prc-bottom-right"><span class="statsbox-prc house_generated_total_generated_prc">0</span></div>
-                        <div class="prc-right"><span class="statsbox-prc total_export_prc">0</span></div>
-                    </div>
-                </div>
-            </td>
+    <div class="app-card app-card-body">
+        <div class="app-card-caption">
+            <span class="app-section-label"><?php echo tr('Energy flow') ?> &middot; <?php echo tr('this window') ?></span>
+            <span class="app-caption-note"><?php echo tr('Generation') ?>: <?php echo tr('house') ?> <b class="house_generated_total_generated_prc"></b> &middot; <?php echo tr('divert') ?> <b class="divert_total_generated_prc"></b> &middot; <?php echo tr('export') ?> <b class="total_export_prc"></b></span>
+            <span class="app-caption-note"><?php echo tr('House') ?>: <?php echo tr('generation') ?> <b class="house_generated_house_use_prc"></b> &middot; <?php echo tr('grid') ?> <b class="total_import_prc"></b></span>
+        </div>
 
-            <td class="statsbox statsbox-energy statsbox-export">
-                <div class="statsbox-padded">
-                    <div class="statsbox-title">EXPORT</div>
-                    <div><span class="statsbox-value total_export_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
+        <div class="app-flow">
+            <div id="solar-box" class="app-flow-node app-flow-wide statsbox-solar">
+                <span class="app-flow-name generationtitle"><?php echo tr('SOLAR') ?></span><span class="app-flow-value total_generated_kwh">0</span><span class="app-flow-unit">kWh</span>
+            </div>
+            <div id="solar-to-grid-box" class="app-flow-link" title="<?php echo tr('Export') ?>">
+                <span class="app-flow-title"><?php echo tr('Export') ?></span><span class="app-flow-value total_export_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9654;</span>
+            </div>
+            <div id="grid-box" class="app-flow-node statsbox-import" title="<?php echo tr('Grid balance') ?>">
+                <span class="app-flow-name"><?php echo tr('GRID') ?></span><span class="app-flow-value total_grid_balance_kwh">0</span><span class="app-flow-unit">kWh</span>
+            </div>
 
-            <td class="statsbox statsbox-energy statsbox-import">
-                <div class="statsbox-padded statsbox-inner-unit">
-                    <div class="statsbox-title">GRID<span class="statsbox-units"> (IMPORT / BALANCE)</span></div>
-                    <div>
-                        <span class="statsbox-value total_import_kwh">0</span> <span class="statsbox-units">kWh</span>
-                        <span class="statsbox-value"> / </span>
-                        <span class="statsbox-value total_grid_balance_kwh">0</span> <span class="statsbox-units">kWh</span>
-                    </div>
-                </div>
-            </td>
-        </tr>
+            <div id="solar-to-divert-box" class="app-flow-link">
+                <span class="app-flow-value total_divert_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
+            </div>
+            <div class="app-flow-link"></div>
+            <div id="solar-to-house-box" class="app-flow-link">
+                <span class="app-flow-value total_house_generated_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
+            </div>
+            <div class="app-flow-link"></div>
+            <div id="grid-to-house-box" class="app-flow-link">
+                <span class="app-flow-value total_import_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
+            </div>
 
-        <tr>
-            <td id="solar-to-divert-box" class="statsbox">
-                <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_divert_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
-
-            <td id="solar-to-house-box" class="statsbox">
-                <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_house_generated_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
-
-            <td class="statsbox"></td>
-
-            <td id="grid-to-house-box" class="statsbox">
-                <div class="statsbox-inner-arrow">
-                    <div class="statsbox-padded statsbox-arrow-down"><span class="statsbox-value total_import_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
-        </tr>
-
-        <tr>
-            <td class="statsbox statsbox-energy statsbox-battery">
-                <div class="statsbox-padded statsbox-inner-unit">
-                    <div class="statsbox-title">DIVERT</div>
-                    <div><span class="statsbox-value total_divert_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                </div>
-            </td>
-
-            <td class="statsbox statsbox-energy statsbox-house" colspan="3">
-                <div class="statsbox-inner-unit">
-                    <div class="statsbox-padded prc-box">
-                        <div class="statsbox-title">HOUSE</div>
-                        <div><span class="statsbox-value total_house_kwh">0</span> <span class="statsbox-units">kWh</span></div>
-                        <div class="prc-top-left"><span class="statsbox-prc house_generated_house_use_prc">0</span></div>
-                        <div class="prc-top-right"><span class="statsbox-prc total_import_prc">0</span></div>
-                    </div>
-                </div>
-            </td>
-        </tr>
-    </table>
+            <div id="divert-box" class="app-flow-node statsbox-battery">
+                <span class="app-flow-name"><?php echo tr('DIVERT') ?></span><span class="app-flow-value total_divert_kwh">0</span><span class="app-flow-unit">kWh</span>
+            </div>
+            <div class="app-flow-link"></div>
+            <div id="house-box" class="app-flow-node app-flow-wide statsbox-house">
+                <span class="app-flow-name"><?php echo tr('HOUSE') ?></span><span class="app-flow-value total_house_kwh">0</span><span class="app-flow-unit">kWh</span>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -275,37 +239,58 @@ function init()
     $('#right').click(function () {view.panright(); reload = true; autoupdate = false; draw();});
     $('#left').click(function () {view.panleft(); reload = true; autoupdate = false; draw();});
     
-    $('.time').click(function () {
-        view.timewindow($(this).attr("time")/24.0); 
+    $('#time-select').change(function () {
+        var hours = parseFloat($(this).val());
+        if (!hours) return;
+        view.timewindow(hours/24.0); 
         reload = true; 
         autoupdate = true;
         live_timerange = view.end - view.start;
+        draw();
+    });
+
+    // Start and End fields, and the Now button, from Lib/vis.helper.js
+    timebar_manual(function () {
+        reload = true;
+        autoupdate = false;
+        draw();
+    });
+    timebar_now(function (length) {
+        live_timerange = length;
+        reload = true;
+        autoupdate = true;
         draw();
     });
     
     $(".balanceline").click(function () {
         $btn = $(this);
         $btn.toggleClass('active');
-        $('.viewhistory').toggleClass('active', false);
 
         show_balance_line = $btn.is('.active') ? 1 : 0;
         draw();
     });
     
-    $(".viewhistory").click(function () {
-        $btn = $(this);
-        $btn.toggleClass('active');
-
-        $(".powergraph-navigation").show();
-        $('.balanceline').attr('disabled', $btn.is('.active'));
-
-        viewmode = $btn.is('.active') ? 'bargraph' : 'powergraph';
+    $(".viewpower, .viewhistory").click(function () {
+        var bargraph = $(this).is(".viewhistory");
+        if (bargraph === (viewmode == "bargraph")) return;
+        viewmode = bargraph ? "bargraph" : "powergraph";
+        update_viewmode_buttons();
         if(viewmode==='powergraph') {
             powergraph_events();
         }
 
         draw();
     });
+}
+
+// Mode buttons and the controls of each mode. Bar graph has its own window,
+// so the time bar is hidden.
+function update_viewmode_buttons() {
+    var bargraph = viewmode == "bargraph";
+    $(".viewhistory").toggleClass("active", bargraph);
+    $(".viewpower").toggleClass("active", !bargraph);
+    $(".balanceline").attr("disabled", bargraph);
+    $("#graph-nav .app-timebar, #window-label").toggleClass("d-none", bargraph);
 }
 
 function show() 
@@ -327,20 +312,21 @@ function resize()
 {
     app_log("INFO","mysolarpvdivert resize");
     
-    var top_offset = 0;
     var placeholder_bound = $('#placeholder_bound');
     var placeholder = $('#placeholder');
 
-    var is_landscape = $(window).height() < $(window).width();
+    // Height from the top of the chart to the bottom of the viewport, with room
+    // for the legend and the flow card, as MyElectricFlow
     var width = placeholder_bound.width();
-    var height = $(window).height()*(is_landscape ? 0.3: 0.6);
+    var bottom_margin = $('#chart-legend').outerHeight(true) + $('.app-flow').closest('.app-card').outerHeight(true) + 40;
+    var offset_top = placeholder_bound.offset().top - $(window).scrollTop();
+    var height = $(window).height() - offset_top - bottom_margin;
 
-    if (height>width) height = width;
-    if (height<180) height = 180;
+    if (height<200) height = 200;
 
     placeholder.width(width);
     placeholder_bound.height(height);
-    placeholder.height(height-top_offset);
+    placeholder.height(height);
     
     draw();
 }
@@ -370,8 +356,10 @@ function livefn()
       wind_now = parseInt(feeds[config.app.wind.value].value);
     }
 
+    var updatetime = feeds[config.app.solar.value].time;
+    live_status_update(updatetime);
+
     if (autoupdate) {
-        var updatetime = feeds[config.app.solar.value].time;
         timeseries.append("solar",updatetime,solar_now);
         timeseries.trim_start("solar",view.start*0.001);
         timeseries.append("use",updatetime,use_now);
@@ -444,8 +432,15 @@ function livefn()
 
 function draw()
 {
-    if (viewmode=="powergraph") draw_powergraph();
-    if (viewmode=="bargraph") draw_bargraph();
+    if (viewmode=="powergraph") {
+        draw_powergraph();
+        chart_legend(powerseries);
+        timebar_update(false);
+    }
+    if (viewmode=="bargraph") {
+        draw_bargraph();
+        chart_legend(historyseries);
+    }
 }
 
 function draw_powergraph() {
@@ -896,16 +891,12 @@ function bargraph_events() {
             view.start = solar_kwhd_data[z][0];
             view.end = view.start + 86400*1000;
 
-            $(".balanceline").attr('disabled',false);
-            $(".viewhistory").removeClass('active');
-            // $(".bargraph-navigation").hide();
-            $(".powergraph-navigation").show();
-            
             plot_unbind('placeholder');
             
             reload = true; 
             autoupdate = false;
             viewmode = "powergraph";
+            update_viewmode_buttons();
             
             draw();
             powergraph_events();

@@ -146,9 +146,6 @@ var current_view = "classic";
 var updaterinst = false;
 var previousPoint = null;
 
-let datetimepicker1 = false;
-let datetimepicker2 = false;
-
 config.init();
 
 // ----------------------------------------------------------------------
@@ -262,13 +259,15 @@ function draw_context() {
             { font: { color: "#888", fill: "#888" }, axisPan: false, plotPan: false, axisZoom: false, plotZoom: false },                      // left: temperature
             { position: "right", font: { color: "#888", fill: "#888" }, axisPan: false, plotPan: false, axisZoom: false, plotZoom: false }    // right: humidity
         ],
-        legend: { show: true, position: "nw", margin: [8, 8] },
+        legend: { show: false },
         selection: { mode: is_touch_primary() ? null : "x", color: "#555", visualization: "fill" },
         zoom: { interactive: is_touch_primary(), enableTouch: true, amount: 1.5 },
         pan: { interactive: is_touch_primary(), enableTouch: true, touchMode: "smartLock", frameRate: 60 },
         recenter: { interactive: is_touch_primary(), enableTouch: true }
     };
     Flot.plot(document.getElementById("contextgraph"), contextseries, options);
+    chart_legend(contextseries);
+    timebar_update(false);
 }
 
 // Build the flot series for the psychrometric (or Givoni) chart
@@ -395,7 +394,12 @@ $("#zoomout").click(function () { view.zoomout(); load(); });
 $("#zoomin").click(function () { view.zoomin(); load(); });
 $('#right').click(function () { view.panright(); load(); });
 $('#left').click(function () { view.panleft(); load(); });
-$('.time').click(function () { view.timewindow($(this).attr("time") / 24.0); load(); });
+$('#time-select').change(function () {
+    var hours = parseFloat($(this).val());
+    if (!hours) return;
+    view.timewindow(hours / 24.0);
+    load();
+});
 
 // Drag-to-select on the context chart sets the time window
 document.getElementById("contextgraph").addEventListener("plotselected", function (event) {
@@ -423,41 +427,10 @@ $("#psychrograph, #givonigraph").each(function () { this.addEventListener("ploth
 }); });
 
 // ----------------------------------------------------------------------
-// Manual date-time range nav (mirrors My Electric Flow)
+// Start and End fields, and the Now button, from Lib/vis.helper.js
 // ----------------------------------------------------------------------
-datetimepicker1 = DateTimePicker.attach(document.getElementById('request-start'), { onChange: set_view_start });
-datetimepicker2 = DateTimePicker.attach(document.getElementById('request-end'), { onChange: set_view_end });
-
-$("#time-manual-open").click(function () {
-    update_time_pickers();
-    $("#graph-nav").addClass("d-none");
-    $("#graph-nav-manual").removeClass("d-none");
-});
-$("#time-manual-close").click(function () {
-    $("#graph-nav-manual").addClass("d-none");
-    $("#graph-nav").removeClass("d-none");
-});
-
-
-// Start and end from the manual date-time pickers
-function set_view_start(date) {
-    if (!date) { alert("Please enter a valid start date."); return; }
-    if (date.getTime() >= view.end) { alert("Start date must be before the end date."); return; }
-    view.start = date.getTime();
-    load();
-}
-
-function set_view_end(date) {
-    if (!date) { alert("Please enter a valid end date."); return; }
-    if (view.start >= date.getTime()) { alert("End date must be after the start date."); return; }
-    view.end = date.getTime();
-    load();
-}
-
-function update_time_pickers() {
-    if (datetimepicker1) datetimepicker1.setDate(new Date(view.start));
-    if (datetimepicker2) datetimepicker2.setDate(new Date(view.end));
-}
+timebar_manual(load);
+timebar_now(load);
 
 // ----------------------------------------------------------------------
 // Resize

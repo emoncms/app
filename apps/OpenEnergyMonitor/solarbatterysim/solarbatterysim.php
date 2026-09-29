@@ -7,6 +7,8 @@ load_js("Lib/js/flot-5.1.0.mod.min.js");
 load_js("Modules/app/Lib/vis.helper.js");
 load_js("Lib/js/clipboard.js");
 load_js("Lib/js/vue.global.prod-3.5.22.min.js");
+load_js("Lib/js/DateTimePicker.js");
+load_css("Theme/css/datetimepicker.css");
 load_css("Modules/app/Views/css/app-kit.css");
 load_css("Modules/app/apps/OpenEnergyMonitor/solarbatterysim/solarbatterysim.css");
 ?>
@@ -15,14 +17,14 @@ load_css("Modules/app/apps/OpenEnergyMonitor/solarbatterysim/solarbatterysim.css
 
 <section id="app-block" style="display:none">
 
-  <div class="app-panel">
-    <nav class="app-top-bar align-items-center mb-0 border-0">
+  <div class="app-card">
+    <nav class="app-card-head">
       <div class="nav nav-underline">
-        <span class="nav-link active"><i class="svg-icon-sun"></i>Solar &amp; Battery Simulator</span>
+        <button class="nav-link active"><i class="svg-icon-sun"></i><span class="d-none d-sm-inline">Solar &amp; Battery </span>Simulator</button>
       </div>
-      <div class="d-flex align-items-center gap-2">
-        <div class="input-group">
-          <span class="input-group-text">Interval</span>
+      <div class="app-card-tools">
+        <div class="input-group input-group-sm w-auto">
+          <span class="input-group-text d-none d-sm-flex">Interval</span>
           <select id="resolution" class="form-select">
             <option value="600">10 mins</option>
             <option value="900">15 mins</option>
@@ -36,57 +38,57 @@ load_css("Modules/app/apps/OpenEnergyMonitor/solarbatterysim/solarbatterysim.css
     </nav>
   </div>
 
-  <div class="app-panel">
-    <div class="app-navbar">
-      <div class="btn-group app-timebar">
-        <button class="btn graph-time" time="1">D</button>
-        <button class="btn graph-time" time="7">W</button>
-        <button class="btn graph-time" time="30">M</button>
-        <button class="btn graph-time" time="365">Y</button>
-        <button id="zoomin" class="btn">+</button>
-        <button id="zoomout" class="btn">-</button>
-        <button id="left" class="btn">&lt;</button>
-        <button id="right" class="btn">&gt;</button>
-      </div>
+  <div class="app-card app-card-body">
+    <div id="graph-nav" class="app-navbar">
+      <?php
+      $timebar_ranges = array(24 => tr('1 day'), 168 => tr('1 week'), 720 => tr('1 month'), 8760 => tr('1 year'));
+      include "Modules/app/Lib/timebar.php";
+      ?>
     </div>
+    <?php include "Modules/app/Lib/timebar_manual.php"; ?>
     <div id="graph"></div>
+    <div id="chart-legend" class="app-legend"></div>
   </div>
 
   <div id="app">
 
-    <div class="app-panel">
-      <div class="stats-grid">
+    <div class="app-card app-card-body">
+      <div class="app-card-caption">
+        <span class="app-section-label">Annual result</span>
+        <span class="app-caption-note">Last 12 full months</span>
+      </div>
+      <div class="app-live">
         <div>
-          <h5 class="power-title">IMPORT SAVING</h5>
-          <h2 class="power-value text-success">£{{ toFixed(annual.import_saving, 0) }}<span class="power-unit fs-5"> /yr</span></h2>
+          <div class="app-live-label">Import saving</div>
+          <div class="app-live-value text-success">£{{ toFixed(annual.import_saving, 0) }}<span class="power-unit-static">/yr</span></div>
         </div>
         <div>
-          <h5 class="power-title">SIMPLE PAYBACK</h5>
-          <h2 class="power-value text-use">{{ toFixed(output.simple_payback, 1) }}<span class="power-unit fs-5"> years</span></h2>
+          <div class="app-live-label">Simple payback</div>
+          <div class="app-live-value text-use">{{ toFixed(output.simple_payback, 1) }}<span class="power-unit-static">years</span></div>
         </div>
         <div>
-          <h5 class="power-title">UNIT PRICE</h5>
-          <h2 class="power-value text-use">{{ toFixed(annual.unit_price*100, 1) }}<span class="power-unit fs-5"> p/kWh</span></h2>
+          <div class="app-live-label">Unit price</div>
+          <div class="app-live-value text-use">{{ toFixed(annual.unit_price*100, 1) }}<span class="power-unit-static">p/kWh</span></div>
         </div>
         <div>
-          <h5 class="power-title">SYSTEM COST</h5>
-          <h2 class="power-value text-battery">£{{ toFixed(annual.system_cost, 0) }}<span class="power-unit fs-5"> /yr</span></h2>
+          <div class="app-live-label">System cost</div>
+          <div class="app-live-value text-battery">£{{ toFixed(annual.system_cost, 0) }}<span class="power-unit-static">/yr</span></div>
         </div>
         <div>
-          <h5 class="power-title">SYSTEM + IMPORT</h5>
-          <h2 class="power-value text-battery">£{{ toFixed(annual.total_cost, 0) }}<span class="power-unit fs-5"> /yr</span></h2>
+          <div class="app-live-label">System + import</div>
+          <div class="app-live-value text-battery">£{{ toFixed(annual.total_cost, 0) }}<span class="power-unit-static">/yr</span></div>
         </div>
         <div>
-          <h5 class="power-title">GRID IMPORT</h5>
-          <h2 class="power-value text-import">{{ toFixed(annual.total_import, 0) }}<span class="power-unit fs-5"> kWh</span></h2>
+          <div class="app-live-label">Grid import</div>
+          <div class="app-live-value text-import">{{ toFixed(annual.total_import, 0) }}<span class="power-unit-static">kWh</span></div>
         </div>
       </div>
     </div>
 
-    <div class="app-panel sim-inputs">
+    <div class="app-card app-card-body sim-inputs">
       <div class="row g-4">
         <div class="col-lg-4">
-          <h4>Solar &amp; battery</h4>
+          <div class="app-section-label mb-2">Solar &amp; battery</div>
           <div class="input-group input-group-sm">
             <span class="input-group-text">Existing solar</span>
             <span class="input-group-text"><input type="checkbox" class="form-check-input mt-0" v-model="input.solar_existing" /></span>
@@ -119,7 +121,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/solarbatterysim/solarbatterysim.css
         </div>
 
         <div class="col-lg-4">
-          <h4>Off-peak charging</h4>
+          <div class="app-section-label mb-2">Off-peak charging</div>
           <div class="input-group input-group-sm">
             <span class="input-group-text">Enable</span>
             <span class="input-group-text"><input type="checkbox" class="form-check-input mt-0" v-model="input.offpeak_enable" /></span>
@@ -152,7 +154,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/solarbatterysim/solarbatterysim.css
         </div>
 
         <div class="col-lg-4">
-          <h4>Tariff &amp; costs</h4>
+          <div class="app-section-label mb-2">Tariff &amp; costs</div>
           <div class="input-group input-group-sm">
             <span class="input-group-text">Off-peak start</span>
             <input type="text" class="form-control" v-model.number="input.offpeak_start" />
@@ -195,7 +197,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/solarbatterysim/solarbatterysim.css
       </div>
     </div>
 
-    <div class="app-panel">
+    <div class="app-card app-card-body">
       <div class="table-responsive">
         <table class="table text-nowrap mb-0">
           <tr>
@@ -660,7 +662,7 @@ function show()
 
     options = {
         series: { lines: { fill: true, lineWidth: 2 } },
-        legend: { show: true },
+        legend: { show: false },
         //bars: { show: true, align: "center", barWidth: 0.75*interval*1000, fill: false},
         xaxis: { mode: "time", timezone: "browser", timeBase: "milliseconds", autoScale: "none", min: view.start, max: view.end, axisPan: true, plotPan: true, axisZoom: true, plotZoom: true },
         yaxis: { axisPan: false, plotPan: false, axisZoom: false, plotZoom: false },
@@ -678,8 +680,7 @@ function show()
         recenter: { interactive: is_touch_primary(), enableTouch: true }
     }
     
-    // Draw graph
-    Flot.plot(document.getElementById('graph'),data, options);
+    draw();
     $(".ajax-loader").hide();
 }
    
@@ -699,6 +700,10 @@ function draw() {
     options.xaxis.min = view.start;
     options.xaxis.max = view.end;
     Flot.plot(document.getElementById('graph'),data, options);
+    chart_legend(data);
+    timebar_update(false);
+    // Fixed dataset, so no Now button
+    $("#time-now").hide();
 }
 
 function clear()
@@ -721,7 +726,15 @@ $("#zoomout").click(function () {view.zoomout(); draw();});
 $("#zoomin").click(function () {view.zoomin(); draw();});
 $('#right').click(function () {view.panright(); draw();});
 $('#left').click(function () {view.panleft(); draw();});
-$('.graph-time').click(function () {view.timewindow($(this).attr("time")); draw();});
+$('#time-select').change(function () {
+    var hours = parseFloat($(this).val());
+    if (!hours) return;
+    view.timewindow(hours/24.0);
+    draw();
+});
+
+// Start and End fields from Lib/vis.helper.js
+timebar_manual(draw);
 
 document.getElementById("graph").addEventListener("plotselected", function (event)
 {

@@ -15,57 +15,38 @@ load_css("Modules/app/apps/OpenEnergyMonitor/psychrograph/psychrograph.css");
 
 <section id="app-block" style="display:none" class="block">
 
-    <div class="app-panel psy-panel">
-        <nav class="app-top-bar">
+    <div class="app-card">
+        <nav class="app-card-head">
             <div id="tabs" class="nav nav-underline">
                 <button class="nav-link view-toggle-btn active" data-view="classic"><i class="svg-icon-show_chart"></i><?php echo tr('Psychrometric') ?></button>
                 <button class="nav-link view-toggle-btn givoni-tab d-none" data-view="givoni"><i class="svg-icon-leaf"></i><?php echo tr('Givoni') ?></button>
             </div>
-            <div class="nav">
-                <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
-                <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+            <div class="app-card-tools">
+                <div class="nav">
+                    <button class="nav-link config-open" title="<?php echo tr('Configure app') ?>"><i class="svg-icon-wrench"></i></button>
+                    <button class="nav-link config-close d-none" title="<?php echo tr('Close') ?>"><i class="svg-icon-close"></i></button>
+                </div>
             </div>
         </nav>
 
-        <p class="psy-axis-note text-body-secondary mb-0">
-            <?php echo tr('Y-axis: absolute humidity (g water / kg dry air) &nbsp;&middot;&nbsp; X-axis: temperature (&deg;C)') ?>
-        </p>
+        <div class="app-card-body">
+            <div id="graph-nav" class="app-navbar">
+                <?php
+                $timebar_ranges = array(24 => tr('1 day'), 168 => tr('1 week'), 720 => tr('1 month'), 8760 => tr('1 year'));
+                include "Modules/app/Lib/timebar.php";
+                ?>
+                <span class="app-caption-note ms-auto d-none d-md-inline"><?php echo tr('Drag on the chart to select a time window') ?></span>
+            </div>
+            <?php include "Modules/app/Lib/timebar_manual.php"; ?>
+            <div id="contextgraph_bound"><div id="contextgraph"></div></div>
+            <div id="chart-legend" class="app-legend"></div>
+        </div>
     </div>
 
-    <div class="app-panel psy-panel">
-        <div id="graph-nav" class="app-navbar">
-            <div class="btn-group app-timebar">
-                <button class='btn time' time='24'><?php echo tr('D') ?></button>
-                <button class='btn time' time='168'><?php echo tr('W') ?></button>
-                <button class='btn time' time='720'><?php echo tr('M') ?></button>
-                <button class='btn time' time='8760'><?php echo tr('Y') ?></button>
-                <button id='zoomin' class='btn'>+</button>
-                <button id='zoomout' class='btn'>-</button>
-                <button id='left' class='btn'>&lt;</button>
-                <button id='right' class='btn'>&gt;</button>
-                <button id='time-manual-open' class='btn' title="<?php echo tr('Select time window') ?>"><i class="svg-icon-calendar"></i></button>
-            </div>
+    <div class="app-card app-card-body">
+        <div class="app-card-caption">
+            <span class="app-caption-note"><?php echo tr('Y-axis: absolute humidity (g water / kg dry air) &nbsp;&middot;&nbsp; X-axis: temperature (&deg;C)') ?></span>
         </div>
-
-        <div id="graph-nav-manual" class="d-flex flex-wrap align-items-center gap-2 mb-2 d-none">
-            <div class="input-group w-auto">
-                <span class="input-group-text"><?php echo tr('Start') ?></span>
-                <input id="request-start" class="form-control" type="text" placeholder="YYYY-MM-DD HH:MM:SS" />
-            </div>
-            <div class="input-group w-auto">
-                <span class="input-group-text"><?php echo tr('End') ?></span>
-                <input id="request-end" class="form-control" type="text" placeholder="YYYY-MM-DD HH:MM:SS" />
-            </div>
-            <div class="btn-group app-timebar flex-grow-0">
-                <button id='time-manual-close' class='btn' title="<?php echo tr('Done') ?>"><i class="svg-icon-check"></i></button>
-            </div>
-        </div>
-
-        <div class="psy-context-label text-body-secondary"><?php echo tr('Drag to select a time window') ?></div>
-        <div id="contextgraph_bound"><div id="contextgraph"></div></div>
-    </div>
-
-    <div class="app-panel psy-panel">
         <div id="classic-view">
             <div id="psychrograph_bound"><div id="psychrograph"></div></div>
         </div>
@@ -74,12 +55,12 @@ load_css("Modules/app/apps/OpenEnergyMonitor/psychrograph/psychrograph.css");
         </div>
     </div>
 
-    <div class="app-panel psy-panel">
-        <div class="psy-stats-controls d-flex flex-wrap justify-content-between align-items-center mb-2">
-            <h5 class="power-title mb-0"><?php echo tr('COMFORT ZONE ANALYSIS') ?></h5>
+    <div class="app-card app-card-body">
+        <div class="app-card-caption justify-content-between align-items-center">
+            <span class="app-section-label"><?php echo tr('Comfort zone analysis') ?></span>
             <div class="d-flex gap-2">
-                <button id="calc" class="btn btn-outline-primary"><?php echo tr('Calculate %') ?></button>
-                <button id="clear" class="btn btn-outline-primary"><?php echo tr('Clear') ?></button>
+                <button id="calc" class="btn btn-sm btn-outline-primary"><?php echo tr('Calculate %') ?></button>
+                <button id="clear" class="btn btn-sm btn-outline-primary"><?php echo tr('Clear') ?></button>
             </div>
         </div>
         <div id="psychrotext"><p class="small text-body-secondary"><?php echo tr('Click "Calculate %" to show the proportion of data points falling in each comfort zone.') ?></p></div>
