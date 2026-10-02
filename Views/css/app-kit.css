@@ -16,6 +16,10 @@ body:has(.app-page[data-bs-theme="dark"]) #footer { margin: 0; }
 
 .app-page #app-block { padding: 0; }
 
+/* Breakpoints below follow the width of the app, not the window, so the
+   phone layout also applies beside an open sidebar on a tablet */
+.app-page #app-block { container: app / inline-size; }
+
 .app-page[data-bs-theme="dark"] .ajax-loader {
     background: var(--ec-dark-page-bg) url(../../images/ajax-loader.gif) center no-repeat;
 }
@@ -143,7 +147,7 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
     font-size: 14px;
 }
 
-@media (max-width: 767.98px) {
+@container app (max-width: 767.98px) {
     .app-live { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 8px; }
     .app-live > :nth-child(3n+1) { border-left: none; }
     .app-live > * { padding: 0 8px; }
@@ -152,7 +156,7 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
 
 /* Row of values inside a card body, first value in line with the body edge */
 .app-card-body > .app-live { margin: 0 -12px; padding: 0 0 6px; }
-@media (max-width: 767.98px) {
+@container app (max-width: 767.98px) {
     .app-card-body > .app-live { margin: 0 -8px; }
 }
 
@@ -192,7 +196,7 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
 .app-timebar > .btn > [class^="icon-"] { opacity: 0.8; }
 .app-timebar > .btn:hover > [class^="icon-"] { opacity: 1; }
 .app-window-text { font-size: 13px; color: var(--bs-secondary-color); white-space: nowrap; }
-@media (max-width: 991.98px) { .app-window-text { display: none; } }
+@container app (max-width: 991.98px) { .app-window-text { display: none; } }
 
 /* Two way toggle */
 .app-segmented > .btn {
@@ -268,7 +272,7 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
 .app-flow-title { font-size: 12px; }
 .app-flow-arrow { font-size: 11px; }
 
-@media (max-width: 767.98px) {
+@container app (max-width: 767.98px) {
     .app-flow { grid-template-rows: 40px 34px 40px; gap: 4px; }
     .app-flow > *, .app-flow-link > span[id] { gap: 3px; }
     .app-flow-value { font-size: 15px; }
@@ -279,13 +283,24 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
 }
 
 /* Phones: time bar on its own row, window label shortened */
-@media (max-width: 575.98px) {
+@container app (max-width: 575.98px) {
     .app-card-body { padding: 8px 10px 6px; }
     .app-card-head { padding: 0 6px; }
     .app-status-text { display: none; }
     .app-card .app-navbar { gap: 6px; }
     .app-card .app-navbar > .app-timebar:has(#time-select) { flex: 1 1 100%; }
-    .app-legend { padding-left: 0; }
+    .app-legend { gap: 0 10px; padding-left: 0; font-size: 11px; line-height: 18px; }
+    .app-legend-item { gap: 4px; }
+}
+
+/* Small phones: header tabs without icons, smaller live values */
+@container app (max-width: 399.98px) {
+    .app-card-head .nav-underline:has(> .nav-link + .nav-link:not(.d-none)) .nav-link { font-size: 14px; }
+    .app-card-head .nav-underline:has(> .nav-link + .nav-link:not(.d-none)) .nav-link > [class^="svg-icon-"] { display: none; }
+    .app-card-tools { gap: 8px; }
+    .app-live > * { padding: 0 6px; }
+    .app-live-value { font-size: 19px; }
+    .app-live-value :is(.power-unit, .power-unit-static) { margin-left: 2px; font-size: 12px; }
 }
 
 /* Line under a chart: window totals and a detail toggle, with a rule above */
@@ -322,6 +337,11 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
     color: var(--bs-secondary-color);
 }
 .app-tile-value { font-size: 22px; font-weight: 600; }
+@container app (max-width: 575.98px) {
+    .app-tiles { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+    .app-tiles > * { padding: 6px 10px; }
+    .app-tile-value { font-size: 19px; }
+}
 
 /* Option rows in two columns. An open row spans both. */
 .app-options-label { display: block; margin: 16px 0 8px; }
@@ -335,7 +355,7 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
     border-radius: 6px;
 }
 .app-options > .app-option:has(> div[id$="_options"]:not([style*="none"])) { grid-column: 1 / -1; }
-@media (max-width: 767.98px) {
+@container app (max-width: 767.98px) {
     .app-options { grid-template-columns: 1fr; }
 }
 
@@ -455,13 +475,36 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
     --bs-btn-focus-box-shadow: inset 0 0 0 2px rgba(var(--bs-primary-rgb), 0.5);
 }
 
-@media (max-width: 575.98px) {
+@container app (max-width: 575.98px) {
     .app-timebar { flex: 1; }
     .app-timebar > .btn { min-width: 0; --bs-btn-padding-x: 0.3rem; }
 }
 
+/* Power and Daily toggle folds into the time bar on phones, as one button
+   showing the other view: bars in power view, a line in daily view */
+.app-view-switch { display: none; }
+.svg-icon-bar_chart {
+    -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M4 10h4v10H4zM10 4h4v16h-4zM16 13h4v7h-4z'/></svg>");
+    mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M4 10h4v10H4zM10 4h4v16h-4zM16 13h4v7h-4z'/></svg>");
+}
+@container app (max-width: 575.98px) {
+    .app-navbar:has(> .viewmode-toggle:not([style*="none"])) .app-view-switch { display: block; flex: 0 0 auto; }
+    /* !important as apps show and hide the toggle with inline styles */
+    .app-navbar > .viewmode-toggle { display: none !important; }
+    .app-navbar:has(.viewhistory.active) .app-view-switch .svg-icon-bar_chart,
+    .app-navbar:has(.viewpower.active) .app-view-switch .svg-icon-show_chart { display: none; }
+    .app-view-switch [class^="svg-icon-"] { font-size: 1.1rem; vertical-align: -0.2em; }
+    .app-timebar > select.btn { flex: 1 1 auto; --bs-btn-padding-x: 0.4rem; }
+}
+
 /* Fields line up with buttons in a flex row */
 .app-page .input-group { margin-bottom: 0; }
+
+/* Compact tables on phones */
+@container app (max-width: 575.98px) {
+    .app-page .table { font-size: 13px; }
+    .app-page .table > :not(caption) > * > * { padding: 0.4rem 0.25rem; }
+}
 
 /* Name cell in a table */
 .app-page .table .col-primary { color: var(--bs-emphasis-color); }

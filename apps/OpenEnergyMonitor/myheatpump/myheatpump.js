@@ -454,13 +454,13 @@ function resize() {
     var width = placeholder_bound.width();
 
     // Viewport height less content above the chart (measured from the top of the page,
-    // independent of scroll position), one legend line, the chart foot and the all time
-    // history card. Fixed allowances are used as legend and foot content change with the view.
-    var legend_line = 26;
+    // independent of scroll position), the legend, the chart foot and the all time history
+    // card. Legend height is the tallest seen at this width and the foot a fixed allowance,
+    // so the chart keeps its size when the view changes.
     var chart_foot = 48;
     var history_card = $('#all_time_history_title').closest('.app-card').outerHeight(true);
     var offset_top = placeholder_bound.offset().top;
-    var height = window.innerHeight - offset_top - legend_line - chart_foot - history_card - 16;
+    var height = window.innerHeight - offset_top - chart_legend_height() - chart_foot - history_card - 16;
 
     // min size to avoid flot errors
     if (height < 250) height = 250;

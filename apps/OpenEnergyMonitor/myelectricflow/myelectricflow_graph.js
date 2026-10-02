@@ -268,7 +268,7 @@ function draw_graph() {
 
     $(".ajax-loader").hide();
 
-    chart_legend(powerseries);
+    chart_legend(powerseries, resize);
     update_window_label();
 }
 

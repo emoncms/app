@@ -677,6 +677,39 @@ function calculate_standby_heat_loss() {
 // -------------------------------------------------------------------------------
 // POWER GRAPH
 // -------------------------------------------------------------------------------
+
+// Legend columns that fit the chart width, kept per width and label set
+var powergraph_legend_fit = { key: "", columns: 0 };
+
+// Plot with the legend in the top margin, wrapped to more rows when one row is too wide
+function powergraph_plot(series, options) {
+    var placeholder = document.getElementById('placeholder');
+    var width = placeholder.clientWidth;
+    var labels = series.filter(function (s) { return s.label; }).map(function (s) { return s.label; });
+    var key = width + "|" + labels.join(",");
+    var columns = powergraph_legend_fit.key == key ? powergraph_legend_fit.columns : labels.length;
+
+    var plot;
+    for (var i = 0; i < 4; i++) {
+        var rows = Math.ceil(labels.length / Math.max(columns, 1));
+        var top = 10 + 20 * rows;
+        options.legend.noColumns = columns;
+        options.legend.margin = [0, -top];
+        options.grid.margin.top = top;
+        plot = Flot.plot(placeholder, series, options);
+
+        // Legend is moved to the left edge by plot_legend, so its width is compared
+        var legend = placeholder.querySelector('.legend');
+        var legend_width = legend ? legend.getBoundingClientRect().width : 0;
+        if (columns <= 1 || legend_width <= width) break;
+        // Scale columns down by the overflow, at least one fewer each pass
+        columns = Math.min(columns - 1, Math.floor(columns * width / legend_width));
+        if (columns < 1) columns = 1;
+    }
+    powergraph_legend_fit = { key: key, columns: columns };
+    return plot;
+}
+
 function powergraph_draw() {
     $("#overlay_text").html("");
     $("#overlay").hide();  
@@ -712,7 +745,8 @@ function powergraph_draw() {
             margin: { top: 30 }
         },
         selection: { mode: "x", color: "#e8cfac", visualization: "fill" },
-        // Placed in the top grid margin, above the plot, as flot 0.8 drew it
+        // Placed in the top grid margin, above the plot, as flot 0.8 drew it.
+        // Columns and margin are set by powergraph_plot.
         legend: { show: true, position: "nw", margin: [0, -30], noColumns: 13 }
     }
 
@@ -733,7 +767,7 @@ function powergraph_draw() {
             if (Array.isArray(powergraph_series[key]) && !powergraph_series[key].length) show = false;
             if (show) powergraph_series_without_key.push(powergraph_series[key]);
         }
-        var plot = Flot.plot(document.getElementById('placeholder'), powergraph_series_without_key, options);
+        var plot = powergraph_plot(powergraph_series_without_key, options);
         plot_legend(plot, 0);
     }
 

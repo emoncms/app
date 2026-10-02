@@ -574,10 +574,33 @@ function live_status_update(time){
 
 // Legend below the chart from the drawn series. Series on the second axis
 // are drawn as lines.
-function chart_legend(series){
+// Optional on_grow is called when the legend is taller than chart_legend_height
+// last returned, so the app can resize the chart.
+function chart_legend(series, on_grow){
     var items = series.filter(function(s){ return s.label; }).map(function(s){
         var mark = s.yaxis == 2 ? "app-legend-line" : "app-legend-swatch";
         return '<span class="app-legend-item"><span class="' + mark + '" style="background:' + s.color + '"></span>' + s.label + '</span>';
     });
-    $("#chart-legend").html(items.join(""));
+    var legend = $("#chart-legend");
+    legend.html(items.join(""));
+
+    if (on_grow && legend.width() == chart_legend_fit.width && legend.outerHeight(true) > chart_legend_fit.height) {
+        chart_legend_fit.height = legend.outerHeight(true);
+        on_grow();
+    }
 }
+
+// Tallest legend seen at the current width, for the chart height. Kept when the
+// legend gets shorter, so the chart keeps its size between views.
+var chart_legend_fit = { width: 0, height: 0 };
+function chart_legend_height(){
+    var legend = $("#chart-legend");
+    if (legend.width() != chart_legend_fit.width) chart_legend_fit = { width: legend.width(), height: 0 };
+    chart_legend_fit.height = Math.max(chart_legend_fit.height, legend.outerHeight(true));
+    return chart_legend_fit.height;
+}
+
+// Time bar view switch on phones: clicks the Power or Daily button that is not active
+$(document).on("click", ".app-view-switch", function(){
+    $(this).closest(".app-navbar").find(".viewmode-toggle > .btn:not(.active)").first().trigger("click");
+});

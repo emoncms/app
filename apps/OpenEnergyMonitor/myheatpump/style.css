@@ -21,7 +21,7 @@
   width: 150px;
 }
 
-@media (max-width: 767.98px) {
+@container app (max-width: 767.98px) {
   .bargraph-navigation { flex: 1 1 100%; }
   .bargraph-navigation > .btn { flex: 1; }
   .bargraph-navigation [class^="svg-icon-"] { display: none; }
@@ -32,6 +32,13 @@
   #live_table .app-live-label { font-size: 10px; letter-spacing: 0.03em; }
   #live_table .app-live-value { font-size: 20px; }
   #live_table .hp-return { font-size: 12px; margin-left: 3px; }
+}
+
+/* Phones: stats table and totals fit the width, Diff column dropped */
+@container app (max-width: 575.98px) {
+  .stats-col { width: auto; }
+  #advanced-block .table :is(th, td):nth-child(4) { display: none; }
+  .app-card-caption:has(#all_time_history_title) + .app-live .app-live-value { font-size: 19px; }
 }
 
 #overlay {

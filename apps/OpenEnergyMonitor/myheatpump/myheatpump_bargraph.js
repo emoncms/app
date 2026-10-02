@@ -471,7 +471,7 @@ function bargraph_draw() {
         var plot = Flot.plot(document.getElementById('placeholder'), bargraph_series, options);
         $('#placeholder').append("<div id='bargraph-label' style='position:absolute;left:50px;top:30px;color:var(--bs-secondary-color);font-size:12px'></div>");
     }
-    chart_legend(bargraph_series);
+    chart_legend(bargraph_series, resize);
     hp_timebar_sync();
 }
 

@@ -4,6 +4,8 @@
   window switch, zoom, pan and Now, then the window dates. Include inside
   div#graph-nav.app-navbar, and Lib/timebar_manual.php after it.
   Set $timebar_ranges (hours => label) before the include to change the list.
+  On phones the Power and Daily toggle (.viewmode-toggle in the same row) folds
+  into a button at the end of the time bar.
   Behaviour: timebar_update, timebar_manual and timebar_now in Lib/vis.helper.js.
 */
 defined('EMONCMS_EXEC') or die('Restricted access');
@@ -33,5 +35,6 @@ if (!isset($timebar_ranges)) {
     <button id="left" class="btn" title="<?php echo tr('Earlier') ?>">&lt;</button>
     <button id="right" class="btn" title="<?php echo tr('Later') ?>">&gt;</button>
     <button id="time-now" class="btn" title="<?php echo tr('Move the window to now') ?>" style="display:none"><?php echo tr('Now') ?></button>
+    <button class="btn app-view-switch" title="<?php echo tr('Switch between power and daily view') ?>"><i class="svg-icon-bar_chart"></i><i class="svg-icon-show_chart"></i></button>
 </div>
 <span id="window-label" class="app-window-text"></span>
