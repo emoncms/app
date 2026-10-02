@@ -480,20 +480,51 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
     .app-timebar > .btn { min-width: 0; --bs-btn-padding-x: 0.3rem; }
 }
 
-/* Power and Daily toggle folds into the time bar on phones, as one button
-   showing the other view: bars in power view, a line in daily view */
-.app-view-switch { display: none; }
+/* Time bar zoom and pan icons, line style: 24px grid, 2px stroke. Bar chart
+   icon for the view switch, filled as svg-icon-show_chart. */
+.svg-icon-zoom_in {
+    -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><path d='M20 20l-4-4M11 8v6M8 11h6'/></svg>");
+    mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><path d='M20 20l-4-4M11 8v6M8 11h6'/></svg>");
+}
+.svg-icon-zoom_out {
+    -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><path d='M20 20l-4-4M8 11h6'/></svg>");
+    mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><path d='M20 20l-4-4M8 11h6'/></svg>");
+}
+.svg-icon-pan_left {
+    -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M15 18l-6-6 6-6'/></svg>");
+    mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M15 18l-6-6 6-6'/></svg>");
+}
+.svg-icon-pan_right {
+    -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M9 18l6-6-6-6'/></svg>");
+    mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M9 18l6-6-6-6'/></svg>");
+}
 .svg-icon-bar_chart {
     -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M4 10h4v10H4zM10 4h4v16h-4zM16 13h4v7h-4z'/></svg>");
     mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M4 10h4v10H4zM10 4h4v16h-4zM16 13h4v7h-4z'/></svg>");
 }
+.svg-icon-pan_end {
+    -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M7 18l6-6-6-6M17 6v12'/></svg>");
+    mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M7 18l6-6-6-6M17 6v12'/></svg>");
+}
+.app-timebar > .btn > [class^="svg-icon-"] { font-size: 1.15rem; vertical-align: -0.2em; }
+
+/* Now is text, and an icon on small phones */
+#time-now > .svg-icon-pan_end { display: none; }
+@container app (max-width: 399.98px) {
+    #time-now > .app-now-text { display: none; }
+    #time-now > .svg-icon-pan_end { display: inline-block; }
+}
+
+/* Power and Daily toggle folds into the time bar on phones, as one button
+   showing the other view: bars in power view, a line in daily view */
+.app-view-switch { display: none; }
 @container app (max-width: 575.98px) {
-    .app-navbar:has(> .viewmode-toggle:not([style*="none"])) .app-view-switch { display: block; flex: 0 0 auto; }
+    .app-navbar:has(> .viewmode-toggle:not([style*="none"])) .app-view-switch { display: block; }
     /* !important as apps show and hide the toggle with inline styles */
     .app-navbar > .viewmode-toggle { display: none !important; }
     .app-navbar:has(.viewhistory.active) .app-view-switch .svg-icon-bar_chart,
     .app-navbar:has(.viewpower.active) .app-view-switch .svg-icon-show_chart { display: none; }
-    .app-view-switch [class^="svg-icon-"] { font-size: 1.1rem; vertical-align: -0.2em; }
+    .app-view-switch [class^="svg-icon-"] { font-size: 1.1rem; }
     .app-timebar > select.btn { flex: 1 1 auto; --bs-btn-padding-x: 0.4rem; }
 }
 

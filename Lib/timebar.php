@@ -30,11 +30,11 @@ if (!isset($timebar_ranges)) {
         <?php } ?>
     </select>
     <button id="time-manual-open" class="btn" title="<?php echo tr('Select time window') ?>"><i class="icon-resize-horizontal"></i></button>
-    <button id="zoomin" class="btn" title="<?php echo tr('Zoom in') ?>">+</button>
-    <button id="zoomout" class="btn" title="<?php echo tr('Zoom out') ?>">&minus;</button>
-    <button id="left" class="btn" title="<?php echo tr('Earlier') ?>">&lt;</button>
-    <button id="right" class="btn" title="<?php echo tr('Later') ?>">&gt;</button>
-    <button id="time-now" class="btn" title="<?php echo tr('Move the window to now') ?>" style="display:none"><?php echo tr('Now') ?></button>
+    <button id="zoomin" class="btn" title="<?php echo tr('Zoom in') ?>"><i class="svg-icon-zoom_in"></i></button>
+    <button id="zoomout" class="btn" title="<?php echo tr('Zoom out') ?>"><i class="svg-icon-zoom_out"></i></button>
+    <button id="left" class="btn" title="<?php echo tr('Earlier') ?>"><i class="svg-icon-pan_left"></i></button>
+    <button id="right" class="btn" title="<?php echo tr('Later') ?>"><i class="svg-icon-pan_right"></i></button>
+    <button id="time-now" class="btn" title="<?php echo tr('Move the window to now') ?>" style="display:none"><span class="app-now-text"><?php echo tr('Now') ?></span><i class="svg-icon-pan_end"></i></button>
     <button class="btn app-view-switch" title="<?php echo tr('Switch between power and daily view') ?>"><i class="svg-icon-bar_chart"></i><i class="svg-icon-show_chart"></i></button>
 </div>
 <span id="window-label" class="app-window-text"></span>
