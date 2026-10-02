@@ -206,8 +206,6 @@ function show() {
         heatpump_heat_start = feed.getvalue(feeds["heatpump_heat_kwh"].id, alltime_start_time);
     }
 
-    resize();
-
     var date = new Date();
     var now = date.getTime();
 
@@ -217,6 +215,8 @@ function show() {
     live_status_update(end_time);
     $("#live_table").toggle(now - end <= HOUR);
     $(".hp-return-part").toggle(feeds["heatpump_returnT"] != undefined);
+
+    resize();
 
     if (urlParams.mode != undefined) {
         if (urlParams.mode == "power") {
@@ -448,21 +448,27 @@ function resize() {
     }
 
 
-    var top_offset = 0;
     var placeholder_bound = $('#placeholder_bound');
     var placeholder = $('#placeholder');
 
     var width = placeholder_bound.width();
-    var height = width * 0.6;
+
+    // Viewport height less content above the chart (measured from the top of the page,
+    // independent of scroll position), one legend line, the chart foot and the all time
+    // history card. Fixed allowances are used as legend and foot content change with the view.
+    var legend_line = 26;
+    var chart_foot = 48;
+    var history_card = $('#all_time_history_title').closest('.app-card').outerHeight(true);
+    var offset_top = placeholder_bound.offset().top;
+    var height = window.innerHeight - offset_top - legend_line - chart_foot - history_card - 16;
+
+    // min size to avoid flot errors
     if (height < 250) height = 250;
-    if (height > 480) height = 480;
-    if (height > width) height = width;
 
     placeholder.width(width);
     placeholder_bound.height(height);
-    placeholder.height(height - top_offset);
+    placeholder.height(height);
 
-    
 
     if (viewmode == "bargraph") {
         bargraph_draw();
@@ -472,7 +478,20 @@ function resize() {
 }
 // on finish sidebar hide/show
 $(function () {
-    $(document).on('window.resized hidden.sidebar.collapse shown.sidebar.collapse', resize)
+    var last_width = window.innerWidth;
+    var last_height = window.innerHeight;
+
+    $(document).on('window.resized', function () {
+        // Touch devices: skip small height-only changes from the browser address bar
+        // showing and hiding on scroll, and from the on-screen keyboard
+        var touch = window.matchMedia('(pointer: coarse)').matches;
+        if (touch && window.innerWidth == last_width && Math.abs(window.innerHeight - last_height) < 150) return;
+        last_width = window.innerWidth;
+        last_height = window.innerHeight;
+        resize();
+    })
+
+    $(document).on('hidden.sidebar.collapse shown.sidebar.collapse', resize)
 })
 // ----------------------------------------------------------------------
 // App log
