@@ -731,8 +731,9 @@ function powergraph_draw() {
             { font: style, position: "right", labelWidth: 36, tickFormatter: function (v) { return v + "\u00b0"; } },
             { min: 0, autoScale: "none", font: { size: flot_font_size, color: "#44b3e2", fill: "#44b3e2" }, position: "right", labelWidth: 30 },
             { min: 0, max: 1, autoScale: "none", show: false, reserveSpace: false },
+            { font: style, reserveSpace: false },   // unused
             { font: style, reserveSpace: false },   // emitter spec
-            { font: style, reserveSpace: false }    // system volume
+            { font: style, reserveSpace: false }    // system volume and DHW charge
         ],
         grid: {
             show: true,
