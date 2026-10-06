@@ -473,6 +473,7 @@ function bargraph_draw() {
     }
     chart_legend(bargraph_series, resize);
     hp_timebar_sync();
+    heatdemand_draw();
 }
 
 function bargraph_tooltip(item)

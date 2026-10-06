@@ -46,6 +46,9 @@ config.app = {
     // Hybrid Boiler
     'boiler_heat': { "type": "feed", "autoname": "boiler_heat", "optional": true, "description": "Boiler heat output in watts" },
 
+    // Solar
+    "solar_elec_kwh": { "type": "feed", "autoname": "solar_elec_kwh", "optional": true, "description": "Cumulative solar generation kWh, used by heat demand" },
+
     // Other
     "starting_power": { "type": "value", "default": 150, "name": "Starting power", "description": "Starting power of heatpump in watts" },
     "auto_detect_cooling":{"type":"checkbox", "default":false, "name": "Auto detect cooling", "description":"Auto detect summer cooling if cooling status feed is not present"},
@@ -544,6 +547,8 @@ function hp_timebar_sync() {
     $(".viewhistory").toggleClass("active", daily);
     $(".viewpower").toggleClass("active", !daily);
     $(".bargraph-navigation").toggle(daily);
+    $("#heatdemand-toggle").toggle(daily);
+    $("#heatdemand-block").toggle(daily && $("#heatdemand-toggle").html() == "HIDE HEAT DEMAND");
 }
 
 // Range select: days of bars, or hours of power data
@@ -632,10 +637,6 @@ document.getElementById('placeholder').addEventListener("plothover", function (e
 document.getElementById('placeholder').addEventListener("plotclick", function (event) {
     var pos = event.detail[0], item = event.detail[1];
     if (item && !panning && viewmode == "bargraph") {
-
-        last_bargraph_start = bargraph_start;
-        last_bargraph_end = bargraph_end;
-
         var z = item.dataIndex;
         var itemTime = item.datapoint[0];
 
@@ -644,21 +645,29 @@ document.getElementById('placeholder').addEventListener("plotclick", function (e
             z = daily_data_timestamp_map[itemTime];
         }
 
-        view.start = data["heatpump_elec_kwhd"][z][0];
-        view.end = view.start + DAY;
-        viewmode = "powergraph";
-        powergraph_load();
-
-        $(".bargraph-navigation").hide();
-        $(".powergraph-navigation").show();
-        $("#advanced-toggle").show();
-        if ($("#advanced-toggle").html() == "SHOW DETAIL") {
-            $("#advanced-block").hide();
-        } else {
-            $("#advanced-block").show();
-        }
+        hp_open_day(data["heatpump_elec_kwhd"][z][0]);
     }
 });
+
+// Open the power view for the day starting at time (ms)
+function hp_open_day(time) {
+    last_bargraph_start = bargraph_start;
+    last_bargraph_end = bargraph_end;
+
+    view.start = time;
+    view.end = view.start + DAY;
+    viewmode = "powergraph";
+    powergraph_load();
+
+    $(".bargraph-navigation").hide();
+    $(".powergraph-navigation").show();
+    $("#advanced-toggle").show();
+    if ($("#advanced-toggle").html() == "SHOW DETAIL") {
+        $("#advanced-block").hide();
+    } else {
+        $("#advanced-block").show();
+    }
+}
 
 document.getElementById('placeholder').addEventListener("plotselected", function (event) {
     var ranges = event.detail[0];
