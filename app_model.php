@@ -107,10 +107,14 @@ class AppConfig
         }
 
         $apps = array();
-        $result = $this->mysqli->query("SELECT `id`, `app`, `name`, `public` FROM app WHERE `userid`='$userid' ORDER BY `id` ASC");
+        $stmt = $this->mysqli->prepare("SELECT `id`, `app`, `name`, `public` FROM app WHERE `userid`=? ORDER BY `id` ASC");
+        $stmt->bind_param("i", $userid);
+        $stmt->execute();
+        $result = $stmt->get_result();
         while ($row = $result->fetch_object()) {
             $apps[] = $row;
         }
+        $stmt->close();
         return $apps;
     }
     
