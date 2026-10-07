@@ -399,6 +399,10 @@ if (window.Flot && is_touch_primary()) Flot.plugins.unshift({
     name: "app-touch",
     init: function(plot){
         plot.hooks.processOptions.push(function(plot, options){
+            // A new plot drops a gesture window from the plot before it, e.g.
+            // a tap on a bar that also panned it slightly before opening a day
+            var placeholder = plot.getPlaceholder();
+            clearTimeout(placeholder.app_touch_timer);
             if (!options.pan || options.xaxes[0].mode != "time") return;
             if (options.selection) options.selection.mode = null;
             Object.assign(options.zoom, { interactive: true, enableTouch: true, amount: 1.5 });
@@ -408,19 +412,17 @@ if (window.Flot && is_touch_primary()) Flot.plugins.unshift({
                 Object.assign(axis, { axisPan: false, plotPan: false, axisZoom: false, plotZoom: false });
             });
             // Gestures stay in the chart, no page scroll or browser zoom
-            var placeholder = plot.getPlaceholder();
             placeholder.style.touchAction = "none";
             placeholder.style.overscrollBehavior = "contain";
             // One handler per placeholder. Flot does not shut down a plot
             // that is drawn over, so the plot is taken from the event.
             if (placeholder.app_touch_bound) return;
             placeholder.app_touch_bound = true;
-            var timer = null;
             var on_window = function(event){
                 var xaxis = event.detail[0].getAxes().xaxis;
                 var range = { from: xaxis.min, to: xaxis.max };
-                clearTimeout(timer);
-                timer = setTimeout(function(){
+                clearTimeout(placeholder.app_touch_timer);
+                placeholder.app_touch_timer = setTimeout(function(){
                     placeholder.dispatchEvent(new CustomEvent("plotselected", { detail: [{ xaxis: range }] }));
                 }, 250);
             };
