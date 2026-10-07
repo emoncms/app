@@ -278,8 +278,31 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
     .app-flow-value { font-size: 15px; }
     .app-flow-node .app-flow-value { font-size: 17px; }
     .app-flow-name { font-size: 11px; }
-    .app-flow-title, .app-flow-link .app-flow-unit { display: none; }
-    .app-flow-node:not(.app-flow-wide) :is(.app-flow-name, .app-flow-unit) { display: none; }
+    .app-flow-link .app-flow-unit { display: none; }
+    .app-flow-node:not(.app-flow-wide) .app-flow-unit { display: none; }
+    /* Narrow nodes and titled flows: name on a line above the value */
+    .app-flow-node:not(.app-flow-wide),
+    .app-flow-link:has(.app-flow-title),
+    .app-flow-link > span[id]:has(.app-flow-title) {
+        flex-wrap: wrap;
+        align-content: center;
+        row-gap: 0;
+        line-height: 1.1;
+    }
+    .app-flow-node:not(.app-flow-wide) .app-flow-name,
+    .app-flow-title {
+        flex: 0 0 100%;
+        order: -1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: center;
+        font-size: 10px;
+    }
+}
+.app-flow-short { display: none; }
+@container app (max-width: 575.98px) {
+    .app-flow-title:has(.app-flow-short) .app-flow-long { display: none; }
+    .app-flow-short { display: inline; }
 }
 
 /* Phones: time bar on its own row, window label shortened */

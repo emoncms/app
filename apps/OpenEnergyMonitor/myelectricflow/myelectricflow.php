@@ -148,13 +148,13 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
                 <span class="app-flow-value solar_to_battery">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
             </div>
             <div id="grid-to-battery-box" class="app-flow-link">
-                <span id="battery_import"><span class="app-flow-arrow">&#9664;</span><span class="app-flow-title"><?php echo tr('Grid charge') ?></span><span class="app-flow-value grid_to_battery">0</span></span>
+                <span id="battery_import"><span class="app-flow-arrow">&#9664;</span><span class="app-flow-title"><span class="app-flow-long"><?php echo tr('Grid charge') ?></span><span class="app-flow-short"><?php echo tr('Charge') ?></span></span><span class="app-flow-value grid_to_battery">0</span></span>
             </div>
             <div id="solar-to-load-box" class="app-flow-link">
                 <span class="app-flow-value solar_to_load">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
             </div>
             <div id="battery-to-grid-box" class="app-flow-link">
-                <span id="battery_export"><span class="app-flow-title"><?php echo tr('Battery to grid') ?></span><span class="app-flow-value battery_to_grid">0</span><span class="app-flow-arrow">&#9654;</span></span>
+                <span id="battery_export"><span class="app-flow-title"><span class="app-flow-long"><?php echo tr('Battery to grid') ?></span><span class="app-flow-short"><?php echo tr('To grid') ?></span></span><span class="app-flow-value battery_to_grid">0</span><span class="app-flow-arrow">&#9654;</span></span>
             </div>
             <div id="grid-to-load-box" class="app-flow-link">
                 <span class="app-flow-value grid_to_load">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>

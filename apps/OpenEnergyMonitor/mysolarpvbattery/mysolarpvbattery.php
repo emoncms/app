@@ -97,7 +97,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
                 <span class="app-flow-value total_battery_charge_from_solar_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
             </div>
             <div id="grid-to-battery-box" class="app-flow-link">
-                <span id="battery_import"><span class="app-flow-arrow">&#9664;</span><span class="app-flow-title"><?php echo tr('Grid charge') ?></span><span class="app-flow-value total_import_for_battery_kwh">0</span></span>
+                <span id="battery_import"><span class="app-flow-arrow">&#9664;</span><span class="app-flow-title"><span class="app-flow-long"><?php echo tr('Grid charge') ?></span><span class="app-flow-short"><?php echo tr('Charge') ?></span></span><span class="app-flow-value total_import_for_battery_kwh">0</span></span>
             </div>
             <div id="solar-to-load-box" class="app-flow-link">
                 <span class="app-flow-value total_solar_direct_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
