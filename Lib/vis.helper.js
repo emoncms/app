@@ -419,6 +419,13 @@ if (window.Flot && is_touch_primary()) Flot.plugins.unshift({
             if (placeholder.app_touch_bound) return;
             placeholder.app_touch_bound = true;
             var on_window = function(event){
+                // Flot sends a zero pan for a tap that moves under its snap
+                // distance. Window is unchanged, so no reload.
+                var delta = event.detail[1];
+                if (event.type == "plotpan" && delta && !delta.x && !delta.left) {
+                    clearTimeout(placeholder.app_touch_timer);
+                    return;
+                }
                 var xaxis = event.detail[0].getAxes().xaxis;
                 var range = { from: xaxis.min, to: xaxis.max };
                 clearTimeout(placeholder.app_touch_timer);
