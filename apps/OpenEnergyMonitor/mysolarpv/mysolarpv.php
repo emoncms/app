@@ -48,10 +48,22 @@
 
     <div class="app-card app-card-body">
         <div id="graph-nav" class="app-navbar">
-            <?php include "Modules/app/Lib/timebar.php"; ?>
+            <?php
+            // All: daily view only
+            $timebar_ranges = array(
+                1 => tr('1 hour'),
+                3 => tr('3 hours'),
+                6 => tr('6 hours'),
+                24 => tr('24 hours'),
+                168 => tr('1 week'),
+                720 => tr('1 month'),
+                8760 => tr('1 year'),
+                'all' => tr('All')
+            );
+            include "Modules/app/Lib/timebar.php";
+            ?>
             <div class="nav ms-auto">
                 <button class="nav-link balanceline" title="<?php echo tr('Show Balance') ?>"><i class="svg-icon-show_chart"></i><?php echo tr('Balance') ?></button>
-                <button id="show-all" class="nav-link bargraph-viewall d-none" title="<?php echo tr('Show All') ?>"><i class="svg-icon-expand"></i><?php echo tr('Show All') ?></button>
             </div>
             <div class="btn-group app-segmented viewmode-toggle">
                 <button class="btn viewpower active" title="<?php echo tr('Power View') ?>"><?php echo tr('Power') ?></button>
@@ -176,6 +188,10 @@ var historyseries = [];
 var latest_start_time = 0;
 var panning = false;
 var bargraph_initialized = false;
+var bargraph_all = false;
+// Window of the mode not shown
+var power_start = 0, power_end = 0;
+var history_start = 0, history_end = 0;
 var live_timerange = 0;
 var meta = {};
 var power_graph_end_time = 0;
@@ -226,33 +242,27 @@ function init()
     
     // The buttons for these powergraph events are hidden when in historic mode 
     // The events are loaded at the start here and dont need to be unbinded and binded again.
-    $("#zoomout").click(function () {view.zoomout(); reload = true; autoupdate = false; draw();});
-    $("#zoomin").click(function () {view.zoomin(); reload = true; autoupdate = false; draw();});
-    $('#right').click(function () {view.panright(); reload = true; autoupdate = false; draw();});
-    $('#left').click(function () {view.panleft(); reload = true; autoupdate = false; draw();});
+    $("#zoomout").click(function () {view.zoomout(); nav_update(false);});
+    $("#zoomin").click(function () {view.zoomin(); nav_update(false);});
+    $('#right').click(function () {view.panright(); nav_update(false);});
+    $('#left').click(function () {view.panleft(); nav_update(false);});
     
     $('#time-select').change(function () {
+        if ($(this).val() == "all") {
+            bargraph_all = true;
+            load_bargraph(latest_start_time * 1000, +new Date);
+            draw();
+            return;
+        }
         var hours = parseFloat($(this).val());
         if (!hours) return;
         view.timewindow(hours/24.0);
-        live_timerange = view.end - view.start;
-        reload = true; 
-        autoupdate = true;
-        draw();
+        nav_update(true);
     });
 
     // Start and End fields, and the Now button, from Lib/vis.helper.js
-    timebar_manual(function () {
-        reload = true;
-        autoupdate = false;
-        draw();
-    });
-    timebar_now(function (length) {
-        live_timerange = length;
-        reload = true;
-        autoupdate = true;
-        draw();
-    });
+    timebar_manual(function () { nav_update(false); });
+    timebar_now(function () { nav_update(true); });
     
     $(".balanceline").click(function () { 
         if (show_balance_line === 0) {
@@ -272,8 +282,15 @@ function init()
         viewmode = bargraph ? "bargraph" : "powergraph";
         update_viewmode_buttons();
         if (bargraph) {
+            power_start = view.start;
+            power_end = view.end;
+            view.start = history_start;
+            view.end = history_end;
             bargraph_events();
         } else {
+            view.start = power_start;
+            view.end = power_end;
+            reload = true;
             powergraph_events();
         }
         draw();
@@ -281,15 +298,25 @@ function init()
 
 }
 
-// Mode buttons and the controls of each mode. Bar graph has its own window,
-// so the time bar is hidden.
+// Window changed by the time bar. Live applies to the power graph only.
+function nav_update(live) {
+    bargraph_all = false;
+    if (viewmode == "bargraph") {
+        load_bargraph(view.start, view.end);
+    } else {
+        reload = true;
+        autoupdate = live;
+        if (live) live_timerange = view.end - view.start;
+    }
+    draw();
+}
+
+// Mode buttons and the controls of each mode
 function update_viewmode_buttons() {
     var bargraph = viewmode == "bargraph";
     $(".viewhistory").toggleClass("active", bargraph);
     $(".viewpower").toggleClass("active", !bargraph);
     $(".balanceline").toggleClass("d-none", bargraph);
-    $("#show-all").toggleClass("d-none", !bargraph);
-    $("#graph-nav .app-timebar, #window-label").toggleClass("d-none", bargraph);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -392,7 +419,7 @@ function livefn()
     var updatetime = Math.max(feeds[config.app.solar.value].time, feeds[config.app.use.value].time);
     live_status_update(updatetime);
 
-    if (autoupdate) {
+    if (autoupdate && viewmode == "powergraph") {
         power_graph_end_time = updatetime;
         timeseries.append("solar",updatetime,solar_now);
         timeseries.trim_start("solar",view.start*0.001);
@@ -569,6 +596,7 @@ function draw_powergraph() {
     Flot.plot(document.getElementById('placeholder'),series,options);
     chart_legend(series);
     timebar_update(false);
+    $("#time-select option[value=all]").prop("hidden", true);
     $(".ajax-loader").hide();
 }
 
@@ -696,7 +724,7 @@ function init_bargraph() {
     earliest_start_time = Math.min(meta['import_kwh'].start_time, earliest_start_time);
     view.first_data = earliest_start_time * 1000;
 
-    var timeWindow = (3600000*24.0*40);
+    var timeWindow = (3600000*24.0*30);
     var end = +new Date;
     var start = end - timeWindow;
     load_bargraph(start,end);
@@ -706,8 +734,16 @@ function load_bargraph(start,end) {
 
     var interval = 3600*24;
     var intervalms = interval * 1000;
-    end = Math.ceil(end/intervalms)*intervalms;
-    start = Math.floor(start/intervalms)*intervalms;
+    // Whole days, rounded so panning keeps the window length
+    end = Math.round(end/intervalms)*intervalms;
+    start = Math.round(start/intervalms)*intervalms;
+    if (end <= start) end = start + intervalms;
+    history_start = start;
+    history_end = end;
+    if (viewmode == "bargraph") {
+        view.start = start;
+        view.end = end;
+    }
     
     // Load kWh data
     var solar_kwh_data = feed.getdata(config.app.solar_kwh.value,start,end,"daily",0,1);
@@ -789,6 +825,9 @@ function draw_bargraph()
 
     var plot = Flot.plot(document.getElementById('placeholder'),historyseries,options);
     chart_legend(historyseries);
+    timebar_update(true);
+    $("#time-select option[value=all]").prop("hidden", false);
+    if (bargraph_all) $("#time-select").val("all");
 
     var use = 0, solar = 0, direct = 0;
     for (var z=0; z<use_kwhd_data.length; z++) {
@@ -813,7 +852,6 @@ function draw_bargraph()
 function bargraph_events(){
 
     plot_unbind('placeholder');
-    $('.bargraph-viewall').unbind("click");
     
     // Day's values in a tooltip
     document.getElementById('placeholder').addEventListener("plothover", plot_handlers.plothover = function (event)
@@ -849,6 +887,8 @@ function bargraph_events(){
             
             view.start = solar_kwhd_data[z][0];
             view.end = view.start + 86400*1000;
+            power_start = view.start;
+            power_end = view.end;
             
             reload = true; 
             autoupdate = false;
@@ -864,28 +904,12 @@ function bargraph_events(){
         var ranges = event.detail[0];
         var start = ranges.xaxis.from;
         var end = ranges.xaxis.to;
+        bargraph_all = false;
         load_bargraph(start,end);
         draw();
         panning = true; setTimeout(function() {panning = false; }, 100);
     });
     
-    $('.bargraph-viewall').click(function () { 
-        $btn = $(this);
-        $btn.toggleClass('active');
-        if ($btn.is('.active')) {
-            // show all
-            var start = latest_start_time * 1000;
-            var end = +new Date;
-            load_bargraph(start,end);
-        } else {
-            // show 40 days
-            var timeWindow = (3600000*24.0*40);
-            var end = +new Date;
-            var start = end - timeWindow;
-            load_bargraph(start,end);
-        }
-        draw();
-    });
 }
 $(function() {
     $(document).on('window.resized hidden.sidebar.collapse shown.sidebar.collapse', resize)
