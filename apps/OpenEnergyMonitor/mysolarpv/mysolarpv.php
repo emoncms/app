@@ -86,7 +86,7 @@
             </div>
             <div>
                 <div class="app-live-label"><?php echo tr('EXPORT') ?></div>
-                <div class="app-live-value text-export"><span class="total_export_prc">--</span><span class="power-unit-static"><span id="total_export_kwh"></span> kWh</span></div>
+                <div class="app-live-value text-solar-export"><span class="total_export_prc">--</span><span class="power-unit-static"><span id="total_export_kwh"></span> kWh</span></div>
             </div>
             <div>
                 <div class="app-live-label"><?php echo tr('GRID') ?></div>

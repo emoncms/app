@@ -1,10 +1,13 @@
 /* My Solar PV and My Solar PV Divert.
    Shared components are in Modules/app/Views/css/app-kit.css. */
 
+/* No page padding below the last card, chart takes the space */
+#wrap main.content-container:has(> .app-page) { padding-bottom: 0 !important; }
+
 /* Chart fills the screen below the live values. Divert sets the height in JS. */
 #placeholder_bound { width: 100%; position: relative; }
 #placeholder {
-    height: calc(100vh - 32rem);
+    height: calc(100vh - 30.25rem);
     min-height: 250px;
 }
 
@@ -22,3 +25,6 @@
 #solar-to-divert-box { --statsbox-color: var(--ec-energy-battery); }
 #solar-to-house-box  { --statsbox-color: var(--ec-energy-use-light); }
 #grid-to-house-box   { --statsbox-color: var(--ec-energy-import); }
+
+/* Exported solar total: darker solar yellow */
+.text-solar-export { color: #b7aa1f; }
