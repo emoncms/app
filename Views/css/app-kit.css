@@ -251,6 +251,19 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
 .app-legend-swatch { width: 10px; height: 10px; border-radius: 2px; }
 .app-legend-line { width: 14px; height: 2px; }
 
+/* Legend item that shows or hides a series, dimmed when off */
+.app-legend-toggle {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    opacity: 0.5;
+    cursor: pointer;
+}
+.app-legend-toggle.active { opacity: 1; }
+.app-legend-toggle:hover { color: var(--bs-body-color); }
+
 /* Compact flow diagram: five columns, energy nodes and the flows between them.
    Flow colour comes from --statsbox-color, set by the app. */
 .app-flow {

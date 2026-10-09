@@ -62,10 +62,7 @@
             );
             include "Modules/app/Lib/timebar.php";
             ?>
-            <div class="nav ms-auto">
-                <button class="nav-link balanceline" title="<?php echo tr('Show Balance') ?>"><i class="svg-icon-show_chart"></i><?php echo tr('Balance') ?></button>
-            </div>
-            <div class="btn-group app-segmented viewmode-toggle">
+            <div class="btn-group app-segmented viewmode-toggle ms-auto">
                 <button class="btn viewpower active" title="<?php echo tr('Power View') ?>"><?php echo tr('Power') ?></button>
                 <button class="btn viewhistory" title="<?php echo tr('View History') ?>"><?php echo tr('Daily') ?><span class="d-none d-sm-inline"> kWh</span></button>
             </div>

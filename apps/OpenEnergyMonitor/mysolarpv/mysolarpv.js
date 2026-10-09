@@ -112,9 +112,9 @@ function init()
     timebar_manual(function () { nav_update(false); });
     timebar_now(function () { nav_update(true); });
 
-    $(".balanceline").click(function () {
+    // Balance toggle at the end of the legend, rebuilt on each draw
+    $("#chart-legend").on("click", ".balanceline", function () {
         show_balance_line = !show_balance_line;
-        $(this).toggleClass('active', show_balance_line);
         draw();
     });
 
@@ -190,7 +190,6 @@ function set_viewmode(mode) {
     var bargraph = viewmode == "bargraph";
     $(".viewhistory").toggleClass("active", bargraph);
     $(".viewpower").toggleClass("active", !bargraph);
-    $(".balanceline").toggleClass("d-none", bargraph);
 }
 
 // ----------------------------------------------------------------------
@@ -286,7 +285,8 @@ function draw_powergraph() {
         {data:flows.solar, name:'solar', label:'Solar', color: "#dccc1f", lines:{lineWidth:0, fill:1.0}},
         {data:flows.use, name:'use', label:'Use', color: "#0699fa", lines:{lineWidth:0, fill:0.8}}
     ];
-    if (show_balance_line) series.push({data:flows.balance, yaxis:2, name:'balance', label:'Balance', color: 'green'});
+    var balance = {data:flows.balance, yaxis:2, name:'balance', label:'Balance', color: 'green'};
+    if (show_balance_line) series.push(balance);
 
     var options = {
         series: { lines: { fill: false, lineWidth: 2 } },
@@ -299,7 +299,9 @@ function draw_powergraph() {
 
     powerseries = series;
     Flot.plot(document.getElementById('placeholder'), series, options);
-    chart_legend(series);
+    chart_legend(series.filter(function (s) { return s !== balance; }));
+    $("#chart-legend").append('<button class="app-legend-item app-legend-toggle balanceline' + (show_balance_line ? ' active' : '') + '" title="Show or hide the balance line">'
+        + '<span class="app-legend-line" style="background:' + balance.color + '"></span>' + balance.label + '</button>');
     timebar_update(false);
     $("#time-select option[value=all]").prop("hidden", true);
     $(".ajax-loader").hide();

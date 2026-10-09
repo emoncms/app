@@ -10,6 +10,10 @@
     height: calc(100vh - 30.25rem);
     min-height: 250px;
 }
+/* Narrow layout: taller live values and time bar, no second nav row */
+@container app (max-width: 767.98px) {
+    #placeholder { height: calc(100vh - 28.125rem); }
+}
 
 /* Chart notes drawn over the bar graph */
 .chart-note {
