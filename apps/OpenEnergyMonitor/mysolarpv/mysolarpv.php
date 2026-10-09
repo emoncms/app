@@ -189,6 +189,10 @@ var latest_start_time = 0;
 var panning = false;
 var bargraph_initialized = false;
 var bargraph_all = false;
+// Power graph source: "power", or "kwh" for windows over 7 days when the kWh feeds are set
+var data_mode = "power";
+var loaded_mode = false;
+var kwh_window = {};
 // Window of the mode not shown
 var power_start = 0, power_end = 0;
 var history_start = 0, history_end = 0;
@@ -305,8 +309,8 @@ function nav_update(live) {
         load_bargraph(view.start, view.end);
     } else {
         reload = true;
-        autoupdate = live;
-        if (live) live_timerange = view.end - view.start;
+        autoupdate = live && (view.end - view.start) < 25*3600000;
+        if (autoupdate) live_timerange = view.end - view.start;
     }
     draw();
 }
@@ -493,13 +497,32 @@ function draw_powergraph() {
         legend: { show: false }
     }
     view.calc_interval(1500); // npoints = 1500
+
+    // kWh data over 7 days: flows from cumulative kWh stay exact at any interval
+    data_mode = ((view.end - view.start) > 3600000*24*7 && has_kwh_feeds()) ? "kwh" : "power";
+    if (data_mode == "kwh") {
+        // Interval in whole 15 minutes, window aligned to it
+        view.interval = Math.ceil(Math.max(view.interval, 900) / 900) * 900;
+        view.start = Math.floor(view.start / (view.interval*1000)) * (view.interval*1000);
+        view.end = Math.ceil(view.end / (view.interval*1000)) * (view.interval*1000);
+    }
+    $(".viewpower").attr("title", data_mode == "kwh" ? "Chart from energy data" : "Chart from power data");
+
     // -------------------------------------------------------------------------------------------------------
     // LOAD DATA ON INIT OR RELOAD
     // -------------------------------------------------------------------------------------------------------
-    if (reload) {
+    if (reload || loaded_mode != data_mode) {
         reload = false;
-        timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,view.interval,1));
-        timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,1));
+        loaded_mode = data_mode;
+        if (data_mode == "kwh") {
+            kwh_window = {};
+            for (var key of ["use_kwh", "solar_kwh", "import_kwh"]) {
+                kwh_window[key] = feed.getdata(config.app[key].value,view.start,view.end,view.interval,0,1) || [];
+            }
+        } else {
+            timeseries.load("solar",feed.getdata(config.app.solar.value,view.start,view.end,view.interval,1));
+            timeseries.load("use",feed.getdata(config.app.use.value,view.start,view.end,view.interval,1));
+        }
     }
     // -------------------------------------------------------------------------------------------------------
     
@@ -517,10 +540,48 @@ function draw_powergraph() {
     var total_use_kwh = 0;
     var total_use_direct_kwh = 0;
     
-    var datastart = timeseries.start_time("solar");
-    
     var interval = view.interval;
-    var sample_size = Math.min(timeseries.length("solar"), timeseries.length("use"));
+
+    if (data_mode == "kwh") {
+        // kWh per interval to average W
+        var to_watts = 3600000 / interval;
+        var n = Math.min(kwh_window.use_kwh.length, kwh_window.solar_kwh.length, kwh_window.import_kwh.length);
+
+        for (var z=0; z<n; z++) {
+            var time = kwh_window.use_kwh[z][0];
+            var use_kwh = kwh_window.use_kwh[z][1];
+            var solar_kwh = kwh_window.solar_kwh[z][1];
+            var import_kwh = kwh_window.import_kwh[z][1];
+
+            // Gap in any feed: no point and nothing added to the totals
+            if (use_kwh==null || solar_kwh==null || import_kwh==null) {
+                use_data.push([time,null]);
+                gen_data.push([time,null]);
+                store_data.push([time,null]);
+                continue;
+            }
+            use_kwh = Math.max(0, use_kwh);
+            solar_kwh = Math.max(0, solar_kwh);
+            var direct_kwh = Math.min(Math.max(0, use_kwh - import_kwh), use_kwh, solar_kwh);
+
+            store += solar_kwh - use_kwh;
+            if (storage_capacity!=0) {
+                if (store>storage_capacity) store = storage_capacity;
+                if (store<0) store = 0;
+            }
+
+            total_use_kwh += use_kwh;
+            total_solar_kwh += solar_kwh;
+            total_use_direct_kwh += direct_kwh;
+
+            use_data.push([time,use_kwh*to_watts]);
+            gen_data.push([time,solar_kwh*to_watts]);
+            store_data.push([time,store]);
+        }
+    }
+
+    var datastart = timeseries.start_time("solar");
+    var sample_size = data_mode == "power" ? Math.min(timeseries.length("solar"), timeseries.length("use")) : 0;
 
     for (var z=0; z<sample_size; z++) {
         var time = datastart + (1000 * interval * z);
@@ -563,23 +624,6 @@ function draw_powergraph() {
         t += interval;
     }
     
-    // Consider loading totals from kWh feeds if available
-    // Need to avoid too many requests here, currently updating every 10s
-    /*
-    console.log("-----");
-    
-    skwh = get_kwh_between_two_timestamps('solar_kwh',view.start*0.001,view.end*0.001);
-    console.log(skwh);
-    
-    ukwh = get_kwh_between_two_timestamps('use_kwh',view.start*0.001,view.end*0.001);
-    console.log(ukwh);
-    
-    ikwh = get_kwh_between_two_timestamps('import_kwh',view.start*0.001,view.end*0.001);
-    console.log(ikwh);
-    
-    console.log((ukwh-ikwh)/skwh)
-    */
-    
     show_totals(total_use_kwh, total_solar_kwh, total_use_direct_kwh);
 
     options.xaxis.min = view.start;
@@ -598,6 +642,11 @@ function draw_powergraph() {
     timebar_update(false);
     $("#time-select option[value=all]").prop("hidden", true);
     $(".ajax-loader").hide();
+}
+
+// Use, solar and import kWh feeds all set
+function has_kwh_feeds() {
+    return !!(config.app.use_kwh.value && config.app.solar_kwh.value && config.app.import_kwh.value);
 }
 
 // Window totals below the chart. Direct is solar used on site.
@@ -624,18 +673,6 @@ function show_totals(use_kwh, solar_kwh, direct_kwh) {
     }
 }
 
-function get_kwh_between_two_timestamps(key,start,end) {
-    if (meta[key]!=undefined) {
-        if (start<meta[key].start_time) start = meta[key].start_time;
-        if (end>meta[key].end_time) end = meta[key].end_time;
-        
-        var kwh_start = feed.getvalue(config.app[key].value,start);
-        var kwh_end = feed.getvalue(config.app[key].value,end);
-        return kwh_end - kwh_start;
-    }
-    return false;
-}
-
 // ------------------------------------------------------------------------------------------
 // POWER GRAPH EVENTS
 // ------------------------------------------------------------------------------------------
@@ -653,7 +690,7 @@ function powergraph_events() {
         reload = true; 
         
         var now = +new Date();
-        if (Math.abs(view.end-now)<30000) {
+        if (Math.abs(view.end-now)<30000 && (view.end-view.start) < 25*3600000) {
             autoupdate = true;
             live_timerange = view.end - view.start;
             
