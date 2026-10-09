@@ -934,7 +934,6 @@ function solar_battery_visibility() {
     $(".prc-solar").toggle(s);
     $(".prc-battery").toggle(b);
     $(".prc-solar-battery").toggle(s && b);
-    $(".prc-self").toggle(s || b);
 
     $(".battery-section").toggle(b);
 }
@@ -988,8 +987,6 @@ function calc_stats(d) {
         solar_to_battery_prc:  solar_kwh > 0 ? (100 * d.solar_to_battery  / solar_kwh).toFixed(0) + "%" : "",
         use_from_solar_prc:    use_kwh   > 0 ? (100 * d.solar_to_load     / use_kwh).toFixed(0)   + "%" : "",
         use_from_battery_prc:  use_kwh   > 0 ? (100 * d.battery_to_load   / use_kwh).toFixed(0)   + "%" : "",
-        self_consumption_prc:  solar_kwh > 0 ? (100 * (d.solar_to_load + d.solar_to_battery) / solar_kwh).toFixed(0) + "%" : "",
-        self_sufficiency_prc:  use_kwh   > 0 ? (100 * (d.solar_to_load + d.battery_to_load) / use_kwh).toFixed(0)    + "%" : "",
     };
 }
 
@@ -1018,8 +1015,6 @@ function updateStats(d) {
     $(".battery_to_load").html(d.battery_to_load.toFixed(1));
     $(".battery_to_grid").html(d.battery_to_grid.toFixed(1));
     $(".use_from_battery_prc").html(s.use_from_battery_prc);
-    $(".self_consumption_prc").html(s.self_consumption_prc);
-    $(".self_sufficiency_prc").html(s.self_sufficiency_prc);
 
     toggleBatteryFlowVisibility(d.grid_to_battery, d.battery_to_grid);
 }

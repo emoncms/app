@@ -271,7 +271,8 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     grid-template-rows: 46px 38px 46px;
-    gap: 6px;
+    --app-flow-gap: 6px;
+    gap: var(--app-flow-gap);
     margin-bottom: 4px;
     font-weight: bold;
 }
@@ -306,14 +307,23 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
 .app-flow-unit,
 .app-flow-title { font-size: 12px; }
 .app-flow-arrow { font-size: 11px; }
+/* Percentage on a node edge, placed by the app */
+.app-flow-node { position: relative; }
+.app-flow-prc {
+    position: absolute;
+    font-size: 12px;
+    line-height: 1;
+    opacity: 0.75;
+}
 
 @container app (max-width: 767.98px) {
-    .app-flow { grid-template-rows: 40px 34px 40px; gap: 4px; }
+    .app-flow { grid-template-rows: 40px 34px 40px; --app-flow-gap: 4px; }
     .app-flow > *, .app-flow-link > span[id] { gap: 3px; }
     .app-flow-value { font-size: 15px; }
     .app-flow-node .app-flow-value { font-size: 17px; }
     .app-flow-name { font-size: 11px; }
     .app-flow-link .app-flow-unit { display: none; }
+    .app-flow-prc { font-size: 11px; }
     .app-flow-node:not(.app-flow-wide) .app-flow-unit { display: none; }
     /* Narrow nodes and titled flows: name on a line above the value */
     .app-flow-node:not(.app-flow-wide),
