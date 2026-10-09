@@ -298,6 +298,8 @@ function draw_powergraph() {
     };
 
     powerseries = series;
+    // Bind before plotting: Flot fires plothover from the last mouse position while drawing
+    powergraph_events();
     Flot.plot(document.getElementById('placeholder'), series, options);
     chart_legend(series.filter(function (s) { return s !== balance; }));
     $("#chart-legend").append('<button class="app-legend-item app-legend-toggle balanceline' + (show_balance_line ? ' active' : '') + '" title="Show or hide the balance line">'
@@ -305,7 +307,6 @@ function draw_powergraph() {
     timebar_update(false);
     $("#time-select option[value=all]").prop("hidden", true);
     $(".ajax-loader").hide();
-    powergraph_events();
 }
 
 function load_powergraph() {
@@ -488,6 +489,7 @@ function draw_bargraph()
         legend: { show: false }
     };
 
+    bargraph_events();
     Flot.plot(document.getElementById('placeholder'), series, options);
     chart_legend(series);
     timebar_update(true);
@@ -504,8 +506,6 @@ function draw_bargraph()
 
     $('#placeholder').append("<div class='chart-note' style='top:30px'><b>Above:</b> Onsite Use & Total Use</div>");
     $('#placeholder').append("<div class='chart-note' style='bottom:50px'><b>Below:</b> Exported solar</div>");
-
-    bargraph_events();
 }
 
 function bargraph_events() {
