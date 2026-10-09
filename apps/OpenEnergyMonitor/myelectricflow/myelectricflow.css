@@ -3,3 +3,8 @@
 /* Graph placeholder */
 #placeholder_bound { width: 100%; }
 #placeholder { height: 100px; }
+
+/* Narrow layout: live values in two rows, centred */
+@container app (max-width: 767.98px) {
+    .app-live > * { text-align: center; }
+}

@@ -94,6 +94,8 @@ config.app = {
     "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description": "Display power as kW"},
     "battery_capacity_kwh":{"type":"value", "default":0, "name":"Battery Capacity", "description":"Battery capacity in kWh, used for the time left estimate"},
 
+    "live_size":{"type":"select", "default":"Small", "options":["Small", "Large"], "name":"Live value size", "description":"Text size of the live values at the top of the app"},
+
     "strategy":{"type":"select", "default":"Solar first", "options":["Solar first", "Battery first"], "name":"Flow allocation strategy", "description":"Which source supplies the load first when solar and battery are both available"},
 
     // == Tariff cost breakdown (Octopus) ==
@@ -486,6 +488,8 @@ function update_window_label() {
 function show() 
 {
     app_log("INFO","solar & battery show");
+
+    $("#live-power-view, #live-cost-view").toggleClass("is-large", config.app.live_size.value == "Large");
 
     const state = flow_available();
     available             = state.available;
