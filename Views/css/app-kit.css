@@ -315,6 +315,18 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
     line-height: 1;
     opacity: 0.75;
 }
+/* Centred on the column of the flow below or above a wide node */
+.app-flow-wide { --app-flow-col: calc((100% - 2 * var(--app-flow-gap)) / 3); }
+.app-flow-prc-bottom-left,
+.app-flow-prc-bottom-right,
+.app-flow-prc-top-left,
+.app-flow-prc-top-right { width: var(--app-flow-col); text-align: center; }
+.app-flow-prc-bottom-left  { left: 0; bottom: 4px; }
+.app-flow-prc-bottom-right { right: 0; bottom: 4px; }
+.app-flow-prc-top-left     { left: 0; top: 4px; }
+.app-flow-prc-top-right    { right: 0; top: 4px; }
+.app-flow-prc-left         { left: 6px; top: 50%; transform: translateY(-50%); }
+.app-flow-prc-right        { right: 6px; top: 50%; transform: translateY(-50%); }
 
 @container app (max-width: 767.98px) {
     .app-flow { grid-template-rows: 40px 34px 40px; --app-flow-gap: 4px; }
@@ -324,6 +336,9 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
     .app-flow-name { font-size: 11px; }
     .app-flow-link .app-flow-unit { display: none; }
     .app-flow-prc { font-size: 11px; }
+    /* Edge percentages to the free corner, clear of the column ones */
+    .app-flow-prc-left  { top: auto; bottom: 4px; transform: none; }
+    .app-flow-prc-right { top: 4px; transform: none; }
     .app-flow-node:not(.app-flow-wide) .app-flow-unit { display: none; }
     /* Narrow nodes and titled flows: name on a line above the value */
     .app-flow-node:not(.app-flow-wide),

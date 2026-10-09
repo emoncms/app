@@ -133,9 +133,9 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
         <div id="flow-block-view" class="app-flow">
             <div id="solar-box" class="app-flow-node app-flow-wide statsbox-solar">
                 <span class="app-flow-name"><?php echo tr('SOLAR') ?></span><span class="app-flow-value solar_kwh">0</span><span class="app-flow-unit">kWh</span>
-                <span class="app-flow-prc prc-bottom-left solar_to_battery_prc prc-solar-battery" title="<?php echo tr('Share of solar') ?>"></span>
-                <span class="app-flow-prc prc-bottom-right solar_to_load_prc prc-solar" title="<?php echo tr('Share of solar') ?>"></span>
-                <span class="app-flow-prc prc-right solar_export_prc prc-solar" title="<?php echo tr('Share of solar') ?>"></span>
+                <span class="app-flow-prc app-flow-prc-bottom-left solar_to_battery_prc prc-solar-battery" title="<?php echo tr('Share of solar') ?>"></span>
+                <span class="app-flow-prc app-flow-prc-bottom-right solar_to_load_prc prc-solar" title="<?php echo tr('Share of solar') ?>"></span>
+                <span class="app-flow-prc app-flow-prc-right solar_export_prc prc-solar" title="<?php echo tr('Share of solar') ?>"></span>
             </div>
             <div id="solar-to-grid-box" class="app-flow-link">
                 <span class="app-flow-value solar_to_grid">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9654;</span>
@@ -168,9 +168,9 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
             </div>
             <div id="house-box" class="app-flow-node app-flow-wide statsbox-house">
                 <span class="app-flow-name"><?php echo tr('HOUSE') ?></span><span class="app-flow-value use_kwh">0</span><span class="app-flow-unit">kWh</span>
-                <span class="app-flow-prc prc-left use_from_battery_prc prc-battery" title="<?php echo tr('Share of use') ?>"></span>
-                <span class="app-flow-prc prc-top-left use_from_solar_prc prc-solar" title="<?php echo tr('Share of use') ?>"></span>
-                <span class="app-flow-prc prc-top-right use_from_import_prc" title="<?php echo tr('Share of use') ?>"></span>
+                <span class="app-flow-prc app-flow-prc-left use_from_battery_prc prc-battery" title="<?php echo tr('Share of use') ?>"></span>
+                <span class="app-flow-prc app-flow-prc-top-left use_from_solar_prc prc-solar" title="<?php echo tr('Share of use') ?>"></span>
+                <span class="app-flow-prc app-flow-prc-top-right use_from_import_prc" title="<?php echo tr('Share of use') ?>"></span>
             </div>
         </div>
     </div>

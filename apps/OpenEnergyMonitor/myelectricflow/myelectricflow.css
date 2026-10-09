@@ -11,22 +11,3 @@
 @container app (max-width: 767.98px) {
     .app-live > * { text-align: center; }
 }
-
-/* Flow percentages on the solar and house edges, centred on the column of each flow */
-.app-flow-wide { --app-flow-col: calc((100% - 2 * var(--app-flow-gap)) / 3); }
-.prc-bottom-left,
-.prc-bottom-right,
-.prc-top-left,
-.prc-top-right { width: var(--app-flow-col); text-align: center; }
-.prc-bottom-left  { left: 0; bottom: 4px; }
-.prc-bottom-right { right: 0; bottom: 4px; }
-.prc-top-left     { left: 0; top: 4px; }
-.prc-top-right    { right: 0; top: 4px; }
-.prc-left         { left: 6px; top: 50%; transform: translateY(-50%); }
-.prc-right        { right: 6px; top: 50%; transform: translateY(-50%); }
-
-/* Narrow: edge percentages to the free corner, clear of the column ones */
-@container app (max-width: 767.98px) {
-    .prc-left  { top: auto; bottom: 4px; transform: none; }
-    .prc-right { top: 4px; transform: none; }
-}

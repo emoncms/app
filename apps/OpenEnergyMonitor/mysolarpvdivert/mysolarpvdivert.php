@@ -57,10 +57,7 @@
     <div class="app-card app-card-body">
         <div id="graph-nav" class="app-navbar">
             <?php include "Modules/app/Lib/timebar.php"; ?>
-            <div class="nav ms-auto">
-                <button class="nav-link balanceline" title="<?php echo tr('Show Balance') ?>"><i class="svg-icon-show_chart"></i><?php echo tr('Balance') ?></button>
-            </div>
-            <div class="btn-group app-segmented viewmode-toggle">
+            <div class="btn-group app-segmented viewmode-toggle ms-auto">
                 <button class="btn viewpower active" title="<?php echo tr('Power View') ?>"><?php echo tr('Power') ?></button>
                 <button class="btn viewhistory" title="<?php echo tr('View History') ?>"><?php echo tr('Daily') ?><span class="d-none d-sm-inline"> kWh</span></button>
             </div>
@@ -77,13 +74,14 @@
     <div class="app-card app-card-body">
         <div class="app-card-caption">
             <span class="app-section-label"><?php echo tr('Energy flow') ?> &middot; <?php echo tr('this window') ?></span>
-            <span class="app-caption-note"><?php echo tr('Generation') ?>: <?php echo tr('house') ?> <b class="house_generated_total_generated_prc"></b> &middot; <?php echo tr('divert') ?> <b class="divert_total_generated_prc"></b> &middot; <?php echo tr('export') ?> <b class="total_export_prc"></b></span>
-            <span class="app-caption-note"><?php echo tr('House') ?>: <?php echo tr('generation') ?> <b class="house_generated_house_use_prc"></b> &middot; <?php echo tr('grid') ?> <b class="total_import_prc"></b></span>
         </div>
 
         <div class="app-flow">
             <div id="solar-box" class="app-flow-node app-flow-wide statsbox-solar">
                 <span class="app-flow-name generationtitle"><?php echo tr('SOLAR') ?></span><span class="app-flow-value total_generated_kwh">0</span><span class="app-flow-unit">kWh</span>
+                <span class="app-flow-prc app-flow-prc-bottom-left solar_to_divert_prc" title="<?php echo tr('Share of generation') ?>"></span>
+                <span class="app-flow-prc app-flow-prc-bottom-right solar_to_house_prc" title="<?php echo tr('Share of generation') ?>"></span>
+                <span class="app-flow-prc app-flow-prc-right solar_to_grid_prc" title="<?php echo tr('Share of generation') ?>"></span>
             </div>
             <div id="solar-to-grid-box" class="app-flow-link" title="<?php echo tr('Export') ?>">
                 <span class="app-flow-title"><?php echo tr('Export') ?></span><span class="app-flow-value total_export_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9654;</span>
@@ -93,15 +91,17 @@
             </div>
 
             <div id="solar-to-divert-box" class="app-flow-link">
-                <span class="app-flow-value total_divert_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
+                <span class="app-flow-value solar_to_divert_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
             </div>
-            <div class="app-flow-link"></div>
+            <div id="grid-to-divert-box" class="app-flow-link">
+                <span id="grid_boost"><span class="app-flow-arrow">&#9664;</span><span class="app-flow-title"><span class="app-flow-long"><?php echo tr('Grid boost') ?></span><span class="app-flow-short"><?php echo tr('Boost') ?></span></span><span class="app-flow-value grid_to_divert_kwh">0</span></span>
+            </div>
             <div id="solar-to-house-box" class="app-flow-link">
-                <span class="app-flow-value total_house_generated_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
+                <span class="app-flow-value solar_to_house_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
             </div>
             <div class="app-flow-link"></div>
             <div id="grid-to-house-box" class="app-flow-link">
-                <span class="app-flow-value total_import_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
+                <span class="app-flow-value grid_to_house_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9660;</span>
             </div>
 
             <div id="divert-box" class="app-flow-node statsbox-battery">
@@ -110,6 +110,8 @@
             <div class="app-flow-link"></div>
             <div id="house-box" class="app-flow-node app-flow-wide statsbox-house">
                 <span class="app-flow-name"><?php echo tr('HOUSE') ?></span><span class="app-flow-value total_house_kwh">0</span><span class="app-flow-unit">kWh</span>
+                <span class="app-flow-prc app-flow-prc-top-left house_from_solar_prc" title="<?php echo tr('Share of house') ?>"></span>
+                <span class="app-flow-prc app-flow-prc-top-right house_from_grid_prc" title="<?php echo tr('Share of house') ?>"></span>
             </div>
         </div>
     </div>
@@ -161,7 +163,8 @@ config.app = {
     "wind_kwh":{"optional":true, "type":"feed", "autoname":"wind_kwh", "description":"Cumulative wind generation in kWh"},
     "divert_kwh":{"optional":true, "type":"feed", "autoname":"divert_kwh", "description":"Cumulative divert energy in kWh"},
     "import_kwh":{"optional":true, "type":"feed", "autoname":"import_kwh", "description":"Cumulative grid import in kWh"},
-    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":tr("Display power as kW")}
+    "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description":tr("Display power as kW")},
+    "live_size":{"type":"select", "default":"Small", "options":["Small", "Large"], "name":"Live value size", "description":"Text size of the live values at the top of the app"}
     //"import_unitcost":{"type":"value", "default":0.1508, "name": "Import unit cost", "description":"Unit cost of imported grid electricity"}
 }
 
@@ -184,7 +187,7 @@ config.hideapp = function(){hide()};
 var feeds = {};
 
 var live = false;
-var show_balance_line = 0;
+var show_balance_line = false;
 var has_wind = false;
 var reload = true;
 var autoupdate = true;
@@ -192,6 +195,7 @@ var lastupdate = 0;
 var viewmode = "powergraph";
 var historyseries = [];
 var powerseries = [];
+var balance_series = null;
 var latest_start_time = 0;
 var panning = false;
 var bargraph_initialized = false;
@@ -262,11 +266,9 @@ function init()
         draw();
     });
     
-    $(".balanceline").click(function () {
-        $btn = $(this);
-        $btn.toggleClass('active');
-
-        show_balance_line = $btn.is('.active') ? 1 : 0;
+    // Balance toggle at the end of the legend, rebuilt on each draw
+    $("#chart-legend").on("click", ".balanceline", function () {
+        show_balance_line = !show_balance_line;
         draw();
     });
     
@@ -289,13 +291,14 @@ function update_viewmode_buttons() {
     var bargraph = viewmode == "bargraph";
     $(".viewhistory").toggleClass("active", bargraph);
     $(".viewpower").toggleClass("active", !bargraph);
-    $(".balanceline").attr("disabled", bargraph);
     $("#graph-nav .app-timebar, #window-label").toggleClass("d-none", bargraph);
 }
 
 function show() 
 {
     app_log("INFO","mysolarpvdivert show");
+
+    $(".app-live").toggleClass("is-large", config.app.live_size.value == "Large");
     
     if (config.app.solar_kwh.value && config.app.use_kwh.value && config.app.import_kwh.value && config.app.divert_kwh.value) {
         if (!bargraph_initialized) init_bargraph();
@@ -434,7 +437,9 @@ function draw()
 {
     if (viewmode=="powergraph") {
         draw_powergraph();
-        chart_legend(powerseries);
+        chart_legend(powerseries.filter(function (s) { return s !== balance_series; }));
+        $("#chart-legend").append('<button class="app-legend-item app-legend-toggle balanceline' + (show_balance_line ? ' active' : '') + '" title="Show or hide the balance line">'
+            + '<span class="app-legend-line" style="background:' + balance_series.color + '"></span>' + balance_series.label + '</button>');
         timebar_update(false);
     }
     if (viewmode=="bargraph") {
@@ -493,9 +498,9 @@ function draw_powergraph() {
     var total_solar_kwh = 0;
     var total_wind_kwh = 0;
     var total_use_kwh = 0;
-    var total_use_generated_kwh = 0;
     var total_house_generated_kwh = 0;
     var total_divert_kwh = 0;
+    var total_solar_divert_kwh = 0;
     
     var datastart = timeseries.start_time("solar");
     
@@ -526,12 +531,6 @@ function draw_powergraph() {
         var generated_now = solar_now + wind_now;
 
         var balance_use = generated_now - use_now;
-        if (balance_use>=0) {
-            total_use_generated_kwh += (use_now*interval)/(1000*3600);
-        }
-        if (balance_use<0) {
-            total_use_generated_kwh += (generated_now*interval)/(1000*3600);
-        }
         
         var balance_house = generated_now - house_now;
         if (balance_house>=0) {
@@ -541,6 +540,10 @@ function draw_powergraph() {
             total_house_generated_kwh += (generated_now*interval)/(1000*3600);
         }
         
+        // Surplus after the house goes to divert, any remainder of divert is grid boost
+        var solar_divert_now = Math.min(divert_now, Math.max(0, generated_now - Math.max(0, house_now)));
+        total_solar_divert_kwh += (solar_divert_now*interval)/(1000*3600);
+
         var store_change = (balance_use * interval) / (1000*3600);
         store += store_change;
         
@@ -563,33 +566,7 @@ function draw_powergraph() {
 
     var total_generated_kwh = total_solar_kwh + total_wind_kwh;
     var total_house_kwh = total_use_kwh - total_divert_kwh;
-    var total_export_kwh = total_generated_kwh - total_use_generated_kwh;
-    var total_import_kwh = total_use_kwh - total_use_generated_kwh;
-    var total_grid_balance_kwh = total_export_kwh - total_import_kwh;
-
-    $(".total_house_kwh").html(total_house_kwh.toFixed(1));
-    $(".total_divert_kwh").html((total_divert_kwh).toFixed(1));
-    $(".total_use_kwh").html((total_use_kwh).toFixed(1));
-    $(".total_generated_kwh").html(total_generated_kwh.toFixed(1));
-
-    $(".total_house_generated_kwh").html((total_house_generated_kwh).toFixed(1));
-    $(".total_export_kwh").html(total_export_kwh.toFixed(1));
-    $(".total_grid_balance_kwh").html(total_grid_balance_kwh.toFixed(1));
-    
-    if (total_generated_kwh > 0) {
-        $(".house_generated_total_generated_prc").html(((total_house_generated_kwh/total_generated_kwh)*100).toFixed(0)+"%");
-        $(".house_generated_house_use_prc").html(((total_house_generated_kwh/total_house_kwh)*100).toFixed(0)+"%");
-        $(".divert_total_generated_prc").html(((total_divert_kwh/total_generated_kwh)*100).toFixed(0)+"%");
-        $(".total_export_prc").html(((total_export_kwh/total_generated_kwh)*100).toFixed(0)+"%");
-    } else {
-        $(".house_generated_total_generated_prc").html("-- %");
-        $(".house_generated_house_use_prc").html("-- %");
-        $(".divert_total_generated_prc").html("-- %");
-        $(".total_export_prc").html("-- %");
-    }
-            
-    $(".total_import_prc").html(((total_import_kwh/total_house_kwh)*100).toFixed(0)+"%");
-    $(".total_import_kwh").html(total_import_kwh.toFixed(1));        
+    update_flow_stats(total_generated_kwh, total_house_kwh, total_divert_kwh, total_house_generated_kwh, total_solar_divert_kwh);
 
     options.xaxis.min = view.start;
     options.xaxis.max = view.end;
@@ -602,7 +579,8 @@ function draw_powergraph() {
     series.push({data:house_data, label: "House", color: "#82cbfc", stack:2, lines:{lineWidth:0, fill:0.8}});
     series.push({data:divert_data, label: "Divert", color: "#fb7b50", stack:2, lines:{lineWidth:0, fill:0.8}});
     
-    if (show_balance_line) series.push({data:store_data, label: "Balance", yaxis:2, color: "#888"});
+    balance_series = {data:store_data, label: "Balance", yaxis:2, color: "#888"};
+    if (show_balance_line) series.push(balance_series);
 
     powerseries = series;
     
@@ -726,6 +704,7 @@ function load_bargraph(start,end) {
     use_kwhd_data = [];
     house_kwhd_data = [];
     divert_kwhd_data = [];
+    solar_divert_kwhd_data = [];
     export_kwhd_data = [];
     
     if (solar_kwh_data.length) {    
@@ -744,7 +723,10 @@ function load_bargraph(start,end) {
             var generated_kwh = solar_kwh + wind_kwh;
             var export_kwh = generated_kwh - (use_kwh - import_kwh);
             var house_kwh = use_kwh - divert_kwh;
-            var house_generated_kwh = house_kwh - import_kwh;
+            // Generation used on site goes to the house first, then divert
+            var generated_used_kwh = use_kwh - import_kwh;
+            var house_generated_kwh = Math.max(0, Math.min(generated_used_kwh, house_kwh));
+            var solar_divert_kwh = Math.max(0, Math.min(generated_used_kwh - house_generated_kwh, divert_kwh));
             
             if (solar_kwh!=null && use_kwh!=null && export_kwh!=null && divert_kwh!=null && house_kwh!=null && (!has_wind || wind_kwh!=null))
             {
@@ -755,6 +737,7 @@ function load_bargraph(start,end) {
                 use_kwhd_data.push([time,use_kwh]);
                 house_kwhd_data.push([time,house_kwh*-1]);
                 divert_kwhd_data.push([time,divert_kwh]);
+                solar_divert_kwhd_data.push([time,solar_divert_kwh]);
                 export_kwhd_data.push([time,export_kwh]);
             }
         }
@@ -771,7 +754,7 @@ function load_bargraph(start,end) {
     });
     
     series.push({
-        data: divert_kwhd_data,
+        data: solar_divert_kwhd_data,
         label: "Divert",
         color: "#fb7b50",
         bars: { show: true, align: "center", barWidth: [0.8*3600*24*1000, true], fill: 1.0, lineWidth: 0 },
@@ -795,6 +778,41 @@ function load_bargraph(start,end) {
     });
     
     historyseries = series;
+}
+
+// ------------------------------------------------------------------------------------------
+// Flow block totals and percentages from generation, house and divert energy and the
+// generation share of house and divert. Grid supplies the rest of house and divert.
+// ------------------------------------------------------------------------------------------
+function update_flow_stats(generated_kwh, house_kwh, divert_kwh, solar_to_house_kwh, solar_to_divert_kwh)
+{
+    var solar_to_grid_kwh = generated_kwh - solar_to_house_kwh - solar_to_divert_kwh;
+    var grid_to_house_kwh = house_kwh - solar_to_house_kwh;
+    var grid_to_divert_kwh = divert_kwh - solar_to_divert_kwh;
+    var grid_balance_kwh = solar_to_grid_kwh - grid_to_house_kwh - grid_to_divert_kwh;
+
+    // Blank below the 0.1 kWh shown in the boxes
+    function prc(kwh, total_kwh) {
+        return total_kwh >= 0.05 ? ((kwh / total_kwh) * 100).toFixed(0) + "%" : "";
+    }
+
+    $(".total_generated_kwh").html(generated_kwh.toFixed(1));
+    $(".total_house_kwh").html(house_kwh.toFixed(1));
+    $(".total_divert_kwh").html(divert_kwh.toFixed(1));
+    $(".total_export_kwh").html(solar_to_grid_kwh.toFixed(1));
+    $(".total_grid_balance_kwh").html(grid_balance_kwh.toFixed(1));
+    $(".solar_to_house_kwh").html(solar_to_house_kwh.toFixed(1));
+    $(".solar_to_divert_kwh").html(solar_to_divert_kwh.toFixed(1));
+    $(".grid_to_house_kwh").html(grid_to_house_kwh.toFixed(1));
+    $(".grid_to_divert_kwh").html(grid_to_divert_kwh.toFixed(1));
+
+    $(".solar_to_house_prc").html(prc(solar_to_house_kwh, generated_kwh));
+    $(".solar_to_divert_prc").html(prc(solar_to_divert_kwh, generated_kwh));
+    $(".solar_to_grid_prc").html(prc(solar_to_grid_kwh, generated_kwh));
+    $(".house_from_solar_prc").html(prc(solar_to_house_kwh, house_kwh));
+    $(".house_from_grid_prc").html(prc(grid_to_house_kwh, house_kwh));
+
+    $("#grid_boost").toggle(grid_to_divert_kwh >= 0.1);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -844,37 +862,11 @@ function bargraph_events() {
             var solar_kwh = solar_kwhd_data[z][1];
             var wind_kwh = (has_wind) ? wind_kwhd_data[z][1] : 0;
             var house_generated_kwh = house_generated_kwhd_data[z][1];
-            var use_kwh = use_kwhd_data[z][1];
             var house_kwh = house_kwhd_data[z][1]*-1;
             var divert_kwh = divert_kwhd_data[z][1];
-            var export_kwh = export_kwhd_data[z][1];
             
             var generated_kwh = solar_kwh + wind_kwh;
-            var import_kwh = use_kwh - house_generated_kwh - divert_kwh;
-            var total_grid_balance_kwh = export_kwh - import_kwh;
-            
-            $(".total_house_kwh").html(house_kwh.toFixed(1));
-            $(".total_divert_kwh").html((divert_kwh).toFixed(1));
-            $(".total_use_kwh").html((use_kwh).toFixed(1));
-            $(".total_generated_kwh").html(generated_kwh.toFixed(1));
-            $(".total_house_generated_kwh").html((house_generated_kwh).toFixed(1));
-            $(".total_export_kwh").html(export_kwh.toFixed(1));
-            $(".total_import_kwh").html(import_kwh.toFixed(1));
-            $(".total_grid_balance_kwh").html(total_grid_balance_kwh.toFixed(1));
-            
-            $(".total_import_prc").html(((import_kwh/house_kwh)*100).toFixed(0)+"%");
-            
-            if (generated_kwh > 0) {
-                $(".house_generated_total_generated_prc").html(((house_generated_kwh/generated_kwh)*100).toFixed(0)+"%");
-                $(".house_generated_house_use_prc").html(((house_generated_kwh/house_kwh)*100).toFixed(0)+"%");
-                $(".divert_total_generated_prc").html(((divert_kwh/generated_kwh)*100).toFixed(0)+"%");
-                $(".total_export_prc").html(((export_kwh/generated_kwh)*100).toFixed(0)+"%");
-            } else {
-                $(".house_generated_total_generated_prc").html("-- %");
-                $(".house_generated_house_use_prc").html("-- %");
-                $(".divert_total_generated_prc").html("-- %");
-                $(".total_export_prc").html("-- %");
-            }
+            update_flow_stats(generated_kwh, house_kwh, divert_kwh, house_generated_kwh, solar_divert_kwhd_data[z][1]);
         } else {
             // Hide tooltip
             hide_tooltip();

@@ -23,12 +23,18 @@
     color: var(--bs-secondary-color);
 }
 
+/* Narrow layout: live values centred. My Solar PV is centred at all widths. */
+@container app (max-width: 767.98px) {
+    .app-live > * { text-align: center; }
+}
+
 
 /* Flow colours */
 #solar-to-grid-box   { --statsbox-color: var(--ec-energy-solar); }
 #solar-to-divert-box { --statsbox-color: var(--ec-energy-battery); }
 #solar-to-house-box  { --statsbox-color: var(--ec-energy-use-light); }
 #grid-to-house-box   { --statsbox-color: var(--ec-energy-import); }
+#grid-to-divert-box  { --statsbox-color: var(--ec-energy-import); }
 
 /* Exported solar total: darker solar yellow */
 .text-solar-export { color: #b7aa1f; }
