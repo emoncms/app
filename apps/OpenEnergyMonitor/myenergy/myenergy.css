@@ -1,4 +1,21 @@
 /* MyEnergy. Shared components are in Modules/app/Views/css/app-kit.css. */
 
-#placeholder_bound { width: 100%; }
+/* No page padding below the last card, chart takes the space */
+#wrap main.content-container:has(> .app-page) { padding-bottom: 0 !important; }
 
+/* Chart fills the screen below the live values */
+#placeholder_bound { width: 100%; position: relative; }
+#placeholder {
+    height: calc(100vh - 30.25rem);
+    min-height: 250px;
+}
+/* Narrow layout: live values in two rows, no second nav row */
+@container app (max-width: 767.98px) {
+    #placeholder { height: calc(100vh - 32.75rem); }
+}
+@container app (max-width: 399.98px) {
+    #placeholder { height: calc(100vh - 31.625rem); }
+}
+
+/* Wind values: chart wind green */
+.text-wind { color: #2ed52e; }
