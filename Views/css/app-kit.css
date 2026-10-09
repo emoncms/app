@@ -214,7 +214,8 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
 .app-timebar > select.btn option { color: var(--bs-body-color); background-color: var(--bs-body-bg); }
 /* Sprite icons in the time bar: white set on dark, faded as the button text */
 .app-page[data-bs-theme="dark"] .app-timebar [class^="icon-"] { background-image: url("../../../../Theme/img/glyphicons-halflings-white.png"); }
-.app-timebar > .btn > [class^="icon-"] { opacity: 0.8; }
+/* Sprite icons: 14px box, glyph drawn low in the box, raised 1px */
+.app-timebar > .btn > [class^="icon-"] { opacity: 0.8; vertical-align: top; margin-top: calc((1.5rem - 14px) / 2 - 1px); }
 .app-timebar > .btn:hover > [class^="icon-"] { opacity: 1; }
 .app-window-text { font-size: 13px; color: var(--bs-secondary-color); white-space: nowrap; }
 @container app (max-width: 991.98px) { .app-window-text { display: none; } }
@@ -537,33 +538,34 @@ body:not(.app-config-open):has(.app-page[data-bs-theme="light"] .app-card) { bac
     .app-timebar > .btn { min-width: 0; --bs-btn-padding-x: 0.3rem; }
 }
 
-/* Time bar zoom and pan icons, line style: 24px grid, 2px stroke. Bar chart
+/* Time bar zoom (plus and minus) and pan icons, line style: 24px grid, 2.5px stroke. Bar chart
    icon for the view switch, filled as svg-icon-show_chart. */
 .svg-icon-zoom_in {
-    -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><path d='M20 20l-4-4M11 8v6M8 11h6'/></svg>");
-    mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><path d='M20 20l-4-4M11 8v6M8 11h6'/></svg>");
+    -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M12 5v14M5 12h14'/></svg>");
+    mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M12 5v14M5 12h14'/></svg>");
 }
 .svg-icon-zoom_out {
-    -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><path d='M20 20l-4-4M8 11h6'/></svg>");
-    mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><path d='M20 20l-4-4M8 11h6'/></svg>");
+    -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12h14'/></svg>");
+    mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12h14'/></svg>");
 }
 .svg-icon-pan_left {
-    -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M15 18l-6-6 6-6'/></svg>");
-    mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M15 18l-6-6 6-6'/></svg>");
+    -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M15 18l-6-6 6-6'/></svg>");
+    mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M15 18l-6-6 6-6'/></svg>");
 }
 .svg-icon-pan_right {
-    -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M9 18l6-6-6-6'/></svg>");
-    mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M9 18l6-6-6-6'/></svg>");
+    -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M9 18l6-6-6-6'/></svg>");
+    mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M9 18l6-6-6-6'/></svg>");
 }
 .svg-icon-bar_chart {
     -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M4 10h4v10H4zM10 4h4v16h-4zM16 13h4v7h-4z'/></svg>");
     mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M4 10h4v10H4zM10 4h4v16h-4zM16 13h4v7h-4z'/></svg>");
 }
 .svg-icon-pan_end {
-    -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M7 18l6-6-6-6M17 6v12'/></svg>");
-    mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M7 18l6-6-6-6M17 6v12'/></svg>");
+    -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M7 18l6-6-6-6M17 6v12'/></svg>");
+    mask-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M7 18l6-6-6-6M17 6v12'/></svg>");
 }
-.app-timebar > .btn > [class^="svg-icon-"] { font-size: 1.15rem; vertical-align: -0.2em; }
+/* Icons centred in the 1.5rem line box */
+.app-timebar > .btn > [class^="svg-icon-"] { font-size: 1.05rem; vertical-align: top; margin-top: calc((1.5rem - 1em) / 2); }
 
 /* Now is text, and an icon on small phones */
 #time-now > .svg-icon-pan_end { display: none; }
