@@ -316,7 +316,8 @@ function show_tooltip(x, y, values) {
     for (i = 0; i < values.length; i++) {
         var value = values[i];
         var row = $('<tr class="tooltip-item"/>').appendTo(table);
-        $('<td style="padding-right: 8px"><span class="tooltip-title">'+value[0]+'</span></td>').appendTo(row);
+        var swatch = value[3] ? '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+value[3]+';margin-right:6px"></span>' : '';
+        $('<td style="padding-right: 8px">'+swatch+'<span class="tooltip-title">'+value[0]+'</span></td>').appendTo(row);
         $('<td><span class="tooltip-value">'+value[1]+'</span> <span class="tooltip-units">'+value[2]+'</span></td>').appendTo(row);
     }
 
@@ -326,6 +327,13 @@ function show_tooltip(x, y, values) {
             top: y
         })
         .show();
+
+    // Flip to the left of the cursor if the tooltip would overflow the chart's right edge
+    var placeholder = $('#placeholder');
+    var chartRight = placeholder.offset().left + placeholder.outerWidth();
+    if (x + tooltip.outerWidth() > chartRight) {
+        tooltip.css({ left: x - tooltip.outerWidth() - 20 });
+    }
 }
 
 function hide_tooltip() {
@@ -545,32 +553,7 @@ function draw_powergraph() {
     console.log((ukwh-ikwh)/skwh)
     */
     
-    if (total_solar_kwh < 1) {
-    	$(".total_solar_kwh").html(total_solar_kwh.toFixed(2));
-    } else {
-    	$(".total_solar_kwh").html(total_solar_kwh.toFixed(1));
-    }
-    if (total_use_kwh < 1) {
-    	$(".total_use_kwh").html((total_use_kwh).toFixed(2));
-    } else {
-    	$(".total_use_kwh").html((total_use_kwh).toFixed(1));
-    }
-    $("#total_use_direct_kwh").html((total_use_direct_kwh).toFixed(1));
-
-    $("#total_export_kwh").html((total_solar_kwh-total_use_direct_kwh).toFixed(1));
-    var import_percent = Math.round(100*(1-(total_use_direct_kwh/total_use_kwh)));
-    if(!isNaN(import_percent)) {
-        $(".total_import_prc").html(import_percent+"%");
-    }
-    $("#total_import_kwh").html((total_use_kwh-total_use_direct_kwh).toFixed(1));        
-    
-    if (total_solar_kwh > 0) {
-        $(".total_use_direct_prc").html(Math.round(100*total_use_direct_kwh/total_use_kwh)+"%");
-        $(".total_export_prc").html((((total_solar_kwh-total_use_direct_kwh)/total_solar_kwh)*100).toFixed(0)+"%");
-    } else {
-        $(".total_use_direct_prc").html("-- %");
-        $(".total_export_prc").html("-- %");
-    }
+    show_totals(total_use_kwh, total_solar_kwh, total_use_direct_kwh);
 
     options.xaxis.min = view.start;
     options.xaxis.max = view.end;
@@ -587,6 +570,30 @@ function draw_powergraph() {
     chart_legend(series);
     timebar_update(false);
     $(".ajax-loader").hide();
+}
+
+// Window totals below the chart. Direct is solar used on site.
+function show_totals(use_kwh, solar_kwh, direct_kwh) {
+    var export_kwh = solar_kwh - direct_kwh;
+    var import_kwh = use_kwh - direct_kwh;
+
+    $(".total_use_kwh").html(use_kwh.toFixed(use_kwh < 1 ? 2 : 1));
+    $(".total_solar_kwh").html(solar_kwh.toFixed(solar_kwh < 1 ? 2 : 1));
+    $("#total_use_direct_kwh").html(direct_kwh.toFixed(1));
+    $("#total_export_kwh").html(export_kwh.toFixed(1));
+    $("#total_import_kwh").html(import_kwh.toFixed(1));
+
+    if (use_kwh > 0) {
+        $(".total_use_direct_prc").html(Math.round(100*direct_kwh/use_kwh)+"%");
+        $(".total_import_prc").html(Math.round(100*import_kwh/use_kwh)+"%");
+    } else {
+        $(".total_use_direct_prc, .total_import_prc").html("-- %");
+    }
+    if (solar_kwh > 0) {
+        $(".total_export_prc").html(Math.round(100*export_kwh/solar_kwh)+"%");
+    } else {
+        $(".total_export_prc").html("-- %");
+    }
 }
 
 function get_kwh_between_two_timestamps(key,start,end) {
@@ -782,6 +789,14 @@ function draw_bargraph()
 
     var plot = Flot.plot(document.getElementById('placeholder'),historyseries,options);
     chart_legend(historyseries);
+
+    var use = 0, solar = 0, direct = 0;
+    for (var z=0; z<use_kwhd_data.length; z++) {
+        use += use_kwhd_data[z][1];
+        solar += solar_kwhd_data[z][1];
+        direct += solarused_kwhd_data[z][1];
+    }
+    show_totals(use, solar, direct);
     
     $('#placeholder').append("<div class='chart-note' style='top:30px'><b>Above:</b> Onsite Use & Total Use</div>");
     $('#placeholder').append("<div class='chart-note' style='bottom:50px'><b>Below:</b> Exported solar</div>");
@@ -800,46 +815,27 @@ function bargraph_events(){
     plot_unbind('placeholder');
     $('.bargraph-viewall').unbind("click");
     
-    // Show day's figures on the bottom of the page
+    // Day's values in a tooltip
     document.getElementById('placeholder').addEventListener("plothover", plot_handlers.plothover = function (event)
     {
         var pos = event.detail[0], item = event.detail[1];
         if (item) {
-            // console.log(item.datapoint[0]+" "+item.dataIndex);
             var z = item.dataIndex;
-            
-            var solar_kwhd = solar_kwhd_data[z][1];
-            var solarused_kwhd = solarused_kwhd_data[z][1];
-            var use_kwhd = use_kwhd_data[z][1];
-            var export_kwhd = export_kwhd_data[z][1];
-            var imported_kwhd = use_kwhd-solarused_kwhd;
-            
-            if (solar_kwhd < 1) {
-                $(".total_solar_kwh").html((solar_kwhd).toFixed(2));
-            } else {
-                $(".total_solar_kwh").html((solar_kwhd).toFixed(1));
-            }
-            if (use_kwhd < 1) {
-                $(".total_use_kwh").html((use_kwhd).toFixed(2));
-            } else {
-                $(".total_use_kwh").html((use_kwhd).toFixed(1));
-            }
-            
-            $("#total_use_direct_kwh").html((solarused_kwhd).toFixed(1));
-            
-            $("#total_export_kwh").html((export_kwhd*-1).toFixed(1));
-            
-            $(".total_import_prc").html(((imported_kwhd/use_kwhd)*100).toFixed(0)+"%");
-            $("#total_import_kwh").html((imported_kwhd).toFixed(1));
-    
-            if (solar_kwhd > 0) {
-                $(".total_use_direct_prc").html(((solarused_kwhd/use_kwhd)*100).toFixed(0)+"%");
-                $(".total_export_prc").html(((export_kwhd/solar_kwhd)*100*-1).toFixed(0)+"%");
-            } else {
-                $(".total_use_direct_prc").html("-- %");
-                $(".total_export_prc").html("-- %");
-            }
-            
+            var use = use_kwhd_data[z][1];
+            var solar = solar_kwhd_data[z][1];
+            var direct = solarused_kwhd_data[z][1];
+            var date = new Date(use_kwhd_data[z][0]);
+
+            show_tooltip(pos.pageX+10, pos.pageY+5, [
+                [date.toLocaleDateString(undefined, {weekday: "short", day: "numeric", month: "short"}), "", ""],
+                ["USE", use.toFixed(1), "kWh", "var(--ec-energy-use)"],
+                ["SOLAR", solar.toFixed(1), "kWh", "var(--ec-energy-solar)"],
+                ["DIRECT", direct.toFixed(1), "kWh", "var(--ec-energy-direct)"],
+                ["EXPORT", (solar-direct).toFixed(1), "kWh", "#b7aa1f"],
+                ["GRID", (use-direct).toFixed(1), "kWh", "var(--ec-energy-import)"]
+            ]);
+        } else {
+            hide_tooltip();
         }
     });
 
