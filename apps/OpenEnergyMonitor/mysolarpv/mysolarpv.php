@@ -30,7 +30,7 @@
             </div>
         </nav>
 
-        <div class="app-live">
+        <div class="app-live is-center is-large">
             <div>
                 <div class="app-live-label"><?php echo tr('USE') ?></div>
                 <div class="app-live-value text-use"><span class="usenow">0</span><span class="power-unit"></span></div>
@@ -71,7 +71,7 @@
         <div class="app-card-caption">
             <span class="app-section-label"><?php echo tr('Energy') ?> &middot; <?php echo tr('this window') ?></span>
         </div>
-        <div class="app-live">
+        <div class="app-live is-row is-center">
             <div>
                 <div class="app-live-label"><?php echo tr('USE') ?></div>
                 <div class="app-live-value text-use"><span class="total_use_kwh">--</span><span class="power-unit-static">kWh</span></div>
