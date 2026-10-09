@@ -731,11 +731,13 @@ function resize()
     let width = placeholder_bound.width();
 
     // Viewport height less content above the chart (measured from the top of the page,
-    // independent of scroll position), the legend and the flow block. Legend height is
-    // the tallest seen at this width. Flow block height is kept from flow view. Both
-    // keep the chart size when the view changes.
+    // independent of scroll position), the legend, the chart card bottom edge, the flow block
+    // and the page footer. Legend height is the tallest seen at this width. Flow block
+    // height is kept from flow view. Both keep the chart size when the view changes.
     if ($('#flow-section').is(':visible')) flow_card_height = $('#flow-section').closest('.app-card').outerHeight(true);
-    const bottom_margin = chart_legend_height() + 40 + flow_card_height;
+    const chart_card = placeholder_bound.closest('.app-card');
+    const card_bottom = ['padding-bottom', 'border-bottom-width', 'margin-bottom'].reduce((sum, prop) => sum + parseFloat(chart_card.css(prop)), 0);
+    const bottom_margin = chart_legend_height() + card_bottom + flow_card_height + ($('#footer').outerHeight(true) || 0);
     const offset_top = placeholder_bound.offset().top;
     let height = window.innerHeight - offset_top - bottom_margin;
 
