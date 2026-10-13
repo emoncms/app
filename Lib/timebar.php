@@ -24,7 +24,7 @@ if (!isset($timebar_ranges)) {
 ?>
 <div class="btn-group app-timebar">
     <select id="time-select" class="btn" title="<?php echo tr('Time range') ?>">
-        <option id="time-custom" value="" hidden></option>
+        <option id="time-custom" value="" hidden disabled><?php echo tr('Custom') ?></option>
         <?php foreach ($timebar_ranges as $hours => $label) { ?>
         <option value="<?php echo $hours ?>"><?php echo $label ?></option>
         <?php } ?>

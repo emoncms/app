@@ -508,18 +508,14 @@ function timebar_hide(selector, hide){
 function timebar_update(daily){
     var $select = $("#time-select");
     timebar_hide("option[value=1], option[value=3], option[value=6], option[value=24]", daily);
-    // Nearest listed range within 5%, so a month of whole days reads "1 month"
+    // Nearest listed range within 5%, so a month of whole days reads "1 month".
+    // Other windows show Custom.
     var hours = Math.round((view.end - view.start) / 3600000);
     var $option = $select.find("option").filter(function(){
         var h = parseFloat(this.value);
         return !this.hidden && h > 0 && Math.abs(h - hours) <= h * 0.05;
     }).first();
-    if ($option.length) {
-        $select.val($option.val());
-    } else {
-        $("#time-custom").text(hours < 48 ? hours + " h" : Math.round(hours / 24) + " days");
-        $select.val("");
-    }
+    $select.val($option.length ? $option.val() : "");
 
     // Dates with the year for daily bars and windows over two months
     var dates_only = daily || (view.end - view.start) > 60 * 86400000;

@@ -542,7 +542,7 @@ function hp_timebar_sync() {
         view.end = bargraph_end;
     }
     timebar_update(daily);
-    timebar_hide("option", false);
+    timebar_hide("option:not(#time-custom)", false);
     if (daily && bargraph_alltime) $("#time-select").val("all");
     $(".viewhistory").toggleClass("active", daily);
     $(".viewpower").toggleClass("active", !daily);
