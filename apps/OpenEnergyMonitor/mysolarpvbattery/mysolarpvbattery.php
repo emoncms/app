@@ -178,7 +178,8 @@ config.app = {
     "kw":{"type":"checkbox", "default":0, "name": "Show kW", "description": "Display power as kW"},
     "battery_capacity_kwh":{"type":"value", "default":0, "name":"Battery Capacity", "description":"Battery capacity in kWh"},
     
-    "is_dc_battery":{"type":"checkbox", "name": "DC Battery", "default": 0, "optional":true, "description":"Is the Battery on the DC side?"}
+    "is_dc_battery":{"type":"checkbox", "name": "DC Battery", "default": 0, "optional":true, "description":"Is the Battery on the DC side?"},
+    "live_size":{"type":"select", "default":"Small", "options":["Small", "Large"], "name":"Live value size", "description":"Text size of the live values at the top of the app"}
     }
 
 config.app_name = "My Solar PV Battery";
@@ -328,6 +329,8 @@ function update_viewmode_buttons() {
 function show() 
 {
     app_log("INFO","solar & battery show");
+
+    $(".app-live").toggleClass("is-large", config.app.live_size.value == "Large");
     
     if (config.app.solar_kwh.value && config.app.use_kwh.value && config.app.import_kwh.value) {
         if (!bargraph_initialized) init_bargraph();
