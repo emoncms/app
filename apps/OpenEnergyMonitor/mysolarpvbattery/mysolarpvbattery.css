@@ -9,3 +9,8 @@
 #grid-to-battery-box,
 #battery-to-load-box  { --statsbox-color: var(--ec-energy-battery); }
 #grid-to-load-box     { --statsbox-color: var(--ec-energy-use-light); }
+
+/* Narrow layout: live values centred */
+@container app (max-width: 767.98px) {
+    .app-live > * { text-align: center; }
+}

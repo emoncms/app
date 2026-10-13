@@ -78,13 +78,15 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
     <div class="app-card app-card-body">
         <div class="app-card-caption">
             <span class="app-section-label"><?php echo tr('Energy flow') ?> &middot; <?php echo tr('this window') ?></span>
-            <span class="app-caption-note"><?php echo tr('Solar') ?>: <?php echo tr('direct') ?> <b class="solar_direct_prc"></b> &middot; <?php echo tr('battery') ?> <b class="solar_to_battery_prc"></b> &middot; <?php echo tr('export') ?> <b class="solar_export_prc"></b></span>
-            <span class="app-caption-note"><?php echo tr('House') ?>: <?php echo tr('solar') ?> <b class="use_from_solar_prc"></b> &middot; <?php echo tr('battery') ?> <b class="use_from_battery_prc"></b> &middot; <?php echo tr('grid') ?> <b class="use_from_import_prc"></b></span>
+            <span id="battery-export-warning" class="app-caption-note text-warning-emphasis" style="display:none"><?php echo tr('Battery export to grid detected. This app assumes the battery only supplies the house, flows shown are not accurate. Use MyElectricFlow for systems with battery export.') ?></span>
         </div>
 
         <div class="app-flow">
             <div id="solar-box" class="app-flow-node app-flow-wide statsbox-solar">
                 <span class="app-flow-name generationtitle"><?php echo tr('SOLAR') ?></span><span class="app-flow-value total_solar_kwh">0</span><span class="app-flow-unit">kWh</span>
+                <span class="app-flow-prc app-flow-prc-bottom-left solar_to_battery_prc" title="<?php echo tr('Share of solar') ?>"></span>
+                <span class="app-flow-prc app-flow-prc-bottom-right solar_direct_prc" title="<?php echo tr('Share of solar') ?>"></span>
+                <span class="app-flow-prc app-flow-prc-right solar_export_prc" title="<?php echo tr('Share of solar') ?>"></span>
             </div>
             <div id="solar-to-grid-box" class="app-flow-link">
                 <span class="app-flow-value total_solar_export_kwh">0</span><span class="app-flow-unit">kWh</span><span class="app-flow-arrow">&#9654;</span>
@@ -115,6 +117,9 @@ load_css("Modules/app/apps/OpenEnergyMonitor/mysolarpvbattery/mysolarpvbattery.c
             </div>
             <div id="house-box" class="app-flow-node app-flow-wide statsbox-house">
                 <span class="app-flow-name"><?php echo tr('HOUSE') ?></span><span class="app-flow-value total_use_kwh">0</span><span class="app-flow-unit">kWh</span>
+                <span class="app-flow-prc app-flow-prc-left use_from_battery_prc" title="<?php echo tr('Share of use') ?>"></span>
+                <span class="app-flow-prc app-flow-prc-top-left use_from_solar_prc" title="<?php echo tr('Share of use') ?>"></span>
+                <span class="app-flow-prc app-flow-prc-top-right use_from_import_prc" title="<?php echo tr('Share of use') ?>"></span>
             </div>
         </div>
     </div>
@@ -552,6 +557,7 @@ function load_powergraph() {
     var total_solar_direct_kwh = 0;
     var total_battery_charge_kwh = 0;
     var total_battery_discharge_kwh = 0;
+    var total_battery_export_kwh = 0;
     
     var datastart = timeseries.start_time("solar");
     
@@ -622,6 +628,12 @@ function load_powergraph() {
             total_import_kwh += (unmet*interval)/(1000*3600);
             total_battery_charge_kwh += (battery_charge_now*interval)/(1000*3600);
             total_battery_discharge_kwh += (battery_discharge_now*interval)/(1000*3600);
+
+            // AC battery discharge above the house demand left after solar, 50 W allowance for control lag
+            if (!config.app.is_dc_battery.value) {
+                var battery_export = battery_discharge_now - (use_now - solar_direct) - 50;
+                if (battery_export > 0) total_battery_export_kwh += (battery_export*interval)/(1000*3600);
+            }
             
             use_data.push([time,use_now]);
             solar_data.push([time,solar_now]);
@@ -640,38 +652,8 @@ function load_powergraph() {
     }
     
 
-    var total_import_direct_kwh = total_use_kwh - total_battery_discharge_kwh - total_solar_direct_kwh;
-    var total_import_for_battery_kwh = total_import_kwh - total_import_direct_kwh;
-    var total_battery_charge_from_solar_kwh = total_battery_charge_kwh - total_import_for_battery_kwh;
-    var total_solar_export_kwh = total_solar_kwh - total_solar_direct_kwh - total_battery_charge_from_solar_kwh;
-    var total_grid_balance_kwh = total_import_kwh - total_solar_export_kwh;
-    
-    $(".total_solar_kwh").html(total_solar_kwh.toFixed(1));
-    $(".total_use_kwh").html(total_use_kwh.toFixed(1));
-    $(".total_import_direct_kwh").html(total_import_direct_kwh.toFixed(1));
-    $(".total_grid_balance_kwh").html(total_grid_balance_kwh.toFixed(1));
-    if (total_solar_kwh) {
-        $(".total_solar_direct_kwh").html(total_solar_direct_kwh.toFixed(1));
-        $(".total_solar_export_kwh").html(total_solar_export_kwh.toFixed(1));
-        $(".solar_export_prc").html((100*total_solar_export_kwh/total_solar_kwh).toFixed(0)+"%");
-        $(".solar_direct_prc").html((100*total_solar_direct_kwh/total_solar_kwh).toFixed(0)+"%");
-        $(".solar_to_battery_prc").html((100*total_battery_charge_from_solar_kwh/total_solar_kwh).toFixed(0)+"%");
-        
-        $(".use_from_solar_prc").html((100*total_solar_direct_kwh/total_use_kwh).toFixed(0)+"%");
-    }
-    $(".use_from_import_prc").html((100*total_import_direct_kwh/total_use_kwh).toFixed(0)+"%");
-    $(".total_battery_charge_from_solar_kwh").html(total_battery_charge_from_solar_kwh.toFixed(1));
-    $(".total_import_for_battery_kwh").html(total_import_for_battery_kwh.toFixed(1));
-    $(".total_battery_discharge_kwh").html(total_battery_discharge_kwh.toFixed(1));
-    $(".use_from_battery_prc").html((100*total_battery_discharge_kwh/total_use_kwh).toFixed(0)+"%");
-    
-    if (total_import_for_battery_kwh>=0.1) {
-        $("#battery_import").show();
-    } else {
-        $("#battery_import").hide();
-    }
-    
-    
+    update_flow_stats(total_solar_kwh, total_use_kwh, total_solar_direct_kwh, total_battery_charge_kwh, total_battery_discharge_kwh, total_import_kwh, total_battery_export_kwh);
+
     var soc_change = 0; 
     if (config.app.battery_soc.value) {
         soc_change = battery_soc_now-timeseries.value("battery_soc",0);
@@ -715,6 +697,47 @@ function draw_powergraph() {
     options.xaxis.max = view.end;
     Flot.plot(document.getElementById('placeholder'),powerseries,options);
     $(".ajax-loader").hide();
+}
+
+// ------------------------------------------------------------------------------------------
+// Flow block totals and percentages from solar, use, solar used directly, battery charge,
+// battery discharge and grid import energy. Battery export is measured in the power view,
+// daily totals only show it as negative flows.
+// ------------------------------------------------------------------------------------------
+function update_flow_stats(solar_kwh, use_kwh, solar_direct_kwh, battery_charge_kwh, battery_discharge_kwh, import_kwh, battery_export_kwh)
+{
+    var import_direct_kwh = use_kwh - battery_discharge_kwh - solar_direct_kwh;
+    var import_for_battery_kwh = import_kwh - import_direct_kwh;
+    var battery_charge_from_solar_kwh = battery_charge_kwh - import_for_battery_kwh;
+    var solar_export_kwh = solar_kwh - solar_direct_kwh - battery_charge_from_solar_kwh;
+    var grid_balance_kwh = import_kwh - solar_export_kwh;
+
+    // Blank below the 0.1 kWh shown in the boxes
+    function prc(kwh, total_kwh) {
+        return total_kwh >= 0.05 ? ((kwh / total_kwh) * 100).toFixed(0) + "%" : "";
+    }
+
+    $(".total_solar_kwh").html(solar_kwh.toFixed(1));
+    $(".total_use_kwh").html(use_kwh.toFixed(1));
+    $(".total_solar_direct_kwh").html(solar_direct_kwh.toFixed(1));
+    $(".total_solar_export_kwh").html(solar_export_kwh.toFixed(1));
+    $(".total_import_direct_kwh").html(import_direct_kwh.toFixed(1));
+    $(".total_grid_balance_kwh").html(grid_balance_kwh.toFixed(1));
+    $(".total_battery_charge_from_solar_kwh").html(battery_charge_from_solar_kwh.toFixed(1));
+    $(".total_import_for_battery_kwh").html(import_for_battery_kwh.toFixed(1));
+    $(".total_battery_discharge_kwh").html(battery_discharge_kwh.toFixed(1));
+
+    $(".solar_direct_prc").html(prc(solar_direct_kwh, solar_kwh));
+    $(".solar_to_battery_prc").html(prc(battery_charge_from_solar_kwh, solar_kwh));
+    $(".solar_export_prc").html(prc(solar_export_kwh, solar_kwh));
+    $(".use_from_solar_prc").html(prc(solar_direct_kwh, use_kwh));
+    $(".use_from_battery_prc").html(prc(battery_discharge_kwh, use_kwh));
+    $(".use_from_import_prc").html(prc(import_direct_kwh, use_kwh));
+
+    $("#battery_import").toggle(import_for_battery_kwh >= 0.1);
+
+    var negative_flow = Math.min(import_direct_kwh, import_for_battery_kwh, battery_charge_from_solar_kwh, solar_export_kwh) <= -0.1;
+    $("#battery-export-warning").toggle(battery_export_kwh >= 0.1 || negative_flow);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -935,43 +958,13 @@ function bargraph_events() {
             
             var total_solar_kwh = solar_kwhd_data[z][1];
             var total_use_kwh = use_kwhd_data[z][1];
-            var total_solar_export_kwh = export_kwhd_data[z][1]*-1;
             var total_solar_direct_kwh = solar_direct_kwhd_data[z][1];
             var total_battery_charge_kwh = battery_charge_kwhd_data[z][1];
             var total_battery_discharge_kwh = battery_discharge_kwhd_data[z][1];
             var total_import_kwh = import_kwhd_data[z][1];
 
-            var total_import_direct_kwh = total_use_kwh - total_battery_discharge_kwh - total_solar_direct_kwh;
-            var total_import_for_battery_kwh = total_import_kwh - total_import_direct_kwh;
-            var total_battery_charge_from_solar_kwh = total_battery_charge_kwh - total_import_for_battery_kwh;
-            var total_solar_export_kwh = total_solar_kwh - total_solar_direct_kwh - total_battery_charge_from_solar_kwh;
-            var total_grid_balance_kwh = total_import_kwh - total_solar_export_kwh;
-            
-            $(".total_solar_kwh").html(total_solar_kwh.toFixed(1));
-            $(".total_use_kwh").html(total_use_kwh.toFixed(1));
-            $(".total_import_direct_kwh").html(total_import_direct_kwh.toFixed(1));
-            $(".total_grid_balance_kwh").html(total_grid_balance_kwh.toFixed(1));
-            if (total_solar_kwh) {
-                $(".total_solar_direct_kwh").html(total_solar_direct_kwh.toFixed(1));
-                $(".total_solar_export_kwh").html(total_solar_export_kwh.toFixed(1));
-                $(".solar_export_prc").html((100*total_solar_export_kwh/total_solar_kwh).toFixed(0)+"%");
-                $(".solar_direct_prc").html((100*total_solar_direct_kwh/total_solar_kwh).toFixed(0)+"%");
-                $(".solar_to_battery_prc").html((100*total_battery_charge_from_solar_kwh/total_solar_kwh).toFixed(0)+"%");
-                
-                $(".use_from_solar_prc").html((100*total_solar_direct_kwh/total_use_kwh).toFixed(0)+"%");
-            }
-            $(".use_from_import_prc").html((100*total_import_direct_kwh/total_use_kwh).toFixed(0)+"%");
-            $(".total_battery_charge_from_solar_kwh").html(total_battery_charge_from_solar_kwh.toFixed(1));
-            $(".total_import_for_battery_kwh").html(total_import_for_battery_kwh.toFixed(1));
-            $(".total_battery_discharge_kwh").html(total_battery_discharge_kwh.toFixed(1));
-            $(".use_from_battery_prc").html((100*total_battery_discharge_kwh/total_use_kwh).toFixed(0)+"%");
-            
-            if (total_import_for_battery_kwh>=0.1) {
-                $("#battery_import").show();
-            } else {
-                $("#battery_import").hide();
-            }
-            
+            update_flow_stats(total_solar_kwh, total_use_kwh, total_solar_direct_kwh, total_battery_charge_kwh, total_battery_discharge_kwh, total_import_kwh, 0);
+
             $(".battery_soc_change").html("---");
 
         } else {
