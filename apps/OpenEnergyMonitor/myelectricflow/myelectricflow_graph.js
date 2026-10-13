@@ -428,48 +428,6 @@ function bind_bar_click() {
     });
 }
 
-// Builds and positions the hover tooltip. Each entry in `values` is
-// [label, value, units, swatchColor?]. Creates the tooltip element on first call.
-function show_tooltip(x, y, values) {
-    let tooltip = $('#tooltip');
-    if (!tooltip[0]) {
-        tooltip = $('<div id="tooltip"></div>')
-            .css({
-                position: "absolute",
-                display: "none",
-                border: "1px solid #545454",
-                padding: "8px",
-                "background-color": "#333",
-            })
-            .appendTo("body");
-    }
-
-    tooltip.html('');
-    const table = $('<table/>').appendTo(tooltip);
-
-    for (let i = 0; i < values.length; i++) {
-        const value = values[i];
-        const row = $('<tr class="tooltip-item"/>').appendTo(table);
-        const swatch = value[3] ? '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+value[3]+';margin-right:6px"></span>' : '';
-        $('<td style="padding-right: 8px">'+swatch+'<span class="tooltip-title">'+value[0]+'</span></td>').appendTo(row);
-        $('<td><span class="tooltip-value">'+value[1]+'</span> <span class="tooltip-units">'+value[2]+'</span></td>').appendTo(row);
-    }
-
-    tooltip.css({ left: x, top: y }).show();
-
-    // Flip to the left of the cursor if the tooltip would overflow the chart's right edge
-    const placeholder = $('#placeholder');
-    const chartRight = placeholder.offset().left + placeholder.outerWidth();
-    if (x + tooltip.outerWidth() > chartRight) {
-        tooltip.css({ left: x - tooltip.outerWidth() - 20 });
-    }
-}
-
-// Hides the hover tooltip when the cursor moves off a data point.
-function hide_tooltip() {
-    $('#tooltip').hide();
-}
-
 // Invert kWh/d data for export flows so they appear as negative bars on the graph
 function invert_kwhd_data(data) {
     const neg_data = [];

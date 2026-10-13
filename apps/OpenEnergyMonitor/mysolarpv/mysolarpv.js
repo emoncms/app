@@ -556,7 +556,7 @@ function bargraph_events() {
 }
 
 // ----------------------------------------------------------------------
-// Totals and tooltip
+// Totals
 // ----------------------------------------------------------------------
 
 // Window totals below the chart. Direct is solar used on site.
@@ -581,43 +581,4 @@ function show_totals(use_kwh, solar_kwh, direct_kwh) {
     } else {
         $(".total_export_prc").html("-- %");
     }
-}
-
-// Tooltip rows as [label, value, units, swatch colour]
-function show_tooltip(x, y, values) {
-    var tooltip = $('#tooltip');
-    if (!tooltip[0]) {
-        tooltip = $('<div id="tooltip"></div>')
-            .css({
-                position: "absolute",
-                display: "none",
-                border: "1px solid #545454",
-                padding: "8px",
-                "background-color": "#333",
-            })
-            .appendTo("body");
-    }
-
-    tooltip.html('');
-    var table = $('<table/>').appendTo(tooltip);
-
-    values.forEach(function (value) {
-        var row = $('<tr class="tooltip-item"/>').appendTo(table);
-        var swatch = value[3] ? '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+value[3]+';margin-right:6px"></span>' : '';
-        $('<td style="padding-right: 8px">'+swatch+'<span class="tooltip-title">'+value[0]+'</span></td>').appendTo(row);
-        $('<td><span class="tooltip-value">'+value[1]+'</span> <span class="tooltip-units">'+value[2]+'</span></td>').appendTo(row);
-    });
-
-    tooltip.css({ left: x, top: y }).show();
-
-    // Flip to the left of the cursor if the tooltip would overflow the chart's right edge
-    var placeholder = $('#placeholder');
-    var chart_right = placeholder.offset().left + placeholder.outerWidth();
-    if (x + tooltip.outerWidth() > chart_right) {
-        tooltip.css({ left: x - tooltip.outerWidth() - 20 });
-    }
-}
-
-function hide_tooltip() {
-    $('#tooltip').hide();
 }

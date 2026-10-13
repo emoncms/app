@@ -313,6 +313,52 @@ function tooltip_time(date){
     return h+":"+m;
 }
 
+// Chart tooltip at page position x, y. Rows as [label, value, units, swatch colour].
+// Shown to the left of the cursor when it would overflow the right edge of #placeholder.
+// Apps that define their own show_tooltip after this file replace it.
+function show_tooltip(x, y, values){
+    var tooltip = $('#tooltip');
+    if (!tooltip[0]) {
+        tooltip = $('<div id="tooltip"></div>')
+            .css({
+                position: "absolute",
+                display: "none",
+                border: "1px solid #545454",
+                padding: "8px",
+                "background-color": "#333",
+            })
+            .appendTo("body");
+    }
+
+    tooltip.html('');
+    var table = $('<table/>').appendTo(tooltip);
+
+    values.forEach(function(value){
+        var row = $('<tr class="tooltip-item"/>').appendTo(table);
+        var swatch = value[3] ? '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+value[3]+';margin-right:6px"></span>' : '';
+        $('<td style="padding-right: 8px">'+swatch+'<span class="tooltip-title">'+value[0]+'</span></td>').appendTo(row);
+        $('<td><span class="tooltip-value">'+value[1]+'</span> <span class="tooltip-units">'+value[2]+'</span></td>').appendTo(row);
+    });
+
+    tooltip.css({ left: x, top: y }).show();
+
+    var placeholder = $('#placeholder');
+    var chart_right = placeholder.offset().left + placeholder.outerWidth();
+    if (x + tooltip.outerWidth() > chart_right) {
+        tooltip.css({ left: x - tooltip.outerWidth() - 20 });
+    }
+}
+
+function hide_tooltip(){
+    $('#tooltip').hide();
+}
+
+// Energy colour from the theme tokens, e.g. energy_color("solar") for --ec-energy-solar.
+// Flot draws on a canvas, so the value is read here rather than set as a CSS variable.
+function energy_color(name){
+    return getComputedStyle(document.documentElement).getPropertyValue("--ec-energy-" + name).trim();
+}
+
 // True on a device with touch and no mouse like pointer. Used to gate the
 // flot 5 touch navigation options so a mouse keeps drag selection.
 function is_touch_primary(){
