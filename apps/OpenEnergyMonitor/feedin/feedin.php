@@ -548,7 +548,7 @@ function feedin_timebar_sync() {
     view.start = current.start;
     // Daily window ends at midnight, the last bar covers the day after it
     view.end = daily ? current.end + 86400000 : current.end;
-    $("#time-select").find("option[value=all]").prop("hidden", !daily);
+    timebar_hide("option[value=all]", !daily);
     timebar_update(daily);
     if (daily && range_all) $("#time-select").val("all");
     $(".viewhistory").toggleClass("active", daily);

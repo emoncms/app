@@ -447,7 +447,7 @@ function bargraph_draw() {
             font: { size: flot_font_size, color: "#c880ff", fill: "#c880ff" },
             position: "right",
             labelWidth: 36,
-            tickFormatter: function (v) { return v + "\u00b0"; }
+            tickFormatter: function (v, axis) { return v.toFixed(axis.tickDecimals) + "\u00b0"; }
         }, {
             font: { size: flot_font_size, color: "#44b3e2", fill: "#44b3e2" },
             position: "right",

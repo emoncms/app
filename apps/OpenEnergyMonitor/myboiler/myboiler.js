@@ -337,7 +337,7 @@ function boiler_timebar_sync() {
         view.start = bargraph_start;
         view.end = bargraph_end;
     }
-    $("#time-select").find("option[value=all], option[value=2160], option[value=8760]").prop("hidden", !daily);
+    timebar_hide("option[value=all], option[value=2160], option[value=8760]", !daily);
     timebar_update(daily);
     if (daily && bargraph_alltime) $("#time-select").val("all");
     $(".viewhistory").toggleClass("active", daily);
@@ -945,7 +945,7 @@ function powergraph_draw() {
         yaxes: [
             { min: 0, autoScale: "none", font: style, reserveSpace: false },
             // Temperatures, and fuel kWh or flow rate, on the right
-            { font: style, position: "right", labelWidth: 36, tickFormatter: function (v) { return v + "\u00b0"; } },
+            { font: style, position: "right", labelWidth: 36, tickFormatter: function (v, axis) { return v.toFixed(axis.tickDecimals) + "\u00b0"; } },
             { font: { size: flot_font_size, color: flot_color(6), fill: flot_color(6) }, position: "right", labelWidth: 48 },
             { min: 0, max: 1, autoScale: "none", show: false, reserveSpace: false }
         ],
@@ -1121,7 +1121,7 @@ function bargraph_draw() {
             font: { size: flot_font_size, color: "#9440ed", fill: "#9440ed" },
             position: "right",
             labelWidth: 36,
-            tickFormatter: function (v) { return v + "\u00b0"; }
+            tickFormatter: function (v, axis) { return v.toFixed(axis.tickDecimals) + "\u00b0"; }
         }, {
             font: { size: flot_font_size, color: "#44b3e2", fill: "#44b3e2" },
             position: "right",

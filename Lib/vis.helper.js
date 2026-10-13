@@ -497,11 +497,17 @@ function plot_apply_hidden(plot){
 // -- Compact card layout: time bar, status and legend ------------------------
 // Markup in Lib/timebar.php and Lib/timebar_manual.php, classes in app-kit.css.
 
+// Hide or show range options. iOS Safari lists hidden options, so they are
+// disabled as well.
+function timebar_hide(selector, hide){
+    $("#time-select").find(selector).prop({ hidden: !!hide, disabled: !!hide });
+}
+
 // Sync the time bar after each redraw: range select, window dates and the Now
 // button. daily hides the ranges under a week and shows dates without times.
 function timebar_update(daily){
     var $select = $("#time-select");
-    $select.find("option[value=1], option[value=3], option[value=6], option[value=24]").prop("hidden", !!daily);
+    timebar_hide("option[value=1], option[value=3], option[value=6], option[value=24]", daily);
     // Nearest listed range within 5%, so a month of whole days reads "1 month"
     var hours = Math.round((view.end - view.start) / 3600000);
     var $option = $select.find("option").filter(function(){

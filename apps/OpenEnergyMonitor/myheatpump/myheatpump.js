@@ -533,16 +533,16 @@ function set_url_view_params(mode, start, end) {
 // TIME BAR
 // -------------------------------------------------------------------------------
 
-// Time bar after a redraw. Daily bars use their own window; the power view
-// stops at a month and has no all time range.
+// Time bar after a redraw. Daily bars use their own window. All ranges stay
+// listed, the range select switches view where needed.
 function hp_timebar_sync() {
     var daily = viewmode == "bargraph";
     if (daily) {
         view.start = bargraph_start;
         view.end = bargraph_end;
     }
-    $("#time-select").find("option[value=all], option[value=2160], option[value=8760]").prop("hidden", !daily);
     timebar_update(daily);
+    timebar_hide("option", false);
     if (daily && bargraph_alltime) $("#time-select").val("all");
     $(".viewhistory").toggleClass("active", daily);
     $(".viewpower").toggleClass("active", !daily);
@@ -551,20 +551,22 @@ function hp_timebar_sync() {
     $("#heatdemand-block").toggle(daily && $("#heatdemand-toggle").html() == "HIDE HEAT DEMAND");
 }
 
-// Range select: days of bars, or hours of power data
+// Range select: under a week opens the power view, over a month the daily
+// bars, a week or a month keeps the current view
 $("#time-select").change(function () {
     var value = $(this).val();
     if (!value) return;
-    if (viewmode == "bargraph") {
-        var end = (new Date()).getTime();
+    var daily = value == "all" || value > 720 || (value >= 168 && viewmode == "bargraph");
+    var end = (new Date()).getTime();
+    if (daily) {
         var start = value == "all" ? start_time * 1000 : end - value * HOUR;
         if (start < start_time * 1000) start = start_time * 1000;
+        if (viewmode != "bargraph") hp_show_daily();
         bargraph_alltime = value == "all";
         bargraph_load(start, end);
         bargraph_draw();
     } else {
-        view.timewindow(value / 24.0);
-        powergraph_load();
+        hp_open_power(end - value * HOUR, end);
     }
 });
 
@@ -609,13 +611,18 @@ $(".viewhistory").click(function () {
         end = last_bargraph_end;
     }
 
-    viewmode = "bargraph";
+    hp_show_daily();
     bargraph_load(start, end);
     bargraph_draw();
+});
+
+// Daily view controls, before the bars load
+function hp_show_daily() {
+    viewmode = "bargraph";
     $(".bargraph-navigation").show();
     $("#advanced-toggle").hide();
     $("#advanced-block").hide();
-});
+}
 
 document.getElementById('placeholder').addEventListener("plothover", function (event) {
     var pos = event.detail[0], item = event.detail[1];
@@ -651,11 +658,18 @@ document.getElementById('placeholder').addEventListener("plotclick", function (e
 
 // Open the power view for the day starting at time (ms)
 function hp_open_day(time) {
-    last_bargraph_start = bargraph_start;
-    last_bargraph_end = bargraph_end;
+    hp_open_power(time, time + DAY);
+}
 
-    view.start = time;
-    view.end = view.start + DAY;
+// Open the power view for a window in ms, from either view
+function hp_open_power(start, end) {
+    if (viewmode == "bargraph") {
+        last_bargraph_start = bargraph_start;
+        last_bargraph_end = bargraph_end;
+    }
+
+    view.start = start;
+    view.end = end;
     viewmode = "powergraph";
     powergraph_load();
 

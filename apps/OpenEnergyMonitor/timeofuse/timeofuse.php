@@ -261,7 +261,7 @@ function updater()
 // stops at a month and has no all time range.
 function tou_timebar_sync() {
     var daily = viewmode == "bargraph";
-    $("#time-select").find("option[value=all]").prop("hidden", !daily);
+    timebar_hide("option[value=all]", !daily);
     timebar_update(daily);
     if (daily && bargraph_alltime) $("#time-select").val("all");
     $(".viewhistory").toggleClass("active", daily);
