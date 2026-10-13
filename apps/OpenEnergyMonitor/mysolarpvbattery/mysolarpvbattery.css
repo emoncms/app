@@ -1,6 +1,14 @@
 /* My Solar PV Battery. Shared components are in Modules/app/Views/css/app-kit.css. */
 
-#placeholder_bound { width: 100%; }
+#placeholder_bound { width: 100%; position: relative; }
+
+/* Chart notes drawn over the bar graph */
+.chart-note {
+    position: absolute;
+    left: 50px;
+    font-size: 12px;
+    color: var(--bs-secondary-color);
+}
 
 /* Flow colours, from the source or the battery */
 #solar-to-grid-box,
