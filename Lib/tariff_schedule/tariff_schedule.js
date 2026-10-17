@@ -1,29 +1,60 @@
 // ----------------------------------------------------------------------
 // Tariff schedule
 // ----------------------------------------------------------------------
-// Named bands with prices, and blocks that set the band from a start time.
-// One set of blocks applies every day. An optional weekend set applies on
-// Saturdays, Sundays and listed public holidays. Stored as compact strings,
-// as app config values must be flat strings:
+// A list of periods, each with a start time and a price. A period runs until
+// the next one starts, and time before the first period uses the last one.
+// One list applies every day. An optional weekend list applies on Saturdays,
+// Sundays and listed public holidays.
+//
+// Periods with the same price form a band, named by the label given to the
+// first period at that price. Stored as compact strings, as app config values
+// must be flat strings:
 //
 //   bands     OffPeak:8.5,Peak:28
 //   weekday   00:30=OffPeak,05:30=Peak
 //   weekend   00:00=OffPeak               (empty: same every day)
 //   holidays  2026-12-25,2026-12-26       (dates in local time)
 //
-// Time before the first block uses the last block of the day.
+// Schedule object used by the editor and rates():
+//
+//   { weekday: [{ start: "00:30", price: 8.5 }, ...],
+//     weekend: null or [...],
+//     labels: { "8.5": "OffPeak", "28": "Peak" },
+//     holidays: ["2026-12-25"] }
 // ----------------------------------------------------------------------
 var tariff_schedule = {
 
-    colours: ["#44b3e2", "#fb1a80", "#ffb000", "#29af29", "#941afb", "#888888"],
+    // Cold to hot colour scale for prices, cheapest blue, dearest red
+    scale: [[44, 123, 182], [171, 217, 233], [255, 255, 191], [253, 174, 97], [215, 25, 28]],
 
-    // Example presets. Prices are examples only.
+    // Colour for a price within min..max. A single price uses the middle of the scale.
+    price_colour: function(price, min, max) {
+        var t = max > min ? (price - min) / (max - min) : 0.5;
+        t = Math.min(1, Math.max(0, t)) * (this.scale.length - 1);
+        var i = Math.min(Math.floor(t), this.scale.length - 2);
+        var f = t - i;
+        var a = this.scale[i], b = this.scale[i + 1];
+        var rgb = [0, 1, 2].map(function(c) { return Math.round(a[c] + (b[c] - a[c]) * f); });
+        return "rgb(" + rgb.join(",") + ")";
+    },
+
+    // Example presets for import and export. Prices are examples only.
     presets: {
-        "Flat rate":      { bands: "Standard:25", weekday: "00:00=Standard" },
-        "Octopus Go":     { bands: "OffPeak:8.5,Peak:28", weekday: "00:30=OffPeak,05:30=Peak" },
-        "Intelligent Go": { bands: "OffPeak:7,Peak:28", weekday: "05:30=Peak,23:30=OffPeak" },
-        "Cosy":           { bands: "Cosy:13,Standard:26,Peak:39", weekday: "00:00=Standard,04:00=Cosy,07:00=Standard,13:00=Cosy,16:00=Peak,19:00=Standard,22:00=Cosy" },
-        "Flat export":    { bands: "Export:15", weekday: "00:00=Export" }
+        // Times checked Oct 2026
+        import: {
+            "Flat rate":                   { bands: "Standard:25", weekday: "00:00=Standard" },
+            "Economy 7 (00:30 to 07:30)":  { bands: "Night:15,Day:30", weekday: "00:30=Night,07:30=Day" },
+            "Octopus Go":                  { bands: "OffPeak:8.5,Peak:28", weekday: "00:30=OffPeak,05:30=Peak" },
+            "Octopus Intelligent Go":      { bands: "OffPeak:7,Peak:28", weekday: "05:30=Peak,23:30=OffPeak" },
+            "Octopus Cosy":                { bands: "Cosy:13,Standard:26,Peak:39", weekday: "00:00=Standard,04:00=Cosy,07:00=Standard,13:00=Cosy,16:00=Peak,19:00=Standard,22:00=Cosy" },
+            "British Gas Electric Driver": { bands: "OffPeak:9,Peak:31", weekday: "00:00=OffPeak,05:00=Peak" },
+            "EDF GoElectric":              { bands: "OffPeak:6.5,Peak:26", weekday: "06:00=Peak,23:00=OffPeak" },
+            "E.ON Next Drive":             { bands: "OffPeak:6.9,Peak:26", weekday: "00:00=OffPeak,06:00=Peak" },
+            "E.ON Next Pumped":            { bands: "SuperOffPeak:15,OffPeak:24,Peak:35", weekday: "00:00=SuperOffPeak,06:00=OffPeak,16:00=Peak,19:00=OffPeak,22:00=SuperOffPeak" }
+        },
+        export: {
+            "Flat export":    { bands: "Export:15", weekday: "00:00=Export" }
+        }
     },
 
     // Half hour slots: 0 = 00:00, 1 = 00:30 ... 47 = 23:30
@@ -46,122 +77,145 @@ var tariff_schedule = {
         return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (day < 10 ? "0" : "") + day;
     },
 
-    // Band names must not contain the separators used by the stored format
-    clean_name: function(name) {
-        return ("" + name).replace(/[:,=]/g, "").trim();
+    // Labels are keyed by price, so 8.5 and 8.50 share a label
+    price_key: function(price) {
+        return String(parseFloat(price) || 0);
     },
 
-    parse_bands: function(value) {
-        var bands = [];
-        ("" + (value || "")).split(",").forEach(function(item) {
+    // Labels must not contain the separators used by the stored format
+    clean_label: function(label) {
+        return ("" + (label || "")).replace(/[:,=]/g, "").trim();
+    },
+
+    // Schedule object from stored strings. A weekend list that matches the
+    // weekday list is treated as the same every day.
+    parse: function(bands, weekday, weekend, holidays) {
+        var self = this;
+        var price = {};
+        var labels = {};
+        var first = null;
+        ("" + (bands || "")).split(",").forEach(function(item) {
             var i = item.lastIndexOf(":");
             if (i < 1) return;
-            bands.push({ name: item.slice(0, i).trim(), price: parseFloat(item.slice(i + 1)) || 0 });
+            var name = item.slice(0, i).trim();
+            var p = parseFloat(item.slice(i + 1)) || 0;
+            price[name] = p;
+            if (first === null) first = p;
+            var key = self.price_key(p);
+            if (labels[key] === undefined) labels[key] = name;
         });
-        return bands;
-    },
 
-    parse_blocks: function(value) {
-        var self = this;
-        var blocks = [];
-        ("" + (value || "")).split(",").forEach(function(item) {
-            var i = item.indexOf("=");
-            if (i < 1) return;
-            blocks.push({ start: self.slot_to_time(self.time_to_slot(item.slice(0, i))), name: item.slice(i + 1).trim() });
-        });
-        return blocks;
-    },
+        var parse_periods = function(value) {
+            var periods = [];
+            ("" + (value || "")).split(",").forEach(function(item) {
+                var i = item.indexOf("=");
+                if (i < 1) return;
+                var name = item.slice(i + 1).trim();
+                periods.push({ start: item.slice(0, i), price: price[name] !== undefined ? price[name] : (first || 0) });
+            });
+            return periods;
+        };
 
-    serialise_bands: function(bands) {
-        return bands.map(function(b) { return b.name + ":" + b.price; }).join(",");
-    },
-
-    serialise_blocks: function(blocks) {
-        return blocks.map(function(b) { return b.start + "=" + b.name; }).join(",");
-    },
-
-    // Schedule object from stored strings. A weekend set that matches the
-    // weekday set is treated as the same every day.
-    parse: function(bands, weekday, weekend, holidays) {
         var schedule = this.clean({
-            bands: this.parse_bands(bands),
-            weekday: this.parse_blocks(weekday),
-            weekend: weekend ? this.parse_blocks(weekend) : null,
+            weekday: parse_periods(weekday),
+            weekend: weekend ? parse_periods(weekend) : null,
+            labels: labels,
             holidays: ("" + (holidays || "")).split(",")
         });
-        if (schedule.weekend && this.serialise_blocks(schedule.weekend) === this.serialise_blocks(schedule.weekday)) {
+        if (schedule.weekend && JSON.stringify(schedule.weekend) === JSON.stringify(schedule.weekday)) {
             schedule.weekend = null;
         }
         return schedule;
     },
 
+    // Distinct prices in order of first use, weekday list first
+    prices: function(schedule) {
+        var self = this;
+        var keys = [];
+        schedule.weekday.concat(schedule.weekend || []).forEach(function(p) {
+            var key = self.price_key(p.price);
+            if (keys.indexOf(key) === -1) keys.push(key);
+        });
+        return keys;
+    },
+
+    // Band name for each price: its label, else the price, made unique
+    band_names: function(schedule) {
+        var self = this;
+        var names = {};
+        var used = {};
+        this.prices(schedule).forEach(function(key) {
+            var base = self.clean_label(schedule.labels[key]) || key + "p";
+            var name = base, n = 2;
+            while (used[name]) name = base + " " + (n++);
+            used[name] = true;
+            names[key] = name;
+        });
+        return names;
+    },
+
     serialise: function(schedule) {
+        var self = this;
+        var names = this.band_names(schedule);
+        var periods = function(list) {
+            return list.map(function(p) { return p.start + "=" + names[self.price_key(p.price)]; }).join(",");
+        };
         return {
-            bands: this.serialise_bands(schedule.bands),
-            weekday: this.serialise_blocks(schedule.weekday),
-            weekend: schedule.weekend ? this.serialise_blocks(schedule.weekend) : "",
+            bands: this.prices(schedule).map(function(key) { return names[key] + ":" + key; }).join(","),
+            weekday: periods(schedule.weekday),
+            weekend: schedule.weekend ? periods(schedule.weekend) : "",
             holidays: schedule.weekend ? schedule.holidays.join(",") : ""
         };
     },
 
-    // Unique non-empty band names, blocks sorted with one block per slot and
-    // referencing a defined band, at least one band and block, and valid
-    // unique holiday dates.
+    // Periods sorted with one per slot and at least one period, numeric
+    // prices, and valid unique holiday dates.
     clean: function(schedule) {
         var self = this;
-        var seen = {};
-        var bands = [];
-        schedule.bands.forEach(function(b) {
-            var name = self.clean_name(b.name);
-            if (!name || seen[name]) return;
-            seen[name] = true;
-            bands.push({ name: name, price: parseFloat(b.price) || 0 });
-        });
-        if (!bands.length) bands.push({ name: "Standard", price: 0 });
-
-        var clean_blocks = function(blocks) {
+        var clean_periods = function(periods) {
             var by_slot = {};
-            blocks.forEach(function(b) {
-                var name = self.clean_name(b.name);
-                by_slot[self.time_to_slot(b.start)] = seen[name] ? name : bands[0].name;
-            });
+            periods.forEach(function(p) { by_slot[self.time_to_slot(p.start)] = parseFloat(p.price) || 0; });
             var out = Object.keys(by_slot).map(Number).sort(function(a, b) { return a - b; }).map(function(slot) {
-                return { start: self.slot_to_time(slot), name: by_slot[slot] };
+                return { start: self.slot_to_time(slot), price: by_slot[slot] };
             });
-            if (!out.length) out.push({ start: "00:00", name: bands[0].name });
+            if (!out.length) out.push({ start: "00:00", price: 0 });
             return out;
         };
+
+        var labels = {};
+        for (var key in (schedule.labels || {})) {
+            var label = this.clean_label(schedule.labels[key]);
+            if (label) labels[this.price_key(key)] = label;
+        }
 
         var holidays = (schedule.holidays || []).map(function(d) { return ("" + d).trim(); })
             .filter(function(d, i, all) { return /^\d{4}-\d{2}-\d{2}$/.test(d) && all.indexOf(d) === i; })
             .sort();
 
         return {
-            bands: bands,
-            weekday: clean_blocks(schedule.weekday),
-            weekend: schedule.weekend ? clean_blocks(schedule.weekend) : null,
+            weekday: clean_periods(schedule.weekday),
+            weekend: schedule.weekend ? clean_periods(schedule.weekend) : null,
+            labels: labels,
             holidays: holidays
         };
     },
 
-    // Band name for each of the 48 slots of a day
-    slot_bands: function(blocks) {
+    // Price for each of the 48 slots of a day
+    slot_prices: function(periods) {
         var self = this;
-        var sorted = blocks.slice().sort(function(a, b) { return self.time_to_slot(a.start) - self.time_to_slot(b.start); });
-        var names = new Array(48).fill(sorted.length ? sorted[sorted.length - 1].name : "");
-        sorted.forEach(function(b) {
-            for (var s = self.time_to_slot(b.start); s < 48; s++) names[s] = b.name;
+        var sorted = periods.slice().sort(function(a, b) { return self.time_to_slot(a.start) - self.time_to_slot(b.start); });
+        var prices = new Array(48).fill(sorted.length ? sorted[sorted.length - 1].price : null);
+        sorted.forEach(function(p) {
+            for (var s = self.time_to_slot(p.start); s < 48; s++) prices[s] = p.price;
         });
-        return names;
+        return prices;
     },
 
     // Price for each half hour from ts to te inclusive (ms), in browser local time
     rates: function(schedule, ts, te, interval) {
         var self = this;
-        var price = {};
-        schedule.bands.forEach(function(b) { price[b.name] = b.price; });
-        var weekday = this.slot_bands(schedule.weekday).map(function(n) { return price[n]; });
-        var weekend = schedule.weekend ? this.slot_bands(schedule.weekend).map(function(n) { return price[n]; }) : weekday;
+        var weekday = this.slot_prices(schedule.weekday);
+        var weekend = schedule.weekend ? this.slot_prices(schedule.weekend) : weekday;
         var holidays = {};
         (schedule.holidays || []).forEach(function(d) { holidays[d] = true; });
 
@@ -172,8 +226,7 @@ var tariff_schedule = {
             var slot = d.getHours() * 2 + (d.getMinutes() >= 30 ? 1 : 0);
             var day = d.getDay();
             var is_weekend = day === 0 || day === 6 || holidays[self.date_key(d)] === true;
-            var rate = is_weekend ? weekend[slot] : weekday[slot];
-            data.push([time, rate === undefined ? null : rate]);
+            data.push([time, (is_weekend ? weekend : weekday)[slot]]);
         }
         return data;
     }
@@ -191,7 +244,7 @@ tariff_schedule.component = {
     props: ["schedule", "editing", "unit"],
     data: function() {
         tariff_schedule.count = (tariff_schedule.count || 0) + 1;
-        return { tab: "weekday", message: "", new_holiday: "", uid: "sched-weekend-" + tariff_schedule.count };
+        return { tab: "weekday", new_holiday: "", uid: "sched-weekend-" + tariff_schedule.count };
     },
     computed: {
         time_options: function() {
@@ -199,85 +252,100 @@ tariff_schedule.component = {
             for (var s = 0; s < 48; s++) opts.push(tariff_schedule.slot_to_time(s));
             return opts;
         },
-        band_names: function() {
-            return this.schedule.bands.map(function(b) { return b.name; });
-        },
-        // Blocks shown, weekday when there is no weekend set
-        blocks: function() {
-            return (this.tab === "weekend" && this.schedule.weekend) ? this.schedule.weekend : this.schedule.weekday;
-        },
         has_weekend: function() {
             return !!this.schedule.weekend;
+        },
+        // Periods shown, weekday when there is no weekend list
+        periods: function() {
+            return (this.tab === "weekend" && this.schedule.weekend) ? this.schedule.weekend : this.schedule.weekday;
+        },
+        // Lowest and highest price across both lists, for the colour scale
+        price_range: function() {
+            var prices = tariff_schedule.prices(this.schedule).map(Number);
+            return { min: Math.min.apply(null, prices), max: Math.max.apply(null, prices) };
+        },
+        // Index of the first period at each price across both lists
+        first_index: function() {
+            var first = {};
+            var tab_offset = this.tab === "weekend" ? this.schedule.weekday.length : 0;
+            this.schedule.weekday.concat(this.schedule.weekend || []).forEach(function(p, i) {
+                var key = tariff_schedule.price_key(p.price);
+                if (first[key] === undefined) first[key] = i - tab_offset;
+            });
+            return first;
+        },
+        hours: function() {
+            return ["00:00", "03:00", "06:00", "09:00", "12:00", "15:00", "18:00", "21:00"];
+        },
+        cells: function() {
+            var self = this;
+            return tariff_schedule.slot_prices(this.periods).map(function(price, s) {
+                return { colour: self.colour(price), title: tariff_schedule.slot_to_time(s) + " " + self.label(price) + " " + price + " " + self.unit };
+            });
         }
     },
     watch: {
         has_weekend: function(on) { if (!on) this.tab = "weekday"; }
     },
     methods: {
-        price: function(name) {
-            var band = this.schedule.bands.find(function(b) { return b.name === name; });
-            return band ? band.price : "";
+        key: function(price) {
+            return tariff_schedule.price_key(price);
         },
-        // End of a block: start of the next block, wrapping to the first
+        colour: function(price) {
+            return tariff_schedule.price_colour(parseFloat(price) || 0, this.price_range.min, this.price_range.max);
+        },
+        label: function(price) {
+            return this.schedule.labels[this.key(price)] || "";
+        },
+        // Only the first period at a price sets the label
+        is_first: function(i) {
+            return this.first_index[this.key(this.periods[i].price)] === i;
+        },
+        set_label: function(price, value) {
+            this.schedule.labels[this.key(price)] = tariff_schedule.clean_label(value);
+        },
+        // A label moves with its price when no other period uses the old price
+        set_price: function(i, value) {
+            var period = this.periods[i];
+            var old_key = this.key(period.price);
+            var new_key = this.key(value);
+            period.price = parseFloat(value) || 0;
+            var labels = this.schedule.labels;
+            var still_used = this.schedule.weekday.concat(this.schedule.weekend || []).some(function(p) {
+                return tariff_schedule.price_key(p.price) === old_key;
+            });
+            if (labels[old_key] && !still_used && !labels[new_key]) {
+                labels[new_key] = labels[old_key];
+                delete labels[old_key];
+            }
+        },
         until: function(i) {
-            if (this.blocks.length < 2) return "All day";
-            return this.blocks[(i + 1) % this.blocks.length].start;
-        },
-        colour: function(name) {
-            var i = this.band_names.indexOf(name);
-            return tariff_schedule.colours[Math.max(0, i) % tariff_schedule.colours.length];
+            if (this.periods.length < 2) return "All day";
+            return this.periods[(i + 1) % this.periods.length].start;
         },
         format_date: function(key) {
             var p = key.split("-");
             return new Date(p[0], p[1] - 1, p[2]).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
         },
-        all_blocks: function() {
-            return this.schedule.weekday.concat(this.schedule.weekend || []);
-        },
-        unique_name: function(base, ignore) {
-            var names = this.band_names.filter(function(n, i) { return i !== ignore; });
-            var name = base, n = 2;
-            while (names.indexOf(name) !== -1) name = base + " " + (n++);
-            return name;
-        },
-        add_band: function() {
-            this.schedule.bands.push({ name: this.unique_name("Band", -1), price: 0 });
-        },
-        del_band: function(i) {
-            var name = this.schedule.bands[i].name;
-            if (this.all_blocks().some(function(b) { return b.name === name; })) {
-                this.flash("\"" + name + "\" is used in the schedule. Remove those blocks first.");
-                return;
-            }
-            if (this.schedule.bands.length > 1) this.schedule.bands.splice(i, 1);
-        },
-        rename_band: function(i, raw) {
-            var old_name = this.schedule.bands[i].name;
-            var new_name = this.unique_name(tariff_schedule.clean_name(raw) || "Band", i);
-            this.all_blocks().forEach(function(b) {
-                if (b.name === old_name) b.name = new_name;
-            });
-            this.schedule.bands[i].name = new_name;
-        },
-        sort_blocks: function() {
-            this.blocks.sort(function(a, b) {
+        sort_periods: function() {
+            this.periods.sort(function(a, b) {
                 return tariff_schedule.time_to_slot(a.start) - tariff_schedule.time_to_slot(b.start);
             });
         },
-        add_block: function() {
-            var used = this.blocks.map(function(b) { return tariff_schedule.time_to_slot(b.start); });
+        add_period: function() {
+            var used = this.periods.map(function(p) { return tariff_schedule.time_to_slot(p.start); });
             var slot = 0;
             while (slot < 47 && used.indexOf(slot) !== -1) slot++;
-            var name = this.blocks.length ? this.blocks[this.blocks.length - 1].name : this.band_names[0];
-            this.blocks.push({ start: tariff_schedule.slot_to_time(slot), name: name });
-            this.sort_blocks();
+            var last = this.periods[this.periods.length - 1];
+            this.periods.push({ start: tariff_schedule.slot_to_time(slot), price: last ? last.price : 0 });
+            this.sort_periods();
         },
-        del_block: function(i) {
-            if (this.blocks.length > 1) this.blocks.splice(i, 1);
+        del_period: function(i) {
+            if (this.periods.length > 1) this.periods.splice(i, 1);
         },
-        // Weekend set starts as a copy of the weekday set
+        // Weekend list starts as a copy of the weekday list
         set_weekend: function(on) {
-            this.schedule.weekend = on ? this.schedule.weekday.map(function(b) { return { start: b.start, name: b.name }; }) : null;
+            this.schedule.weekend = on ? this.schedule.weekday.map(function(p) { return { start: p.start, price: p.price }; }) : null;
             if (on) this.tab = "weekend";
         },
         add_holiday: function() {
@@ -290,99 +358,74 @@ tariff_schedule.component = {
         },
         del_holiday: function(i) {
             this.schedule.holidays.splice(i, 1);
-        },
-        flash: function(text) {
-            var self = this;
-            this.message = text;
-            setTimeout(function() { self.message = ""; }, 4000);
         }
     },
     template: `
-<div class="row g-3">
-  <div class="col-md-5" v-if="editing">
-   <div class="sched-panel">
-    <div class="sched-panel-head">
-      <span class="sched-subhead">Bands</span>
+<div class="sched-panel">
+  <div class="sched-panel-head">
+    <span class="sched-subhead">Schedule</span>
+    <span class="small text-body-secondary" v-if="!has_weekend">Every day</span>
+    <div class="btn-group app-segmented" v-else>
+      <button type="button" class="btn" :class="{active: tab == 'weekday'}" @click="tab = 'weekday'">Weekday</button>
+      <button type="button" class="btn" :class="{active: tab == 'weekend'}" @click="tab = 'weekend'">Weekend &amp; holidays</button>
     </div>
-    <table class="table table-sm align-middle sched-table">
-      <thead>
-        <tr>
-          <th>Band</th>
-          <th>Price ({{ unit }})</th>
-          <th class="text-end"><button type="button" class="btn btn-link p-0" title="Add a band" @click="add_band"><span class="svg-icon-plus"></span></button></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(b, i) in schedule.bands" :key="i">
-          <td><div class="d-flex align-items-center"><span class="app-swatch" :style="{background: colour(b.name)}"></span>
-            <input type="text" class="form-control form-control-sm sched-name" :value="b.name" @change="rename_band(i, $event.target.value)"></div></td>
-          <td><input type="number" step="0.01" class="form-control form-control-sm text-end sched-num" v-model.number="b.price"></td>
-          <td class="text-end"><button type="button" class="btn btn-link p-0 sched-del" title="Remove band" @click="del_band(i)"><span class="svg-icon-close"></span></button></td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="small text-warning" v-if="message">{{ message }}</div>
-   </div>
   </div>
-  <div :class="editing ? 'col-md-7' : 'col-12'">
-   <div class="sched-panel">
-    <div class="sched-panel-head">
-      <span class="sched-subhead">Schedule</span>
-      <span class="small text-body-secondary" v-if="!has_weekend">Every day</span>
-      <div class="btn-group app-segmented" v-else>
-        <button type="button" class="btn" :class="{active: tab == 'weekday'}" @click="tab = 'weekday'">Weekday</button>
-        <button type="button" class="btn" :class="{active: tab == 'weekend'}" @click="tab = 'weekend'">Weekend &amp; holidays</button>
-      </div>
-    </div>
-    <table class="table table-sm align-middle sched-table">
-      <thead>
-        <tr>
-          <th>From</th>
-          <th v-if="!editing">Until</th>
-          <th>Band</th>
-          <th class="text-end">Price ({{ unit }})</th>
-          <th class="text-end" v-if="editing"><button type="button" class="btn btn-link p-0" title="Add a time block" @click="add_block"><span class="svg-icon-plus"></span></button></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(b, i) in blocks" :key="tab + i">
-          <template v-if="editing">
-            <td><select class="form-select form-select-sm sched-num" v-model="b.start" @change="sort_blocks">
-              <option v-for="t in time_options" :key="t" :value="t">{{ t }}</option></select></td>
-            <td><div class="d-flex align-items-center"><span class="app-swatch" :style="{background: colour(b.name)}"></span>
-              <select class="form-select form-select-sm sched-name" v-model="b.name">
-                <option v-for="n in band_names" :key="n" :value="n">{{ n }}</option></select></div></td>
-            <td class="text-end text-body-secondary">{{ price(b.name) }}</td>
-            <td class="text-end"><button type="button" class="btn btn-link p-0 sched-del" title="Remove block" @click="del_block(i)"><span class="svg-icon-close"></span></button></td>
-          </template>
-          <template v-else>
-            <td>{{ b.start }}</td>
-            <td>{{ until(i) }}</td>
-            <td><span class="app-swatch" :style="{background: colour(b.name)}"></span>{{ b.name }}</td>
-            <td class="text-end">{{ price(b.name) }}</td>
-          </template>
-        </tr>
-      </tbody>
-    </table>
 
-    <div v-if="tab == 'weekend' && has_weekend">
-      <div class="small text-body-secondary mb-1">Public holidays</div>
-      <div class="d-flex flex-wrap gap-2 mb-2">
-        <span class="badge text-bg-secondary sched-holiday" v-for="(d, i) in schedule.holidays" :key="d">{{ format_date(d) }}
-          <button type="button" class="btn btn-link p-0 ms-1 sched-del" v-if="editing" title="Remove date" @click="del_holiday(i)"><span class="svg-icon-close"></span></button></span>
-        <span class="small text-body-secondary" v-if="!schedule.holidays.length">None</span>
-      </div>
-      <div class="input-group input-group-sm w-auto" v-if="editing">
-        <input type="date" class="form-control" v-model="new_holiday">
-        <button type="button" class="btn btn-outline-secondary" @click="add_holiday">Add date</button>
-      </div>
-    </div>
+  <div class="sched-hours"><span v-for="h in hours" :key="h">{{ h }}</span></div>
+  <div class="sched-strip">
+    <span v-for="(c, s) in cells" :key="s" :title="c.title" :style="{background: c.colour}"></span>
+  </div>
 
-    <div class="form-check mt-2" v-if="editing">
-      <input class="form-check-input" type="checkbox" :id="uid" :checked="has_weekend" @change="set_weekend($event.target.checked)">
-      <label class="form-check-label small" :for="uid">Different schedule at weekends and on public holidays</label>
+  <table class="table table-sm align-middle sched-table">
+    <thead>
+      <tr>
+        <th class="sched-swatch-col"></th>
+        <th>Label</th>
+        <th>Time</th>
+        <th class="text-end">Price</th>
+        <th class="text-end" v-if="editing"><button type="button" class="btn btn-link p-0" title="Add a period" @click="add_period"><span class="svg-icon-plus"></span></button></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(p, i) in periods" :key="tab + i">
+        <td class="sched-swatch-col"><span class="app-swatch" :style="{background: colour(p.price)}"></span></td>
+        <template v-if="editing">
+          <td><input type="text" class="form-control form-control-sm sched-name" :value="label(p.price)" :disabled="!is_first(i)"
+            :placeholder="is_first(i) ? 'Optional' : ''" :title="is_first(i) ? '' : 'Set by the first period at this price'" @change="set_label(p.price, $event.target.value)"></td>
+          <td><div class="d-flex align-items-center gap-2">
+            <select class="form-select form-select-sm sched-time" v-model="p.start" @change="sort_periods">
+              <option v-for="t in time_options" :key="t" :value="t">{{ t }}</option></select>
+            <span class="text-body-secondary text-nowrap">&rarr; {{ until(i) }}</span></div></td>
+          <td><div class="d-flex align-items-center justify-content-end gap-2">
+            <input type="number" step="0.01" class="form-control form-control-sm text-end sched-num" :value="p.price" @change="set_price(i, $event.target.value)">
+            <span class="text-body-secondary small">{{ unit }}</span></div></td>
+          <td class="text-end"><button type="button" class="btn btn-link p-0 sched-del" title="Remove period" @click="del_period(i)"><span class="svg-icon-close"></span></button></td>
+        </template>
+        <template v-else>
+          <td>{{ label(p.price) }}</td>
+          <td class="text-nowrap">{{ p.start }} <span class="text-body-secondary">&rarr; {{ until(i) }}</span></td>
+          <td class="text-end text-nowrap">{{ p.price }} <span class="text-body-secondary small">{{ unit }}</span></td>
+        </template>
+      </tr>
+    </tbody>
+  </table>
+
+  <div v-if="tab == 'weekend' && has_weekend">
+    <div class="small text-body-secondary mb-1">Public holidays</div>
+    <div class="d-flex flex-wrap gap-2 mb-2">
+      <span class="badge text-bg-secondary sched-holiday" v-for="(d, i) in schedule.holidays" :key="d">{{ format_date(d) }}
+        <button type="button" class="btn btn-link p-0 ms-1 sched-del" v-if="editing" title="Remove date" @click="del_holiday(i)"><span class="svg-icon-close"></span></button></span>
+      <span class="small text-body-secondary" v-if="!schedule.holidays.length">None</span>
     </div>
-   </div>
+    <div class="input-group input-group-sm w-auto" v-if="editing">
+      <input type="date" class="form-control" v-model="new_holiday">
+      <button type="button" class="btn btn-outline-secondary" @click="add_holiday">Add date</button>
+    </div>
+  </div>
+
+  <div class="form-check mt-2" v-if="editing">
+    <input class="form-check-input" type="checkbox" :id="uid" :checked="has_weekend" @change="set_weekend($event.target.checked)">
+    <label class="form-check-label small" :for="uid">Different schedule at weekends and on public holidays</label>
   </div>
 </div>`
 };

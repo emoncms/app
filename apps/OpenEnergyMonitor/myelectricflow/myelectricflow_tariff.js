@@ -884,15 +884,18 @@ function schedule_editor_sync() {
                     editing: false,
                     sessionwrite: !!sessionwrite,
                     schedules: { import: saved_schedule("import"), export: saved_schedule("export") },
-                    presets: Object.keys(tariff_schedule.presets),
                     status: ""
                 };
+            },
+            computed: {
+                // Presets for the direction shown
+                presets: function() { return Object.keys(tariff_schedule.presets[this.tab]); }
             },
             methods: {
                 edit: function() { this.editing = true; this.status = ""; },
                 cancel: function() { this.editing = false; schedule_editor_sync(); },
                 apply_preset: function(name) {
-                    var preset = tariff_schedule.presets[name];
+                    var preset = tariff_schedule.presets[this.tab][name];
                     if (preset) this.schedules[this.tab] = tariff_schedule.parse(preset.bands, preset.weekday, preset.weekend);
                 },
                 save: function() {
