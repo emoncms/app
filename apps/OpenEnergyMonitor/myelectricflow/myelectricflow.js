@@ -584,47 +584,30 @@ function flow_available() {
     if (available.battery) number_of_feeds++;
     if (available.grid) number_of_feeds++;
 
-    // 3 Feeds: Just find the one that is missing
-    if (number_of_feeds === 3) {
-        if (!available.grid) derive = "grid";
-        else if (!available.use) derive = "use";
-        else if (!available.solar) derive = "solar";
-        else if (!available.battery) {
-            if (config.app.has_battery.value) {
-                derive = "battery";
-            } else {
-                // If all feeds are preset but battery is disabled by config, assume battery=0 and recalculate grid from use and solar
-                derive = "grid";
-            }
-        }
+    // Same rules as the solarbatterykwh post-processor.
+    // Solar or battery switched off is zero.
+    if (!config.app.has_solar.value) assume_zero_solar = true;
+    if (!config.app.has_battery.value) assume_zero_battery = true;
+
+    // Unknown values
+    let missing = ["use", "grid", "solar", "battery"].filter(key => {
+        if (key === "solar" && assume_zero_solar) return false;
+        if (key === "battery" && assume_zero_battery) return false;
+        return !available[key];
+    });
+
+    // Too few feeds to derive solar or battery: assume zero
+    if (missing.length > 1) {
+        if (missing.includes("solar")) assume_zero_solar = true;
+        if (missing.includes("battery")) assume_zero_battery = true;
+        missing = missing.filter(key => key === "use" || key === "grid");
     }
 
-    // 2 Feeds: Specific logic based on your priority rules
-    else if (number_of_feeds === 2) {
-
-        if (available.solar && available.battery) {
-            // We cant derive in this scenario
-        }
-        
-        if (available.solar) {
-            if (available.use) derive = "grid";
-            else if (available.grid) derive = "use";
-            assume_zero_battery = true; // if battery feed is missing, assume no battery power (solar-only mode)
-        }
-
-        if (available.battery) {
-            if (available.use) derive = "grid";
-            else if (available.grid) derive = "use";
-            assume_zero_solar = true; // if solar feed is missing, assume no solar generation (battery-only mode)
-        }
-    }
-
-    // 1 Feed (derive use from grid or vice versa, assume zero solar and battery)
-    else if (number_of_feeds === 1) {
-        if (available.use) derive = "grid";
-        else if (available.grid) derive = "use";
-        assume_zero_solar = true;
-        assume_zero_battery = true;
+    if (missing.length === 1) {
+        derive = missing[0];
+    } else if (missing.length === 0 && (assume_zero_solar || assume_zero_battery)) {
+        // All feeds measured with one switched off: grid from the others
+        derive = "grid";
     }
 
     const battery_soc_available = (available.battery || derive === "battery") && !!config.app.battery_soc.value;
@@ -639,6 +622,11 @@ function flow_available() {
         assume_zero_battery: assume_zero_battery,
         battery_soc_available: battery_soc_available
     };
+}
+
+// Feed measured or derived
+function flow_present(key) {
+    return available[key] || derive === key;
 }
 
 function flow_derive_missing(input) {
@@ -925,8 +913,8 @@ function update_live_cost_display(grid_power, scale, dp, powerUnit) {
 }
 
 function solar_battery_visibility() {
-    const s = available.solar;
-    const b = available.battery;
+    const s = flow_present("solar");
+    const b = flow_present("battery");
 
         $("#live-solar-value").toggleClass("text-solar", s);
 

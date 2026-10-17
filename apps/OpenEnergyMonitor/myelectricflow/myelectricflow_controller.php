@@ -65,9 +65,13 @@ function myelectricflow_app_controller($route,$app,$appconfig,$apikey)
             $value = isset($app->config->$key) ? $app->config->$key : 0;
             return is_numeric($value) ? (int) $value : 0;
         };
-        // Solar and battery default to on when not set, as in the app
-        $has_solar = !isset($app->config->has_solar) || $app->config->has_solar;
-        $has_battery = !isset($app->config->has_battery) || $app->config->has_battery;
+        // Solar and battery default to on when a feed is set, as in the app
+        $mode = function($key, $feed_key) use ($app) {
+            if (isset($app->config->$key)) return (bool) $app->config->$key;
+            return isset($app->config->$feed_key) && $app->config->$feed_key !== "disable";
+        };
+        $has_solar = $mode("has_solar", "solar");
+        $has_battery = $mode("has_battery", "battery");
 
         $solar = $has_solar ? $input("solar") : 0;
         $battery = $has_battery ? $input("battery") : 0;
@@ -88,6 +92,8 @@ function myelectricflow_app_controller($route,$app,$appconfig,$apikey)
             "battery"             => $battery,
 
             "strategy"            => isset($app->config->strategy) ? $app->config->strategy : "Solar first",
+            "has_solar"           => $has_solar ? 1 : 0,
+            "has_battery"         => $has_battery ? 1 : 0,
 
             "solar_to_load_kwh"    => $output("solar_to_load_kwh", $has_solar),
             "solar_to_grid_kwh"    => $output("solar_to_grid_kwh", $has_solar),

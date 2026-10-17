@@ -45,14 +45,16 @@ function load_process_draw_graph() {
         view.start = Math.floor(view.start / (view.interval*1000)) * (view.interval*1000);
         view.end   = Math.ceil(view.end   / (view.interval*1000)) * (view.interval*1000);
 
+        const solar = flow_present("solar");
+        const battery = flow_present("battery");
         feeds = [
-            { key: "grid_to_load",     kwh: true,  cond: true,                                 avg: 0, delta: 1 },
-            { key: "solar_to_load",    kwh: true,  cond: available.solar,                      avg: 0, delta: 1 },
-            { key: "solar_to_grid",    kwh: true,  cond: available.solar,                      avg: 0, delta: 1 },
-            { key: "solar_to_battery", kwh: true,  cond: available.solar && available.battery, avg: 0, delta: 1 },
-            { key: "battery_to_load",  kwh: true,  cond: available.battery,                    avg: 0, delta: 1 },
-            { key: "battery_to_grid",  kwh: true,  cond: available.battery,                    avg: 0, delta: 1 },
-            { key: "grid_to_battery",  kwh: true,  cond: available.battery,                    avg: 0, delta: 1 },
+            { key: "grid_to_load",     kwh: true,  cond: true,               avg: 0, delta: 1 },
+            { key: "solar_to_load",    kwh: true,  cond: solar,              avg: 0, delta: 1 },
+            { key: "solar_to_grid",    kwh: true,  cond: solar,              avg: 0, delta: 1 },
+            { key: "solar_to_battery", kwh: true,  cond: solar && battery,   avg: 0, delta: 1 },
+            { key: "battery_to_load",  kwh: true,  cond: battery,            avg: 0, delta: 1 },
+            { key: "battery_to_grid",  kwh: true,  cond: battery,            avg: 0, delta: 1 },
+            { key: "grid_to_battery",  kwh: true,  cond: battery,            avg: 0, delta: 1 },
             { key: "battery_soc",      kwh: false, cond: battery_soc_enabled,                avg: 1, delta: 0 }
         ].filter(f => f.cond);
 
