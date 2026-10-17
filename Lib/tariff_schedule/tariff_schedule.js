@@ -211,24 +211,46 @@ var tariff_schedule = {
         return prices;
     },
 
-    // Price for each half hour from ts to te inclusive (ms), in browser local time
-    rates: function(schedule, ts, te, interval) {
+    // Weekend list applies on Saturdays, Sundays and holidays
+    weekend_test: function(schedule) {
         var self = this;
-        var weekday = this.slot_prices(schedule.weekday);
-        var weekend = schedule.weekend ? this.slot_prices(schedule.weekend) : weekday;
         var holidays = {};
         (schedule.holidays || []).forEach(function(d) { holidays[d] = true; });
+        return function(d) {
+            if (!schedule.weekend) return false;
+            var day = d.getDay();
+            return day === 0 || day === 6 || holidays[self.date_key(d)] === true;
+        };
+    },
+
+    // Price for each half hour from ts to te inclusive (ms), in browser local time
+    rates: function(schedule, ts, te, interval) {
+        var weekday = this.slot_prices(schedule.weekday);
+        var weekend = schedule.weekend ? this.slot_prices(schedule.weekend) : weekday;
+        var is_weekend = this.weekend_test(schedule);
 
         var data = [];
         var d = new Date();
         for (var time = ts; time <= te; time += interval) {
             d.setTime(time);
             var slot = d.getHours() * 2 + (d.getMinutes() >= 30 ? 1 : 0);
-            var day = d.getDay();
-            var is_weekend = day === 0 || day === 6 || holidays[self.date_key(d)] === true;
-            data.push([time, (is_weekend ? weekend : weekday)[slot]]);
+            data.push([time, (is_weekend(d) ? weekend : weekday)[slot]]);
         }
         return data;
+    },
+
+    // Energy series [[time, kWh], ...] summed by half hour of day, weekday and weekend
+    slot_energy: function(schedule, series) {
+        var is_weekend = this.weekend_test(schedule);
+        var out = { weekday: new Array(48).fill(0), weekend: new Array(48).fill(0) };
+        var d = new Date();
+        (series || []).forEach(function(dp) {
+            if (!(dp[1] > 0)) return;
+            d.setTime(dp[0]);
+            var slot = d.getHours() * 2 + (d.getMinutes() >= 30 ? 1 : 0);
+            out[is_weekend(d) ? "weekend" : "weekday"][slot] += dp[1];
+        });
+        return out;
     }
 };
 
@@ -236,12 +258,24 @@ var tariff_schedule = {
 // Schedule editor (Vue component)
 // ----------------------------------------------------------------------
 // Props:
-//   schedule  schedule object, edited in place
-//   editing   show edit controls
-//   unit      price unit label, e.g. p/kWh
+//   schedule     schedule object, edited in place
+//   editing      show edit controls
+//   unit         price unit label, e.g. p/kWh
+//   series       optional energy series [[time, kWh], ...] for per period totals
+//   currency     currency symbol for totals
+//   price_scale  price to currency factor, 0.01 for pence
+//   value_label  heading for the value column, e.g. Cost
 // ----------------------------------------------------------------------
 tariff_schedule.component = {
-    props: ["schedule", "editing", "unit"],
+    props: {
+        schedule: Object,
+        editing: Boolean,
+        unit: String,
+        series: { type: Array, default: null },
+        currency: { type: String, default: "£" },
+        price_scale: { type: Number, default: 0.01 },
+        value_label: { type: String, default: "Cost" }
+    },
     data: function() {
         tariff_schedule.count = (tariff_schedule.count || 0) + 1;
         return { tab: "weekday", new_holiday: "", uid: "sched-weekend-" + tariff_schedule.count };
@@ -273,6 +307,29 @@ tariff_schedule.component = {
                 if (first[key] === undefined) first[key] = i - tab_offset;
             });
             return first;
+        },
+        // Totals shown in view mode when an energy series is given
+        show_totals: function() {
+            return !this.editing && !!this.series;
+        },
+        // Energy and value for each period over the series
+        period_totals: function() {
+            if (!this.show_totals) return [];
+            var energy = tariff_schedule.slot_energy(this.schedule, this.series);
+            var slots = energy[(this.tab === "weekend" && this.schedule.weekend) ? "weekend" : "weekday"];
+            var periods = this.periods;
+            var scale = this.price_scale;
+            return periods.map(function(p, i) {
+                var start = tariff_schedule.time_to_slot(p.start);
+                var end = periods.length > 1 ? tariff_schedule.time_to_slot(periods[(i + 1) % periods.length].start) : start;
+                var len = ((end - start) % 48 + 48) % 48 || 48;
+                var kwh = 0;
+                for (var k = 0; k < len; k++) kwh += slots[(start + k) % 48];
+                return { kwh: kwh, value: kwh * p.price * scale };
+            });
+        },
+        grand_total: function() {
+            return this.period_totals.reduce(function(t, p) { return { kwh: t.kwh + p.kwh, value: t.value + p.value }; }, { kwh: 0, value: 0 });
         },
         hours: function() {
             return ["00:00", "03:00", "06:00", "09:00", "12:00", "15:00", "18:00", "21:00"];
@@ -322,6 +379,12 @@ tariff_schedule.component = {
         until: function(i) {
             if (this.periods.length < 2) return "All day";
             return this.periods[(i + 1) % this.periods.length].start;
+        },
+        format_kwh: function(kwh) {
+            return kwh.toFixed(kwh < 10 ? 2 : 1);
+        },
+        format_value: function(value) {
+            return (value < 0 ? "-" : "") + this.currency + Math.abs(value).toFixed(2);
         },
         format_date: function(key) {
             var p = key.split("-");
@@ -383,6 +446,8 @@ tariff_schedule.component = {
         <th>Label</th>
         <th>Time</th>
         <th class="text-end">Price</th>
+        <th class="text-end" v-if="show_totals">Energy</th>
+        <th class="text-end" v-if="show_totals">{{ value_label }}</th>
         <th class="text-end" v-if="editing"><button type="button" class="btn btn-link p-0" title="Add a period" @click="add_period"><span class="svg-icon-plus"></span></button></th>
       </tr>
     </thead>
@@ -405,9 +470,21 @@ tariff_schedule.component = {
           <td>{{ label(p.price) }}</td>
           <td class="text-nowrap">{{ p.start }} <span class="text-body-secondary">&rarr; {{ until(i) }}</span></td>
           <td class="text-end text-nowrap">{{ p.price }} <span class="text-body-secondary small">{{ unit }}</span></td>
+          <template v-if="show_totals">
+            <td class="text-end text-nowrap">{{ format_kwh(period_totals[i].kwh) }} <span class="text-body-secondary small">kWh</span></td>
+            <td class="text-end text-nowrap">{{ format_value(period_totals[i].value) }}</td>
+          </template>
         </template>
       </tr>
     </tbody>
+    <tfoot v-if="show_totals" class="fw-bold">
+      <tr>
+        <td></td>
+        <td colspan="3" class="text-body-secondary">Total for this window<span v-if="has_weekend">, {{ tab == 'weekend' ? 'weekends and holidays' : 'weekdays' }}</span></td>
+        <td class="text-end text-nowrap">{{ format_kwh(grand_total.kwh) }} <span class="text-body-secondary small">kWh</span></td>
+        <td class="text-end text-nowrap">{{ format_value(grand_total.value) }}</td>
+      </tr>
+    </tfoot>
   </table>
 
   <div v-if="tab == 'weekend' && has_weekend">

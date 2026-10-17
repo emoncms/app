@@ -134,7 +134,7 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
                         <button v-else class="btn btn-sm btn-outline-primary" @click="edit"><?php echo tr('Edit') ?></button>
                     </div>
                 </div>
-                <tariff-schedule :schedule="schedules[tab]" :editing="editing" unit="p/kWh"></tariff-schedule>
+                <tariff-schedule :schedule="schedules[tab]" :editing="editing" unit="p/kWh" :series="series[tab]" :value_label="tab == 'import' ? 'Cost' : 'Earned'"></tariff-schedule>
                 <div class="small text-body-secondary mt-2"><?php echo tr('Enter prices as charged, including any VAT. Preset prices are examples.') ?></div>
                 <div class="small text-danger" v-if="status">{{ status }}</div>
             </div>

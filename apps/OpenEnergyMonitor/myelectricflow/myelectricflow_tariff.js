@@ -871,6 +871,18 @@ function schedule_directions() {
     return dirs;
 }
 
+// Half hourly import or export kWh for the window, for the schedule totals
+function schedule_series(dir) {
+    var keys = dir === "import" ? ["grid_to_load", "grid_to_battery"] : ["solar_to_grid", "battery_to_grid"];
+    var ref = tariff_data["grid_to_load"];
+    if (!ref || !ref.length) return null;
+    return ref.map(function(dp, z) {
+        var kwh = 0;
+        keys.forEach(function(key) { kwh += Math.max(0, get_value_at_index(tariff_data[key], z, 0)); });
+        return [dp[0], kwh];
+    });
+}
+
 // Schedule editor (Vue), mounted on first use as config.app is defined after this file loads
 let schedule_editor = false;
 
@@ -884,6 +896,7 @@ function schedule_editor_sync() {
                     editing: false,
                     sessionwrite: !!sessionwrite,
                     schedules: { import: saved_schedule("import"), export: saved_schedule("export") },
+                    series: { import: null, export: null },
                     status: ""
                 };
             },
@@ -921,6 +934,11 @@ function schedule_editor_sync() {
 
     var editor = schedule_editor;
     editor.directions = schedule_directions();
+    // Raw arrays, no need for Vue to track each data point
+    editor.series = {
+        import: Vue.markRaw(schedule_series("import") || []),
+        export: Vue.markRaw(schedule_series("export") || [])
+    };
     if (editor.directions.indexOf(editor.tab) === -1 && editor.directions.length) editor.tab = editor.directions[0];
     // Unsaved edits are kept until saved or cancelled
     if (!editor.editing) {
