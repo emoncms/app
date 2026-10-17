@@ -1,0 +1,42 @@
+/* Tariff schedule editor */
+.sched-panel {
+    height: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+}
+
+/* Same height for both panel heads so the tables line up */
+.sched-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 32px;
+    margin-bottom: 0.5rem;
+}
+
+.sched-subhead {
+    color: var(--bs-primary);
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.sched-table th {
+    font-size: 13px;
+    color: var(--bs-secondary-color);
+}
+.sched-table .sched-num { width: 110px; }
+.sched-table .sched-name { max-width: 240px; }
+
+.sched-del {
+    --bs-btn-color: var(--bs-secondary-color);
+    --bs-btn-hover-color: var(--bs-danger);
+}
+
+.sched-holiday {
+    display: inline-flex;
+    align-items: center;
+    font-weight: normal;
+}

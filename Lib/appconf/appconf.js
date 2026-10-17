@@ -221,17 +221,24 @@ var config = {
         return false;
     },
 
+    // Saves config.db, returns true on success
     set: function()
     {   
+        var saved = false;
         $.ajax({ 
             url: path+"app/setconfig", 
-            data: "id="+config.id+"&config="+JSON.stringify(config.db),
+            data: { id: config.id, config: JSON.stringify(config.db) },
             dataType: 'text',
             async: false, 
             success: function(result){
                 try {
                     result = JSON.parse(result);
-                    if (result.success != undefined && !result.success) appLog("ERROR", result.message);
+                    if (result.success != undefined && !result.success) {
+                        console.error("setconfig: " + result.message);
+                        return;
+                    }
+
+                    saved = true;
 
                     // If success update config.app with latest from config.db
                     for (var key in config.app) {
@@ -244,14 +251,11 @@ var config = {
                     }
 
                 } catch (e) {
-                    try {
-                        app.log("ERROR","Could not parse /setconfig reply, error: "+e);
-                    } catch (e2) {
-                        console.log(e,e2);
-                    }
+                    console.error("Could not parse setconfig reply: " + e);
                 }
             } 
         });
+        return saved;
     },
 
     set_name: function()

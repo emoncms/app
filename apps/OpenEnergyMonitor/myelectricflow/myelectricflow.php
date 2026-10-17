@@ -9,6 +9,7 @@ load_js("Modules/app/Lib/timeseries.js");
 load_js("Lib/js/DateTimePicker.js");
 load_css("Theme/css/datetimepicker.css");
 load_css("Modules/app/Views/css/app-kit.css");
+load_css("Modules/app/Lib/tariff_schedule/tariff_schedule.css");
 load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css");
 ?>
 
@@ -112,6 +113,31 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
             </div>
             <button id="show_profile" class="btn btn-outline-primary"><?php echo tr('Profile') ?></button>
             <button id="download-csv" class="btn btn-outline-primary"><?php echo tr('Download CSV') ?></button>
+        </div>
+
+        <!-- Custom schedule editor, a Vue app (myelectricflow_tariff.js) -->
+        <div id="tariff-schedule-app">
+            <div class="mb-3" v-show="directions.length">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                    <nav class="nav nav-underline">
+                        <a v-for="dir in directions" :key="dir" class="nav-link" :class="{active: dir == tab}" href="#" @click.prevent="tab = dir"><span v-if="dir == 'import'"><?php echo tr('Import schedule') ?></span><span v-else><?php echo tr('Export schedule') ?></span></a>
+                    </nav>
+                    <div class="ms-auto d-flex gap-2" v-if="sessionwrite">
+                        <template v-if="editing">
+                            <select class="form-select form-select-sm w-auto" @change="apply_preset($event.target.value); $event.target.value = ''">
+                                <option value=""><?php echo tr('Preset') ?>...</option>
+                                <option v-for="name in presets" :key="name" :value="name">{{ name }}</option>
+                            </select>
+                            <button class="btn btn-sm btn-primary" @click="save"><?php echo tr('Save') ?></button>
+                            <button class="btn btn-sm btn-outline-secondary" @click="cancel"><?php echo tr('Cancel') ?></button>
+                        </template>
+                        <button v-else class="btn btn-sm btn-outline-primary" @click="edit"><?php echo tr('Edit') ?></button>
+                    </div>
+                </div>
+                <tariff-schedule :schedule="schedules[tab]" :editing="editing" unit="p/kWh"></tariff-schedule>
+                <div class="small text-body-secondary mt-2"><?php echo tr('Enter prices as charged, including any VAT. Preset prices are examples.') ?></div>
+                <div class="small text-danger" v-if="status">{{ status }}</div>
+            </div>
         </div>
 
         <div class="form-check small">
@@ -219,6 +245,7 @@ config.db = <?php echo isset($config) ? json_encode($config) : 'null'; ?>;
 <?php
 
 // Load app specific JS with auto versioning based on file modification time to prevent caching issues after updates
+load_js("Modules/app/Lib/tariff_schedule/tariff_schedule.js");
 load_js("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow_graph.js");
 load_js("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow_tariff.js");
 load_js("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.js");

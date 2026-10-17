@@ -33,6 +33,9 @@ const tariff_historical_age = 2 * 24 * 3600;
 // Export option for no export tariff.
 const EXPORT_NONE = "None";
 
+// Tariff option for a custom schedule (see Lib/tariff_schedule).
+const TARIFF_SCHEDULE = "Custom schedule";
+
 // Octopus product codes for tags that are named differently on emoncms.org.
 const tariff_tag_aliases = { "agile_export": "AGILE-OUTGOING-19-05-13" };
 
@@ -111,6 +114,7 @@ function octopus_tariffs(is_export) {
 // when the list could not be fetched, so the config is not lost.
 function tariff_select_options(is_export, saved, fallback) {
     var options = octopus_tariffs(is_export);
+    options.push(TARIFF_SCHEDULE);
     if (is_export) options.push(EXPORT_NONE);
     [saved, fallback].forEach(function(tag) {
         if (tag && options.indexOf(tag) === -1) options.push(tag);
@@ -132,7 +136,7 @@ const tariff_families = [
 ];
 
 // Option groups for a tariff select: one group per family, then historical
-// tariffs and other options. None has no group.
+// tariffs and other options. Custom schedule and None have no group.
 function tariff_select_groups(options) {
     var groups = tariff_families.map(function(f) { return { label: f.label, options: [] }; });
     var other = { label: "Other", options: [] };
@@ -140,7 +144,7 @@ function tariff_select_groups(options) {
     var ungrouped = { label: "", options: [] };
 
     options.forEach(function(tag) {
-        if (tag === EXPORT_NONE) { ungrouped.options.push(tag); return; }
+        if (tag === EXPORT_NONE || tag === TARIFF_SCHEDULE) { ungrouped.options.push(tag); return; }
         if (is_historical_tariff(tag)) { historical.options.push(tag); return; }
         var i = tariff_families.findIndex(function(f) { return f.match.test(tag); });
         (i === -1 ? other : groups[i]).options.push(tag);
@@ -232,6 +236,10 @@ function load_tariff_rates(ts, te, interval) {
         export_tariff: octopus_feedid(config.app.export_tariff.value),
         carbonintensity: show_carbonintensity ? carbonintensity_feedid : false
     };
+    const schedule_rates = {
+        import_tariff: config.app.tariff.value === TARIFF_SCHEDULE ? "import" : false,
+        export_tariff: config.app.export_tariff.value === TARIFF_SCHEDULE ? "export" : false
+    };
 
     let feedids = [];
     let keys_to_load = [];
@@ -240,7 +248,7 @@ function load_tariff_rates(ts, te, interval) {
         else tariff_data[key] = [];
     }
 
-    feed.getdata(feedids, ts, te, interval, 0, 0, 0, 0, function (all_data) {
+    const loaded = function (all_data) {
         if (all_data.success === false) {
             keys_to_load.forEach(function(key) { tariff_data[key] = []; });
         } else {
@@ -254,9 +262,22 @@ function load_tariff_rates(ts, te, interval) {
             if (dp[1] !== null) dp[1] *= vat;
         });
 
+        // Custom schedule prices are entered as charged, VAT is not added
+        for (const key in schedule_rates) {
+            if (schedule_rates[key]) {
+                tariff_data[key] = tariff_schedule.rates(saved_schedule(schedule_rates[key]), ts, te, interval * 1000);
+            }
+        }
+
         process_tariff_data();
         render_cost_breakdown();
-    }, false, "notime", "app/dataremote.json");
+    };
+
+    if (feedids.length) {
+        feed.getdata(feedids, ts, te, interval, 0, 0, 0, 0, loaded, false, "notime", "app/dataremote.json");
+    } else {
+        loaded([]);
+    }
 }
 
 // ----------------------------------------------------------------------
@@ -530,9 +551,16 @@ function render_monthly_table(summaries) {
     $("#monthly-data").removeClass("d-none");
 }
 
+// Tariff name for labels, key is tariff or export_tariff
+function tariff_label(key) {
+    var value = config.app[key].value;
+    if (value !== TARIFF_SCHEDULE) return value;
+    return key === "tariff" ? "Import schedule" : "Export schedule";
+}
+
 // Import and export tariff names for table headings.
 function tariff_pair_label() {
-    return config.app.tariff.value + " / " + config.app.export_tariff.value;
+    return tariff_label("tariff") + " / " + tariff_label("export_tariff");
 }
 
 // Fill a quick tariff selector with the same groups as the config panel.
@@ -560,6 +588,7 @@ function populate_quick_tariff() {
 // (re)draws the half-hourly kWh + tariff chart on the shared placeholder.
 function render_cost_breakdown() {
     populate_quick_tariff();
+    schedule_editor_sync();
 
     $("#cost_breakdown_body").html(render_flow_table());
 
@@ -621,7 +650,7 @@ function draw_tariff_graph() {
     // Import / export tariff price signals on the right-hand axis.
     if (tariff_data["import_tariff"] && tariff_data["import_tariff"].length) {
         graph_series.push({
-            label: config.app.tariff.value, data: tariff_data["import_tariff"], yaxis: 2,
+            label: tariff_label("tariff"), data: tariff_data["import_tariff"], yaxis: 2,
             color: "#fb1a80", lines: { show: true, steps: true, align: "left", lineWidth: 1 }
         });
     }
@@ -631,7 +660,7 @@ function draw_tariff_graph() {
             return [dp[0], dp[1] === null ? null : dp[1] * -1];
         });
         graph_series.push({
-            label: config.app.export_tariff.value, data: export_line, yaxis: 2,
+            label: tariff_label("export_tariff"), data: export_line, yaxis: 2,
             color: "#941afb", lines: { show: true, steps: true, align: "center", lineWidth: 1 }
         });
     }
@@ -680,7 +709,7 @@ function profile_draw() {
     var graph_series = [];
     graph_series.push({ label: "Import", data: profile_kwh, yaxis: 1, color: "#44b3e2", stack: true, bars: bars });
     graph_series.push({
-        label: config.app.tariff.value, data: profile_unitprice, yaxis: 2,
+        label: tariff_label("tariff"), data: profile_unitprice, yaxis: 2,
         color: "#fb1a80", lines: { show: true, align: "left", lineWidth: 1 }
     });
 
@@ -826,6 +855,77 @@ function download_tariff_csv() {
 }
 
 // -------------------------------------------------------------------------------
+// CUSTOM SCHEDULES
+// -------------------------------------------------------------------------------
+
+// Saved import or export schedule from config
+function saved_schedule(dir) {
+    return tariff_schedule.parse(config.app[dir + "_bands"].value, config.app[dir + "_wd"].value, config.app[dir + "_we"].value, config.app[dir + "_ph"].value);
+}
+
+// Directions that use a custom schedule
+function schedule_directions() {
+    var dirs = [];
+    if (config.app.tariff.value === TARIFF_SCHEDULE) dirs.push("import");
+    if (config.app.export_tariff.value === TARIFF_SCHEDULE) dirs.push("export");
+    return dirs;
+}
+
+// Schedule editor (Vue), mounted on first use as config.app is defined after this file loads
+let schedule_editor = false;
+
+function schedule_editor_sync() {
+    if (!schedule_editor) {
+        schedule_editor = Vue.createApp({
+            data: function() {
+                return {
+                    directions: [],
+                    tab: "import",
+                    editing: false,
+                    sessionwrite: !!sessionwrite,
+                    schedules: { import: saved_schedule("import"), export: saved_schedule("export") },
+                    presets: Object.keys(tariff_schedule.presets),
+                    status: ""
+                };
+            },
+            methods: {
+                edit: function() { this.editing = true; this.status = ""; },
+                cancel: function() { this.editing = false; schedule_editor_sync(); },
+                apply_preset: function(name) {
+                    var preset = tariff_schedule.presets[name];
+                    if (preset) this.schedules[this.tab] = tariff_schedule.parse(preset.bands, preset.weekday, preset.weekend);
+                },
+                save: function() {
+                    var schedules = this.schedules;
+                    ["import", "export"].forEach(function(dir) {
+                        var stored = tariff_schedule.serialise(tariff_schedule.clean(schedules[dir]));
+                        config.db[dir + "_bands"] = stored.bands;
+                        config.db[dir + "_wd"] = stored.weekday;
+                        config.db[dir + "_we"] = stored.weekend;
+                        config.db[dir + "_ph"] = stored.holidays;
+                    });
+                    if (!config.set()) {
+                        this.status = "Could not save the schedule";
+                        return;
+                    }
+                    this.editing = false;
+                    schedule_editor_sync();
+                    load_tariff_analysis(false, true);
+                }
+            }
+        }).component("tariff-schedule", tariff_schedule.component).mount("#tariff-schedule-app");
+    }
+
+    var editor = schedule_editor;
+    editor.directions = schedule_directions();
+    if (editor.directions.indexOf(editor.tab) === -1 && editor.directions.length) editor.tab = editor.directions[0];
+    // Unsaved edits are kept until saved or cancelled
+    if (!editor.editing) {
+        editor.schedules = { import: saved_schedule("import"), export: saved_schedule("export") };
+    }
+}
+
+// -------------------------------------------------------------------------------
 // EVENTS (cost-view controls)
 // -------------------------------------------------------------------------------
 
@@ -835,6 +935,10 @@ $("#tariff, #export_tariff").on("change", function() {
     config.app[key].value = $(this).val();
     config.db[key] = config.app[key].value;
     config.set();
+    // Show the schedule just selected
+    if (schedule_editor && config.app[key].value === TARIFF_SCHEDULE) {
+        schedule_editor.tab = key === "tariff" ? "import" : "export";
+    }
     load_tariff_analysis(false, true);
 });
 
