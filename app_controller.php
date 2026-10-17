@@ -99,7 +99,16 @@ function app_controller()
 
     else if ($route->action == "octopus-feed-list") {
         $route->format = "json";
-        return json_decode(file_get_contents("http://emoncms.org/octopus/feed/list.json"));
+        // Cached for an hour to avoid a remote request on every app load
+        $cache_key = "app:octopus-feed-list";
+        if ($redis && ($cached = $redis->get($cache_key))) {
+            return json_decode($cached);
+        }
+        $json = @file_get_contents("https://emoncms.org/octopus/feed/list.json");
+        $list = $json ? json_decode($json) : null;
+        if (!is_array($list)) return array();
+        if ($redis) $redis->setex($cache_key, 3600, $json);
+        return $list;
     }
     else if ($route->action == "dataremote") {
         $route->format = "json";

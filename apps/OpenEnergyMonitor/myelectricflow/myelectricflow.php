@@ -103,8 +103,12 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
 
         <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
             <div class="input-group w-auto">
-                <span class="input-group-text"><?php echo tr('Tariff') ?></span>
+                <span class="input-group-text"><?php echo tr('Import') ?></span>
                 <select id="tariff" class="form-select"></select>
+            </div>
+            <div class="input-group w-auto">
+                <span class="input-group-text"><?php echo tr('Export') ?></span>
+                <select id="export_tariff" class="form-select"></select>
             </div>
             <button id="show_profile" class="btn btn-outline-primary"><?php echo tr('Profile') ?></button>
             <button id="download-csv" class="btn btn-outline-primary"><?php echo tr('Download CSV') ?></button>

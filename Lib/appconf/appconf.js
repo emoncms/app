@@ -713,7 +713,9 @@ var vue_config_app = Vue.createApp({
                     selectedFeedId: 0,
                     // value / checkbox / select
                     inputValue:    config.app[z].default !== undefined ? config.app[z].default : "",
-                    selectOptions: config.app[z].options || []
+                    selectOptions: config.app[z].options || [],
+                    // Optional option groups: [{ label, options }], no label for ungrouped options
+                    selectGroups:  config.app[z].groups || null
                 };
 
                 if (item.type === "feed") {

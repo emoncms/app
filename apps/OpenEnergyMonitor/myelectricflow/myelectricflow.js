@@ -22,24 +22,8 @@ const flow_colors = {
 const SOLAR_FIRST = 0;
 const BATTERY_FIRST = 1;
 
-// Available Octopus tariffs for the integrated cost breakdown (see myelectricflow_tariff.js)
-const tariff_options = [
-    "AGILE-18-02-21",
-    "AGILE-22-07-22",
-    "AGILE-22-08-31",
-    "AGILE-23-12-06",
-    "AGILE-24-10-01",
-    "GO-VAR-22-10-14",
-    "INTELLI-FLUX-IMPORT-23-07-14",
-    "INTELLI-VAR-22-10-14",
-    "INTELLI-VAR-24-10-29",
-    "INTELLI-VAR-OEV-24-07-17",
-    "SNUG-24-11-07",
-    "COSY-22-12-08",
-    "FLUX-IMPORT-23-02-14",
-    "BUS-12M-FIXED-SHAPE-SHIFTER-25-05-23",
-    "AGILE-BUS-25-02-05"
-];
+// Octopus tariff list for the cost breakdown (see myelectricflow_tariff.js)
+fetch_octopus_feed_list();
 
 // ----------------------------------------------------------------------
 // Configuration
@@ -99,7 +83,7 @@ config.app = {
     "strategy":{"type":"select", "default":"Solar first", "options":["Solar first", "Battery first"], "name":"Flow allocation strategy", "description":"Which source supplies the load first when solar and battery are both available"},
 
     // == Tariff cost breakdown (Octopus) ==
-    // Region + tariff used by the integrated cost breakdown view (myelectricflow_tariff.js).
+    // Region, import and export tariff used by the cost breakdown view (myelectricflow_tariff.js).
     "region": {
         "type": "select",
         "section": "Tariff",
@@ -111,11 +95,37 @@ config.app = {
     "tariff": {
         "type": "select",
         "section": "Tariff",
-        "name": "Select tariff:",
+        "name": "Import tariff:",
         "default": "AGILE-23-12-06",
-        "options": tariff_options
+        "options": []
+    },
+
+    "export_tariff": {
+        "type": "select",
+        "section": "Tariff",
+        "name": "Export tariff:",
+        "default": "AGILE-OUTGOING-19-05-13",
+        "options": []
+    },
+
+    "vat": {
+        "type": "value",
+        "section": "Tariff",
+        "name": "Import VAT (%)",
+        "default": 5,
+        "description": "VAT applied to Octopus import rates. Export rates have no VAT."
     }
 };
+
+// Saved tariff tags are mapped to Octopus product codes
+if (config.db && config.db.tariff) config.db.tariff = tariff_tag(config.db.tariff);
+if (config.db && config.db.export_tariff) config.db.export_tariff = tariff_tag(config.db.export_tariff);
+
+// Tariff options from the fetched list
+config.app.tariff.options = tariff_select_options(false, config.db ? config.db.tariff : false, config.app.tariff.default);
+config.app.export_tariff.options = tariff_select_options(true, config.db ? config.db.export_tariff : false, config.app.export_tariff.default);
+config.app.tariff.groups = tariff_select_groups(config.app.tariff.options);
+config.app.export_tariff.groups = tariff_select_groups(config.app.export_tariff.options);
 
 // ----------------------------------------------------------------------
 // Custom check: enforce the correct minimum set of feeds based on mode.
@@ -497,9 +507,6 @@ function show()
     assume_zero_solar     = state.assume_zero_solar;
     assume_zero_battery   = state.assume_zero_battery;
     battery_soc_available = state.battery_soc_available;
-
-    // Fetch the remote Octopus tariff feed list (import tariffs by region) for the cost breakdown.
-    fetch_octopus_feed_list();
 
     solar_battery_visibility();
     load_process_draw_graph();
@@ -886,13 +893,11 @@ function update_live_cost_display(grid_power, scale, dp, powerUnit) {
     // price inc VAT (pink). Show "--" if no current half-hour rate is loaded.
     let price, label, color;
     if (grid_power < 0) {
-        const rate = get_current_tariff_rate("export_tariff"); // stored inverted (negative)
-        price = rate === null ? null : (rate * -1);
+        price = get_current_tariff_rate("export_tariff");
         label = "EXPORT PRICE";
         color = "#941afb";
     } else {
-        const rate = get_current_tariff_rate("import_tariff");
-        price = rate === null ? null : (rate * 1.05); // inc VAT
+        price = get_current_tariff_rate("import_tariff");
         label = "IMPORT PRICE";
         color = "#fb1a80";
     }

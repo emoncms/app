@@ -6,7 +6,7 @@
 // power/bar chart's variable interval, so tariff costs are always computed on half-hourly buckets.
 //
 // Relies on globals defined elsewhere in the app: feed, config, view, path, flow_colors,
-// tariff_options, load_process_draw_graph().
+// load_process_draw_graph().
 // -------------------------------------------------------------------------------------------------------
 
 // Per-flow rate metadata: which tariff feed (import vs export) prices each energy flow,
@@ -21,26 +21,24 @@ const tariff_flows = [
     { key: "grid_to_battery",  rate: "tariff",   str: "&#9889; Grid &rarr; Battery",    label: "cost"   }
 ];
 
-// Export (outgoing) tariff feed ids on emoncms.org, keyed by region.
-const regions_outgoing = {
-    "A_Eastern_England": 399374,
-    "B_East_Midlands": 399361,
-    "C_London": 399362,
-    "D_Merseyside_and_Northern_Wales": 399363,
-    "E_West_Midlands": 399364,
-    "F_North_Eastern_England": 399365,
-    "G_North_Western_England": 399366,
-    "H_Southern_England": 399367,
-    "J_South_Eastern_England": 399368,
-    "K_Southern_Wales": 399369,
-    "L_South_Western_England": 399370,
-    "M_Yorkshire": 399371,
-    "N_Southern_Scotland": 399372,
-    "P_Northern_Scotland": 399373
-};
-
-// Tariff name + region -> import tariff feed id, fetched from emoncms.org via app/octopus-feed-list.
+// Tariff tag + region -> remote feed id, fetched from emoncms.org via app/octopus-feed-list.
 let octopus_feed_list = {};
+
+// Tariff tag -> latest rate time (unix seconds) across regions.
+let octopus_tariff_time = {};
+
+// Tariffs with no rate update for this long are listed as historical.
+const tariff_historical_age = 2 * 24 * 3600;
+
+// Export option for no export tariff.
+const EXPORT_NONE = "None";
+
+// Octopus product codes for tags that are named differently on emoncms.org.
+const tariff_tag_aliases = { "agile_export": "AGILE-OUTGOING-19-05-13" };
+
+function tariff_tag(tag) {
+    return tariff_tag_aliases[tag] || tag;
+}
 
 // Loaded half-hourly data arrays (flow kWh + tariff rates) and accumulated totals.
 let tariff_data = {};
@@ -68,8 +66,8 @@ let profile_kwh = [];
 let profile_cost = [];
 
 // ----------------------------------------------------------------------
-// Fetch the list of remote Octopus tariff feeds (import tariffs by region).
-// Called once from show().
+// Fetch the list of remote Octopus tariff feeds (tariffs by region).
+// Called once before config.init() so the tariff selects have options.
 // ----------------------------------------------------------------------
 function fetch_octopus_feed_list() {
     $.ajax({
@@ -78,12 +76,83 @@ function fetch_octopus_feed_list() {
         async: false,
         success: function(result) {
             for (var z in result) {
-                var tag = result[z].tag;
+                var tag = tariff_tag(result[z].tag);
                 if (octopus_feed_list[tag] == undefined) octopus_feed_list[tag] = {};
                 octopus_feed_list[tag][result[z].name] = parseInt(result[z].id);
+                var time = parseInt(result[z].time) || 0;
+                if (!(octopus_tariff_time[tag] >= time)) octopus_tariff_time[tag] = time;
             }
         }
     });
+}
+
+// Export tariffs are identified by tag, as list.json has no direction field.
+function is_export_tariff(tag) {
+    return /EXPORT|OUTGOING/i.test(tag);
+}
+
+function is_historical_tariff(tag) {
+    var time = octopus_tariff_time[tag];
+    return time !== undefined && (Date.now() * 0.001 - time) > tariff_historical_age;
+}
+
+// Sorted tariff tags for one direction, current tariffs first.
+function octopus_tariffs(is_export) {
+    return Object.keys(octopus_feed_list)
+        .filter(function(tag) { return is_export_tariff(tag) === is_export; })
+        .sort(function(a, b) {
+            var ha = is_historical_tariff(a), hb = is_historical_tariff(b);
+            if (ha !== hb) return ha ? 1 : -1;
+            return a.localeCompare(b);
+        });
+}
+
+// Select options for one direction. The saved or default value is kept
+// when the list could not be fetched, so the config is not lost.
+function tariff_select_options(is_export, saved, fallback) {
+    var options = octopus_tariffs(is_export);
+    if (is_export) options.push(EXPORT_NONE);
+    [saved, fallback].forEach(function(tag) {
+        if (tag && options.indexOf(tag) === -1) options.push(tag);
+    });
+    return options;
+}
+
+// Tariff families for grouping the selects, in display order.
+const tariff_families = [
+    { label: "Agile",                  match: /^AGILE-(?!BUS)/ },
+    { label: "Intelligent Octopus Go", match: /^(INTELLI-(?!FLUX)|IOG-)/ },
+    { label: "Go",                     match: /^GO-/ },
+    { label: "Flux",                   match: /^(INTELLI-)?FLUX-/ },
+    { label: "Heat pump",              match: /^(COSY|SNUG)-/ },
+    { label: "Tracker",                match: /^SILVER-/ },
+    { label: "Flexible",               match: /^(VAR|OE)-/ },
+    { label: "Outgoing",               match: /^OUTGOING-/ },
+    { label: "Business",               match: /^(AGILE-BUS|BUS)-/ }
+];
+
+// Option groups for a tariff select: one group per family, then historical
+// tariffs and other options. None has no group.
+function tariff_select_groups(options) {
+    var groups = tariff_families.map(function(f) { return { label: f.label, options: [] }; });
+    var other = { label: "Other", options: [] };
+    var historical = { label: "Historical", options: [] };
+    var ungrouped = { label: "", options: [] };
+
+    options.forEach(function(tag) {
+        if (tag === EXPORT_NONE) { ungrouped.options.push(tag); return; }
+        if (is_historical_tariff(tag)) { historical.options.push(tag); return; }
+        var i = tariff_families.findIndex(function(f) { return f.match.test(tag); });
+        (i === -1 ? other : groups[i]).options.push(tag);
+    });
+
+    return groups.concat([other, historical, ungrouped]).filter(function(g) { return g.options.length; });
+}
+
+// Import VAT multiplier from the vat config value (%).
+function import_vat_factor() {
+    var vat = parseFloat(config.app.vat ? config.app.vat.value : 5);
+    return 1 + (isNaN(vat) ? 5 : vat) / 100;
 }
 
 // ----------------------------------------------------------------------
@@ -99,7 +168,8 @@ function load_tariff_analysis(load_flows = true, load_tariffs = true) {
     const interval = 1800;
     const intervalms = interval * 1000;
     const ts = Math.ceil(view.start / intervalms) * intervalms;
-    const te = Math.ceil(view.end / intervalms) * intervalms;
+    // Start of the last half hour before view.end, as the data end time is inclusive
+    const te = Math.max(ts, Math.ceil(view.end / intervalms) * intervalms - intervalms);
 
     // A changed window / reloaded flows invalidates the saved baseline period.
     if (load_flows) baseline_monthly_summary = {};
@@ -143,17 +213,23 @@ function load_flow_data(ts, te, interval, load_tariffs) {
     }, false, "notime");
 }
 
+// Remote feed id for a tariff tag in the selected region, false if not available.
+function octopus_feedid(tag) {
+    const region = config.app.region ? config.app.region.value : false;
+    if (!region || !tag || !octopus_feed_list[tag]) return false;
+    return octopus_feed_list[tag][region] || false;
+}
+
 // ----------------------------------------------------------------------
 // Load the remote import/export tariff rate feeds for the selected
 // region/tariff (via app/dataremote.json), then process.
+// Import rates are stored ex VAT and VAT is applied here.
+// Export rates have no VAT.
 // ----------------------------------------------------------------------
 function load_tariff_rates(ts, te, interval) {
-    const region = config.app.region ? config.app.region.value : false;
-    const tariff = config.app.tariff ? config.app.tariff.value : false;
-
     const remote_feeds = {
-        import_tariff: (region && tariff && octopus_feed_list[tariff]) ? octopus_feed_list[tariff][region] : false,
-        export_tariff: region ? (regions_outgoing[region] || false) : false,
+        import_tariff: octopus_feedid(config.app.tariff.value),
+        export_tariff: octopus_feedid(config.app.export_tariff.value),
         carbonintensity: show_carbonintensity ? carbonintensity_feedid : false
     };
 
@@ -173,10 +249,10 @@ function load_tariff_rates(ts, te, interval) {
             });
         }
 
-        // Invert export tariff (stored as a positive rate, applied as a credit).
-        for (var z in tariff_data["export_tariff"]) {
-            tariff_data["export_tariff"][z][1] *= -1;
-        }
+        const vat = import_vat_factor();
+        tariff_data["import_tariff"].forEach(function(dp) {
+            if (dp[1] !== null) dp[1] *= vat;
+        });
 
         process_tariff_data();
         render_cost_breakdown();
@@ -228,7 +304,7 @@ function process_tariff_data() {
 
         tariff_flows.forEach(function(f) {
             let kwh = Math.max(0, get_value_at_index(tariff_data[f.key], z, 0));
-            let unit_rate = (f.rate === "outgoing") ? (export_unit_rate === null ? null : export_unit_rate * -1) : import_unit_rate;
+            let unit_rate = (f.rate === "outgoing") ? export_unit_rate : import_unit_rate;
             if (unit_rate !== null) {
                 monthly_data[startOfMonth][f.key].cost += kwh * unit_rate * 0.01;
                 monthly_data[startOfMonth][f.key].kwh  += kwh;
@@ -268,7 +344,7 @@ function get_value_at_index(data_array, index, default_value = null) {
 
 // Tariff rate (p/kWh) for the current half-hour from the loaded tariff_data, or null
 // if not loaded / the current half-hour is outside the loaded window. Mirrors the
-// Tariff Explorer's this_halfhour lookup. Note: export_tariff is stored inverted.
+// Tariff Explorer's this_halfhour lookup.
 function get_current_tariff_rate(key) {
     var arr = tariff_data[key];
     if (!arr || !arr.length) return null;
@@ -283,7 +359,7 @@ function get_current_tariff_rate(key) {
 // CALCULATIONS
 // -------------------------------------------------------------------------------
 function calc_net_cost(bucket) {
-    return ((bucket.grid_to_load.cost + bucket.grid_to_battery.cost) - (bucket.solar_to_grid.cost + bucket.battery_to_grid.cost)) * 1.05;
+    return (bucket.grid_to_load.cost + bucket.grid_to_battery.cost) - (bucket.solar_to_grid.cost + bucket.battery_to_grid.cost);
 }
 
 function calc_total_consumption(bucket) {
@@ -364,18 +440,17 @@ function render_flow_row(label, kwh, value_gbp, value_label, color, rowStyle) {
 
 // Builds the HTML for the flow totals table body.
 function render_flow_table() {
-    var vat = 1.05;
     var net_cost_gbp          = calc_net_cost(total_tariff);
     var total_consumption_kwh = calc_total_consumption(total_tariff);
 
     var rows = "";
-    rows += render_flow_row("&#9728; Solar &rarr; Load",              total_tariff.solar_to_load.kwh,    total_tariff.solar_to_load.cost    * vat, "avoided import cost",          flow_colors.solar_to_load);
-    rows += render_flow_row("&#9728; Solar &rarr; Grid (export)",     total_tariff.solar_to_grid.kwh,    total_tariff.solar_to_grid.cost    * vat, "earned at export tariff",      flow_colors.solar_to_grid);
-    rows += render_flow_row("&#9728; Solar &rarr; Battery",           total_tariff.solar_to_battery.kwh, total_tariff.solar_to_battery.cost * vat, "avoided import cost",          flow_colors.solar_to_battery);
-    rows += render_flow_row("&#x1F50B; Battery &rarr; Load",          total_tariff.battery_to_load.kwh,  total_tariff.battery_to_load.cost  * vat, "avoided import cost",          flow_colors.battery_to_load);
-    rows += render_flow_row("&#x1F50B; Battery &rarr; Grid (export)", total_tariff.battery_to_grid.kwh,  total_tariff.battery_to_grid.cost  * vat, "earned at export tariff",      flow_colors.battery_to_grid);
-    rows += render_flow_row("&#x1F4A1; Grid &rarr; Battery",          total_tariff.grid_to_battery.kwh,  total_tariff.grid_to_battery.cost  * vat, "import cost",                  flow_colors.grid_to_battery);
-    rows += render_flow_row("&#x1F4A1; Grid &rarr; Load",             total_tariff.grid_to_load.kwh,     total_tariff.grid_to_load.cost     * vat, "import cost",                  flow_colors.grid_to_load);
+    rows += render_flow_row("&#9728; Solar &rarr; Load",              total_tariff.solar_to_load.kwh,    total_tariff.solar_to_load.cost,    "avoided import cost",          flow_colors.solar_to_load);
+    rows += render_flow_row("&#9728; Solar &rarr; Grid (export)",     total_tariff.solar_to_grid.kwh,    total_tariff.solar_to_grid.cost,    "earned at export tariff",      flow_colors.solar_to_grid);
+    rows += render_flow_row("&#9728; Solar &rarr; Battery",           total_tariff.solar_to_battery.kwh, total_tariff.solar_to_battery.cost, "avoided import cost",          flow_colors.solar_to_battery);
+    rows += render_flow_row("&#x1F50B; Battery &rarr; Load",          total_tariff.battery_to_load.kwh,  total_tariff.battery_to_load.cost,  "avoided import cost",          flow_colors.battery_to_load);
+    rows += render_flow_row("&#x1F50B; Battery &rarr; Grid (export)", total_tariff.battery_to_grid.kwh,  total_tariff.battery_to_grid.cost,  "earned at export tariff",      flow_colors.battery_to_grid);
+    rows += render_flow_row("&#x1F4A1; Grid &rarr; Battery",          total_tariff.grid_to_battery.kwh,  total_tariff.grid_to_battery.cost,  "import cost",                  flow_colors.grid_to_battery);
+    rows += render_flow_row("&#x1F4A1; Grid &rarr; Load",             total_tariff.grid_to_load.kwh,     total_tariff.grid_to_load.cost,     "import cost",                  flow_colors.grid_to_load);
     rows += render_flow_row("Net result", total_consumption_kwh, net_cost_gbp, "grid costs minus export earnings", "#444", "font-weight:bold;background-color:#333");
 
     return rows;
@@ -413,7 +488,7 @@ function render_monthly_row(summary, has_baseline, month_names) {
 function render_monthly_table(summaries) {
     var month_names  = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     var has_baseline = baseline_monthly_summary != undefined && Object.keys(baseline_monthly_summary).length > 0;
-    var tariff_label = config.app.tariff.value + (has_baseline ? " (A)" : "");
+    var tariff_label = tariff_pair_label() + (has_baseline ? " (A)" : "");
 
     var heading = "<th>Month</th><th>Consumption (kWh)</th><th>" + tariff_label + "</th>";
     if (has_baseline) {
@@ -455,15 +530,30 @@ function render_monthly_table(summaries) {
     $("#monthly-data").removeClass("d-none");
 }
 
-// Populate the quick tariff selector once, then sync its value.
+// Import and export tariff names for table headings.
+function tariff_pair_label() {
+    return config.app.tariff.value + " / " + config.app.export_tariff.value;
+}
+
+// Fill a quick tariff selector with the same groups as the config panel.
+function fill_tariff_select(sel, groups) {
+    sel.empty();
+    groups.forEach(function(g) {
+        var parent = g.label ? $("<optgroup>").attr("label", g.label).appendTo(sel) : sel;
+        g.options.forEach(function(tag) {
+            parent.append($("<option>").val(tag).text(tag));
+        });
+    });
+}
+
+// Populate the quick tariff selectors once, then sync their values.
 function populate_quick_tariff() {
-    var sel = $("#tariff");
-    if (sel.find("option").length === 0) {
-        for (var i = 0; i < tariff_options.length; i++) {
-            sel.append("<option>" + tariff_options[i] + "</option>");
-        }
+    if ($("#tariff option").length === 0) {
+        fill_tariff_select($("#tariff"), config.app.tariff.groups);
+        fill_tariff_select($("#export_tariff"), config.app.export_tariff.groups);
     }
-    sel.val(config.app.tariff.value);
+    $("#tariff").val(config.app.tariff.value);
+    $("#export_tariff").val(config.app.export_tariff.value);
 }
 
 // Injects the cost breakdown table + monthly table into the cost view, and
@@ -536,8 +626,12 @@ function draw_tariff_graph() {
         });
     }
     if (tariff_data["export_tariff"] && tariff_data["export_tariff"].length) {
+        // Export rate drawn below zero as a credit
+        var export_line = tariff_data["export_tariff"].map(function(dp) {
+            return [dp[0], dp[1] === null ? null : dp[1] * -1];
+        });
         graph_series.push({
-            label: "Export", data: tariff_data["export_tariff"], yaxis: 2,
+            label: config.app.export_tariff.value, data: export_line, yaxis: 2,
             color: "#941afb", lines: { show: true, steps: true, align: "center", lineWidth: 1 }
         });
     }
@@ -648,8 +742,7 @@ function tariff_tooltip(item) {
         var kwh = get_value_at_index(tariff_data[f.key], z);
         if (kwh != null && kwh > 0) {
             text += f.str + ": " + kwh.toFixed(3) + " kWh";
-            // export_tariff is stored inverted; negate so "gained" reads positive.
-            var rate_val = f.rate === "tariff" ? import_tariff : (export_tariff == null ? null : export_tariff * -1);
+            var rate_val = f.rate === "tariff" ? import_tariff : export_tariff;
             if (rate_val != null) text += " (" + (kwh * rate_val).toFixed(2) + "p " + f.label + ")<br>";
             else text += "<br>";
         }
@@ -660,8 +753,7 @@ function tariff_tooltip(item) {
         text += "<span style='color:#fb1a80'>&#x25CF;</span> Import: " + import_tariff.toFixed(2) + " p/kWh (inc VAT)<br>";
     }
     if (export_tariff != null) {
-        // export_tariff is stored inverted; present a positive rate.
-        text += "<span style='color:#941afb'>&#x25CF;</span> Export: " + (export_tariff * -1).toFixed(2) + " p/kWh (inc VAT)<br>";
+        text += "<span style='color:#941afb'>&#x25CF;</span> Export: " + export_tariff.toFixed(2) + " p/kWh<br>";
     }
     if (show_carbonintensity && carbonintensity != null) {
         text += "&#x1F331; Carbon Intensity: " + carbonintensity.toFixed(0) + " gCO2/kWh<br>";
@@ -698,7 +790,7 @@ function download_data(filename, data) {
     }
 }
 
-// Export the half-hourly window: time + 7 flow kWh + import/export tariff rates (p/kWh inc VAT).
+// Export the half-hourly window: time + 7 flow kWh + import (inc VAT) and export tariff rates (p/kWh).
 function download_tariff_csv() {
     var ref_data = tariff_data["grid_to_load"];
     if (!ref_data || !ref_data.length) { alert("No data to export."); return; }
@@ -720,8 +812,7 @@ function download_tariff_csv() {
         var import_rate = get_value_at_index(tariff_data["import_tariff"], z, null);
         var export_rate = get_value_at_index(tariff_data["export_tariff"], z, null);
         line.push(import_rate === null ? "" : import_rate.toFixed(3));
-        // export_tariff is stored inverted; re-negate to present a positive p/kWh rate.
-        line.push(export_rate === null ? "" : (export_rate * -1).toFixed(3));
+        line.push(export_rate === null ? "" : export_rate.toFixed(3));
 
         if (show_carbonintensity) {
             var ci = get_value_at_index(tariff_data["carbonintensity"], z, null);
@@ -738,10 +829,11 @@ function download_tariff_csv() {
 // EVENTS (cost-view controls)
 // -------------------------------------------------------------------------------
 
-// Quick tariff selector: persist the choice to config and reload rates only.
-$("#tariff").on("change", function() {
-    config.app.tariff.value = $("#tariff").val();
-    config.db.tariff = config.app.tariff.value;
+// Quick tariff selectors: persist the choice to config and reload rates only.
+$("#tariff, #export_tariff").on("change", function() {
+    var key = this.id;
+    config.app[key].value = $(this).val();
+    config.db[key] = config.app[key].value;
     config.set();
     load_tariff_analysis(false, true);
 });
@@ -749,7 +841,7 @@ $("#tariff").on("change", function() {
 // Save the current month-by-month costs as a baseline for tariff comparison.
 $("#save-baseline").on("click", function() {
     baseline_monthly_summary = JSON.parse(JSON.stringify(monthly_summary));
-    baseline_tariff_name = config.app.tariff.value;
+    baseline_tariff_name = tariff_pair_label();
     render_cost_breakdown();
 });
 

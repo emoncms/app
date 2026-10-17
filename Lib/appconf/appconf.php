@@ -17,7 +17,17 @@ if (!function_exists('cfg_option_cards')) { function cfg_option_cards($items) { 
                         </div>
                         <input v-else-if="item.type === 'value'" class="form-control app-config-value" type="text" :value="item.inputValue" @change="changeValue(item.key, $event.target.value)">
                         <select v-else-if="item.type === 'select'" class="form-select app-config-value" :value="item.inputValue" @change="changeValue(item.key, $event.target.value)">
-                            <option v-for="opt in item.selectOptions">{{ opt }}</option>
+                            <template v-if="item.selectGroups">
+                                <template v-for="group in item.selectGroups">
+                                    <optgroup v-if="group.label" :label="group.label">
+                                        <option v-for="opt in group.options">{{ opt }}</option>
+                                    </optgroup>
+                                    <option v-else v-for="opt in group.options">{{ opt }}</option>
+                                </template>
+                            </template>
+                            <template v-else>
+                                <option v-for="opt in item.selectOptions">{{ opt }}</option>
+                            </template>
                         </select>
                     </div>
                 </div>
