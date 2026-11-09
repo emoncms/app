@@ -117,15 +117,17 @@ config.app = {
     },
 
     // Custom schedules, edited in the tariff explorer view (see Lib/tariff_schedule)
-    // Empty weekend blocks mean the same schedule every day
+    // Empty weekend blocks mean the same schedule every day. Empty days means sat,sun.
     "import_bands": {"type":"value", "hidden":true, "default":"OffPeak:8.5,Peak:28"},
     "import_wd":    {"type":"value", "hidden":true, "default":"00:30=OffPeak,05:30=Peak"},
     "import_we":    {"type":"value", "hidden":true, "default":""},
     "import_ph":    {"type":"value", "hidden":true, "default":""},
+    "import_days":  {"type":"value", "hidden":true, "default":""},
     "export_bands": {"type":"value", "hidden":true, "default":"Export:15"},
     "export_wd":    {"type":"value", "hidden":true, "default":"00:00=Export"},
     "export_we":    {"type":"value", "hidden":true, "default":""},
-    "export_ph":    {"type":"value", "hidden":true, "default":""}
+    "export_ph":    {"type":"value", "hidden":true, "default":""},
+    "export_days":  {"type":"value", "hidden":true, "default":""}
 };
 
 // Saved tariff tags are mapped to Octopus product codes

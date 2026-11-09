@@ -3,8 +3,8 @@
 // ----------------------------------------------------------------------
 // A list of periods, each with a start time and a price. A period runs until
 // the next one starts, and time before the first period uses the last one.
-// One list applies every day. An optional weekend list applies on Saturdays,
-// Sundays and listed public holidays.
+// One list applies every day. An optional weekend list applies on selected
+// days of the week (Saturday and Sunday by default) and listed public holidays.
 //
 // Periods with the same price form a band, named by the label given to the
 // first period at that price. Stored as compact strings, as app config values
@@ -13,12 +13,14 @@
 //   bands     OffPeak:8.5,Peak:28
 //   weekday   00:30=OffPeak,05:30=Peak
 //   weekend   00:00=OffPeak               (empty: same every day)
+//   days      sat,sun                     (days for the weekend list, empty: sat,sun)
 //   holidays  2026-12-25,2026-12-26       (dates in local time)
 //
 // Schedule object used by the editor and rates():
 //
 //   { weekday: [{ start: "00:30", price: 8.5 }, ...],
 //     weekend: null or [...],
+//     days: [6, 0],                       (Date.getDay() numbers, Monday first)
 //     labels: { "8.5": "OffPeak", "28": "Peak" },
 //     holidays: ["2026-12-25"] }
 // ----------------------------------------------------------------------
@@ -50,11 +52,69 @@ var tariff_schedule = {
             "British Gas Electric Driver": { bands: "OffPeak:9,Peak:31", weekday: "00:00=OffPeak,05:00=Peak" },
             "EDF GoElectric":              { bands: "OffPeak:6.5,Peak:26", weekday: "06:00=Peak,23:00=OffPeak" },
             "E.ON Next Drive":             { bands: "OffPeak:6.9,Peak:26", weekday: "00:00=OffPeak,06:00=Peak" },
-            "E.ON Next Pumped":            { bands: "SuperOffPeak:15,OffPeak:24,Peak:35", weekday: "00:00=SuperOffPeak,06:00=OffPeak,16:00=Peak,19:00=OffPeak,22:00=SuperOffPeak" }
+            "E.ON Next Pumped":            { bands: "SuperOffPeak:15,OffPeak:24,Peak:35", weekday: "00:00=SuperOffPeak,06:00=OffPeak,16:00=Peak,19:00=OffPeak,22:00=SuperOffPeak" },
+            // Times checked Nov 2026
+            "100% Green Tide Lifestyle":   { bands: "Peak:36.17,OffPeak:15,Free:0",
+                                             weekday: "03:00=OffPeak,06:00=Peak,12:00=OffPeak,15:00=Peak,19:30=OffPeak,22:30=Peak",
+                                             weekend: "03:00=OffPeak,06:00=Peak,12:00=Free,14:00=OffPeak,15:00=Peak,19:30=OffPeak,22:30=Peak",
+                                             days: "sun" }
         },
         export: {
             "Flat export":    { bands: "Export:15", weekday: "00:00=Export" }
         }
+    },
+
+    // Day names indexed by Date.getDay()
+    day_names: ["sun", "mon", "tue", "wed", "thu", "fri", "sat"],
+    day_labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    default_days: [6, 0],
+
+    // Day numbers in display order, Monday first
+    week_order: [1, 2, 3, 4, 5, 6, 0],
+
+    // Valid unique day numbers in display order, default when none
+    clean_days: function(days) {
+        var set = {};
+        (days || []).forEach(function(d) { set[parseInt(d, 10)] = true; });
+        var out = this.week_order.filter(function(d) { return set[d]; });
+        return out.length ? out : this.default_days.slice();
+    },
+
+    // Day numbers from stored text, e.g. "sat,sun"
+    parse_days: function(value) {
+        var self = this;
+        var days = [];
+        ("" + (value || "")).split(",").forEach(function(name) {
+            var d = self.day_names.indexOf(name.trim().toLowerCase());
+            if (d !== -1) days.push(d);
+        });
+        return this.clean_days(days);
+    },
+
+    // Short text for a set of days, e.g. "Weekend", "Mon-Sat", "Sun"
+    days_label: function(days) {
+        var key = this.clean_days(days).join(",");
+        if (key === "6,0") return "Weekend";
+        if (key === "1,2,3,4,5") return "Weekday";
+        var self = this;
+        var order = this.week_order;
+        var pos = this.clean_days(days).map(function(d) { return order.indexOf(d); });
+        var parts = [];
+        for (var i = 0; i < pos.length; i++) {
+            var j = i;
+            while (j + 1 < pos.length && pos[j + 1] === pos[j] + 1) j++;
+            var a = self.day_labels[order[pos[i]]], b = self.day_labels[order[pos[j]]];
+            if (j - i >= 2) parts.push(a + "-" + b);
+            else for (var k = i; k <= j; k++) parts.push(self.day_labels[order[pos[k]]]);
+            i = j;
+        }
+        return parts.join(", ");
+    },
+
+    // Days not in the given set
+    other_days: function(days) {
+        days = this.clean_days(days);
+        return this.week_order.filter(function(d) { return days.indexOf(d) === -1; });
     },
 
     // Half hour slots: 0 = 00:00, 1 = 00:30 ... 47 = 23:30
@@ -87,9 +147,8 @@ var tariff_schedule = {
         return ("" + (label || "")).replace(/[:,=]/g, "").trim();
     },
 
-    // Schedule object from stored strings. A weekend list that matches the
-    // weekday list is treated as the same every day.
-    parse: function(bands, weekday, weekend, holidays) {
+    // Schedule object from stored strings
+    parse: function(bands, weekday, weekend, holidays, days) {
         var self = this;
         var price = {};
         var labels = {};
@@ -116,16 +175,13 @@ var tariff_schedule = {
             return periods;
         };
 
-        var schedule = this.clean({
+        return this.clean({
             weekday: parse_periods(weekday),
             weekend: weekend ? parse_periods(weekend) : null,
+            days: this.parse_days(days),
             labels: labels,
             holidays: ("" + (holidays || "")).split(",")
         });
-        if (schedule.weekend && JSON.stringify(schedule.weekend) === JSON.stringify(schedule.weekday)) {
-            schedule.weekend = null;
-        }
-        return schedule;
     },
 
     // Distinct prices in order of first use, weekday list first
@@ -164,6 +220,7 @@ var tariff_schedule = {
             bands: this.prices(schedule).map(function(key) { return names[key] + ":" + key; }).join(","),
             weekday: periods(schedule.weekday),
             weekend: schedule.weekend ? periods(schedule.weekend) : "",
+            days: schedule.weekend ? schedule.days.map(function(d) { return self.day_names[d]; }).join(",") : "",
             holidays: schedule.weekend ? schedule.holidays.join(",") : ""
         };
     },
@@ -195,6 +252,7 @@ var tariff_schedule = {
         return {
             weekday: clean_periods(schedule.weekday),
             weekend: schedule.weekend ? clean_periods(schedule.weekend) : null,
+            days: this.clean_days(schedule.days),
             labels: labels,
             holidays: holidays
         };
@@ -204,6 +262,7 @@ var tariff_schedule = {
     //
     //   { "weekday": [{ "start": "00:30", "price": 8.5, "label": "OffPeak" }, ...],
     //     "weekend": null or [...],
+    //     "weekend_days": ["sat", "sun"],
     //     "holidays": ["2026-12-25"] }
     to_json: function(schedule) {
         var self = this;
@@ -218,6 +277,7 @@ var tariff_schedule = {
         return JSON.stringify({
             weekday: periods(schedule.weekday),
             weekend: schedule.weekend ? periods(schedule.weekend) : null,
+            weekend_days: schedule.weekend ? this.clean_days(schedule.days).map(function(d) { return self.day_names[d]; }) : [],
             holidays: schedule.weekend ? schedule.holidays.slice() : []
         }, null, 2);
     },
@@ -238,7 +298,7 @@ var tariff_schedule = {
         catch (e) { return fail("Invalid JSON: " + e.message); }
         if (!is_object(data)) return fail("JSON must be an object");
 
-        var allowed = ["weekday", "weekend", "holidays"];
+        var allowed = ["weekday", "weekend", "weekend_days", "holidays"];
         for (var key in data) {
             if (allowed.indexOf(key) === -1) return fail("Unknown key: " + key);
         }
@@ -284,6 +344,19 @@ var tariff_schedule = {
             if (weekend.error) return weekend;
         }
 
+        var days = [];
+        if (data.weekend_days !== undefined && data.weekend_days !== null) {
+            if (!Array.isArray(data.weekend_days)) return fail("weekend_days must be a list of days");
+            for (var n = 0; n < data.weekend_days.length; n++) {
+                var name = data.weekend_days[n];
+                var day = typeof name === "string" ? this.day_names.indexOf(name.toLowerCase()) : -1;
+                if (day === -1) return fail("weekend_days " + (n + 1) + " must be one of " + this.day_names.join(", "));
+                if (days.indexOf(day) !== -1) return fail("weekend_days lists " + name + " more than once");
+                days.push(day);
+            }
+            if (days.length && !weekend) return fail("weekend_days need a weekend schedule");
+        }
+
         var holidays = [];
         if (data.holidays !== undefined && data.holidays !== null) {
             if (!Array.isArray(data.holidays)) return fail("holidays must be a list of dates");
@@ -303,6 +376,7 @@ var tariff_schedule = {
         return { schedule: this.clean({
             weekday: weekday.periods,
             weekend: weekend ? weekend.periods : null,
+            days: days,
             labels: labels,
             holidays: holidays
         }) };
@@ -319,15 +393,16 @@ var tariff_schedule = {
         return prices;
     },
 
-    // Weekend list applies on Saturdays, Sundays and holidays
+    // Weekend list applies on the selected days and holidays
     weekend_test: function(schedule) {
         var self = this;
         var holidays = {};
         (schedule.holidays || []).forEach(function(d) { holidays[d] = true; });
+        var days = {};
+        this.clean_days(schedule.days).forEach(function(d) { days[d] = true; });
         return function(d) {
             if (!schedule.weekend) return false;
-            var day = d.getDay();
-            return day === 0 || day === 6 || holidays[self.date_key(d)] === true;
+            return days[d.getDay()] === true || holidays[self.date_key(d)] === true;
         };
     },
 
@@ -396,6 +471,19 @@ tariff_schedule.component = {
         },
         has_weekend: function() {
             return !!this.schedule.weekend;
+        },
+        // Tab labels from the selected days
+        weekday_label: function() {
+            return tariff_schedule.days_label(tariff_schedule.other_days(this.schedule.days));
+        },
+        weekend_label: function() {
+            return tariff_schedule.days_label(this.schedule.days) + " & holidays";
+        },
+        week: function() {
+            var days = tariff_schedule.clean_days(this.schedule.days);
+            return tariff_schedule.week_order.map(function(d) {
+                return { day: d, label: tariff_schedule.day_labels[d], on: days.indexOf(d) !== -1 };
+            });
         },
         // Periods shown, weekday when there is no weekend list
         periods: function() {
@@ -515,6 +603,17 @@ tariff_schedule.component = {
             if (this.periods.length > 1) this.periods.splice(i, 1);
         },
         // Weekend list starts as a copy of the weekday list
+        // At least one day stays selected, and at least one day uses the weekday list
+        toggle_day: function(day) {
+            var days = tariff_schedule.clean_days(this.schedule.days);
+            var i = days.indexOf(day);
+            if (i === -1) {
+                if (days.length < 6) days.push(day);
+            } else if (days.length > 1) {
+                days.splice(i, 1);
+            }
+            this.schedule.days = tariff_schedule.clean_days(days);
+        },
         set_weekend: function(on) {
             this.schedule.weekend = on ? this.schedule.weekday.map(function(p) { return { start: p.start, price: p.price }; }) : null;
             if (on) this.tab = "weekend";
@@ -537,8 +636,8 @@ tariff_schedule.component = {
     <span class="sched-subhead">Schedule</span>
     <span class="small text-body-secondary" v-if="!has_weekend">Every day</span>
     <div class="btn-group app-segmented" v-else>
-      <button type="button" class="btn" :class="{active: tab == 'weekday'}" @click="tab = 'weekday'">Weekday</button>
-      <button type="button" class="btn" :class="{active: tab == 'weekend'}" @click="tab = 'weekend'">Weekend &amp; holidays</button>
+      <button type="button" class="btn" :class="{active: tab == 'weekday'}" @click="tab = 'weekday'">{{ weekday_label }}</button>
+      <button type="button" class="btn" :class="{active: tab == 'weekend'}" @click="tab = 'weekend'">{{ weekend_label }}</button>
     </div>
   </div>
 
@@ -588,7 +687,7 @@ tariff_schedule.component = {
     <tfoot v-if="show_totals" class="fw-bold">
       <tr>
         <td></td>
-        <td colspan="3" class="text-body-secondary">Total for this window<span v-if="has_weekend">, {{ tab == 'weekend' ? 'weekends and holidays' : 'weekdays' }}</span></td>
+        <td colspan="3" class="text-body-secondary">Total for this window<span v-if="has_weekend">, {{ tab == 'weekend' ? weekend_label : weekday_label }}</span></td>
         <td class="text-end text-nowrap">{{ format_kwh(grand_total.kwh) }} <span class="text-body-secondary small">kWh</span></td>
         <td class="text-end text-nowrap">{{ format_value(grand_total.value) }}</td>
       </tr>
@@ -596,6 +695,12 @@ tariff_schedule.component = {
   </table>
 
   <div v-if="tab == 'weekend' && has_weekend">
+    <template v-if="editing">
+      <div class="small text-body-secondary mb-1">Days</div>
+      <div class="btn-group btn-group-sm mb-2" role="group">
+        <button type="button" class="btn btn-outline-secondary" v-for="d in week" :key="d.day" :class="{active: d.on}" @click="toggle_day(d.day)">{{ d.label }}</button>
+      </div>
+    </template>
     <div class="small text-body-secondary mb-1">Public holidays</div>
     <div class="d-flex flex-wrap gap-2 mb-2">
       <span class="badge text-bg-secondary sched-holiday" v-for="(d, i) in schedule.holidays" :key="d">{{ format_date(d) }}
@@ -610,7 +715,7 @@ tariff_schedule.component = {
 
   <div class="form-check mt-2" v-if="editing">
     <input class="form-check-input" type="checkbox" :id="uid" :checked="has_weekend" @change="set_weekend($event.target.checked)">
-    <label class="form-check-label small" :for="uid">Different schedule at weekends and on public holidays</label>
+    <label class="form-check-label small" :for="uid">Different schedule on selected days and public holidays</label>
   </div>
 </div>`
 };

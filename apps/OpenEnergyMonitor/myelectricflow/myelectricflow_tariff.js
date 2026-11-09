@@ -860,7 +860,7 @@ function download_tariff_csv() {
 
 // Saved import or export schedule from config
 function saved_schedule(dir) {
-    return tariff_schedule.parse(config.app[dir + "_bands"].value, config.app[dir + "_wd"].value, config.app[dir + "_we"].value, config.app[dir + "_ph"].value);
+    return tariff_schedule.parse(config.app[dir + "_bands"].value, config.app[dir + "_wd"].value, config.app[dir + "_we"].value, config.app[dir + "_ph"].value, config.app[dir + "_days"].value);
 }
 
 // Directions that use a custom schedule
@@ -940,7 +940,7 @@ function schedule_editor_sync() {
                 },
                 apply_preset: function(name) {
                     var preset = tariff_schedule.presets[this.tab][name];
-                    if (preset) this.schedules[this.tab] = tariff_schedule.parse(preset.bands, preset.weekday, preset.weekend);
+                    if (preset) this.schedules[this.tab] = tariff_schedule.parse(preset.bands, preset.weekday, preset.weekend, "", preset.days);
                 },
                 save: function() {
                     var schedules = this.schedules;
@@ -950,6 +950,7 @@ function schedule_editor_sync() {
                         config.db[dir + "_wd"] = stored.weekday;
                         config.db[dir + "_we"] = stored.weekend;
                         config.db[dir + "_ph"] = stored.holidays;
+                        config.db[dir + "_days"] = stored.days;
                     });
                     if (!config.set()) {
                         this.status = "Could not save the schedule";
