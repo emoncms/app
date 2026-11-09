@@ -200,6 +200,114 @@ var tariff_schedule = {
         };
     },
 
+    // JSON text for a schedule, with labels given per period:
+    //
+    //   { "weekday": [{ "start": "00:30", "price": 8.5, "label": "OffPeak" }, ...],
+    //     "weekend": null or [...],
+    //     "holidays": ["2026-12-25"] }
+    to_json: function(schedule) {
+        var self = this;
+        var periods = function(list) {
+            return list.map(function(p) {
+                var out = { start: p.start, price: p.price };
+                var label = schedule.labels[self.price_key(p.price)];
+                if (label) out.label = label;
+                return out;
+            });
+        };
+        return JSON.stringify({
+            weekday: periods(schedule.weekday),
+            weekend: schedule.weekend ? periods(schedule.weekend) : null,
+            holidays: schedule.weekend ? schedule.holidays.slice() : []
+        }, null, 2);
+    },
+
+    // Schedule from JSON text in the to_json format.
+    // Returns { schedule: ... } or { error: "..." }.
+    from_json: function(text) {
+        var self = this;
+        var fail = function(msg) { return { error: msg }; };
+        var is_object = function(v) { return v !== null && typeof v === "object" && !Array.isArray(v); };
+
+        text = "" + (text || "");
+        if (!text.trim()) return fail("Nothing to import");
+        if (text.length > 20000) return fail("JSON is too long");
+
+        var data;
+        try { data = JSON.parse(text); }
+        catch (e) { return fail("Invalid JSON: " + e.message); }
+        if (!is_object(data)) return fail("JSON must be an object");
+
+        var allowed = ["weekday", "weekend", "holidays"];
+        for (var key in data) {
+            if (allowed.indexOf(key) === -1) return fail("Unknown key: " + key);
+        }
+
+        var labels = {};
+        var parse_periods = function(list, name) {
+            if (!Array.isArray(list)) return fail(name + " must be a list of periods");
+            if (!list.length) return fail(name + " must have at least one period");
+            if (list.length > 48) return fail(name + " has more than 48 periods");
+            var periods = [];
+            var used = {};
+            for (var i = 0; i < list.length; i++) {
+                var p = list[i], at = name + " period " + (i + 1);
+                if (!is_object(p)) return fail(at + " must be an object");
+                for (var k in p) {
+                    if (["start", "price", "label"].indexOf(k) === -1) return fail(at + ": unknown key " + k);
+                }
+                if (typeof p.start !== "string" || !/^([01]\d|2[0-3]):(00|30)$/.test(p.start)) {
+                    return fail(at + ": start must be a time on the half hour, e.g. 07:30");
+                }
+                if (used[p.start]) return fail(name + ": more than one period starts at " + p.start);
+                used[p.start] = true;
+                if (typeof p.price !== "number" || !isFinite(p.price)) return fail(at + ": price must be a number");
+                if (Math.abs(p.price) > 1000) return fail(at + ": price must be between -1000 and 1000");
+                if (p.label !== undefined) {
+                    if (typeof p.label !== "string") return fail(at + ": label must be text");
+                    if (p.label.length > 40) return fail(at + ": label is longer than 40 characters");
+                    var label = self.clean_label(p.label);
+                    var pk = self.price_key(p.price);
+                    if (label && labels[pk] === undefined) labels[pk] = label;
+                }
+                periods.push({ start: p.start, price: p.price });
+            }
+            return { periods: periods };
+        };
+
+        var weekday = parse_periods(data.weekday, "weekday");
+        if (weekday.error) return weekday;
+
+        var weekend = null;
+        if (data.weekend !== undefined && data.weekend !== null) {
+            weekend = parse_periods(data.weekend, "weekend");
+            if (weekend.error) return weekend;
+        }
+
+        var holidays = [];
+        if (data.holidays !== undefined && data.holidays !== null) {
+            if (!Array.isArray(data.holidays)) return fail("holidays must be a list of dates");
+            if (data.holidays.length > 1000) return fail("holidays has more than 1000 dates");
+            for (var j = 0; j < data.holidays.length; j++) {
+                var d = data.holidays[j];
+                var m = typeof d === "string" ? d.match(/^(\d{4})-(\d{2})-(\d{2})$/) : null;
+                var date = m ? new Date(+m[1], m[2] - 1, +m[3]) : null;
+                if (!date || date.getMonth() !== m[2] - 1 || date.getDate() !== +m[3]) {
+                    return fail("holiday " + (j + 1) + " must be a date as YYYY-MM-DD");
+                }
+                holidays.push(d);
+            }
+            if (holidays.length && !weekend) return fail("holidays need a weekend schedule");
+        }
+
+        return { schedule: this.clean({
+            weekday: weekday.periods,
+            weekend: weekend ? weekend.periods : null,
+            labels: labels,
+            holidays: holidays
+        }) };
+    },
+
     // Price for each of the 48 slots of a day
     slot_prices: function(periods) {
         var self = this;

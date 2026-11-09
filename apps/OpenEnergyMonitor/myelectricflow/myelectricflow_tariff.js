@@ -897,16 +897,47 @@ function schedule_editor_sync() {
                     sessionwrite: !!sessionwrite,
                     schedules: { import: saved_schedule("import"), export: saved_schedule("export") },
                     series: { import: null, export: null },
-                    status: ""
+                    status: "",
+                    json_open: false,
+                    json_text: "",
+                    json_error: ""
                 };
             },
             computed: {
                 // Presets for the direction shown
                 presets: function() { return Object.keys(tariff_schedule.presets[this.tab]); }
             },
+            watch: {
+                tab: function() { this.json_open = false; },
+                // JSON box follows table edits and presets
+                schedules: {
+                    deep: true,
+                    handler: function() {
+                        if (!this.json_open) return;
+                        this.json_text = tariff_schedule.to_json(this.schedules[this.tab]);
+                        this.json_error = "";
+                    }
+                }
+            },
             methods: {
                 edit: function() { this.editing = true; this.status = ""; },
-                cancel: function() { this.editing = false; schedule_editor_sync(); },
+                cancel: function() { this.editing = false; this.json_open = false; schedule_editor_sync(); },
+                // JSON panel opens with the schedule shown, ready to copy or replace
+                toggle_json: function() {
+                    this.json_open = !this.json_open;
+                    this.json_error = "";
+                    if (this.json_open) this.json_text = tariff_schedule.to_json(this.schedules[this.tab]);
+                },
+                apply_json: function() {
+                    var result = tariff_schedule.from_json(this.json_text);
+                    if (result.error) {
+                        this.json_error = result.error;
+                        return;
+                    }
+                    this.schedules[this.tab] = result.schedule;
+                    this.json_open = false;
+                    this.json_error = "";
+                },
                 apply_preset: function(name) {
                     var preset = tariff_schedule.presets[this.tab][name];
                     if (preset) this.schedules[this.tab] = tariff_schedule.parse(preset.bands, preset.weekday, preset.weekend);
@@ -925,6 +956,7 @@ function schedule_editor_sync() {
                         return;
                     }
                     this.editing = false;
+                    this.json_open = false;
                     schedule_editor_sync();
                     load_tariff_analysis(false, true);
                 }

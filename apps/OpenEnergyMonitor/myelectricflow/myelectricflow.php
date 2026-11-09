@@ -128,10 +128,20 @@ load_css("Modules/app/apps/OpenEnergyMonitor/myelectricflow/myelectricflow.css")
                                 <option value=""><?php echo tr('Preset') ?>...</option>
                                 <option v-for="name in presets" :key="name" :value="name">{{ name }}</option>
                             </select>
+                            <button class="btn btn-sm btn-outline-secondary" :class="{active: json_open}" @click="toggle_json">JSON</button>
                             <button class="btn btn-sm btn-primary" @click="save"><?php echo tr('Save') ?></button>
                             <button class="btn btn-sm btn-outline-secondary" @click="cancel"><?php echo tr('Cancel') ?></button>
                         </template>
                         <button v-else class="btn btn-sm btn-outline-primary" @click="edit"><?php echo tr('Edit') ?></button>
+                    </div>
+                </div>
+                <div class="mb-3" v-if="editing && json_open">
+                    <label class="form-label small text-body-secondary"><?php echo tr('Copy the schedule as JSON, or paste a schedule and apply it') ?></label>
+                    <textarea class="form-control font-monospace small" rows="10" spellcheck="false" v-model="json_text" @input="json_error = ''"></textarea>
+                    <div class="d-flex align-items-center gap-2 mt-2">
+                        <button class="btn btn-sm btn-primary" @click="apply_json"><?php echo tr('Apply') ?></button>
+                        <button class="btn btn-sm btn-outline-secondary" @click="json_open = false"><?php echo tr('Close') ?></button>
+                        <span class="small text-danger" v-if="json_error">{{ json_error }}</span>
                     </div>
                 </div>
                 <tariff-schedule :schedule="schedules[tab]" :editing="editing" unit="p/kWh" :series="series[tab]" :value_label="tab == 'import' ? 'Cost' : 'Earned'"></tariff-schedule>
