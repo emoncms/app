@@ -102,7 +102,7 @@ function process_weighted_averages($feed, $app, $start, $end) {
     $daily_kwh_elec_running = array();
     $daily_kwh_heat_running = array();
 
-    $starting_power = 200;
+    $error_elec_threshold = 500;
     for ($i=0; $i<$npoints; $i++) {
 
 
@@ -230,7 +230,7 @@ function process_weighted_averages($feed, $app, $start, $end) {
         }
 
         // DHW error detection
-        if ($elec > $starting_power && $heat == 0 && $dt > 1.5 && $flowT > 30) {
+        if ($elec > $error_elec_threshold && $heat == 0 && $dt > 1.5 && $flowT > 30) {
             $dhw_error_state = 1;            
             $dhw_error_time += $interval;
             $dhw_error_kwh += $elec * $power_to_kwh;
