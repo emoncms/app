@@ -214,12 +214,15 @@ class MyHeatPump {
         // Count days processed 
         $days_processed = 0;
 
+        // Feed files stay open across the days of this run
+        $reader = new MyHeatPumpFeedReader($this->feed);
+
         // Main processing loop
         $time = $start;
         while ($time<$end) {
-            
+
             // Get stats for the day
-            $stats = get_heatpump_stats($this->feed,$app,$time,$time+(3600*24),$starting_power,$this->user_timezone);
+            $stats = get_heatpump_stats($this->feed,$app,$time,$time+(3600*24),$starting_power,$this->user_timezone,$reader);
 
             // Translate for database field compatibility
             $row = $this->format_flat_keys($stats);
@@ -239,6 +242,8 @@ class MyHeatPump {
                 break;
             }
         }
+
+        $reader->close();
 
         // days left to process
         $days_left = $days - $days_processed;

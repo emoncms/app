@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__."/myheatpump_feed_reader.php";
+
 function process_error_data($data, $interval, $starting_power) {
     $total_error_time = 0;
     $min_error_time = 120;
@@ -140,7 +142,8 @@ function auto_detect_cooling($data, $interval) {
     return $data_heatpump_cooling;
 }
 
-function get_heatpump_stats($feed,$app,$start,$end,$starting_power,$timezone = 'Europe/London') {
+// $reader: a MyHeatPumpFeedReader to reuse over a run of days, or null for one for this call
+function get_heatpump_stats($feed,$app,$start,$end,$starting_power,$timezone = 'Europe/London',$reader = null) {
 
     // --------------------------------------------------------------------------------------------------------------    
     // Validate params
@@ -180,16 +183,21 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power,$timezone = '
     // Load data
     // --------------------------------------------------------------------------------------------------------------    
     $data = array();
-    
+
     $feeds = array("heatpump_elec","heatpump_flowT","heatpump_returnT","heatpump_outsideT","heatpump_roomT","heatpump_heat","heatpump_dhw","heatpump_error","heatpump_cooling","immersion_elec","boiler_heat");
-    
+
+    $own_reader = $reader === null;
+    if ($own_reader) $reader = new MyHeatPumpFeedReader($feed);
+
     foreach ($feeds as $key) {
         $data[$key] = false;
-        if (isset($app->config->$key) && $app->config->$key>0) {   
-            $data[$key] = $feed->get_data($app->config->$key,$start,$end-$interval,$interval,1,$timezone,"notime");
+        if (isset($app->config->$key) && $app->config->$key>0) {
+            $data[$key] = $reader->get_day($app->config->$key,$start,$end-$interval,$interval,$timezone);
             $data[$key] = remove_null_values($data[$key],$interval);
         }
     }
+
+    if ($own_reader) $reader->close();
 
     $errors = process_error_data($data, $interval, $starting_power);
 
@@ -321,8 +329,14 @@ function process_stats($data, $interval, $starting_power) {
         $cooling_enable = true;
     }
 
-    for ($z = 0; $z < count($data["heatpump_elec"]); $z++) {
-        $power = $data["heatpump_elec"][$z];
+    // Category of each sample: 0 not running, 1 running (no water/space split),
+    // 2 cooling, 3 water, 4 space
+    $elec = $data["heatpump_elec"];
+    $nz = count($elec);
+    $category = array();
+    $cool = array();
+    for ($z = 0; $z < $nz; $z++) {
+        $power = $elec[$z];
 
         $dhw = false;
         if ($dhw_enable) {
@@ -331,52 +345,65 @@ function process_stats($data, $interval, $starting_power) {
             }
         }
 
-        $cool = false;
+        $c = false;
         if ($cooling_enable && isset($data["heatpump_cooling"][$z])) {
-            $cool = $data["heatpump_cooling"][$z];
+            $c = $data["heatpump_cooling"][$z];
         }
+        $cool[$z] = (bool) $c;
 
-        foreach ($feed_options as $key => $props) {
-            if (isset($data["heatpump_".$key][$z])) {
-                $value = $data["heatpump_".$key][$z];
-                if ($value !== null) {
+        if ($power !== null && $power >= $starting_power) {
+            if ($c) $category[$z] = 2;
+            else if ($dhw_enable) $category[$z] = $dhw ? 3 : 4;
+            else $category[$z] = 1;
+        } else {
+            $category[$z] = 0;
+        }
+    }
 
-                    if ($cool && $key == "heat") {
-                        // cooling is negative heat
-                        // invert here so we can sum it with the heat
-                        $value = -1 * $value;
-                    }
+    // One feed at a time: each sum still adds the same samples in the same
+    // order as a sample by sample loop, so the results are the same
+    foreach ($feed_options as $key => $props) {
+        $values = $data["heatpump_".$key];
+        if (!is_array($values)) continue;
+        $invert = $key == "heat";
 
-                    $stats['combined'][$key]['sum'] += $value;
-                    $stats['combined'][$key]['count']++;
-                    //stats_min_max($stats, 'combined', $key, $value);
+        $sum = array(0, 0, 0, 0, 0);     // combined, running, cooling, water, space
+        $count = array(0, 0, 0, 0, 0);
 
-                    if ($power !== null && $power >= $starting_power) {
-                        $stats['running'][$key]['sum'] += $value;
-                        $stats['running'][$key]['count']++;
-                        //stats_min_max($stats, 'running', $key, $value);
+        for ($z = 0; $z < $nz; $z++) {
+            if (!isset($values[$z])) continue;      // also skips null
+            $value = $values[$z];
 
-                        if ($cool) {
-                            $stats['cooling'][$key]['sum'] += $value;
-                            $stats['cooling'][$key]['count']++;
-                            //stats_min_max($stats, 'cooling', $key, $value);
-                        } else {
-                            if ($dhw_enable) {
-                                if ($dhw) {
-                                    $stats['water'][$key]['sum'] += $value;
-                                    $stats['water'][$key]['count']++;
-                                    //stats_min_max($stats, 'water', $key, $value);
-                                } else {
-                                    $stats['space'][$key]['sum'] += $value;
-                                    $stats['space'][$key]['count']++;
-                                    //stats_min_max($stats, 'space', $key, $value);
-                                }
-                            }
-                        }
-                    }
+            if ($invert && $cool[$z]) {
+                // cooling is negative heat
+                // invert here so we can sum it with the heat
+                $value = -1 * $value;
+            }
+
+            $sum[0] += $value;
+            $count[0]++;
+
+            $cat = $category[$z];
+            if ($cat) {
+                $sum[1] += $value;
+                $count[1]++;
+                if ($cat > 1) {
+                    $sum[$cat] += $value;
+                    $count[$cat]++;
                 }
             }
         }
+
+        $stats['combined'][$key]['sum'] += $sum[0];
+        $stats['combined'][$key]['count'] += $count[0];
+        $stats['running'][$key]['sum'] += $sum[1];
+        $stats['running'][$key]['count'] += $count[1];
+        $stats['cooling'][$key]['sum'] += $sum[2];
+        $stats['cooling'][$key]['count'] += $count[2];
+        $stats['water'][$key]['sum'] += $sum[3];
+        $stats['water'][$key]['count'] += $count[3];
+        $stats['space'][$key]['sum'] += $sum[4];
+        $stats['space'][$key]['count'] += $count[4];
     }
 
     foreach ($stats as $x => $val) {
@@ -445,6 +472,9 @@ function stats_min_max(&$stats, $category, $key, $value) {
 
 // Remove null values from feed data
 function remove_null_values($data, $interval) {
+    // Nothing to fill on a day with no gaps (in_array runs in C)
+    if (is_array($data) && !in_array(null, $data, true)) return $data;
+
     $last_valid_pos = 0;
     for ($pos = 0; $pos < count($data); $pos++) {
         if (isset($data[$pos]) && $data[$pos] !== null) {
