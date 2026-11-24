@@ -88,7 +88,11 @@ class MyHeatPumpFeedReader {
         $native = unpack("f*", $raw);       // 1 based
 
         if ($fi == $interval) {
-            // One value per slot, in order
+            // One value per slot, in order. A whole request with no NaN (a NaN
+            // makes the sum NaN, worked out in C) is the file's values as they are
+            if ($k0 == 0 && $k1 == $count - 1 && !is_nan(array_sum($native))) {
+                return array_values($native);
+            }
             $j = 1;
             for ($k = $k0; $k <= $k1; $k++) {
                 $v = $native[$j++];

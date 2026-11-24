@@ -38,16 +38,13 @@ function process_error_data($data, $interval, $starting_power) {
             $error_time = 0;
             $error_kwh = 0;
 
-            
+            $H = $data["heatpump_heat"];
+            $F = $data["heatpump_flowT"];
+            $R = $data["heatpump_returnT"];
 
             foreach ($data["heatpump_elec"] as $z => $elec) {
-                $heat = $data["heatpump_heat"][$z];
-                $flowT = $data["heatpump_flowT"][$z];
-                $returnT = $data["heatpump_returnT"][$z];
-
-                $DT = $flowT - $returnT;
-
-                if ($elec > $starting_power && $heat == 0 && $DT > 1.5 && $flowT > 30) {
+                // Most samples fail on elec, so heat and temperatures are only read past it
+                if ($elec > $starting_power && $H[$z] == 0 && $F[$z] - $R[$z] > 1.5 && $F[$z] > 30) {
                     $error_state = 1;
                     
                     $error_time += $interval;
@@ -333,28 +330,35 @@ function process_stats($data, $interval, $starting_power) {
     // 2 cooling, 3 water, 4 space
     $elec = $data["heatpump_elec"];
     $nz = count($elec);
+    $D = $dhw_enable ? $data["heatpump_dhw"] : null;
+    $C = $cooling_enable ? $data["heatpump_cooling"] : null;
     $category = array();
     $cool = array();
+    $sets = array(1 => array(), 2 => array(), 3 => array(), 4 => array());   // samples in each category, as keys
+    $cool_samples = array();
     for ($z = 0; $z < $nz; $z++) {
         $power = $elec[$z];
 
         $dhw = false;
         if ($dhw_enable) {
-            if (isset($data["heatpump_dhw"][$z])) {
-                $dhw = $data["heatpump_dhw"][$z];
+            if (isset($D[$z])) {
+                $dhw = $D[$z];
             }
         }
 
         $c = false;
-        if ($cooling_enable && isset($data["heatpump_cooling"][$z])) {
-            $c = $data["heatpump_cooling"][$z];
+        if ($cooling_enable && isset($C[$z])) {
+            $c = $C[$z];
         }
         $cool[$z] = (bool) $c;
+        if ($c) $cool_samples[] = $z;
 
         if ($power !== null && $power >= $starting_power) {
             if ($c) $category[$z] = 2;
             else if ($dhw_enable) $category[$z] = $dhw ? 3 : 4;
             else $category[$z] = 1;
+            $sets[1][$z] = true;
+            if ($category[$z] > 1) $sets[$category[$z]][$z] = true;
         } else {
             $category[$z] = 0;
         }
@@ -365,14 +369,32 @@ function process_stats($data, $interval, $starting_power) {
     foreach ($feed_options as $key => $props) {
         $values = $data["heatpump_".$key];
         if (!is_array($values)) continue;
-        $invert = $key == "heat";
+        $invert = $key == "heat" && $cooling_enable;
 
         $sum = array(0, 0, 0, 0, 0);     // combined, running, cooling, water, space
         $count = array(0, 0, 0, 0, 0);
 
-        for ($z = 0; $z < $nz; $z++) {
-            if (!isset($values[$z])) continue;      // also skips null
-            $value = $values[$z];
+        // A feed with one value per elec sample, the usual case, is summed in C:
+        // array_sum adds left to right from 0 as += does, and a null adds 0,
+        // which leaves the sum as it is. array_intersect_key keeps the order
+        if (count($values) == $nz && $values === array_values($values)) {
+            if ($invert) {
+                foreach ($cool_samples as $z) {
+                    if ($values[$z] !== null) $values[$z] = -1 * $values[$z];
+                }
+            }
+            $sum[0] = array_sum($values);
+            $count[0] = $nz - count(array_keys($values, null, true));
+            for ($cat = 1; $cat <= 4; $cat++) {
+                if (!$sets[$cat]) continue;
+                $subset = array_intersect_key($values, $sets[$cat]);
+                $sum[$cat] = array_sum($subset);
+                $count[$cat] = count($subset) - count(array_keys($subset, null, true));
+            }
+        } else foreach ($values as $z => $value) {
+            // Samples 0 to $nz - 1, as elec, in order
+            if ($value === null || !is_int($z)) continue;
+            if ($z >= $nz) break;
 
             if ($invert && $cool[$z]) {
                 // cooling is negative heat
@@ -471,20 +493,28 @@ function stats_min_max(&$stats, $category, $key, $value) {
 
 
 // Remove null values from feed data
+// A run of nulls is filled with the value before it when the next valid value
+// comes less than 900 s after that one. Runs at the start or end of the data,
+// with no valid value before or after them, are left as they are. The null
+// positions are found in C (array_keys) and only the runs are stepped through.
 function remove_null_values($data, $interval) {
-    // Nothing to fill on a day with no gaps (in_array runs in C)
-    if (is_array($data) && !in_array(null, $data, true)) return $data;
-
-    $last_valid_pos = 0;
-    for ($pos = 0; $pos < count($data); $pos++) {
-        if (isset($data[$pos]) && $data[$pos] !== null) {
-            $null_time = ($pos - $last_valid_pos) * $interval;
-            if ($null_time < 900) {
-                for ($x = $last_valid_pos + 1; $x < $pos; $x++) {
-                    $data[$x] = $data[$last_valid_pos];
-                }
+    $n = count($data);
+    $nulls = array_keys($data, null, true);
+    $m = count($nulls);
+    $i = 0;
+    while ($i < $m) {
+        $a = $nulls[$i];
+        $b = $a;
+        while ($i + 1 < $m && $nulls[$i + 1] === $b + 1) {
+            $i++;
+            $b++;
+        }
+        $i++;
+        if ($a > 0 && $b + 1 < $n && ($b + 1 - ($a - 1)) * $interval < 900) {
+            $value = $data[$a - 1];
+            for ($x = $a; $x <= $b; $x++) {
+                $data[$x] = $value;
             }
-            $last_valid_pos = $pos;
         }
     }
     return $data;
@@ -496,13 +526,8 @@ function get_quality($data) {
     if ($count<1) return 0;
 
     if (!array_key_exists(0, $data)) return 0;
-    
-    $null_count = 0;
-    for ($pos = 0; $pos < $count; $pos++) {
-        if (is_null($data[$pos])) {
-            $null_count ++;
-        }
-    }
+
+    $null_count = count(array_keys($data, null, true));
     $quality = 100*(1-($null_count / $count));
     return number_format($quality,3,'.','')*1;
 }
@@ -542,23 +567,25 @@ function calculate_window_cops($data, $interval, $starting_power) {
 
     $power_to_kwh = 1.0 * $interval / 3600000.0;
 
-    foreach ($data["heatpump_elec"] as $z => $elec_data) {
-        $elec = $data["heatpump_elec"][$z];
-        $heat = $data["heatpump_heat"][$z];
+    $H = $data["heatpump_heat"];
+    $D = $dhw_enable ? $data["heatpump_dhw"] : null;
+    $C = $cooling_enable ? $data["heatpump_cooling"] : null;
 
-        $dhw = false;
-        if ($dhw_enable) {
-            if (isset($data["heatpump_dhw"][$z])) {
-                $dhw = $data["heatpump_dhw"][$z];
-            }
-        }
+    // Sums held in locals in the loop, in the same order: combined, running,
+    // cooling, water, space
+    $ek = array(0, 0, 0, 0, 0);
+    $hk = array(0, 0, 0, 0, 0);
+    $dl = array(0, 0, 0, 0, 0);
 
-        $cool = false;
-        if ($cooling_enable && isset($data["heatpump_cooling"][$z])) {
-            $cool = $data["heatpump_cooling"][$z];
-        }
+    foreach ($data["heatpump_elec"] as $z => $elec) {
+        $heat = $H[$z];
 
         if ($elec !== null && $heat !== null && $elec>=0) {
+
+            $cool = false;
+            if ($cooling_enable && isset($C[$z])) {
+                $cool = $C[$z];
+            }
 
             if ($cool) {
                 // cooling is negative heat
@@ -566,34 +593,38 @@ function calculate_window_cops($data, $interval, $starting_power) {
                 $heat = -1 * $heat;
             }
 
-            $cop_stats["combined"]["elec_kwh"] += $elec * $power_to_kwh;
-            $cop_stats["combined"]["heat_kwh"] += $heat * $power_to_kwh;
-            $cop_stats["combined"]["data_length"] += $interval;
-            
-            if ($elec >= $starting_power) {
-                $cop_stats["running"]["elec_kwh"] += $elec * $power_to_kwh;
-                $cop_stats["running"]["heat_kwh"] += $heat * $power_to_kwh;
-                $cop_stats["running"]["data_length"] += $interval;
+            $e = $elec * $power_to_kwh;
+            $h = $heat * $power_to_kwh;
 
+            $ek[0] += $e;
+            $hk[0] += $h;
+            $dl[0] += $interval;
+
+            if ($elec >= $starting_power) {
+                $ek[1] += $e;
+                $hk[1] += $h;
+                $dl[1] += $interval;
+
+                $cat = 0;
                 if ($cool) {
-                    $cop_stats["cooling"]["elec_kwh"] += $elec * $power_to_kwh;
-                    $cop_stats["cooling"]["heat_kwh"] += $heat * $power_to_kwh;
-                    $cop_stats["cooling"]["data_length"] += $interval;
-                } else {
-                    if ($dhw_enable) {
-                        if ($dhw) {
-                            $cop_stats["water"]["elec_kwh"] += $elec * $power_to_kwh;
-                            $cop_stats["water"]["heat_kwh"] += $heat * $power_to_kwh;
-                            $cop_stats["water"]["data_length"] += $interval;
-                        } else {
-                            $cop_stats["space"]["elec_kwh"] += $elec * $power_to_kwh;
-                            $cop_stats["space"]["heat_kwh"] += $heat * $power_to_kwh;
-                            $cop_stats["space"]["data_length"] += $interval;
-                        }
-                    }
+                    $cat = 2;
+                } else if ($dhw_enable) {
+                    $cat = (isset($D[$z]) && $D[$z]) ? 3 : 4;
+                }
+                if ($cat) {
+                    $ek[$cat] += $e;
+                    $hk[$cat] += $h;
+                    $dl[$cat] += $interval;
                 }
             }
         }
+    }
+
+    $names = array("combined", "running", "cooling", "water", "space");
+    foreach ($names as $i => $category) {
+        $cop_stats[$category]["elec_kwh"] += $ek[$i];
+        $cop_stats[$category]["heat_kwh"] += $hk[$i];
+        $cop_stats[$category]["data_length"] += $dl[$i];
     }
 
     foreach ($cop_stats as $category => $stats) {
@@ -656,36 +687,36 @@ function carnot_simulator($data, $starting_power) {
 
     $ambientT = null;
 
-    foreach ($data["heatpump_elec"] as $z => $value) {
-        $elec = $data["heatpump_elec"][$z];
-        $heat = $data["heatpump_heat"][$z];
-        $flowT = $data["heatpump_flowT"][$z];
-        $returnT = $data["heatpump_returnT"][$z];
-        
-        if (isset($data["heatpump_outsideT"][$z]) && $data["heatpump_outsideT"][$z] !== null) {
-            $ambientT = $data["heatpump_outsideT"][$z];
-        }
-        
-        $cool = false;
-        if ($cooling_enable && isset($data["heatpump_cooling"][$z])) {
-            $cool = $data["heatpump_cooling"][$z];
+    $H = $data["heatpump_heat"];
+    $F = $data["heatpump_flowT"];
+    $R = $data["heatpump_returnT"];
+    $O = $data["heatpump_outsideT"];
+    $D = $dhw_enable ? $data["heatpump_dhw"] : null;
+    $C = $cooling_enable ? $data["heatpump_cooling"] : null;
+
+    // Heat output only needs to be present: the simulated heat comes from elec
+    foreach ($data["heatpump_elec"] as $z => $elec) {
+        $flowT = $F[$z];
+        $returnT = $R[$z];
+
+        if (isset($O[$z])) {
+            $ambientT = $O[$z];
         }
 
         // if any of the values are null, skip this iteration
-        if ($elec === null || $heat === null || $flowT === null || $returnT === null || $ambientT === null) {
+        if ($elec === null || $H[$z] === null || $flowT === null || $returnT === null || $ambientT === null) {
             continue;
         }
-        
-        if ($cool) {
-            // cooling is negative heat
-            // invert here so we can sum it with the heat
-            $heat = -1 * $heat;
+
+        $cool = false;
+        if ($cooling_enable && isset($C[$z])) {
+            $cool = $C[$z];
         }
-        
+
         $dhw = false;
         if ($dhw_enable) {
-            if (isset($data["heatpump_dhw"][$z])) {
-                $dhw = $data["heatpump_dhw"][$z];
+            if (isset($D[$z])) {
+                $dhw = $D[$z];
             }
         }
 
@@ -764,8 +795,7 @@ function process_defrosts($data, $interval) {
     
     $total_negative_heat_kwh = 0;
     if (isset($data["heatpump_heat"]) && is_array($data["heatpump_heat"])) {
-        foreach ($data["heatpump_heat"] as $z => $value) {
-            $heat = $data["heatpump_heat"][$z];
+        foreach ($data["heatpump_heat"] as $heat) {
             if ($heat !== null && $heat < 0) {
                 $total_negative_heat_kwh += -1 * $heat * $power_to_kwh;
             }
@@ -781,9 +811,7 @@ function compressor_starts($data, $interval, $starting_power) {
     $starts = 0;
     $time_elapsed = 0;
     
-    foreach ($data["heatpump_elec"] as $z => $value) {
-        $elec = $data["heatpump_elec"][$z];
-            
+    foreach ($data["heatpump_elec"] as $elec) {
         if ($elec !== null) {
             $last_state = $state;
             
@@ -924,27 +952,27 @@ function process_weighted_average($data, $interval) {
         $outsideT_available = true;
     }
 
-    foreach ($data["heatpump_elec"] as $z => $value) {
-        $elec = $data["heatpump_elec"][$z];
-        $heat = $data["heatpump_heat"][$z];
-        $flowT = $data["heatpump_flowT"][$z];
-        $returnT = $data["heatpump_returnT"][$z];
-        $outsideT = null;
+    // With no outside temperature every sample is skipped
+    $H =$data["heatpump_heat"];
+    $F = $data["heatpump_flowT"];
+    $R = $data["heatpump_returnT"];
+    $O = $outsideT_available ? $data["heatpump_outsideT"] : array();
+    $C = $cooling_enable ? $data["heatpump_cooling"] : null;
 
-        $cool = false;
-        if ($cooling_enable && isset($data["heatpump_cooling"][$z])) {
-            $cool = $data["heatpump_cooling"][$z];
-        }
-
-        if ($outsideT_available) {
-            if (isset($data["heatpump_outsideT"][$z])) {
-                $outsideT = $data["heatpump_outsideT"][$z];
-            }
-        }
+    foreach ($data["heatpump_elec"] as $z => $elec) {
+        $heat = $H[$z];
+        $flowT = $F[$z];
+        $returnT = $R[$z];
+        $outsideT = isset($O[$z]) ? $O[$z] : null;
 
         // if any of the values are null, skip this iteration
         if ($elec === null || $heat === null || $flowT === null || $returnT === null || $outsideT === null) {
             continue;
+        }
+
+        $cool = false;
+        if ($cooling_enable && isset($C[$z])) {
+            $cool = $C[$z];
         }
 
         if ($cool) {
@@ -969,18 +997,6 @@ function process_weighted_average($data, $interval) {
             if ($carnot_dt>0) {
                 $ideal_carnot = $condensor / $carnot_dt;
             }
-        }
-    
-        // Calculate COP
-        $cop = 0;
-        if ($elec>0 && $heat>0) {
-            $cop = $heat / $elec;
-        }
-
-        // Calculate % of carnot efficiency
-        $prc_carnot = 0;
-        if ($ideal_carnot>0) {
-            $prc_carnot = $cop / $ideal_carnot;
         }
 
         $flowT_weighted_sum += $heat * $flowT * $power_to_kwh;
