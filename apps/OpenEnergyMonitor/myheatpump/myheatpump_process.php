@@ -194,8 +194,6 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power,$timezone = '
         }
     }
 
-    if ($own_reader) $reader->close();
-
     $errors = process_error_data($data, $interval, $starting_power);
 
     if ($data["heatpump_cooling"]==false && isset($app->config->auto_detect_cooling) && $app->config->auto_detect_cooling) {
@@ -240,12 +238,14 @@ function get_heatpump_stats($feed,$app,$start,$end,$starting_power,$timezone = '
     
     $elec_kwh = 0;
     if (isset($app->config->heatpump_elec_kwh)) {
-        $elec_kwh = get_cumulative_kwh($feed,$app->config->heatpump_elec_kwh,$start,$end);
+        $elec_kwh = get_cumulative_kwh($feed,$app->config->heatpump_elec_kwh,$start,$end,$reader);
     }
     $heat_kwh = 0;
     if (isset($app->config->heatpump_heat_kwh)) {
-        $heat_kwh = get_cumulative_kwh($feed,$app->config->heatpump_heat_kwh,$start,$end);
+        $heat_kwh = get_cumulative_kwh($feed,$app->config->heatpump_heat_kwh,$start,$end,$reader);
     }
+
+    if ($own_reader) $reader->close();
     
     $cop = null;
     if ($elec_kwh>0) {
@@ -841,21 +841,29 @@ function compressor_starts($data, $interval, $starting_power) {
     );
 }
 
-function get_cumulative_kwh($feed,$feedid,$start,$end) {
-    
-    $meta = $feed->get_meta($feedid);
+// $reader: a MyHeatPumpFeedReader, which reads PHPFina feeds directly; other
+// feeds, or no reader, go through $feed
+function get_cumulative_kwh($feed,$feedid,$start,$end,$reader = null) {
+
+    $direct = $reader !== null ? $reader->meta($feedid) : false;
+    $meta = $direct !== false ? $direct : $feed->get_meta($feedid);
     if ($meta->start_time>$start) {
         $start = $meta->start_time;
     }
     if ($meta->end_time<$end) {
         $end = $meta->end_time;
     }
-    
+
     if ($end<$start) return false;
-    
-    
-    $kwh_start = $feed->get_value($feedid,$start);
-    $kwh_end = $feed->get_value($feedid,$end);
+
+    // A time of 0 asks get_value for the last value, so that stays with $feed
+    if ($direct !== false && $start && $end) {
+        $kwh_start = $reader->value_at($feedid,$start,$direct);
+        $kwh_end = $reader->value_at($feedid,$end,$direct);
+    } else {
+        $kwh_start = $feed->get_value($feedid,$start);
+        $kwh_end = $feed->get_value($feedid,$end);
+    }
 
     return $kwh_end - $kwh_start;
 }

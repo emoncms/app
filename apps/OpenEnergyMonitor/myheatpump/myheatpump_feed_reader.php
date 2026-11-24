@@ -41,9 +41,7 @@ class MyHeatPumpFeedReader {
             return $this->feed->get_data($feedid, $start, $end, $interval, 1, $timezone, "notime");
         }
 
-        // Points in the file now: it grows as data comes in
-        $stat = fstat($f['fh']);
-        $npoints = (int) floor($stat['size'] / 4.0);
+        $npoints = $this->npoints($f);
         if ($npoints == 0) {
             return $this->feed->get_data($feedid, $start, $end, $interval, 1, $timezone, "notime");
         }
@@ -58,6 +56,36 @@ class MyHeatPumpFeedReader {
         } else {
             return $this->read_averages($f['fh'], $fi, $fs, $npoints, $start, $interval, $count);
         }
+    }
+
+    // Meta data as PHPFina::get_meta works it out (interval, start_time,
+    // npoints, end_time = time of the last point), or false where the feed is
+    // not read directly
+    public function meta($feedid) {
+        $f = $this->open((int) $feedid);
+        if ($f === false) return false;
+        $npoints = $this->npoints($f);
+        if ($npoints == 0) return false;
+
+        $meta = new stdClass();
+        $meta->interval = $f['interval'];
+        $meta->start_time = $f['start_time'];
+        $meta->npoints = $npoints;
+        $meta->end_time = $f['start_time'] + $f['interval'] * ($npoints - 1);
+        return $meta;
+    }
+
+    // The value at $time as PHPFina::get_value returns it: the nearest point
+    // (rounded, not floored), null for NaN or a time outside the data. $meta
+    // from meta() for the same feed
+    public function value_at($feedid, $time, $meta) {
+        $f = $this->feeds[(int) $feedid];
+        $pos = round(($time - $meta->start_time) / $meta->interval);
+        if ($pos < 0 || $pos >= $meta->npoints) return null;
+        fseek($f['fh'], $pos * 4);
+        $val = unpack("f", fread($f['fh'], 4));
+        if (is_nan($val[1])) return null;
+        return (float) $val[1];
     }
 
     public function close() {
@@ -134,6 +162,12 @@ class MyHeatPumpFeedReader {
             if ($n > 0) $out[$k] = 1.0 * $sum / $n;
         }
         return $out;
+    }
+
+    // Points in the file now: it grows as data comes in
+    private function npoints($f) {
+        $stat = fstat($f['fh']);
+        return (int) floor($stat['size'] / 4.0);
     }
 
     private function clamp_pos($pos, $npoints) {
