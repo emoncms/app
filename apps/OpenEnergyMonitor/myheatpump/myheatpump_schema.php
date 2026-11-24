@@ -3,7 +3,10 @@
 $schema['myheatpump_daily_stats'] = array(
     
     // App ID (On heatpumpmonitor.org this is the system ID)
-    'id' => array('type' => 'int(11)'),
+    // Indexed: rows are found and replaced by app and day. The schema setup
+    // makes single column indexes only; an existing index that includes id,
+    // such as idx_id_timestamp (id, timestamp), already counts
+    'id' => array('type' => 'int(11)', 'Index' => true),
     
     // Start of day timestamp
     'timestamp' => array('type' => 'int(11)'),
