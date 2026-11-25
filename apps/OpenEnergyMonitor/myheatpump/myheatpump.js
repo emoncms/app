@@ -104,7 +104,7 @@ var bargraph_end = 0;
 var last_bargraph_start = 0;
 var last_bargraph_end = 0;
 var bargraph_mode = "combined";
-var bargraph_alltime = false;
+var bargraph_period = false; // days or "all", false after zoom or pan
 
 var realtime_cop_div_mode = "30min";
 
@@ -194,11 +194,11 @@ function show() {
     if (config_start_date > alltime_start_time) {
         alltime_start_time = config_start_date;
         var d = new Date(alltime_start_time * 1000);
-        $("#all_time_history_title").html("Total since " + d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear());
     } else {
         var d = new Date(start_time * 1000);
-        $("#all_time_history_title").html("Total since " + d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear());
     }
+    totals_since_title = "Total since " + d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear();
+    $("#all_time_history_title").html(totals_since_title);
 
     // Load elec start here after start_time may have been modified by heat start time
     if (elec_enabled) {
@@ -271,7 +271,8 @@ function show() {
 
         if (urlParams.start != undefined) start = urlParams.start * 1000;
         if (urlParams.end != undefined) end = urlParams.end * 1000;
-        
+        if (urlParams.start == undefined && urlParams.end == undefined) bargraph_period = "30";
+
         bargraph_load(start, end);
         bargraph_draw();
 
@@ -291,36 +292,120 @@ function show() {
     updater();
     updaterinst = setInterval(updater, 10000);
 
-    // Load totals from pre-processed daily data
+    // Load all time and last 365 day totals from pre-processed daily data
+    totals = { all: null, last365: null };
+    $("#totals-tools").toggle(!!config.app.enable_process_daily.value);
     if (config.app.enable_process_daily.value) {
-        $.ajax({
-            url: path + "app/gettotals",
-            data: { id: config.id, apikey: apikey },
-            async: true,
-            dataType: "json",
-            success: function (result) {
-                if (result.combined_elec_kwh != undefined) {
-                    $("#total_elec").html(Math.round(result.combined_elec_kwh));
-                    $("#total_heat").html(Math.round(result.combined_heat_kwh));
-                    if (result.combined_cop != undefined && result.combined_cop != null) {
-                        $("#total_cop").html(result.combined_cop.toFixed(2));
-                    } else {
-                        $("#total_cop").html("-");
+        var now_s = Math.floor(now / 1000);
+        var periods = {
+            all: {},
+            last365: { start: now_s - 365 * 86400, end: now_s }
+        };
+        Object.keys(periods).forEach(function (period) {
+            $.ajax({
+                url: path + "app/gettotals",
+                data: $.extend({ id: config.id, apikey: apikey }, periods[period]),
+                async: true,
+                dataType: "json",
+                success: function (result) {
+                    if (result && result.combined_elec_kwh != undefined) {
+                        totals[period] = result;
+                        alltime_totals_draw();
                     }
-                    
                 }
-
-                // if result includes boiler show this
-                if (boiler_enabled && result.boiler_kwh != undefined) {
-                    $("#total_boiler").html(Math.round(result.boiler_kwh));
-                    $("#boiler_total_bound").show();
-                }
-            }
+            });
         });
     }
 
     $(".ajax-loader").hide();
 }
+
+// All time and last 365 day totals from the daily pre-processed data.
+// The single row follows the bar graph mode, By mode shows every mode.
+var totals = { all: null, last365: null };
+var totals_period = "all";
+var totals_since_title = "All time history";
+var alltime_mode_names = { running: "When running", space: "Space heating", water: "Water heating", cooling: "Cooling" };
+
+function alltime_totals_draw() {
+    var t = totals[totals_period];
+    $("#all_time_history_title").html(totals_period == "last365" ? "Last 365 days" : totals_since_title);
+    $(".total-period").each(function () {
+        $(this).toggleClass("active", $(this).attr("period") == totals_period);
+    });
+    if (!t) return;
+
+    var mode = t[bargraph_mode + "_elec_kwh"] != undefined ? bargraph_mode : "combined";
+    var elec = t[mode + "_elec_kwh"];
+    var heat = t[mode + "_heat_kwh"];
+    var cop = t[mode + "_cop"];
+
+    $("#total_elec").html(elec != null ? Math.round(elec) : "-");
+    $("#total_heat").html(heat != null ? Math.round(heat) : "-");
+    $("#total_cop").html(cop != null ? cop.toFixed(2) : "-");
+    $("#total_mode").html(alltime_mode_names[mode] ? "&middot; " + alltime_mode_names[mode] : "");
+
+    // Boiler total is for the whole system, shown with All
+    var show_boiler = boiler_enabled && mode == "combined" && t.boiler_kwh != undefined;
+    if (show_boiler) $("#total_boiler").html(Math.round(t.boiler_kwh));
+    $("#boiler_total_bound").toggle(show_boiler);
+
+    totals_breakdown_draw(t);
+}
+
+// By mode: totals for All, Space heating, Water heating and Cooling in one table,
+// in place of the single mode row. Icons and colours as the mode buttons and COP tiles.
+var totals_breakdown = false;
+var totals_breakdown_modes = [
+    { key: "combined", name: "All", icon: "svg-icon-hpmon", color: "var(--ec-primary-darker)" },
+    { key: "space", name: "Space heating", icon: "svg-icon-radiator", color: "#f6a801" },
+    { key: "water", name: "Water heating", icon: "svg-icon-shower", color: "#014656" },
+    { key: "cooling", name: "Cooling", icon: "svg-icon-snowflake", color: "#66b0ff" }
+];
+
+function totals_breakdown_draw(t) {
+    // Split into space and water heating needs the daily pre-processed split
+    var space_heat = t.space_heat_kwh || 0;
+    var water_heat = t.water_heat_kwh || 0;
+    var has_split = water_heat > 0 && space_heat > 0;
+    var has_cooling = (t.cooling_heat_kwh || 0) > 0;
+
+    $("#totals-breakdown-bound").toggle(has_split || has_cooling);
+    var show = totals_breakdown && (has_split || has_cooling);
+    $("#totals-breakdown").toggle(show);
+    $("#totals-single").toggle(!show);
+    $("#total_mode").toggle(!show);
+    $("#totals-breakdown-toggle").toggleClass("active", show)
+        .find("i").attr("class", show ? "svg-icon-chevron-up" : "svg-icon-chevron-down");
+    if (!show) return;
+
+    var fmt = function (v, dp) { return v != null ? v.toFixed(dp) : "-"; };
+    var rows = "";
+    totals_breakdown_modes.forEach(function (m) {
+        if ((m.key == "space" || m.key == "water") && !has_split) return;
+        if (m.key == "cooling" && !has_cooling) return;
+        var heat = t[m.key + "_heat_kwh"];
+        var share = (m.key == "space" || m.key == "water") ? fmt(100 * heat / (space_heat + water_heat), 0) + "<span class='power-unit-static'>%</span>" : "";
+        rows += "<tr>" +
+            "<td class='hp-totals-mode' style='color:" + m.color + "' title='" + m.name + "'><i class='" + m.icon + "'></i><span>" + m.name + "</span></td>" +
+            "<td class='text-hp-elec'>" + fmt(t[m.key + "_elec_kwh"], 0) + "<span class='power-unit-static'>kWh</span></td>" +
+            "<td class='text-hp-heat'>" + fmt(heat, 0) + "<span class='power-unit-static'>kWh</span></td>" +
+            "<td class='text-hp-cop'>" + fmt(t[m.key + "_cop"], 2) + "</td>" +
+            "<td class='hp-totals-share'>" + share + "</td>" +
+            "</tr>";
+    });
+    $("#totals-breakdown-rows").html(rows);
+}
+
+$(".total-period").click(function () {
+    totals_period = $(this).attr("period");
+    alltime_totals_draw();
+});
+
+$("#totals-breakdown-toggle").click(function () {
+    totals_breakdown = !totals_breakdown;
+    alltime_totals_draw();
+});
 
 function clear() {
     clearInterval(updaterinst);
@@ -533,8 +618,8 @@ function set_url_view_params(mode, start, end) {
 // TIME BAR
 // -------------------------------------------------------------------------------
 
-// Time bar after a redraw. Daily bars use their own window. All ranges stay
-// listed, the range select switches view where needed.
+// Time bar after a redraw. Daily bars use their own window. Period and time
+// buttons are marked active when they match the window.
 function hp_timebar_sync() {
     var daily = viewmode == "bargraph";
     if (daily) {
@@ -542,32 +627,39 @@ function hp_timebar_sync() {
         view.end = bargraph_end;
     }
     timebar_update(daily);
-    timebar_hide("option:not(#time-custom)", false);
-    if (daily && bargraph_alltime) $("#time-select").val("all");
-    $(".viewhistory").toggleClass("active", daily);
-    $(".viewpower").toggleClass("active", !daily);
+    $(".hp-period").each(function () {
+        $(this).toggleClass("active", daily && $(this).attr("days") == bargraph_period);
+    });
+    var hours = (view.end - view.start) / HOUR;
+    $(".hp-time").each(function () {
+        var h = $(this).attr("hours");
+        $(this).toggleClass("active", !daily && Math.abs(h - hours) <= h * 0.05);
+    });
     $(".bargraph-navigation").toggle(daily);
+    $(".powergraph-navigation").toggle(!daily);
     $("#heatdemand-toggle").toggle(daily);
     $("#heatdemand-block").toggle(daily && $("#heatdemand-toggle").html() == "HIDE HEAT DEMAND");
 }
 
-// Range select: under a week opens the power view, over a month the daily
-// bars, a week or a month keeps the current view
-$("#time-select").change(function () {
-    var value = $(this).val();
-    if (!value) return;
-    var daily = value == "all" || value > 720 || (value >= 168 && viewmode == "bargraph");
+// Daily view periods. Day opens the power view for the last 24 hours.
+$(".hp-period").click(function () {
+    var days = $(this).attr("days");
     var end = (new Date()).getTime();
-    if (daily) {
-        var start = value == "all" ? start_time * 1000 : end - value * HOUR;
-        if (start < start_time * 1000) start = start_time * 1000;
-        if (viewmode != "bargraph") hp_show_daily();
-        bargraph_alltime = value == "all";
-        bargraph_load(start, end);
-        bargraph_draw();
-    } else {
-        hp_open_power(end - value * HOUR, end);
+    if (days == "day") {
+        hp_open_power(end - DAY, end);
+        return;
     }
+    var start = days == "all" ? start_time * 1000 : end - days * DAY;
+    if (start < start_time * 1000) start = start_time * 1000;
+    bargraph_period = days;
+    bargraph_load(start, end);
+    bargraph_draw();
+});
+
+// Power view windows ending now
+$(".hp-time").click(function () {
+    var end = (new Date()).getTime();
+    hp_open_power(end - $(this).attr("hours") * HOUR, end);
 });
 
 // Zoom and pan act on the daily bars or the power graph
@@ -576,7 +668,7 @@ function hp_navigate(move) {
         view.start = bargraph_start;
         view.end = bargraph_end;
         move();
-        bargraph_alltime = false;
+        bargraph_period = false;
         bargraph_load(view.start, view.end);
         bargraph_draw();
     } else {
@@ -589,9 +681,17 @@ $("#zoomin").click(function () { hp_navigate(function () { view.zoomin(); }); })
 $("#right").click(function () { hp_navigate(function () { view.panright(); }); });
 $("#left").click(function () { hp_navigate(function () { view.panleft(); }); });
 
-// Start and End fields, and Now for the power view, from Lib/vis.helper.js
-timebar_manual(function () { hp_navigate(function () {}); });
-timebar_now(function () { powergraph_load(); });
+// Start and End fields, from Lib/vis.helper.js
+// hp_navigate would reset view to the bar window first, so the typed dates are loaded directly
+timebar_manual(function () {
+    if (viewmode == "bargraph") {
+        bargraph_period = false;
+        bargraph_load(view.start, view.end);
+        bargraph_draw();
+    } else {
+        powergraph_load();
+    }
+});
 
 // -------------------------------------------------------------------------------
 // EVENTS
@@ -690,6 +790,7 @@ document.getElementById('placeholder').addEventListener("plotselected", function
     panning = true;
 
     if (viewmode == "bargraph") {
+        bargraph_period = false;
         bargraph_load(start, end);
         bargraph_draw();
     } else {

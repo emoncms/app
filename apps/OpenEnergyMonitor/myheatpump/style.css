@@ -16,6 +16,10 @@
 /* Full window tile in the COP colour. Other tiles set theirs inline. */
 .show_stats_category[key="combined"] .app-tile-value { color: var(--ec-primary-darker); }
 
+/* Power view time bar: windows, zoom and pan, Back */
+.hp-power-nav { display: flex; flex-wrap: wrap; gap: 8px; }
+.hp-periods > .btn, .hp-power-nav .btn { white-space: nowrap; }
+
 .stats-col {
   text-align: center;
   width: 150px;
@@ -25,6 +29,11 @@
   .bargraph-navigation { flex: 1 1 100%; }
   .bargraph-navigation > .btn { flex: 1; }
   .bargraph-navigation > .btn { white-space: nowrap; }
+  .hp-periods > .btn { --bs-btn-padding-x: 0.4rem; }
+  .hp-power-nav { flex: 1 1 auto; gap: 6px; }
+  .hp-power-nav > .btn-group:not(:last-child) { flex: 1 1 auto; }
+  .hp-power-nav .btn { flex: 1; --bs-btn-padding-x: 0.5rem; }
+  .app-card .app-navbar > .hp-manual { flex: 0 0 auto; }
   .hp-return { font-size: 13px; margin-left: 6px; }
   /* Live values stay in one row of 4 */
   #live_table { grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.4fr); }
@@ -32,6 +41,11 @@
   #live_table .app-live-label { font-size: 10px; letter-spacing: 0.03em; }
   #live_table .app-live-value { font-size: 20px; }
   #live_table .hp-return { font-size: 12px; margin-left: 3px; }
+}
+
+/* No room for the date window button on phones */
+@container app (max-width: 575.98px) {
+  .app-card .app-navbar > .hp-manual { display: none; }
 }
 
 /* Small phones: tighter mode buttons. Icons are dropped when Cooling makes five. */
@@ -46,7 +60,7 @@
 @container app (max-width: 575.98px) {
   .stats-col { width: auto; }
   #advanced-block .table :is(th, td):nth-child(4) { display: none; }
-  .app-card-caption:has(#all_time_history_title) + .app-live .app-live-value { font-size: 19px; }
+  #totals-single .app-live-value { font-size: 19px; }
 }
 
 #overlay {
@@ -64,4 +78,49 @@
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
+}
+
+/* Totals card: By mode and period buttons, then totals for each mode */
+.hp-totals-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.hp-totals-tools .btn { white-space: nowrap; }
+.hp-totals-tools [class^="svg-icon-"] { font-size: 11px; vertical-align: -1px; }
+
+.hp-totals-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin-bottom: 6px;
+}
+.hp-totals-table th { padding: 0 12px 4px; font-weight: bold; text-align: left; }
+.hp-totals-table th:first-child { width: 22%; }
+.hp-totals-table td {
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  font-size: 22px;
+  font-weight: bold;
+  line-height: 28px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hp-totals-table td + td, .hp-totals-table th + th { border-left: 1px solid var(--border); }
+.hp-totals-table .power-unit-static { margin-left: 3px; font-size: 13px; }
+.hp-totals-table td.hp-totals-mode { font-size: 14px; }
+.hp-totals-mode i { font-size: 20px; margin-right: 8px; vertical-align: -4px; }
+.hp-totals-share { color: var(--bs-secondary-color); }
+.hp-label-short { display: none; }
+
+/* Phones: icon only for the mode, smaller values, no units */
+@container app (max-width: 575.98px) {
+  .hp-totals-tools { gap: 6px; }
+  .hp-totals-table th:first-child { width: 36px; }
+  .hp-totals-table th, .hp-totals-table td { padding-left: 6px; padding-right: 6px; }
+  .hp-totals-table th.app-live-label { font-size: 9px; letter-spacing: 0.02em; }
+  .hp-totals-table td { font-size: 17px; line-height: 24px; }
+  .hp-totals-table td .power-unit-static { display: none; }
+  .hp-totals-table td.hp-totals-share .power-unit-static { display: inline; font-size: 12px; margin-left: 1px; }
+  .hp-totals-mode span { display: none; }
+  .hp-label-long { display: none; }
+  .hp-label-short { display: inline; }
+  .hp-totals-mode i { margin-right: 0; }
 }

@@ -59,14 +59,35 @@ global $path, $session, $v;
           <button class="btn bargraph_mode" mode="water" title="Water heating"><i class="svg-icon-shower"></i> Water</button>
           <button class="btn bargraph_mode" mode="cooling" title="Cooling"><i class="svg-icon-snowflake"></i> Cooling</button>
         </div>
-        <?php
-        // Power view uses up to a month, daily bars from a week to all time
-        $timebar_ranges = array(1 => tr('1 hour'), 6 => tr('6 hours'), 24 => tr('24 hours'), 168 => tr('1 week'), 720 => tr('1 month'), 2160 => tr('3 months'), 8760 => tr('1 year'), 'all' => tr('All time'));
-        include "Modules/app/Lib/timebar.php";
-        ?>
-        <div class="btn-group app-segmented viewmode-toggle ms-auto">
-          <button class="btn viewpower"><?php echo tr('Power') ?></button>
-          <button class="btn viewhistory active"><?php echo tr('Daily') ?></button>
+        <span id="window-label" class="app-window-text"></span>
+        <div class="btn-group app-segmented bargraph-navigation hp-periods ms-auto">
+          <button class="btn hp-period" days="day" title="<?php echo tr('Power view, last 24 hours') ?>"><?php echo tr('Day') ?></button>
+          <button class="btn hp-period" days="7" title="<?php echo tr('Daily bars, last 7 days') ?>"><?php echo tr('Week') ?></button>
+          <button class="btn hp-period" days="30" title="<?php echo tr('Daily bars, last 30 days') ?>"><?php echo tr('Month') ?></button>
+          <button class="btn hp-period" days="90" title="<?php echo tr('Daily bars, last 90 days') ?>"><?php echo tr('3 Months') ?></button>
+          <button class="btn hp-period" days="365" title="<?php echo tr('Daily bars, last 365 days') ?>"><?php echo tr('Year') ?></button>
+          <button class="btn hp-period" days="all" title="<?php echo tr('Daily bars, all time') ?>"><?php echo tr('All') ?></button>
+        </div>
+        <div class="powergraph-navigation hp-power-nav ms-auto" style="display:none">
+          <div class="btn-group app-segmented">
+            <button class="btn hp-time" hours="1" title="<?php echo tr('Last hour') ?>">H</button>
+            <button class="btn hp-time" hours="6" title="<?php echo tr('Last 6 hours') ?>">6</button>
+            <button class="btn hp-time" hours="24" title="<?php echo tr('Last 24 hours') ?>">D</button>
+            <button class="btn hp-time" hours="168" title="<?php echo tr('Last 7 days') ?>">W</button>
+            <button class="btn hp-time" hours="720" title="<?php echo tr('Last 30 days') ?>">M</button>
+          </div>
+          <div class="btn-group app-timebar">
+            <button id="zoomin" class="btn" title="<?php echo tr('Zoom in') ?>"><i class="svg-icon-zoom_in"></i></button>
+            <button id="zoomout" class="btn" title="<?php echo tr('Zoom out') ?>"><i class="svg-icon-zoom_out"></i></button>
+            <button id="left" class="btn" title="<?php echo tr('Earlier') ?>"><i class="svg-icon-pan_left"></i></button>
+            <button id="right" class="btn" title="<?php echo tr('Later') ?>"><i class="svg-icon-pan_right"></i></button>
+          </div>
+          <div class="btn-group app-segmented">
+            <button class="btn viewhistory" title="<?php echo tr('Back to daily summary') ?>"><?php echo tr('Back') ?></button>
+          </div>
+        </div>
+        <div class="btn-group app-timebar hp-manual">
+          <button id="time-manual-open" class="btn" title="<?php echo tr('Select time window') ?>"><i class="svg-icon-calendar"></i></button>
         </div>
       </div>
       <?php include "Modules/app/Lib/timebar_manual.php"; ?>
@@ -347,8 +368,33 @@ global $path, $session, $v;
     </div>
 
     <div class="app-card app-card-body">
-      <div class="app-card-caption"><span class="app-section-label" id="all_time_history_title">All time history</span></div>
-      <div class="app-live">
+      <div class="app-card-caption"><span class="app-section-label"><span id="all_time_history_title">All time history</span> <span id="total_mode"></span></span>
+        <div class="hp-totals-tools ms-auto" id="totals-tools" style="display:none">
+          <div class="btn-group app-segmented" id="totals-breakdown-bound" style="display:none">
+            <button class="btn" id="totals-breakdown-toggle" title="Show totals for each mode"><i class="svg-icon-chevron-down"></i> By mode</button>
+          </div>
+          <div class="btn-group app-segmented">
+            <button class="btn total-period" period="last365" title="Totals for the last 365 days">Last year</button>
+            <button class="btn total-period active" period="all" title="Totals since the start of monitoring">All time</button>
+          </div>
+        </div>
+      </div>
+      <!-- Totals for each mode, shown in place of the single mode row by By mode -->
+      <div id="totals-breakdown" style="display:none">
+        <table class="hp-totals-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th class="app-live-label"><span class="hp-label-long">Electricity input</span><span class="hp-label-short">Electric</span></th>
+              <th class="app-live-label"><span class="hp-label-long">Heat output</span><span class="hp-label-short">Heat</span></th>
+              <th class="app-live-label">SCOP</th>
+              <th class="app-live-label" title="Share of space and water heat output">Share</th>
+            </tr>
+          </thead>
+          <tbody id="totals-breakdown-rows"></tbody>
+        </table>
+      </div>
+      <div class="app-live" id="totals-single">
         <div>
           <div class="app-live-label">Electricity input</div>
           <div class="app-live-value text-hp-elec"><span id="total_elec"></span><span class="power-unit-static">kWh</span></div>
